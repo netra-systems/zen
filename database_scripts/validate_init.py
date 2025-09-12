@@ -185,7 +185,7 @@ def get_required_tables() -> Dict[str, TableValidation]:
 
 def run_validation():
     """Run full validation of database initialization."""
-    print("🔍 Database Initialization Validation\n" + "="*50)
+    print(" SEARCH:  Database Initialization Validation\n" + "="*50)
     
     try:
         conn = get_connection()
@@ -197,51 +197,51 @@ def run_validation():
         failed_tables = []
         
         for table_name, validation in tables.items():
-            print(f"\n📊 Validating table: {table_name}")
+            print(f"\n CHART:  Validating table: {table_name}")
             total_checks += 1
             
             # Check table exists
             if not validate_table_exists(cursor, table_name):
-                print(f"  ❌ Table does not exist!")
+                print(f"   FAIL:  Table does not exist!")
                 failed_tables.append(table_name)
                 continue
             
-            print(f"  ✅ Table exists")
+            print(f"   PASS:  Table exists")
             passed_checks += 1
             
             # Check columns
             missing_cols = validate_columns(cursor, table_name, validation.required_columns)
             if missing_cols:
-                print(f"  ⚠️  Missing columns: {', '.join(missing_cols)}")
+                print(f"   WARNING: [U+FE0F]  Missing columns: {', '.join(missing_cols)}")
             else:
-                print(f"  ✅ All required columns present")
+                print(f"   PASS:  All required columns present")
             
             # Check foreign keys
             if validation.foreign_keys:
                 missing_fks = validate_foreign_keys(cursor, table_name, validation.foreign_keys)
                 if missing_fks:
-                    print(f"  ⚠️  Missing foreign keys: {', '.join(missing_fks)}")
+                    print(f"   WARNING: [U+FE0F]  Missing foreign keys: {', '.join(missing_fks)}")
                 else:
-                    print(f"  ✅ All foreign keys configured")
+                    print(f"   PASS:  All foreign keys configured")
         
         # Summary
         print(f"\n{'='*50}")
-        print("📈 Validation Summary:")
+        print("[U+1F4C8] Validation Summary:")
         print(f"  Total tables checked: {total_checks}")
         print(f"  Tables present: {passed_checks}")
         print(f"  Tables missing: {len(failed_tables)}")
         
         if failed_tables:
-            print(f"\n❌ Missing tables: {', '.join(failed_tables)}")
-            print("\n⚠️  Run the initialization scripts to create missing tables:")
+            print(f"\n FAIL:  Missing tables: {', '.join(failed_tables)}")
+            print("\n WARNING: [U+FE0F]  Run the initialization scripts to create missing tables:")
             print("  psql -U netra_app -d netra_dev -f database_scripts/00-init-main.sql")
             return 1
         else:
-            print("\n✅ All required tables are present!")
+            print("\n PASS:  All required tables are present!")
             return 0
             
     except psycopg2.Error as e:
-        print(f"\n❌ Database connection error: {e}")
+        print(f"\n FAIL:  Database connection error: {e}")
         return 1
     finally:
         if 'cursor' in locals():

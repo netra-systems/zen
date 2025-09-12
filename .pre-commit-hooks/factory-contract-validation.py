@@ -81,7 +81,7 @@ def get_staged_files() -> List[str]:
 def main():
     """Main pre-commit hook execution."""
     
-    print("🔍 Factory Contract Validation Pre-commit Hook")
+    print(" SEARCH:  Factory Contract Validation Pre-commit Hook")
     print("=" * 50)
     
     # Check if this is a factory-related change
@@ -89,16 +89,16 @@ def main():
     factory_files = check_modified_factory_files(staged_files)
     
     if not factory_files:
-        print("✅ No factory-related files modified, skipping validation")
+        print(" PASS:  No factory-related files modified, skipping validation")
         return 0
     
-    print(f"🏭 Factory-related files detected: {len(factory_files)}")
+    print(f"[U+1F3ED] Factory-related files detected: {len(factory_files)}")
     for file in factory_files[:5]:  # Show first 5
         print(f"   - {file}")
     if len(factory_files) > 5:
         print(f"   ... and {len(factory_files) - 5} more")
     
-    print("\n🧪 Running factory contract validation...")
+    print("\n[U+1F9EA] Running factory contract validation...")
     
     # Run validation
     exit_code, stdout, stderr = run_validation_script()
@@ -109,12 +109,12 @@ def main():
         print("STDERR:", stderr, file=sys.stderr)
     
     if exit_code == 0:
-        print("\n✅ Factory contract validation PASSED")
-        print("🎉 All factory interfaces are valid - commit allowed!")
+        print("\n PASS:  Factory contract validation PASSED")
+        print(" CELEBRATION:  All factory interfaces are valid - commit allowed!")
         return 0
     elif exit_code == 1:
-        print("\n❌ Factory contract validation FAILED")
-        print("🚨 Contract violations found - commit blocked!")
+        print("\n FAIL:  Factory contract validation FAILED")
+        print(" ALERT:  Contract violations found - commit blocked!")
         print("\nTo fix:")
         print("1. Review the validation errors above")
         print("2. Fix parameter name mismatches")
@@ -123,8 +123,8 @@ def main():
         print("5. Commit again after fixing issues")
         return 1
     else:
-        print("\n⚠️  Factory contract validation encountered errors")
-        print("🔧 Check validation script configuration")
+        print("\n WARNING: [U+FE0F]  Factory contract validation encountered errors")
+        print("[U+1F527] Check validation script configuration")
         return 2
 
 

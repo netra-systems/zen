@@ -124,7 +124,7 @@
     # REMOVED_SYNTAX_ERROR: required_events = ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]
     # REMOVED_SYNTAX_ERROR: for event_type in required_events:
         # REMOVED_SYNTAX_ERROR: count = self.event_counts.get(event_type, 0)
-        # REMOVED_SYNTAX_ERROR: status = "✅" if count > 0 else "❌"
+        # REMOVED_SYNTAX_ERROR: status = " PASS: " if count > 0 else " FAIL: "
         # REMOVED_SYNTAX_ERROR: report.append("formatted_string")
 
         # REMOVED_SYNTAX_ERROR: if errors:
@@ -181,7 +181,7 @@
             # REMOVED_SYNTAX_ERROR: method = getattr(notifier, method_name)
             # REMOVED_SYNTAX_ERROR: assert callable(method), "formatted_string"
 
-            # REMOVED_SYNTAX_ERROR: logger.info("✅ All required WebSocketNotifier methods exist")
+            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  All required WebSocketNotifier methods exist")
 
             # Removed problematic line: @pytest.mark.asyncio
             # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -192,7 +192,7 @@
                 # Ensure integration (may fail gracefully in test environment)
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: await bridge.ensure_integration()
-                    # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket bridge integration successful")
+                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  WebSocket bridge integration successful")
                     # REMOVED_SYNTAX_ERROR: except Exception as e:
                         # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
                         # This is acceptable in test environment
@@ -222,7 +222,7 @@
     # REMOVED_SYNTAX_ERROR: assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
     # REMOVED_SYNTAX_ERROR: "Tool dispatcher should use UnifiedToolExecutionEngine"
 
-    # REMOVED_SYNTAX_ERROR: logger.info("✅ AgentRegistry WebSocket enhancement works")
+    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  AgentRegistry WebSocket enhancement works")
 
     # Removed problematic line: @pytest.mark.asyncio
     # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -246,7 +246,7 @@
     # REMOVED_SYNTAX_ERROR: for method_name in notification_methods:
         # REMOVED_SYNTAX_ERROR: assert hasattr(engine, method_name), "formatted_string"
 
-        # REMOVED_SYNTAX_ERROR: logger.info("✅ ExecutionEngine WebSocket integration verified")
+        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  ExecutionEngine WebSocket integration verified")
 
         # Removed problematic line: @pytest.mark.asyncio
         # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -266,7 +266,7 @@
             # REMOVED_SYNTAX_ERROR: max_retries=1
             
 
-            # REMOVED_SYNTAX_ERROR: logger.info("🚀 Starting comprehensive WebSocket event flow test")
+            # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] Starting comprehensive WebSocket event flow test")
 
             # Send ALL 5 required events in proper sequence
             # REMOVED_SYNTAX_ERROR: await notifier.send_agent_started(context)
@@ -303,7 +303,7 @@
             # REMOVED_SYNTAX_ERROR: for required_event in required_events:
                 # REMOVED_SYNTAX_ERROR: assert required_event in event_types, "formatted_string"
 
-                # REMOVED_SYNTAX_ERROR: logger.info("🎉 ALL 5 required WebSocket events validated successfully!")
+                # REMOVED_SYNTAX_ERROR: logger.info(" CELEBRATION:  ALL 5 required WebSocket events validated successfully!")
 
                 # Removed problematic line: @pytest.mark.asyncio
                 # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -387,7 +387,7 @@
                         # REMOVED_SYNTAX_ERROR: has_completion = any(event_type in event_types for event_type in completion_events)
                         # REMOVED_SYNTAX_ERROR: assert has_completion, "Must have completion event even with errors"
 
-                        # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket error handling validated")
+                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  WebSocket error handling validated")
 
                         # Removed problematic line: @pytest.mark.asyncio
                         # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -410,7 +410,7 @@
                             # REMOVED_SYNTAX_ERROR: assert isinstance(dispatcher_with_ws.executor, UnifiedToolExecutionEngine), \
                             # REMOVED_SYNTAX_ERROR: "Should use UnifiedToolExecutionEngine with WebSocket support"
 
-                            # REMOVED_SYNTAX_ERROR: logger.info("✅ Tool dispatcher WebSocket integration verified")
+                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Tool dispatcher WebSocket integration verified")
 
 
                             # ============================================================================

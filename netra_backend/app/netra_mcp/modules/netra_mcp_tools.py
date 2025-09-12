@@ -1,7 +1,7 @@
 """Netra MCP Server Tools Registration - Modular Facade
 
 This module provides backward compatibility while using the new modular architecture.
-All functionality has been split into focused modules ≤300 lines with functions ≤8 lines.
+All functionality has been split into focused modules  <= 300 lines with functions  <= 8 lines.
 """
 
 # Import all modular components for backward compatibility

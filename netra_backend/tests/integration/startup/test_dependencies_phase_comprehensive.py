@@ -158,7 +158,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         assert service_secret is not None, "SERVICE_SECRET should be accessible for auth validation"
         assert len(jwt_key) >= 32, "JWT_SECRET_KEY should be sufficiently long for security"
         
-        self.logger.info(f"✓ SSOT auth validation successful ({auth_validation_time:.3f}s)")
+        self.logger.info(f"[U+2713] SSOT auth validation successful ({auth_validation_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -225,7 +225,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"KeyManager initialization failed: {e}")
         
-        self.logger.info(f"✓ Key Manager initialization successful ({key_manager_time:.3f}s)")
+        self.logger.info(f"[U+2713] Key Manager initialization successful ({key_manager_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -283,7 +283,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"LLM Manager initialization failed: {e}")
         
-        self.logger.info(f"✓ LLM Manager initialization successful ({llm_manager_time:.3f}s)")
+        self.logger.info(f"[U+2713] LLM Manager initialization successful ({llm_manager_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -330,7 +330,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"Startup fixes application failed: {e}")
         
-        self.logger.info(f"✓ Startup fixes application successful ({startup_fixes_time:.3f}s)")
+        self.logger.info(f"[U+2713] Startup fixes application successful ({startup_fixes_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -377,7 +377,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"Security Service initialization failed: {e}")
         
-        self.logger.info(f"✓ Security Service initialization successful ({security_service_time:.3f}s)")
+        self.logger.info(f"[U+2713] Security Service initialization successful ({security_service_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -420,14 +420,14 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             # Test that handlers exist for critical exceptions
             for exc_type in expected_exceptions:
                 if exc_type in test_app.exception_handlers:
-                    self.logger.info(f"✓ Error handler registered for {exc_type.__name__}")
+                    self.logger.info(f"[U+2713] Error handler registered for {exc_type.__name__}")
             
         except ImportError as e:
             pytest.fail(f"Error handler modules not available: {e}")
         except Exception as e:
             pytest.fail(f"Error handler registration failed: {e}")
         
-        self.logger.info(f"✓ Error handler registration successful ({error_handler_time:.3f}s)")
+        self.logger.info(f"[U+2713] Error handler registration successful ({error_handler_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -462,7 +462,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             middleware_count = len(test_app.user_middleware)
             assert middleware_count > 0, "Should have registered middleware components"
             
-            self.logger.info(f"✓ Registered {middleware_count} middleware components")
+            self.logger.info(f"[U+2713] Registered {middleware_count} middleware components")
             
             # Verify specific middleware types are present
             middleware_types = [middleware.cls.__name__ for middleware in test_app.user_middleware]
@@ -471,14 +471,14 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             expected_middleware = ['CORSMiddleware', 'SecurityHeadersMiddleware']
             found_middleware = [mw for mw in expected_middleware if any(mw in mt for mt in middleware_types)]
             
-            self.logger.info(f"✓ Found middleware: {found_middleware}")
+            self.logger.info(f"[U+2713] Found middleware: {found_middleware}")
             
         except ImportError as e:
             pytest.fail(f"Middleware modules not available: {e}")
         except Exception as e:
             pytest.fail(f"Middleware configuration failed: {e}")
         
-        self.logger.info(f"✓ Middleware configuration successful ({middleware_setup_time:.3f}s)")
+        self.logger.info(f"[U+2713] Middleware configuration successful ({middleware_setup_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -528,14 +528,14 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             frontend_url = self.env.get('FRONTEND_URL')
             assert frontend_url is not None, "Frontend URL should be configured for CORS"
             
-            self.logger.info(f"✓ CORS configured for frontend: {frontend_url}")
+            self.logger.info(f"[U+2713] CORS configured for frontend: {frontend_url}")
             
         except ImportError as e:
             pytest.fail(f"CORS middleware modules not available: {e}")
         except Exception as e:
             pytest.fail(f"CORS middleware setup failed: {e}")
         
-        self.logger.info(f"✓ CORS middleware setup successful ({cors_setup_time:.3f}s)")
+        self.logger.info(f"[U+2713] CORS middleware setup successful ({cors_setup_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -568,7 +568,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             for middleware in test_app.user_middleware:
                 if 'Auth' in middleware.cls.__name__:
                     auth_middleware_found = True
-                    self.logger.info(f"✓ Found auth middleware: {middleware.cls.__name__}")
+                    self.logger.info(f"[U+2713] Found auth middleware: {middleware.cls.__name__}")
                     break
             
             assert auth_middleware_found, "Authentication middleware should be registered"
@@ -582,7 +582,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"Auth middleware setup failed: {e}")
         
-        self.logger.info(f"✓ Authentication middleware setup successful ({auth_middleware_time:.3f}s)")
+        self.logger.info(f"[U+2713] Authentication middleware setup successful ({auth_middleware_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies  
@@ -615,21 +615,21 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             for middleware in test_app.user_middleware:
                 if 'Session' in middleware.cls.__name__:
                     session_middleware_found = True
-                    self.logger.info(f"✓ Found session middleware: {middleware.cls.__name__}")
+                    self.logger.info(f"[U+2713] Found session middleware: {middleware.cls.__name__}")
                     break
             
             assert session_middleware_found, "Session middleware should be registered"
             
             # Verify session configuration is environment-appropriate
             environment = self.env.get('ENVIRONMENT', 'test')
-            self.logger.info(f"✓ Session middleware configured for {environment} environment")
+            self.logger.info(f"[U+2713] Session middleware configured for {environment} environment")
             
         except ImportError as e:
             pytest.fail(f"Session middleware modules not available: {e}")
         except Exception as e:
             pytest.fail(f"Session middleware setup failed: {e}")
         
-        self.logger.info(f"✓ Session middleware configuration successful ({session_middleware_time:.3f}s)")
+        self.logger.info(f"[U+2713] Session middleware configuration successful ({session_middleware_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -672,7 +672,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"Health checker initialization failed: {e}")
         
-        self.logger.info(f"✓ Health checker initialization successful ({health_checker_time:.3f}s)")
+        self.logger.info(f"[U+2713] Health checker initialization successful ({health_checker_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -720,14 +720,14 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             assert oauth_client_id is not None, "OAuth client ID should be configured"
             assert auth_service_url is not None, "Auth service URL should be configured for OAuth delegation"
             
-            self.logger.info(f"✓ OAuth delegated to auth service at {auth_service_url}")
+            self.logger.info(f"[U+2713] OAuth delegated to auth service at {auth_service_url}")
             
         except ImportError as e:
             pytest.fail(f"OAuth modules not available: {e}")
         except Exception as e:
             pytest.fail(f"OAuth client delegation failed: {e}")
         
-        self.logger.info(f"✓ OAuth client delegation successful ({oauth_init_time:.3f}s)")
+        self.logger.info(f"[U+2713] OAuth client delegation successful ({oauth_init_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -769,7 +769,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
                     value = getattr(config, attr)
                     if value is None:
                         missing_attrs.append(f"{attr} (None)")
-                    self.logger.info(f"✓ Config {attr}: {'configured' if value else 'missing'}")
+                    self.logger.info(f"[U+2713] Config {attr}: {'configured' if value else 'missing'}")
             
             assert not missing_attrs, f"Missing critical configuration attributes: {missing_attrs}"
             
@@ -786,7 +786,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"Configuration validation failed: {e}")
         
-        self.logger.info(f"✓ Configuration validation successful ({config_validation_time:.3f}s)")
+        self.logger.info(f"[U+2713] Configuration validation successful ({config_validation_time:.3f}s)")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -815,7 +815,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
                 await test_method()
                 dep_time = time.time() - start_time
                 timing_results[dep_name] = dep_time
-                self.logger.info(f"✓ {dep_name}: {dep_time:.3f}s")
+                self.logger.info(f"[U+2713] {dep_name}: {dep_time:.3f}s")
             except Exception as e:
                 self.logger.warning(f"Timing test for {dep_name} failed: {e}")
                 timing_results[dep_name] = -1  # Mark as failed
@@ -833,12 +833,12 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             if dep_time > 0:  # Skip failed tests
                 assert dep_time < max_individual_time, f"{dep_name} initialization too slow: {dep_time:.3f}s > {max_individual_time}s"
         
-        self.logger.info(f"✓ DEPENDENCIES phase performance: total={total_time:.3f}s")
+        self.logger.info(f"[U+2713] DEPENDENCIES phase performance: total={total_time:.3f}s")
         for dep_name, dep_time in timing_results.items():
             if dep_time > 0:
                 self.logger.info(f"  - {dep_name}: {dep_time:.3f}s")
         
-        self.logger.info("✓ DEPENDENCIES phase timing and performance successful")
+        self.logger.info("[U+2713] DEPENDENCIES phase timing and performance successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -886,12 +886,12 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
             
         except Exception as e:
             # This is expected - invalid config should cause errors
-            self.logger.info(f"✓ Invalid config correctly caused error: {e}")
+            self.logger.info(f"[U+2713] Invalid config correctly caused error: {e}")
         
         # Restore valid database URL
         self.env.set('DATABASE_URL', 'postgresql://test_user:test_pass@localhost:5434/test_db', source='restore')
         
-        self.logger.info("✓ Dependency failure error handling successful")
+        self.logger.info("[U+2713] Dependency failure error handling successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -925,13 +925,13 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
                 # Verify environment-appropriate settings
                 if environment == 'development':
                     # Development should allow more relaxed settings
-                    self.logger.info("✓ Development environment configured")
+                    self.logger.info("[U+2713] Development environment configured")
                 elif environment == 'production':
                     # Production should have strict security settings
-                    self.logger.info("✓ Production environment configured")
+                    self.logger.info("[U+2713] Production environment configured")
                 elif environment == 'test':
                     # Test environment should use test databases/services
-                    self.logger.info("✓ Test environment configured")
+                    self.logger.info("[U+2713] Test environment configured")
                 
             except Exception as e:
                 pytest.fail(f"Environment-specific configuration failed for {environment}: {e}")
@@ -939,7 +939,7 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         # Restore test environment
         self.env.set('ENVIRONMENT', 'test', source='restore')
         
-        self.logger.info("✓ Environment-specific dependency configuration successful")
+        self.logger.info("[U+2713] Environment-specific dependency configuration successful")
 
     @pytest.mark.integration
     @pytest.mark.startup_dependencies
@@ -1003,13 +1003,13 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
                 dep_name, dep_obj, success = result
                 if success:
                     success_count += 1
-                    self.logger.info(f"✓ Concurrent {dep_name}: successful")
+                    self.logger.info(f"[U+2713] Concurrent {dep_name}: successful")
                 else:
-                    self.logger.warning(f"✗ Concurrent {dep_name}: failed")
+                    self.logger.warning(f"[U+2717] Concurrent {dep_name}: failed")
         
         assert success_count > 0, "At least some dependencies should initialize successfully"
         
-        self.logger.info(f"✓ Concurrent dependency initialization: {success_count}/{len(results)} successful ({concurrent_time:.3f}s)")
+        self.logger.info(f"[U+2713] Concurrent dependency initialization: {success_count}/{len(results)} successful ({concurrent_time:.3f}s)")
         
         # Compare with sequential timing (if we have the data)
         total_individual_time = sum([
@@ -1020,6 +1020,6 @@ class TestDependenciesPhaseComprehensive(BaseIntegrationTest):
         
         if total_individual_time > concurrent_time:
             speedup = total_individual_time / concurrent_time
-            self.logger.info(f"✓ Concurrent initialization {speedup:.1f}x faster than sequential")
+            self.logger.info(f"[U+2713] Concurrent initialization {speedup:.1f}x faster than sequential")
         
-        self.logger.info("✓ Concurrent dependency initialization successful")
+        self.logger.info("[U+2713] Concurrent dependency initialization successful")

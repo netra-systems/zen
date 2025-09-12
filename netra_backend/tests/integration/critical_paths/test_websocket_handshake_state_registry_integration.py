@@ -53,8 +53,8 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
         cls.backend_url = cls.docker_utility.ensure_backend_service()
         cls.websocket_url = f"ws://{cls.backend_url.replace('http://', '')}/ws"
         
-        logger.info(f"🔧 INTEGRATION TEST: Backend running at {cls.backend_url}")
-        logger.info(f"🔧 INTEGRATION TEST: WebSocket endpoint at {cls.websocket_url}")
+        logger.info(f"[U+1F527] INTEGRATION TEST: Backend running at {cls.backend_url}")
+        logger.info(f"[U+1F527] INTEGRATION TEST: WebSocket endpoint at {cls.websocket_url}")
     
     @classmethod
     def tearDownClass(cls):
@@ -78,14 +78,14 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
         
         EXPECTED RESULT: Connection should fail due to state_registry NameError
         """
-        logger.info("🔴 INTEGRATION TEST: Testing WebSocket handshake state registry race condition")
+        logger.info("[U+1F534] INTEGRATION TEST: Testing WebSocket handshake state registry race condition")
         
         # Test configuration
         max_attempts = 5
         connection_timeout = 10.0
         
         for attempt in range(max_attempts):
-            logger.info(f"🔄 Attempt {attempt + 1}/{max_attempts}: Testing WebSocket connection")
+            logger.info(f" CYCLE:  Attempt {attempt + 1}/{max_attempts}: Testing WebSocket connection")
             
             try:
                 # Attempt WebSocket connection with authentication
@@ -95,7 +95,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
                     extra_headers={"Authorization": "Bearer fake_jwt_token"}
                 ) as websocket:
                     
-                    logger.info(f"✅ WebSocket connected successfully on attempt {attempt + 1}")
+                    logger.info(f" PASS:  WebSocket connected successfully on attempt {attempt + 1}")
                     
                     # Send authentication message to trigger state registry access
                     auth_message = {
@@ -105,7 +105,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
                     }
                     
                     await websocket.send(json.dumps(auth_message))
-                    logger.info("📤 Sent authentication message")
+                    logger.info("[U+1F4E4] Sent authentication message")
                     
                     # Try to receive response - this should trigger the scope bug
                     try:
@@ -113,14 +113,14 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
                             websocket.recv(),
                             timeout=5.0
                         )
-                        logger.info(f"📥 Received response: {response}")
+                        logger.info(f"[U+1F4E5] Received response: {response}")
                         
                         # If we get here without error, the bug might be fixed
                         # But for this test, we expect it to fail
                         pytest.fail("Expected connection to fail due to state_registry scope bug, but it succeeded")
                         
                     except asyncio.TimeoutError:
-                        logger.error("🔴 Timeout waiting for WebSocket response - likely due to server error")
+                        logger.error("[U+1F534] Timeout waiting for WebSocket response - likely due to server error")
                         self.connection_attempts.append({
                             "attempt": attempt + 1,
                             "result": "timeout",
@@ -128,7 +128,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
                         })
                         
                     except ConnectionClosed as e:
-                        logger.error(f"🔴 WebSocket connection closed unexpectedly: {e}")
+                        logger.error(f"[U+1F534] WebSocket connection closed unexpectedly: {e}")
                         self.connection_attempts.append({
                             "attempt": attempt + 1,
                             "result": "connection_closed",
@@ -136,7 +136,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
                         })
                         
             except (ConnectionRefusedError, InvalidStatus, OSError) as e:
-                logger.error(f"🔴 WebSocket connection failed on attempt {attempt + 1}: {e}")
+                logger.error(f"[U+1F534] WebSocket connection failed on attempt {attempt + 1}: {e}")
                 self.connection_attempts.append({
                     "attempt": attempt + 1,
                     "result": "connection_failed",
@@ -151,15 +151,15 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
         successful_connections = [a for a in self.connection_attempts if a["result"] == "success"]
         failed_connections = [a for a in self.connection_attempts if a["result"] != "success"]
         
-        logger.info(f"📊 INTEGRATION TEST RESULTS:")
+        logger.info(f" CHART:  INTEGRATION TEST RESULTS:")
         logger.info(f"   - Successful connections: {len(successful_connections)}/{max_attempts}")
         logger.info(f"   - Failed connections: {len(failed_connections)}/{max_attempts}")
         
         # For this bug reproduction test, we expect failures
         if len(failed_connections) == max_attempts:
-            logger.info("✅ INTEGRATION TEST SUCCESS: All connections failed as expected due to state_registry bug")
+            logger.info(" PASS:  INTEGRATION TEST SUCCESS: All connections failed as expected due to state_registry bug")
         elif len(failed_connections) > 0:
-            logger.info(f"✅ INTEGRATION TEST PARTIAL SUCCESS: {len(failed_connections)} connections failed due to state_registry bug")
+            logger.info(f" PASS:  INTEGRATION TEST PARTIAL SUCCESS: {len(failed_connections)} connections failed due to state_registry bug")
         else:
             pytest.fail("Expected at least some connections to fail due to state_registry scope bug")
     
@@ -173,7 +173,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
         2. Authentication message is processed
         3. State registry access fails due to scope bug
         """
-        logger.info("🔴 INTEGRATION TEST: Testing authentication flow timing")
+        logger.info("[U+1F534] INTEGRATION TEST: Testing authentication flow timing")
         
         # Use custom WebSocket client to control timing
         try:
@@ -183,7 +183,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
                 timeout=5.0
             ) as websocket:
                 
-                logger.info("✅ WebSocket connection established")
+                logger.info(" PASS:  WebSocket connection established")
                 
                 # Send authentication message immediately to trigger race condition
                 auth_messages = [
@@ -203,38 +203,38 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
                 for i, msg in enumerate(auth_messages):
                     try:
                         await websocket.send(json.dumps(msg))
-                        logger.info(f"📤 Sent auth message {i + 1}")
+                        logger.info(f"[U+1F4E4] Sent auth message {i + 1}")
                         
                         # Brief delay to see if server can handle rapid messages
                         await asyncio.sleep(0.1)
                         
                     except ConnectionClosed as e:
-                        logger.error(f"🔴 Connection closed during message {i + 1}: {e}")
+                        logger.error(f"[U+1F534] Connection closed during message {i + 1}: {e}")
                         # This is expected due to the scope bug
                         break
                 
                 # Try to receive any responses
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
-                    logger.info(f"📥 Received: {response}")
+                    logger.info(f"[U+1F4E5] Received: {response}")
                     
                     # If we get a response, check if it indicates an error
                     if "error" in response.lower() or "exception" in response.lower():
-                        logger.info("✅ INTEGRATION TEST SUCCESS: Server returned error as expected")
+                        logger.info(" PASS:  INTEGRATION TEST SUCCESS: Server returned error as expected")
                     else:
                         pytest.fail("Expected server error due to state_registry scope bug")
                         
                 except asyncio.TimeoutError:
-                    logger.error("🔴 No response from server - likely crashed due to scope bug")
-                    logger.info("✅ INTEGRATION TEST SUCCESS: Server timeout indicates scope bug")
+                    logger.error("[U+1F534] No response from server - likely crashed due to scope bug")
+                    logger.info(" PASS:  INTEGRATION TEST SUCCESS: Server timeout indicates scope bug")
                     
                 except ConnectionClosed:
-                    logger.error("🔴 Server closed connection - likely due to internal error")
-                    logger.info("✅ INTEGRATION TEST SUCCESS: Connection closure indicates scope bug")
+                    logger.error("[U+1F534] Server closed connection - likely due to internal error")
+                    logger.info(" PASS:  INTEGRATION TEST SUCCESS: Connection closure indicates scope bug")
         
         except Exception as e:
-            logger.error(f"🔴 Integration test connection failed: {e}")
-            logger.info("✅ INTEGRATION TEST SUCCESS: Connection failure indicates state_registry scope bug")
+            logger.error(f"[U+1F534] Integration test connection failed: {e}")
+            logger.info(" PASS:  INTEGRATION TEST SUCCESS: Connection failure indicates state_registry scope bug")
     
     @pytest.mark.asyncio  
     async def test_websocket_state_registry_concurrent_access_integration(self):
@@ -244,7 +244,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
         Multiple simultaneous connections should all fail due to state_registry scope bug.
         This test simulates production load conditions.
         """
-        logger.info("🔴 INTEGRATION TEST: Testing concurrent WebSocket connections")
+        logger.info("[U+1F534] INTEGRATION TEST: Testing concurrent WebSocket connections")
         
         concurrent_connections = 3
         connection_results = []
@@ -296,7 +296,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
         failed = [r for r in results if isinstance(r, dict) and r.get("status") == "failed"] 
         exceptions = [r for r in results if isinstance(r, Exception)]
         
-        logger.info(f"📊 CONCURRENT CONNECTION RESULTS:")
+        logger.info(f" CHART:  CONCURRENT CONNECTION RESULTS:")
         logger.info(f"   - Successful: {len(successful)}")
         logger.info(f"   - Failed: {len(failed)}")
         logger.info(f"   - Exceptions: {len(exceptions)}")
@@ -304,7 +304,7 @@ class TestWebSocketHandshakeStateRegistryIntegration(SSotAsyncTestCase):
         # For state_registry scope bug, we expect most/all to fail
         total_failures = len(failed) + len(exceptions)
         if total_failures >= concurrent_connections * 0.8:  # 80% failure rate expected
-            logger.info("✅ INTEGRATION TEST SUCCESS: High failure rate confirms state_registry scope bug")
+            logger.info(" PASS:  INTEGRATION TEST SUCCESS: High failure rate confirms state_registry scope bug")
         else:
             pytest.fail(f"Expected high failure rate due to scope bug, but got {total_failures}/{concurrent_connections} failures")
 

@@ -31,9 +31,9 @@ class WebSocketAuthDiagnostic:
         self.staging_base_url = "https://api.staging.netrasystems.ai"
         self.staging_ws_url = "wss://api.staging.netrasystems.ai/ws"
         
-        print(f"🔍 WebSocket Auth Diagnostic - Environment: {self.environment}")
-        print(f"🔍 Staging API: {self.staging_base_url}")
-        print(f"🔍 Staging WebSocket: {self.staging_ws_url}")
+        print(f" SEARCH:  WebSocket Auth Diagnostic - Environment: {self.environment}")
+        print(f" SEARCH:  Staging API: {self.staging_base_url}")
+        print(f" SEARCH:  Staging WebSocket: {self.staging_ws_url}")
     
     def get_jwt_secret_diagnostics(self) -> Dict:
         """Get comprehensive JWT secret diagnostics"""
@@ -59,16 +59,16 @@ class WebSocketAuthDiagnostic:
                 "hash": hashlib.md5(value.encode()).hexdigest()[:16] if value else None
             }
         
-        print("🔍 JWT Secret Sources Analysis:")
+        print(" SEARCH:  JWT Secret Sources Analysis:")
         for source, info in diagnostics["jwt_secrets"].items():
-            status = "✅" if info["available"] else "❌"
+            status = " PASS: " if info["available"] else " FAIL: "
             print(f"   {status} {source}: {info['length']} chars, hash: {info['hash']}")
         
         return diagnostics
     
     def test_unified_jwt_secret_resolution(self) -> Dict:
         """Test the unified JWT secret manager resolution"""
-        print("\n🔍 Testing Unified JWT Secret Manager...")
+        print("\n SEARCH:  Testing Unified JWT Secret Manager...")
         
         try:
             from shared.jwt_secret_manager import get_unified_jwt_secret, get_jwt_secret_manager
@@ -90,19 +90,19 @@ class WebSocketAuthDiagnostic:
                 "validation": validation_result
             }
             
-            print(f"✅ Unified JWT Secret Resolution SUCCESS")
+            print(f" PASS:  Unified JWT Secret Resolution SUCCESS")
             print(f"   Secret Hash: {secret_hash}")
             print(f"   Secret Length: {len(secret)}")
             print(f"   Available Keys: {debug_info.get('available_keys', [])}")
             print(f"   Validation Valid: {validation_result.get('valid', False)}")
             
             if validation_result.get('issues'):
-                print(f"⚠️  Validation Issues: {validation_result['issues']}")
+                print(f" WARNING: [U+FE0F]  Validation Issues: {validation_result['issues']}")
                 
             return result
             
         except Exception as e:
-            print(f"❌ Unified JWT Secret Manager FAILED: {e}")
+            print(f" FAIL:  Unified JWT Secret Manager FAILED: {e}")
             return {
                 "success": False,
                 "error": str(e)
@@ -110,7 +110,7 @@ class WebSocketAuthDiagnostic:
     
     def test_websocket_context_extractor(self) -> Dict:
         """Test WebSocket user context extractor JWT secret"""
-        print("\n🔍 Testing WebSocket UserContextExtractor JWT Secret...")
+        print("\n SEARCH:  Testing WebSocket UserContextExtractor JWT Secret...")
         
         try:
             from netra_backend.app.websocket_core.user_context_extractor import UserContextExtractor
@@ -128,7 +128,7 @@ class WebSocketAuthDiagnostic:
                 "algorithm": extractor.jwt_algorithm
             }
             
-            print(f"✅ WebSocket UserContextExtractor SUCCESS")
+            print(f" PASS:  WebSocket UserContextExtractor SUCCESS")
             print(f"   Secret Hash: {secret_hash}")
             print(f"   Secret Length: {len(extractor.jwt_secret_key)}")
             print(f"   Algorithm: {extractor.jwt_algorithm}")
@@ -136,7 +136,7 @@ class WebSocketAuthDiagnostic:
             return result
             
         except Exception as e:
-            print(f"❌ WebSocket UserContextExtractor FAILED: {e}")
+            print(f" FAIL:  WebSocket UserContextExtractor FAILED: {e}")
             return {
                 "success": False,
                 "error": str(e)
@@ -160,7 +160,7 @@ class WebSocketAuthDiagnostic:
     
     async def test_rest_api_with_token(self, token: str) -> Dict:
         """Test REST API authentication with JWT token"""
-        print(f"\n🔍 Testing REST API authentication...")
+        print(f"\n SEARCH:  Testing REST API authentication...")
         
         headers = {
             "Authorization": f"Bearer {token}",
@@ -188,7 +188,7 @@ class WebSocketAuthDiagnostic:
                         "response_size": len(response.content)
                     }
                     
-                    status = "✅" if results[endpoint]["success"] else "❌"
+                    status = " PASS: " if results[endpoint]["success"] else " FAIL: "
                     print(f"   {status} {endpoint}: {response.status_code}")
                     
                 except Exception as e:
@@ -196,13 +196,13 @@ class WebSocketAuthDiagnostic:
                         "success": False,
                         "error": str(e)
                     }
-                    print(f"   ❌ {endpoint}: {str(e)}")
+                    print(f"    FAIL:  {endpoint}: {str(e)}")
         
         return results
     
     async def test_websocket_connection_with_token(self, token: str) -> Dict:
         """Test WebSocket connection with JWT token"""
-        print(f"\n🔍 Testing WebSocket connection...")
+        print(f"\n SEARCH:  Testing WebSocket connection...")
         
         headers = {
             "Authorization": f"Bearer {token}"
@@ -225,7 +225,7 @@ class WebSocketAuthDiagnostic:
                 close_timeout=5
             ) as ws:
                 connection_result["connection_succeeded"] = True
-                print("✅ WebSocket connection SUCCEEDED!")
+                print(" PASS:  WebSocket connection SUCCEEDED!")
                 
                 # Send test message
                 test_message = {
@@ -234,24 +234,24 @@ class WebSocketAuthDiagnostic:
                 }
                 
                 await ws.send(json.dumps(test_message))
-                print("   📤 Sent test message")
+                print("   [U+1F4E4] Sent test message")
                 
                 # Wait for response
                 try:
                     response = await asyncio.wait_for(ws.recv(), timeout=5)
                     response_data = json.loads(response)
                     connection_result["messages_received"].append(response_data)
-                    print(f"   📥 Received: {response_data.get('type', 'unknown')}")
+                    print(f"   [U+1F4E5] Received: {response_data.get('type', 'unknown')}")
                 except asyncio.TimeoutError:
-                    print("   ⏰ No response within timeout (may be normal)")
+                    print("   [U+23F0] No response within timeout (may be normal)")
                 
         except Exception as e:
             connection_result["error"] = str(e)
-            print(f"❌ WebSocket connection FAILED: {e}")
+            print(f" FAIL:  WebSocket connection FAILED: {e}")
             
             # Check if this is a 403 error
             if "403" in str(e) or "Forbidden" in str(e):
-                print("❌ CRITICAL: This is the 403 Forbidden error we're investigating!")
+                print(" FAIL:  CRITICAL: This is the 403 Forbidden error we're investigating!")
                 print("   This confirms JWT authentication is failing for WebSocket connections")
         
         return connection_result
@@ -259,7 +259,7 @@ class WebSocketAuthDiagnostic:
     async def run_comprehensive_diagnostic(self) -> Dict:
         """Run comprehensive diagnostic of WebSocket auth issue"""
         print("=" * 80)
-        print("🔍 COMPREHENSIVE WEBSOCKET AUTHENTICATION DIAGNOSTIC")
+        print(" SEARCH:  COMPREHENSIVE WEBSOCKET AUTHENTICATION DIAGNOSTIC")
         print("=" * 80)
         
         diagnostic_results = {
@@ -280,20 +280,20 @@ class WebSocketAuthDiagnostic:
         unified_hash = diagnostic_results["unified_manager"].get("secret_hash")
         websocket_hash = diagnostic_results["websocket_extractor"].get("secret_hash")
         
-        print(f"\n🔍 JWT SECRET COMPARISON:")
+        print(f"\n SEARCH:  JWT SECRET COMPARISON:")
         print(f"   Unified Manager Hash: {unified_hash}")
         print(f"   WebSocket Extractor Hash: {websocket_hash}")
         
         if unified_hash and websocket_hash:
             if unified_hash == websocket_hash:
-                print("✅ JWT secrets MATCH - secret consistency is good")
+                print(" PASS:  JWT secrets MATCH - secret consistency is good")
                 diagnostic_results["secret_consistency"] = "MATCH"
             else:
-                print("❌ JWT secrets DO NOT MATCH - THIS IS THE ROOT CAUSE!")
+                print(" FAIL:  JWT secrets DO NOT MATCH - THIS IS THE ROOT CAUSE!")
                 print("   Different JWT secrets will cause signature validation failures")
                 diagnostic_results["secret_consistency"] = "MISMATCH"
         else:
-            print("⚠️  Cannot compare secrets - one or both failed to resolve")
+            print(" WARNING: [U+FE0F]  Cannot compare secrets - one or both failed to resolve")
             diagnostic_results["secret_consistency"] = "UNKNOWN"
         
         # 5. Test with actual tokens if secrets available
@@ -303,7 +303,7 @@ class WebSocketAuthDiagnostic:
                 secret = get_unified_jwt_secret()
                 test_token = self.create_test_jwt_token(secret)
                 
-                print(f"\n🔍 CREATED TEST TOKEN (using unified secret)")
+                print(f"\n SEARCH:  CREATED TEST TOKEN (using unified secret)")
                 print(f"   Token length: {len(test_token)}")
                 print(f"   Token prefix: {test_token[:30]}...")
                 
@@ -317,26 +317,26 @@ class WebSocketAuthDiagnostic:
                 rest_success = any(result.get("success") for result in diagnostic_results["rest_api_test"].values())
                 websocket_success = diagnostic_results["websocket_test"].get("connection_succeeded", False)
                 
-                print(f"\n🔍 FINAL AUTHENTICATION TEST RESULTS:")
-                print(f"   REST API Success: {'✅' if rest_success else '❌'}")
-                print(f"   WebSocket Success: {'✅' if websocket_success else '❌'}")
+                print(f"\n SEARCH:  FINAL AUTHENTICATION TEST RESULTS:")
+                print(f"   REST API Success: {' PASS: ' if rest_success else ' FAIL: '}")
+                print(f"   WebSocket Success: {' PASS: ' if websocket_success else ' FAIL: '}")
                 
                 if rest_success and not websocket_success:
-                    print("❌ CONFIRMED: REST works but WebSocket fails - this is our bug!")
+                    print(" FAIL:  CONFIRMED: REST works but WebSocket fails - this is our bug!")
                     diagnostic_results["bug_confirmed"] = True
                 elif rest_success and websocket_success:
-                    print("✅ Both REST and WebSocket work - authentication is functioning")
+                    print(" PASS:  Both REST and WebSocket work - authentication is functioning")
                     diagnostic_results["bug_confirmed"] = False
                 else:
-                    print("❌ Both REST and WebSocket fail - broader authentication issue")
+                    print(" FAIL:  Both REST and WebSocket fail - broader authentication issue")
                     diagnostic_results["bug_confirmed"] = "BROADER_ISSUE"
                     
             except Exception as e:
-                print(f"❌ Token testing failed: {e}")
+                print(f" FAIL:  Token testing failed: {e}")
                 diagnostic_results["token_test_error"] = str(e)
         
         print("=" * 80)
-        print("🔍 DIAGNOSTIC COMPLETE")
+        print(" SEARCH:  DIAGNOSTIC COMPLETE")
         print("=" * 80)
         
         return diagnostic_results
@@ -354,10 +354,10 @@ async def main():
         with open("websocket_auth_diagnostic_results.json", "w") as f:
             json.dump(results, f, indent=2)
         
-        print(f"\n📊 Diagnostic results saved to: websocket_auth_diagnostic_results.json")
+        print(f"\n CHART:  Diagnostic results saved to: websocket_auth_diagnostic_results.json")
         
         # Provide summary recommendations
-        print("\n🎯 RECOMMENDATIONS:")
+        print("\n TARGET:  RECOMMENDATIONS:")
         
         if results.get("secret_consistency") == "MISMATCH":
             print("1. CRITICAL: Fix JWT secret mismatch between unified manager and WebSocket extractor")
@@ -372,10 +372,10 @@ async def main():
             print("2. Check staging environment setup and connectivity")
         
     except Exception as e:
-        print(f"❌ DIAGNOSTIC FAILED: {e}")
+        print(f" FAIL:  DIAGNOSTIC FAILED: {e}")
         raise
 
 
 if __name__ == "__main__":
-    print("🚀 Starting WebSocket Authentication Diagnostic...")
+    print("[U+1F680] Starting WebSocket Authentication Diagnostic...")
     asyncio.run(main())

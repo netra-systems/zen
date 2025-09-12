@@ -146,7 +146,7 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
         )
         
         self.record_metric("ssot_runner_validated", True)
-        logger.info("✅ SSOT test runner validation passed")
+        logger.info(" PASS:  SSOT test runner validation passed")
 
     def test_no_unauthorized_test_runners(self):
         """CRITICAL: Ensure no unauthorized test runners exist."""
@@ -157,7 +157,7 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             pytest.fail(violation_details)
         
         self.record_metric("unauthorized_runners_found", 0)
-        logger.info("✅ No unauthorized test runners found")
+        logger.info(" PASS:  No unauthorized test runners found")
 
     def test_no_direct_pytest_bypasses(self):
         """CRITICAL: Prevent scripts calling pytest directly, bypassing SSOT."""
@@ -168,7 +168,7 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             pytest.fail(violation_details)
         
         self.record_metric("pytest_bypasses_found", 0)
-        logger.info("✅ No direct pytest bypasses found")
+        logger.info(" PASS:  No direct pytest bypasses found")
 
     def test_ssot_orchestration_compliance(self):
         """CRITICAL: All orchestration uses SSOT patterns, no try-except bypasses."""
@@ -179,7 +179,7 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             pytest.fail(violation_details)
         
         self.record_metric("orchestration_violations_found", 0)
-        logger.info("✅ SSOT orchestration compliance verified")
+        logger.info(" PASS:  SSOT orchestration compliance verified")
 
     def test_legacy_wrappers_redirect_to_ssot(self):
         """CRITICAL: Verify legacy wrappers properly redirect to SSOT."""
@@ -190,7 +190,7 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             pytest.fail(violation_details)
         
         self.record_metric("invalid_legacy_wrappers", 0)
-        logger.info("✅ Legacy wrapper compliance verified")
+        logger.info(" PASS:  Legacy wrapper compliance verified")
 
     def test_ci_scripts_use_ssot_runner(self):
         """WARNING: Check CI/CD scripts for SSOT compliance (warning only)."""
@@ -202,7 +202,7 @@ class TestSSOTTestRunnerEnforcement(SSotBaseTestCase):
             self.record_metric("ci_violations_found", len(ci_violations))
         else:
             self.record_metric("ci_violations_found", 0)
-            logger.info("✅ CI scripts SSOT compliance verified")
+            logger.info(" PASS:  CI scripts SSOT compliance verified")
 
     # === PRIVATE IMPLEMENTATION METHODS ===
 
@@ -606,7 +606,7 @@ if __name__ == "__main__":
     Usage:
         python tests/mission_critical/test_ssot_test_runner_enforcement.py
     """
-    print("🔍 SSOT Test Runner Enforcement Validation")
+    print(" SEARCH:  SSOT Test Runner Enforcement Validation")
     print("=" * 60)
     
     # Initialize test instance
@@ -617,31 +617,31 @@ if __name__ == "__main__":
         # Run all enforcement checks
         print("\n1. Checking SSOT test runner exists...")
         test_instance.test_ssot_test_runner_exists()
-        print("   ✅ SSOT test runner validation passed")
+        print("    PASS:  SSOT test runner validation passed")
         
         print("\n2. Scanning for unauthorized test runners...")
         test_instance.test_no_unauthorized_test_runners()
-        print("   ✅ No unauthorized test runners found")
+        print("    PASS:  No unauthorized test runners found")
         
         print("\n3. Checking for direct pytest bypasses...")
         test_instance.test_no_direct_pytest_bypasses()
-        print("   ✅ No direct pytest bypasses found")
+        print("    PASS:  No direct pytest bypasses found")
         
         print("\n4. Validating SSOT orchestration compliance...")
         test_instance.test_ssot_orchestration_compliance()
-        print("   ✅ SSOT orchestration compliance verified")
+        print("    PASS:  SSOT orchestration compliance verified")
         
         print("\n5. Checking legacy wrapper compliance...")
         test_instance.test_legacy_wrappers_redirect_to_ssot()
-        print("   ✅ Legacy wrapper compliance verified")
+        print("    PASS:  Legacy wrapper compliance verified")
         
         print("\n6. Checking CI script compliance...")
         test_instance.test_ci_scripts_use_ssot_runner()
-        print("   ⚠️  CI script compliance checked (warnings may appear above)")
+        print("    WARNING: [U+FE0F]  CI script compliance checked (warnings may appear above)")
         
         # Show metrics
         metrics = test_instance.get_all_metrics()
-        print(f"\n📊 ENFORCEMENT METRICS:")
+        print(f"\n CHART:  ENFORCEMENT METRICS:")
         print(f"   Test Type: {metrics.get('test_type', 'unknown')}")
         print(f"   Business Value: {metrics.get('business_value', 'unknown')}")
         print(f"   Execution Time: {metrics.get('execution_time', 0):.3f}s")
@@ -649,12 +649,12 @@ if __name__ == "__main__":
         print(f"   Pytest Bypasses: {metrics.get('pytest_bypasses_found', 0)}")
         print(f"   Orchestration Violations: {metrics.get('orchestration_violations_found', 0)}")
         
-        print(f"\n🎉 [SUCCESS] SSOT COMPLIANCE: All enforcement checks passed!")
+        print(f"\n CELEBRATION:  [SUCCESS] SSOT COMPLIANCE: All enforcement checks passed!")
         print("   The system is protected against unauthorized test runner violations.")
         
     except Exception as e:
-        print(f"\n💥 [FAILURE] SSOT VIOLATION DETECTED: {str(e)}")
-        print("\n🚨 IMMEDIATE ACTION REQUIRED:")
+        print(f"\n[U+1F4A5] [FAILURE] SSOT VIOLATION DETECTED: {str(e)}")
+        print("\n ALERT:  IMMEDIATE ACTION REQUIRED:")
         print("   1. Review violation details above")
         print("   2. Implement remediation steps")
         print("   3. Re-run enforcement check")

@@ -25,7 +25,7 @@ def create_service_account(project_id: str, account_name: str = "netra-deployer"
     
     email = f"{account_name}@{project_id}.iam.gserviceaccount.com"
     
-    print(f"🔐 Creating service account: {email}")
+    print(f"[U+1F510] Creating service account: {email}")
     
     # Create service account
     subprocess.run(
@@ -38,7 +38,7 @@ def create_service_account(project_id: str, account_name: str = "netra-deployer"
         shell=use_shell
     )
     
-    print("📝 Granting necessary roles...")
+    print("[U+1F4DD] Granting necessary roles...")
     
     # Grant necessary roles
     roles = [
@@ -71,7 +71,7 @@ def download_key(project_id: str, email: str, key_path: Path):
     gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
     use_shell = sys.platform == "win32"
     
-    print(f"📥 Downloading key to: {key_path}")
+    print(f"[U+1F4E5] Downloading key to: {key_path}")
     
     subprocess.run(
         [
@@ -84,7 +84,7 @@ def download_key(project_id: str, email: str, key_path: Path):
         shell=use_shell
     )
     
-    print(f"✅ Key saved to: {key_path}")
+    print(f" PASS:  Key saved to: {key_path}")
     
 
 def setup_default_credentials(key_path: Path):
@@ -102,7 +102,7 @@ def setup_default_credentials(key_path: Path):
     with open(config_file, "w") as f:
         json.dump(config, f, indent=2)
     
-    print(f"✅ Default configuration saved to: {config_file}")
+    print(f" PASS:  Default configuration saved to: {config_file}")
     
     # Create deployment wrapper script
     wrapper_script = Path(__file__).parent / "deploy_staging.py"
@@ -144,8 +144,8 @@ sys.exit(subprocess.call(command))
     with open(wrapper_script, "w") as f:
         f.write(wrapper_content)
     
-    print(f"✅ Deployment wrapper created: {wrapper_script}")
-    print("\n📋 Usage:")
+    print(f" PASS:  Deployment wrapper created: {wrapper_script}")
+    print("\n[U+1F4CB] Usage:")
     print(f"   python {wrapper_script}")
     print(f"   python {wrapper_script} --no-checks  # Skip pre-deployment checks")
     
@@ -165,7 +165,7 @@ def main():
         # Use existing key
         key_path = Path(args.use_existing)
         if not key_path.exists():
-            print(f"❌ Key file not found: {key_path}")
+            print(f" FAIL:  Key file not found: {key_path}")
             sys.exit(1)
     else:
         # Create new service account and download key
@@ -175,7 +175,7 @@ def main():
         key_path = key_dir / f"{args.account_name}-{args.project}.json"
         
         if key_path.exists():
-            response = input(f"⚠️ Key file already exists: {key_path}\n   Overwrite? (y/n): ")
+            response = input(f" WARNING: [U+FE0F] Key file already exists: {key_path}\n   Overwrite? (y/n): ")
             if response.lower() != 'y':
                 print("Using existing key file.")
             else:
@@ -188,8 +188,8 @@ def main():
     # Set up default configuration
     setup_default_credentials(key_path)
     
-    print("\n✅ Service account setup complete!")
-    print("\n🚀 You can now deploy using:")
+    print("\n PASS:  Service account setup complete!")
+    print("\n[U+1F680] You can now deploy using:")
     print(f"   python scripts/deploy_staging.py")
     print("\nOr with the main script:")
     print(f"   python scripts/deploy_to_gcp.py --project {args.project} --build-local --service-account {key_path}")

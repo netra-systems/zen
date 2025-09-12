@@ -224,18 +224,18 @@ class SecretsValidator:
             if not self.check_secret_exists(secret_name):
                 if secret_def.required:
                     self.errors.append(f"[{service}] Required secret missing: {secret_name}")
-                    print(f"❌ {secret_name}: MISSING (REQUIRED)")
+                    print(f" FAIL:  {secret_name}: MISSING (REQUIRED)")
                     all_valid = False
                 else:
                     self.warnings.append(f"[{service}] Optional secret missing: {secret_name}")
-                    print(f"⚠️  {secret_name}: MISSING (optional)")
+                    print(f" WARNING: [U+FE0F]  {secret_name}: MISSING (optional)")
                 continue
             
             # Get secret value
             value = self.get_secret_value(secret_name)
             if value is None:
                 self.errors.append(f"[{service}] Could not read secret: {secret_name}")
-                print(f"❌ {secret_name}: UNREADABLE")
+                print(f" FAIL:  {secret_name}: UNREADABLE")
                 all_valid = False
                 continue
             
@@ -245,15 +245,15 @@ class SecretsValidator:
                 if not is_valid:
                     if secret_def.allows_placeholder:
                         self.warnings.append(f"[{service}] {secret_name}: {error}")
-                        print(f"⚠️  {secret_name}: {error}")
+                        print(f" WARNING: [U+FE0F]  {secret_name}: {error}")
                     else:
                         self.errors.append(f"[{service}] {secret_name}: {error}")
-                        print(f"❌ {secret_name}: {error}")
+                        print(f" FAIL:  {secret_name}: {error}")
                         all_valid = False
                 else:
-                    print(f"✅ {secret_name}: Valid")
+                    print(f" PASS:  {secret_name}: Valid")
             else:
-                print(f"✅ {secret_name}: Exists (development mode)")
+                print(f" PASS:  {secret_name}: Exists (development mode)")
         
         return all_valid
     
@@ -278,10 +278,10 @@ class SecretsValidator:
                     
                     if secret_ref not in content:
                         self.errors.append(f"Deployment script missing backend mapping: {secret_ref}")
-                        print(f"❌ Backend missing: {env_var}")
+                        print(f" FAIL:  Backend missing: {env_var}")
                         all_valid = False
                     else:
-                        print(f"✅ Backend has: {env_var}")
+                        print(f" PASS:  Backend has: {env_var}")
             
             # Check auth mappings
             for secret_def in self.REQUIRED_SECRETS["auth"]:
@@ -291,10 +291,10 @@ class SecretsValidator:
                     
                     if secret_ref not in content:
                         self.errors.append(f"Deployment script missing auth mapping: {secret_ref}")
-                        print(f"❌ Auth missing: {env_var}")
+                        print(f" FAIL:  Auth missing: {env_var}")
                         all_valid = False
                     else:
-                        print(f"✅ Auth has: {env_var}")
+                        print(f" PASS:  Auth has: {env_var}")
             
             return all_valid
             
@@ -360,23 +360,23 @@ class SecretsValidator:
         print(f"{'='*60}")
         
         if self.errors:
-            print(f"\n❌ ERRORS ({len(self.errors)}):")
+            print(f"\n FAIL:  ERRORS ({len(self.errors)}):")
             for error in self.errors:
                 print(f"  - {error}")
         
         if self.warnings:
-            print(f"\n⚠️  WARNINGS ({len(self.warnings)}):")
+            print(f"\n WARNING: [U+FE0F]  WARNINGS ({len(self.warnings)}):")
             for warning in self.warnings:
                 print(f"  - {warning}")
         
         if not self.errors:
-            print("\n✅ All secrets are properly configured!")
+            print("\n PASS:  All secrets are properly configured!")
             return True
         else:
             # Generate fix commands
             fix_commands = self.generate_fix_commands()
             if fix_commands:
-                print(f"\n📝 FIX COMMANDS:")
+                print(f"\n[U+1F4DD] FIX COMMANDS:")
                 for cmd in fix_commands:
                     print(f"\n{cmd}")
             
@@ -415,10 +415,10 @@ def main():
     is_valid = validator.run_validation()
     
     if not is_valid:
-        print("\n❌ Validation failed! Fix the issues before deploying.")
+        print("\n FAIL:  Validation failed! Fix the issues before deploying.")
         sys.exit(1)
     else:
-        print("\n✅ Validation passed! Ready to deploy.")
+        print("\n PASS:  Validation passed! Ready to deploy.")
         sys.exit(0)
 
 

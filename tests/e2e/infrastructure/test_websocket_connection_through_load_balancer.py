@@ -529,28 +529,28 @@ if __name__ == "__main__":
         
         try:
             await test_instance.test_authenticated_websocket_connection_through_load_balancer()
-            print("✅ WebSocket connections through load balancer working")
+            print(" PASS:  WebSocket connections through load balancer working")
         except AssertionError as e:
-            print(f"❌ WebSocket connection failures:\n{e}")
+            print(f" FAIL:  WebSocket connection failures:\n{e}")
             return False
         
         try:
             await test_instance.test_agent_events_delivered_through_websocket_load_balancer()
-            print("✅ Agent events delivered through WebSocket load balancer")
+            print(" PASS:  Agent events delivered through WebSocket load balancer")
         except AssertionError as e:
-            print(f"❌ Agent event delivery failures:\n{e}")
+            print(f" FAIL:  Agent event delivery failures:\n{e}")
             return False
         
         try:
             await test_instance.test_websocket_connection_resilience_through_load_balancer()
-            print("✅ WebSocket connection resilience through load balancer verified")
+            print(" PASS:  WebSocket connection resilience through load balancer verified")
         except AssertionError as e:
-            print(f"❌ WebSocket resilience failures:\n{e}")
+            print(f" FAIL:  WebSocket resilience failures:\n{e}")
             return False
         
         return True
     
     if asyncio.run(run_tests()):
-        print("✅ All WebSocket load balancer tests passed!")
+        print(" PASS:  All WebSocket load balancer tests passed!")
     else:
         exit(1)

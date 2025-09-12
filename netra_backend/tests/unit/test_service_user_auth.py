@@ -17,7 +17,7 @@ class TestServiceUserAuth(unittest.TestCase):
             
             # This reproduces the core issue from #463
             if not service_secret:
-                print("✓ REPRODUCED: SERVICE_SECRET is missing - this causes 403 auth failures in staging")
+                print("[U+2713] REPRODUCED: SERVICE_SECRET is missing - this causes 403 auth failures in staging")
             
     def test_missing_jwt_secret_reproduces_auth_failure(self):
         """Test JWT_SECRET missing also causes auth failures"""  
@@ -28,7 +28,7 @@ class TestServiceUserAuth(unittest.TestCase):
             self.assertIsNone(jwt_secret, "JWT_SECRET should be missing (None)")
             
             if not jwt_secret:
-                print("✓ REPRODUCED: JWT_SECRET is missing - this also causes auth failures")
+                print("[U+2713] REPRODUCED: JWT_SECRET is missing - this also causes auth failures")
 
 if __name__ == "__main__":
     unittest.main()

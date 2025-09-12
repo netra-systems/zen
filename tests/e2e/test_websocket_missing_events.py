@@ -397,7 +397,7 @@ class TestWebSocketMissingEvents:
                 if last_incomplete >= 0:
                     assert last_incomplete < first_complete, "incomplete partial_results should come before complete ones"
     
-    # Helper methods (each ≤8 lines)
+    # Helper methods (each  <= 8 lines)
     def _extract_event_by_type(self, events: List[Dict], event_type: str) -> Optional[Dict]:
         """Extract first event of specified type from events list."""
         for event in events:

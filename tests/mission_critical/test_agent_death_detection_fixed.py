@@ -476,7 +476,7 @@
 
         # REMOVED_SYNTAX_ERROR: print(" )
         # REMOVED_SYNTAX_ERROR: " + "="*80)
-        # REMOVED_SYNTAX_ERROR: print("✅ AGENT DEATH DETECTION SYSTEM WORKING CORRECTLY")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  AGENT DEATH DETECTION SYSTEM WORKING CORRECTLY")
         # REMOVED_SYNTAX_ERROR: print("="*80)
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
         # REMOVED_SYNTAX_ERROR: print("formatted_string")

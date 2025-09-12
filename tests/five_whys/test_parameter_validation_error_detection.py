@@ -96,7 +96,7 @@ class TestParameterValidationErrorDetection:
             assert any(term in error_msg for term in ['websocket', 'bridge', 'type', 'invalid']), \
                 f"Error message should indicate WebSocket bridge type issue: {exc_info.value}"
         
-        print("✅ WHY #3 - SupervisorAgent.create() parameter type validation catches errors early")
+        print(" PASS:  WHY #3 - SupervisorAgent.create() parameter type validation catches errors early")
     
     def test_why_3_user_execution_context_parameter_validation(self):
         """
@@ -132,7 +132,7 @@ class TestParameterValidationErrorDetection:
                 assert missing_param.lower() in error_msg, \
                     f"Error message should mention {missing_param}: {exc_info.value}"
         
-        print("✅ WHY #3 - UserExecutionContext parameter validation prevents invalid contexts")
+        print(" PASS:  WHY #3 - UserExecutionContext parameter validation prevents invalid contexts")
     
     def test_why_3_websocket_parameter_name_validation(self):
         """
@@ -169,7 +169,7 @@ class TestParameterValidationErrorDetection:
         
         assert context.websocket_client_id == "correct_param_value"
         
-        print("✅ WHY #3 - WebSocket parameter name validation prevents deprecated usage")
+        print(" PASS:  WHY #3 - WebSocket parameter name validation prevents deprecated usage")
     
     def test_why_3_factory_parameter_validation_integration(self):
         """
@@ -203,7 +203,7 @@ class TestParameterValidationErrorDetection:
             assert param_name in create_signature.parameters, \
                 f"SupervisorAgent.create() missing required parameter: {param_name}"
         
-        print("✅ WHY #3 - Factory parameter validation integration prevents cascading failures")
+        print(" PASS:  WHY #3 - Factory parameter validation integration prevents cascading failures")
     
     def test_why_3_error_message_clarity_validation(self):
         """
@@ -253,7 +253,7 @@ class TestParameterValidationErrorDetection:
             assert "thread_id" in error_msg or "required" in error_msg, \
                 f"Error message should indicate missing required parameter: {e}"
         
-        print("✅ WHY #3 - Error messages provide clear indication of parameter validation failures")
+        print(" PASS:  WHY #3 - Error messages provide clear indication of parameter validation failures")
     
     def test_why_3_validation_prevents_silent_failures(self):
         """
@@ -302,9 +302,9 @@ class TestParameterValidationErrorDetection:
             error_msg = str(exc_info.value)
             assert len(error_msg) > 0, f"Error message should not be empty for: {scenario['description']}"
             
-            print(f"  ✅ {scenario['description']}: {type(exc_info.value).__name__}: {error_msg[:100]}...")
+            print(f"   PASS:  {scenario['description']}: {type(exc_info.value).__name__}: {error_msg[:100]}...")
         
-        print("✅ WHY #3 - Validation prevents all silent parameter failures")
+        print(" PASS:  WHY #3 - Validation prevents all silent parameter failures")
     
     def test_why_3_comprehensive_validation_integration(self):
         """
@@ -382,11 +382,11 @@ class TestParameterValidationErrorDetection:
             failure_details = [f"- {r['check']}: {r['result']}" for r in critical_failures]
             pytest.fail(f"VALIDATION SYSTEM FAILURES - Parameter issues may cause system failures:\n" + "\n".join(failure_details))
         
-        print("✅ WHY #3 - Comprehensive validation integration prevents system-level parameter failures")
+        print(" PASS:  WHY #3 - Comprehensive validation integration prevents system-level parameter failures")
         
         # Report validation coverage
         for result in validation_results:
-            status = "✅" if result['result'] else "❌"
+            status = " PASS: " if result['result'] else " FAIL: "
             critical = " (CRITICAL)" if result['critical'] else ""
             print(f"  {status} {result['check']}{critical}: {result['result']}")
 

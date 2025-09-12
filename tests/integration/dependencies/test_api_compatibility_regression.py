@@ -37,7 +37,7 @@ class TestAPICompatibilityRegression:
     API Compatibility Regression Prevention Test Suite.
     
     This suite tests for regressions that occur when dependencies are upgraded:
-    1. SQLAlchemy 1.x → 2.x compatibility breaks
+    1. SQLAlchemy 1.x  ->  2.x compatibility breaks
     2. Redis 6.4.0+ parameter changes
     3. Python asyncio changes across versions
     4. Database driver version compatibility
@@ -51,7 +51,7 @@ class TestAPICompatibilityRegression:
         
         # Get current dependency versions for comparison
         self.dependency_versions = self._get_current_dependency_versions()
-        logger.info(f"📦 Current dependency versions: {self.dependency_versions}")
+        logger.info(f"[U+1F4E6] Current dependency versions: {self.dependency_versions}")
     
     def _get_current_dependency_versions(self) -> Dict[str, str]:
         """Get versions of critical dependencies that could cause regressions."""
@@ -97,9 +97,9 @@ class TestAPICompatibilityRegression:
         Test SQLAlchemy version compatibility to prevent regressions.
         
         This test detects regressions when SQLAlchemy is upgraded:
-        - 1.4.x → 2.0.x: requires text() wrapper for raw SQL
-        - 1.3.x → 1.4.x: async patterns changed
-        - 2.0.x → 2.1.x: potential future breaking changes
+        - 1.4.x  ->  2.0.x: requires text() wrapper for raw SQL
+        - 1.3.x  ->  1.4.x: async patterns changed
+        - 2.0.x  ->  2.1.x: potential future breaking changes
         """
         import sqlalchemy
         from sqlalchemy import text
@@ -107,7 +107,7 @@ class TestAPICompatibilityRegression:
         
         # Get SQLAlchemy version and determine compatibility requirements
         sqlalchemy_version = version.parse(sqlalchemy.__version__)
-        logger.info(f"🔍 Testing SQLAlchemy version {sqlalchemy_version}")
+        logger.info(f" SEARCH:  Testing SQLAlchemy version {sqlalchemy_version}")
         
         # Test database URL
         env = get_env()
@@ -120,7 +120,7 @@ class TestAPICompatibilityRegression:
                 # Test 1: Raw SQL compatibility across versions
                 if sqlalchemy_version >= version.parse("2.0.0"):
                     # SQLAlchemy 2.0+ requires text() wrapper
-                    logger.info("📋 Testing SQLAlchemy 2.0+ text() wrapper requirement")
+                    logger.info("[U+1F4CB] Testing SQLAlchemy 2.0+ text() wrapper requirement")
                     
                     # This should work in 2.0+
                     result = await conn.execute(text("SELECT 1 as test_value"))
@@ -132,11 +132,11 @@ class TestAPICompatibilityRegression:
                         await conn.execute("SELECT 2 as raw_test")
                         pytest.fail("Raw SQL strings should fail in SQLAlchemy 2.0+ (regression detected)")
                     except Exception:
-                        logger.info("✅ Raw SQL properly rejected in SQLAlchemy 2.0+ (no regression)")
+                        logger.info(" PASS:  Raw SQL properly rejected in SQLAlchemy 2.0+ (no regression)")
                 
                 elif sqlalchemy_version >= version.parse("1.4.0"):
                     # SQLAlchemy 1.4.x should support both patterns
-                    logger.info("📋 Testing SQLAlchemy 1.4.x compatibility patterns")
+                    logger.info("[U+1F4CB] Testing SQLAlchemy 1.4.x compatibility patterns")
                     
                     # Both should work in 1.4.x
                     result1 = await conn.execute(text("SELECT 1 as test_value"))
@@ -146,18 +146,18 @@ class TestAPICompatibilityRegression:
                     try:
                         result2 = await conn.execute("SELECT 2 as raw_test")
                         raw_works = True
-                        logger.info("ℹ️ Raw SQL still works in SQLAlchemy 1.4.x")
+                        logger.info("[U+2139][U+FE0F] Raw SQL still works in SQLAlchemy 1.4.x")
                     except Exception:
                         raw_works = False
-                        logger.info("ℹ️ Raw SQL rejected in SQLAlchemy 1.4.x")
+                        logger.info("[U+2139][U+FE0F] Raw SQL rejected in SQLAlchemy 1.4.x")
                 
                 else:
                     # SQLAlchemy < 1.4.0
-                    logger.info("📋 Testing legacy SQLAlchemy compatibility")
+                    logger.info("[U+1F4CB] Testing legacy SQLAlchemy compatibility")
                     pytest.skip("SQLAlchemy version too old for async testing")
                 
                 # Test 2: Async session patterns
-                logger.info("📋 Testing async session compatibility patterns")
+                logger.info("[U+1F4CB] Testing async session compatibility patterns")
                 
                 # Test async context manager
                 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -174,7 +174,7 @@ class TestAPICompatibilityRegression:
                         await session.execute(text("SELECT 1"))
                         # Transaction will auto-commit on success
                 
-                logger.info("✅ SQLAlchemy version compatibility validated")
+                logger.info(" PASS:  SQLAlchemy version compatibility validated")
                 
         except Exception as e:
             pytest.fail(f"SQLAlchemy compatibility test failed: {e}")
@@ -194,7 +194,7 @@ class TestAPICompatibilityRegression:
         import redis.asyncio as redis_async
         
         redis_version = version.parse(self.dependency_versions["redis"])
-        logger.info(f"🔍 Testing Redis version {redis_version}")
+        logger.info(f" SEARCH:  Testing Redis version {redis_version}")
         
         # Connect to test Redis
         redis_conn = redis_async.Redis(
@@ -214,7 +214,7 @@ class TestAPICompatibilityRegression:
             
             # Test current Redis API compatibility
             if redis_version >= version.parse("6.4.0"):
-                logger.info("📋 Testing Redis 6.4.0+ parameter compatibility")
+                logger.info("[U+1F4CB] Testing Redis 6.4.0+ parameter compatibility")
                 
                 # Should work with 'ex' parameter
                 await redis_conn.set(test_key, test_value, ex=60)
@@ -229,10 +229,10 @@ class TestAPICompatibilityRegression:
                 with pytest.raises(TypeError):
                     await redis_conn.set(f"{test_key}_old", test_value, expire_seconds=60)
                 
-                logger.info("✅ Redis 6.4.0+ parameter compatibility validated")
+                logger.info(" PASS:  Redis 6.4.0+ parameter compatibility validated")
                 
             else:
-                logger.info("📋 Testing legacy Redis parameter compatibility")
+                logger.info("[U+1F4CB] Testing legacy Redis parameter compatibility")
                 
                 # For older versions, test what should work
                 await redis_conn.set(test_key, test_value)
@@ -241,10 +241,10 @@ class TestAPICompatibilityRegression:
                 retrieved = await redis_conn.get(test_key)
                 assert retrieved == test_value, "Basic Redis operations should work"
                 
-                logger.info("✅ Legacy Redis compatibility validated")
+                logger.info(" PASS:  Legacy Redis compatibility validated")
             
             # Test async Redis patterns across versions
-            logger.info("📋 Testing async Redis patterns")
+            logger.info("[U+1F4CB] Testing async Redis patterns")
             
             # Pipeline operations
             pipeline = redis_conn.pipeline()
@@ -263,7 +263,7 @@ class TestAPICompatibilityRegression:
             cleanup_keys = [test_key] + [f"{test_key}_batch_{i}" for i in range(3)]
             await redis_conn.delete(*cleanup_keys)
             
-            logger.info("✅ Redis async patterns validated")
+            logger.info(" PASS:  Redis async patterns validated")
             
         except Exception as e:
             pytest.fail(f"Redis compatibility test failed: {e}")
@@ -282,7 +282,7 @@ class TestAPICompatibilityRegression:
         - Python 3.11+: asyncio performance improvements
         """
         python_version = version.parse(self.dependency_versions["python"])
-        logger.info(f"🔍 Testing Python {python_version} asyncio compatibility")
+        logger.info(f" SEARCH:  Testing Python {python_version} asyncio compatibility")
         
         # Test 1: Basic asyncio patterns
         async def test_task():
@@ -316,7 +316,7 @@ class TestAPICompatibilityRegression:
             result = await asyncio.wait_for(slow_task(), timeout=0.05)
             pytest.fail("Task should have timed out")
         except asyncio.TimeoutError:
-            logger.info("✅ Asyncio timeout handling works correctly")
+            logger.info(" PASS:  Asyncio timeout handling works correctly")
         
         # Test successful completion within timeout
         result = await asyncio.wait_for(slow_task(), timeout=0.2)
@@ -345,7 +345,7 @@ class TestAPICompatibilityRegression:
         except ValueError as e:
             assert str(e) == "Intentional test error", "Exception should propagate correctly"
         
-        logger.info(f"✅ Python {python_version} asyncio compatibility validated")
+        logger.info(f" PASS:  Python {python_version} asyncio compatibility validated")
     
     @pytest.mark.asyncio
     async def test_database_driver_compatibility_regression(self):
@@ -378,7 +378,7 @@ class TestAPICompatibilityRegression:
                 assert row[0] == 1, "SQLite driver should return correct ID"
                 assert row[1] == "test_value", "SQLite driver should return correct value"
             
-            logger.info("✅ SQLite driver compatibility validated")
+            logger.info(" PASS:  SQLite driver compatibility validated")
             
         except Exception as e:
             pytest.fail(f"SQLite driver compatibility failed: {e}")
@@ -387,7 +387,7 @@ class TestAPICompatibilityRegression:
         
         # Test PostgreSQL driver if asyncpg is available
         if self.dependency_versions.get("asyncpg", "not_installed") != "not_installed":
-            logger.info("📋 Testing PostgreSQL driver compatibility")
+            logger.info("[U+1F4CB] Testing PostgreSQL driver compatibility")
             
             # Try to connect to test PostgreSQL
             env = get_env()
@@ -401,7 +401,7 @@ class TestAPICompatibilityRegression:
                     version_row = result.fetchone()
                     
                     if version_row:
-                        logger.info(f"📊 PostgreSQL version: {version_row[0][:50]}...")
+                        logger.info(f" CHART:  PostgreSQL version: {version_row[0][:50]}...")
                         
                         # Test PostgreSQL-specific features
                         await conn.execute(text("""
@@ -430,7 +430,7 @@ class TestAPICompatibilityRegression:
                         assert stored_data["test"] is True, "PostgreSQL JSONB should work"
                         assert stored_data["value"] == 42, "PostgreSQL JSONB should preserve values"
                         
-                        logger.info("✅ PostgreSQL driver compatibility validated")
+                        logger.info(" PASS:  PostgreSQL driver compatibility validated")
                     
             except Exception as e:
                 logger.warning(f"PostgreSQL driver test skipped: {e}")
@@ -438,7 +438,7 @@ class TestAPICompatibilityRegression:
             finally:
                 await pg_engine.dispose()
         else:
-            logger.info("📋 PostgreSQL driver not installed, skipping compatibility test")
+            logger.info("[U+1F4CB] PostgreSQL driver not installed, skipping compatibility test")
     
     @pytest.mark.asyncio
     async def test_dependency_interaction_regression(self):
@@ -450,7 +450,7 @@ class TestAPICompatibilityRegression:
         - Redis + asyncio version interactions
         - Authentication libraries + async patterns
         """
-        logger.info("📋 Testing dependency interaction patterns")
+        logger.info("[U+1F4CB] Testing dependency interaction patterns")
         
         # Test 1: SQLAlchemy + Redis interaction
         from sqlalchemy.ext.asyncio import create_async_engine
@@ -531,7 +531,7 @@ class TestAPICompatibilityRegression:
             # Cleanup
             await redis_conn.delete(cache_key)
             
-            logger.info("✅ Database + Cache interaction compatibility validated")
+            logger.info(" PASS:  Database + Cache interaction compatibility validated")
             
         except Exception as e:
             pytest.fail(f"Dependency interaction test failed: {e}")
@@ -540,7 +540,7 @@ class TestAPICompatibilityRegression:
             await redis_conn.aclose()
         
         # Test 2: Authentication + async patterns
-        logger.info("📋 Testing authentication async pattern compatibility")
+        logger.info("[U+1F4CB] Testing authentication async pattern compatibility")
         
         # Test JWT token creation and validation in async context
         test_tasks = []
@@ -573,7 +573,7 @@ class TestAPICompatibilityRegression:
             assert result["token_valid"] is True, f"Auth task {result['task_id']} should be valid"
             assert result["user_id"] == f"task_user_{result['task_id']}", "User ID should match"
         
-        logger.info("✅ Authentication async pattern compatibility validated")
+        logger.info(" PASS:  Authentication async pattern compatibility validated")
     
     def test_dependency_version_matrix_regression(self):
         """
@@ -628,12 +628,12 @@ class TestAPICompatibilityRegression:
         
         # Log detected potential regressions
         if detected_regressions:
-            logger.warning(f"⚠️ Detected {len(detected_regressions)} potential regression patterns:")
+            logger.warning(f" WARNING: [U+FE0F] Detected {len(detected_regressions)} potential regression patterns:")
             for regression in detected_regressions:
-                logger.warning(f"   📦 {regression['package']} {regression['current_version']}: {regression['breaking_changes']}")
-                logger.warning(f"      🔍 Affected patterns: {regression['affected_patterns']}")
+                logger.warning(f"   [U+1F4E6] {regression['package']} {regression['current_version']}: {regression['breaking_changes']}")
+                logger.warning(f"       SEARCH:  Affected patterns: {regression['affected_patterns']}")
         else:
-            logger.info("✅ No known regression patterns detected in current dependency versions")
+            logger.info(" PASS:  No known regression patterns detected in current dependency versions")
         
         # Verify our tests cover the detected regressions
         covered_patterns = {
@@ -651,7 +651,7 @@ class TestAPICompatibilityRegression:
                 if breaking_change not in covered_patterns:
                     pytest.fail(f"Regression pattern '{breaking_change}' not covered by tests")
         
-        logger.info(f"✅ Dependency version matrix validated: {len(detected_regressions)} regressions detected and covered")
+        logger.info(f" PASS:  Dependency version matrix validated: {len(detected_regressions)} regressions detected and covered")
         assert True, "Dependency regression prevention is properly configured"
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ integration, ensuring user isolation in real-time communication channels. WebSoc
 events are critical for chat functionality which delivers 90% of platform business value.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - affects every user interaction
+- Segment: ALL (Free  ->  Enterprise) - affects every user interaction
 - Business Goal: Revenue/Retention - ensures chat functionality works correctly
 - Value Impact: Delivers 90% of platform value through reliable real-time chat
 - Revenue Impact: Prevents $500K+ ARR loss from broken WebSocket communications
@@ -933,7 +933,7 @@ class TestExecutionEngineFactoryWebSocketIntegration(SSotAsyncTestCase):
 """
 BUSINESS VALUE JUSTIFICATION for ExecutionEngine Factory WebSocket Integration Tests
 
-Segment: ALL (Free → Enterprise) - affects every user interaction with chat
+Segment: ALL (Free  ->  Enterprise) - affects every user interaction with chat
 Business Goal: Revenue/Retention - ensures primary value delivery mechanism works correctly
 Value Impact: Delivers 90% of platform value through reliable real-time chat communication
 Revenue Impact: Prevents $500K+ ARR loss from broken WebSocket communications that break chat

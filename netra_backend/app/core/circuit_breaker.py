@@ -73,7 +73,7 @@ def get_circuit_breaker(name: str, config=None):
                 recovery_timeout=getattr(config, 'recovery_timeout', 60.0),
                 timeout_seconds=getattr(config, 'timeout_seconds', 30.0)
             )
-    # 🔧 FIX: Ensure unified_config is never None to prevent AttributeError
+    # [U+1F527] FIX: Ensure unified_config is never None to prevent AttributeError
     if unified_config is None:
         unified_config = UnifiedCircuitConfig(name=name)
     return manager.create_circuit_breaker(name, unified_config)

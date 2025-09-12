@@ -485,7 +485,7 @@ class TestWebSocketConnectionLifecycleCompliant:
         finally:
             await ws_client.disconnect()
     
-    # Helper methods (each ≤8 lines)
+    # Helper methods (each  <= 8 lines)
     def _validate_connection_state(self, ws_client: WebSocketTestClient, expected_state: bool) -> bool:
         """Validate WebSocket connection state matches expectation."""
         actual_state = ws_client.is_connected()

@@ -444,11 +444,11 @@ async def main():
             print(json.dumps(result, indent=2))
             
             if result["overall_assessment"]["issue_confirmed"]:
-                print("\n❌ JWT SECRET CONSISTENCY ISSUE CONFIRMED")
+                print("\n FAIL:  JWT SECRET CONSISTENCY ISSUE CONFIRMED")
                 print("Run with 'fix' argument to apply emergency fix")
                 return 1
             else:
-                print("\n✅ JWT SECRET CONSISTENCY OK")
+                print("\n PASS:  JWT SECRET CONSISTENCY OK")
                 return 0
         
         elif len(sys.argv) > 1 and sys.argv[1] == "fix":
@@ -460,13 +460,13 @@ async def main():
             print(json.dumps(result, indent=2))
             
             if result.get("fix_success", False):
-                print("\n✅ EMERGENCY FIX SUCCESSFUL")
+                print("\n PASS:  EMERGENCY FIX SUCCESSFUL")
                 print("JWT secret consistency restored")
                 print("Expected auth success rate: 95%+")
                 print("Business impact: $120K+ MRR restored")
                 return 0
             else:
-                print("\n❌ EMERGENCY FIX FAILED")
+                print("\n FAIL:  EMERGENCY FIX FAILED")
                 print("Manual intervention required")
                 return 1
         
@@ -478,7 +478,7 @@ async def main():
     
     except Exception as e:
         logger.error(f"Fatal error: {e}", exc_info=True)
-        print(f"\n❌ FATAL ERROR: {e}")
+        print(f"\n FAIL:  FATAL ERROR: {e}")
         return 1
 
 

@@ -75,8 +75,8 @@ Time frames:
         
         if args.output:
             Path(args.output).write_text(report, encoding='utf-8')
-            print(f"✅ Team update report saved to: {args.output}")
-            print(f"\n📊 Report Preview:\n{'-' * 50}")
+            print(f" PASS:  Team update report saved to: {args.output}")
+            print(f"\n CHART:  Report Preview:\n{'-' * 50}")
             print(report[:500] + "...\n")
             print(f"{'=' * 50}")
             print(f"View full report: {args.output}")
@@ -84,7 +84,7 @@ Time frames:
             print(report)
             
     except Exception as e:
-        print(f"❌ Error generating report: {e}")
+        print(f" FAIL:  Error generating report: {e}")
         sys.exit(1)
 
 

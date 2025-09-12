@@ -107,14 +107,14 @@ def generate_mro_report():
     
     for result in analysis_results:
         if "error" in result:
-            report.append(f"### ❌ {result['class']}")
+            report.append(f"###  FAIL:  {result['class']}")
             report.append(f"- **Error**: {result['error']}\n")
             continue
         
         report.append(f"### {result['class']}")
         report.append(f"- **Module**: `{result['module']}`")
         report.append(f"- **Direct Base Classes**: {', '.join(result['base_classes']) if result['base_classes'] else 'None (object)'}")
-        report.append(f"- **MRO**: {' → '.join(result['mro'])}")
+        report.append(f"- **MRO**: {'  ->  '.join(result['mro'])}")
         report.append(f"- **Method Count**: {len(result['methods'])}")
         report.append(f"- **Attribute Count**: {len(result['attributes'])}")
         
@@ -132,7 +132,7 @@ def generate_mro_report():
             
             for method in critical_methods:
                 if method in result['methods']:
-                    report.append(f"  - ✅ `{method}`")
+                    report.append(f"  -  PASS:  `{method}`")
         
         report.append("")
     
@@ -174,9 +174,9 @@ def generate_mro_report():
                     classes_with_event.append(result['class'])
         
         if classes_with_event:
-            report.append(f"- ✅ `{event}`: {', '.join(classes_with_event)}")
+            report.append(f"-  PASS:  `{event}`: {', '.join(classes_with_event)}")
         else:
-            report.append(f"- ❌ `{event}`: NOT FOUND")
+            report.append(f"-  FAIL:  `{event}`: NOT FOUND")
     
     # Recommendations
     report.append("\n## Recommendations\n")

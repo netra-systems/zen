@@ -107,7 +107,7 @@ class TestClaudeCommandGitHubIntegration(BaseTestCase):
         }
         
         expected_formatted_response = """
-✅ **GitHub Issue Created Successfully**
+ PASS:  **GitHub Issue Created Successfully**
 
 **Issue #123:** [dependency] ImportError: module 'xyz' not found
 - **Status:** Open

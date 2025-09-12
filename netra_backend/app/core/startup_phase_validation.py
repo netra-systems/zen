@@ -85,7 +85,7 @@ class StartupPhaseValidator:
             Phase validation results
         """
         start_time = time.time()
-        logger.info(f"🔍 STARTUP PHASE VALIDATION: Starting {target_phase.value} validation")
+        logger.info(f" SEARCH:  STARTUP PHASE VALIDATION: Starting {target_phase.value} validation")
         
         # Log service dependencies for this phase
         await self._log_phase_service_dependencies(target_phase, app_state)
@@ -114,7 +114,7 @@ class StartupPhaseValidator:
             self.validation_history.append(phase_result)
             
             if phase_result.success:
-                logger.info(f"✅ STARTUP PHASE SUCCESS: {target_phase.value} validation passed "
+                logger.info(f" PASS:  STARTUP PHASE SUCCESS: {target_phase.value} validation passed "
                           f"({contract_results['passed_contracts']}/{contract_results['total_contracts']} "
                           f"contracts validated in {duration:.2f}s)")
                 
@@ -126,7 +126,7 @@ class StartupPhaseValidator:
                     self.completed_phases.append(target_phase)
                     
             else:
-                logger.critical(f"🚨 STARTUP PHASE FAILURE: {target_phase.value} validation failed "
+                logger.critical(f" ALERT:  STARTUP PHASE FAILURE: {target_phase.value} validation failed "
                                f"({len(phase_result.errors)} critical errors)")
                 
                 # Log detailed service integration failures
@@ -147,7 +147,7 @@ class StartupPhaseValidator:
             
         except Exception as e:
             duration = time.time() - start_time
-            logger.critical(f"🚨 STARTUP PHASE EXCEPTION: {target_phase.value} validation exception "
+            logger.critical(f" ALERT:  STARTUP PHASE EXCEPTION: {target_phase.value} validation exception "
                            f"(duration: {duration:.2f}s, exception: {type(e).__name__}: {e})")
             
             # Log service integration context for exception
@@ -178,7 +178,7 @@ class StartupPhaseValidator:
         missing_services = [svc for svc in phase_services if svc not in available_services]
         
         logger.info(
-            f"🔍 PHASE SERVICE DEPENDENCIES: {phase.value} phase "
+            f" SEARCH:  PHASE SERVICE DEPENDENCIES: {phase.value} phase "
             f"(required_services: {phase_services}, "
             f"available_services: {list(available_services.keys())}, "
             f"missing_services: {missing_services})"
@@ -186,7 +186,7 @@ class StartupPhaseValidator:
         
         if missing_services:
             logger.warning(
-                f"⚠️ MISSING SERVICES: {phase.value} phase missing required services "
+                f" WARNING: [U+FE0F] MISSING SERVICES: {phase.value} phase missing required services "
                 f"(missing: {missing_services}, "
                 f"impact: Phase may fail or operate with reduced functionality)"
             )
@@ -199,7 +199,7 @@ class StartupPhaseValidator:
         
         if working_services:
             logger.info(
-                f"✅ SERVICE INTEGRATIONS: {phase.value} phase service integrations successful "
+                f" PASS:  SERVICE INTEGRATIONS: {phase.value} phase service integrations successful "
                 f"(working_services: {working_services}, "
                 f"golden_path_status: {'enabled' if 'websocket_manager' in working_services else 'limited'})"
             )
@@ -215,7 +215,7 @@ class StartupPhaseValidator:
         golden_path_impact = self._assess_golden_path_impact_from_failures(failed_services)
         
         logger.critical(
-            f"🚨 SERVICE INTEGRATION FAILURES: {phase.value} phase integration failures "
+            f" ALERT:  SERVICE INTEGRATION FAILURES: {phase.value} phase integration failures "
             f"(failed_services: {failed_services}, "
             f"failure_patterns: {failure_patterns}, "
             f"golden_path_impact: {golden_path_impact}, "
@@ -226,7 +226,7 @@ class StartupPhaseValidator:
         for service in failed_services:
             service_errors = [err for err in errors if service in err.lower()]
             logger.critical(
-                f"🚨 SERVICE FAILURE DETAIL: {service} service failed "
+                f" ALERT:  SERVICE FAILURE DETAIL: {service} service failed "
                 f"(related_errors: {len(service_errors)}, "
                 f"phase: {phase.value}, "
                 f"impact: Service unavailable for {phase.value} operations)"
@@ -238,7 +238,7 @@ class StartupPhaseValidator:
         phase_services = self._get_phase_required_services(phase)
         
         logger.critical(
-            f"🚨 SERVICE EXCEPTION CONTEXT: {phase.value} phase exception occurred "
+            f" ALERT:  SERVICE EXCEPTION CONTEXT: {phase.value} phase exception occurred "
             f"(exception_type: {type(exception).__name__}, "
             f"exception_message: {str(exception)}, "
             f"available_services: {list(available_services.keys())}, "
@@ -337,7 +337,7 @@ class StartupPhaseValidator:
         
         This ensures all phases are validated in proper order.
         """
-        logger.info(f"🚀 Starting startup sequence validation to {target_phase.value}")
+        logger.info(f"[U+1F680] Starting startup sequence validation to {target_phase.value}")
         
         # Define phase order
         phase_order = [
@@ -396,10 +396,10 @@ class StartupPhaseValidator:
         
         # Generate summary
         if sequence_results["success"]:
-            logger.info(f"🎉 Startup sequence validation complete: "
+            logger.info(f" CELEBRATION:  Startup sequence validation complete: "
                        f"All phases passed ({sequence_results['total_duration']:.2f}s)")
         else:
-            logger.error(f"💥 Startup sequence validation failed: "
+            logger.error(f"[U+1F4A5] Startup sequence validation failed: "
                         f"{len(sequence_results['critical_failures'])} critical failures")
         
         return sequence_results
@@ -420,7 +420,7 @@ class StartupPhaseValidator:
         successful_validations = sum(1 for result in self.validation_history if result.success)
         overall_success = successful_validations == total_validations
         
-        status = "✅ PASSED" if overall_success else "❌ FAILED"
+        status = " PASS:  PASSED" if overall_success else " FAIL:  FAILED"
         report_lines.append(f"Overall Status: {status}")
         report_lines.append(f"Validations: {successful_validations}/{total_validations} successful")
         report_lines.append(f"Current Phase: {self.current_phase.value if self.current_phase else 'Not started'}")
@@ -431,7 +431,7 @@ class StartupPhaseValidator:
         report_lines.append("-" * 40)
         
         for result in self.validation_history:
-            status_icon = "✅" if result.success else "❌"
+            status_icon = " PASS: " if result.success else " FAIL: "
             report_lines.append(f"{status_icon} {result.phase.value}")
             report_lines.append(f"   Duration: {result.duration_seconds:.2f}s")
             report_lines.append(f"   Components: {result.components_validated}")
@@ -457,7 +457,7 @@ class StartupPhaseValidator:
         report_lines.append("COMPLETED PHASES:")
         report_lines.append("-" * 40)
         for phase in self.completed_phases:
-            report_lines.append(f"✅ {phase.value}")
+            report_lines.append(f" PASS:  {phase.value}")
         
         report_lines.append("")
         report_lines.append("=" * 60)
@@ -496,20 +496,20 @@ async def enforce_startup_phase_contracts(app_state: Any,
     
     This is the "fail fast" mechanism for startup validation.
     """
-    logger.info(f"🛡️  Enforcing startup phase contracts: {phase.value}")
+    logger.info(f"[U+1F6E1][U+FE0F]  Enforcing startup phase contracts: {phase.value}")
     
     try:
         result = await validate_startup_phase(app_state, phase, skip_enforcement=False)
         if result.success:
-            logger.info(f"✅ Phase {phase.value} contracts enforced successfully")
+            logger.info(f" PASS:  Phase {phase.value} contracts enforced successfully")
             return True
         else:
             # This should not happen since skip_enforcement=False
-            logger.error(f"❌ Phase {phase.value} contract enforcement failed unexpectedly")
+            logger.error(f" FAIL:  Phase {phase.value} contract enforcement failed unexpectedly")
             return False
             
     except Exception as e:
-        logger.error(f"💥 Phase {phase.value} contract enforcement failed: {e}")
+        logger.error(f"[U+1F4A5] Phase {phase.value} contract enforcement failed: {e}")
         raise StartupValidationError(f"Startup phase {phase.value} contract enforcement failed: {e}")
 
 
@@ -563,9 +563,9 @@ async def validate_complete_startup_sequence(app_state: Any,
         )
         
         if results["success"]:
-            logger.info("🎉 Complete startup sequence validation passed")
+            logger.info(" CELEBRATION:  Complete startup sequence validation passed")
         else:
-            logger.error("💥 Complete startup sequence validation failed")
+            logger.error("[U+1F4A5] Complete startup sequence validation failed")
             
             if enforce_contracts:
                 error_message = (
@@ -602,7 +602,7 @@ if __name__ == "__main__":
                 self.agent_websocket_bridge = None
                 self.execution_engine_factory = None
         
-        print("🧪 Testing startup phase validation...")
+        print("[U+1F9EA] Testing startup phase validation...")
         
         # Test with empty app state (should fail)
         mock_app_state = MockAppState()

@@ -449,7 +449,7 @@ class TestWebSocketAuthenticationFailureScenarios(SSotBaseTestCase):
             "not_base64.not_base64.not_base64",  # Invalid base64 encoding
             "..",  # Empty parts
             "too.many.parts.in.this.jwt.token",  # Too many parts
-            "àáâãäå.invalid.utf8",  # Invalid UTF-8 characters
+            "[U+00E0][U+00E1][U+00E2][U+00E3][U+00E4][U+00E5].invalid.utf8",  # Invalid UTF-8 characters
         ]
         
         for malformed_token in malformed_tokens:

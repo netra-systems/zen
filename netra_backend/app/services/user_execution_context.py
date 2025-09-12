@@ -4,7 +4,7 @@ This module provides the definitive UserExecutionContext implementation for prop
 request isolation and session management across the entire Netra platform.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) 
+- Segment: ALL (Free  ->  Enterprise) 
 - Business Goal: Ensure complete request isolation and prevent data leakage
 - Value Impact: Guarantees user data security, request traceability, and proper session management
 - Revenue Impact: Prevents security breaches and enables audit trails for compliance
@@ -156,7 +156,7 @@ class UserExecutionContext:
         for field_name, value in required_fields.items():
             if not value or not isinstance(value, str) or not value.strip():
                 logger.error(
-                    f"❌ VALIDATION FAILURE: Required field '{field_name}' validation failed. "
+                    f" FAIL:  VALIDATION FAILURE: Required field '{field_name}' validation failed. "
                     f"Expected non-empty string, got: {value!r} (type: {type(value).__name__}). "
                     f"Context: user_id={getattr(self, 'user_id', 'unknown')[:8]}..."
                 )
@@ -354,7 +354,7 @@ class UserExecutionContext:
         # Validate agent_context structure
         if not isinstance(self.agent_context, dict):
             logger.error(
-                f"❌ VALIDATION FAILURE: agent_context must be a dictionary. "
+                f" FAIL:  VALIDATION FAILURE: agent_context must be a dictionary. "
                 f"Got: {type(self.agent_context).__name__}, Value: {self.agent_context!r}, "
                 f"User: {getattr(self, 'user_id', 'unknown')[:8]}..."
             )
@@ -364,7 +364,7 @@ class UserExecutionContext:
         
         if not isinstance(self.audit_metadata, dict):
             logger.error(
-                f"❌ VALIDATION FAILURE: audit_metadata must be a dictionary. "
+                f" FAIL:  VALIDATION FAILURE: audit_metadata must be a dictionary. "
                 f"Got: {type(self.audit_metadata).__name__}, Value: {self.audit_metadata!r}, "
                 f"User: {getattr(self, 'user_id', 'unknown')[:8]}..."
             )
@@ -385,7 +385,7 @@ class UserExecutionContext:
             conflicting_keys = set(metadata_dict.keys()) & reserved_keys
             if conflicting_keys:
                 logger.error(
-                    f"❌ VALIDATION FAILURE: {dict_name} contains reserved keys that would cause conflicts. "
+                    f" FAIL:  VALIDATION FAILURE: {dict_name} contains reserved keys that would cause conflicts. "
                     f"Conflicting keys: {conflicting_keys}, Reserved keys: {reserved_keys}, "
                     f"User: {getattr(self, 'user_id', 'unknown')[:8]}..., "
                     f"This prevents proper context isolation."
@@ -413,7 +413,7 @@ class UserExecutionContext:
                 nested_user_id = getattr(value, 'user_id', None)
                 if nested_user_id and nested_user_id != self.user_id:
                     logger.error(
-                        f"🚨 ISOLATION VIOLATION: agent_context['{key}'] contains object with different user_id. "
+                        f" ALERT:  ISOLATION VIOLATION: agent_context['{key}'] contains object with different user_id. "
                         f"Context user_id: {self.user_id}, Nested user_id: {nested_user_id}, "
                         f"This indicates cross-user data contamination!"
                     )
@@ -431,12 +431,12 @@ class UserExecutionContext:
                     # Check if any part looks like a user ID that doesn't match ours
                     if (part.startswith('user') or part.endswith('user')) and part != self.user_id:
                         logger.warning(
-                            f"⚠️ POTENTIAL ISOLATION ISSUE: websocket_client_id contains foreign user identifier. "
+                            f" WARNING: [U+FE0F] POTENTIAL ISOLATION ISSUE: websocket_client_id contains foreign user identifier. "
                             f"User: {self.user_id}, WebSocket ID: {self.websocket_client_id}, "
                             f"Suspicious part: {part}"
                         )
         
-        logger.debug(f"✅ User isolation validation passed for {self.user_id[:8]}... (fingerprint: {validation_fingerprint})")
+        logger.debug(f" PASS:  User isolation validation passed for {self.user_id[:8]}... (fingerprint: {validation_fingerprint})")
     
     def _setup_memory_tracking(self) -> None:
         """Setup memory tracking to prevent memory leaks (Issue #414 fix)."""
@@ -464,7 +464,7 @@ class UserExecutionContext:
             # Store in memory references list for tracking
             self._memory_refs.append(memory_info)
             
-            logger.debug(f"🧠 Memory tracking setup for context {self.user_id[:8]}... (objects: {memory_info['gc_count']})")
+            logger.debug(f"[U+1F9E0] Memory tracking setup for context {self.user_id[:8]}... (objects: {memory_info['gc_count']})")
             
         except Exception as e:
             # Don't fail context creation for memory tracking issues
@@ -474,7 +474,7 @@ class UserExecutionContext:
     def _cleanup_callback(weak_ref):
         """Callback when context is garbage collected (Issue #414 memory leak detection)."""
         try:
-            logger.debug("🧹 UserExecutionContext garbage collected - memory cleaned up properly")
+            logger.debug("[U+1F9F9] UserExecutionContext garbage collected - memory cleaned up properly")
         except Exception:
             # Ignore errors in cleanup callback
             pass
@@ -925,7 +925,7 @@ class UserExecutionContext:
             logger.debug(f"No cleanup callbacks for context {self.request_id}")
             return
             
-        logger.debug(f"🧹 Running {len(self.cleanup_callbacks)} cleanup callbacks for context {self.request_id}")
+        logger.debug(f"[U+1F9F9] Running {len(self.cleanup_callbacks)} cleanup callbacks for context {self.request_id}")
         
         # Execute cleanup callbacks in reverse order (LIFO)
         for i, callback in enumerate(reversed(self.cleanup_callbacks)):
@@ -934,17 +934,17 @@ class UserExecutionContext:
                     await callback()
                 else:
                     callback()
-                logger.debug(f"✅ Cleanup callback {i+1}/{len(self.cleanup_callbacks)} executed successfully")
+                logger.debug(f" PASS:  Cleanup callback {i+1}/{len(self.cleanup_callbacks)} executed successfully")
             except Exception as e:
                 logger.error(
-                    f"❌ Cleanup callback {i+1}/{len(self.cleanup_callbacks)} failed: {e}",
+                    f" FAIL:  Cleanup callback {i+1}/{len(self.cleanup_callbacks)} failed: {e}",
                     exc_info=True
                 )
                 # Continue with other callbacks even if one fails
         
         # Clear all callbacks after execution
         self.cleanup_callbacks.clear()
-        logger.debug(f"🧹 Cleanup completed for context {self.request_id}")
+        logger.debug(f"[U+1F9F9] Cleanup completed for context {self.request_id}")
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert context to dictionary for serialization and logging.
@@ -1084,10 +1084,10 @@ class UserExecutionContext:
         intelligently split into agent_context and audit_metadata.
         
         **Metadata Split Logic:**
-        - Keys containing 'audit', 'compliance', 'trace', 'log' → audit_metadata
-        - Keys containing 'agent', 'operation', 'workflow' → agent_context  
-        - Special supervisor fields (operation_depth, parent_request_id) → audit_metadata
-        - All other keys → agent_context (default)
+        - Keys containing 'audit', 'compliance', 'trace', 'log'  ->  audit_metadata
+        - Keys containing 'agent', 'operation', 'workflow'  ->  agent_context  
+        - Special supervisor fields (operation_depth, parent_request_id)  ->  audit_metadata
+        - All other keys  ->  agent_context (default)
         
         Args:
             user_id: User identifier from authentication
@@ -1436,7 +1436,7 @@ async def create_isolated_execution_context(
     with comprehensive isolation guarantees and database/WebSocket integration.
     
     Business Value Justification (BVJ):
-    - Segment: ALL (Free → Enterprise)
+    - Segment: ALL (Free  ->  Enterprise)
     - Business Goal: Ensure complete request isolation and proper resource management
     - Value Impact: Guarantees user data security and prevents resource leaks
     - Strategic Impact: Critical for multi-user agent execution and compliance
@@ -1541,7 +1541,7 @@ async def create_isolated_execution_context(
     )
     
     logger.info(
-        f"🔒 ISOLATED_CONTEXT_CREATED: Secure isolated execution context ready. "
+        f"[U+1F512] ISOLATED_CONTEXT_CREATED: Secure isolated execution context ready. "
         f"User: {user_id[:8]}..., Request: {request_id[:8]}..., "
         f"Isolation_level: {isolation_level}, Validation_performed: {validate_user and database_session is not None}, "
         f"WebSocket_emitter: {'configured' if websocket_emitter else 'none'}, "

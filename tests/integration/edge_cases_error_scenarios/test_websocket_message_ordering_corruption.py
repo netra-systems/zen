@@ -317,7 +317,7 @@ class TestWebSocketMessageOrderingCorruption(BaseIntegrationTest):
             {
                 'name': 'encoding_corruption',
                 'corruption_type': 'encoding_error',
-                'original_message': 'Hello with unicode: émojis 🚀',
+                'original_message': 'Hello with unicode: [U+00E9]mojis [U+1F680]',
                 'corrupted_message': b'Hello with unicode: \xff\xfe invalid bytes',
                 'expected_behavior': 'encoding_error_handling'
             },

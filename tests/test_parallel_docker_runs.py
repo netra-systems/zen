@@ -233,9 +233,9 @@
                             # Final summary
                             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                             # REMOVED_SYNTAX_ERROR: if all_passed:
-                                # REMOVED_SYNTAX_ERROR: logger.info("✅ ALL PARALLEL DOCKER TESTS PASSED")
+                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  ALL PARALLEL DOCKER TESTS PASSED")
                                 # REMOVED_SYNTAX_ERROR: else:
-                                    # REMOVED_SYNTAX_ERROR: logger.error("❌ SOME PARALLEL DOCKER TESTS FAILED")
+                                    # REMOVED_SYNTAX_ERROR: logger.error(" FAIL:  SOME PARALLEL DOCKER TESTS FAILED")
                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                                     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)

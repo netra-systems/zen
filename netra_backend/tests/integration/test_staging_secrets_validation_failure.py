@@ -96,7 +96,7 @@ class TestStagingSecretsValidationFailure(BaseTestCase):
         )
         
         # SUCCESS: Test reproduces the exact GitHub #259 issue
-        print(f"✅ ISSUE #259 REPRODUCED: {len(secrets_mentioned)} missing staging secrets detected")
+        print(f" PASS:  ISSUE #259 REPRODUCED: {len(secrets_mentioned)} missing staging secrets detected")
         print(f"Missing secrets found in error: {secrets_mentioned}")
         print(f"Root cause confirmed: staging test defaults missing in isolated_environment.py")
 
@@ -141,7 +141,7 @@ class TestStagingSecretsValidationFailure(BaseTestCase):
         )
         
         # SUCCESS: All staging secrets are missing as expected
-        print(f"✅ DETAILED DIAGNOSIS: All {len(failures)} staging secrets missing")
+        print(f" PASS:  DETAILED DIAGNOSIS: All {len(failures)} staging secrets missing")
         for failure in failures:
             print(f"  - {failure}")
 
@@ -166,7 +166,7 @@ class TestStagingSecretsValidationFailure(BaseTestCase):
         assert detected_env.value == "staging", f"Environment value should be 'staging', got '{detected_env.value}'"
         
         # SUCCESS: Environment detection is accurate
-        print("✅ ENVIRONMENT DETECTION: Staging environment correctly identified by all methods")
+        print(" PASS:  ENVIRONMENT DETECTION: Staging environment correctly identified by all methods")
 
     @pytest.mark.integration
     def test_test_defaults_availability_in_test_mode(self):
@@ -211,7 +211,7 @@ class TestStagingSecretsValidationFailure(BaseTestCase):
         )
         
         # SUCCESS: Test defaults work in test mode but not staging mode
-        print("✅ TEST DEFAULTS SCOPE: Available in test mode, missing in staging mode (confirms issue #259)")
+        print(" PASS:  TEST DEFAULTS SCOPE: Available in test mode, missing in staging mode (confirms issue #259)")
 
     @pytest.mark.integration
     def test_comprehensive_staging_validation_failure_scenario(self):
@@ -257,7 +257,7 @@ class TestStagingSecretsValidationFailure(BaseTestCase):
         )
         
         # SUCCESS: All validation scenarios fail as expected for issue #259
-        print("✅ COMPREHENSIVE VALIDATION: All staging validation scenarios fail as expected")
+        print(" PASS:  COMPREHENSIVE VALIDATION: All staging validation scenarios fail as expected")
         print(f"OAuth error: {oauth_error[:100]}...")
         print(f"JWT error: {jwt_error[:100]}...")
         print(f"Redis error: {redis_error[:100]}...")
@@ -294,11 +294,11 @@ class TestStagingSecretsValidationFailure(BaseTestCase):
         
         # ANALYSIS: Report production missing secrets for scope assessment
         if len(production_failures) > 0:
-            print(f"⚠️ SCOPE EXPANSION: Production also missing {len(production_failures)} secrets")
+            print(f" WARNING: [U+FE0F] SCOPE EXPANSION: Production also missing {len(production_failures)} secrets")
             print(f"Production missing secrets: {production_failures}")
             print("Issue #259 likely affects production environment as well")
         else:
-            print("✅ SCOPE LIMITED: Production secrets are available (issue #259 staging-specific)")
+            print(" PASS:  SCOPE LIMITED: Production secrets are available (issue #259 staging-specific)")
         
         # This test doesn't assert - it's diagnostic for scope assessment
         # The main issue #259 is about staging, but this helps understand the full scope

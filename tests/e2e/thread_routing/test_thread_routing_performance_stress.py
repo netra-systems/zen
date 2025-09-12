@@ -346,10 +346,10 @@ class TestThreadRoutingPerformanceStress(BaseE2ETest):
             
             # Performance thresholds
             if avg_message_time > 1.0:
-                self.logger.warning(f"⚠️ Average message creation time too slow: {avg_message_time:.3f}s > 1.0s")
+                self.logger.warning(f" WARNING: [U+FE0F] Average message creation time too slow: {avg_message_time:.3f}s > 1.0s")
             
             if p95_message_time > 2.0:
-                self.logger.warning(f"⚠️ P95 message creation time concerning: {p95_message_time:.3f}s > 2.0s")
+                self.logger.warning(f" WARNING: [U+FE0F] P95 message creation time concerning: {p95_message_time:.3f}s > 2.0s")
         
         high_volume_metrics.end_monitoring()
         
@@ -396,7 +396,7 @@ class TestThreadRoutingPerformanceStress(BaseE2ETest):
             for issue in integrity_issues:
                 self.logger.warning(f"  - {issue}")
         else:
-            self.logger.info("✅ Data integrity verified after high-volume operations")
+            self.logger.info(" PASS:  Data integrity verified after high-volume operations")
         
         # Performance summary
         performance_summary = high_volume_metrics.get_summary()
@@ -667,10 +667,10 @@ class TestThreadRoutingPerformanceStress(BaseE2ETest):
             overall_success_rate = (total_messages + total_threads) / (total_messages + total_threads + total_errors) if (total_messages + total_threads + total_errors) > 0 else 0
             
             if overall_success_rate < 0.95:
-                self.logger.warning(f"⚠️ Overall success rate below 95%: {overall_success_rate:.1%}")
+                self.logger.warning(f" WARNING: [U+FE0F] Overall success rate below 95%: {overall_success_rate:.1%}")
             
             if concurrent_duration > 120:  # More than 2 minutes for this test is slow
-                self.logger.warning(f"⚠️ Test duration concerning: {concurrent_duration:.1f}s > 120s")
+                self.logger.warning(f" WARNING: [U+FE0F] Test duration concerning: {concurrent_duration:.1f}s > 120s")
             
             # Check for user isolation
             user_threads_check = {}
@@ -698,11 +698,11 @@ class TestThreadRoutingPerformanceStress(BaseE2ETest):
                             })
             
             if isolation_violations:
-                self.logger.error(f"🚨 USER ISOLATION VIOLATIONS DETECTED: {len(isolation_violations)}")
+                self.logger.error(f" ALERT:  USER ISOLATION VIOLATIONS DETECTED: {len(isolation_violations)}")
                 for violation in isolation_violations[:5]:  # Log first 5
                     self.logger.error(f"  Users {violation['user1']} and {violation['user2']} share threads: {violation['shared_threads']}")
             else:
-                self.logger.info("✅ User isolation maintained under concurrent load")
+                self.logger.info(" PASS:  User isolation maintained under concurrent load")
         
         # Overall scalability assessment
         performance_summary = scalability_metrics.get_summary()
@@ -732,9 +732,9 @@ class TestThreadRoutingPerformanceStress(BaseE2ETest):
         self.logger.info(f"Overall Scalability Score: {scalability_score}/100")
         
         if scalability_score < 70:
-            self.logger.warning("⚠️ Scalability needs improvement for production deployment")
+            self.logger.warning(" WARNING: [U+FE0F] Scalability needs improvement for production deployment")
         elif scalability_score >= 85:
-            self.logger.info("✅ Good scalability performance")
+            self.logger.info(" PASS:  Good scalability performance")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -868,7 +868,7 @@ class TestThreadRoutingPerformanceStress(BaseE2ETest):
                 
                 # Early warning for excessive memory growth
                 if memory_increase > 500:  # More than 500MB increase
-                    self.logger.warning(f"⚠️ Excessive memory growth detected: +{memory_increase:.1f} MB")
+                    self.logger.warning(f" WARNING: [U+FE0F] Excessive memory growth detected: +{memory_increase:.1f} MB")
             
             cycle_end = time.time()
             cycle_duration = cycle_end - cycle_start
@@ -936,11 +936,11 @@ class TestThreadRoutingPerformanceStress(BaseE2ETest):
             self.logger.info(f"Memory leak detection: {leak_severity}")
             
             if memory_leak_detected:
-                self.logger.warning(f"🚨 POTENTIAL MEMORY LEAK DETECTED: {leak_severity}")
+                self.logger.warning(f" ALERT:  POTENTIAL MEMORY LEAK DETECTED: {leak_severity}")
                 self.logger.warning(f"   Memory growth trend: {memory_trend_per_hour:.1f} MB/hour")
                 self.logger.warning(f"   Projected 24h growth: {memory_trend_per_hour * 24:.1f} MB")
             else:
-                self.logger.info("✅ No significant memory leak detected")
+                self.logger.info(" PASS:  No significant memory leak detected")
         
         # Resource cleanup verification
         self.logger.info("=== Resource Cleanup Verification ===")
@@ -967,9 +967,9 @@ class TestThreadRoutingPerformanceStress(BaseE2ETest):
             performance_degradation = False
             if late_ops_per_sec < early_ops_per_sec * 0.8:  # 20% degradation
                 performance_degradation = True
-                self.logger.warning("⚠️ Performance degradation detected during sustained load")
+                self.logger.warning(" WARNING: [U+FE0F] Performance degradation detected during sustained load")
             else:
-                self.logger.info("✅ Performance maintained during sustained load")
+                self.logger.info(" PASS:  Performance maintained during sustained load")
         
         # Overall assessment
         overall_health = "GOOD"

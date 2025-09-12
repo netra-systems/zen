@@ -846,8 +846,8 @@ class TestJWTHandlerBoundaryConditionsAndErrorHandling(TestJWTHandlerCore):
             
     def test_operations_with_unicode_characters_handle_correctly(self):
         """Test operations with Unicode characters handle correctly"""
-        unicode_user_id = "用户123-مستخدم"  # Chinese and Arabic
-        unicode_email = "тест@пример.com"   # Cyrillic
+        unicode_user_id = "[U+7528][U+6237]123-[U+0645][U+0633][U+062A][U+062E][U+062F][U+0645]"  # Chinese and Arabic
+        unicode_email = "tect@[U+043F]p[U+0438]mep.com"   # Cyrillic
         
         token = self.handler.create_access_token(unicode_user_id, unicode_email)
         

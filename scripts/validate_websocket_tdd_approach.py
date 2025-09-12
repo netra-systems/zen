@@ -30,14 +30,14 @@ logger = logging.getLogger(__name__)
 
 def validate_rfc_6455_subprotocol_issue():
     """Validate the RFC 6455 subprotocol compliance issue"""
-    print("🧪 RFC 6455 Subprotocol Compliance Validation")
+    print("[U+1F9EA] RFC 6455 Subprotocol Compliance Validation")
     print("=" * 60)
     
     # Read the actual websocket_ssot.py file to check the 4 locations
     websocket_file_path = os.path.join(project_root, "netra_backend/app/routes/websocket_ssot.py")
     
     if not os.path.exists(websocket_file_path):
-        print(f"❌ WebSocket SSOT file not found: {websocket_file_path}")
+        print(f" FAIL:  WebSocket SSOT file not found: {websocket_file_path}")
         return False
     
     try:
@@ -61,25 +61,25 @@ def validate_rfc_6455_subprotocol_issue():
             if line_num < len(lines):
                 line_content = lines[line_num - 1].strip()  # Line numbers are 1-indexed
                 
-                print(f"\n📋 Checking {mode_name} (line {line_num}):")
+                print(f"\n[U+1F4CB] Checking {mode_name} (line {line_num}):")
                 print(f"   Code: {line_content}")
                 
                 if 'websocket.accept(' in line_content:
                     if 'subprotocol=' in line_content:
-                        print(f"   ✅ HAS subprotocol parameter")
+                        print(f"    PASS:  HAS subprotocol parameter")
                     else:
-                        print(f"   ❌ MISSING subprotocol parameter (RFC 6455 violation)")
+                        print(f"    FAIL:  MISSING subprotocol parameter (RFC 6455 violation)")
                         violations_found += 1
                 else:
-                    print(f"   ⚠️ Not websocket.accept() call - may need context check")
+                    print(f"    WARNING: [U+FE0F] Not websocket.accept() call - may need context check")
         
-        print(f"\n📊 RFC 6455 Compliance Analysis:")
+        print(f"\n CHART:  RFC 6455 Compliance Analysis:")
         print(f"   Locations checked: {len(issue_locations)}")
         print(f"   RFC 6455 violations: {violations_found}")
-        print(f"   Compliance status: {'❌ NON-COMPLIANT' if violations_found > 0 else '✅ COMPLIANT'}")
+        print(f"   Compliance status: {' FAIL:  NON-COMPLIANT' if violations_found > 0 else ' PASS:  COMPLIANT'}")
         
         if violations_found > 0:
-            print(f"\n🔧 Required Fix:")
+            print(f"\n[U+1F527] Required Fix:")
             print(f"   Change: await websocket.accept()")
             print(f"   To: await websocket.accept(subprotocol='jwt-auth')")
             print(f"   At {violations_found} locations in websocket_ssot.py")
@@ -87,13 +87,13 @@ def validate_rfc_6455_subprotocol_issue():
         return violations_found > 0
         
     except Exception as e:
-        print(f"❌ Error analyzing WebSocket file: {e}")
+        print(f" FAIL:  Error analyzing WebSocket file: {e}")
         return False
 
 
 def validate_jwt_extraction_logic():
     """Validate JWT extraction from WebSocket subprotocols works correctly"""
-    print("\n🔐 JWT Extraction Logic Validation")
+    print("\n[U+1F510] JWT Extraction Logic Validation")
     print("=" * 60)
     
     try:
@@ -121,7 +121,7 @@ def validate_jwt_extraction_logic():
         # Frontend subprotocol format
         frontend_subprotocols = ["jwt-auth", f"jwt.{encoded_jwt_token}"]
         
-        print(f"📋 Testing JWT Extraction:")
+        print(f"[U+1F4CB] Testing JWT Extraction:")
         print(f"   Original JWT: {test_jwt_token[:50]}...")
         print(f"   Encoded for subprotocol: jwt.{encoded_jwt_token[:30]}...")
         print(f"   Frontend subprotocols: {frontend_subprotocols[0]}, jwt.{encoded_jwt_token[:20]}...")
@@ -136,24 +136,24 @@ def validate_jwt_extraction_logic():
         extracted_jwt = UnifiedJWTProtocolHandler.extract_jwt_from_websocket(mock_websocket)
         
         if extracted_jwt == test_jwt_token:
-            print(f"   ✅ JWT extraction SUCCESSFUL")
-            print(f"   ✅ Frontend-backend compatibility VALIDATED")
-            print(f"   ✅ Authentication logic WORKING")
+            print(f"    PASS:  JWT extraction SUCCESSFUL")
+            print(f"    PASS:  Frontend-backend compatibility VALIDATED")
+            print(f"    PASS:  Authentication logic WORKING")
             return True
         else:
-            print(f"   ❌ JWT extraction FAILED")
+            print(f"    FAIL:  JWT extraction FAILED")
             print(f"   Expected: {test_jwt_token[:50]}...")
             print(f"   Got: {extracted_jwt[:50] if extracted_jwt else 'None'}...")
             return False
             
     except Exception as e:
-        print(f"❌ Error testing JWT extraction: {e}")
+        print(f" FAIL:  Error testing JWT extraction: {e}")
         return False
 
 
 def validate_business_impact():
     """Validate and document the business impact of the RFC 6455 violation"""
-    print("\n💼 Business Impact Analysis")
+    print("\n[U+1F4BC] Business Impact Analysis")
     print("=" * 60)
     
     # Critical events blocked by WebSocket connection failure
@@ -196,22 +196,22 @@ def validate_business_impact():
         "enterprise_customer_impact": "Immediate ($15K+ MRR each)"
     }
     
-    print(f"📊 Critical Events Analysis:")
+    print(f" CHART:  Critical Events Analysis:")
     for event in critical_events:
-        print(f"   ❌ {event['name']}: {event['business_value']}")
+        print(f"    FAIL:  {event['name']}: {event['business_value']}")
         print(f"      Impact: {event['user_impact']}")
     
-    print(f"\n📊 Business Metrics Impact:")
+    print(f"\n CHART:  Business Metrics Impact:")
     for metric, impact in business_impact.items():
-        print(f"   • {metric.replace('_', ' ').title()}: {impact}")
+        print(f"   [U+2022] {metric.replace('_', ' ').title()}: {impact}")
     
-    print(f"\n🎯 Golden Path Analysis:")
-    print(f"   Steps 1-3: ✅ Working (login, chat interface, message send)")
-    print(f"   Step 4: ❌ BLOCKED (WebSocket connection fails - RFC 6455)")
-    print(f"   Steps 5-8: ❌ BLOCKED (All WebSocket events fail)")
+    print(f"\n TARGET:  Golden Path Analysis:")
+    print(f"   Steps 1-3:  PASS:  Working (login, chat interface, message send)")
+    print(f"   Step 4:  FAIL:  BLOCKED (WebSocket connection fails - RFC 6455)")
+    print(f"   Steps 5-8:  FAIL:  BLOCKED (All WebSocket events fail)")
     print(f"   Overall: 62.5% of Golden Path blocked")
     
-    print(f"\n🔧 Root Cause Chain:")
+    print(f"\n[U+1F527] Root Cause Chain:")
     print(f"   1. Frontend: subprotocols=['jwt-auth', 'jwt.{{encoded_token}}']")
     print(f"   2. Backend: websocket.accept() missing subprotocol parameter")
     print(f"   3. RFC 6455 violation: No selected subprotocol in response")
@@ -223,7 +223,7 @@ def validate_business_impact():
 
 def validate_websocket_accept_locations():
     """Validate the exact WebSocket accept() locations that need fixing"""
-    print("\n🔧 WebSocket Accept() Location Analysis")
+    print("\n[U+1F527] WebSocket Accept() Location Analysis")
     print("=" * 60)
     
     websocket_file_path = os.path.join(project_root, "netra_backend/app/routes/websocket_ssot.py")
@@ -242,41 +242,41 @@ def validate_websocket_accept_locations():
                     'context': lines[max(0, i-3):i+2] if i > 3 else lines[0:i+2]
                 })
         
-        print(f"📋 Found {len(accept_calls)} websocket.accept() calls:")
+        print(f"[U+1F4CB] Found {len(accept_calls)} websocket.accept() calls:")
         
         for i, call in enumerate(accept_calls, 1):
             print(f"\n   {i}. Line {call['line_number']}: {call['code']}")
             
             # Check if this call has subprotocol parameter
             if 'subprotocol=' in call['code']:
-                print(f"      ✅ Has subprotocol parameter")
+                print(f"       PASS:  Has subprotocol parameter")
             else:
-                print(f"      ❌ MISSING subprotocol parameter")
-                print(f"      🔧 Fix: Change to → await websocket.accept(subprotocol='jwt-auth')")
+                print(f"       FAIL:  MISSING subprotocol parameter")
+                print(f"      [U+1F527] Fix: Change to  ->  await websocket.accept(subprotocol='jwt-auth')")
             
             # Show context
             print(f"      Context:")
             for ctx_line in call['context']:
-                prefix = "    → " if ctx_line == call['code'] else "      "
+                prefix = "     ->  " if ctx_line == call['code'] else "      "
                 print(f"{prefix}{ctx_line.rstrip()}")
         
         missing_subprotocol = sum(1 for call in accept_calls if 'subprotocol=' not in call['code'])
         
-        print(f"\n📊 Summary:")
+        print(f"\n CHART:  Summary:")
         print(f"   Total websocket.accept() calls: {len(accept_calls)}")
         print(f"   Missing subprotocol parameter: {missing_subprotocol}")
-        print(f"   RFC 6455 compliance: {'❌ VIOLATIONS FOUND' if missing_subprotocol > 0 else '✅ COMPLIANT'}")
+        print(f"   RFC 6455 compliance: {' FAIL:  VIOLATIONS FOUND' if missing_subprotocol > 0 else ' PASS:  COMPLIANT'}")
         
         return missing_subprotocol > 0
         
     except Exception as e:
-        print(f"❌ Error analyzing WebSocket accept locations: {e}")
+        print(f" FAIL:  Error analyzing WebSocket accept locations: {e}")
         return False
 
 
 def main():
     """Main TDD validation script"""
-    print("🚀 WebSocket Authentication RFC 6455 TDD Validation")
+    print("[U+1F680] WebSocket Authentication RFC 6455 TDD Validation")
     print("Issue #280: WebSocket authentication failure - P0 CRITICAL affecting $500K+ ARR")
     print("TDD Approach: Validate issue exists, then create failing tests, then implement fix")
     print("=" * 80)
@@ -288,45 +288,45 @@ def main():
     accept_locations = validate_websocket_accept_locations()
     
     print("\n" + "=" * 80)
-    print("📋 TDD VALIDATION SUMMARY") 
+    print("[U+1F4CB] TDD VALIDATION SUMMARY") 
     print("=" * 80)
     
-    print(f"🧪 RFC 6455 Violations: {'✅ CONFIRMED' if rfc_violations else '⚠️ NOT FOUND'}")
-    print(f"🔐 JWT Extraction Logic: {'✅ WORKING' if jwt_working else '❌ BROKEN'}")
-    print(f"💼 Business Impact: {'✅ DOCUMENTED' if business_impact else '❌ UNCLEAR'}")
-    print(f"🔧 Fix Locations: {'✅ IDENTIFIED' if accept_locations else '⚠️ NOT FOUND'}")
+    print(f"[U+1F9EA] RFC 6455 Violations: {' PASS:  CONFIRMED' if rfc_violations else ' WARNING: [U+FE0F] NOT FOUND'}")
+    print(f"[U+1F510] JWT Extraction Logic: {' PASS:  WORKING' if jwt_working else ' FAIL:  BROKEN'}")
+    print(f"[U+1F4BC] Business Impact: {' PASS:  DOCUMENTED' if business_impact else ' FAIL:  UNCLEAR'}")
+    print(f"[U+1F527] Fix Locations: {' PASS:  IDENTIFIED' if accept_locations else ' WARNING: [U+FE0F] NOT FOUND'}")
     
     if rfc_violations and jwt_working and business_impact and accept_locations:
-        print(f"\n✅ TDD VALIDATION SUCCESSFUL")
-        print(f"   • Issue confirmed: RFC 6455 subprotocol violations found")
-        print(f"   • Root cause validated: Missing subprotocol parameter in websocket.accept()")
-        print(f"   • Authentication logic confirmed working")
-        print(f"   • Business impact quantified: $500K+ ARR at risk")
-        print(f"   • Fix locations identified: websocket_ssot.py accept() calls")
+        print(f"\n PASS:  TDD VALIDATION SUCCESSFUL")
+        print(f"   [U+2022] Issue confirmed: RFC 6455 subprotocol violations found")
+        print(f"   [U+2022] Root cause validated: Missing subprotocol parameter in websocket.accept()")
+        print(f"   [U+2022] Authentication logic confirmed working")
+        print(f"   [U+2022] Business impact quantified: $500K+ ARR at risk")
+        print(f"   [U+2022] Fix locations identified: websocket_ssot.py accept() calls")
         
-        print(f"\n🎯 TDD APPROACH VALIDATED:")
-        print(f"   1. ✅ Issue exists and is well-understood")
-        print(f"   2. ✅ Business impact is critical and quantifiable")
-        print(f"   3. ✅ Fix is targeted and low-risk (add subprotocol parameter)")
-        print(f"   4. ✅ Test-driven approach will validate fix effectiveness")
+        print(f"\n TARGET:  TDD APPROACH VALIDATED:")
+        print(f"   1.  PASS:  Issue exists and is well-understood")
+        print(f"   2.  PASS:  Business impact is critical and quantifiable")
+        print(f"   3.  PASS:  Fix is targeted and low-risk (add subprotocol parameter)")
+        print(f"   4.  PASS:  Test-driven approach will validate fix effectiveness")
         
-        print(f"\n🔧 IMPLEMENTATION READY:")
-        print(f"   • Tests created to demonstrate failure")
-        print(f"   • Tests will validate fix when subprotocol parameter added")
-        print(f"   • Fix is simple and surgical")
-        print(f"   • Business value restoration is immediate")
+        print(f"\n[U+1F527] IMPLEMENTATION READY:")
+        print(f"   [U+2022] Tests created to demonstrate failure")
+        print(f"   [U+2022] Tests will validate fix when subprotocol parameter added")
+        print(f"   [U+2022] Fix is simple and surgical")
+        print(f"   [U+2022] Business value restoration is immediate")
         
     else:
-        print(f"\n⚠️ TDD VALIDATION INCOMPLETE")
-        print(f"   • May need environment adjustments")  
-        print(f"   • Core issue might be partially fixed")
-        print(f"   • Review specific validation failures")
+        print(f"\n WARNING: [U+FE0F] TDD VALIDATION INCOMPLETE")
+        print(f"   [U+2022] May need environment adjustments")  
+        print(f"   [U+2022] Core issue might be partially fixed")
+        print(f"   [U+2022] Review specific validation failures")
     
-    print(f"\n💰 BUSINESS PRIORITY:")
-    print(f"   • P0 CRITICAL: $500K+ ARR blocked")
-    print(f"   • Golden Path non-functional")
-    print(f"   • Chat (90% platform value) broken")
-    print(f"   • Immediate fix required")
+    print(f"\n[U+1F4B0] BUSINESS PRIORITY:")
+    print(f"   [U+2022] P0 CRITICAL: $500K+ ARR blocked")
+    print(f"   [U+2022] Golden Path non-functional")
+    print(f"   [U+2022] Chat (90% platform value) broken")
+    print(f"   [U+2022] Immediate fix required")
 
 
 if __name__ == "__main__":

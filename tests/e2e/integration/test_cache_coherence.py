@@ -3,7 +3,7 @@
 Business Value Justification (BVJ):
 1. Segment: Enterprise ($40K+ MRR protection)
 2. Business Goal: Prevent revenue loss from stale data serving incorrect AI optimization
-3. Value Impact: Ensures cache consistency across Auth→Backend→Frontend services
+3. Value Impact: Ensures cache consistency across Auth -> Backend -> Frontend services
 4. Revenue Impact: Protects $40K+ MRR from cache-induced customer churn
 
 CRITICAL TEST IMPLEMENTATION #5: Distributed Cache Coherence
@@ -52,7 +52,7 @@ class TestCacheCoherence:
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_user_data_cache_invalidation_flow(self):
-        """Test user data update → cache invalidation → consistency."""
+        """Test user data update  ->  cache invalidation  ->  consistency."""
         # BVJ: Enterprise revenue protection from stale user data
         user_id = "cache_test_user_001"
         
@@ -82,7 +82,7 @@ class TestCacheCoherence:
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_cross_service_cache_consistency(self):
-        """Test cache consistency across Auth→Backend→Frontend services."""
+        """Test cache consistency across Auth -> Backend -> Frontend services."""
         user_id = "cache_consistency_user_002"
         
         # Step 1: Auth service updates user data

@@ -353,9 +353,9 @@ class DockerServicesAuditor:
                           self.unexpected_services.get(service_name))
                 
                 # Status indicators
-                container_indicator = "🟢" if status.container_status == "running" else "🔴" if status.container_status in ["exited", "dead"] else "⚪"
-                health_indicator = "🟢" if status.health_status == "healthy" else "🔴" if status.health_status == "unhealthy" else "⚪"
-                port_indicator = "🟢" if status.port_accessible else "🔴"
+                container_indicator = "[U+1F7E2]" if status.container_status == "running" else "[U+1F534]" if status.container_status in ["exited", "dead"] else "[U+26AA]"
+                health_indicator = "[U+1F7E2]" if status.health_status == "healthy" else "[U+1F534]" if status.health_status == "unhealthy" else "[U+26AA]"
+                port_indicator = "[U+1F7E2]" if status.port_accessible else "[U+1F534]"
                 
                 print(f"  {service_name}")
                 print(f"    Container: {container_indicator} {status.container_status}")
@@ -367,13 +367,13 @@ class DockerServicesAuditor:
                 if status.errors:
                     print("    Errors:")
                     for error in status.errors:
-                        print(f"      ❌ {error}")
+                        print(f"       FAIL:  {error}")
                         
                 # Warnings
                 if status.warnings:
                     print("    Warnings:")
                     for warning in status.warnings:
-                        print(f"      ⚠️  {warning}")
+                        print(f"       WARNING: [U+FE0F]  {warning}")
                 print()
         
         # Recommendations

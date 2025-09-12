@@ -111,9 +111,9 @@ def main():
     exit_code = run_staging_tests(test_level)
     
     if exit_code == 0:
-        print("\n✅ STAGING TESTS PASSED")
+        print("\n PASS:  STAGING TESTS PASSED")
     else:
-        print(f"\n❌ STAGING TESTS FAILED (exit code: {exit_code})")
+        print(f"\n FAIL:  STAGING TESTS FAILED (exit code: {exit_code})")
     
     return exit_code
 

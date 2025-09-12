@@ -2,7 +2,7 @@
 Query Execution Strategy Pattern
 
 This module implements the Strategy pattern for different query execution approaches.
-Breaks down complex query logic into focused, ≤8 line functions.
+Breaks down complex query logic into focused,  <= 8 line functions.
 """
 
 import time

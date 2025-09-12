@@ -142,7 +142,7 @@ def main():
     
     print("\nCategory Results:")
     for result in results:
-        status_emoji = "✅" if result["success"] else "❌"
+        status_emoji = " PASS: " if result["success"] else " FAIL: "
         print(f"  {status_emoji} {result['category']:15} {result['status']:10} ({result['duration']:.2f}s) - {len(result['failures'])} failures")
     
     if all_failures:

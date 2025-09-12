@@ -77,7 +77,7 @@ class TestOAuthFlow:
     
     @pytest.mark.e2e
     async def test_google_oauth_complete_flow(self, oauth_manager, oauth_validator, mock_oauth_responses, enterprise_config):
-        """Test Google OAuth → User creation → Dashboard access"""
+        """Test Google OAuth  ->  User creation  ->  Dashboard access"""
         
         # Step 1: Initiate Google OAuth
         redirect_uri = f"{enterprise_config['frontend_url']}/auth/callback"

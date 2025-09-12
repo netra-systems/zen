@@ -63,7 +63,7 @@ class TestWebSocketOptimizations:
             # Should have taken some time due to backoff (at least 3 seconds for 3 retries: 0 + 1 + 2)
             assert elapsed >= 3.0, f"Expected at least 3s backoff, got {elapsed:.2f}s"
             assert "failed after 3 attempts" in str(e)
-            logger.info(f"✅ Connection recovery backoff worked: {elapsed:.2f}s")
+            logger.info(f" PASS:  Connection recovery backoff worked: {elapsed:.2f}s")
     
     @pytest.mark.asyncio  
     async def test_connection_pool_optimization(self):
@@ -102,7 +102,7 @@ class TestWebSocketOptimizations:
             pool_stats_2 = manager.get_pool_statistics()
             assert pool_stats_2["total_usage_count"] >= 1
             
-            logger.info("✅ Connection pool optimization validated")
+            logger.info(" PASS:  Connection pool optimization validated")
             
         finally:
             await manager.cleanup_all_connections()
@@ -131,11 +131,11 @@ class TestWebSocketOptimizations:
         except Exception as e:
             # Should get pytest.skip, not hard failure
             if "pytest" in str(type(e)).lower() and "skip" in str(type(e)).lower():
-                logger.info("✅ Graceful degradation worked (pytest.skip)")
+                logger.info(" PASS:  Graceful degradation worked (pytest.skip)")
             else:
                 # If not pytest.skip, check that it's a DockerUnavailableError
                 assert isinstance(e, (DockerUnavailableError, ConnectionRefusedError))
-                logger.info(f"✅ Graceful degradation caught error: {type(e).__name__}")
+                logger.info(f" PASS:  Graceful degradation caught error: {type(e).__name__}")
     
     @pytest.mark.asyncio
     async def test_parallel_execution_support(self):
@@ -182,7 +182,7 @@ class TestWebSocketOptimizations:
         assert perf_summary["total_tests"] == 2
         assert perf_summary["tests_passed_isolation"] == True
         
-        logger.info("✅ Parallel execution support validated")
+        logger.info(" PASS:  Parallel execution support validated")
     
     @pytest.mark.asyncio
     async def test_enhanced_docker_health_checks(self):
@@ -201,7 +201,7 @@ class TestWebSocketOptimizations:
             assert 'ws_url' in sig.parameters
             assert 'timeout' in sig.parameters
             
-            logger.info("✅ Enhanced Docker health checks validated")
+            logger.info(" PASS:  Enhanced Docker health checks validated")
             
         except Exception as e:
             logger.warning(f"Docker health check validation skipped: {e}")
@@ -248,7 +248,7 @@ class TestWebSocketOptimizations:
             isolation_summary = manager.get_isolation_summary()
             
             logger.info(
-                f"✅ Integration test completed:\n"
+                f" PASS:  Integration test completed:\n"
                 f"   Connections created: {result}\n" 
                 f"   Pool enabled: {pool_stats['pool_enabled']}\n"
                 f"   Isolation passed: {isolation_summary['test_passed']}"
@@ -291,7 +291,7 @@ async def test_parallel_execution_with_real_tests():
     assert len(results) == 2
     successful_results = [r for r in results if r.success]
     
-    logger.info(f"✅ Parallel execution completed: {len(successful_results)}/{len(results)} successful")
+    logger.info(f" PASS:  Parallel execution completed: {len(successful_results)}/{len(results)} successful")
 
 
 if __name__ == "__main__":

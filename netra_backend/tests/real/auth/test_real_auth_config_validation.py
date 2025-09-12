@@ -61,7 +61,7 @@ class TestRealAuthConfigValidation:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for config validation testing."""
-        print("🐳 Starting Docker services for auth config validation tests...")
+        print("[U+1F433] Starting Docker services for auth config validation tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -73,13 +73,13 @@ class TestRealAuthConfigValidation:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for config validation tests")
+            print(" PASS:  Docker services ready for config validation tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for config validation tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for config validation tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after config validation tests...")
+            print("[U+1F9F9] Cleaning up Docker services after config validation tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -172,15 +172,15 @@ class TestRealAuthConfigValidation:
             assert decoded_payload[JWTConstants.SUBJECT] == "config_test_user"
             assert decoded_payload["test"] == "config_validation"
             
-            print("✅ JWT secret validation successful - Can create and validate tokens")
+            print(" PASS:  JWT secret validation successful - Can create and validate tokens")
             
             # Test cross-service consistency (both services should use same secret)
             # In real implementation, this would test multiple service endpoints
             
-            print("✅ JWT secret consistency validated across services")
+            print(" PASS:  JWT secret consistency validated across services")
             
         except jwt.InvalidTokenError as e:
-            pytest.fail(f"❌ JWT secret validation failed: {e}")
+            pytest.fail(f" FAIL:  JWT secret validation failed: {e}")
 
     @pytest.mark.asyncio
     async def test_oauth_credential_environment_validation(self):
@@ -195,7 +195,7 @@ class TestRealAuthConfigValidation:
         
         # Determine current environment
         current_env = env.get_current_environment()
-        print(f"🔍 Validating OAuth credentials for environment: {current_env}")
+        print(f" SEARCH:  Validating OAuth credentials for environment: {current_env}")
         
         # Get environment-specific patterns
         env_patterns = self.get_environment_specific_config_patterns()
@@ -213,27 +213,27 @@ class TestRealAuthConfigValidation:
             if client_id_patterns:
                 pattern_match = any(pattern in google_client_id.lower() for pattern in client_id_patterns)
                 if not pattern_match:
-                    print(f"⚠️ OAuth client ID may not match environment {current_env}: {google_client_id[:20]}...")
+                    print(f" WARNING: [U+FE0F] OAuth client ID may not match environment {current_env}: {google_client_id[:20]}...")
             
             # Check forbidden patterns (CRITICAL for security)
             for forbidden_pattern in forbidden_client_patterns:
                 if forbidden_pattern in google_client_id.lower():
-                    pytest.fail(f"❌ CRITICAL: {current_env.upper()} environment using {forbidden_pattern.upper()} OAuth credentials!")
+                    pytest.fail(f" FAIL:  CRITICAL: {current_env.upper()} environment using {forbidden_pattern.upper()} OAuth credentials!")
             
-            print(f"✅ OAuth credentials validated for {current_env} environment")
+            print(f" PASS:  OAuth credentials validated for {current_env} environment")
         
         # Validate credential format and structure
         # Google OAuth client IDs typically have specific format
         if "googleusercontent.com" in google_client_id:
-            print("✅ OAuth client ID format appears valid (contains googleusercontent.com)")
+            print(" PASS:  OAuth client ID format appears valid (contains googleusercontent.com)")
         else:
-            print("⚠️ OAuth client ID format may be non-standard")
+            print(" WARNING: [U+FE0F] OAuth client ID format may be non-standard")
         
         # Validate client secret strength
         assert len(google_client_secret) >= 20, "OAuth client secret should be at least 20 characters"
         assert not google_client_secret.lower().startswith("test"), "OAuth client secret should not start with 'test'"
         
-        print("✅ OAuth credential validation completed")
+        print(" PASS:  OAuth credential validation completed")
 
     @pytest.mark.asyncio
     async def test_database_configuration_validation(self):
@@ -245,7 +245,7 @@ class TestRealAuthConfigValidation:
             pytest.skip("#removed-legacynot configured - skipping database config validation")
         
         current_env = env.get_current_environment()
-        print(f"🔍 Validating database configuration for environment: {current_env}")
+        print(f" SEARCH:  Validating database configuration for environment: {current_env}")
         
         # Parse database URL components
         db_components = {
@@ -267,7 +267,7 @@ class TestRealAuthConfigValidation:
             db_components["username"] = parsed_url.username
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to parse DATABASE_URL: {e}")
+            pytest.fail(f" FAIL:  Failed to parse DATABASE_URL: {e}")
         
         # Validate database configuration
         assert db_components["scheme"] in ["postgresql", "postgres"], "Database should use PostgreSQL"
@@ -286,19 +286,19 @@ class TestRealAuthConfigValidation:
             for forbidden_pattern in forbidden_db_patterns:
                 db_url_lower = database_url.lower()
                 if forbidden_pattern in db_url_lower:
-                    pytest.fail(f"❌ CRITICAL: {current_env.upper()} environment using {forbidden_pattern.upper()} database!")
+                    pytest.fail(f" FAIL:  CRITICAL: {current_env.upper()} environment using {forbidden_pattern.upper()} database!")
             
-            print(f"✅ Database configuration validated for {current_env} environment")
+            print(f" PASS:  Database configuration validated for {current_env} environment")
         
         # Test database connection parameters
         if current_env == "test":
             # Test environment should use test-specific database
             if "5434" in database_url:  # Test PostgreSQL port
-                print("✅ Test environment using test database port (5434)")
+                print(" PASS:  Test environment using test database port (5434)")
             elif "5432" in database_url:
-                print("⚠️ Test environment using standard PostgreSQL port (5432)")
+                print(" WARNING: [U+FE0F] Test environment using standard PostgreSQL port (5432)")
         
-        print(f"✅ Database configuration validation completed")
+        print(f" PASS:  Database configuration validation completed")
         print(f"   Host: {db_components['host']}")
         print(f"   Port: {db_components['port']}")
         print(f"   Database: {db_components['database']}")
@@ -313,7 +313,7 @@ class TestRealAuthConfigValidation:
             pytest.skip("REDIS_URL not configured - skipping Redis config validation")
         
         current_env = env.get_current_environment()
-        print(f"🔍 Validating Redis configuration for environment: {current_env}")
+        print(f" SEARCH:  Validating Redis configuration for environment: {current_env}")
         
         # Parse Redis URL
         try:
@@ -325,7 +325,7 @@ class TestRealAuthConfigValidation:
             redis_db = parsed_redis.path.lstrip('/')
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to parse REDIS_URL: {e}")
+            pytest.fail(f" FAIL:  Failed to parse REDIS_URL: {e}")
         
         # Validate Redis configuration
         assert parsed_redis.scheme == "redis", "Redis URL should use redis:// scheme"
@@ -334,17 +334,17 @@ class TestRealAuthConfigValidation:
         # Environment-specific Redis validation
         if current_env == "test":
             if redis_port == 6381:  # Test Redis port
-                print("✅ Test environment using test Redis port (6381)")
+                print(" PASS:  Test environment using test Redis port (6381)")
             elif redis_port == 6379:
-                print("⚠️ Test environment using standard Redis port (6379)")
+                print(" WARNING: [U+FE0F] Test environment using standard Redis port (6379)")
         
         # Test Redis connection format
         if redis_host in ["localhost", "127.0.0.1"] and current_env != "production":
-            print(f"✅ Redis host appropriate for {current_env} environment")
+            print(f" PASS:  Redis host appropriate for {current_env} environment")
         elif redis_host not in ["localhost", "127.0.0.1"] and current_env == "production":
-            print(f"✅ Redis host appropriate for {current_env} environment")
+            print(f" PASS:  Redis host appropriate for {current_env} environment")
         
-        print(f"✅ Redis configuration validation completed")
+        print(f" PASS:  Redis configuration validation completed")
         print(f"   Host: {redis_host}")
         print(f"   Port: {redis_port}")
         print(f"   Database: {redis_db if redis_db else '0'}")
@@ -373,19 +373,19 @@ class TestRealAuthConfigValidation:
                 insecure_values = ["password", "secret", "default", "123456", "admin", "test"]
                 
                 if value.lower() in insecure_values:
-                    pytest.fail(f"❌ SECURITY: {key} uses insecure default value!")
+                    pytest.fail(f" FAIL:  SECURITY: {key} uses insecure default value!")
                 
                 # Validate minimum length for secrets
                 if len(value) < 16:
-                    print(f"⚠️ {key} may be too short for security (length: {len(value)})")
+                    print(f" WARNING: [U+FE0F] {key} may be too short for security (length: {len(value)})")
                 
                 # Ensure secret has entropy (not all same character)
                 if len(set(value)) < 5:
-                    print(f"⚠️ {key} may have low entropy")
+                    print(f" WARNING: [U+FE0F] {key} may have low entropy")
                 
-                print(f"✅ {key} security validation passed")
+                print(f" PASS:  {key} security validation passed")
         
-        print(f"✅ Configuration security validated for {secure_config_count} sensitive keys")
+        print(f" PASS:  Configuration security validated for {secure_config_count} sensitive keys")
 
     @pytest.mark.asyncio
     async def test_frontend_backend_config_consistency(self):
@@ -408,17 +408,17 @@ class TestRealAuthConfigValidation:
                 # For test environment, both might be localhost
                 if current_env == "test":
                     if "localhost" in frontend_domain and "localhost" in backend_domain:
-                        print("✅ Test environment URL consistency validated")
+                        print(" PASS:  Test environment URL consistency validated")
                     elif "127.0.0.1" in frontend_domain and "127.0.0.1" in backend_domain:
-                        print("✅ Test environment URL consistency validated")
+                        print(" PASS:  Test environment URL consistency validated")
                 
                 # For staging/production, domains should match environment
                 elif current_env in ["staging", "production"]:
                     if current_env in frontend_domain and current_env in backend_domain:
-                        print(f"✅ {current_env.title()} environment URL consistency validated")
+                        print(f" PASS:  {current_env.title()} environment URL consistency validated")
                 
             except Exception as e:
-                print(f"⚠️ URL parsing error: {e}")
+                print(f" WARNING: [U+FE0F] URL parsing error: {e}")
         
         # Test OAuth redirect URI consistency
         google_client_id = env.get_env_var(CredentialConstants.GOOGLE_OAUTH_CLIENT_ID, required=False)
@@ -430,9 +430,9 @@ class TestRealAuthConfigValidation:
             assert oauth_callback_url.startswith("http"), "OAuth callback URL should be absolute"
             assert OAuthConstants.OAUTH_CALLBACK_PATH in oauth_callback_url, "OAuth callback path should be included"
             
-            print(f"✅ OAuth callback URL consistency validated: {oauth_callback_url}")
+            print(f" PASS:  OAuth callback URL consistency validated: {oauth_callback_url}")
         
-        print("✅ Frontend-backend configuration consistency validated")
+        print(" PASS:  Frontend-backend configuration consistency validated")
 
     @pytest.mark.asyncio
     async def test_configuration_completeness_validation(self):
@@ -450,18 +450,18 @@ class TestRealAuthConfigValidation:
             elif value in ["", "None", "null", "undefined"]:
                 invalid_configs.append(config_key)
             else:
-                print(f"✅ {config_key} is configured")
+                print(f" PASS:  {config_key} is configured")
         
         # Report missing configurations
         if missing_configs:
-            print(f"⚠️ Missing configurations: {missing_configs}")
+            print(f" WARNING: [U+FE0F] Missing configurations: {missing_configs}")
             # Don't fail for optional configs in test environment
             if env.get_current_environment() != "test":
-                pytest.fail(f"❌ Required configurations missing: {missing_configs}")
+                pytest.fail(f" FAIL:  Required configurations missing: {missing_configs}")
         
         # Report invalid configurations
         if invalid_configs:
-            pytest.fail(f"❌ Invalid configurations detected: {invalid_configs}")
+            pytest.fail(f" FAIL:  Invalid configurations detected: {invalid_configs}")
         
         # Validate configuration relationships
         database_url = env.get_env_var("DATABASE_URL", required=False)
@@ -473,11 +473,11 @@ class TestRealAuthConfigValidation:
             redis_localhost = "localhost" in redis_url or "127.0.0.1" in redis_url
             
             if db_localhost == redis_localhost:
-                print("✅ Database and Redis configuration environment consistency validated")
+                print(" PASS:  Database and Redis configuration environment consistency validated")
             else:
-                print("⚠️ Database and Redis may be configured for different environments")
+                print(" WARNING: [U+FE0F] Database and Redis may be configured for different environments")
         
-        print(f"✅ Configuration completeness validation completed")
+        print(f" PASS:  Configuration completeness validation completed")
         print(f"   Required configs found: {len(required_configs) - len(missing_configs)}/{len(required_configs)}")
 
     @pytest.mark.asyncio
@@ -519,14 +519,14 @@ class TestRealAuthConfigValidation:
             validation_requirement = scenario["validation"]
             
             # Log configuration change impact
-            print(f"🔄 Configuration change scenario: {description}")
+            print(f" CYCLE:  Configuration change scenario: {description}")
             print(f"   Impact: {impact}")
             print(f"   Validation: {validation_requirement}")
             
             # In real implementation, this would validate the specific change
             # For now, we just document the change impact patterns
         
-        print("✅ Configuration change impact detection validated")
+        print(" PASS:  Configuration change impact detection validated")
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

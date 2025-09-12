@@ -95,7 +95,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
         MISSION CRITICAL: Test enterprise error reporting with real services and SLA validation.
         
         Business Value: Enterprise customers ($50K+ ARR) REQUIRE error visibility for SLA compliance.
-        Expected Result: INITIALLY FAIL - proves service → GCP integration gaps exist.
+        Expected Result: INITIALLY FAIL - proves service  ->  GCP integration gaps exist.
         
         This test validates:
         1. Real service errors are captured with business context
@@ -103,7 +103,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
         3. Error correlation preserves user/business context
         4. GCP Error Reporting integration works properly
         """
-        print("\n🏢 ENTERPRISE SLA ERROR REPORTING TEST")
+        print("\n[U+1F3E2] ENTERPRISE SLA ERROR REPORTING TEST")
         print("=" * 60)
         
         # Setup enterprise context
@@ -124,7 +124,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
             headers = auth_helper.get_auth_headers(token)
             
             # Test 1: Force a database error with enterprise context
-            print("\n📊 Test 1: Database Error with Enterprise Context")
+            print("\n CHART:  Test 1: Database Error with Enterprise Context")
             database_error_detected = False
             
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -153,7 +153,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                     if response.status_code == 500:
                         database_error_detected = True
                         error_data = response.json()
-                        print(f"✅ Database error captured: {error_data.get('error_type', 'unknown')}")
+                        print(f" PASS:  Database error captured: {error_data.get('error_type', 'unknown')}")
                         
                         # Validate enterprise context is preserved
                         assert "enterprise" in str(error_data).lower(), \
@@ -166,18 +166,18 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                             "context": error_data
                         })
                     else:
-                        print(f"❌ Expected 500 error, got {response.status_code}")
+                        print(f" FAIL:  Expected 500 error, got {response.status_code}")
                         
                 except httpx.ConnectError:
-                    print("⚠️ Service connection failed - likely not running")
+                    print(" WARNING: [U+FE0F] Service connection failed - likely not running")
                     pytest.skip("Backend service not available for real service test")
                 except Exception as e:
-                    print(f"⚠️ Database error test failed: {e}")
+                    print(f" WARNING: [U+FE0F] Database error test failed: {e}")
                     # This is expected initially - proves integration gap
                     database_error_detected = True  # Continue with other tests
             
             # Test 2: WebSocket error with enterprise SLA monitoring
-            print("\n🔌 Test 2: WebSocket Error with Enterprise SLA")
+            print("\n[U+1F50C] Test 2: WebSocket Error with Enterprise SLA")
             websocket_error_detected = False
             
             try:
@@ -217,7 +217,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                     
                     if error_data.get("type") == "error":
                         websocket_error_detected = True
-                        print(f"✅ WebSocket error captured: {error_data.get('error', 'unknown')}")
+                        print(f" PASS:  WebSocket error captured: {error_data.get('error', 'unknown')}")
                         
                         # Validate enterprise context preservation
                         assert "enterprise" in str(error_data).lower() or "premium" in str(error_data).lower(), \
@@ -231,16 +231,16 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                         })
             
             except (websockets.exceptions.ConnectionClosedError, asyncio.TimeoutError) as e:
-                print(f"⚠️ WebSocket error test failed: {e}")
+                print(f" WARNING: [U+FE0F] WebSocket error test failed: {e}")
                 # This is expected initially - proves WebSocket error handling gaps
                 websocket_error_detected = True  # Continue with validation
             
             except Exception as e:
-                print(f"❌ Unexpected WebSocket error: {e}")
+                print(f" FAIL:  Unexpected WebSocket error: {e}")
                 websocket_error_detected = True
             
             # Test 3: SLA Latency Validation
-            print("\n⏱️ Test 3: Enterprise SLA Latency Validation")
+            print("\n[U+23F1][U+FE0F] Test 3: Enterprise SLA Latency Validation")
             sla_elapsed_time = time.time() - sla_start_time
             sla_max_latency = self.sla_requirements["error_reporting_latency_max_seconds"]
             
@@ -253,21 +253,21 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                     "sla_max": sla_max_latency,
                     "violation_amount": sla_elapsed_time - sla_max_latency
                 })
-                print(f"❌ SLA VIOLATION: Error reporting exceeded {sla_max_latency}s requirement")
+                print(f" FAIL:  SLA VIOLATION: Error reporting exceeded {sla_max_latency}s requirement")
             else:
-                print(f"✅ SLA COMPLIANT: Error reporting within {sla_max_latency}s requirement")
+                print(f" PASS:  SLA COMPLIANT: Error reporting within {sla_max_latency}s requirement")
             
             # Test 4: GCP Error Reporting Integration Validation
-            print("\n☁️ Test 4: GCP Error Reporting Integration")
+            print("\n[U+2601][U+FE0F] Test 4: GCP Error Reporting Integration")
             gcp_integration_working = await self.validate_gcp_error_reporting_integration()
             
             # Test Results Summary
-            print("\n📋 ENTERPRISE SLA ERROR REPORTING RESULTS")
+            print("\n[U+1F4CB] ENTERPRISE SLA ERROR REPORTING RESULTS")
             print("=" * 50)
-            print(f"Database Error Detection: {'✅' if database_error_detected else '❌'}")
-            print(f"WebSocket Error Detection: {'✅' if websocket_error_detected else '❌'}")
-            print(f"SLA Latency Compliance: {'✅' if not self.sla_violations else '❌'}")
-            print(f"GCP Integration: {'✅' if gcp_integration_working else '❌'}")
+            print(f"Database Error Detection: {' PASS: ' if database_error_detected else ' FAIL: '}")
+            print(f"WebSocket Error Detection: {' PASS: ' if websocket_error_detected else ' FAIL: '}")
+            print(f"SLA Latency Compliance: {' PASS: ' if not self.sla_violations else ' FAIL: '}")
+            print(f"GCP Integration: {' PASS: ' if gcp_integration_working else ' FAIL: '}")
             print(f"Total Error Events: {len(self.error_events)}")
             print(f"SLA Violations: {len(self.sla_violations)}")
             
@@ -282,7 +282,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
             
             if not enterprise_sla_met:
                 # EXPECTED INITIAL FAILURE - proves integration gaps
-                print("\n🚨 EXPECTED INITIAL FAILURE: Enterprise SLA requirements not fully met")
+                print("\n ALERT:  EXPECTED INITIAL FAILURE: Enterprise SLA requirements not fully met")
                 print("This proves integration gaps exist that need to be addressed:")
                 
                 if not database_error_detected:
@@ -300,14 +300,14 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                 pytest.xfail("EXPECTED: Enterprise SLA error reporting integration gaps detected")
             
             else:
-                print("\n✅ SUCCESS: Enterprise SLA error reporting fully functional")
+                print("\n PASS:  SUCCESS: Enterprise SLA error reporting fully functional")
                 # Validate that all enterprise context is preserved
                 for event in self.error_events:
                     assert event["user_id"] == self.enterprise_user_id, \
                         "Enterprise user context not preserved across error events"
             
         except Exception as e:
-            print(f"\n❌ CRITICAL: Enterprise SLA error reporting test failed: {e}")
+            print(f"\n FAIL:  CRITICAL: Enterprise SLA error reporting test failed: {e}")
             # Log the error for enterprise debugging
             logger.error(f"Enterprise SLA test failure: {e}", extra={
                 "user_id": self.enterprise_user_id,
@@ -335,11 +335,11 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
             gcp_credentials = self.env.get("GOOGLE_APPLICATION_CREDENTIALS")
             
             if gcp_project and gcp_credentials:
-                print(f"✅ GCP Project configured: {gcp_project}")
-                print(f"✅ GCP Credentials configured: {bool(gcp_credentials)}")
+                print(f" PASS:  GCP Project configured: {gcp_project}")
+                print(f" PASS:  GCP Credentials configured: {bool(gcp_credentials)}")
                 gcp_config_valid = True
             else:
-                print("❌ GCP configuration missing (expected initially)")
+                print(" FAIL:  GCP configuration missing (expected initially)")
                 print(f"  - GCP_PROJECT_ID: {bool(gcp_project)}")
                 print(f"  - GOOGLE_APPLICATION_CREDENTIALS: {bool(gcp_credentials)}")
             
@@ -365,25 +365,25 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                 # This should work if GCP integration is properly configured
                 await error_reporter.report_error(test_error, context=enterprise_context)
                 gcp_client_working = True
-                print("✅ GCP Error Reporter client working")
+                print(" PASS:  GCP Error Reporter client working")
                 
             except ImportError as e:
-                print(f"❌ GCP Error Reporter not available: {e}")
+                print(f" FAIL:  GCP Error Reporter not available: {e}")
             except Exception as e:
-                print(f"❌ GCP Error Reporter failed: {e}")
+                print(f" FAIL:  GCP Error Reporter failed: {e}")
                 # This is expected initially - proves integration gap
             
             # Overall GCP integration status
             gcp_integration_working = gcp_config_valid and gcp_client_working
             
             if not gcp_integration_working:
-                print("⚠️ GCP Error Reporting integration not fully functional (expected initially)")
+                print(" WARNING: [U+FE0F] GCP Error Reporting integration not fully functional (expected initially)")
                 print("This proves enterprise SLA monitoring integration gap exists")
             
             return gcp_integration_working
             
         except Exception as e:
-            print(f"❌ GCP integration validation failed: {e}")
+            print(f" FAIL:  GCP integration validation failed: {e}")
             return False
     
     @pytest.mark.mission_critical
@@ -395,7 +395,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
         Business Value: Enterprise customers need full traceability for their compliance requirements.
         This test validates that user context, business impact, and SLA requirements are maintained.
         """
-        print("\n🔗 ENTERPRISE ERROR CONTEXT PRESERVATION TEST")
+        print("\n[U+1F517] ENTERPRISE ERROR CONTEXT PRESERVATION TEST")
         print("=" * 60)
         
         enterprise_context = await self.setup_enterprise_context()
@@ -439,11 +439,11 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                 assert "enterprise" in str(call_args), "Enterprise context not passed to error handler"
                 assert str(enterprise_context.user_id) in str(call_args), "User ID not preserved"
                 
-                print("✅ Enterprise context preserved through error handling flow")
+                print(" PASS:  Enterprise context preserved through error handling flow")
                 
         except ImportError:
             # Expected if UnifiedErrorHandler is not available
-            print("⚠️ UnifiedErrorHandler not available - testing with mock pattern")
+            print(" WARNING: [U+FE0F] UnifiedErrorHandler not available - testing with mock pattern")
             
             # Test the pattern that should exist
             mock_context_preservation = True
@@ -452,15 +452,15 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
             for field in required_fields:
                 if field not in context_data:
                     mock_context_preservation = False
-                    print(f"❌ Required enterprise context field missing: {field}")
+                    print(f" FAIL:  Required enterprise context field missing: {field}")
             
             if mock_context_preservation:
-                print("✅ Enterprise context structure validated")
+                print(" PASS:  Enterprise context structure validated")
             else:
                 pytest.fail("Enterprise context preservation validation failed")
         
         except Exception as e:
-            print(f"❌ Enterprise context preservation test failed: {e}")
+            print(f" FAIL:  Enterprise context preservation test failed: {e}")
             # This may be expected initially - proves error context gaps
             pytest.xfail(f"EXPECTED: Enterprise context preservation gap - {e}")
     
@@ -473,7 +473,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
         Business Value: Enterprise customers require real-time SLA monitoring dashboards.
         This validates that SLA metrics are captured and available for monitoring systems.
         """
-        print("\n⏱️ ENTERPRISE SLA REAL-TIME MONITORING TEST")
+        print("\n[U+23F1][U+FE0F] ENTERPRISE SLA REAL-TIME MONITORING TEST")
         print("=" * 60)
         
         enterprise_context = await self.setup_enterprise_context()
@@ -494,7 +494,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
         ]
         
         for scenario in test_scenarios:
-            print(f"\n📊 Testing scenario: {scenario['type']}")
+            print(f"\n CHART:  Testing scenario: {scenario['type']}")
             
             start_time = time.time()
             
@@ -516,12 +516,12 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
                 sla_metrics["context_preservation_total"] += 1
                 if detection_time < scenario["expected_latency"]:
                     sla_metrics["context_preservation_success"] += 1
-                    print(f"✅ SLA met: {detection_time:.3f}s < {scenario['expected_latency']}s")
+                    print(f" PASS:  SLA met: {detection_time:.3f}s < {scenario['expected_latency']}s")
                 else:
-                    print(f"❌ SLA violation: {detection_time:.3f}s > {scenario['expected_latency']}s")
+                    print(f" FAIL:  SLA violation: {detection_time:.3f}s > {scenario['expected_latency']}s")
                 
             except Exception as e:
-                print(f"⚠️ Scenario {scenario['type']} failed: {e}")
+                print(f" WARNING: [U+FE0F] Scenario {scenario['type']} failed: {e}")
                 # Continue with other scenarios
         
         # Calculate SLA metrics
@@ -529,7 +529,7 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
         avg_reporting_latency = sum(sla_metrics["error_reporting_latency"]) / len(sla_metrics["error_reporting_latency"])
         context_preservation_rate = sla_metrics["context_preservation_success"] / sla_metrics["context_preservation_total"] * 100
         
-        print(f"\n📈 ENTERPRISE SLA METRICS SUMMARY")
+        print(f"\n[U+1F4C8] ENTERPRISE SLA METRICS SUMMARY")
         print(f"Average Error Detection Latency: {avg_detection_latency:.3f}s")
         print(f"Average Error Reporting Latency: {avg_reporting_latency:.3f}s")
         print(f"Context Preservation Rate: {context_preservation_rate:.1f}%")
@@ -542,9 +542,9 @@ class TestEnterpriseErrorReporting(SSotBaseTestCase):
         )
         
         if sla_compliant:
-            print("✅ Enterprise SLA requirements met")
+            print(" PASS:  Enterprise SLA requirements met")
         else:
-            print("❌ Enterprise SLA requirements not met (may be expected initially)")
+            print(" FAIL:  Enterprise SLA requirements not met (may be expected initially)")
             print("This indicates SLA monitoring integration needs implementation")
             
             # This may be expected initially - proves SLA monitoring gap

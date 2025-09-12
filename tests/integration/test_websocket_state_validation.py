@@ -166,7 +166,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
         - CURRENT STATE: FAIL - Staging always returns False conservatively
         - AFTER FIX: PASS - Proper detection using available attributes
         """
-        logger.info("🧪 Testing WebSocket connection validation per environment")
+        logger.info("[U+1F9EA] Testing WebSocket connection validation per environment")
         
         # Test scenarios for different environments
         test_scenarios = [
@@ -239,7 +239,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
                             f"expected {scenario['expected_result']}, got {result}"
                         )
                         
-        logger.info("✅ Environment-specific connection validation tests passed")
+        logger.info(" PASS:  Environment-specific connection validation tests passed")
         
     @pytest.mark.integration
     def test_websocket_state_attributes_edge_cases(self):
@@ -249,7 +249,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
         This test covers edge cases that may occur in different proxy environments
         or during connection state transitions.
         """
-        logger.info("🧪 Testing WebSocket state attribute edge cases")
+        logger.info("[U+1F9EA] Testing WebSocket state attribute edge cases")
         
         # Edge case scenarios
         edge_cases = [
@@ -322,15 +322,15 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
                     f"Description: {case['description']}"
                 )
                 
-                logger.info(f"  ✅ Passed")
+                logger.info(f"   PASS:  Passed")
                 
             except Exception as e:
-                logger.error(f"  ❌ Edge case '{case['name']}' raised exception: {e}")
+                logger.error(f"   FAIL:  Edge case '{case['name']}' raised exception: {e}")
                 
                 # Some edge cases might raise exceptions - validate they're handled properly
                 if case['name'] == 'no_attributes_at_all':
                     # This is expected - function should handle gracefully
-                    logger.info(f"  ✅ Exception handled gracefully for {case['name']}")
+                    logger.info(f"   PASS:  Exception handled gracefully for {case['name']}")
                 else:
                     # Unexpected exception
                     raise AssertionError(
@@ -338,7 +338,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
                         f"Function should handle all WebSocket state scenarios gracefully."
                     )
                     
-        logger.info("✅ WebSocket state attribute edge case tests passed")
+        logger.info(" PASS:  WebSocket state attribute edge case tests passed")
         
     @pytest.mark.integration
     def test_websocket_manager_lifecycle_coordination(self):
@@ -348,7 +348,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
         This test validates that WebSocket managers are properly cleaned up
         when connections close, preventing the resource accumulation issue.
         """
-        logger.info("🧪 Testing WebSocket manager lifecycle coordination")
+        logger.info("[U+1F9EA] Testing WebSocket manager lifecycle coordination")
         
         # Mock WebSocket managers and connections for testing
         mock_connections = []
@@ -383,7 +383,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
         for i, ws in enumerate(mock_connections):
             result = self.is_websocket_connected(ws)
             assert result is True, f"Connection {i} should be detected as connected"
-            logger.info(f"  ✅ Connection {i} detected as connected")
+            logger.info(f"   PASS:  Connection {i} detected as connected")
             
         # Test 2: Simulate connection closure
         logger.info("Testing connection closure detection")
@@ -394,7 +394,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
             
             result = self.is_websocket_connected(mock_connections[i])
             assert result is False, f"Closed connection {i} should be detected as disconnected"
-            logger.info(f"  ✅ Closed connection {i} detected as disconnected")
+            logger.info(f"   PASS:  Closed connection {i} detected as disconnected")
             
         # Test 3: Validate that managers would be cleaned up
         # (This would be integration with actual WebSocket manager cleanup)
@@ -411,7 +411,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
                 
                 # Simulate cleanup call
                 manager.cleanup()
-                logger.info(f"  ✅ Manager {manager.connection_id} cleanup simulated")
+                logger.info(f"   PASS:  Manager {manager.connection_id} cleanup simulated")
                 
         # Test 4: Verify resource count management
         active_managers = [m for m in mock_managers if m.is_active]
@@ -423,7 +423,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
             f"got {actual_active}. This indicates cleanup coordination issues."
         )
         
-        logger.info(f"✅ Resource management validated: {actual_active} active managers")
+        logger.info(f" PASS:  Resource management validated: {actual_active} active managers")
         
         # Test 5: Validate no resource accumulation under normal operations
         logger.info("Testing resource accumulation prevention")
@@ -446,9 +446,9 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
             # Verify it's detected as disconnected
             assert self.is_websocket_connected(ws) is False
             
-        logger.info("✅ Resource accumulation prevention validated")
+        logger.info(" PASS:  Resource accumulation prevention validated")
         
-        logger.info("✅ WebSocket manager lifecycle coordination tests passed")
+        logger.info(" PASS:  WebSocket manager lifecycle coordination tests passed")
         
     @pytest.mark.integration
     def test_cloud_environment_detection_fallbacks(self):
@@ -458,7 +458,7 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
         This specifically tests the fixes needed for GCP Cloud Run
         where standard state attributes may not be available.
         """
-        logger.info("🧪 Testing cloud environment detection fallbacks")
+        logger.info("[U+1F9EA] Testing cloud environment detection fallbacks")
         
         # Test scenarios for cloud fallback detection
         cloud_scenarios = [
@@ -531,9 +531,9 @@ class TestWebSocketStateValidation(SSotBaseTestCase):
                             f"expected {scenario['expected']}, got {result}"
                         )
                         
-                    logger.info(f"  ✅ Passed")
+                    logger.info(f"   PASS:  Passed")
                     
-        logger.info("✅ Cloud environment detection fallback tests passed")
+        logger.info(" PASS:  Cloud environment detection fallback tests passed")
 
 
 if __name__ == "__main__":

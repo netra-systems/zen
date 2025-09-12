@@ -124,7 +124,7 @@ class TestUserExperienceBusinessRules:
         cost1 = cost_calculator.calculate_cost(usage1, LLMProvider.OPENAI, "gpt-3.5-turbo")
         cost2 = cost_calculator.calculate_cost(usage2, LLMProvider.OPENAI, "gpt-3.5-turbo")
         
-        # Business Rule: Costs should be predictable - double tokens ≈ double cost
+        # Business Rule: Costs should be predictable - double tokens [U+2248] double cost
         if cost1 > 0:
             ratio = cost2 / cost1
             assert Decimal('1.9') <= ratio <= Decimal('2.1'), "Cost scaling should be predictable for users"

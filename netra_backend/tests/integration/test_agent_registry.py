@@ -453,7 +453,7 @@ class TestAgentRegistry(BaseIntegrationTest):
         assert stats["total_registrations"] >= 1
         assert stats["active_agents"] >= 1
         
-        logger.info(f"✅ Agent registration test passed - {stats['total_registrations']} registrations")
+        logger.info(f" PASS:  Agent registration test passed - {stats['total_registrations']} registrations")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -491,7 +491,7 @@ class TestAgentRegistry(BaseIntegrationTest):
         assert result["specialization"] == "cost_optimization"
         assert result["business_value"]["user_matched_to_expert"] is True
         
-        logger.info("✅ Agent discovery and capability matching test passed")
+        logger.info(" PASS:  Agent discovery and capability matching test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -530,7 +530,7 @@ class TestAgentRegistry(BaseIntegrationTest):
         # Cached lookups should be fast
         assert cache_time < 0.5  # Less than 500ms for 10 lookups
         
-        logger.info(f"✅ Registry caching test passed - hit rate: {final_stats['cache_hit_rate']:.2f}")
+        logger.info(f" PASS:  Registry caching test passed - hit rate: {final_stats['cache_hit_rate']:.2f}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -581,7 +581,7 @@ class TestAgentRegistry(BaseIntegrationTest):
         stats = test_agent_registry.get_registry_stats()
         assert stats["active_agents"] >= 3  # Should have created different agent types
         
-        logger.info(f"✅ Concurrent agent access test passed - {successful_retrievals}/5 successful in {execution_time:.3f}s")
+        logger.info(f" PASS:  Concurrent agent access test passed - {successful_retrievals}/5 successful in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -630,7 +630,7 @@ class TestAgentRegistry(BaseIntegrationTest):
         assert final_stats["total_registrations"] >= initial_stats["total_registrations"]
         assert final_stats["active_agents"] >= initial_stats["active_agents"]
         
-        logger.info("✅ Agent lifecycle management test passed")
+        logger.info(" PASS:  Agent lifecycle management test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -664,7 +664,7 @@ class TestAgentRegistry(BaseIntegrationTest):
         assert stats_after["cache_misses"] > stats_before["cache_misses"]  # Recorded the miss
         assert stats_after["active_agents"] >= stats_before["active_agents"]  # No corruption
         
-        logger.info("✅ Registry error handling and recovery test passed")
+        logger.info(" PASS:  Registry error handling and recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -716,7 +716,7 @@ class TestAgentRegistry(BaseIntegrationTest):
         assert final_stats["active_agents"] >= 3  # All agent types available
         assert final_stats["initialization_count"] >= 3  # All agents initialized
         
-        logger.info("✅ Multi-agent workflow coordination test passed")
+        logger.info(" PASS:  Multi-agent workflow coordination test passed")
 
 
 if __name__ == "__main__":

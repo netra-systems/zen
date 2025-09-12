@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 3. Value Impact: Ensures agent orchestration produces real problem-solving results
 4. Strategic Impact: Prevents chat system failures affecting all customer tiers
 
-🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
+ ALERT:  CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 
 COMPLIANCE: Claude.md - Real services only, no mocks, absolute imports
@@ -24,7 +24,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 import pytest
 
-# 🚨 MANDATORY: SSOT E2E Authentication - CHEATING violation fix
+#  ALERT:  MANDATORY: SSOT E2E Authentication - CHEATING violation fix
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
@@ -417,7 +417,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers for E2E tests
+        #  ALERT:  MANDATORY: Create authenticated helpers for E2E tests
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
@@ -435,7 +435,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
     @pytest.mark.e2e
     async def test_real_multi_agent_coordination_with_business_value(self, orchestration_tester):
         """Test REAL multi-agent coordination delivering substantive AI value with MANDATORY authentication."""
-        # 🚨 MANDATORY: Create authenticated user for E2E test
+        #  ALERT:  MANDATORY: Create authenticated user for E2E test
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.orchestration@example.com",
@@ -477,7 +477,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
         assert result["successful_agents"] >= 1, "No agents delivered results"
         assert len(result["websocket_events"]) > 0, "No WebSocket events for chat transparency"
         
-        # 🚨 CRITICAL: Validate all WebSocket events were sent with proper authentication
+        #  ALERT:  CRITICAL: Validate all WebSocket events were sent with proper authentication
         for event in result["websocket_events"]:
             event_payload = event.get("payload", {})
             if "user_id" in event_payload:
@@ -498,7 +498,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
     @pytest.mark.e2e
     async def test_sequential_agent_execution_with_websocket_transparency(self, orchestration_tester):
         """Test sequential agent execution with full WebSocket event transparency and MANDATORY authentication."""
-        # 🚨 MANDATORY: Create authenticated user for sequential execution test
+        #  ALERT:  MANDATORY: Create authenticated user for sequential execution test
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.sequential@example.com",
@@ -538,7 +538,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
         thinking_events = [e for e in websocket_events if e.get("type") == "agent_thinking"]
         assert len(thinking_events) >= 2, "Agent thinking events missing for transparency"
         
-        # 🚨 CRITICAL: Validate all WebSocket events are for authenticated user
+        #  ALERT:  CRITICAL: Validate all WebSocket events are for authenticated user
         for event in websocket_events:
             event_payload = event.get("payload", {})
             if "user_id" in event_payload:
@@ -548,7 +548,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
     @pytest.mark.e2e
     async def test_multi_agent_business_value_accumulation(self, orchestration_tester):
         """Test business value accumulation across multiple real agents with MANDATORY authentication."""
-        # 🚨 MANDATORY: Create authenticated user for business value test
+        #  ALERT:  MANDATORY: Create authenticated user for business value test
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.business.value@example.com",
@@ -583,7 +583,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
         for response in coordination_result["agent_responses"]:
             assert response.get("status") == "completed", f"Agent {response.get('agent_name')} failed"
             assert len(response.get("result", "")) > 30, f"Agent {response.get('agent_name')} result lacks substance"
-            # 🚨 CRITICAL: Ensure execution time indicates real processing (prevent CHEATING)
+            #  ALERT:  CRITICAL: Ensure execution time indicates real processing (prevent CHEATING)
             execution_time = response.get("execution_time", 0)
             assert execution_time >= 0.05, f"Agent {response.get('agent_name')} execution time {execution_time}s indicates fake execution"
     
@@ -591,7 +591,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
     @pytest.mark.e2e
     async def test_real_error_handling_with_business_continuity(self, orchestration_tester):
         """Test REAL error handling maintaining business continuity with MANDATORY authentication."""
-        # 🚨 MANDATORY: Create authenticated user for error handling test
+        #  ALERT:  MANDATORY: Create authenticated user for error handling test
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.error.handling@example.com",
@@ -623,7 +623,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
     @pytest.mark.e2e
     async def test_concurrent_real_agent_orchestration_with_performance_sla(self, orchestration_tester):
         """Test concurrent REAL agent orchestration meeting performance SLAs with MANDATORY authentication."""
-        # 🚨 MANDATORY: Create authenticated users for concurrent test
+        #  ALERT:  MANDATORY: Create authenticated users for concurrent test
         authenticated_users = []
         for i in range(3):
             token, user_data = await create_authenticated_user(
@@ -669,7 +669,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
         successful_results = [r for r in results if isinstance(r, dict) and r.get("status") in ["success", "partial_failure"]]
         assert len(successful_results) >= 2, f"Too many concurrent failures: {len(successful_results)}/3 succeeded"
         
-        # 🚨 CRITICAL: Validate user isolation in concurrent execution
+        #  ALERT:  CRITICAL: Validate user isolation in concurrent execution
         for i, result in enumerate(successful_results):
             expected_user_id = authenticated_users[i % len(authenticated_users)]["user_id"]
             # Check that result contains correct user context
@@ -684,7 +684,7 @@ class TestRealAgentOrchestration(SSotBaseTestCase):
         # Validate performance SLA (adjusted for real processing)
         assert total_time < 15.0, f"Concurrent orchestration too slow: {total_time:.2f}s (SLA: 15s)"
         
-        # 🚨 CRITICAL: Ensure all executions took real time (no 0.00s fake executions)
+        #  ALERT:  CRITICAL: Ensure all executions took real time (no 0.00s fake executions)
         for result in successful_results:
             if "execution_time" in result:
                 assert result["execution_time"] >= 0.1, f"Concurrent execution time {result['execution_time']}s indicates CHEATING violation"
@@ -712,7 +712,7 @@ class TestCriticalRealOrchestrationScenarios(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers for critical E2E tests
+        #  ALERT:  MANDATORY: Create authenticated helpers for critical E2E tests
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
@@ -729,7 +729,7 @@ class TestCriticalRealOrchestrationScenarios(SSotBaseTestCase):
     @pytest.mark.e2e
     async def test_enterprise_scale_real_orchestration_with_sla(self, enterprise_tester):
         """Test enterprise-scale REAL agent orchestration meeting SLA requirements with MANDATORY authentication."""
-        # 🚨 MANDATORY: Create authenticated enterprise user
+        #  ALERT:  MANDATORY: Create authenticated enterprise user
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.enterprise@example.com",
@@ -763,7 +763,7 @@ class TestCriticalRealOrchestrationScenarios(SSotBaseTestCase):
         assert result["successful_agents"] >= 8, f"Too many agent failures: {result['successful_agents']}/12"
         assert execution_time < 25.0, f"Enterprise SLA violated: {execution_time:.2f}s > 25s"
         
-        # 🚨 CRITICAL: Validate enterprise execution time indicates real processing
+        #  ALERT:  CRITICAL: Validate enterprise execution time indicates real processing
         assert execution_time >= 1.0, f"Enterprise execution time {execution_time:.2f}s too fast - indicates CHEATING violation"
         
         # Validate all enterprise agent responses are for authenticated user
@@ -786,7 +786,7 @@ class TestCriticalRealOrchestrationScenarios(SSotBaseTestCase):
         assert metrics.get("agents_coordinated", 0) == 12, "Not all enterprise agents coordinated"
         assert metrics.get("business_value_delivered", 0) >= 0.8, "Enterprise business value threshold not met"
         
-        # 🚨 CRITICAL: Final validation - no CHEATING violations in enterprise test
+        #  ALERT:  CRITICAL: Final validation - no CHEATING violations in enterprise test
         # All metrics should indicate real processing with proper execution times
         if "execution_metrics" in metrics:
             total_agent_time = metrics["execution_metrics"].get("total_agent_execution_time", 0)

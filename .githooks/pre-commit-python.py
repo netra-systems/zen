@@ -224,9 +224,9 @@ def main():
         print("[FAIL] COMMIT BLOCKED - Architecture violations found!")
         print("="*60)
         print("\n[RULES] Architecture rules (from CLAUDE.md):")
-        print("   • Files must be <=450 lines")
-        print("   • Functions must be <=8 lines")
-        print("   • No test stubs in production code")
+        print("   [U+2022] Files must be <=450 lines")
+        print("   [U+2022] Functions must be <=8 lines")
+        print("   [U+2022] No test stubs in production code")
         print("\n[ACTION] Fix violations and try committing again")
         print("[CMD] Run: python scripts/check_architecture_compliance.py --path .")
         return 1

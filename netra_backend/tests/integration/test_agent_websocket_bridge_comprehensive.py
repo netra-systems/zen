@@ -8,12 +8,12 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core platform infrastructure for agent execution visibility
 
 This integration test suite covers the CRITICAL agent-WebSocket bridge functionality:
-1. Agent-WebSocket event bridging lifecycle (agent event → bridge → WebSocket → user)
+1. Agent-WebSocket event bridging lifecycle (agent event  ->  bridge  ->  WebSocket  ->  user)
 2. Multi-user agent-WebSocket isolation and concurrent agent execution  
 3. Real-time agent event routing and WebSocket delivery coordination
 4. Agent execution context bridging to WebSocket user sessions
 5. Agent WebSocket bridge health monitoring and error recovery
-6. Cross-service agent-WebSocket coordination (agents ↔ backend ↔ frontend)
+6. Cross-service agent-WebSocket coordination (agents [U+2194] backend [U+2194] frontend)
 7. Agent event queue management and delivery guarantees during WebSocket issues
 8. Business-critical agent event bridging (all 5 WebSocket events: started, thinking, tool_executing, tool_completed, completed)
 9. Agent WebSocket bridge performance under concurrent agent execution
@@ -685,7 +685,7 @@ class TestAgentWebSocketBridgeIntegration(BaseIntegrationTest):
     @pytest.mark.real_services 
     async def test_cross_service_agent_websocket_coordination(self, real_services_fixture):
         """
-        Test cross-service agent-WebSocket coordination (agents ↔ backend ↔ frontend).
+        Test cross-service agent-WebSocket coordination (agents [U+2194] backend [U+2194] frontend).
         
         BUSINESS VALUE: Ensures complete system integration for seamless
         agent execution visibility across all system components.
@@ -1259,7 +1259,7 @@ class TestAgentWebSocketBridgeIntegration(BaseIntegrationTest):
             "numbers": [1, 2.5, -3, 4.0],
             "booleans": [True, False, True],
             "nulls": [None, None],
-            "unicode": "Test 🚀 Unicode ñ 中文",
+            "unicode": "Test [U+1F680] Unicode [U+00F1] [U+4E2D][U+6587]",
             "special_chars": "Special chars: <>&\"'`"
         }
         
@@ -1275,7 +1275,7 @@ class TestAgentWebSocketBridgeIntegration(BaseIntegrationTest):
         complex_thinking = """
         Multi-line thinking content with:
         - Special characters: !@#$%^&*()
-        - Unicode: 🎯 ✅ ❌ 🔄 🎉
+        - Unicode:  TARGET:   PASS:   FAIL:   CYCLE:   CELEBRATION: 
         - JSON-like structure: {"key": "value", "number": 123}
         - Quotes: "double" and 'single'
         - Line breaks and tabs

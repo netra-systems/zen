@@ -134,37 +134,37 @@ sys.path.insert(0, str(project_root))
     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
     # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
-    # REMOVED_SYNTAX_ERROR: 🔍 COMPREHENSIVE COMPLIANCE VALIDATION STARTING...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  COMPREHENSIVE COMPLIANCE VALIDATION STARTING...")
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
 
     # 1. Mock Policy Validation
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 📋 1. MOCK POLICY VALIDATION")
+    # REMOVED_SYNTAX_ERROR: [U+1F4CB] 1. MOCK POLICY VALIDATION")
     # REMOVED_SYNTAX_ERROR: mock_violations = self._validate_mock_policy()
 
     # 2. Environment Isolation Validation
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🏗️ 2. ENVIRONMENT ISOLATION VALIDATION")
+    # REMOVED_SYNTAX_ERROR: [U+1F3D7][U+FE0F] 2. ENVIRONMENT ISOLATION VALIDATION")
     # REMOVED_SYNTAX_ERROR: env_violations = self._validate_environment_isolation()
 
     # 3. Architecture Compliance Validation
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🏛️ 3. ARCHITECTURE COMPLIANCE VALIDATION")
+    # REMOVED_SYNTAX_ERROR: [U+1F3DB][U+FE0F] 3. ARCHITECTURE COMPLIANCE VALIDATION")
     # REMOVED_SYNTAX_ERROR: arch_violations = self._validate_architecture_compliance()
 
     # 4. Real Service Connection Validation
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔌 4. REAL SERVICE CONNECTION VALIDATION")
+    # REMOVED_SYNTAX_ERROR: [U+1F50C] 4. REAL SERVICE CONNECTION VALIDATION")
     # REMOVED_SYNTAX_ERROR: service_status = self._validate_real_service_connections()
 
     # 5. WebSocket Agent Events Validation
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔄 5. WEBSOCKET AGENT EVENTS VALIDATION")
+    # REMOVED_SYNTAX_ERROR:  CYCLE:  5. WEBSOCKET AGENT EVENTS VALIDATION")
     # REMOVED_SYNTAX_ERROR: websocket_status = self._validate_websocket_agent_events()
 
     # 6. Test Quality Assessment
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 📊 6. TEST QUALITY ASSESSMENT")
+    # REMOVED_SYNTAX_ERROR:  CHART:  6. TEST QUALITY ASSESSMENT")
     # REMOVED_SYNTAX_ERROR: test_quality = self._assess_test_quality()
 
     # Calculate overall compliance
@@ -671,7 +671,7 @@ sys.path.insert(0, str(project_root))
 
             # REMOVED_SYNTAX_ERROR: if metrics.overall_compliance_percentage >= compliance_threshold:
                 # REMOVED_SYNTAX_ERROR: print(f" )
-                # REMOVED_SYNTAX_ERROR: ✅ COMPLIANCE VALIDATION PASSED")
+                # REMOVED_SYNTAX_ERROR:  PASS:  COMPLIANCE VALIDATION PASSED")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -681,7 +681,7 @@ sys.path.insert(0, str(project_root))
                     # REMOVED_SYNTAX_ERROR: failure_report = "
                     # REMOVED_SYNTAX_ERROR: " + "=" * 80 + "
                     # REMOVED_SYNTAX_ERROR: "
-                    # REMOVED_SYNTAX_ERROR: failure_report += "❌ COMPLIANCE VALIDATION FAILED
+                    # REMOVED_SYNTAX_ERROR: failure_report += " FAIL:  COMPLIANCE VALIDATION FAILED
                     # REMOVED_SYNTAX_ERROR: "
                     # REMOVED_SYNTAX_ERROR: failure_report += "=" * 80 + "
 
@@ -1068,7 +1068,7 @@ sys.path.insert(0, str(project_root))
 
     # REMOVED_SYNTAX_ERROR: **Generated:** {timestamp}
     # REMOVED_SYNTAX_ERROR: **Overall Compliance:** {metrics.overall_compliance_percentage:.1f}%
-    # REMOVED_SYNTAX_ERROR: **Status:** {'✅ PASSED' if metrics.overall_compliance_percentage >= 90 else '❌ FAILED'}
+    # REMOVED_SYNTAX_ERROR: **Status:** {' PASS:  PASSED' if metrics.overall_compliance_percentage >= 90 else ' FAIL:  FAILED'}
 
     ## Executive Summary
 
@@ -1080,12 +1080,12 @@ sys.path.insert(0, str(project_root))
 
     # REMOVED_SYNTAX_ERROR: | Metric | Value | Status |
     # REMOVED_SYNTAX_ERROR: |--------|-------|--------|
-    # REMOVED_SYNTAX_ERROR: | Mock Violations | {metrics.mock_violations} | {'✅' if metrics.mock_violations == 0 else '❌'} |
-    # REMOVED_SYNTAX_ERROR: | Environment Violations | {metrics.isolated_environment_violations} | {'✅' if metrics.isolated_environment_violations == 0 else '❌'} |
-    # REMOVED_SYNTAX_ERROR: | Architecture Violations | {metrics.architecture_violations} | {'✅' if metrics.architecture_violations < 1000 else '❌'} |
-    # REMOVED_SYNTAX_ERROR: | Test Quality Score | {metrics.test_quality_score*100:.1f}% | {'✅' if metrics.test_quality_score >= 0.7 else '❌'} |
-    # REMOVED_SYNTAX_ERROR: | WebSocket Events | {metrics.websocket_events_status} | {'✅' if metrics.websocket_events_status == 'WORKING' else '❌'} |
-    # REMOVED_SYNTAX_ERROR: | Real Service Connections | {metrics.real_service_connection_status} | {'✅' if metrics.real_service_connection_status == 'WORKING' else '❌'} |
+    # REMOVED_SYNTAX_ERROR: | Mock Violations | {metrics.mock_violations} | {' PASS: ' if metrics.mock_violations == 0 else ' FAIL: '} |
+    # REMOVED_SYNTAX_ERROR: | Environment Violations | {metrics.isolated_environment_violations} | {' PASS: ' if metrics.isolated_environment_violations == 0 else ' FAIL: '} |
+    # REMOVED_SYNTAX_ERROR: | Architecture Violations | {metrics.architecture_violations} | {' PASS: ' if metrics.architecture_violations < 1000 else ' FAIL: '} |
+    # REMOVED_SYNTAX_ERROR: | Test Quality Score | {metrics.test_quality_score*100:.1f}% | {' PASS: ' if metrics.test_quality_score >= 0.7 else ' FAIL: '} |
+    # REMOVED_SYNTAX_ERROR: | WebSocket Events | {metrics.websocket_events_status} | {' PASS: ' if metrics.websocket_events_status == 'WORKING' else ' FAIL: '} |
+    # REMOVED_SYNTAX_ERROR: | Real Service Connections | {metrics.real_service_connection_status} | {' PASS: ' if metrics.real_service_connection_status == 'WORKING' else ' FAIL: '} |
 
     ## Critical Issues
 
@@ -1095,7 +1095,7 @@ sys.path.insert(0, str(project_root))
         # REMOVED_SYNTAX_ERROR: for issue in metrics.critical_issues:
             # REMOVED_SYNTAX_ERROR: report += "formatted_string"
             # REMOVED_SYNTAX_ERROR: else:
-                # REMOVED_SYNTAX_ERROR: report += "- ✅ No critical issues detected
+                # REMOVED_SYNTAX_ERROR: report += "-  PASS:  No critical issues detected
                 # REMOVED_SYNTAX_ERROR: "
 
                 # REMOVED_SYNTAX_ERROR: report += "
@@ -1107,7 +1107,7 @@ sys.path.insert(0, str(project_root))
                     # REMOVED_SYNTAX_ERROR: for rec in metrics.recommendations:
                         # REMOVED_SYNTAX_ERROR: report += "formatted_string"
                         # REMOVED_SYNTAX_ERROR: else:
-                            # REMOVED_SYNTAX_ERROR: report += "- ✅ System is fully compliant
+                            # REMOVED_SYNTAX_ERROR: report += "-  PASS:  System is fully compliant
                             # REMOVED_SYNTAX_ERROR: "
 
                             # REMOVED_SYNTAX_ERROR: report += f'''

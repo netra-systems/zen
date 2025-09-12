@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🚨 SSOT Compliance Regression Prevention Monitor
+ ALERT:  SSOT Compliance Regression Prevention Monitor
 
 CRITICAL MISSION: Prevent regression of SSOT violations in WebSocket auth patterns
 Context: GitHub Issue #300 (WebSocket JWT bypass) has been RESOLVED
@@ -304,7 +304,7 @@ class WebSocketAuthPatternMonitor:
         all_violations = []
         files_scanned = 0
         
-        logger.info("🔍 Scanning WebSocket files for SSOT compliance violations...")
+        logger.info(" SEARCH:  Scanning WebSocket files for SSOT compliance violations...")
         
         for websocket_path in self.websocket_paths:
             if websocket_path.is_file():
@@ -320,7 +320,7 @@ class WebSocketAuthPatternMonitor:
                     all_violations.extend(violations)
                     files_scanned += 1
                     
-        logger.info(f"✅ Scanned {files_scanned} files for WebSocket auth violations")
+        logger.info(f" PASS:  Scanned {files_scanned} files for WebSocket auth violations")
         return all_violations
     
     def scan_full_backend(self) -> List[SSOTViolation]:
@@ -328,7 +328,7 @@ class WebSocketAuthPatternMonitor:
         all_violations = []
         files_scanned = 0
         
-        logger.info("🔍 Performing full backend scan for SSOT compliance...")
+        logger.info(" SEARCH:  Performing full backend scan for SSOT compliance...")
         
         backend_root = self.project_root / "netra_backend"
         if backend_root.exists():
@@ -341,7 +341,7 @@ class WebSocketAuthPatternMonitor:
                 all_violations.extend(violations)
                 files_scanned += 1
                 
-        logger.info(f"✅ Scanned {files_scanned} backend files for SSOT violations")
+        logger.info(f" PASS:  Scanned {files_scanned} backend files for SSOT violations")
         return all_violations
 
 
@@ -362,7 +362,7 @@ class SSOTComplianceMonitor:
     def run_monitoring_scan(self, websocket_only: bool = False, save_baseline: bool = False) -> MonitoringReport:
         """Run comprehensive SSOT compliance monitoring scan."""
         scan_start = datetime.datetime.now()
-        logger.info(f"🚀 Starting SSOT compliance monitoring scan at {scan_start.isoformat()}")
+        logger.info(f"[U+1F680] Starting SSOT compliance monitoring scan at {scan_start.isoformat()}")
         
         # Perform scans based on scope
         all_violations = []
@@ -415,7 +415,7 @@ class SSOTComplianceMonitor:
             }
         )
         
-        logger.info(f"✅ Monitoring scan completed in {report.monitoring_config['scan_duration_seconds']:.2f}s")
+        logger.info(f" PASS:  Monitoring scan completed in {report.monitoring_config['scan_duration_seconds']:.2f}s")
         logger.info(f"   Files scanned: {files_scanned}")
         logger.info(f"   Total violations: {len(all_violations)}")
         logger.info(f"   Baseline violations: {baseline_count}")
@@ -457,13 +457,13 @@ class SSOTComplianceMonitor:
         with open(report_file, 'w') as f:
             json.dump(report_data, f, indent=2)
         
-        logger.info(f"📄 Monitoring report saved to {report_file}")
+        logger.info(f"[U+1F4C4] Monitoring report saved to {report_file}")
         return report_file
     
     def print_monitoring_report(self, report: MonitoringReport, verbose: bool = False):
         """Print formatted monitoring report."""
         print("\n" + "="*80)
-        print("🚨 SSOT COMPLIANCE MONITORING REPORT")
+        print(" ALERT:  SSOT COMPLIANCE MONITORING REPORT")
         print("="*80)
         
         print(f"\nScan Details:")
@@ -475,16 +475,16 @@ class SSOTComplianceMonitor:
         print(f"\nViolation Summary:")
         print(f"  Total Violations: {len(report.violations)}")
         print(f"  Baseline Violations: {report.baseline_violations} (existing, monitored)")
-        print(f"  🚨 REGRESSION Violations: {report.regression_violations} (NEW - requires action)")
-        print(f"  🔴 CRITICAL Security Issues: {report.security_critical_count} (immediate action required)")
+        print(f"   ALERT:  REGRESSION Violations: {report.regression_violations} (NEW - requires action)")
+        print(f"  [U+1F534] CRITICAL Security Issues: {report.security_critical_count} (immediate action required)")
         
         # Print critical violations first
         critical_violations = [v for v in report.violations if v.severity == ViolationSeverity.CRITICAL]
         if critical_violations:
-            print(f"\n🔴 CRITICAL SECURITY VIOLATIONS ({len(critical_violations)}):")
+            print(f"\n[U+1F534] CRITICAL SECURITY VIOLATIONS ({len(critical_violations)}):")
             print("="*60)
             for v in critical_violations:
-                print(f"  🚨 {v.description}")
+                print(f"   ALERT:  {v.description}")
                 print(f"     File: {v.file_path}:{v.line_number}")
                 print(f"     Issue: {v.issue_reference}")
                 print(f"     Business Impact: {v.business_impact}")
@@ -497,7 +497,7 @@ class SSOTComplianceMonitor:
         regression_violations = [v for v in report.violations 
                                if not self.websocket_monitor._is_baseline_violation(v)]
         if regression_violations:
-            print(f"\n🚨 REGRESSION VIOLATIONS ({len(regression_violations)}) - NEW ISSUES:")
+            print(f"\n ALERT:  REGRESSION VIOLATIONS ({len(regression_violations)}) - NEW ISSUES:")
             print("="*60)
             
             # Group by severity
@@ -515,7 +515,7 @@ class SSOTComplianceMonitor:
         
         # Print baseline violations summary (if any)
         if report.baseline_violations > 0:
-            print(f"\n📊 BASELINE VIOLATIONS ({report.baseline_violations}) - Known Issues (Monitored):")
+            print(f"\n CHART:  BASELINE VIOLATIONS ({report.baseline_violations}) - Known Issues (Monitored):")
             print("  These violations existed before monitoring was implemented.")
             print("  They are tracked but don't trigger regression alerts.")
             print("  Consider addressing them during future refactoring.")
@@ -523,21 +523,21 @@ class SSOTComplianceMonitor:
         # Final verdict and recommendations
         print("\n" + "="*80)
         if report.security_critical_count > 0:
-            print("🔴 CRITICAL ALERT: Security vulnerabilities detected!")
+            print("[U+1F534] CRITICAL ALERT: Security vulnerabilities detected!")
             print("   IMMEDIATE ACTION REQUIRED to prevent security incidents.")
             print("   These violations could compromise $500K+ ARR from auth bypass.")
             
         elif report.regression_violations > 0:
-            print("🚨 REGRESSION ALERT: New SSOT violations detected!")
+            print(" ALERT:  REGRESSION ALERT: New SSOT violations detected!")
             print("   These violations were introduced since last scan.")
             print("   Address before deployment to maintain SSOT compliance.")
             
         elif len(report.violations) > 0:
-            print("⚠️  MONITORING STATUS: Baseline violations present.")
+            print(" WARNING: [U+FE0F]  MONITORING STATUS: Baseline violations present.")
             print("   No new regressions detected. Baseline violations are being monitored.")
             
         else:
-            print("✅ COMPLIANCE STATUS: All checks passed!")
+            print(" PASS:  COMPLIANCE STATUS: All checks passed!")
             print("   No SSOT violations detected. System maintains proper architecture.")
         
         print(f"\nBusiness Impact Protection: WebSocket auth security maintained")
@@ -546,12 +546,12 @@ class SSOTComplianceMonitor:
         
     def run_continuous_monitoring(self, interval_seconds: int = 300, websocket_only: bool = True):
         """Run continuous monitoring with specified interval."""
-        logger.info(f"🔄 Starting continuous SSOT monitoring (interval: {interval_seconds}s)")
+        logger.info(f" CYCLE:  Starting continuous SSOT monitoring (interval: {interval_seconds}s)")
         logger.info(f"   Scope: {'WebSocket patterns only' if websocket_only else 'Full backend'}")
         
         try:
             while True:
-                logger.info("⏰ Running scheduled SSOT compliance scan...")
+                logger.info("[U+23F0] Running scheduled SSOT compliance scan...")
                 
                 try:
                     report = self.run_monitoring_scan(websocket_only=websocket_only)
@@ -561,24 +561,24 @@ class SSOTComplianceMonitor:
                     
                     # Alert on violations
                     if report.security_critical_count > 0:
-                        logger.critical(f"🚨 CRITICAL ALERT: {report.security_critical_count} security violations detected!")
+                        logger.critical(f" ALERT:  CRITICAL ALERT: {report.security_critical_count} security violations detected!")
                         # In production, this would trigger alerts (email, Slack, etc.)
                         
                     elif report.regression_violations > 0:
-                        logger.error(f"🚨 REGRESSION ALERT: {report.regression_violations} new SSOT violations!")
+                        logger.error(f" ALERT:  REGRESSION ALERT: {report.regression_violations} new SSOT violations!")
                         
                     else:
-                        logger.info("✅ Monitoring cycle completed - no regressions detected")
+                        logger.info(" PASS:  Monitoring cycle completed - no regressions detected")
                         
                 except Exception as e:
-                    logger.error(f"❌ Monitoring scan failed: {e}")
+                    logger.error(f" FAIL:  Monitoring scan failed: {e}")
                 
                 # Wait for next cycle
-                logger.info(f"💤 Sleeping for {interval_seconds}s until next scan...")
+                logger.info(f"[U+1F4A4] Sleeping for {interval_seconds}s until next scan...")
                 time.sleep(interval_seconds)
                 
         except KeyboardInterrupt:
-            logger.info("🛑 Continuous monitoring stopped by user")
+            logger.info("[U+1F6D1] Continuous monitoring stopped by user")
 
 
 def main():
@@ -668,7 +668,7 @@ Examples:
             )
         else:
             # Run single scan
-            logger.info("🚀 Starting SSOT compliance monitoring scan...")
+            logger.info("[U+1F680] Starting SSOT compliance monitoring scan...")
             
             report = monitor.run_monitoring_scan(
                 websocket_only=websocket_only,
@@ -683,20 +683,20 @@ Examples:
             
             # Determine exit code
             if report.security_critical_count > 0:
-                logger.critical("🔴 Exiting with code 2 - CRITICAL security violations detected")
+                logger.critical("[U+1F534] Exiting with code 2 - CRITICAL security violations detected")
                 sys.exit(2)
             elif report.regression_violations > 0:
-                logger.error("🚨 Exiting with code 1 - SSOT regression violations detected")
+                logger.error(" ALERT:  Exiting with code 1 - SSOT regression violations detected")
                 sys.exit(1)
             else:
-                logger.info("✅ Exiting with code 0 - No violations detected")
+                logger.info(" PASS:  Exiting with code 0 - No violations detected")
                 sys.exit(0)
                 
     except KeyboardInterrupt:
-        logger.info("🛑 Monitoring interrupted by user")
+        logger.info("[U+1F6D1] Monitoring interrupted by user")
         sys.exit(3)
     except Exception as e:
-        logger.error(f"❌ Monitoring failed: {e}")
+        logger.error(f" FAIL:  Monitoring failed: {e}")
         sys.exit(3)
 
 

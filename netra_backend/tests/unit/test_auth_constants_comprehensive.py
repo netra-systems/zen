@@ -2,7 +2,7 @@
 Comprehensive Unit Tests for auth_constants.py - AUTH SSOT Constants
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Auth is the foundation of Golden Path
+- Segment: ALL (Free  ->  Enterprise) - Auth is the foundation of Golden Path
 - Business Goal: Prevent CASCADE FAILURES from auth configuration errors
 - Value Impact: Authentication enables $50K+ MRR from AI optimization services
 - Strategic Impact: AUTH CONSTANTS are CRITICAL - one wrong constant breaks entire platform

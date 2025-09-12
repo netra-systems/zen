@@ -421,12 +421,12 @@ class CIPipelineEnhancer:
                 results.append(result)
                 
                 if not result.success:
-                    print(f"❌ {stage.value}: {result.message}")
+                    print(f" FAIL:  {stage.value}: {result.message}")
                     if result.blocking and self.config.fail_fast:
-                        print("💥 Fail-fast enabled, stopping validation")
+                        print("[U+1F4A5] Fail-fast enabled, stopping validation")
                         break
                 else:
-                    print(f"✅ {stage.value}: {result.message}")
+                    print(f" PASS:  {stage.value}: {result.message}")
                     
             except Exception as e:
                 error_result = PipelineValidationResult(
@@ -509,11 +509,11 @@ class CIPipelineEnhancer:
             with open(workflow_file, 'w') as f:
                 f.write(workflow_content)
             
-            print(f"✅ Installed GitHub Actions workflow: {workflow_file}")
+            print(f" PASS:  Installed GitHub Actions workflow: {workflow_file}")
             return True
             
         except Exception as e:
-            print(f"❌ Failed to install GitHub Actions workflow: {e}")
+            print(f" FAIL:  Failed to install GitHub Actions workflow: {e}")
             return False
 
 
@@ -527,7 +527,7 @@ class PipelineReporter:
             return "No validation results to report"
         
         report_lines = []
-        report_lines.append("🚀 CI/CD PIPELINE VALIDATION RESULTS")
+        report_lines.append("[U+1F680] CI/CD PIPELINE VALIDATION RESULTS")
         report_lines.append("=" * 60)
         
         successful = [r for r in results if r.success]
@@ -535,13 +535,13 @@ class PipelineReporter:
         blocking_failures = [r for r in failed if r.blocking]
         
         # Summary
-        report_lines.append(f"✅ Successful: {len(successful)}")
-        report_lines.append(f"❌ Failed: {len(failed)} ({len(blocking_failures)} blocking)")
+        report_lines.append(f" PASS:  Successful: {len(successful)}")
+        report_lines.append(f" FAIL:  Failed: {len(failed)} ({len(blocking_failures)} blocking)")
         report_lines.append("")
         
         # Detailed results
         for result in results:
-            status_icon = "✅" if result.success else "❌"
+            status_icon = " PASS: " if result.success else " FAIL: "
             blocking_text = " (BLOCKING)" if not result.success and result.blocking else ""
             
             report_lines.append(f"{status_icon} {result.stage.value.upper()}{blocking_text}")
@@ -552,11 +552,11 @@ class PipelineReporter:
         
         # Final status
         if blocking_failures:
-            report_lines.append("🚨 PIPELINE BLOCKED: Fix blocking failures before deployment")
+            report_lines.append(" ALERT:  PIPELINE BLOCKED: Fix blocking failures before deployment")
         elif failed:
-            report_lines.append("⚠️  PIPELINE WARNING: Consider addressing non-blocking failures")
+            report_lines.append(" WARNING: [U+FE0F]  PIPELINE WARNING: Consider addressing non-blocking failures")
         else:
-            report_lines.append("🎉 PIPELINE SUCCESS: All validations passed")
+            report_lines.append(" CELEBRATION:  PIPELINE SUCCESS: All validations passed")
         
         return "\n".join(report_lines)
     

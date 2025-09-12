@@ -211,7 +211,7 @@ async def main():
     print(f"Successful: {successful}/{len(results)}")
     
     for i, result in enumerate(results, 1):
-        status = "✓" if "error" not in result["result"] else "✗"
+        status = "[U+2713]" if "error" not in result["result"] else "[U+2717]"
         print(f"{status} Test {i}: {result['prompt']}")
         if "error" in result["result"]:
             print(f"    Error: {result['result']['error']}")

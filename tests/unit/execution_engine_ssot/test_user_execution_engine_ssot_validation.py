@@ -54,7 +54,7 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
         
     def test_user_execution_engine_has_all_required_methods(self):
         """Test that UserExecutionEngine has all methods needed to replace deprecated engines"""
-        print("\n🔍 Validating UserExecutionEngine has all required methods...")
+        print("\n SEARCH:  Validating UserExecutionEngine has all required methods...")
         
         # Create instance
         engine = UserExecutionEngine(
@@ -83,19 +83,19 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
                 if not callable(method):
                     missing_methods.append(f"{method_name} (not callable)")
         
-        print(f"  ✅ Checking {len(required_methods)} required methods...")
+        print(f"   PASS:  Checking {len(required_methods)} required methods...")
         for method in required_methods:
             if method not in missing_methods:
-                print(f"    ✅ {method}")
+                print(f"     PASS:  {method}")
             else:
-                print(f"    ❌ {method}")
+                print(f"     FAIL:  {method}")
         
         self.assertEqual(len(missing_methods), 0, 
                         f"UserExecutionEngine missing required methods: {missing_methods}")
     
     def test_user_execution_engine_initialization(self):
         """Test UserExecutionEngine initializes correctly with proper isolation"""
-        print("\n🔍 Testing UserExecutionEngine initialization and isolation...")
+        print("\n SEARCH:  Testing UserExecutionEngine initialization and isolation...")
         
         # Test 1: Basic initialization
         engine1 = UserExecutionEngine(
@@ -107,7 +107,7 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
         self.assertEqual(engine1.user_id, "user_1")
         self.assertEqual(engine1.session_id, "session_1")
         self.assertEqual(engine1.websocket_manager, self.mock_websocket_manager)
-        print("  ✅ Basic initialization works")
+        print("   PASS:  Basic initialization works")
         
         # Test 2: User isolation
         mock_websocket_2 = Mock()
@@ -122,17 +122,17 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
         self.assertNotEqual(engine1.user_id, engine2.user_id)
         self.assertNotEqual(engine1.session_id, engine2.session_id)
         self.assertNotEqual(engine1.websocket_manager, engine2.websocket_manager)
-        print("  ✅ User isolation works - different users have separate engines")
+        print("   PASS:  User isolation works - different users have separate engines")
         
         # Test 3: Tool dispatcher initialization (async property)
         # Note: tool_dispatcher is an async property, so we test the sync getter
         tool_dispatcher = engine1.tool_dispatcher  # This will return the sync getter result
         self.assertIsNotNone(tool_dispatcher)
-        print("  ✅ Tool dispatcher properly initialized")
+        print("   PASS:  Tool dispatcher properly initialized")
         
     def test_factory_delegation_to_user_execution_engine(self):
         """Test that ExecutionEngineFactory delegates to UserExecutionEngine"""
-        print("\n🔍 Testing factory delegation to UserExecutionEngine...")
+        print("\n SEARCH:  Testing factory delegation to UserExecutionEngine...")
         
         # Test factory creates UserExecutionEngine instances
         factory = ExecutionEngineFactory()
@@ -150,11 +150,11 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
             self.assertEqual(engine.user_id, self.user_id)
             self.assertEqual(engine.session_id, self.session_id)
             
-        print("  ✅ Factory correctly delegates to UserExecutionEngine")
+        print("   PASS:  Factory correctly delegates to UserExecutionEngine")
         
     def test_websocket_event_integration(self):
         """Test WebSocket event integration works through UserExecutionEngine"""
-        print("\n🔍 Testing WebSocket event integration...")
+        print("\n SEARCH:  Testing WebSocket event integration...")
         
         engine = UserExecutionEngine(
             user_id=self.user_id,
@@ -194,11 +194,11 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
         self.assertEqual(calls[1][0][0], "tool_executing") 
         self.assertEqual(calls[2][0][0], "agent_completed")
         
-        print("  ✅ WebSocket events sent correctly through UserExecutionEngine")
+        print("   PASS:  WebSocket events sent correctly through UserExecutionEngine")
         
     def test_tool_execution_capabilities(self):
         """Test tool execution capabilities through UserExecutionEngine"""
-        print("\n🔍 Testing tool execution capabilities...")
+        print("\n SEARCH:  Testing tool execution capabilities...")
         
         engine = UserExecutionEngine(
             user_id=self.user_id,
@@ -209,7 +209,7 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
         # Test 1: Tool dispatcher is properly configured
         tool_dispatcher = engine.tool_dispatcher
         self.assertIsNotNone(tool_dispatcher)
-        print("  ✅ Tool dispatcher properly configured")
+        print("   PASS:  Tool dispatcher properly configured")
         
         # Test 2: User context is maintained
         context = engine.get_user_context()
@@ -218,18 +218,18 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
         self.assertIn('session_id', context)
         self.assertEqual(context['user_id'], self.user_id)
         self.assertEqual(context['session_id'], self.session_id)
-        print("  ✅ User context properly maintained")
+        print("   PASS:  User context properly maintained")
         
         # Test 3: Execution context includes tool access
         exec_context = engine.get_execution_context()
         self.assertIsInstance(exec_context, dict)
         self.assertIn('tool_dispatcher', exec_context)
         self.assertIn('user_context', exec_context)
-        print("  ✅ Execution context includes tool access")
+        print("   PASS:  Execution context includes tool access")
         
     def test_user_execution_engine_vs_deprecated_methods(self):
         """Test that UserExecutionEngine provides equivalents to deprecated engine methods"""
-        print("\n🔍 Comparing UserExecutionEngine methods to deprecated engine patterns...")
+        print("\n SEARCH:  Comparing UserExecutionEngine methods to deprecated engine patterns...")
         
         engine = UserExecutionEngine(
             user_id=self.user_id,
@@ -265,21 +265,21 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
             else:
                 missing_methods.append(f"{deprecated_method} -> {user_engine_method} (MISSING)")
         
-        print(f"  ✅ Available method mappings ({len(available_methods)}):")
+        print(f"   PASS:  Available method mappings ({len(available_methods)}):")
         for mapping in available_methods:
-            print(f"    ✅ {mapping}")
+            print(f"     PASS:  {mapping}")
             
         if missing_methods:
-            print(f"  ❌ Missing method mappings ({len(missing_methods)}):")
+            print(f"   FAIL:  Missing method mappings ({len(missing_methods)}):")
             for mapping in missing_methods:
-                print(f"    ❌ {mapping}")
+                print(f"     FAIL:  {mapping}")
                 
         self.assertEqual(len(missing_methods), 0,
                         f"UserExecutionEngine missing equivalents for: {missing_methods}")
         
     def test_concurrent_user_isolation(self):
         """Test that concurrent users are properly isolated"""
-        print("\n🔍 Testing concurrent user isolation...")
+        print("\n SEARCH:  Testing concurrent user isolation...")
         
         # Create multiple engines for different users
         users = ["user_1", "user_2", "user_3"]
@@ -305,7 +305,7 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
             # Test that WebSocket managers are separate
             self.assertEqual(engine.websocket_manager.user_id, user)
             
-        print(f"  ✅ {len(users)} concurrent users properly isolated")
+        print(f"   PASS:  {len(users)} concurrent users properly isolated")
         
         # Test sending events doesn't cross contaminate
         async def test_isolated_events():
@@ -321,11 +321,11 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
             self.assertEqual(call_args[0], "test_event")
             self.assertEqual(call_args[1]["user"], user)
             
-        print("  ✅ WebSocket events properly isolated between users")
+        print("   PASS:  WebSocket events properly isolated between users")
         
     def test_error_handling_and_cleanup(self):
         """Test error handling and cleanup capabilities"""
-        print("\n🔍 Testing error handling and cleanup...")
+        print("\n SEARCH:  Testing error handling and cleanup...")
         
         engine = UserExecutionEngine(
             user_id=self.user_id,
@@ -340,18 +340,18 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
         # Test cleanup can be called without errors
         try:
             engine.cleanup()
-            print("  ✅ Cleanup method executes without errors")
+            print("   PASS:  Cleanup method executes without errors")
         except Exception as e:
             self.fail(f"Cleanup method raised exception: {e}")
             
         # Test tool access validation
         self.assertTrue(hasattr(engine, 'validate_tool_access'))
         self.assertTrue(callable(engine.validate_tool_access))
-        print("  ✅ Tool access validation available")
+        print("   PASS:  Tool access validation available")
         
     def test_deprecated_engines_still_exist(self):
         """Test that deprecated engines still exist (for safe removal verification)"""
-        print("\n🔍 Verifying deprecated engines still exist before removal...")
+        print("\n SEARCH:  Verifying deprecated engines still exist before removal...")
         
         deprecated_files = [
             '/Users/anthony/Desktop/netra-apex/netra_backend/app/agents/supervisor/execution_engine.py',
@@ -368,16 +368,16 @@ class TestUserExecutionEngineSSoTValidation(unittest.TestCase):
         for file_path in deprecated_files:
             if os.path.exists(file_path):
                 existing_files.append(file_path)
-                print(f"  ✅ {os.path.basename(file_path)} exists")
+                print(f"   PASS:  {os.path.basename(file_path)} exists")
             else:
                 missing_files.append(file_path)
-                print(f"  ❌ {os.path.basename(file_path)} MISSING")
+                print(f"   FAIL:  {os.path.basename(file_path)} MISSING")
         
         self.assertGreater(len(existing_files), 0,
                           "At least some deprecated files should exist before removal")
         
         if missing_files:
-            print(f"  ⚠️  WARNING: {len(missing_files)} deprecated files already missing")
+            print(f"   WARNING: [U+FE0F]  WARNING: {len(missing_files)} deprecated files already missing")
             
         return existing_files, missing_files
 

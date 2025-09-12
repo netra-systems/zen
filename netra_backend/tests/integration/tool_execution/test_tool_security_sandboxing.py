@@ -158,7 +158,7 @@ class TestToolSecuritySandboxing(BaseIntegrationTest):
             
             self.assert_business_value_delivered(security_result, "automation")
             
-        self.logger.info("✅ Permission enforcement test passed")
+        self.logger.info(" PASS:  Permission enforcement test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -218,9 +218,9 @@ class TestToolSecuritySandboxing(BaseIntegrationTest):
                 })
                 
                 if result.success:
-                    self.logger.info(f"✅ Admin tool {admin_tool.name} accessible to admin user")
+                    self.logger.info(f" PASS:  Admin tool {admin_tool.name} accessible to admin user")
                 else:
-                    self.logger.warning(f"⚠️  Admin tool {admin_tool.name} denied: {result.error}")
+                    self.logger.warning(f" WARNING: [U+FE0F]  Admin tool {admin_tool.name} denied: {result.error}")
             
             # Test public tool still works
             public_result = await admin_dispatcher.execute_tool(
@@ -247,7 +247,7 @@ class TestToolSecuritySandboxing(BaseIntegrationTest):
         finally:
             await admin_dispatcher.cleanup()
         
-        self.logger.info("✅ Admin elevated permissions test passed")
+        self.logger.info(" PASS:  Admin elevated permissions test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -348,7 +348,7 @@ class TestToolSecuritySandboxing(BaseIntegrationTest):
         
         self.assert_business_value_delivered(isolation_result, "automation")
         
-        self.logger.info("✅ User context isolation test passed")
+        self.logger.info(" PASS:  User context isolation test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -422,7 +422,7 @@ class TestToolSecuritySandboxing(BaseIntegrationTest):
                         "violation_detected": True,
                         "error": str(e)
                     })
-                    self.logger.info(f"✅ Invalid context properly blocked: {e}")
+                    self.logger.info(f" PASS:  Invalid context properly blocked: {e}")
                 
                 if invalid_context_result:
                     security_violation_results.append({
@@ -456,7 +456,7 @@ class TestToolSecuritySandboxing(BaseIntegrationTest):
             
             self.assert_business_value_delivered(violation_detection_result, "automation")
             
-        self.logger.info("✅ Security violation detection test passed")
+        self.logger.info(" PASS:  Security violation detection test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -535,4 +535,4 @@ class TestToolSecuritySandboxing(BaseIntegrationTest):
         
         self.assert_business_value_delivered(concurrent_security_result, "automation")
         
-        self.logger.info("✅ Concurrent security context isolation test passed")
+        self.logger.info(" PASS:  Concurrent security context isolation test passed")

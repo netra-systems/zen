@@ -1179,7 +1179,7 @@ class TestAgentRegistryInterplay(BaseIntegrationTest):
             results[user_id] = result
         
         # Verify execution coordination
-        assert len(execution_coordination_log) == 4  # 2 agents × 2 phases each
+        assert len(execution_coordination_log) == 4  # 2 agents  x  2 phases each
         
         # Verify pre/post execution phases for each agent
         phases_by_user = {}

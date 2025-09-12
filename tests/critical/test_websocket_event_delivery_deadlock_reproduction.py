@@ -98,7 +98,7 @@ class WebSocketEventDeliveryMonitor:
             if event_type in self.critical_events:
                 self.critical_events[event_type]["found"] = True
                 self.critical_events[event_type]["timestamp"] = timestamp
-                print(f"✓ Critical event received: {event_type}")
+                print(f"[U+2713] Critical event received: {event_type}")
     
     def record_id_mismatch(self, expected_id: str, received_id: str, context: str):
         """Record ID mismatches that prevent event delivery"""
@@ -108,7 +108,7 @@ class WebSocketEventDeliveryMonitor:
             "context": context,
             "timestamp": time.time()
         })
-        print(f"🔍 ID mismatch in {context}: expected {expected_id[:8]}..., got {received_id[:8]}...")
+        print(f" SEARCH:  ID mismatch in {context}: expected {expected_id[:8]}..., got {received_id[:8]}...")
     
     def _analyze_event_delivery_failure(self):
         """Analyze the event delivery failure pattern"""
@@ -182,21 +182,21 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
         """
         config = get_staging_config() 
         
-        print("🔍 Starting mission-critical WebSocket event delivery deadlock reproduction")
-        print(f"🔍 Platform: {platform.system()} {platform.version()}")
-        print("🔍 Testing delivery of 5 mission-critical events for chat business value")
+        print(" SEARCH:  Starting mission-critical WebSocket event delivery deadlock reproduction")
+        print(f" SEARCH:  Platform: {platform.system()} {platform.version()}")
+        print(" SEARCH:  Testing delivery of 5 mission-critical events for chat business value")
         
         async with WebSocketEventDeliveryMonitor(300) as event_monitor:
             
             try:
-                print("🔍 Establishing WebSocket connection for event delivery test...")
+                print(" SEARCH:  Establishing WebSocket connection for event delivery test...")
                 
                 # Use connection without auth to focus on event delivery issues
                 async with websockets.connect(
                     config.websocket_url,
                     timeout=15
                 ) as ws:
-                    print("✓ WebSocket connection established")
+                    print("[U+2713] WebSocket connection established")
                     
                     # Send agent execution request that should trigger all 5 critical events
                     trigger_request = {
@@ -209,14 +209,14 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                         "timestamp": time.time()
                     }
                     
-                    print(f"🔍 Sending agent execution request: {trigger_request['type']}")
-                    print(f"🔍 Request ID: {trigger_request['request_id'][:8]}...")
-                    print(f"🔍 Thread ID: {trigger_request['thread_id'][:8]}...")
+                    print(f" SEARCH:  Sending agent execution request: {trigger_request['type']}")
+                    print(f" SEARCH:  Request ID: {trigger_request['request_id'][:8]}...")
+                    print(f" SEARCH:  Thread ID: {trigger_request['thread_id'][:8]}...")
                     
                     await ws.send(json.dumps(trigger_request))
                     
                     # This is where the complex async coordination should deadlock on Windows
-                    print("🔍 Starting complex event delivery monitoring (deadlock expected)...")
+                    print(" SEARCH:  Starting complex event delivery monitoring (deadlock expected)...")
                     
                     # Create multiple concurrent event monitoring tasks
                     # This reproduces the circular async dependency from SESSION5
@@ -235,13 +235,13 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                         )
                     ]
                     
-                    print("🔍 Running concurrent event monitoring tasks (should deadlock)...")
+                    print(" SEARCH:  Running concurrent event monitoring tasks (should deadlock)...")
                     
                     # This gather should deadlock on Windows due to complex async coordination
                     results = await asyncio.gather(*monitoring_tasks, return_exceptions=True)
                     
-                    print("❌ DEADLOCK NOT REPRODUCED: Event monitoring completed")
-                    print(f"❌ Monitoring results: {results}")
+                    print(" FAIL:  DEADLOCK NOT REPRODUCED: Event monitoring completed")
+                    print(f" FAIL:  Monitoring results: {results}")
                     
                     # Check if we got all critical events despite no deadlock
                     missing_events = [
@@ -250,8 +250,8 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                     ]
                     
                     if missing_events:
-                        print(f"✅ PARTIAL SUCCESS: Missing critical events: {missing_events}")
-                        print("✅ This demonstrates event delivery failure even without deadlock")
+                        print(f" PASS:  PARTIAL SUCCESS: Missing critical events: {missing_events}")
+                        print(" PASS:  This demonstrates event delivery failure even without deadlock")
                         
                         # Missing events is still a critical failure for business value
                         pytest.fail(
@@ -260,7 +260,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                             f"Events received: {list(event_monitor.event_types_found)}"
                         )
                     else:
-                        print("❌ All critical events delivered - event system appears working")
+                        print(" FAIL:  All critical events delivered - event system appears working")
                         pytest.fail(
                             "Failed to reproduce event delivery deadlock. "
                             "All 5 critical events were delivered successfully. "
@@ -269,38 +269,38 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                     
             except websockets.exceptions.InvalidStatus as e:
                 if e.status_code in [401, 403]:
-                    print(f"🔍 WebSocket connection rejected: {e}")
-                    print("🔍 Cannot test event delivery without connection")
+                    print(f" SEARCH:  WebSocket connection rejected: {e}")
+                    print(" SEARCH:  Cannot test event delivery without connection")
                     pytest.skip("WebSocket connection rejected - cannot test event delivery deadlock")
                 else:
                     raise
                     
             except asyncio.TimeoutError:
                 # EXPECTED: This is the event delivery deadlock we want to reproduce  
-                print("✅ EVENT DELIVERY DEADLOCK REPRODUCED: 300s timeout reached")
+                print(" PASS:  EVENT DELIVERY DEADLOCK REPRODUCED: 300s timeout reached")
                 
                 if event_monitor.is_critical_event_delivery_failure():
-                    print("✅ CONFIRMED: Critical event delivery failure matches SESSION5")
+                    print(" PASS:  CONFIRMED: Critical event delivery failure matches SESSION5")
                     
                     failure_analysis = event_monitor.delivery_failures
-                    print(f"✅ Missing events: {failure_analysis['missing_critical_events']}")
-                    print(f"✅ Events received: {failure_analysis['total_events_received']}")
-                    print(f"✅ ID mismatches: {failure_analysis['id_mismatches']}")
-                    print(f"✅ Duration: {failure_analysis['duration']:.1f}s")
+                    print(f" PASS:  Missing events: {failure_analysis['missing_critical_events']}")
+                    print(f" PASS:  Events received: {failure_analysis['total_events_received']}")
+                    print(f" PASS:  ID mismatches: {failure_analysis['id_mismatches']}")
+                    print(f" PASS:  Duration: {failure_analysis['duration']:.1f}s")
                     
-                    print("\n🚨 BUSINESS IMPACT: Critical event delivery failure!")
-                    print("🚨 Real-time chat transparency broken - users won't see agent progress")
-                    print("🚨 This affects core platform value delivery")
+                    print("\n ALERT:  BUSINESS IMPACT: Critical event delivery failure!")
+                    print(" ALERT:  Real-time chat transparency broken - users won't see agent progress")
+                    print(" ALERT:  This affects core platform value delivery")
                     
                     # For reproduction test, demonstrating the failure is success
                     assert True, "Critical WebSocket event delivery deadlock successfully reproduced"
                 else:
-                    print("🔍 Timeout occurred but not the expected event delivery pattern")
+                    print(" SEARCH:  Timeout occurred but not the expected event delivery pattern")
                     pytest.fail(f"Timeout pattern differs from SESSION5: {event_monitor.delivery_failures}")
                     
             except Exception as e:
-                print(f"🔍 Unexpected error during event delivery reproduction: {e}")
-                print(f"🔍 Traceback: {traceback.format_exc()}")
+                print(f" SEARCH:  Unexpected error during event delivery reproduction: {e}")
+                print(f" SEARCH:  Traceback: {traceback.format_exc()}")
                 pytest.fail(f"Unexpected error instead of event delivery deadlock: {e}")
     
     async def _monitor_event_stream(
@@ -316,7 +316,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
         deadlocks on Windows in SESSION5.
         """
         try:
-            print(f"🔍 {stream_name}: Starting primary event stream monitoring")
+            print(f" SEARCH:  {stream_name}: Starting primary event stream monitoring")
             
             while True:
                 try:
@@ -329,22 +329,22 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                         
                         event_type = event.get("type") or event.get("event")
                         if event_type:
-                            print(f"🔍 {stream_name}: Received {event_type} event")
+                            print(f" SEARCH:  {stream_name}: Received {event_type} event")
                             
                     except json.JSONDecodeError:
                         # Non-JSON event data
-                        print(f"🔍 {stream_name}: Non-JSON event data received")
+                        print(f" SEARCH:  {stream_name}: Non-JSON event data received")
                         
                 except asyncio.TimeoutError:
                     # Continue monitoring - timeouts are expected
                     continue
                     
                 except websockets.exceptions.ConnectionClosed:
-                    print(f"🔍 {stream_name}: WebSocket connection closed")
+                    print(f" SEARCH:  {stream_name}: WebSocket connection closed")
                     break
                     
         except Exception as e:
-            print(f"🔍 {stream_name}: Error - {e}")
+            print(f" SEARCH:  {stream_name}: Error - {e}")
             return {"stream": stream_name, "error": str(e)}
             
         return {"stream": stream_name, "status": "completed"}
@@ -362,7 +362,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
         the Windows IOCP deadlock in SESSION5.
         """
         try:
-            print(f"🔍 {monitor_name}: Monitoring for 5 mission-critical events")
+            print(f" SEARCH:  {monitor_name}: Monitoring for 5 mission-critical events")
             
             critical_events_needed = set(event_monitor.critical_events.keys())
             
@@ -379,8 +379,8 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                         
                         if event_type in critical_events_needed:
                             critical_events_needed.remove(event_type)
-                            print(f"✓ {monitor_name}: Found critical event {event_type}")
-                            print(f"🔍 {monitor_name}: Still need: {critical_events_needed}")
+                            print(f"[U+2713] {monitor_name}: Found critical event {event_type}")
+                            print(f" SEARCH:  {monitor_name}: Still need: {critical_events_needed}")
                             
                     except json.JSONDecodeError:
                         pass
@@ -389,10 +389,10 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                     timeout_count += 1
                     
                     if timeout_count % 30 == 0:  # Log every minute
-                        print(f"🔍 {monitor_name}: {timeout_count*2}s elapsed, still need: {critical_events_needed}")
+                        print(f" SEARCH:  {monitor_name}: {timeout_count*2}s elapsed, still need: {critical_events_needed}")
             
             if critical_events_needed:
-                print(f"❌ {monitor_name}: FAILED - Missing critical events: {critical_events_needed}")
+                print(f" FAIL:  {monitor_name}: FAILED - Missing critical events: {critical_events_needed}")
                 return {
                     "monitor": monitor_name, 
                     "status": "failed",
@@ -400,11 +400,11 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                     "timeout_count": timeout_count
                 }
             else:
-                print(f"✅ {monitor_name}: SUCCESS - All critical events found")
+                print(f" PASS:  {monitor_name}: SUCCESS - All critical events found")
                 return {"monitor": monitor_name, "status": "success"}
                 
         except Exception as e:
-            print(f"🔍 {monitor_name}: Error - {e}")
+            print(f" SEARCH:  {monitor_name}: Error - {e}")
             return {"monitor": monitor_name, "error": str(e)}
     
     async def _validate_event_ids(
@@ -421,7 +421,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
         event delivery in SESSION5.
         """
         try:
-            print(f"🔍 {validator_name}: Validating event ID consistency")
+            print(f" SEARCH:  {validator_name}: Validating event ID consistency")
             
             expected_request_id = trigger_request["request_id"]
             expected_thread_id = trigger_request["thread_id"]
@@ -464,7 +464,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                     timeout_count += 1
             
             id_mismatches = len(event_monitor.id_mismatches)
-            print(f"🔍 {validator_name}: Completed with {id_mismatches} ID mismatches detected")
+            print(f" SEARCH:  {validator_name}: Completed with {id_mismatches} ID mismatches detected")
             
             return {
                 "validator": validator_name,
@@ -473,7 +473,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
             }
             
         except Exception as e:
-            print(f"🔍 {validator_name}: Error - {e}")
+            print(f" SEARCH:  {validator_name}: Error - {e}")
             return {"validator": validator_name, "error": str(e)}
     
     async def _timeout_watchdog(
@@ -488,7 +488,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
         IOCP deadlock in SESSION5.
         """
         try:
-            print(f"🔍 {watchdog_name}: Starting timeout watchdog")
+            print(f" SEARCH:  {watchdog_name}: Starting timeout watchdog")
             
             start_time = time.time()
             check_interval = 30  # Check every 30 seconds
@@ -503,21 +503,21 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                     if details["found"]
                 )
                 
-                print(f"🔍 {watchdog_name}: {elapsed:.0f}s elapsed, "
+                print(f" SEARCH:  {watchdog_name}: {elapsed:.0f}s elapsed, "
                       f"{events_received} events, {critical_found}/5 critical")
                 
                 # Check if we're making no progress (deadlock indicator)
                 if elapsed > 120 and events_received == 0:
-                    print(f"⚠️ {watchdog_name}: No events received after 2 minutes - possible deadlock")
+                    print(f" WARNING: [U+FE0F] {watchdog_name}: No events received after 2 minutes - possible deadlock")
                     
                 elif elapsed > 180 and critical_found == 0:
-                    print(f"⚠️ {watchdog_name}: No critical events after 3 minutes - delivery failure")
+                    print(f" WARNING: [U+FE0F] {watchdog_name}: No critical events after 3 minutes - delivery failure")
             
-            print(f"🔍 {watchdog_name}: Watchdog timeout approaching")
+            print(f" SEARCH:  {watchdog_name}: Watchdog timeout approaching")
             return {"watchdog": watchdog_name, "status": "timeout_approaching"}
             
         except Exception as e:
-            print(f"🔍 {watchdog_name}: Error - {e}")
+            print(f" SEARCH:  {watchdog_name}: Error - {e}")
             return {"watchdog": watchdog_name, "error": str(e)}
     
     @pytest.mark.asyncio
@@ -543,9 +543,9 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
             async with httpx.AsyncClient(timeout=30) as client:
                 health_response = await client.get(f"{config.backend_url}/health")
                 infrastructure_status["backend_health"] = health_response.status_code == 200
-                print(f"🔍 Backend health: {health_response.status_code}")
+                print(f" SEARCH:  Backend health: {health_response.status_code}")
         except Exception as e:
-            print(f"🔍 Backend health check failed: {e}")
+            print(f" SEARCH:  Backend health check failed: {e}")
         
         # Test 2: Event-related endpoints
         event_endpoints = [
@@ -572,7 +572,7 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
         try:
             async with websockets.connect(config.websocket_url, timeout=10) as ws:
                 infrastructure_status["websocket_connectivity"] = True
-                print("🔍 WebSocket connection: SUCCESS")
+                print(" SEARCH:  WebSocket connection: SUCCESS")
                 
                 # Test basic message exchange
                 test_msg = {"type": "ping", "timestamp": time.time()}
@@ -580,12 +580,12 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
                 
                 try:
                     response = await asyncio.wait_for(ws.recv(), timeout=5)
-                    print(f"🔍 WebSocket response: {response[:50]}...")
+                    print(f" SEARCH:  WebSocket response: {response[:50]}...")
                 except asyncio.TimeoutError:
-                    print("🔍 WebSocket response: TIMEOUT (but connection works)")
+                    print(" SEARCH:  WebSocket response: TIMEOUT (but connection works)")
                     
         except Exception as e:
-            print(f"🔍 WebSocket connection failed: {e}")
+            print(f" SEARCH:  WebSocket connection failed: {e}")
         
         duration = time.time() - start_time
         
@@ -605,15 +605,15 @@ class TestWebSocketEventDeliveryDeadlockReproduction:
         )
         
         if infrastructure_status["websocket_connectivity"]:
-            print("✅ WebSocket infrastructure ready for event delivery testing")
+            print(" PASS:  WebSocket infrastructure ready for event delivery testing")
         else:
-            print("❌ WebSocket infrastructure not available")
+            print(" FAIL:  WebSocket infrastructure not available")
             pytest.skip("Cannot test event delivery without WebSocket connectivity")
             
         if endpoints_available > 0:
-            print(f"✅ {endpoints_available} event endpoints available")
+            print(f" PASS:  {endpoints_available} event endpoints available")
         else:
-            print("⚠️ No event endpoints responding - may affect event delivery")
+            print(" WARNING: [U+FE0F] No event endpoints responding - may affect event delivery")
             
         print(f"Event delivery infrastructure validated: WebSocket={infrastructure_status['websocket_connectivity']}, Endpoints={endpoints_available}")
 

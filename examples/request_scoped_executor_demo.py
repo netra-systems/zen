@@ -66,7 +66,7 @@ async def demo_basic_usage():
         alice_context, event_emitter, mock_registry
     ) as executor:
         
-        print(f"✅ Created executor for user: {alice_context.user_id}")
+        print(f" PASS:  Created executor for user: {alice_context.user_id}")
         print(f"   Context ID: {alice_context.get_correlation_id()}")
         
         # Create test state
@@ -86,28 +86,28 @@ async def demo_basic_usage():
         # Mock the agent core execution (for demo purposes)
         executor._agent_core.execute_agent = AsyncMock(return_value=mock_result)
         
-        print("\n🔄 Executing agent for Alice...")
+        print("\n CYCLE:  Executing agent for Alice...")
         result = await executor.execute_agent("demo_agent", test_state)
         
-        print(f"✅ Agent execution completed!")
+        print(f" PASS:  Agent execution completed!")
         print(f"   Success: {result.success}")
         print(f"   Duration: {result.duration:.2f}s")
         print(f"   User Request: {result.state.user_request}")
         
         # Show metrics
         metrics = executor.get_metrics()
-        print(f"\n📊 Execution Metrics:")
+        print(f"\n CHART:  Execution Metrics:")
         print(f"   Total Executions: {metrics['total_executions']}")
         print(f"   Success Rate: {metrics['success_rate']:.1%}")
         print(f"   User Context: {metrics['user_context']['user_id']}")
     
-    print("\n✅ Executor disposed automatically (async context manager)")
+    print("\n PASS:  Executor disposed automatically (async context manager)")
 
 
 async def demo_user_isolation():
     """Demonstrate complete user isolation between concurrent users."""
     print("\n" + "=" * 60)
-    print("🔐 DEMO 2: Complete User Isolation")
+    print("[U+1F510] DEMO 2: Complete User Isolation")
     print("=" * 60)
     
     # Create contexts for different users
@@ -136,7 +136,7 @@ async def demo_user_isolation():
     # Mock agent registry
     mock_registry = Mock()
     
-    print("👥 Creating isolated executors for 3 concurrent users...")
+    print("[U+1F465] Creating isolated executors for 3 concurrent users...")
     
     # Create executors for each user
     for user_context in users:
@@ -172,19 +172,19 @@ async def demo_user_isolation():
         
         return user_index + 1, result
     
-    print("\n🏃‍♂️ Running concurrent executions...")
+    print("\n[U+1F3C3][U+200D][U+2642][U+FE0F] Running concurrent executions...")
     
     # Run all users concurrently
     tasks = [simulate_user_work(i, executor) for i, executor in enumerate(executors)]
     results = await asyncio.gather(*tasks)
     
-    print("\n✅ All executions completed! Results:")
+    print("\n PASS:  All executions completed! Results:")
     for user_num, result in results:
         print(f"   User {user_num}: {result.state.user_request}")
         print(f"     Success: {result.success}, Duration: {result.duration:.2f}s")
     
     # Verify isolation by checking metrics
-    print("\n🔒 Verifying User Isolation:")
+    print("\n[U+1F512] Verifying User Isolation:")
     for i, executor in enumerate(executors):
         metrics = executor.get_metrics()
         print(f"   User {i+1} Metrics:")
@@ -196,10 +196,10 @@ async def demo_user_isolation():
         assert metrics['total_executions'] == 1, f"User {i+1} should have 1 execution only"
         assert f"demo_user_{i+1}" in metrics['user_context']['user_id'], f"User {i+1} context mismatch"
     
-    print("\n✅ User isolation verified - no data leakage between users!")
+    print("\n PASS:  User isolation verified - no data leakage between users!")
     
     # Check WebSocket message routing
-    print(f"\n📡 WebSocket Messages Sent: {len(sent_messages)}")
+    print(f"\n[U+1F4E1] WebSocket Messages Sent: {len(sent_messages)}")
     thread_ids = set(msg[0] for msg in sent_messages)
     print(f"   Unique Thread IDs: {len(thread_ids)} (should be 3)")
     assert len(thread_ids) == 3, "Messages should go to 3 different threads"
@@ -212,7 +212,7 @@ async def demo_user_isolation():
 async def demo_factory_patterns():
     """Demonstrate factory patterns for easier usage."""
     print("\n" + "=" * 60)
-    print("🏭 DEMO 3: Factory Patterns & Convenience Functions")
+    print("[U+1F3ED] DEMO 3: Factory Patterns & Convenience Functions")
     print("=" * 60)
     
     # Create user context
@@ -222,7 +222,7 @@ async def demo_factory_patterns():
         run_id="demo_factory_run_001"
     )
     
-    print("🔧 Method 1: Using RequestScopedExecutorFactory")
+    print("[U+1F527] Method 1: Using RequestScopedExecutorFactory")
     
     # Mock dependencies
     mock_ws_manager = Mock()
@@ -235,7 +235,7 @@ async def demo_factory_patterns():
         user_context, event_emitter, mock_registry
     )
     
-    print(f"✅ Factory created executor for: {user_context.user_id}")
+    print(f" PASS:  Factory created executor for: {user_context.user_id}")
     
     # Test it works
     test_state = DeepAgentState(user_request="Factory test request")
@@ -243,16 +243,16 @@ async def demo_factory_patterns():
     executor._agent_core.execute_agent = AsyncMock(return_value=mock_result)
     
     result = await executor.execute_agent("factory_agent", test_state)
-    print(f"✅ Factory executor worked: Success={result.success}")
+    print(f" PASS:  Factory executor worked: Success={result.success}")
     
     await executor.dispose()
     
-    print("\n🔧 Method 2: Using Convenience Function")
+    print("\n[U+1F527] Method 2: Using Convenience Function")
     
     # Use convenience function to create full stack
     try:
         # This would normally create the full stack but requires more mocking
-        print("📦 create_full_request_execution_stack() available for production use")
+        print("[U+1F4E6] create_full_request_execution_stack() available for production use")
         print("   (Creates both WebSocketEventEmitter and RequestScopedAgentExecutor)")
     except Exception as e:
         print(f"   Skipping full stack demo due to dependencies: {e}")
@@ -261,23 +261,23 @@ async def demo_factory_patterns():
 async def demo_comparison_with_singleton():
     """Show the key differences from singleton ExecutionEngine."""
     print("\n" + "=" * 60)
-    print("⚖️  DEMO 4: Comparison with Singleton Pattern")
+    print("[U+2696][U+FE0F]  DEMO 4: Comparison with Singleton Pattern")
     print("=" * 60)
     
-    print("❌ OLD SINGLETON PATTERN PROBLEMS:")
-    print("   • Global state shared between all users")
-    print("   • active_runs dictionary mixed all users")
-    print("   • Single semaphore for ALL user concurrency")
-    print("   • WebSocket events could leak between users")
-    print("   • Memory leaks from global collections")
+    print(" FAIL:  OLD SINGLETON PATTERN PROBLEMS:")
+    print("   [U+2022] Global state shared between all users")
+    print("   [U+2022] active_runs dictionary mixed all users")
+    print("   [U+2022] Single semaphore for ALL user concurrency")
+    print("   [U+2022] WebSocket events could leak between users")
+    print("   [U+2022] Memory leaks from global collections")
     
-    print("\n✅ NEW REQUEST-SCOPED PATTERN BENEFITS:")
-    print("   • Complete user isolation (no shared state)")
-    print("   • Per-request execution tracking")  
-    print("   • User-scoped WebSocket notifications")
-    print("   • Automatic resource cleanup")
-    print("   • Horizontal scaling friendly")
-    print("   • Memory efficient (no global accumulation)")
+    print("\n PASS:  NEW REQUEST-SCOPED PATTERN BENEFITS:")
+    print("   [U+2022] Complete user isolation (no shared state)")
+    print("   [U+2022] Per-request execution tracking")  
+    print("   [U+2022] User-scoped WebSocket notifications")
+    print("   [U+2022] Automatic resource cleanup")
+    print("   [U+2022] Horizontal scaling friendly")
+    print("   [U+2022] Memory efficient (no global accumulation)")
     
     # Create two "users" to demonstrate isolation
     user1_context = UserExecutionContext.from_request(
@@ -298,7 +298,7 @@ async def demo_comparison_with_singleton():
     executor1 = RequestScopedAgentExecutor(user1_context, emitter1, mock_registry)
     executor2 = RequestScopedAgentExecutor(user2_context, emitter2, mock_registry)
     
-    print(f"\n🔒 Isolation Verification:")
+    print(f"\n[U+1F512] Isolation Verification:")
     print(f"   User 1 Context: {executor1.get_user_context().get_correlation_id()}")
     print(f"   User 2 Context: {executor2.get_user_context().get_correlation_id()}")
     print(f"   Executors Share State: {id(executor1._request_executions) == id(executor2._request_executions)}")
@@ -309,7 +309,7 @@ async def demo_comparison_with_singleton():
     assert id(executor1._metrics) != id(executor2._metrics), "Should have separate metrics"
     assert executor1.get_user_context() != executor2.get_user_context(), "Should have different contexts"
     
-    print("✅ Perfect isolation confirmed!")
+    print(" PASS:  Perfect isolation confirmed!")
     
     # Clean up
     await executor1.dispose()
@@ -318,7 +318,7 @@ async def demo_comparison_with_singleton():
 
 async def main():
     """Run all demos."""
-    print("🚀 RequestScopedAgentExecutor Demo")
+    print("[U+1F680] RequestScopedAgentExecutor Demo")
     print("Demonstrates per-request agent execution with complete user isolation")
     
     try:
@@ -328,17 +328,17 @@ async def main():
         await demo_comparison_with_singleton()
         
         print("\n" + "=" * 60)
-        print("🎉 ALL DEMOS COMPLETED SUCCESSFULLY!")
+        print(" CELEBRATION:  ALL DEMOS COMPLETED SUCCESSFULLY!")
         print("=" * 60)
-        print("\n✅ Key Takeaways:")
-        print("   • RequestScopedAgentExecutor provides complete user isolation")
-        print("   • No global state - each request gets its own executor")
-        print("   • WebSocket events are properly scoped to users")
-        print("   • Automatic resource cleanup prevents memory leaks")
-        print("   • Compatible interface with existing ExecutionEngine usage")
-        print("   • Factory patterns available for easy integration")
+        print("\n PASS:  Key Takeaways:")
+        print("   [U+2022] RequestScopedAgentExecutor provides complete user isolation")
+        print("   [U+2022] No global state - each request gets its own executor")
+        print("   [U+2022] WebSocket events are properly scoped to users")
+        print("   [U+2022] Automatic resource cleanup prevents memory leaks")
+        print("   [U+2022] Compatible interface with existing ExecutionEngine usage")
+        print("   [U+2022] Factory patterns available for easy integration")
         
-        print("\n🔧 Integration Guide:")
+        print("\n[U+1F527] Integration Guide:")
         print("   1. Replace ExecutionEngine(registry, websocket) with:")
         print("      RequestScopedAgentExecutor(user_context, event_emitter, registry)")
         print("   2. Create per-request instead of singleton instances")
@@ -347,7 +347,7 @@ async def main():
         print("   5. Dispose executors when request completes")
         
     except Exception as e:
-        print(f"\n❌ Demo failed with error: {e}")
+        print(f"\n FAIL:  Demo failed with error: {e}")
         import traceback
         traceback.print_exc()
         return 1

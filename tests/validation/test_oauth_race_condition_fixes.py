@@ -716,11 +716,11 @@ def test_comprehensive_race_condition_fix_validation():
     all_passed = all(test_results.values())
     assert all_passed, f"All Five Whys fix validations should pass. Results: {test_results}"
     
-    logger.info("✅ Five Whys OAuth race condition fixes validated successfully")
+    logger.info(" PASS:  Five Whys OAuth race condition fixes validated successfully")
     logger.info(f"Validation results: {test_results}")
 
 
 if __name__ == "__main__":
     # Run comprehensive validation
     test_comprehensive_race_condition_fix_validation()
-    print("✅ All Five Whys OAuth race condition fixes validated successfully!")
+    print(" PASS:  All Five Whys OAuth race condition fixes validated successfully!")

@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Configuration reliability enables seamless deployments and zero-downtime operations
 
 This test suite validates Database Configuration as the SINGLE SOURCE OF TRUTH for database settings.
-Critical for golden path: environment setup → database connections → data persistence → business operations.
+Critical for golden path: environment setup  ->  database connections  ->  data persistence  ->  business operations.
 
 SSOT Compliance:
 - Tests the ONLY source for database configuration management
@@ -556,7 +556,7 @@ class TestDatabaseConfigurationBusinessScenarios:
         """Test database configuration for user data operations.
         
         BVJ: Ensures user data is properly stored and retrieved - core business function.
-        Golden Path: User registration → profile storage → authentication data persistence.
+        Golden Path: User registration  ->  profile storage  ->  authentication data persistence.
         """
         manager = DatabaseConfigManager()
         
@@ -585,7 +585,7 @@ class TestDatabaseConfigurationBusinessScenarios:
         """Test database configuration for chat conversation storage.
         
         BVJ: Chat conversations are 90% of platform value - must be reliable.
-        Golden Path: User messages → conversation threads → agent responses → persistent storage.
+        Golden Path: User messages  ->  conversation threads  ->  agent responses  ->  persistent storage.
         """
         manager = DatabaseConfigManager()
         
@@ -614,7 +614,7 @@ class TestDatabaseConfigurationBusinessScenarios:
         """Test database configuration for analytics data collection.
         
         BVJ: Analytics drive business decisions and optimization - must be accurate.
-        Golden Path: User interactions → usage analytics → ClickHouse storage → business insights.
+        Golden Path: User interactions  ->  usage analytics  ->  ClickHouse storage  ->  business insights.
         """
         manager = DatabaseConfigManager()
         
@@ -646,7 +646,7 @@ class TestDatabaseConfigurationBusinessScenarios:
         """Test configuration validation for deployment readiness.
         
         BVJ: Prevents deployments with invalid configurations - protects business continuity.
-        Golden Path: Configuration validation → deployment approval → stable operations.
+        Golden Path: Configuration validation  ->  deployment approval  ->  stable operations.
         """
         manager = DatabaseConfigManager()
         
@@ -689,7 +689,7 @@ class TestDatabaseConfigurationBusinessScenarios:
         """Test configuration error detection and reporting for operations.
         
         BVJ: Enables rapid detection and resolution of configuration issues.
-        Golden Path: Configuration errors → clear error messages → quick resolution.
+        Golden Path: Configuration errors  ->  clear error messages  ->  quick resolution.
         """
         manager = DatabaseConfigManager()
         
@@ -725,7 +725,7 @@ class TestDatabaseConfigurationBusinessScenarios:
         """Test configuration consistency across multiple environments.
         
         BVJ: Ensures consistent behavior across development, staging, and production.
-        Golden Path: Consistent configuration → predictable behavior → reduced operational issues.
+        Golden Path: Consistent configuration  ->  predictable behavior  ->  reduced operational issues.
         """
         environments = ['development', 'staging', 'production']
         base_urls = {

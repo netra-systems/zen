@@ -21,10 +21,10 @@ class ReportTemplates:
             'value_proposition': {
                 'title': 'How I Can Help You Save on AI Costs',
                 'benefits': [
-                    '💰 Reduce cloud AI spending by 20-40% on average',
-                    '⚡ Improve model performance and response times',
-                    '📊 Get visibility into your AI usage patterns',
-                    '🎯 Optimize model selection for your use cases'
+                    '[U+1F4B0] Reduce cloud AI spending by 20-40% on average',
+                    ' LIGHTNING:  Improve model performance and response times',
+                    ' CHART:  Get visibility into your AI usage patterns',
+                    ' TARGET:  Optimize model selection for your use cases'
                 ]
             },
             'quick_assessment': {
@@ -43,7 +43,7 @@ class ReportTemplates:
                         'name': 'OpenAI',
                         'steps': [
                             "Log into your OpenAI dashboard",
-                            "Navigate to Usage → Daily usage",
+                            "Navigate to Usage  ->  Daily usage",
                             "Click 'Export' to download CSV"
                         ]
                     },

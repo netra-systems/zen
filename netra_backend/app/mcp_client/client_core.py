@@ -12,7 +12,7 @@ Key Features:
 - Comprehensive logging and monitoring
 
 Line count: <300 lines (architectural requirement)
-Function limit: ≤8 lines per function (architectural requirement)
+Function limit:  <= 8 lines per function (architectural requirement)
 """
 
 import asyncio

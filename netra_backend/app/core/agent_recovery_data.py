@@ -1,7 +1,7 @@
-"""Data analysis agent recovery strategy with ≤8 line functions.
+"""Data analysis agent recovery strategy with  <= 8 line functions.
 
 Recovery strategy implementation for data analysis agent operations with 
-aggressive function decomposition. All functions ≤8 lines.
+aggressive function decomposition. All functions  <= 8 lines.
 """
 
 import asyncio

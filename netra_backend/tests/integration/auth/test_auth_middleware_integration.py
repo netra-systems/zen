@@ -169,7 +169,7 @@ class TestAuthMiddlewareIntegration(BaseIntegrationTest):
                     assert "insufficient permissions" in error_data["detail"].lower()
                     assert required_permission in error_data.get("required_permission", "")
                 
-                self.logger.info(f"Permission test for {user['subscription_tier']} accessing {test['endpoint']}: {'✓' if user_has_permission else '✗'}")
+                self.logger.info(f"Permission test for {user['subscription_tier']} accessing {test['endpoint']}: {'[U+2713]' if user_has_permission else '[U+2717]'}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -232,7 +232,7 @@ class TestAuthMiddlewareIntegration(BaseIntegrationTest):
                     assert "upgrade required" in error_data["detail"].lower()
                     assert endpoint_test["min_tier"] in error_data.get("required_tier", "")
                 
-                self.logger.info(f"Tier access test for {user['subscription_tier']} accessing {endpoint_test['endpoint']}: {'✓' if should_have_access else '✗'}")
+                self.logger.info(f"Tier access test for {user['subscription_tier']} accessing {endpoint_test['endpoint']}: {'[U+2713]' if should_have_access else '[U+2717]'}")
     
     @pytest.mark.integration
     @pytest.mark.real_services

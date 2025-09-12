@@ -115,7 +115,7 @@ def main():
     print(f"  Functions need splitting to comply with 25-line limit")
     
     if total_violations == 0:
-        print("\n✅ ALL FUNCTIONS ARE COMPLIANT!")
+        print("\n PASS:  ALL FUNCTIONS ARE COMPLIANT!")
 
 if __name__ == "__main__":
     main()

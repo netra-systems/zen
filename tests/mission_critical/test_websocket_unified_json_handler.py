@@ -485,9 +485,9 @@
     # REMOVED_SYNTAX_ERROR: special_message = { )
     # REMOVED_SYNTAX_ERROR: "type": "agent_message",
     # REMOVED_SYNTAX_ERROR: "payload": { )
-    # REMOVED_SYNTAX_ERROR: "unicode_text": "Hello 世界! 🌍 Ñoño café résumé",
+    # REMOVED_SYNTAX_ERROR: "unicode_text": "Hello [U+4E16][U+754C]! [U+1F30D] [U+00D1]o[U+00F1]o caf[U+00E9] r[U+00E9]sum[U+00E9]",
     # REMOVED_SYNTAX_ERROR: "special_chars": ["@", "#", "$", "%", "^", "&", "*"],
-    # REMOVED_SYNTAX_ERROR: "emojis": ["😀", "🚀", "💡", "⚡", "🌟"],
+    # REMOVED_SYNTAX_ERROR: "emojis": ["[U+1F600]", "[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]"],
     # REMOVED_SYNTAX_ERROR: "quotes": ["'single'", '"double"', "`backtick`"],
     # REMOVED_SYNTAX_ERROR: "newlines_and_tabs": "Line 1
     # REMOVED_SYNTAX_ERROR: Line 2\tTabbed",
@@ -503,8 +503,8 @@
     # REMOVED_SYNTAX_ERROR: deserialized = json.loads(json_str)
 
     # Verify special characters are preserved
-    # REMOVED_SYNTAX_ERROR: assert "世界" in deserialized["payload"]["unicode_text"]
-    # REMOVED_SYNTAX_ERROR: assert "🌍" in deserialized["payload"]["unicode_text"]
+    # REMOVED_SYNTAX_ERROR: assert "[U+4E16][U+754C]" in deserialized["payload"]["unicode_text"]
+    # REMOVED_SYNTAX_ERROR: assert "[U+1F30D]" in deserialized["payload"]["unicode_text"]
     # REMOVED_SYNTAX_ERROR: assert len(deserialized["payload"]["emojis"]) == 5
 
 # REMOVED_SYNTAX_ERROR: def test_serialize_message_safely_deeply_nested_structures(self, websocket_manager):

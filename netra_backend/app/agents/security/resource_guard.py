@@ -147,7 +147,7 @@ class ResourceGuard:
         self._current_usage: Optional[ResourceUsage] = None
         self._last_usage_update = 0
         
-        logger.info(f"🛡️ ResourceGuard initialized with limits: {self.limits}")
+        logger.info(f"[U+1F6E1][U+FE0F] ResourceGuard initialized with limits: {self.limits}")
     
     async def validate_resource_request(self, user_id: str, estimated_memory_mb: float = 0) -> Optional[str]:
         """Validate if a new resource request can be granted.
@@ -219,12 +219,12 @@ class ResourceGuard:
         """
         validation_error = await self.validate_resource_request(user_id, estimated_memory_mb)
         if validation_error:
-            logger.warning(f"🚫 Resource request denied for {user_id}: {validation_error}")
+            logger.warning(f"[U+1F6AB] Resource request denied for {user_id}: {validation_error}")
             return False
         
         # Acquire resources
         concurrent_count = self.user_tracker.increment_concurrent(user_id)
-        logger.debug(f"📈 Resources acquired for {user_id}: concurrent={concurrent_count}")
+        logger.debug(f"[U+1F4C8] Resources acquired for {user_id}: concurrent={concurrent_count}")
         
         # Start monitoring if not already running
         if not self._is_monitoring:
@@ -235,7 +235,7 @@ class ResourceGuard:
     async def release_resources(self, user_id: str) -> None:
         """Release resources after execution completion."""
         concurrent_count = self.user_tracker.decrement_concurrent(user_id)
-        logger.debug(f"📉 Resources released for {user_id}: concurrent={concurrent_count}")
+        logger.debug(f"[U+1F4C9] Resources released for {user_id}: concurrent={concurrent_count}")
     
     async def get_current_usage(self) -> ResourceUsage:
         """Get current resource usage statistics."""
@@ -290,7 +290,7 @@ class ResourceGuard:
         self._violation_counts[violation_type] += 1
         self._last_violation_times[violation_type] = datetime.now(UTC)
         
-        logger.warning(f"🚨 Resource violation: {violation_type.value} (count: {self._violation_counts[violation_type]})")
+        logger.warning(f" ALERT:  Resource violation: {violation_type.value} (count: {self._violation_counts[violation_type]})")
     
     async def start_monitoring(self) -> None:
         """Start background resource monitoring."""
@@ -299,7 +299,7 @@ class ResourceGuard:
         
         self._is_monitoring = True
         self._monitor_task = asyncio.create_task(self._monitor_loop())
-        logger.info("👁️ Started resource monitoring")
+        logger.info("[U+1F441][U+FE0F] Started resource monitoring")
     
     async def stop_monitoring(self) -> None:
         """Stop background resource monitoring."""
@@ -312,7 +312,7 @@ class ResourceGuard:
             except asyncio.CancelledError:
                 pass
         
-        logger.info("⏹️ Stopped resource monitoring")
+        logger.info("[U+23F9][U+FE0F] Stopped resource monitoring")
     
     async def _monitor_loop(self) -> None:
         """Main resource monitoring loop."""
@@ -325,15 +325,15 @@ class ResourceGuard:
                     # Check for resource violations
                     if self._current_usage.memory_mb > self.limits.max_memory_mb:
                         self._record_violation(ResourceViolationType.MEMORY_EXCEEDED)
-                        logger.error(f"🚨 Memory limit exceeded: {self._current_usage.memory_mb:.1f}MB > {self.limits.max_memory_mb}MB")
+                        logger.error(f" ALERT:  Memory limit exceeded: {self._current_usage.memory_mb:.1f}MB > {self.limits.max_memory_mb}MB")
                     
                     if self._current_usage.cpu_percent > self.limits.max_cpu_percent:
                         self._record_violation(ResourceViolationType.CPU_EXCEEDED)
-                        logger.warning(f"⚠️ CPU usage high: {self._current_usage.cpu_percent:.1f}% > {self.limits.max_cpu_percent}%")
+                        logger.warning(f" WARNING: [U+FE0F] CPU usage high: {self._current_usage.cpu_percent:.1f}% > {self.limits.max_cpu_percent}%")
                     
                     if self._current_usage.disk_space_mb < self.limits.min_disk_space_mb:
                         self._record_violation(ResourceViolationType.DISK_SPACE)
-                        logger.error(f"🚨 Low disk space: {self._current_usage.disk_space_mb:.1f}MB < {self.limits.min_disk_space_mb}MB")
+                        logger.error(f" ALERT:  Low disk space: {self._current_usage.disk_space_mb:.1f}MB < {self.limits.min_disk_space_mb}MB")
                 
             except asyncio.CancelledError:
                 break
@@ -407,7 +407,7 @@ class ResourceGuard:
             Cleanup statistics
         """
         if user_id:
-            logger.critical(f"🧹 Emergency cleanup for user: {user_id}")
+            logger.critical(f"[U+1F9F9] Emergency cleanup for user: {user_id}")
             old_count = self.user_tracker.concurrent_executions.get(user_id, 0)
             
             if user_id in self.user_tracker.concurrent_executions:
@@ -421,7 +421,7 @@ class ResourceGuard:
                 "timestamp": datetime.now(UTC).isoformat()
             }
         else:
-            logger.critical("🧹 Emergency cleanup of ALL resources")
+            logger.critical("[U+1F9F9] Emergency cleanup of ALL resources")
             total_executions = sum(self.user_tracker.concurrent_executions.values())
             affected_users = len(self.user_tracker.concurrent_executions)
             
@@ -439,7 +439,7 @@ class ResourceGuard:
         old_limits = self.limits
         self.limits = new_limits
         
-        logger.info(f"🔧 Resource limits updated from {old_limits} to {new_limits}")
+        logger.info(f"[U+1F527] Resource limits updated from {old_limits} to {new_limits}")
     
     async def get_user_resource_summary(self, user_id: str) -> Dict[str, Any]:
         """Get resource usage summary for a specific user."""

@@ -161,7 +161,7 @@ class TestTerraformDeployLine111Fix:
             
             print(f"Original line 111: {original_line_111}")
             print(f"Proposed line 111: {proposed_line_111}")
-            print("✅ Syntax check passed for proposed fix")
+            print(" PASS:  Syntax check passed for proposed fix")
             
         finally:
             # Clean up test script
@@ -196,7 +196,7 @@ class TestTerraformDeployLine111Fix:
             assert result.returncode == 0, \
                 f"Deployment script rejected terraform parameters: {result.stderr}"
             
-            print("✅ Parameter compatibility verified")
+            print(" PASS:  Parameter compatibility verified")
             
         except subprocess.TimeoutExpired:
             pytest.fail("Parameter compatibility test timed out")
@@ -236,9 +236,9 @@ class TestTerraformDeployLine111Fix:
                 if not is_config_error:
                     pytest.fail(f"Deployment script failed unexpectedly: {error_output}")
                 else:
-                    print(f"✅ Dry-run failed with expected configuration error: {error_output[:200]}...")
+                    print(f" PASS:  Dry-run failed with expected configuration error: {error_output[:200]}...")
             else:
-                print("✅ Dry-run succeeded")
+                print(" PASS:  Dry-run succeeded")
                 
         except subprocess.TimeoutExpired:
             pytest.fail("Deployment script dry-run timed out")
@@ -246,7 +246,7 @@ class TestTerraformDeployLine111Fix:
             pytest.fail(f"Deployment script dry-run failed: {e}")
     
     def test_integration_sequence_validation(self):
-        """Test the complete terraform → deployment sequence logic."""
+        """Test the complete terraform  ->  deployment sequence logic."""
         # This tests the logical flow without actual execution
         
         # Step 1: Terraform infrastructure changes
@@ -263,7 +263,7 @@ class TestTerraformDeployLine111Fix:
         integration_test_step = "python3 tests/unified_test_runner.py --category integration --env staging --fast-fail"
         
         # Verify sequence makes sense
-        print("✅ Terraform → Deployment sequence:")
+        print(" PASS:  Terraform  ->  Deployment sequence:")
         for i, step in enumerate(terraform_steps, 1):
             print(f"  {i}. {step}")
         print(f"  4. {deployment_step}")
@@ -296,7 +296,7 @@ class TestTerraformDeployLine111Fix:
             "--dry-run"  # Safe simulation
         ]
         
-        print("🧪 Simulating fixed terraform deploy sequence:")
+        print("[U+1F9EA] Simulating fixed terraform deploy sequence:")
         print(f"Environment: {env_vars}")
         print(f"Fixed line 111 command: {' '.join(fixed_deployment_command)}")
         
@@ -317,7 +317,7 @@ class TestTerraformDeployLine111Fix:
             
             # Success or expected configuration error is acceptable
             if result.returncode == 0:
-                print("✅ Fixed deployment command succeeded in simulation")
+                print(" PASS:  Fixed deployment command succeeded in simulation")
             else:
                 # Check for acceptable configuration errors
                 acceptable_errors = [
@@ -331,7 +331,7 @@ class TestTerraformDeployLine111Fix:
                 error_is_acceptable = any(error in result.stderr for error in acceptable_errors)
                 
                 if error_is_acceptable:
-                    print(f"✅ Fixed deployment command failed with expected error: {result.stderr[:200]}...")
+                    print(f" PASS:  Fixed deployment command failed with expected error: {result.stderr[:200]}...")
                 else:
                     pytest.fail(f"Fixed deployment command failed unexpectedly: {result.stderr}")
                     

@@ -174,7 +174,7 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
             # Verify proper message handling
             assert "type" in response_data, "Response should contain message type"
             
-            logger.info(f"✅ WebSocket handshake completed in {connection_time:.2f}s")
+            logger.info(f" PASS:  WebSocket handshake completed in {connection_time:.2f}s")
             
         except asyncio.TimeoutError:
             pytest.fail(f"WebSocket handshake timed out after {time.time() - start_time:.2f}s")
@@ -262,9 +262,9 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
             avg_time = sum(connection_times) / len(connection_times) if connection_times else 0
             assert avg_time < 10.0, f"Average connection time {avg_time:.2f}s too slow"
             
-            logger.info(f"✅ {len(successful_connections)}/{connection_count} concurrent connections successful")
-            logger.info(f"✅ Average handshake time: {avg_time:.2f}s")
-            logger.info(f"✅ Total concurrent setup time: {total_time:.2f}s")
+            logger.info(f" PASS:  {len(successful_connections)}/{connection_count} concurrent connections successful")
+            logger.info(f" PASS:  Average handshake time: {avg_time:.2f}s")
+            logger.info(f" PASS:  Total concurrent setup time: {total_time:.2f}s")
             
             # Test message broadcasting to multiple connections
             broadcast_message = {
@@ -353,7 +353,7 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
             # Ensure database operations complete
             await db_load_task
             
-            logger.info(f"✅ WebSocket handshake completed in {connection_time:.2f}s during database operations")
+            logger.info(f" PASS:  WebSocket handshake completed in {connection_time:.2f}s during database operations")
             
         except asyncio.TimeoutError:
             # Cancel database load task on timeout
@@ -459,8 +459,8 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
             # Should handle at least one cycle successfully
             assert successful_cycles >= 1, f"Expected at least 1 successful cycle, got {successful_cycles}"
             
-            logger.info(f"✅ {successful_cycles}/2 race condition cycles completed successfully")
-            logger.info(f"✅ Total race condition test time: {total_time:.2f}s")
+            logger.info(f" PASS:  {successful_cycles}/2 race condition cycles completed successfully")
+            logger.info(f" PASS:  Total race condition test time: {total_time:.2f}s")
             
         except asyncio.TimeoutError:
             pytest.fail(f"Race condition test timed out after {time.time() - start_time:.2f}s")
@@ -536,12 +536,12 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
             # Verify message can be sent and received
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                logger.info(f"✅ Received response after error recovery: {len(response)} bytes")
+                logger.info(f" PASS:  Received response after error recovery: {len(response)} bytes")
             except asyncio.TimeoutError:
                 # Some WebSocket implementations may not echo back immediately
-                logger.info("✅ Message sent successfully (no echo required)")
+                logger.info(" PASS:  Message sent successfully (no echo required)")
             
-            logger.info(f"✅ WebSocket error recovery successful in {connection_time:.2f}s")
+            logger.info(f" PASS:  WebSocket error recovery successful in {connection_time:.2f}s")
             
         except asyncio.TimeoutError:
             pytest.fail(f"WebSocket error recovery timed out after {time.time() - start_time:.2f}s")
@@ -611,8 +611,8 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
             
             await websocket.send(json.dumps(final_message))
             
-            logger.info(f"✅ Message queuing test completed in {connection_time:.2f}s")
-            logger.info(f"✅ Sent {len(messages_to_send)} messages successfully")
+            logger.info(f" PASS:  Message queuing test completed in {connection_time:.2f}s")
+            logger.info(f" PASS:  Sent {len(messages_to_send)} messages successfully")
             
         except asyncio.TimeoutError:
             pytest.fail(f"Message queuing test timed out after {time.time() - start_time:.2f}s")
@@ -690,7 +690,7 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
             
             await websocket.send(json.dumps(session_message))
             
-            logger.info(f"✅ WebSocket handshake with Redis completed in {connection_time:.2f}s")
+            logger.info(f" PASS:  WebSocket handshake with Redis completed in {connection_time:.2f}s")
             
         except asyncio.TimeoutError:
             pytest.fail(f"WebSocket handshake with Redis timed out after {time.time() - start_time:.2f}s")
@@ -779,7 +779,7 @@ class TestWebSocketHandshakeTiming(BaseIntegrationTest):
             
             assert success_rate >= 0.9, f"Success rate {success_rate:.1%} below 90% baseline"
             
-            logger.info(f"✅ WebSocket Handshake Performance Baseline:")
+            logger.info(f" PASS:  WebSocket Handshake Performance Baseline:")
             logger.info(f"   Average: {avg_time:.3f}s")
             logger.info(f"   Min: {min_time:.3f}s") 
             logger.info(f"   Max: {max_time:.3f}s")

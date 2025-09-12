@@ -97,7 +97,7 @@ def main():
     all_secrets = get_all_secrets(project_id)
     
     if not all_secrets:
-        print("❌ Could not fetch secrets")
+        print(" FAIL:  Could not fetch secrets")
         return 1
     
     print(f"  Found {len(all_secrets)} total secrets")

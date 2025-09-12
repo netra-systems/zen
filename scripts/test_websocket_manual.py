@@ -23,7 +23,7 @@ async def test_websocket_connection():
         
         # Try connection without authentication (development mode)
         async with websockets.connect(uri) as websocket:
-            logger.info("✅ WebSocket connection established!")
+            logger.info(" PASS:  WebSocket connection established!")
             
             # Send a test message
             test_message = {
@@ -39,30 +39,30 @@ async def test_websocket_connection():
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                 response_data = json.loads(response)
-                logger.info(f"✅ Received response: {response_data}")
+                logger.info(f" PASS:  Received response: {response_data}")
                 
                 # Check if we got expected response types
                 if response_data.get("type") in ["pong", "connection_established", "system_message"]:
-                    logger.info("✅ WebSocket bidirectional communication working!")
+                    logger.info(" PASS:  WebSocket bidirectional communication working!")
                     return True
                     
             except asyncio.TimeoutError:
-                logger.warning("⚠️  No response received within 5 seconds")
-                logger.info("✅ Connection established but no response (may be expected)")
+                logger.warning(" WARNING: [U+FE0F]  No response received within 5 seconds")
+                logger.info(" PASS:  Connection established but no response (may be expected)")
                 return True
                 
     except websockets.exceptions.ConnectionClosedError as e:
-        logger.error(f"❌ WebSocket connection closed: {e.code} - {e.reason}")
+        logger.error(f" FAIL:  WebSocket connection closed: {e.code} - {e.reason}")
         
         # Check if this is an auth error (expected without token)
         if e.code == 1008:  # Policy violation (auth failure)
-            logger.info("ℹ️  Connection closed due to authentication (expected without token)")
-            logger.info("✅ WebSocket authentication bypass may need explicit enabling")
+            logger.info("[U+2139][U+FE0F]  Connection closed due to authentication (expected without token)")
+            logger.info(" PASS:  WebSocket authentication bypass may need explicit enabling")
             return False
         return False
         
     except Exception as e:
-        logger.error(f"❌ WebSocket connection failed: {e}")
+        logger.error(f" FAIL:  WebSocket connection failed: {e}")
         return False
 
 
@@ -75,7 +75,7 @@ async def test_websocket_test_endpoint():
         
         # This endpoint should work without authentication
         async with websockets.connect(uri) as websocket:
-            logger.info("✅ Test WebSocket connection established!")
+            logger.info(" PASS:  Test WebSocket connection established!")
             
             # Send a test message
             test_message = {
@@ -90,23 +90,23 @@ async def test_websocket_test_endpoint():
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                 response_data = json.loads(response)
-                logger.info(f"✅ Received response: {response_data}")
+                logger.info(f" PASS:  Received response: {response_data}")
                 
                 if response_data.get("type") == "pong":
-                    logger.info("✅ Test endpoint working perfectly!")
+                    logger.info(" PASS:  Test endpoint working perfectly!")
                     return True
                     
             except asyncio.TimeoutError:
-                logger.warning("⚠️  No response received from test endpoint")
+                logger.warning(" WARNING: [U+FE0F]  No response received from test endpoint")
                 
     except Exception as e:
-        logger.error(f"❌ Test WebSocket connection failed: {e}")
+        logger.error(f" FAIL:  Test WebSocket connection failed: {e}")
         return False
 
 
 async def main():
     """Run WebSocket tests."""
-    logger.info("🚀 Starting WebSocket Connection Tests")
+    logger.info("[U+1F680] Starting WebSocket Connection Tests")
     logger.info("=" * 50)
     
     # Test 1: Test endpoint (should always work)
@@ -119,20 +119,20 @@ async def main():
     
     # Summary
     logger.info("\n" + "=" * 50)
-    logger.info("📊 TEST RESULTS SUMMARY")
+    logger.info(" CHART:  TEST RESULTS SUMMARY")
     logger.info("=" * 50)
-    logger.info(f"Test Endpoint (/ws/test): {'✅ PASS' if test_result else '❌ FAIL'}")
-    logger.info(f"Main Endpoint (/ws): {'✅ PASS' if main_result else '❌ FAIL'}")
+    logger.info(f"Test Endpoint (/ws/test): {' PASS:  PASS' if test_result else ' FAIL:  FAIL'}")
+    logger.info(f"Main Endpoint (/ws): {' PASS:  PASS' if main_result else ' FAIL:  FAIL'}")
     
     if test_result:
-        logger.info("✅ WebSocket infrastructure is working!")
+        logger.info(" PASS:  WebSocket infrastructure is working!")
     else:
-        logger.info("❌ WebSocket infrastructure needs attention")
+        logger.info(" FAIL:  WebSocket infrastructure needs attention")
         
     if main_result:
-        logger.info("✅ Development OAUTH SIMULATION is working!")
+        logger.info(" PASS:  Development OAUTH SIMULATION is working!")
     else:
-        logger.info("ℹ️  Main endpoint requires authentication or bypass configuration")
+        logger.info("[U+2139][U+FE0F]  Main endpoint requires authentication or bypass configuration")
     
     return test_result or main_result
 

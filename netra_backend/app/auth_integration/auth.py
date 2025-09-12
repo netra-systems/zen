@@ -1,5 +1,5 @@
 """
-🔴 CRITICAL: Auth Integration Module - DO NOT IMPLEMENT AUTH LOGIC HERE
+[U+1F534] CRITICAL: Auth Integration Module - DO NOT IMPLEMENT AUTH LOGIC HERE
 
 This module ONLY provides FastAPI dependency injection for authentication.
 It connects to an EXTERNAL auth service via auth_client.
@@ -9,13 +9,13 @@ ARCHITECTURE:
 - This Module: ONLY integration point - NO auth logic
 - auth_client: HTTP client that calls the external auth service
 
-⚠️ NEVER IMPLEMENT HERE:
+ WARNING: [U+FE0F] NEVER IMPLEMENT HERE:
 - Token generation/validation logic
 - Password hashing/verification (except legacy compatibility)
 - OAuth provider integration
 - User authentication logic
 
-✅ ONLY DO HERE:
+ PASS:  ONLY DO HERE:
 - Call auth_client methods
 - FastAPI dependency injection
 - Convert auth service responses to User objects
@@ -92,7 +92,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         
         if current_time - last_used < concurrent_threshold:
             logger.error(
-                f"🚨 AUTHENTICATION TOKEN REUSE DETECTED: Token hash {token_hash} "
+                f" ALERT:  AUTHENTICATION TOKEN REUSE DETECTED: Token hash {token_hash} "
                 f"used {current_time - last_used:.3f}s ago (threshold: {concurrent_threshold}s). "
                 f"User: {session_info.get('user_id', 'unknown')[:8]}..., "
                 f"Previous session: {session_info.get('session_id', 'unknown')}"
@@ -107,7 +107,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     
     _token_usage_stats['total_validations'] += 1
     
-    logger.critical(f"🔑 AUTH SERVICE DEPENDENCY: Starting token validation "
+    logger.critical(f"[U+1F511] AUTH SERVICE DEPENDENCY: Starting token validation "
                    f"(token_hash: {token_hash}, token_length: {len(token) if token else 0}, "
                    f"auth_service_endpoint: {auth_client.settings.base_url}, "
                    f"service_timeout: 30s, reuse_check: passed)")
@@ -117,7 +117,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         response_time = (time.time() - start_time) * 1000
         
         if not validation_result or not validation_result.get("valid"):
-            logger.critical(f"🚨 AUTH SERVICE FAILURE: Token validation failed at auth service "
+            logger.critical(f" ALERT:  AUTH SERVICE FAILURE: Token validation failed at auth service "
                            f"(response_time: {response_time:.2f}ms, "
                            f"result: {validation_result}, "
                            f"service_status: auth_service_responded_but_invalid, "
@@ -129,7 +129,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
                 headers={"WWW-Authenticate": "Bearer"},
             )
         if not validation_result.get("user_id"):
-            logger.critical(f"🚨 AUTH SERVICE FAILURE: Token validation failed - no user_id in payload "
+            logger.critical(f" ALERT:  AUTH SERVICE FAILURE: Token validation failed - no user_id in payload "
                            f"(response_time: {response_time:.2f}ms, "
                            f"payload_keys: {list(validation_result.keys()) if validation_result else 'none'}, "
                            f"service_status: auth_service_invalid_response, "
@@ -142,7 +142,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         
         # Log successful token validation with key claims info
         user_id = validation_result.get('user_id', 'unknown')
-        logger.info(f"✅ AUTH SERVICE SUCCESS: Token validated successfully "
+        logger.info(f" PASS:  AUTH SERVICE SUCCESS: Token validated successfully "
                    f"(user_id: {user_id[:8]}..., "
                    f"role: {validation_result.get('role', 'none')}, "
                    f"response_time: {response_time:.2f}ms, "
@@ -170,7 +170,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         if len(_active_token_sessions) > 1000:  # Prevent memory leak
             asyncio.create_task(_cleanup_expired_tokens())
         
-        logger.debug(f"✅ ISSUE #414 FIX: Token session {session_id[:8]}... tracked for user {user_id[:8]}...")
+        logger.debug(f" PASS:  ISSUE #414 FIX: Token session {session_id[:8]}... tracked for user {user_id[:8]}...")
         
         return validation_result
         
@@ -179,7 +179,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
         raise
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
-        logger.critical(f"🚨 AUTH SERVICE EXCEPTION: Auth service communication failed "
+        logger.critical(f" ALERT:  AUTH SERVICE EXCEPTION: Auth service communication failed "
                        f"(exception_type: {type(e).__name__}, "
                        f"exception_message: {str(e)}, "
                        f"response_time: {response_time:.2f}ms, "
@@ -201,7 +201,7 @@ async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str,
     start_time = time.time()
     user_id = validation_result.get("user_id")
     
-    logger.info(f"🔍 DATABASE SERVICE DEPENDENCY: Starting user lookup "
+    logger.info(f" SEARCH:  DATABASE SERVICE DEPENDENCY: Starting user lookup "
                f"(user_id: {user_id[:8]}..., "
                f"db_session_type: {type(db).__name__}, "
                f"dependent_service: database)")
@@ -216,13 +216,13 @@ async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str,
         db_response_time = (time.time() - start_time) * 1000
         
         if not user:
-            logger.warning(f"🔑 DATABASE USER AUTO-CREATE: User {user_id[:8]}... not found in database "
+            logger.warning(f"[U+1F511] DATABASE USER AUTO-CREATE: User {user_id[:8]}... not found in database "
                           f"(response_time: {db_response_time:.2f}ms, "
                           f"service_status: database_healthy_but_user_missing, "
                           f"action: auto-creating from JWT claims)")
             user = await _auto_create_user_if_needed(db, validation_result)
         else:
-            logger.info(f"✅ DATABASE USER FOUND: User {user_id[:8]}... exists in database "
+            logger.info(f" PASS:  DATABASE USER FOUND: User {user_id[:8]}... exists in database "
                        f"(response_time: {db_response_time:.2f}ms, "
                        f"service_status: database_healthy, "
                        f"action: syncing JWT claims)")
@@ -233,7 +233,7 @@ async def _get_user_from_database(db: AsyncSession, validation_result: Dict[str,
         
     except Exception as e:
         db_response_time = (time.time() - start_time) * 1000
-        logger.critical(f"🚨 DATABASE SERVICE FAILURE: User database lookup failed "
+        logger.critical(f" ALERT:  DATABASE SERVICE FAILURE: User database lookup failed "
                        f"(user_id: {user_id[:8]}..., "
                        f"exception_type: {type(e).__name__}, "
                        f"exception_message: {str(e)}, "
@@ -280,11 +280,11 @@ async def _sync_jwt_claims_to_user_record(user: User, validation_result: Dict[st
         
         if needs_update:
             await db.commit()
-            logger.warning(f"🔄 USER SYNC: User record synchronized with JWT claims for user {user.id[:8]}... (role: {jwt_role}, admin: {jwt_is_admin})")
+            logger.warning(f" CYCLE:  USER SYNC: User record synchronized with JWT claims for user {user.id[:8]}... (role: {jwt_role}, admin: {jwt_is_admin})")
             logger.info(f"User record synchronized with JWT claims for user {user.id[:8]}...")
     
     except Exception as e:
-        logger.critical(f"🚨 USER SYNC FAILURE: Failed to sync JWT claims to user record: {e} (type: {type(e).__name__})")
+        logger.critical(f" ALERT:  USER SYNC FAILURE: Failed to sync JWT claims to user record: {e} (type: {type(e).__name__})")
         logger.error(f"Failed to sync JWT claims to user record: {e}")
         # Don't fail the entire authentication flow for sync issues
         await db.rollback()
@@ -303,7 +303,7 @@ async def _auto_create_user_if_needed(db: AsyncSession, validation_result: Dict[
     user = await user_service.get_or_create_dev_user(db, email=email, user_id=user_id)
     
     config = get_config()
-    logger.warning(f"🔑 USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}...)")
+    logger.warning(f"[U+1F511] USER AUTO-CREATED: Created user {user.email} from JWT claims (env: {config.environment}, user_id: {user_id[:8]}...)")
     logger.info(f"Auto-created user from JWT: {user.email} (env: {config.environment})")
     return user
 
@@ -328,13 +328,13 @@ async def get_current_user_optional(
     try:
         # Extract the token and validate it
         token = credentials.credentials
-        logger.info(f"🔑 OPTIONAL AUTH: Attempting optional authentication (token_length: {len(token) if token else 0})")
+        logger.info(f"[U+1F511] OPTIONAL AUTH: Attempting optional authentication (token_length: {len(token) if token else 0})")
         validation_result = await _validate_token_with_auth_service(token)
         user = await _get_user_from_database(db, validation_result)
-        logger.info(f"✅ OPTIONAL AUTH SUCCESS: Optional authentication succeeded for user {user.id[:8] if user and hasattr(user, 'id') else 'unknown'}...")
+        logger.info(f" PASS:  OPTIONAL AUTH SUCCESS: Optional authentication succeeded for user {user.id[:8] if user and hasattr(user, 'id') else 'unknown'}...")
         return user
     except Exception as e:
-        logger.warning(f"🔑 OPTIONAL AUTH FAILURE: Optional authentication failed: {e} (type: {type(e).__name__})")
+        logger.warning(f"[U+1F511] OPTIONAL AUTH FAILURE: Optional authentication failed: {e} (type: {type(e).__name__})")
         logger.debug(f"Optional auth failed: {e}")
         return None
 
@@ -388,7 +388,7 @@ async def _cleanup_expired_tokens():
             _token_usage_stats['tokens_expired_cleanup'] += 1
         
         if expired_tokens:
-            logger.info(f"🧹 ISSUE #414 CLEANUP: Removed {len(expired_tokens)} expired token sessions")
+            logger.info(f"[U+1F9F9] ISSUE #414 CLEANUP: Removed {len(expired_tokens)} expired token sessions")
 
 def get_token_usage_stats() -> Dict[str, Any]:
     """Get current token usage statistics (Issue #414 monitoring)."""
@@ -421,7 +421,7 @@ async def force_cleanup_user_tokens(user_id: str):
             del _active_token_sessions[token_hash]
         
         if user_tokens:
-            logger.info(f"🧹 ISSUE #414 ISOLATION: Force cleaned up {len(user_tokens)} token sessions for user {user_id[:8]}...")
+            logger.info(f"[U+1F9F9] ISSUE #414 ISOLATION: Force cleaned up {len(user_tokens)} token sessions for user {user_id[:8]}...")
 
 # Type annotations for dependency injection
 ActiveUserDep = Annotated[User, Depends(get_current_user)]
@@ -495,7 +495,7 @@ async def require_admin_with_enhanced_validation(
         
         if not jwt_admin_status.get("is_admin", False):
             logger.critical(
-                f"🚨 ADMIN ACCESS DENIED: User {user.id if hasattr(user, 'id') else 'unknown'} failed both database and JWT admin validation. JWT result: {jwt_admin_status}"
+                f" ALERT:  ADMIN ACCESS DENIED: User {user.id if hasattr(user, 'id') else 'unknown'} failed both database and JWT admin validation. JWT result: {jwt_admin_status}"
             )
             logger.error(
                 f"Admin access denied for user {user.id if hasattr(user, 'id') else 'unknown'} - "
@@ -507,7 +507,7 @@ async def require_admin_with_enhanced_validation(
             )
         else:
             logger.warning(
-                f"🔄 ADMIN JWT OVERRIDE: Admin access granted via JWT override for user {user.id if hasattr(user, 'id') else 'unknown'} - Database record may be out of sync"
+                f" CYCLE:  ADMIN JWT OVERRIDE: Admin access granted via JWT override for user {user.id if hasattr(user, 'id') else 'unknown'} - Database record may be out of sync"
             )
             logger.warning(
                 f"Admin access granted via JWT override for user {user.id if hasattr(user, 'id') else 'unknown'} - "
@@ -521,7 +521,7 @@ async def require_admin(user: User = Depends(get_current_user)) -> User:
     if not _check_admin_permissions(user):
         # Enhanced logging for security audit
         logger.critical(
-            f"🚨 ADMIN ACCESS DENIED: User {user.id if hasattr(user, 'id') else 'unknown'} lacks admin permissions in database record"
+            f" ALERT:  ADMIN ACCESS DENIED: User {user.id if hasattr(user, 'id') else 'unknown'} lacks admin permissions in database record"
         )
         logger.warning(
             f"Admin access denied for user {user.id if hasattr(user, 'id') else 'unknown'} - "
@@ -640,7 +640,7 @@ class BackendAuthIntegration:
         self.auth_interface = auth_interface
         self.auth_client = auth_client  # Use existing SSOT auth client
         
-        logger.info("🔧 BACKEND AUTH INTEGRATION: Initialized with auth service client")
+        logger.info("[U+1F527] BACKEND AUTH INTEGRATION: Initialized with auth service client")
     
     async def validate_request_token(self, authorization_header: str):
         """
@@ -848,7 +848,7 @@ class BackendAuthIntegration:
         self.auth_interface = auth_interface
         self.auth_client = auth_client  # Use existing SSOT auth client
         
-        logger.info("🔧 BACKEND AUTH INTEGRATION: Initialized with auth service client")
+        logger.info("[U+1F527] BACKEND AUTH INTEGRATION: Initialized with auth service client")
     
     async def validate_request_token(self, authorization_header: str):
         """

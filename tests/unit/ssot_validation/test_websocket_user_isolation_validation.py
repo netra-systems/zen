@@ -234,28 +234,28 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
         result = asyncio.run(test_context_isolation())
         
         # Log detailed results
-        self.logger.info(f"🔐 USER ISOLATION TEST RESULTS:")
+        self.logger.info(f"[U+1F510] USER ISOLATION TEST RESULTS:")
         self.logger.info(f"   Users tested: {result.users_tested}")
         self.logger.info(f"   Isolation violations: {result.isolation_violations}")
         self.logger.info(f"   Security score: {result.security_score:.1f}%")
         self.logger.info(f"   Test duration: {result.test_duration_ms:.1f}ms")
         
         if result.violations_detected:
-            self.logger.error("🚨 SECURITY VIOLATIONS DETECTED:")
+            self.logger.error(" ALERT:  SECURITY VIOLATIONS DETECTED:")
             for violation in result.violations_detected:
-                self.logger.error(f"   ❌ {violation}")
+                self.logger.error(f"    FAIL:  {violation}")
         
         # ASSERTION: Zero tolerance for isolation violations
         assert result.isolation_violations == 0, (
             f"Found {result.isolation_violations} user isolation violations. "
             f"These create CRITICAL SECURITY VULNERABILITIES:\n\n"
-            f"🚨 VIOLATIONS:\n" + "\n".join(f"   • {v}" for v in result.violations_detected) +
-            f"\n\n✅ REQUIREMENTS:\n"
-            f"   • Each user must have completely isolated WebSocket manager\n"
-            f"   • No shared instances between users\n"
-            f"   • No shared state or data structures\n"
-            f"   • Concurrent operations must not interfere\n\n"
-            f"💡 REMEDIATION: Ensure factory pattern creates truly isolated instances"
+            f" ALERT:  VIOLATIONS:\n" + "\n".join(f"   [U+2022] {v}" for v in result.violations_detected) +
+            f"\n\n PASS:  REQUIREMENTS:\n"
+            f"   [U+2022] Each user must have completely isolated WebSocket manager\n"
+            f"   [U+2022] No shared instances between users\n"
+            f"   [U+2022] No shared state or data structures\n"
+            f"   [U+2022] Concurrent operations must not interfere\n\n"
+            f" IDEA:  REMEDIATION: Ensure factory pattern creates truly isolated instances"
         )
 
     def test_no_message_cross_contamination(self):
@@ -386,31 +386,31 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
         result = asyncio.run(test_message_isolation())
         
         # Log detailed results
-        self.logger.info(f"📨 MESSAGE ISOLATION TEST RESULTS:")
+        self.logger.info(f"[U+1F4E8] MESSAGE ISOLATION TEST RESULTS:")
         self.logger.info(f"   Users tested: {result.users_tested}")
         self.logger.info(f"   Message contamination violations: {result.isolation_violations}")
         self.logger.info(f"   Security score: {result.security_score:.1f}%")
         self.logger.info(f"   Test duration: {result.test_duration_ms:.1f}ms")
         
         if result.violations_detected:
-            self.logger.error("🚨 MESSAGE CROSS-CONTAMINATION DETECTED:")
+            self.logger.error(" ALERT:  MESSAGE CROSS-CONTAMINATION DETECTED:")
             for violation in result.violations_detected:
-                self.logger.error(f"   ❌ {violation}")
+                self.logger.error(f"    FAIL:  {violation}")
         
         # ASSERTION: Zero tolerance for message cross-contamination
         assert result.isolation_violations == 0, (
             f"Found {result.isolation_violations} message cross-contamination violations. "
             f"These are CRITICAL SECURITY BREACHES:\n\n"
-            f"🚨 VIOLATIONS:\n" + "\n".join(f"   • {v}" for v in result.violations_detected) +
-            f"\n\n💥 IMPACT:\n"
-            f"   • User A could see User B's private messages\n"
-            f"   • Confidential information could leak between users\n"
-            f"   • Platform would violate privacy and security requirements\n\n"
-            f"✅ REQUIREMENTS:\n"
-            f"   • Messages must be delivered only to intended recipient\n"
-            f"   • No shared message queues or delivery mechanisms\n"
-            f"   • User data must remain completely isolated\n\n"
-            f"💡 REMEDIATION: Ensure WebSocket managers have isolated message handling"
+            f" ALERT:  VIOLATIONS:\n" + "\n".join(f"   [U+2022] {v}" for v in result.violations_detected) +
+            f"\n\n[U+1F4A5] IMPACT:\n"
+            f"   [U+2022] User A could see User B's private messages\n"
+            f"   [U+2022] Confidential information could leak between users\n"
+            f"   [U+2022] Platform would violate privacy and security requirements\n\n"
+            f" PASS:  REQUIREMENTS:\n"
+            f"   [U+2022] Messages must be delivered only to intended recipient\n"
+            f"   [U+2022] No shared message queues or delivery mechanisms\n"
+            f"   [U+2022] User data must remain completely isolated\n\n"
+            f" IDEA:  REMEDIATION: Ensure WebSocket managers have isolated message handling"
         )
 
     def test_concurrent_user_operation_isolation(self):
@@ -556,16 +556,16 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
         result = asyncio.run(test_concurrent_operations())
         
         # Log results
-        self.logger.info(f"⚡ CONCURRENT OPERATIONS TEST RESULTS:")
+        self.logger.info(f" LIGHTNING:  CONCURRENT OPERATIONS TEST RESULTS:")
         self.logger.info(f"   Users tested: {result.users_tested}")
         self.logger.info(f"   Operation interference violations: {result.isolation_violations}")
         self.logger.info(f"   Security score: {result.security_score:.1f}%")
         self.logger.info(f"   Test duration: {result.test_duration_ms:.1f}ms")
         
         if result.violations_detected:
-            self.logger.error("🚨 CONCURRENT OPERATION INTERFERENCE DETECTED:")
+            self.logger.error(" ALERT:  CONCURRENT OPERATION INTERFERENCE DETECTED:")
             for violation in result.violations_detected:
-                self.logger.error(f"   ❌ {violation}")
+                self.logger.error(f"    FAIL:  {violation}")
         
         # Allow some tolerance for concurrent operations complexity
         max_allowed_violations = 2  # Allow minor race conditions during development
@@ -574,16 +574,16 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
             f"Found {result.isolation_violations} concurrent operation violations "
             f"(max allowed: {max_allowed_violations}). "
             f"These indicate race conditions or insufficient isolation:\n\n"
-            f"🚨 VIOLATIONS:\n" + "\n".join(f"   • {v}" for v in result.violations_detected) +
-            f"\n\n💥 RISKS:\n"
-            f"   • Race conditions could cause data corruption\n"
-            f"   • User operations could interfere with each other\n"
-            f"   • Deadlocks or performance degradation\n\n"
-            f"✅ REQUIREMENTS:\n"
-            f"   • Each user's operations must be completely independent\n"
-            f"   • No shared locks, queues, or synchronization primitives\n"
-            f"   • Concurrent operations should complete successfully\n\n"
-            f"💡 REMEDIATION: Review threading and async isolation in factory pattern"
+            f" ALERT:  VIOLATIONS:\n" + "\n".join(f"   [U+2022] {v}" for v in result.violations_detected) +
+            f"\n\n[U+1F4A5] RISKS:\n"
+            f"   [U+2022] Race conditions could cause data corruption\n"
+            f"   [U+2022] User operations could interfere with each other\n"
+            f"   [U+2022] Deadlocks or performance degradation\n\n"
+            f" PASS:  REQUIREMENTS:\n"
+            f"   [U+2022] Each user's operations must be completely independent\n"
+            f"   [U+2022] No shared locks, queues, or synchronization primitives\n"
+            f"   [U+2022] Concurrent operations should complete successfully\n\n"
+            f" IDEA:  REMEDIATION: Review threading and async isolation in factory pattern"
         )
 
     def test_cleanup_isolation_validation(self):
@@ -750,31 +750,31 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
         result = asyncio.run(test_cleanup_isolation())
         
         # Log results
-        self.logger.info(f"🧹 CLEANUP ISOLATION TEST RESULTS:")
+        self.logger.info(f"[U+1F9F9] CLEANUP ISOLATION TEST RESULTS:")
         self.logger.info(f"   Users tested: {result.users_tested}")
         self.logger.info(f"   Cleanup interference violations: {result.isolation_violations}")
         self.logger.info(f"   Security score: {result.security_score:.1f}%")
         self.logger.info(f"   Test duration: {result.test_duration_ms:.1f}ms")
         
         if result.violations_detected:
-            self.logger.error("🚨 CLEANUP ISOLATION VIOLATIONS DETECTED:")
+            self.logger.error(" ALERT:  CLEANUP ISOLATION VIOLATIONS DETECTED:")
             for violation in result.violations_detected:
-                self.logger.error(f"   ❌ {violation}")
+                self.logger.error(f"    FAIL:  {violation}")
         
         # Assert zero violations for cleanup isolation
         assert result.isolation_violations == 0, (
             f"Found {result.isolation_violations} cleanup isolation violations. "
             f"These indicate serious isolation failures:\n\n"
-            f"🚨 VIOLATIONS:\n" + "\n".join(f"   • {v}" for v in result.violations_detected) +
-            f"\n\n💥 RISKS:\n"
-            f"   • User cleanup could disconnect other users\n"
-            f"   • Shared resources could be corrupted during cleanup\n"
-            f"   • Memory leaks if cleanup is incomplete\n\n"
-            f"✅ REQUIREMENTS:\n"
-            f"   • Each user's cleanup must be completely independent\n"
-            f"   • User disconnection shouldn't affect other users\n"
-            f"   • Resource cleanup must be thorough but isolated\n\n"
-            f"💡 REMEDIATION: Ensure factory creates truly independent managers"
+            f" ALERT:  VIOLATIONS:\n" + "\n".join(f"   [U+2022] {v}" for v in result.violations_detected) +
+            f"\n\n[U+1F4A5] RISKS:\n"
+            f"   [U+2022] User cleanup could disconnect other users\n"
+            f"   [U+2022] Shared resources could be corrupted during cleanup\n"
+            f"   [U+2022] Memory leaks if cleanup is incomplete\n\n"
+            f" PASS:  REQUIREMENTS:\n"
+            f"   [U+2022] Each user's cleanup must be completely independent\n"
+            f"   [U+2022] User disconnection shouldn't affect other users\n"
+            f"   [U+2022] Resource cleanup must be thorough but isolated\n\n"
+            f" IDEA:  REMEDIATION: Ensure factory creates truly independent managers"
         )
 
     def test_comprehensive_security_validation_report(self):
@@ -868,10 +868,10 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
         validation_result = asyncio.run(run_all_security_tests())
         
         # Generate comprehensive security report
-        self.logger.info("🛡️ COMPREHENSIVE WEBSOCKET SECURITY VALIDATION REPORT")
+        self.logger.info("[U+1F6E1][U+FE0F] COMPREHENSIVE WEBSOCKET SECURITY VALIDATION REPORT")
         self.logger.info("=" * 70)
         
-        self.logger.info(f"📊 OVERALL SECURITY METRICS:")
+        self.logger.info(f" CHART:  OVERALL SECURITY METRICS:")
         self.logger.info(f"   Tests run: {validation_result.total_tests_run}")
         self.logger.info(f"   Tests passed: {validation_result.tests_passed}")
         self.logger.info(f"   Critical violations: {validation_result.critical_violations}")
@@ -881,39 +881,39 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
         score = validation_result.security_compliance_score
         if score >= 95:
             grade = "A+ (EXCELLENT)"
-            status = "🟢 SECURE"
+            status = "[U+1F7E2] SECURE"
         elif score >= 85:
             grade = "A (GOOD)" 
-            status = "🟡 MOSTLY SECURE"
+            status = "[U+1F7E1] MOSTLY SECURE"
         elif score >= 70:
             grade = "B (ACCEPTABLE)"
-            status = "🟠 NEEDS IMPROVEMENT"
+            status = "[U+1F7E0] NEEDS IMPROVEMENT"
         else:
             grade = "F (FAILING)"
-            status = "🔴 INSECURE"
+            status = "[U+1F534] INSECURE"
         
-        self.logger.info(f"🎯 Security Grade: {grade}")
-        self.logger.info(f"📈 Status: {status}")
+        self.logger.info(f" TARGET:  Security Grade: {grade}")
+        self.logger.info(f"[U+1F4C8] Status: {status}")
         
         if validation_result.critical_violations > 0:
-            self.logger.warning("🚨 CRITICAL SECURITY ISSUES FOUND:")
+            self.logger.warning(" ALERT:  CRITICAL SECURITY ISSUES FOUND:")
             for result in validation_result.test_results:
                 for violation in result.violations_detected:
-                    self.logger.warning(f"   ❌ {violation}")
+                    self.logger.warning(f"    FAIL:  {violation}")
         else:
-            self.logger.info("✅ NO CRITICAL SECURITY VIOLATIONS DETECTED")
+            self.logger.info(" PASS:  NO CRITICAL SECURITY VIOLATIONS DETECTED")
         
         # Security recommendations
-        self.logger.info("\n🔧 SECURITY RECOMMENDATIONS:")
+        self.logger.info("\n[U+1F527] SECURITY RECOMMENDATIONS:")
         if validation_result.critical_violations == 0:
-            self.logger.info("   ✅ Current implementation meets security requirements")
-            self.logger.info("   ✅ User isolation appears to be working correctly")
-            self.logger.info("   💡 Continue monitoring with regular security validations")
+            self.logger.info("    PASS:  Current implementation meets security requirements")
+            self.logger.info("    PASS:  User isolation appears to be working correctly")
+            self.logger.info("    IDEA:  Continue monitoring with regular security validations")
         else:
-            self.logger.info("   🚨 Address critical violations immediately")
-            self.logger.info("   🔍 Review factory pattern implementation")
-            self.logger.info("   🧪 Run individual security tests for detailed diagnostics")
-            self.logger.info("   📋 Implement additional isolation safeguards")
+            self.logger.info("    ALERT:  Address critical violations immediately")
+            self.logger.info("    SEARCH:  Review factory pattern implementation")
+            self.logger.info("   [U+1F9EA] Run individual security tests for detailed diagnostics")
+            self.logger.info("   [U+1F4CB] Implement additional isolation safeguards")
         
         # Record comprehensive metrics
         security_metrics = {
@@ -932,9 +932,9 @@ class TestWebSocketUserIsolationValidation(SSotBaseTestCase):
             f"Security compliance score ({validation_result.security_compliance_score:.1f}%) "
             f"below minimum requirement ({self.MIN_SECURITY_SCORE}%). "
             f"Found {validation_result.critical_violations} critical violations.\n\n"
-            f"🚨 SECURITY FAILURE: System does not meet minimum security requirements.\n"
-            f"✅ REQUIREMENTS: User isolation must be complete and secure.\n"
-            f"💡 REMEDIATION: Address all violations before deployment."
+            f" ALERT:  SECURITY FAILURE: System does not meet minimum security requirements.\n"
+            f" PASS:  REQUIREMENTS: User isolation must be complete and secure.\n"
+            f" IDEA:  REMEDIATION: Address all violations before deployment."
         )
 
         assert validation_result.critical_violations <= self.MAX_ISOLATION_VIOLATIONS, (

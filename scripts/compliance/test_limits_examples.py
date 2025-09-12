@@ -26,7 +26,7 @@ def test_user_authentication_flow_long():
     assert decoded_token["email"] == user_data["email"]
 
 
-# AFTER: Split into focused test functions (each ≤8 lines)
+# AFTER: Split into focused test functions (each  <= 8 lines)
 def test_user_creation():
     """Test user creation"""
     user_data = {"email": "test@example.com", "password": "secure_password"}
@@ -74,7 +74,7 @@ This would contain:
 - Helper functions
 """
 
-# AFTER: Split into focused test modules (each ≤300 lines)
+# AFTER: Split into focused test modules (each  <= 300 lines)
 """
 test_user_creation.py (80 lines)
 - test_user_creation_valid_data()
@@ -193,7 +193,7 @@ class FunctionSplittingExamples:
     
     def after_split_into_focused_functions(self):
         """
-        AFTER: Split into multiple focused functions (each ≤8 lines)
+        AFTER: Split into multiple focused functions (each  <= 8 lines)
         
         def test_user_creation():
             user_data = create_user_data()
@@ -263,8 +263,8 @@ def test_user_validation(email, password, expected):
 if __name__ == "__main__":
     print("Test Limits Examples - See function docstrings for splitting strategies")
     print("\nKey principles:")
-    print("1. Test files MUST be ≤300 lines (SPEC/testing.xml)")
-    print("2. Test functions MUST be ≤8 lines (SPEC/testing.xml)")
+    print("1. Test files MUST be  <= 300 lines (SPEC/testing.xml)")
+    print("2. Test functions MUST be  <= 8 lines (SPEC/testing.xml)")
     print("3. Split by functionality, test type, or scenario")
     print("4. Extract common setup to fixtures or helper functions")
     print("5. Use parameterized tests to reduce duplication")

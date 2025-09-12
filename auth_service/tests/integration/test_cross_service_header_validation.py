@@ -107,7 +107,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                 "X-Request-ID": f"req_{uuid.uuid4().hex[:16]}"  # Request tracing
             }
             
-            logger.info(f"✅ JWT token created with headers: {list(forwarded_headers.keys())}")
+            logger.info(f" PASS:  JWT token created with headers: {list(forwarded_headers.keys())}")
             
             # Test auth service JWT validation endpoint
             auth_service_url = self.env.get("AUTH_SERVICE_URL", "http://localhost:8081")
@@ -154,7 +154,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                             f"CRITICAL: Permission '{perm}' lost in JWT header processing"
                         )
                     
-                    logger.info(f"✅ JWT context preserved: user={test_user_id}, permissions={len(permissions)}")
+                    logger.info(f" PASS:  JWT context preserved: user={test_user_id}, permissions={len(permissions)}")
             
             # Test token introspection endpoint
             introspect_url = f"{auth_service_url}/auth/introspect"
@@ -180,15 +180,15 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                             f"Expected: {test_user_id}, Got: {introspect_data.get('sub')}"
                         )
                         
-                        logger.info("✅ Token introspection successful with preserved context")
+                        logger.info(" PASS:  Token introspection successful with preserved context")
                         
                     elif resp.status == 404:
                         # Endpoint may not exist - log but don't fail
-                        logger.info("ℹ️ Token introspection endpoint not available")
+                        logger.info("[U+2139][U+FE0F] Token introspection endpoint not available")
                         
                     else:
                         introspect_error = await resp.text()
-                        logger.warning(f"⚠️ Token introspection failed ({resp.status}): {introspect_error}")
+                        logger.warning(f" WARNING: [U+FE0F] Token introspection failed ({resp.status}): {introspect_error}")
             
             # Assert business value delivered
             self.assert_business_value_delivered(
@@ -239,7 +239,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                 "X-Request-ID": f"oauth_req_{uuid.uuid4().hex[:16]}"
             }
             
-            logger.info(f"✅ OAuth callback headers prepared: {list(oauth_callback_headers.keys())}")
+            logger.info(f" PASS:  OAuth callback headers prepared: {list(oauth_callback_headers.keys())}")
             
             # Test OAuth callback endpoint
             auth_service_url = self.env.get("AUTH_SERVICE_URL", "http://localhost:8081")
@@ -263,7 +263,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                     response_text = await resp.text()
                     
                     if resp.status in [200, 302]:  # Success or redirect
-                        logger.info("✅ OAuth callback processed headers successfully")
+                        logger.info(" PASS:  OAuth callback processed headers successfully")
                         
                         # If redirect, verify Location header preserved
                         if resp.status == 302:
@@ -271,7 +271,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                             assert location is not None, (
                                 "CRITICAL: OAuth redirect location missing - header processing failed"
                             )
-                            logger.info(f"✅ OAuth redirect header preserved: {location[:50]}...")
+                            logger.info(f" PASS:  OAuth redirect header preserved: {location[:50]}...")
                             
                     elif resp.status == 400:
                         # Bad request is expected with test data, but verify it's not header-related
@@ -279,11 +279,11 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                             f"CRITICAL: OAuth callback failed due to header processing. "
                             f"Response: {response_text}"
                         )
-                        logger.info("✅ OAuth callback processed headers (returned expected 400 for test data)")
+                        logger.info(" PASS:  OAuth callback processed headers (returned expected 400 for test data)")
                         
                     elif resp.status == 404:
                         # OAuth endpoint may not be configured - log but don't fail
-                        logger.info("ℹ️ OAuth callback endpoint not available - skipping OAuth header test")
+                        logger.info("[U+2139][U+FE0F] OAuth callback endpoint not available - skipping OAuth header test")
                         
                     else:
                         # Check if failure is header-related
@@ -294,7 +294,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                                 f"Response: {response_text}"
                             )
                         else:
-                            logger.info(f"✅ OAuth callback headers processed (returned {resp.status} for test data)")
+                            logger.info(f" PASS:  OAuth callback headers processed (returned {resp.status} for test data)")
             
             # Test OAuth token exchange with headers
             token_url = f"{auth_service_url}/auth/oauth/token"
@@ -330,11 +330,11 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                             f"Response: {response_text}"
                         )
                         
-                        logger.info(f"✅ OAuth token exchange processed headers (status: {resp.status})")
+                        logger.info(f" PASS:  OAuth token exchange processed headers (status: {resp.status})")
                         
                     elif resp.status == 404:
                         # OAuth token endpoint may not be configured
-                        logger.info("ℹ️ OAuth token endpoint not available - skipping token header test")
+                        logger.info("[U+2139][U+FE0F] OAuth token endpoint not available - skipping token header test")
                         
                     else:
                         # Unexpected error - check if header-related
@@ -344,7 +344,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                                 f"Response: {response_text}"
                             )
                         else:
-                            logger.info(f"✅ OAuth token headers processed (unexpected status {resp.status})")
+                            logger.info(f" PASS:  OAuth token headers processed (unexpected status {resp.status})")
             
             # Assert business value delivered
             self.assert_business_value_delivered(
@@ -397,7 +397,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                 "X-Request-ID": f"e2e_req_{uuid.uuid4().hex[:16]}"
             }
             
-            logger.info(f"✅ E2E bypass headers prepared: {list(e2e_headers.keys())}")
+            logger.info(f" PASS:  E2E bypass headers prepared: {list(e2e_headers.keys())}")
             
             # Test E2E authentication bypass endpoint
             auth_service_url = self.env.get("AUTH_SERVICE_URL", "http://localhost:8081")
@@ -435,7 +435,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                             f"Expected: {test_user_email}, Got: {user_data.get('email')}"
                         )
                         
-                        logger.info("✅ E2E bypass headers processed successfully")
+                        logger.info(" PASS:  E2E bypass headers processed successfully")
                         
                         # Verify created token works
                         e2e_token = e2e_result["access_token"]
@@ -448,12 +448,12 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                                 assert val_data.get("valid") is True, (
                                     "CRITICAL: E2E bypass token validation failed"
                                 )
-                                logger.info("✅ E2E bypass token validation successful")
+                                logger.info(" PASS:  E2E bypass token validation successful")
                         
                     elif resp.status == 401:
                         # Check if it's due to missing E2E bypass key
                         if "bypass" in response_text.lower() or "unauthorized" in response_text.lower():
-                            logger.warning("⚠️ E2E bypass key not configured - test environment limitation")
+                            logger.warning(" WARNING: [U+FE0F] E2E bypass key not configured - test environment limitation")
                         else:
                             raise AssertionError(
                                 f"CRITICAL: E2E bypass failed due to header processing ({resp.status}). "
@@ -463,7 +463,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                             
                     elif resp.status == 404:
                         # E2E bypass endpoint may not be available
-                        logger.info("ℹ️ E2E bypass endpoint not available - skipping E2E header test")
+                        logger.info("[U+2139][U+FE0F] E2E bypass endpoint not available - skipping E2E header test")
                         
                     else:
                         # Check if failure is header-related
@@ -474,7 +474,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                                 f"Response: {response_text}"
                             )
                         else:
-                            logger.info(f"✅ E2E headers processed (returned {resp.status} - may be config issue)")
+                            logger.info(f" PASS:  E2E headers processed (returned {resp.status} - may be config issue)")
             
             # Test E2E header validation endpoint
             validate_e2e_url = f"{auth_service_url}/auth/e2e/validate-headers"
@@ -493,9 +493,9 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                             assert validation_result.get("valid_e2e_headers") is True, (
                                 "CRITICAL: E2E header validation failed"
                             )
-                            logger.info("✅ E2E header validation endpoint successful")
+                            logger.info(" PASS:  E2E header validation endpoint successful")
                         else:
-                            logger.info("ℹ️ E2E header validation endpoint not available")
+                            logger.info("[U+2139][U+FE0F] E2E header validation endpoint not available")
                             
                     else:
                         response_text = await resp.text()
@@ -505,7 +505,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                                 f"Response: {response_text}"
                             )
                         else:
-                            logger.info(f"✅ E2E headers processed by validation (status {resp.status})")
+                            logger.info(f" PASS:  E2E headers processed by validation (status {resp.status})")
             
             # Assert business value delivered
             self.assert_business_value_delivered(
@@ -571,7 +571,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                 "X-Timezone": "America/New_York"
             }
             
-            logger.info(f"✅ Production-like headers prepared: {len(production_headers)} headers")
+            logger.info(f" PASS:  Production-like headers prepared: {len(production_headers)} headers")
             
             # Test multiple auth service endpoints with comprehensive headers
             auth_service_url = self.env.get("AUTH_SERVICE_URL", "http://localhost:8081")
@@ -614,7 +614,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                         raise  # Re-raise validation errors
                     except Exception as e:
                         # Log but don't fail for endpoint-specific issues
-                        logger.warning(f"⚠️ Endpoint {endpoint} had issues: {e}")
+                        logger.warning(f" WARNING: [U+FE0F] Endpoint {endpoint} had issues: {e}")
                         # Still count as success if error is not header-related
                         if "header" not in str(e).lower():
                             successful_forwards += 1
@@ -627,7 +627,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                 f"This indicates widespread header forwarding issues."
             )
             
-            logger.info(f"✅ Header forwarding validated: {successful_forwards}/{total_endpoints} endpoints successful")
+            logger.info(f" PASS:  Header forwarding validated: {successful_forwards}/{total_endpoints} endpoints successful")
             
             # Assert business value delivered
             self.assert_business_value_delivered(
@@ -690,7 +690,7 @@ class TestCrossServiceHeaderValidation(BaseIntegrationTest):
                     f"Response: {response_text[:200]}"
                 )
         
-        logger.info(f"✅ Header forwarding validated for {endpoint} (status: {response.status})")
+        logger.info(f" PASS:  Header forwarding validated for {endpoint} (status: {response.status})")
 
     def assert_business_value_delivered(self, result: Dict[str, Any], expected_value_type: str):
         """

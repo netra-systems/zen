@@ -276,7 +276,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         
     async def test_execution_engine_creation_performance(self):
         """Test UserExecutionEngine creation performance"""
-        print("\n🔍 Testing UserExecutionEngine creation performance...")
+        print("\n SEARCH:  Testing UserExecutionEngine creation performance...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -338,7 +338,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             max_creation_time = max(creation_times)
             std_dev = statistics.stdev(creation_times) if len(creation_times) > 1 else 0
             
-            print(f"  📊 Engine Creation Performance:")
+            print(f"   CHART:  Engine Creation Performance:")
             print(f"    Average: {avg_creation_time:.4f}s")
             print(f"    Median: {median_creation_time:.4f}s")
             print(f"    Maximum: {max_creation_time:.4f}s")
@@ -394,7 +394,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 performance_violations.append(error_msg)
                 return float('inf')
         
-        print(f"  🔄 Testing concurrent engine creation...")
+        print(f"   CYCLE:  Testing concurrent engine creation...")
         concurrent_tasks = [create_engine_concurrent(i) for i in range(20)]
         concurrent_times = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
         
@@ -422,7 +422,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 logger.error(violation)
                 performance_violations.append(violation)
         
-        print(f"  ✅ Engine creation performance tested: {len(creation_times)} sequential, {len(valid_concurrent_times)} concurrent")
+        print(f"   PASS:  Engine creation performance tested: {len(creation_times)} sequential, {len(valid_concurrent_times)} concurrent")
         
         # BUSINESS-CRITICAL: Engine creation performance directly affects user experience and revenue
         if performance_violations:
@@ -431,11 +431,11 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 logger.error(f"  - {violation}")
             self.fail(f"BUSINESS-CRITICAL: Engine creation performance violations affect user experience and revenue: {performance_violations}")
         
-        print(f"  ✅ UserExecutionEngine creation performance validated")
+        print(f"   PASS:  UserExecutionEngine creation performance validated")
     
     async def test_event_processing_performance(self):
         """Test WebSocket event processing performance"""
-        print("\n🔍 Testing WebSocket event processing performance...")
+        print("\n SEARCH:  Testing WebSocket event processing performance...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -455,7 +455,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         )
         
         # Test single event processing performance
-        print(f"  📊 Testing single event processing...")
+        print(f"   CHART:  Testing single event processing...")
         
         event_types = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
         single_event_times = []
@@ -500,7 +500,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 performance_violations.append(f"Slow max event processing: {max_event_time:.4f}s")
         
         # Test burst event processing
-        print(f"  🔄 Testing burst event processing...")
+        print(f"   CYCLE:  Testing burst event processing...")
         
         burst_sizes = [10, 50, 100, 200]
         
@@ -538,7 +538,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 performance_violations.append(f"Burst processing {burst_size} failed: {e}")
         
         # Test sustained event processing
-        print(f"  ⏱️  Testing sustained event processing...")
+        print(f"  [U+23F1][U+FE0F]  Testing sustained event processing...")
         
         sustained_duration = 5.0  # 5 seconds of sustained processing
         sustained_start = time.perf_counter()
@@ -576,17 +576,17 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         if hasattr(engine, 'cleanup'):
             engine.cleanup()
         
-        print(f"  ✅ Event processing performance tested: {len(single_event_times)} single events, {len(burst_sizes)} burst tests, {sustained_events} sustained events")
+        print(f"   PASS:  Event processing performance tested: {len(single_event_times)} single events, {len(burst_sizes)} burst tests, {sustained_events} sustained events")
         
         # CRITICAL: Event processing performance affects real-time user experience
         if performance_violations:
             self.fail(f"Event processing performance violations: {performance_violations}")
         
-        print(f"  ✅ WebSocket event processing performance validated")
+        print(f"   PASS:  WebSocket event processing performance validated")
     
     async def test_memory_performance_characteristics(self):
         """Test memory performance and resource management"""
-        print("\n🔍 Testing memory performance characteristics...")
+        print("\n SEARCH:  Testing memory performance characteristics...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -598,7 +598,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         metrics.start_measurement()
         
         # Test memory usage during engine lifecycle
-        print(f"  💾 Testing memory usage patterns...")
+        print(f"  [U+1F4BE] Testing memory usage patterns...")
         
         initial_memory = tracemalloc.get_traced_memory()[0] if tracemalloc.is_tracing() else 0
         memory_measurements = []
@@ -697,7 +697,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             peak_cycle_memory = max(m['cycle_peak'] for m in memory_measurements)
             avg_cycle_memory = statistics.mean(m['cycle_peak'] for m in memory_measurements)
             
-            print(f"  📊 Memory Performance Analysis:")
+            print(f"   CHART:  Memory Performance Analysis:")
             print(f"    Total memory growth: {total_growth/1024/1024:.2f}MB")
             print(f"    Peak cycle memory: {peak_cycle_memory/1024/1024:.2f}MB")
             print(f"    Average cycle memory: {avg_cycle_memory/1024/1024:.2f}MB")
@@ -715,7 +715,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 performance_violations.append(violation)
         
         # Test memory usage under load
-        print(f"  🚀 Testing memory usage under load...")
+        print(f"  [U+1F680] Testing memory usage under load...")
         
         load_start_memory = tracemalloc.get_traced_memory()[0] if tracemalloc.is_tracing() else 0
         
@@ -787,7 +787,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             logger.error(violation)
             performance_violations.append(violation)
         
-        print(f"  ✅ Memory performance tested: {len(memory_measurements)} cycles, {len(load_tasks)} load engines")
+        print(f"   PASS:  Memory performance tested: {len(memory_measurements)} cycles, {len(load_tasks)} load engines")
         
         # BUSINESS-CRITICAL: Memory performance affects system stability and concurrent user capacity
         if performance_violations:
@@ -796,11 +796,11 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 logger.error(f"  - {violation}")
             self.fail(f"BUSINESS-CRITICAL: Memory performance violations affect system stability and user capacity: {performance_violations}")
         
-        print(f"  ✅ Memory performance characteristics validated")
+        print(f"   PASS:  Memory performance characteristics validated")
     
     def test_baseline_performance_comparison(self):
         """Test performance against established baselines"""
-        print("\n🔍 Testing performance against baselines...")
+        print("\n SEARCH:  Testing performance against baselines...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -819,7 +819,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             'response_time_95th': 0.1         # 100ms 95th percentile
         }
         
-        print(f"  📊 Performance Baselines:")
+        print(f"   CHART:  Performance Baselines:")
         for metric, baseline in baselines.items():
             if 'time' in metric:
                 print(f"    {metric}: {baseline:.3f}s")
@@ -831,7 +831,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 print(f"    {metric}: {baseline}")
         
         # Test against engine creation baseline
-        print(f"  🔬 Testing engine creation baseline...")
+        print(f"  [U+1F52C] Testing engine creation baseline...")
         
         creation_times = []
         for i in range(20):
@@ -864,7 +864,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 performance_violations.append(f"Engine creation time exceeds baseline: {avg_creation_time:.4f}s > {baselines['engine_creation_time']:.3f}s")
         
         # Test against event processing baseline
-        print(f"  🔬 Testing event processing baseline...")
+        print(f"  [U+1F52C] Testing event processing baseline...")
         
         websocket_mock = PerformanceWebSocketMock(self.test_user_id)
         engine = UserExecutionEngine(
@@ -903,7 +903,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 performance_violations.append(f"95th percentile response time exceeds baseline: {p95_event_time:.4f}s > {baselines['response_time_95th']:.3f}s")
         
         # Test throughput baseline
-        print(f"  🔬 Testing throughput baseline...")
+        print(f"  [U+1F52C] Testing throughput baseline...")
         
         async def test_throughput_baseline():
             start_time = time.perf_counter()
@@ -945,7 +945,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
         
         asyncio.run(cleanup_resources())
         
-        print(f"  ✅ Baseline performance comparison completed")
+        print(f"   PASS:  Baseline performance comparison completed")
         
         # BUSINESS-CRITICAL: Baseline performance ensures production readiness and customer experience
         if performance_violations:
@@ -954,11 +954,11 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 logger.error(f"  - {violation}")
             self.fail(f"BUSINESS-CRITICAL: Baseline performance violations affect production readiness and customer experience: {performance_violations}")
         
-        print(f"  ✅ All performance baselines met - system ready for production")
+        print(f"   PASS:  All performance baselines met - system ready for production")
     
     async def test_comprehensive_performance_validation(self):
         """Comprehensive performance validation protecting $500K+ ARR"""
-        print("\n🚀 Running comprehensive performance validation for production readiness...")
+        print("\n[U+1F680] Running comprehensive performance validation for production readiness...")
         
         performance_summary = {
             'test_start_time': time.time(),
@@ -981,7 +981,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
             ]
             
             for test_name, test_method in test_methods:
-                print(f"\n  🔍 Running {test_name}...")
+                print(f"\n   SEARCH:  Running {test_name}...")
                 test_start = time.perf_counter()
                 
                 try:
@@ -992,7 +992,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                         'duration': test_duration,
                         'business_impact': 'Positive - meets production requirements'
                     }
-                    print(f"    ✅ {test_name} PASSED ({test_duration:.2f}s)")
+                    print(f"     PASS:  {test_name} PASSED ({test_duration:.2f}s)")
                     
                 except AssertionError as e:
                     # Performance test failed - BUSINESS CRITICAL
@@ -1007,7 +1007,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                     }
                     # Reduce performance score
                     performance_summary['performance_score'] -= 25
-                    print(f"    ❌ {test_name} FAILED ({test_duration:.2f}s): {e}")
+                    print(f"     FAIL:  {test_name} FAILED ({test_duration:.2f}s): {e}")
                     logger.error(violation_msg)
                     
                 except Exception as e:
@@ -1023,7 +1023,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                     }
                     # Major score reduction for system instability
                     performance_summary['performance_score'] -= 35
-                    print(f"    ⚠️ {test_name} ERROR ({test_duration:.2f}s): {e}")
+                    print(f"     WARNING: [U+FE0F] {test_name} ERROR ({test_duration:.2f}s): {e}")
                     logger.error(error_msg)
             
             # Calculate final performance assessment
@@ -1050,7 +1050,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 customer_impact = "Severe user experience issues - revenue impact"
             
             # Final performance report
-            print(f"\n📊 COMPREHENSIVE PERFORMANCE VALIDATION SUMMARY:")
+            print(f"\n CHART:  COMPREHENSIVE PERFORMANCE VALIDATION SUMMARY:")
             print(f"  Business Impact: {performance_summary['business_impact']}")
             print(f"  Performance Score: {performance_summary['performance_score']}/100 ({performance_level})")
             print(f"  Business Readiness: {business_readiness}")
@@ -1070,7 +1070,7 @@ class TestPerformanceValidation(SSotAsyncTestCase):
                 
                 self.fail(f"BUSINESS-CRITICAL: Comprehensive performance validation failed - system not ready for production. Score: {performance_summary['performance_score']}/100. Violations: {all_violations}")
             
-            print(f"\n✅ COMPREHENSIVE PERFORMANCE VALIDATION PASSED - System ready for production deployment")
+            print(f"\n PASS:  COMPREHENSIVE PERFORMANCE VALIDATION PASSED - System ready for production deployment")
             
         except Exception as e:
             # Catastrophic failure in performance validation

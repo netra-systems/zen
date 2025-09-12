@@ -7,7 +7,7 @@ Real Critical User Journey Optimization Helpers - Analysis, Concurrent Testing, 
 3. **Value Impact**: Modular optimization helpers reduce test maintenance by 70%
 4. **Revenue Impact**: Faster optimization testing = quicker iteration on value demonstration
 
-**ARCHITECTURE**: ≤300 lines, ≤8 lines per function as per CLAUDE.md requirements
+**ARCHITECTURE**:  <= 300 lines,  <= 8 lines per function as per CLAUDE.md requirements
 Provides reusable helper methods for optimization analysis and concurrent testing.
 """
 
@@ -22,7 +22,7 @@ from netra_backend.app.llm.llm_defaults import LLMModel, LLMConfig
 from netra_backend.tests.e2e.first_time_user.real_critical_auth_helpers import CriticalUserJourneyHelpers
 
 class OptimizationHelpers:
-    """Optimization analysis testing helpers (≤8 lines each)"""
+    """Optimization analysis testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def submit_usage_data_for_analysis():
@@ -84,7 +84,7 @@ class OptimizationHelpers:
         return verification_data
 
 class ConcurrentTestHelpers:
-    """Concurrent user testing helpers (≤8 lines each)"""
+    """Concurrent user testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def setup_concurrent_load_environment():
@@ -149,7 +149,7 @@ class ConcurrentTestHelpers:
         return recovery_mechanisms
 
 class PerformanceTestHelpers:
-    """Performance testing helpers for critical user journeys (≤8 lines each)"""
+    """Performance testing helpers for critical user journeys ( <= 8 lines each)"""
     
     @staticmethod
     async def setup_performance_monitoring():
@@ -201,7 +201,7 @@ class PerformanceTestHelpers:
         return {"validation_results": validation_results, "all_passed": all(r["passed"] for r in validation_results)}
 
 class ValueDemonstrationHelpers:
-    """Value demonstration testing helpers (≤8 lines each)"""
+    """Value demonstration testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def setup_value_demonstration_scenario():
@@ -220,7 +220,7 @@ class ValueDemonstrationHelpers:
         return {"recommendations": recommendations, "total_savings": 420}
 
 class ErrorRecoveryHelpers:
-    """Error recovery testing helpers (≤8 lines each)"""
+    """Error recovery testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def simulate_network_failures():

@@ -258,11 +258,11 @@ class HealthMonitor:
                 # Log detailed readiness info
                 grace_remaining = status.time_remaining_in_grace_period()
                 logger.info(f"Service {name} marked as ready")
-                logger.info(f"  → Grace period remaining: {grace_remaining:.1f}s")
+                logger.info(f"   ->  Grace period remaining: {grace_remaining:.1f}s")
                 if ports:
-                    logger.info(f"  → Verified ports: {sorted(ports)}")
+                    logger.info(f"   ->  Verified ports: {sorted(ports)}")
                 if process_pid:
-                    logger.info(f"  → Process PID: {process_pid}")
+                    logger.info(f"   ->  Process PID: {process_pid}")
                     
                 # Verify process on Windows
                 if self.is_windows and process_pid:

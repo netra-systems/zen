@@ -37,7 +37,7 @@
         # REMOVED_SYNTAX_ERROR: - Location: supervisor_consolidated.py, _init_registry() method
         # REMOVED_SYNTAX_ERROR: - Problem: set_websocket_manager() called before register_default_agents()
         # REMOVED_SYNTAX_ERROR: - Impact: Agents couldn"t send WebSocket events, breaking chat functionality
-        # REMOVED_SYNTAX_ERROR: - Fix: Swap order to register_default_agents() → set_websocket_manager()
+        # REMOVED_SYNTAX_ERROR: - Fix: Swap order to register_default_agents()  ->  set_websocket_manager()
 
         # REMOVED_SYNTAX_ERROR: Test Requirements:
             # REMOVED_SYNTAX_ERROR: 1. Verify agents are registered BEFORE WebSocket manager is set

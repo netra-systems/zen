@@ -83,7 +83,7 @@ class TestWebSocketRaceConditionRegressionE2E(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail with chat flow interruption.
         """
-        logger.info("🚨 E2E TEST: Complete user chat flow regression reproduction")
+        logger.info(" ALERT:  E2E TEST: Complete user chat flow regression reproduction")
         
         await self.async_setup_method()
         
@@ -250,7 +250,7 @@ class TestWebSocketRaceConditionRegressionE2E(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail with user isolation violations.
         """
-        logger.info("🚨 E2E TEST: Concurrent multi-user race conditions")
+        logger.info(" ALERT:  E2E TEST: Concurrent multi-user race conditions")
         
         await self.async_setup_method()
         
@@ -421,7 +421,7 @@ class TestWebSocketRaceConditionRegressionE2E(SSotBaseTestCase):
         if cross_contamination_events:
             contamination_pattern = {}
             for event in cross_contamination_events:
-                key = f"{event['receiving_user']}←{event['event_user_id']}"
+                key = f"{event['receiving_user']} <- {event['event_user_id']}"
                 contamination_pattern[key] = contamination_pattern.get(key, 0) + 1
                 
             multi_user_violations.append(
@@ -468,7 +468,7 @@ class TestWebSocketRaceConditionRegressionE2E(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail with business value metrics degradation.
         """
-        logger.info("🚨 E2E TEST: Business value loss from interface confusion")
+        logger.info(" ALERT:  E2E TEST: Business value loss from interface confusion")
         
         await self.async_setup_method()
         
@@ -731,7 +731,7 @@ class TestProductionWebSocketEventDeliveryFailures(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail with production failure patterns.
         """
-        logger.info("🚨 PRODUCTION SIMULATION: Event delivery failure patterns")
+        logger.info(" ALERT:  PRODUCTION SIMULATION: Event delivery failure patterns")
         
         # CRITICAL: Simulate production load characteristics
         production_load_config = {

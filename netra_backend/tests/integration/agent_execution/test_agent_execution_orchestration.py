@@ -294,7 +294,7 @@ class TestAgentExecutionOrchestration(BaseIntegrationTest):
         assert triage_agent.execution_count == 1
         assert triage_agent.websocket_bridge is websocket_bridge
         
-        logger.info(f"✅ Single agent orchestration test passed - {len(events)} events emitted in {execution_time:.3f}s")
+        logger.info(f" PASS:  Single agent orchestration test passed - {len(events)} events emitted in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -366,7 +366,7 @@ class TestAgentExecutionOrchestration(BaseIntegrationTest):
         assert not engine1.is_active()
         assert not engine2.is_active()
         
-        logger.info("✅ User execution engine isolation test passed")
+        logger.info(" PASS:  User execution engine isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -465,7 +465,7 @@ class TestAgentExecutionOrchestration(BaseIntegrationTest):
         if len(agent_started_events) > 6:  # Allow up to 2x events per agent due to delegation
             logger.warning(f"Potential event duplication: {len(agent_started_events)} agent_started events for 3 agents")
         
-        logger.info(f"✅ Performance under load test passed - {len(results)} agents in {total_time:.3f}s")
+        logger.info(f" PASS:  Performance under load test passed - {len(results)} agents in {total_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -575,7 +575,7 @@ class TestAgentExecutionOrchestration(BaseIntegrationTest):
         tool_events = [e for e in events if e["event_type"] in ["tool_executing", "tool_completed"]]
         assert len(tool_events) >= 2  # At least executing and completed
         
-        logger.info("✅ Agent execution with tool dispatcher test passed")
+        logger.info(" PASS:  Agent execution with tool dispatcher test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -644,7 +644,7 @@ class TestAgentExecutionOrchestration(BaseIntegrationTest):
         # Validate cleanup
         assert len(engine.active_runs) == 0
         
-        logger.info("✅ Execution engine resource cleanup test passed")
+        logger.info(" PASS:  Execution engine resource cleanup test passed")
 
 
 @pytest.mark.integration
@@ -723,7 +723,7 @@ async def test_agent_execution_timeout_handling():
     # The important thing is that the execution engine timed out the operation
     assert slow_agent.execution_count >= 0  # Agent may or may not have started execution
     
-    logger.info(f"✅ Agent timeout handling test passed - timed out in {execution_time:.3f}s")
+    logger.info(f" PASS:  Agent timeout handling test passed - timed out in {execution_time:.3f}s")
 
 
 if __name__ == "__main__":

@@ -52,7 +52,7 @@ class TestMessageHandlerStartupRaceConditions(BaseIntegrationTest):
         
         EXPECTED TO FAIL: Handler registration is not thread-safe.
         """
-        logger.info("🏁 Reproducing concurrent handler registration race condition")
+        logger.info("[U+1F3C1] Reproducing concurrent handler registration race condition")
         
         # SETUP: Create multiple handler services simultaneously
         services = []
@@ -99,16 +99,16 @@ class TestMessageHandlerStartupRaceConditions(BaseIntegrationTest):
         handler_counts = [result[1] for result in registration_results if isinstance(result[1], int)]
         errors = [result for result in registration_results if isinstance(result[1], str)]
         
-        logger.info(f"📊 Registration results: {len(successful_services)} services, {len(errors)} errors")
-        logger.info(f"📊 Handler counts: {handler_counts}")
+        logger.info(f" CHART:  Registration results: {len(successful_services)} services, {len(errors)} errors")
+        logger.info(f" CHART:  Handler counts: {handler_counts}")
         
         # Check for inconsistencies
         if len(set(handler_counts)) > 1:
-            logger.error(f"❌ Inconsistent handler registration: counts {set(handler_counts)}")
+            logger.error(f" FAIL:  Inconsistent handler registration: counts {set(handler_counts)}")
         
         if errors:
-            logger.error(f"❌ Registration errors: {errors}")
+            logger.error(f" FAIL:  Registration errors: {errors}")
         
         # FAILURE EXPECTED: Race condition in handler registration
-        logger.error("❌ Handler registration race condition reproduced")
+        logger.error(" FAIL:  Handler registration race condition reproduced")
         assert False, f"HANDLER REGISTRATION RACE: Inconsistent results - counts: {set(handler_counts)}, errors: {len(errors)}"

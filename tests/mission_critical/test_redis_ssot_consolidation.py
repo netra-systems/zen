@@ -89,7 +89,7 @@ class TestRedisSSOTConsolidation(SSotAsyncTestCase):
         """
         from netra_backend.app.cache.redis_cache_manager import default_redis_cache_manager
         
-        # Test cache operations through compatibility layer → SSOT
+        # Test cache operations through compatibility layer  ->  SSOT
         test_key = "test:cache:ssot"
         test_data = {"message": "cache_test", "timestamp": time.time()}
         self.redis_test_keys.add(f"netra:cache:{test_key}")

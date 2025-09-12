@@ -243,7 +243,7 @@ class TestCompleteAgentExecutionWithEvents(BaseE2ETest):
         assert agent_result is not None, \
             "Agent must deliver actual results for business value"
         
-        self.logger.info("✅ CRITICAL SUCCESS: All WebSocket events delivered correctly for complete business value")
+        self.logger.info(" PASS:  CRITICAL SUCCESS: All WebSocket events delivered correctly for complete business value")
     
     @pytest.mark.e2e
     @pytest.mark.real_services  
@@ -378,7 +378,7 @@ class TestCompleteAgentExecutionWithEvents(BaseE2ETest):
         assert has_llm_content, \
             f"Agent result should show evidence of LLM processing. Result: {result}"
         
-        self.logger.info("✅ SUCCESS: Real LLM integration with proper WebSocket event delivery validated")
+        self.logger.info(" PASS:  SUCCESS: Real LLM integration with proper WebSocket event delivery validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -481,4 +481,4 @@ class TestCompleteAgentExecutionWithEvents(BaseE2ETest):
         assert len(all_events) > 0, \
             "WebSocket event delivery must work even when agent execution fails"
         
-        self.logger.info("✅ SUCCESS: Error handling with WebSocket event delivery validated")
+        self.logger.info(" PASS:  SUCCESS: Error handling with WebSocket event delivery validated")

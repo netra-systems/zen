@@ -53,10 +53,10 @@ class DataTemplates:
     
     def _build_parameters_list(self) -> str:
         """Build parameters requirements list."""
-        return ("• Data volume and format\n"
-                "• Key metrics to analyze\n"
-                "• Time range or scope\n"
-                "• Expected insights or patterns\n")
+        return ("[U+2022] Data volume and format\n"
+                "[U+2022] Key metrics to analyze\n"
+                "[U+2022] Time range or scope\n"
+                "[U+2022] Expected insights or patterns\n")
     
     def _get_objectives_template(self) -> str:
         """Get data analysis objectives template."""
@@ -67,10 +67,10 @@ class DataTemplates:
     
     def _build_objectives_list(self) -> str:
         """Build objectives requirements list."""
-        return ("• Sample data or schema\n"
-                "• Analysis objectives\n"
-                "• Historical context if available\n"
-                "• Specific questions to answer\n")
+        return ("[U+2022] Sample data or schema\n"
+                "[U+2022] Analysis objectives\n"
+                "[U+2022] Historical context if available\n"
+                "[U+2022] Specific questions to answer\n")
     
     def _get_processing_issue_template(self) -> str:
         """Get data processing issue template."""
@@ -82,9 +82,9 @@ class DataTemplates:
     
     def _build_processing_issues(self) -> str:
         """Build common processing issues list."""
-        return ("• Inconsistent data formats\n"
-                "• Missing required fields\n"
-                "• Encoding issues\n")
+        return ("[U+2022] Inconsistent data formats\n"
+                "[U+2022] Missing required fields\n"
+                "[U+2022] Encoding issues\n")
     
     def _get_parsing_failure_template(self) -> str:
         """Get data parsing failure template."""
@@ -96,6 +96,6 @@ class DataTemplates:
     
     def _build_parsing_causes(self) -> str:
         """Build common parsing failure causes."""
-        return ("• Malformed JSON/CSV\n"
-                "• Unexpected data types\n"
-                "• Schema mismatches\n")
+        return ("[U+2022] Malformed JSON/CSV\n"
+                "[U+2022] Unexpected data types\n"
+                "[U+2022] Schema mismatches\n")

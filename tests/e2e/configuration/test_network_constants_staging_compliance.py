@@ -516,15 +516,15 @@ if __name__ == "__main__":
     for test_func in tests:
         try:
             test_func()
-            print(f"✅ {test_func.__name__} passed")
+            print(f" PASS:  {test_func.__name__} passed")
             passed_tests += 1
         except AssertionError as e:
-            print(f"❌ {test_func.__name__} failed:\n{e}\n")
+            print(f" FAIL:  {test_func.__name__} failed:\n{e}\n")
         except Exception as e:
-            print(f"❌ {test_func.__name__} error: {e}\n")
+            print(f" FAIL:  {test_func.__name__} error: {e}\n")
     
     if passed_tests == len(tests):
-        print("✅ All network constants staging compliance tests passed!")
+        print(" PASS:  All network constants staging compliance tests passed!")
     else:
-        print(f"❌ {len(tests) - passed_tests} out of {len(tests)} tests failed")
+        print(f" FAIL:  {len(tests) - passed_tests} out of {len(tests)} tests failed")
         exit(1)

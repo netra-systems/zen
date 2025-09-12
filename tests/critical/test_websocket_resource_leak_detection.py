@@ -2,7 +2,7 @@
 WebSocket Manager Resource Leak Detection Tests - PRODUCTION-READY
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - System stability affects all users
+- Segment: ALL (Free  ->  Enterprise) - System stability affects all users
 - Business Goal: Prevent system crashes and resource exhaustion from WebSocket leaks
 - Value Impact: Ensures system can handle concurrent users without hitting resource limits
 - Strategic Impact: Prevents catastrophic service outages that destroy customer trust
@@ -11,11 +11,11 @@ CRITICAL PURPOSE: These tests detect the resource leak scenario identified in GC
 where users hit the 20 manager limit due to insufficient cleanup timing and coordination.
 
 PRODUCTION-READY IMPROVEMENTS:
-✅ REAL WEBSOCKET COMPONENTS: Replaced AsyncMock with TestWebSocketConnection for authentic testing
-✅ ENVIRONMENT-AWARE CONFIGURATION: TestConfiguration automatically adjusts timeouts for CI/GitHub Actions
-✅ RACE CONDITION FIXES: Thread-safe isolation key lookup with retry logic and object identity checks  
-✅ MEMORY LEAK DETECTION: Real memory usage tracking with psutil and configurable thresholds
-✅ CONFIGURATION-BASED TIMEOUTS: No more hardcoded values - all timeouts adapt to environment
+ PASS:  REAL WEBSOCKET COMPONENTS: Replaced AsyncMock with TestWebSocketConnection for authentic testing
+ PASS:  ENVIRONMENT-AWARE CONFIGURATION: TestConfiguration automatically adjusts timeouts for CI/GitHub Actions
+ PASS:  RACE CONDITION FIXES: Thread-safe isolation key lookup with retry logic and object identity checks  
+ PASS:  MEMORY LEAK DETECTION: Real memory usage tracking with psutil and configurable thresholds
+ PASS:  CONFIGURATION-BASED TIMEOUTS: No more hardcoded values - all timeouts adapt to environment
 
 Target Scenarios:
 1. Manager creation limit enforcement (20 managers max per user)
@@ -439,7 +439,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         This test simulates the GCP production scenario where users hit the manager limit
         due to rapid connection creation without proper cleanup coordination.
         """
-        logger.info("🔥 CRITICAL TEST: WebSocket Manager Creation Limit Enforcement")
+        logger.info(" FIRE:  CRITICAL TEST: WebSocket Manager Creation Limit Enforcement")
         
         # Take initial snapshot
         initial_snapshot = self.resource_tracker.take_snapshot("test_start", self.factory)
@@ -582,7 +582,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         
         assert final_snapshot["managers_created"] > initial_snapshot["managers_created"]
         
-        logger.info(f"✅ LIMIT ENFORCEMENT TEST PASSED: Created {final_snapshot['managers_created']} managers total")
+        logger.info(f" PASS:  LIMIT ENFORCEMENT TEST PASSED: Created {final_snapshot['managers_created']} managers total")
 
     @pytest.mark.asyncio
     async def test_websocket_manager_cleanup_timing_precision(self):
@@ -591,7 +591,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         
         This addresses the timing coordination gaps identified in the GCP logs.
         """
-        logger.info("🔥 CRITICAL TEST: WebSocket Manager Cleanup Timing Precision")
+        logger.info(" FIRE:  CRITICAL TEST: WebSocket Manager Cleanup Timing Precision")
         
         initial_snapshot = self.resource_tracker.take_snapshot("timing_test_start", self.factory)
         
@@ -717,7 +717,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         avg_individual_cleanup = sum(individual_cleanup_times) / len(individual_cleanup_times)
         max_individual_cleanup = max(individual_cleanup_times)
         
-        logger.info(f"📊 CLEANUP TIMING ANALYSIS:")
+        logger.info(f" CHART:  CLEANUP TIMING ANALYSIS:")
         logger.info(f"  Average individual cleanup: {avg_individual_cleanup:.1f}ms")
         logger.info(f"  Maximum individual cleanup: {max_individual_cleanup:.1f}ms")
         logger.info(f"  Batch cleanup: {batch_cleanup_duration_ms:.1f}ms for {len(remaining_managers)} managers")
@@ -729,7 +729,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         assert avg_individual_cleanup < avg_threshold, f"Average cleanup time too slow: {avg_individual_cleanup}ms (threshold: {avg_threshold}ms)"
         assert max_individual_cleanup < max_threshold, f"Maximum cleanup time exceeded: {max_individual_cleanup}ms (threshold: {max_threshold}ms)"
         
-        logger.info("✅ CLEANUP TIMING PRECISION TEST PASSED")
+        logger.info(" PASS:  CLEANUP TIMING PRECISION TEST PASSED")
 
     @pytest.mark.asyncio  
     async def test_emergency_cleanup_threshold_trigger(self):
@@ -739,7 +739,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         This tests the proactive cleanup mechanism that prevents hitting emergency thresholds.
         Updated to reflect improved 60% threshold instead of 80% emergency threshold.
         """
-        logger.info("🔥 CRITICAL TEST: Emergency Cleanup Threshold Trigger")
+        logger.info(" FIRE:  CRITICAL TEST: Emergency Cleanup Threshold Trigger")
         
         initial_snapshot = self.resource_tracker.take_snapshot("emergency_test_start", self.factory)
         
@@ -805,7 +805,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
             assert post_proactive_snapshot["active_managers"] <= 7  
             assert new_manager._is_active
             
-            logger.info(f"📊 PROACTIVE CLEANUP TRIGGERED:")
+            logger.info(f" CHART:  PROACTIVE CLEANUP TRIGGERED:")
             logger.info(f"  Before: {threshold_snapshot['active_managers']} managers")
             logger.info(f"  After: {post_proactive_snapshot['active_managers']} managers")
             logger.info(f"  Cleanup duration: {emergency_duration_ms:.1f}ms")
@@ -836,7 +836,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
                 new_manager = await self.factory.create_manager(emergency_context)
                 assert new_manager._is_active
                 
-                logger.info(f"📊 MANUAL EMERGENCY CLEANUP:")
+                logger.info(f" CHART:  MANUAL EMERGENCY CLEANUP:")
                 logger.info(f"  Cleaned managers: {cleaned_count}")
                 logger.info(f"  Cleanup duration: {manual_cleanup_duration_ms:.1f}ms")
             else:
@@ -869,7 +869,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
             max_acceptable = proactive_threshold * 2
             assert max_proactive_time < max_acceptable, f"Proactive cleanup too slow: {max_proactive_time}ms (max allowed: {max_acceptable}ms)"
         
-        logger.info("✅ PROACTIVE CLEANUP THRESHOLD TEST PASSED")
+        logger.info(" PASS:  PROACTIVE CLEANUP THRESHOLD TEST PASSED")
 
     @pytest.mark.asyncio
     async def test_rapid_websocket_connection_cycles_stress(self):
@@ -878,7 +878,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         
         This simulates high-frequency user connection patterns that can cause resource accumulation.
         """
-        logger.info("🔥 CRITICAL TEST: Rapid WebSocket Connection Cycles Stress Test")
+        logger.info(" FIRE:  CRITICAL TEST: Rapid WebSocket Connection Cycles Stress Test")
         
         initial_snapshot = self.resource_tracker.take_snapshot("stress_test_start", self.factory)
         
@@ -966,7 +966,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         cycles_completed = len(cycle_timings)
         cycles_per_second = cycles_completed / total_test_duration
         
-        logger.info(f"📊 STRESS TEST ANALYSIS:")
+        logger.info(f" CHART:  STRESS TEST ANALYSIS:")
         logger.info(f"  Cycles completed: {cycles_completed}/{target_cycles}")
         logger.info(f"  Total duration: {total_test_duration:.1f}s")
         logger.info(f"  Cycles per second: {cycles_per_second:.2f}")
@@ -1047,7 +1047,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
                 minimum_expected=min_cleanup_efficiency
             )
         
-        logger.info("✅ RAPID CONNECTION CYCLES STRESS TEST PASSED")
+        logger.info(" PASS:  RAPID CONNECTION CYCLES STRESS TEST PASSED")
 
     @pytest.mark.asyncio
     async def test_resource_leak_detection_comprehensive(self):
@@ -1057,7 +1057,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         This test combines elements from all individual tests to create a comprehensive
         resource leak detection scenario.
         """
-        logger.info("🔥 COMPREHENSIVE TEST: Resource Leak Detection")
+        logger.info(" FIRE:  COMPREHENSIVE TEST: Resource Leak Detection")
         
         initial_snapshot = self.resource_tracker.take_snapshot("comprehensive_start", self.factory)
         
@@ -1211,7 +1211,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         final_snapshot = self.resource_tracker.take_snapshot("comprehensive_complete", self.factory)
         
         # Phase 5: Comprehensive analysis
-        logger.info("📊 COMPREHENSIVE ANALYSIS:")
+        logger.info(" CHART:  COMPREHENSIVE ANALYSIS:")
         logger.info(f"  Initial managers: {initial_snapshot['active_managers']}")
         logger.info(f"  Peak managers: {pre_cleanup_snapshot['active_managers']}")
         logger.info(f"  Final managers: {final_snapshot['active_managers']}")
@@ -1257,7 +1257,7 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
                 maximum_acceptable=3
             )
         
-        logger.info("✅ COMPREHENSIVE RESOURCE LEAK DETECTION TEST PASSED")
+        logger.info(" PASS:  COMPREHENSIVE RESOURCE LEAK DETECTION TEST PASSED")
 
     def test_resource_leak_test_suite_coverage(self):
         """Validate that this test suite covers all critical resource leak scenarios."""
@@ -1287,6 +1287,6 @@ class TestWebSocketResourceLeakDetection(SSotAsyncTestCase):
         assert self.test_config.cleanup_timeout_ms > 0, "Cleanup timeout not configured"
         assert self.test_config.memory_leak_threshold_mb > 0, "Memory leak threshold not configured"
         
-        logger.info(f"✅ Test suite coverage validated: {len(test_methods)} tests covering all critical scenarios")
-        logger.info(f"✅ Environment-aware configuration validated for: {self.test_config.environment_type}")
-        logger.info(f"✅ Memory leak detection enabled with {self.test_config.memory_leak_threshold_mb}MB threshold")
+        logger.info(f" PASS:  Test suite coverage validated: {len(test_methods)} tests covering all critical scenarios")
+        logger.info(f" PASS:  Environment-aware configuration validated for: {self.test_config.environment_type}")
+        logger.info(f" PASS:  Memory leak detection enabled with {self.test_config.memory_leak_threshold_mb}MB threshold")

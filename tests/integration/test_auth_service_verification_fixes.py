@@ -420,7 +420,7 @@
     # REMOVED_SYNTAX_ERROR: for service_name in self.service_urls.keys():
         # REMOVED_SYNTAX_ERROR: result = await self.verify_service_health(service_name)
         # REMOVED_SYNTAX_ERROR: all_results.append(result)
-        # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if result.success else "❌ FAIL"
+        # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
         # REMOVED_SYNTAX_ERROR: if result.error:
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -432,7 +432,7 @@
             # REMOVED_SYNTAX_ERROR: all_results.extend(auth_endpoint_results)
 
             # REMOVED_SYNTAX_ERROR: for result in auth_endpoint_results:
-                # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if result.success else "❌ FAIL"
+                # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
                 # REMOVED_SYNTAX_ERROR: endpoint = result.details.get('endpoint', 'unknown') if result.details else 'unknown'
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                 # REMOVED_SYNTAX_ERROR: if result.error:
@@ -444,7 +444,7 @@
                     # REMOVED_SYNTAX_ERROR: jwt_result = await self.verify_jwt_token_functionality()
                     # REMOVED_SYNTAX_ERROR: all_results.append(jwt_result)
 
-                    # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if jwt_result.success else "❌ FAIL"
+                    # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if jwt_result.success else " FAIL:  FAIL"
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: if jwt_result.error:
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -456,7 +456,7 @@
                         # REMOVED_SYNTAX_ERROR: all_results.extend(oauth_results)
 
                         # REMOVED_SYNTAX_ERROR: for result in oauth_results:
-                            # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if result.success else "❌ FAIL"
+                            # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
                             # REMOVED_SYNTAX_ERROR: endpoint = result.details.get('endpoint', 'unknown') if result.details else 'unknown'
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: if result.error:
@@ -469,7 +469,7 @@
                                 # REMOVED_SYNTAX_ERROR: all_results.extend(port_results)
 
                                 # REMOVED_SYNTAX_ERROR: for result in port_results:
-                                    # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if result.success else "❌ FAIL"
+                                    # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if result.success else " FAIL:  FAIL"
                                     # REMOVED_SYNTAX_ERROR: port = result.details.get('actual_port', 'unknown') if result.details else 'unknown'
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: if result.error:
@@ -703,7 +703,7 @@
 
                                     # Adaptive assertion: If most services are unavailable, that's expected
                                     # REMOVED_SYNTAX_ERROR: if service_unavailable_count >= results['total_tests'] * 0.8:
-                                        # REMOVED_SYNTAX_ERROR: print("✅ Most services unavailable - test framework working correctly")
+                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Most services unavailable - test framework working correctly")
                                         # REMOVED_SYNTAX_ERROR: assert True, "Test framework correctly identifies unavailable services"
                                         # REMOVED_SYNTAX_ERROR: else:
                                             # If services are available, expect reasonable success rate
@@ -772,17 +772,17 @@
 
                                                                                             # REMOVED_SYNTAX_ERROR: if improvement_detected:
                                                                                                 # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                # REMOVED_SYNTAX_ERROR: ✅ IMPROVEMENT DETECTED: Improved health check succeeded where standard failed")
+                                                                                                # REMOVED_SYNTAX_ERROR:  PASS:  IMPROVEMENT DETECTED: Improved health check succeeded where standard failed")
                                                                                                 # REMOVED_SYNTAX_ERROR: elif improved_success and standard_success:
                                                                                                     # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                    # REMOVED_SYNTAX_ERROR: ✅ BOTH METHODS SUCCESSFUL: No false failure in this case")
+                                                                                                    # REMOVED_SYNTAX_ERROR:  PASS:  BOTH METHODS SUCCESSFUL: No false failure in this case")
                                                                                                     # REMOVED_SYNTAX_ERROR: elif not improved_success and not standard_success:
                                                                                                         # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                        # REMOVED_SYNTAX_ERROR: ⚠️  BOTH METHODS FAILED: Service may actually be unavailable")
+                                                                                                        # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  BOTH METHODS FAILED: Service may actually be unavailable")
                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                         # REMOVED_SYNTAX_ERROR: else:
                                                                                                             # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                            # REMOVED_SYNTAX_ERROR: ⚠️  UNEXPECTED RESULT: Standard succeeded but improved failed")
+                                                                                                            # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  UNEXPECTED RESULT: Standard succeeded but improved failed")
 
                                                                                                             # Test passes to document comparison results
                                                                                                             # REMOVED_SYNTAX_ERROR: assert True, "Health check comparison completed"
@@ -819,7 +819,7 @@
                                                                                                                                 # REMOVED_SYNTAX_ERROR: print(f" )
                                                                                                                                 # REMOVED_SYNTAX_ERROR: Verification method details:")
                                                                                                                                 # REMOVED_SYNTAX_ERROR: for method in result['verification_methods']:
-                                                                                                                                    # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if method['success'] else "❌ FAIL"
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if method['success'] else " FAIL:  FAIL"
                                                                                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                                     # REMOVED_SYNTAX_ERROR: if method.get('error'):
                                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -831,10 +831,10 @@
 
                                                                                                                                             # REMOVED_SYNTAX_ERROR: if result['auth_verified']:
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                                                                # REMOVED_SYNTAX_ERROR: ✅ AUTH SERVICE VERIFIED: Service appears functional")
+                                                                                                                                                # REMOVED_SYNTAX_ERROR:  PASS:  AUTH SERVICE VERIFIED: Service appears functional")
                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                                                                    # REMOVED_SYNTAX_ERROR: ⚠️  AUTH SERVICE NOT VERIFIED: Service may have issues")
+                                                                                                                                                    # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  AUTH SERVICE NOT VERIFIED: Service may have issues")
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: print("This could indicate:")
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: print("  - Service is actually down")
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: print("  - Network connectivity issues")
@@ -901,7 +901,7 @@
                         # REMOVED_SYNTAX_ERROR: issues.append("formatted_string")
 
                         # REMOVED_SYNTAX_ERROR: if issues:
-                            # REMOVED_SYNTAX_ERROR: print(f"  ⚠️  Potential configuration issues detected:")
+                            # REMOVED_SYNTAX_ERROR: print(f"   WARNING: [U+FE0F]  Potential configuration issues detected:")
                             # REMOVED_SYNTAX_ERROR: for issue in issues:
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: mismatches_detected.append({ ))
@@ -910,7 +910,7 @@
                                 # REMOVED_SYNTAX_ERROR: 'issues': issues
                                 
                                 # REMOVED_SYNTAX_ERROR: else:
-                                    # REMOVED_SYNTAX_ERROR: print(f"  ✅ Configuration appears valid")
+                                    # REMOVED_SYNTAX_ERROR: print(f"   PASS:  Configuration appears valid")
 
                                     # REMOVED_SYNTAX_ERROR: print(f" )
                                     # REMOVED_SYNTAX_ERROR: === CONFIGURATION ANALYSIS SUMMARY ===")

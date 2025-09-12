@@ -394,7 +394,7 @@ class TestAgentWorkflowCoordination(TestWorkflowOrchestratorIntegration):
         for agent in expected_agents:
             self.assertIn(agent, executed_agents)
         
-        logger.info(f"✅ Full workflow completed with {len(results)} steps")
+        logger.info(f" PASS:  Full workflow completed with {len(results)} steps")
     
     async def test_workflow_with_insufficient_data_adaptive_path(self):
         """Test adaptive workflow when data is insufficient."""
@@ -423,7 +423,7 @@ class TestAgentWorkflowCoordination(TestWorkflowOrchestratorIntegration):
         self.assertGreaterEqual(len(results), 2)
         self.assertIn("data_helper", self.execution_engine.execution_log)
         
-        logger.info("✅ Adaptive workflow handled insufficient data correctly")
+        logger.info(" PASS:  Adaptive workflow handled insufficient data correctly")
     
     async def test_workflow_with_partial_data_coordination(self):
         """Test workflow coordination with partial data availability."""
@@ -447,7 +447,7 @@ class TestAgentWorkflowCoordination(TestWorkflowOrchestratorIntegration):
         for step in workflow_steps:
             self.assertIsInstance(step.dependencies, list)
             
-        logger.info("✅ Partial data workflow coordination validated")
+        logger.info(" PASS:  Partial data workflow coordination validated")
     
     async def test_agent_dependency_management_and_sequencing(self):
         """Test agent dependency management and execution sequencing."""
@@ -479,7 +479,7 @@ class TestAgentWorkflowCoordination(TestWorkflowOrchestratorIntegration):
         self.assertGreater(execution_time, 0.1)  # At least some execution time
         self.assertLess(execution_time, 30.0)    # But not too long for tests
         
-        logger.info(f"✅ Dependency management validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Dependency management validated in {execution_time:.2f}s")
     
     async def test_workflow_state_management_across_agents(self):
         """Test workflow state management and data passing between agents."""
@@ -502,7 +502,7 @@ class TestAgentWorkflowCoordination(TestWorkflowOrchestratorIntegration):
             self.assertIsNotNone(result.data)
             self.assertIn("agent_name", result.metadata)
             
-        logger.info("✅ Workflow state management validated")
+        logger.info(" PASS:  Workflow state management validated")
     
     async def test_agent_communication_and_result_passing(self):
         """Test inter-agent communication and result passing."""
@@ -530,7 +530,7 @@ class TestAgentWorkflowCoordination(TestWorkflowOrchestratorIntegration):
         if len(execution_log) > 1:
             self.assertIn("triage", execution_log[:2])  # Triage should be early
         
-        logger.info("✅ Agent communication and result passing validated")
+        logger.info(" PASS:  Agent communication and result passing validated")
 
 
 class TestAdaptiveLogicTests(TestWorkflowOrchestratorIntegration):
@@ -560,7 +560,7 @@ class TestAdaptiveLogicTests(TestWorkflowOrchestratorIntegration):
                 f"Failed for data_sufficiency: {sufficiency}"
             )
         
-        logger.info("✅ Dynamic workflow adaptation validated")
+        logger.info(" PASS:  Dynamic workflow adaptation validated")
     
     async def test_conditional_workflow_branching_and_decision_making(self):
         """Test conditional workflow branching based on business logic."""
@@ -586,7 +586,7 @@ class TestAdaptiveLogicTests(TestWorkflowOrchestratorIntegration):
         self.assertIn("phases", workflow_config)
         self.assertIsInstance(workflow_config["phases"], list)
         
-        logger.info("✅ Conditional workflow branching validated")
+        logger.info(" PASS:  Conditional workflow branching validated")
     
     async def test_workflow_optimization_based_on_performance_metrics(self):
         """Test workflow optimization based on execution performance."""
@@ -610,7 +610,7 @@ class TestAdaptiveLogicTests(TestWorkflowOrchestratorIntegration):
         # Check total execution time is reasonable
         self.assertLess(total_time, 10.0)  # Should complete within reasonable time
         
-        logger.info(f"✅ Workflow performance optimization validated ({total_time:.2f}s)")
+        logger.info(f" PASS:  Workflow performance optimization validated ({total_time:.2f}s)")
     
     async def test_adaptive_resource_allocation_during_execution(self):
         """Test adaptive resource allocation based on workflow demands."""
@@ -642,7 +642,7 @@ class TestAdaptiveLogicTests(TestWorkflowOrchestratorIntegration):
         self.assertIsNotNone(assessment)
         self.assertIsNotNone(simple_assessment)
         
-        logger.info("✅ Adaptive resource allocation validated")
+        logger.info(" PASS:  Adaptive resource allocation validated")
 
 
 class TestEnterpriseDataIntegrity(TestWorkflowOrchestratorIntegration):
@@ -713,7 +713,7 @@ class TestEnterpriseDataIntegrity(TestWorkflowOrchestratorIntegration):
         self.assertEqual(orchestrator_1.user_context.user_id, enterprise_user_1.user_id)
         self.assertEqual(orchestrator_2.user_context.user_id, enterprise_user_2.user_id)
         
-        logger.info("✅ Enterprise customer workflow isolation validated")
+        logger.info(" PASS:  Enterprise customer workflow isolation validated")
     
     async def test_data_consistency_across_workflow_steps(self):
         """Test data consistency validation across workflow execution steps."""
@@ -740,7 +740,7 @@ class TestEnterpriseDataIntegrity(TestWorkflowOrchestratorIntegration):
                     validation_data = result.metadata["coordination_validation"]
                     self.assertIn("status", validation_data)
         
-        logger.info("✅ Data consistency across workflow steps validated")
+        logger.info(" PASS:  Data consistency across workflow steps validated")
     
     async def test_enterprise_compliance_workflow_validation(self):
         """Test Enterprise compliance requirements in workflow execution."""
@@ -780,7 +780,7 @@ class TestEnterpriseDataIntegrity(TestWorkflowOrchestratorIntegration):
         # Verify audit trail is maintained
         self.assertGreater(len(self.execution_engine.execution_log), 0)
         
-        logger.info("✅ Enterprise compliance workflow validation completed")
+        logger.info(" PASS:  Enterprise compliance workflow validation completed")
     
     async def test_multi_tenant_workflow_security(self):
         """Test multi-tenant workflow security and data isolation."""
@@ -840,7 +840,7 @@ class TestEnterpriseDataIntegrity(TestWorkflowOrchestratorIntegration):
             expected_user_id = f"tenant_{i}_user"
             self.assertEqual(orchestrator.user_context.user_id, expected_user_id)
         
-        logger.info("✅ Multi-tenant workflow security validated")
+        logger.info(" PASS:  Multi-tenant workflow security validated")
 
 
 class TestAgentCoordinationValidation(TestWorkflowOrchestratorIntegration):
@@ -868,7 +868,7 @@ class TestAgentCoordinationValidation(TestWorkflowOrchestratorIntegration):
             self.assertIn("step_type", step)
             self.assertIn("order", step)
         
-        logger.info("✅ Agent registration and discovery validated")
+        logger.info(" PASS:  Agent registration and discovery validated")
     
     async def test_inter_agent_communication_and_synchronization(self):
         """Test inter-agent communication and synchronization mechanisms."""
@@ -896,7 +896,7 @@ class TestAgentCoordinationValidation(TestWorkflowOrchestratorIntegration):
         self.assertGreater(len(execution_times), 0)
         self.assertTrue(all(t > 0 for t in execution_times))
         
-        logger.info("✅ Inter-agent communication and synchronization validated")
+        logger.info(" PASS:  Inter-agent communication and synchronization validated")
     
     async def test_agent_failure_handling_and_workflow_recovery(self):
         """Test agent failure handling and workflow recovery mechanisms."""
@@ -926,7 +926,7 @@ class TestAgentCoordinationValidation(TestWorkflowOrchestratorIntegration):
         successful_results = [r for r in recovery_results if r.status == ExecutionStatus.COMPLETED]
         self.assertGreater(len(successful_results), 0)
         
-        logger.info("✅ Agent failure handling and workflow recovery validated")
+        logger.info(" PASS:  Agent failure handling and workflow recovery validated")
     
     async def test_concurrent_agent_coordination_safety(self):
         """Test concurrent agent coordination and thread safety."""
@@ -967,7 +967,7 @@ class TestAgentCoordinationValidation(TestWorkflowOrchestratorIntegration):
         expected_minimum = 3 * 2  # At least 2 agents per workflow * 3 workflows
         self.assertGreaterEqual(total_executions, expected_minimum)
         
-        logger.info("✅ Concurrent agent coordination safety validated")
+        logger.info(" PASS:  Concurrent agent coordination safety validated")
 
 
 class TestBusinessLogicIntegration(TestWorkflowOrchestratorIntegration):
@@ -1003,7 +1003,7 @@ class TestBusinessLogicIntegration(TestWorkflowOrchestratorIntegration):
         # Verify execution completed in reasonable business time
         self.assertLess(execution_time, 30.0)  # Should complete within business-acceptable time
         
-        logger.info(f"✅ Complete business workflow validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Complete business workflow validated in {execution_time:.2f}s")
     
     async def test_business_rule_enforcement_across_workflows(self):
         """Test business rule enforcement throughout workflow execution."""
@@ -1044,7 +1044,7 @@ class TestBusinessLogicIntegration(TestWorkflowOrchestratorIntegration):
         if business_rules["required_cost_analysis"]:
             self.assertTrue(cost_analysis_found, "Cost analysis should be present")
         
-        logger.info("✅ Business rule enforcement validated")
+        logger.info(" PASS:  Business rule enforcement validated")
     
     async def test_revenue_impacting_workflow_validation(self):
         """Test validation of workflows that impact revenue calculations."""
@@ -1093,7 +1093,7 @@ class TestBusinessLogicIntegration(TestWorkflowOrchestratorIntegration):
                 coordination_validation_found = True
                 break
         
-        logger.info("✅ Revenue-impacting workflow validation completed")
+        logger.info(" PASS:  Revenue-impacting workflow validation completed")
     
     async def test_customer_value_delivery_workflows(self):
         """Test workflows that deliver direct customer value."""
@@ -1147,7 +1147,7 @@ class TestBusinessLogicIntegration(TestWorkflowOrchestratorIntegration):
         self.assertGreater(len(actionable_results), 0, 
                           "Should provide actionable customer insights")
         
-        logger.info("✅ Customer value delivery workflows validated")
+        logger.info(" PASS:  Customer value delivery workflows validated")
 
 
 class TestPerformanceAndScalability(TestWorkflowOrchestratorIntegration):
@@ -1187,7 +1187,7 @@ class TestPerformanceAndScalability(TestWorkflowOrchestratorIntegration):
         average_time_per_workflow = total_time / load_test_count
         self.assertLess(average_time_per_workflow, 10.0)  # Should average less than 10s per workflow
         
-        logger.info(f"✅ Load performance validated: {average_time_per_workflow:.2f}s avg per workflow")
+        logger.info(f" PASS:  Load performance validated: {average_time_per_workflow:.2f}s avg per workflow")
     
     async def test_concurrent_workflow_management(self):
         """Test concurrent workflow management and resource sharing."""
@@ -1237,7 +1237,7 @@ class TestPerformanceAndScalability(TestWorkflowOrchestratorIntegration):
             for result in results:
                 self.assertEqual(result.request_id, f"concurrent_req_{i}")
         
-        logger.info(f"✅ Concurrent workflow management validated in {total_time:.2f}s")
+        logger.info(f" PASS:  Concurrent workflow management validated in {total_time:.2f}s")
     
     async def test_resource_optimization_during_complex_workflows(self):
         """Test resource optimization during complex workflow execution."""
@@ -1278,7 +1278,7 @@ class TestPerformanceAndScalability(TestWorkflowOrchestratorIntegration):
         execution_log = self.execution_engine.execution_log
         self.assertIn("triage", execution_log)  # Should still follow core patterns
         
-        logger.info(f"✅ Resource optimization validated for complex workflow ({execution_time:.2f}s)")
+        logger.info(f" PASS:  Resource optimization validated for complex workflow ({execution_time:.2f}s)")
     
     async def test_long_running_workflow_reliability(self):
         """Test reliability of long-running workflow executions."""
@@ -1313,7 +1313,7 @@ class TestPerformanceAndScalability(TestWorkflowOrchestratorIntegration):
         # Overall execution should complete in reasonable time
         self.assertLess(execution_time, 30.0)  # Should complete within 30 seconds
         
-        logger.info(f"✅ Long-running workflow reliability validated ({execution_time:.2f}s)")
+        logger.info(f" PASS:  Long-running workflow reliability validated ({execution_time:.2f}s)")
 
 
 if __name__ == "__main__":

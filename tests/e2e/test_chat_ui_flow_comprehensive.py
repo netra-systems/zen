@@ -253,7 +253,7 @@
         # CRITICAL: Set up WebSocket integration per CLAUDE.md Section 6.2
         # REMOVED_SYNTAX_ERROR: self.agent_registry.set_websocket_manager(self.websocket_manager)
 
-        # REMOVED_SYNTAX_ERROR: logger.info("✅ Real services initialized successfully")
+        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Real services initialized successfully")
 
         # REMOVED_SYNTAX_ERROR: except Exception as e:
             # REMOVED_SYNTAX_ERROR: error_msg = "formatted_string"
@@ -301,7 +301,7 @@
             # REMOVED_SYNTAX_ERROR: workflow_type="simple_test"
             
 
-            # REMOVED_SYNTAX_ERROR: logger.info("✅ Agent workflow executed successfully")
+            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Agent workflow executed successfully")
 
             # REMOVED_SYNTAX_ERROR: except Exception as e:
                 # REMOVED_SYNTAX_ERROR: error_msg = "formatted_string"
@@ -382,16 +382,16 @@
                 # REMOVED_SYNTAX_ERROR: await mock_conn.close()
                 # REMOVED_SYNTAX_ERROR: assert mock_conn.closed
 
-                # REMOVED_SYNTAX_ERROR: logger.info("✅ Structure compliance test PASSED - all CLAUDE.md requirements met")
+                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Structure compliance test PASSED - all CLAUDE.md requirements met")
 
                 # REMOVED_SYNTAX_ERROR: print(" )
-                # REMOVED_SYNTAX_ERROR: 📋 CLAUDE.md Compliance Verification:")
-                # REMOVED_SYNTAX_ERROR: print("   ✅ Absolute imports only (no relative imports)")
-                # REMOVED_SYNTAX_ERROR: print("   ✅ IsolatedEnvironment for configuration access")
-                # REMOVED_SYNTAX_ERROR: print("   ✅ Mission-critical WebSocket event validation")
-                # REMOVED_SYNTAX_ERROR: print("   ✅ Real services integration structure")
-                # REMOVED_SYNTAX_ERROR: print("   ✅ Proper typing and error handling")
-                # REMOVED_SYNTAX_ERROR: print("   ✅ No mocks in production paths (only for event capture)")
+                # REMOVED_SYNTAX_ERROR: [U+1F4CB] CLAUDE.md Compliance Verification:")
+                # REMOVED_SYNTAX_ERROR: print("    PASS:  Absolute imports only (no relative imports)")
+                # REMOVED_SYNTAX_ERROR: print("    PASS:  IsolatedEnvironment for configuration access")
+                # REMOVED_SYNTAX_ERROR: print("    PASS:  Mission-critical WebSocket event validation")
+                # REMOVED_SYNTAX_ERROR: print("    PASS:  Real services integration structure")
+                # REMOVED_SYNTAX_ERROR: print("    PASS:  Proper typing and error handling")
+                # REMOVED_SYNTAX_ERROR: print("    PASS:  No mocks in production paths (only for event capture)")
 
                 # Removed problematic line: @pytest.mark.asyncio
                 # REMOVED_SYNTAX_ERROR: @pytest.fixture
@@ -424,7 +424,7 @@
                         # REMOVED_SYNTAX_ERROR: report = tester.event_validator.get_validation_report()
 
                         # REMOVED_SYNTAX_ERROR: print(f" )
-                        # REMOVED_SYNTAX_ERROR: 📊 WebSocket Event Validation Report:")
+                        # REMOVED_SYNTAX_ERROR:  CHART:  WebSocket Event Validation Report:")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -433,7 +433,7 @@
 
                         # REMOVED_SYNTAX_ERROR: if not success:
                             # REMOVED_SYNTAX_ERROR: print(f" )
-                            # REMOVED_SYNTAX_ERROR: ❌ CRITICAL ERRORS:")
+                            # REMOVED_SYNTAX_ERROR:  FAIL:  CRITICAL ERRORS:")
                             # REMOVED_SYNTAX_ERROR: for error in errors:
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -441,7 +441,7 @@
                                 # REMOVED_SYNTAX_ERROR: assert success, "formatted_string"
                                 # REMOVED_SYNTAX_ERROR: assert len(tester.test_failures) == 0, "formatted_string"
 
-                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Complete WebSocket agent events flow test PASSED")
+                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Complete WebSocket agent events flow test PASSED")
 
                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
@@ -471,7 +471,7 @@
                                                 # REMOVED_SYNTAX_ERROR: await connection.close()
                                                 # REMOVED_SYNTAX_ERROR: assert connection.closed
 
-                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ WebSocket connection management test PASSED")
+                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  WebSocket connection management test PASSED")
 
                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
@@ -497,7 +497,7 @@
                                                                 # Test WebSocket manager integration
                                                                 # REMOVED_SYNTAX_ERROR: assert hasattr(tester.agent_registry, '_websocket_manager')
 
-                                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Real services integration test PASSED")
+                                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Real services integration test PASSED")
 
                                                                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
@@ -533,14 +533,14 @@
                                                                                 # REMOVED_SYNTAX_ERROR: assert not success2, "Validator should fail with missing events"
                                                                                 # REMOVED_SYNTAX_ERROR: assert len(errors2) > 0, "Should have validation errors"
 
-                                                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Event validator accuracy test PASSED")
+                                                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Event validator accuracy test PASSED")
 
 
                                                                                 # Test execution marker
                                                                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                                                                                     # This file is designed to be run with pytest and the unified test runner
                                                                                     # Example: python unified_test_runner.py --category e2e --filter test_chat_ui_flow_comprehensive
-                                                                                    # REMOVED_SYNTAX_ERROR: print("🧪 Run with: python unified_test_runner.py --category e2e --filter test_chat_ui_flow_comprehensive")
-                                                                                    # REMOVED_SYNTAX_ERROR: print("📡 Tests mission-critical WebSocket events with real services")
-                                                                                    # REMOVED_SYNTAX_ERROR: print("⚠️  Requires real services to be running (PostgreSQL, Redis, etc.)")
+                                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F9EA] Run with: python unified_test_runner.py --category e2e --filter test_chat_ui_flow_comprehensive")
+                                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F4E1] Tests mission-critical WebSocket events with real services")
+                                                                                    # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Requires real services to be running (PostgreSQL, Redis, etc.)")
                                                                                     # REMOVED_SYNTAX_ERROR: pass

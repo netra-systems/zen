@@ -9,7 +9,7 @@ This module tests critical race conditions in WebSocket connection management th
 - Deadlocks in connection establishment/teardown
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - WebSocket reliability is core to chat functionality
+- Segment: All (Free  ->  Enterprise) - WebSocket reliability is core to chat functionality
 - Business Goal: Ensure reliable real-time communication under concurrent load
 - Value Impact: Prevents connection failures that would make the platform unusable
 - Strategic Impact: CRITICAL - WebSocket stability directly impacts user experience and revenue

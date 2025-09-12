@@ -138,7 +138,7 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         yield
         
         # Cleanup all connections
-        logger.info(f"🧹 Cleaning up {len(self.active_connections)} connections...")
+        logger.info(f"[U+1F9F9] Cleaning up {len(self.active_connections)} connections...")
         cleanup_tasks = [
             WebSocketTestHelpers.close_test_connection(conn) 
             for conn in self.active_connections
@@ -153,7 +153,7 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         # Final memory check
         final_memory = self.process.memory_info().rss / 1024 / 1024
         memory_delta = final_memory - self.initial_memory
-        logger.info(f"📊 Memory usage change: {memory_delta:+.2f} MB")
+        logger.info(f" CHART:  Memory usage change: {memory_delta:+.2f} MB")
 
     async def create_concurrent_user_session(self, user_index: int) -> Tuple[Any, Any, Any]:
         """Create authenticated user session for concurrent testing."""
@@ -213,7 +213,7 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
             auth_user, websocket_connection, user_context = await self.create_concurrent_user_session(user_index)
             metrics.user_id = auth_user.user_id
             
-            logger.info(f"👤 [{user_index+1}/{concurrent_user_count}] Starting agent workflow for {auth_user.email}")
+            logger.info(f"[U+1F464] [{user_index+1}/{concurrent_user_count}] Starting agent workflow for {auth_user.email}")
             
             # Send agent request with load-specific context
             agent_message = {
@@ -274,17 +274,17 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
             metrics.success = has_all_events and has_completion and reasonable_response_time
             
             if metrics.success:
-                logger.info(f"✅ [{user_index+1}/{concurrent_user_count}] User workflow completed successfully in {metrics.response_time:.2f}s")
+                logger.info(f" PASS:  [{user_index+1}/{concurrent_user_count}] User workflow completed successfully in {metrics.response_time:.2f}s")
             else:
                 missing_events = [e for e in required_events if e not in event_types]
                 metrics.error_message = f"Missing events: {missing_events}, completion: {has_completion}, time: {metrics.response_time:.2f}s"
-                logger.warning(f"⚠️ [{user_index+1}/{concurrent_user_count}] User workflow incomplete: {metrics.error_message}")
+                logger.warning(f" WARNING: [U+FE0F] [{user_index+1}/{concurrent_user_count}] User workflow incomplete: {metrics.error_message}")
             
         except Exception as e:
             metrics.end_time = time.time()
             metrics.calculate_response_time()
             metrics.error_message = str(e)
-            logger.error(f"❌ [{user_index+1}/{concurrent_user_count}] User workflow failed: {e}")
+            logger.error(f" FAIL:  [{user_index+1}/{concurrent_user_count}] User workflow failed: {e}")
         
         return metrics
 
@@ -314,16 +314,16 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         This test validates that the system can handle a small but meaningful
         concurrent load while maintaining performance SLAs.
         """
-        logger.info("🚀 Starting concurrent agent execution test with 5 users")
+        logger.info("[U+1F680] Starting concurrent agent execution test with 5 users")
         
         concurrent_users = 5
         
         # Measure initial system state
         initial_resources = self.measure_system_resources()
-        logger.info(f"📊 Initial resources: {initial_resources}")
+        logger.info(f" CHART:  Initial resources: {initial_resources}")
         
         # Start all user workflows concurrently
-        logger.info(f"👥 Starting {concurrent_users} concurrent user workflows...")
+        logger.info(f"[U+1F465] Starting {concurrent_users} concurrent user workflows...")
         
         start_time = time.time()
         
@@ -366,16 +366,16 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         results.memory_usage_mb = final_resources.get("memory_delta_mb", 0.0)
         
         # Log detailed results
-        logger.info("📊 CONCURRENT LOAD TEST RESULTS:")
-        logger.info(f"   👥 Total Users: {results.total_users}")
-        logger.info(f"   ✅ Successful: {results.successful_users}")
-        logger.info(f"   ❌ Failed: {results.failed_users}")
-        logger.info(f"   📈 Success Rate: {((results.successful_users/results.total_users)*100):.1f}%")
-        logger.info(f"   ⏱️ Average Response Time: {results.average_response_time:.2f}s")
-        logger.info(f"   ⚡ Max Response Time: {results.max_response_time:.2f}s")
-        logger.info(f"   📨 Total Events: {results.total_events_received}")
-        logger.info(f"   💾 Memory Delta: {results.memory_usage_mb:+.2f} MB")
-        logger.info(f"   🕐 Total Test Time: {total_time:.2f}s")
+        logger.info(" CHART:  CONCURRENT LOAD TEST RESULTS:")
+        logger.info(f"   [U+1F465] Total Users: {results.total_users}")
+        logger.info(f"    PASS:  Successful: {results.successful_users}")
+        logger.info(f"    FAIL:  Failed: {results.failed_users}")
+        logger.info(f"   [U+1F4C8] Success Rate: {((results.successful_users/results.total_users)*100):.1f}%")
+        logger.info(f"   [U+23F1][U+FE0F] Average Response Time: {results.average_response_time:.2f}s")
+        logger.info(f"    LIGHTNING:  Max Response Time: {results.max_response_time:.2f}s")
+        logger.info(f"   [U+1F4E8] Total Events: {results.total_events_received}")
+        logger.info(f"   [U+1F4BE] Memory Delta: {results.memory_usage_mb:+.2f} MB")
+        logger.info(f"   [U+1F550] Total Test Time: {total_time:.2f}s")
         
         # Validate performance SLAs
         success_rate = (results.successful_users / results.total_users) * 100
@@ -401,11 +401,11 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         assert results.memory_usage_mb < 200.0, \
             f"Memory usage too high: {results.memory_usage_mb:.2f} MB (max: 200 MB)"
         
-        logger.info("🎉 CONCURRENT AGENT EXECUTION (5 USERS) TEST PASSED")
-        logger.info(f"   ✅ Performance SLAs: MET")
-        logger.info(f"   📊 Success Rate: {success_rate:.1f}%")
-        logger.info(f"   ⚡ Response Time: {results.average_response_time:.2f}s avg")
-        logger.info(f"   💾 Resource Usage: ACCEPTABLE")
+        logger.info(" CELEBRATION:  CONCURRENT AGENT EXECUTION (5 USERS) TEST PASSED")
+        logger.info(f"    PASS:  Performance SLAs: MET")
+        logger.info(f"    CHART:  Success Rate: {success_rate:.1f}%")
+        logger.info(f"    LIGHTNING:  Response Time: {results.average_response_time:.2f}s avg")
+        logger.info(f"   [U+1F4BE] Resource Usage: ACCEPTABLE")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -417,13 +417,13 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         This test validates platform ability to handle moderate concurrent load
         which represents typical small-to-medium enterprise usage.
         """
-        logger.info("🚀 Starting concurrent agent execution test with 10 users")
+        logger.info("[U+1F680] Starting concurrent agent execution test with 10 users")
         
         concurrent_users = 10
         
         # Measure initial system state
         initial_resources = self.measure_system_resources()
-        logger.info(f"📊 Initial resources: {initial_resources}")
+        logger.info(f" CHART:  Initial resources: {initial_resources}")
         
         # Execute in smaller batches to reduce resource spike
         batch_size = 5
@@ -435,7 +435,7 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
             batch_end = min(batch_start + batch_size, concurrent_users)
             batch_users = batch_end - batch_start
             
-            logger.info(f"👥 Starting batch {batch_start//batch_size + 1}: users {batch_start+1}-{batch_end}")
+            logger.info(f"[U+1F465] Starting batch {batch_start//batch_size + 1}: users {batch_start+1}-{batch_end}")
             
             # Create batch tasks
             batch_tasks = [
@@ -477,16 +477,16 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         results.memory_usage_mb = final_resources.get("memory_delta_mb", 0.0)
         
         # Log detailed results
-        logger.info("📊 CONCURRENT LOAD TEST RESULTS (10 USERS):")
-        logger.info(f"   👥 Total Users: {results.total_users}")
-        logger.info(f"   ✅ Successful: {results.successful_users}")
-        logger.info(f"   ❌ Failed: {results.failed_users}")
-        logger.info(f"   📈 Success Rate: {((results.successful_users/results.total_users)*100):.1f}%")
-        logger.info(f"   ⏱️ Average Response Time: {results.average_response_time:.2f}s")
-        logger.info(f"   ⚡ Max Response Time: {results.max_response_time:.2f}s")
-        logger.info(f"   📨 Total Events: {results.total_events_received}")
-        logger.info(f"   💾 Memory Delta: {results.memory_usage_mb:+.2f} MB")
-        logger.info(f"   🕐 Total Test Time: {total_time:.2f}s")
+        logger.info(" CHART:  CONCURRENT LOAD TEST RESULTS (10 USERS):")
+        logger.info(f"   [U+1F465] Total Users: {results.total_users}")
+        logger.info(f"    PASS:  Successful: {results.successful_users}")
+        logger.info(f"    FAIL:  Failed: {results.failed_users}")
+        logger.info(f"   [U+1F4C8] Success Rate: {((results.successful_users/results.total_users)*100):.1f}%")
+        logger.info(f"   [U+23F1][U+FE0F] Average Response Time: {results.average_response_time:.2f}s")
+        logger.info(f"    LIGHTNING:  Max Response Time: {results.max_response_time:.2f}s")
+        logger.info(f"   [U+1F4E8] Total Events: {results.total_events_received}")
+        logger.info(f"   [U+1F4BE] Memory Delta: {results.memory_usage_mb:+.2f} MB")
+        logger.info(f"   [U+1F550] Total Test Time: {total_time:.2f}s")
         
         # Validate performance SLAs (slightly relaxed for higher load)
         success_rate = (results.successful_users / results.total_users) * 100
@@ -502,11 +502,11 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         assert results.memory_usage_mb < 400.0, \
             f"Memory usage too high: {results.memory_usage_mb:.2f} MB (max: 400 MB)"
         
-        logger.info("🎉 CONCURRENT AGENT EXECUTION (10 USERS) TEST PASSED")
-        logger.info(f"   ✅ Performance SLAs: MET")
-        logger.info(f"   📊 Success Rate: {success_rate:.1f}%")
-        logger.info(f"   ⚡ Response Time: {results.average_response_time:.2f}s avg")
-        logger.info(f"   💾 Resource Usage: ACCEPTABLE")
+        logger.info(" CELEBRATION:  CONCURRENT AGENT EXECUTION (10 USERS) TEST PASSED")
+        logger.info(f"    PASS:  Performance SLAs: MET")
+        logger.info(f"    CHART:  Success Rate: {success_rate:.1f}%")
+        logger.info(f"    LIGHTNING:  Response Time: {results.average_response_time:.2f}s avg")
+        logger.info(f"   [U+1F4BE] Resource Usage: ACCEPTABLE")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -519,7 +519,7 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         This test validates that the system can handle rapid-fire requests
         from power users or automated systems without degrading.
         """
-        logger.info("🚀 Starting rapid sequential requests stress test")
+        logger.info("[U+1F680] Starting rapid sequential requests stress test")
         
         # Create single user session
         auth_user, websocket_connection, user_context = await self.create_concurrent_user_session(0)
@@ -527,7 +527,7 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         num_requests = 10
         request_metrics = []
         
-        logger.info(f"⚡ Sending {num_requests} rapid sequential requests...")
+        logger.info(f" LIGHTNING:  Sending {num_requests} rapid sequential requests...")
         
         for request_index in range(num_requests):
             request_start = time.time()
@@ -585,7 +585,7 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
                 "event_types": event_types
             })
             
-            logger.info(f"📤 Request {request_index + 1}/{num_requests} completed in {request_time:.2f}s (events: {len(events)})")
+            logger.info(f"[U+1F4E4] Request {request_index + 1}/{num_requests} completed in {request_time:.2f}s (events: {len(events)})")
             
             # Brief pause between requests
             await asyncio.sleep(0.5)
@@ -604,14 +604,14 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         total_events = sum(m["events_count"] for m in request_metrics)
         
         # Log results
-        logger.info("📊 RAPID SEQUENTIAL REQUESTS RESULTS:")
-        logger.info(f"   📤 Total Requests: {len(request_metrics)}")
-        logger.info(f"   ✅ Successful: {len(successful_requests)}")
-        logger.info(f"   📈 Success Rate: {success_rate:.1f}%")
-        logger.info(f"   ⏱️ Average Response Time: {avg_response_time:.2f}s")
-        logger.info(f"   ⚡ Max Response Time: {max_response_time:.2f}s")
-        logger.info(f"   🏃 Min Response Time: {min_response_time:.2f}s")
-        logger.info(f"   📨 Total Events: {total_events}")
+        logger.info(" CHART:  RAPID SEQUENTIAL REQUESTS RESULTS:")
+        logger.info(f"   [U+1F4E4] Total Requests: {len(request_metrics)}")
+        logger.info(f"    PASS:  Successful: {len(successful_requests)}")
+        logger.info(f"   [U+1F4C8] Success Rate: {success_rate:.1f}%")
+        logger.info(f"   [U+23F1][U+FE0F] Average Response Time: {avg_response_time:.2f}s")
+        logger.info(f"    LIGHTNING:  Max Response Time: {max_response_time:.2f}s")
+        logger.info(f"   [U+1F3C3] Min Response Time: {min_response_time:.2f}s")
+        logger.info(f"   [U+1F4E8] Total Events: {total_events}")
         
         # Validate stress test results
         assert success_rate >= 80.0, f"Success rate too low under stress: {success_rate:.1f}%"
@@ -634,12 +634,12 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
             assert degradation_ratio < 2.0, \
                 f"Significant performance degradation during stress test: {degradation_ratio:.2f}x"
             
-            logger.info(f"📈 Performance consistency: {degradation_ratio:.2f}x degradation (acceptable)")
+            logger.info(f"[U+1F4C8] Performance consistency: {degradation_ratio:.2f}x degradation (acceptable)")
         
-        logger.info("🎉 RAPID SEQUENTIAL REQUESTS STRESS TEST PASSED")
-        logger.info(f"   ⚡ Request Processing: STABLE")
-        logger.info(f"   📊 Success Rate: {success_rate:.1f}%")
-        logger.info(f"   🎯 Performance Consistency: MAINTAINED")
+        logger.info(" CELEBRATION:  RAPID SEQUENTIAL REQUESTS STRESS TEST PASSED")
+        logger.info(f"    LIGHTNING:  Request Processing: STABLE")
+        logger.info(f"    CHART:  Success Rate: {success_rate:.1f}%")
+        logger.info(f"    TARGET:  Performance Consistency: MAINTAINED")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -651,17 +651,17 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
         This test validates that memory leaks and connection buildup don't
         occur during sustained load scenarios.
         """
-        logger.info("🚀 Starting resource cleanup after load test")
+        logger.info("[U+1F680] Starting resource cleanup after load test")
         
         initial_resources = self.measure_system_resources()
-        logger.info(f"📊 Initial resources: {initial_resources}")
+        logger.info(f" CHART:  Initial resources: {initial_resources}")
         
         # Create and immediately clean up multiple user sessions
         num_sessions = 8
         cleanup_metrics = []
         
         for session_round in range(3):  # Multiple rounds to test cumulative effects
-            logger.info(f"🔄 Session round {session_round + 1}/3 with {num_sessions} users")
+            logger.info(f" CYCLE:  Session round {session_round + 1}/3 with {num_sessions} users")
             
             round_start_resources = self.measure_system_resources()
             
@@ -678,7 +678,7 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
             
             # Force cleanup of connections
             current_connections = len(self.active_connections)
-            logger.info(f"🧹 Cleaning up {current_connections} connections from round {session_round + 1}")
+            logger.info(f"[U+1F9F9] Cleaning up {current_connections} connections from round {session_round + 1}")
             
             cleanup_tasks = [
                 WebSocketTestHelpers.close_test_connection(conn) 
@@ -704,18 +704,18 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
                 "final_connections": len(self.active_connections)
             })
             
-            logger.info(f"✅ Round {session_round + 1} cleanup: {cleanup_metrics[-1]['memory_delta']:+.2f} MB")
+            logger.info(f" PASS:  Round {session_round + 1} cleanup: {cleanup_metrics[-1]['memory_delta']:+.2f} MB")
         
         # Final resource measurement
         final_resources = self.measure_system_resources()
         total_memory_delta = final_resources.get("memory_mb", 0) - initial_resources.get("memory_mb", 0)
         
         # Log cleanup results
-        logger.info("📊 RESOURCE CLEANUP RESULTS:")
-        logger.info(f"   💾 Initial Memory: {initial_resources.get('memory_mb', 0):.2f} MB")
-        logger.info(f"   💾 Final Memory: {final_resources.get('memory_mb', 0):.2f} MB")
-        logger.info(f"   📈 Total Memory Delta: {total_memory_delta:+.2f} MB")
-        logger.info(f"   🔗 Final Connections: {len(self.active_connections)}")
+        logger.info(" CHART:  RESOURCE CLEANUP RESULTS:")
+        logger.info(f"   [U+1F4BE] Initial Memory: {initial_resources.get('memory_mb', 0):.2f} MB")
+        logger.info(f"   [U+1F4BE] Final Memory: {final_resources.get('memory_mb', 0):.2f} MB")
+        logger.info(f"   [U+1F4C8] Total Memory Delta: {total_memory_delta:+.2f} MB")
+        logger.info(f"   [U+1F517] Final Connections: {len(self.active_connections)}")
         
         for i, metrics in enumerate(cleanup_metrics):
             logger.info(f"   Round {i+1}: {metrics['memory_delta']:+.2f} MB, {metrics['connections_cleaned']} cleaned")
@@ -736,10 +736,10 @@ class TestAgentPerformanceUnderLoadE2E(BaseE2ETest):
             assert memory_growth < 100.0, \
                 f"Memory usage growing across rounds: {memory_growth:+.2f} MB"
         
-        logger.info("🎉 RESOURCE CLEANUP AFTER LOAD TEST PASSED")
-        logger.info(f"   🧹 Memory Management: EFFECTIVE")
-        logger.info(f"   🔗 Connection Cleanup: VERIFIED")
-        logger.info(f"   📊 Resource Growth: CONTROLLED")
+        logger.info(" CELEBRATION:  RESOURCE CLEANUP AFTER LOAD TEST PASSED")
+        logger.info(f"   [U+1F9F9] Memory Management: EFFECTIVE")
+        logger.info(f"   [U+1F517] Connection Cleanup: VERIFIED")
+        logger.info(f"    CHART:  Resource Growth: CONTROLLED")
 
 
 if __name__ == "__main__":

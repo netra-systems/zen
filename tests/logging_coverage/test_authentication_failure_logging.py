@@ -67,7 +67,7 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             
             # This simulates the actual logging call from websocket_ssot.py:503
             self.mock_logger.critical(
-                f"🔑 TOKEN EXTRACTION FAILURE: No JWT token found in WebSocket headers or subprotocols for connection {connection_id}"
+                f"[U+1F511] TOKEN EXTRACTION FAILURE: No JWT token found in WebSocket headers or subprotocols for connection {connection_id}"
             )
         
         # Validate logging
@@ -92,7 +92,7 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             
             # This simulates websocket_ssot.py:506 logging
             self.mock_logger.critical(
-                f"🔑 JWT VALIDATION FAILURE: Token validation failed for connection {connection_id} - likely secret mismatch or malformed token"
+                f"[U+1F511] JWT VALIDATION FAILURE: Token validation failed for connection {connection_id} - likely secret mismatch or malformed token"
             )
         
         # Validate logging
@@ -113,7 +113,7 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             
             # This simulates websocket_ssot.py:508 logging
             self.mock_logger.critical(
-                f"🔑 JWT EXPIRY FAILURE: Token expired for connection {connection_id} - user needs to re-authenticate"
+                f"[U+1F511] JWT EXPIRY FAILURE: Token expired for connection {connection_id} - user needs to re-authenticate"
             )
         
         # Validate logging
@@ -134,7 +134,7 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             
             # This simulates auth.py:122 logging for service communication failure
             self.mock_logger.critical(
-                f"🚨 AUTH SERVICE EXCEPTION: Auth service communication failed "
+                f" ALERT:  AUTH SERVICE EXCEPTION: Auth service communication failed "
                 f"(user_id: {user_id[:8]}..., timestamp: {datetime.now(timezone.utc).isoformat()})"
             )
         
@@ -158,7 +158,7 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             
             # This simulates auth.py:176 logging
             self.mock_logger.critical(
-                f"🚨 DATABASE SERVICE FAILURE: User database lookup failed "
+                f" ALERT:  DATABASE SERVICE FAILURE: User database lookup failed "
                 f"(user_id: {user_id[:8]}..., error: {error_detail}, timestamp: {datetime.now(timezone.utc).isoformat()})"
             )
         
@@ -182,7 +182,7 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             
             # This would be the demo mode logging (needs to be implemented)
             self.mock_logger.warning(
-                f"🎯 DEMO MODE AUTH: Demo authentication bypass activated for connection {connection_id} "
+                f" TARGET:  DEMO MODE AUTH: Demo authentication bypass activated for connection {connection_id} "
                 f"(demo_user: {demo_user_id}, timestamp: {datetime.now(timezone.utc).isoformat()})"
             )
         
@@ -225,10 +225,10 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 GOLDEN PATH AUTH FAILURE: WebSocket authentication failed for connection {self.connection_id} - JWT_VALIDATION_FAILURE"
+                f" ALERT:  GOLDEN PATH AUTH FAILURE: WebSocket authentication failed for connection {self.connection_id} - JWT_VALIDATION_FAILURE"
             )
             self.mock_logger.critical(
-                f"🔍 AUTH FAILURE CONTEXT: {json.dumps(auth_failure_context, indent=2)}"
+                f" SEARCH:  AUTH FAILURE CONTEXT: {json.dumps(auth_failure_context, indent=2)}"
             )
         
         # Validate context logging
@@ -264,10 +264,10 @@ class TestAuthenticationFailureLogging(SSotAsyncTestCase):
             
             # This simulates websocket_ssot.py:535-536 logging
             self.mock_logger.info(
-                f"✅ GOLDEN PATH AUTH SUCCESS: User {user_id[:8] if user_id else 'unknown'}... authenticated successfully for connection {connection_id}"
+                f" PASS:  GOLDEN PATH AUTH SUCCESS: User {user_id[:8] if user_id else 'unknown'}... authenticated successfully for connection {connection_id}"
             )
             self.mock_logger.info(
-                f"🔍 AUTH SUCCESS CONTEXT: {json.dumps(auth_success_context, indent=2)}"
+                f" SEARCH:  AUTH SUCCESS CONTEXT: {json.dumps(auth_success_context, indent=2)}"
             )
         
         # Validate success logging
@@ -351,7 +351,7 @@ class TestAuthorizationFailureLogging(SSotAsyncTestCase):
             
             # This simulates auth.py permission check logging (needs implementation)
             self.mock_logger.warning(
-                f"🔒 AUTHORIZATION FAILURE: User {self.user_id[:8]}... lacks permission for {operation} "
+                f"[U+1F512] AUTHORIZATION FAILURE: User {self.user_id[:8]}... lacks permission for {operation} "
                 f"(required: {required_role}, actual: {user_role}, timestamp: {datetime.now(timezone.utc).isoformat()})"
             )
         
@@ -375,7 +375,7 @@ class TestAuthorizationFailureLogging(SSotAsyncTestCase):
             
             # This would be role escalation detection logging (needs implementation)
             self.mock_logger.critical(
-                f"🚨 SECURITY ALERT: Role escalation attempt by user {self.user_id[:8]}... "
+                f" ALERT:  SECURITY ALERT: Role escalation attempt by user {self.user_id[:8]}... "
                 f"(attempted: {attempted_role}, current: {current_role}, timestamp: {datetime.now(timezone.utc).isoformat()})"
             )
         

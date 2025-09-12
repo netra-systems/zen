@@ -97,10 +97,10 @@ class DatabaseAPICompatibilityTestRunner:
         if not test_path.exists():
             raise FileNotFoundError(f"Test file not found: {test_path}")
         
-        logger.info(f"🚀 Running {suite['description']}")
-        logger.info(f"📁 Test path: {test_path}")
-        logger.info(f"🌍 Environment: {environment}")
-        logger.info(f"🔧 Real services: {real_services}")
+        logger.info(f"[U+1F680] Running {suite['description']}")
+        logger.info(f"[U+1F4C1] Test path: {test_path}")
+        logger.info(f"[U+1F30D] Environment: {environment}")
+        logger.info(f"[U+1F527] Real services: {real_services}")
         
         # Create test runner
         runner = self.create_test_runner(environment, real_services)
@@ -140,15 +140,15 @@ class DatabaseAPICompatibilityTestRunner:
             }
             
             if result["success"]:
-                logger.info(f"✅ {suite['description']} - PASSED ({execution_time:.2f}s)")
+                logger.info(f" PASS:  {suite['description']} - PASSED ({execution_time:.2f}s)")
             else:
-                logger.error(f"❌ {suite['description']} - FAILED ({execution_time:.2f}s)")
+                logger.error(f" FAIL:  {suite['description']} - FAILED ({execution_time:.2f}s)")
                 
             return result
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"💥 {suite['description']} - ERROR: {e}")
+            logger.error(f"[U+1F4A5] {suite['description']} - ERROR: {e}")
             
             return {
                 "suite": suite_name,
@@ -165,11 +165,11 @@ class DatabaseAPICompatibilityTestRunner:
     
     async def run_all_suites(self, environment: str = "test", real_services: bool = False, fail_fast: bool = True) -> Dict:
         """Run all test suites and return comprehensive results."""
-        logger.info("🧪 Starting Database API Compatibility Test Suite")
-        logger.info(f"📋 Running {len(self.test_suites)} test suites")
-        logger.info(f"🌍 Environment: {environment}")
-        logger.info(f"🔧 Real services: {real_services}")
-        logger.info(f"⚡ Fail fast: {fail_fast}")
+        logger.info("[U+1F9EA] Starting Database API Compatibility Test Suite")
+        logger.info(f"[U+1F4CB] Running {len(self.test_suites)} test suites")
+        logger.info(f"[U+1F30D] Environment: {environment}")
+        logger.info(f"[U+1F527] Real services: {real_services}")
+        logger.info(f" LIGHTNING:  Fail fast: {fail_fast}")
         
         overall_start_time = time.time()
         results = []
@@ -178,7 +178,7 @@ class DatabaseAPICompatibilityTestRunner:
         # Run each test suite
         for suite_name, suite_config in self.test_suites.items():
             logger.info(f"\n{'='*80}")
-            logger.info(f"🔍 Test Suite: {suite_name.upper()}")
+            logger.info(f" SEARCH:  Test Suite: {suite_name.upper()}")
             logger.info(f"{'='*80}")
             
             try:
@@ -190,11 +190,11 @@ class DatabaseAPICompatibilityTestRunner:
                     critical_failures.append(result)
                     
                     if fail_fast:
-                        logger.error(f"💥 Critical test suite failed, stopping execution: {suite_name}")
+                        logger.error(f"[U+1F4A5] Critical test suite failed, stopping execution: {suite_name}")
                         break
                         
             except Exception as e:
-                logger.error(f"💥 Failed to run test suite {suite_name}: {e}")
+                logger.error(f"[U+1F4A5] Failed to run test suite {suite_name}: {e}")
                 
                 error_result = {
                     "suite": suite_name,
@@ -237,45 +237,45 @@ class DatabaseAPICompatibilityTestRunner:
     def print_summary(self, summary: Dict):
         """Print comprehensive test results summary."""
         logger.info(f"\n{'='*80}")
-        logger.info("📊 DATABASE API COMPATIBILITY TEST RESULTS SUMMARY")
+        logger.info(" CHART:  DATABASE API COMPATIBILITY TEST RESULTS SUMMARY")
         logger.info(f"{'='*80}")
         
-        logger.info(f"🌍 Environment: {summary['environment']}")
-        logger.info(f"🔧 Real Services: {summary['real_services']}")
-        logger.info(f"⏱️ Total Execution Time: {summary['execution_time']:.2f}s")
-        logger.info(f"📋 Total Suites: {summary['total_suites']}")
-        logger.info(f"✅ Passed: {summary['passed_suites']}")
-        logger.info(f"❌ Failed: {summary['failed_suites']}")
-        logger.info(f"💥 Critical Failures: {summary['critical_failures']}")
+        logger.info(f"[U+1F30D] Environment: {summary['environment']}")
+        logger.info(f"[U+1F527] Real Services: {summary['real_services']}")
+        logger.info(f"[U+23F1][U+FE0F] Total Execution Time: {summary['execution_time']:.2f}s")
+        logger.info(f"[U+1F4CB] Total Suites: {summary['total_suites']}")
+        logger.info(f" PASS:  Passed: {summary['passed_suites']}")
+        logger.info(f" FAIL:  Failed: {summary['failed_suites']}")
+        logger.info(f"[U+1F4A5] Critical Failures: {summary['critical_failures']}")
         
         overall_status = "SUCCESS" if summary["overall_success"] else "FAILURE"
-        status_icon = "✅" if summary["overall_success"] else "💥"
+        status_icon = " PASS: " if summary["overall_success"] else "[U+1F4A5]"
         logger.info(f"\n{status_icon} OVERALL STATUS: {overall_status}")
         
         # Detailed results
-        logger.info(f"\n📋 DETAILED RESULTS:")
+        logger.info(f"\n[U+1F4CB] DETAILED RESULTS:")
         for result in summary["results"]:
-            status_icon = "✅" if result["success"] else "❌"
-            critical_marker = "🔥" if result["critical"] else "🔸"
+            status_icon = " PASS: " if result["success"] else " FAIL: "
+            critical_marker = " FIRE: " if result["critical"] else "[U+1F538]"
             
             logger.info(f"{status_icon} {critical_marker} {result['suite'].upper()}: {result['description']}")
-            logger.info(f"   ⏱️ Time: {result.get('execution_time', 0):.2f}s")
+            logger.info(f"   [U+23F1][U+FE0F] Time: {result.get('execution_time', 0):.2f}s")
             
             if not result["success"] and "error" in result:
-                logger.info(f"   💬 Error: {result['error']}")
+                logger.info(f"   [U+1F4AC] Error: {result['error']}")
         
         # GitHub issue context
-        logger.info(f"\n🎯 GITHUB ISSUE #122 CONTEXT:")
-        logger.info(f"   📝 Issue: Database API Compatibility (SQLAlchemy 2.0+ / Redis 6.4.0+)")
-        logger.info(f"   🔗 Root Cause: SSOT violations with 30+ files using scattered patterns") 
-        logger.info(f"   🛠️ Solution: Implement comprehensive test coverage for API changes")
+        logger.info(f"\n TARGET:  GITHUB ISSUE #122 CONTEXT:")
+        logger.info(f"   [U+1F4DD] Issue: Database API Compatibility (SQLAlchemy 2.0+ / Redis 6.4.0+)")
+        logger.info(f"   [U+1F517] Root Cause: SSOT violations with 30+ files using scattered patterns") 
+        logger.info(f"   [U+1F6E0][U+FE0F] Solution: Implement comprehensive test coverage for API changes")
         
         if summary["overall_success"]:
-            logger.info(f"   ✅ All critical compatibility tests PASSED")
-            logger.info(f"   🚀 Safe to deploy with modern dependency versions")
+            logger.info(f"    PASS:  All critical compatibility tests PASSED")
+            logger.info(f"   [U+1F680] Safe to deploy with modern dependency versions")
         else:
-            logger.info(f"   ❌ Critical compatibility issues detected")
-            logger.info(f"   ⚠️ Deployment blocked until issues are resolved")
+            logger.info(f"    FAIL:  Critical compatibility issues detected")
+            logger.info(f"    WARNING: [U+FE0F] Deployment blocked until issues are resolved")
     
     def create_junit_xml_report(self, summary: Dict, output_path: Path):
         """Create JUnit XML report for CI/CD integration."""
@@ -317,10 +317,10 @@ class DatabaseAPICompatibilityTestRunner:
             # Write XML to file
             tree = ET.ElementTree(testsuite)
             tree.write(output_path, encoding="utf-8", xml_declaration=True)
-            logger.info(f"📊 JUnit XML report written to: {output_path}")
+            logger.info(f" CHART:  JUnit XML report written to: {output_path}")
             
         except Exception as e:
-            logger.warning(f"⚠️ Failed to create JUnit XML report: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Failed to create JUnit XML report: {e}")
 
 async def main():
     """Main entry point for the test runner."""
@@ -420,10 +420,10 @@ Examples:
         sys.exit(exit_code)
         
     except KeyboardInterrupt:
-        logger.info("\n⚠️ Test execution interrupted by user")
+        logger.info("\n WARNING: [U+FE0F] Test execution interrupted by user")
         sys.exit(130)
     except Exception as e:
-        logger.error(f"💥 Fatal error running database API compatibility tests: {e}")
+        logger.error(f"[U+1F4A5] Fatal error running database API compatibility tests: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

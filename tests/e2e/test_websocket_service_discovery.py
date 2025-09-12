@@ -311,7 +311,7 @@ class TestWebSocketServiceDiscovery:
             # Should not crash on malformed requests
             pytest.fail(f"WebSocket config endpoint crashed on malformed request: {e}")
     
-    # Helper methods (each ≤8 lines)
+    # Helper methods (each  <= 8 lines)
     def _validate_url_format(self, url: str) -> bool:
         """Validate WebSocket URL format."""
         if not isinstance(url, str):

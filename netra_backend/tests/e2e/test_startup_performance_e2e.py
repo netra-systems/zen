@@ -774,25 +774,25 @@ class TestStartupPerformanceE2E(BaseTestCase, E2ETestFixture):
         
         # Report Business SLA Compliance
         sla_violations = len(self.performance_metrics['business_sla_violations'])
-        print(f"\n📊 BUSINESS SLA COMPLIANCE:")
+        print(f"\n CHART:  BUSINESS SLA COMPLIANCE:")
         print(f"  SLA Violations: {sla_violations}")
         
         if sla_violations == 0:
-            print(f"  ✅ ALL BUSINESS SLA REQUIREMENTS MET")
+            print(f"   PASS:  ALL BUSINESS SLA REQUIREMENTS MET")
         else:
-            print(f"  ❌ BUSINESS SLA VIOLATIONS DETECTED:")
+            print(f"   FAIL:  BUSINESS SLA VIOLATIONS DETECTED:")
             for violation in self.performance_metrics['business_sla_violations']:
                 print(f"    - {violation.get('test', 'unknown')}: {violation.get('error', 'unknown error')}")
         
         # Report Startup Performance
         if self.performance_metrics['startup_timings']:
-            print(f"\n⚡ STARTUP PERFORMANCE:")
+            print(f"\n LIGHTNING:  STARTUP PERFORMANCE:")
             for timing in self.performance_metrics['startup_timings']:
                 print(f"  - {timing['type']}: {timing['duration']:.3f}s")
         
         # Report Resource Utilization  
         if self.performance_metrics['resource_utilization']:
-            print(f"\n💾 RESOURCE UTILIZATION:")
+            print(f"\n[U+1F4BE] RESOURCE UTILIZATION:")
             for resource_type, data in self.performance_metrics['resource_utilization'].items():
                 print(f"  - {resource_type}:")
                 print(f"    Memory: {data.get('memory_mb', 0):.1f}MB")
@@ -801,7 +801,7 @@ class TestStartupPerformanceE2E(BaseTestCase, E2ETestFixture):
         
         # Report Concurrent Performance
         if self.performance_metrics['concurrent_performance']:
-            print(f"\n🔀 CONCURRENT PERFORMANCE:")
+            print(f"\n[U+1F500] CONCURRENT PERFORMANCE:")
             for perf_type, data in self.performance_metrics['concurrent_performance'].items():
                 if isinstance(data, dict):
                     print(f"  - {perf_type}:")
@@ -816,14 +816,14 @@ class TestStartupPerformanceE2E(BaseTestCase, E2ETestFixture):
         
         # Report WebSocket Performance
         if self.performance_metrics['websocket_performance']:
-            print(f"\n🌐 WEBSOCKET PERFORMANCE:")
+            print(f"\n[U+1F310] WEBSOCKET PERFORMANCE:")
             ws_perf = self.performance_metrics['websocket_performance']
             print(f"  - Success Rate: {ws_perf.get('success_rate', 0):.2%}")
             print(f"  - Avg Connection Time: {ws_perf.get('avg_connection_time', 0):.3f}s")
         
         # Report Memory Performance
         if self.performance_metrics['memory_usage']:
-            print(f"\n🧠 MEMORY PERFORMANCE:")
+            print(f"\n[U+1F9E0] MEMORY PERFORMANCE:")
             mem_data = self.performance_metrics['memory_usage']
             print(f"  - Baseline: {mem_data.get('baseline_mb', 0):.1f}MB")
             print(f"  - Final: {mem_data.get('final_mb', 0):.1f}MB")
@@ -831,7 +831,7 @@ class TestStartupPerformanceE2E(BaseTestCase, E2ETestFixture):
         
         # Report Memory Leak Detection
         if self.performance_metrics['memory_leak_detection']:
-            print(f"\n🔍 MEMORY LEAK DETECTION:")
+            print(f"\n SEARCH:  MEMORY LEAK DETECTION:")
             leak_data = self.performance_metrics['memory_leak_detection']
             print(f"  - Leak Detected: {'YES' if leak_data.get('leak_detected', False) else 'NO'}")
             print(f"  - Growth per Cycle: {leak_data.get('growth_per_cycle_mb', 0):.1f}MB")
@@ -839,7 +839,7 @@ class TestStartupPerformanceE2E(BaseTestCase, E2ETestFixture):
         
         # Report Error Recovery Performance
         if self.performance_metrics['error_recovery_times']:
-            print(f"\n🚨 ERROR RECOVERY PERFORMANCE:")
+            print(f"\n ALERT:  ERROR RECOVERY PERFORMANCE:")
             for recovery in self.performance_metrics['error_recovery_times']:
                 print(f"  - {recovery['scenario']}: {recovery['detection_time']:.3f}s")
         
@@ -847,14 +847,14 @@ class TestStartupPerformanceE2E(BaseTestCase, E2ETestFixture):
         
         # Business Impact Summary
         if sla_violations > 0:
-            print(f"❌ BUSINESS IMPACT: {sla_violations} SLA violations detected.")
+            print(f" FAIL:  BUSINESS IMPACT: {sla_violations} SLA violations detected.")
             print(f"   This indicates potential production issues that could impact:")
             print(f"   - User experience and retention")
             print(f"   - System scalability and reliability") 
             print(f"   - Infrastructure costs and efficiency")
             print(f"   - Chat functionality and responsiveness")
         else:
-            print(f"✅ BUSINESS SUCCESS: All performance SLAs met.")
+            print(f" PASS:  BUSINESS SUCCESS: All performance SLAs met.")
             print(f"   System ready for production deployment with confidence.")
         
         print(f"{'='*80}")

@@ -24,7 +24,7 @@ from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authentica
 
 async def test_connection_id_generation_inconsistency():
     """Test connection ID generation inconsistencies causing routing failures."""
-    print("🚨 TESTING CONNECTION ID GENERATION INCONSISTENCIES")
+    print(" ALERT:  TESTING CONNECTION ID GENERATION INCONSISTENCIES")
     print("="*60)
     
     # Test 1: ConnectionHandler ID format consistency
@@ -57,12 +57,12 @@ async def test_connection_id_generation_inconsistency():
             
             # Check format consistency
             if not conn_id.startswith("conn_"):
-                print(f"   ❌ INCONSISTENT FORMAT: {conn_id} doesn't start with 'conn_'")
+                print(f"    FAIL:  INCONSISTENT FORMAT: {conn_id} doesn't start with 'conn_'")
             
             # Check if any user ID is in the connection ID
             user_found = any(user_part in conn_id for user_part in [f"{user_id}_{i}" for i in range(5)])
             if not user_found:
-                print(f"   ❌ USER ID MISSING: {conn_id} doesn't contain expected user_id pattern")
+                print(f"    FAIL:  USER ID MISSING: {conn_id} doesn't contain expected user_id pattern")
         
         # Test 2: Routing system compatibility
         print(f"\n2. Testing routing system compatibility:")
@@ -79,19 +79,19 @@ async def test_connection_id_generation_inconsistency():
             
             # This demonstrates the mismatch
             if handler_id != routing_compatible_id:
-                print(f"   🚨 ROUTE MISMATCH DETECTED: Handler uses different format than routing system expects")
+                print(f"    ALERT:  ROUTE MISMATCH DETECTED: Handler uses different format than routing system expects")
         
         # Cleanup
         for handler in handlers:
             await handler.cleanup()
     
-    print(f"\n   ✅ Connection ID inconsistency demonstrated")
+    print(f"\n    PASS:  Connection ID inconsistency demonstrated")
     return True
 
 
 async def test_routing_table_synchronization_failure():
     """Test routing table synchronization failures between components."""
-    print("\n🚨 TESTING ROUTING TABLE SYNCHRONIZATION FAILURES")
+    print("\n ALERT:  TESTING ROUTING TABLE SYNCHRONIZATION FAILURES")
     print("="*60)
     
     user_id = "sync_test_user_789"
@@ -135,7 +135,7 @@ async def test_routing_table_synchronization_failure():
         print(f"   Routing success: {routing_success}")
         
         if not routing_success:
-            print(f"   🚨 ROUTING FAILURE REPRODUCED: Message failed to route to connection")
+            print(f"    ALERT:  ROUTING FAILURE REPRODUCED: Message failed to route to connection")
         
         # Test with mismatched connection ID (simulating sync failure)
         mismatched_id = f"mismatched_{handler.connection_id}"
@@ -147,18 +147,18 @@ async def test_routing_table_synchronization_failure():
         print(f"   Mismatched routing success: {mismatched_routing}")
         
         if not mismatched_routing:
-            print(f"   🚨 SYNC FAILURE REPRODUCED: Mismatched connection ID causes routing failure")
+            print(f"    ALERT:  SYNC FAILURE REPRODUCED: Mismatched connection ID causes routing failure")
         
         # Cleanup
         await handler.cleanup()
     
-    print(f"\n   ✅ Routing table synchronization failure demonstrated")
+    print(f"\n    PASS:  Routing table synchronization failure demonstrated")
     return True
 
 
 async def test_multi_user_isolation_with_authentication():
     """Test multi-user isolation with proper authentication."""
-    print("\n🚨 TESTING MULTI-USER ROUTING ISOLATION")
+    print("\n ALERT:  TESTING MULTI-USER ROUTING ISOLATION")
     print("="*60)
     
     # Create authenticated users using SSOT auth helper
@@ -282,9 +282,9 @@ async def test_multi_user_isolation_with_authentication():
     print(f"   Cross-user violations: {len(cross_user_violations)}")
     
     if len(cross_user_violations) == 0:
-        print(f"   ✅ ISOLATION MAINTAINED: No cross-user message leakage detected")
+        print(f"    PASS:  ISOLATION MAINTAINED: No cross-user message leakage detected")
     else:
-        print(f"   🚨 ISOLATION BREACH: {len(cross_user_violations)} cross-user violations detected")
+        print(f"    ALERT:  ISOLATION BREACH: {len(cross_user_violations)} cross-user violations detected")
         for violation in cross_user_violations:
             print(f"      - Message for {violation['intended_user'][:16]}... went to {violation['actual_recipient'][:16]}...")
     
@@ -292,13 +292,13 @@ async def test_multi_user_isolation_with_authentication():
     for handler in handlers:
         await handler.cleanup()
     
-    print(f"\n   ✅ Multi-user routing isolation test completed")
+    print(f"\n    PASS:  Multi-user routing isolation test completed")
     return True
 
 
 async def main():
     """Run all routing failure tests."""
-    print("🚨 WebSocket Routing Failure Test Suite")
+    print(" ALERT:  WebSocket Routing Failure Test Suite")
     print("="*60)
     print("This test suite reproduces WebSocket message routing failures")
     print("caused by connection ID inconsistencies and routing table mismatches.")
@@ -322,25 +322,25 @@ async def main():
         
         # Summary
         print("\n" + "="*60)
-        print("🚨 TEST SUITE SUMMARY")
+        print(" ALERT:  TEST SUITE SUMMARY")
         print("="*60)
         
         all_passed = True
         for test_name, result in test_results:
-            status = "✅ PASSED" if result else "❌ FAILED"
+            status = " PASS:  PASSED" if result else " FAIL:  FAILED"
             print(f"   {test_name}: {status}")
             if not result:
                 all_passed = False
         
-        print(f"\nOverall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
-        print("\n🚨 ROUTING FAILURES SUCCESSFULLY REPRODUCED!")
+        print(f"\nOverall Result: {' PASS:  ALL TESTS PASSED' if all_passed else ' FAIL:  SOME TESTS FAILED'}")
+        print("\n ALERT:  ROUTING FAILURES SUCCESSFULLY REPRODUCED!")
         print("These tests demonstrate the connection ID inconsistencies and")
         print("routing table synchronization issues that cause 'Message routing failed' errors.")
         
         return 0 if all_passed else 1
         
     except Exception as e:
-        print(f"\n❌ TEST SUITE ERROR: {e}")
+        print(f"\n FAIL:  TEST SUITE ERROR: {e}")
         import traceback
         traceback.print_exc()
         return 1

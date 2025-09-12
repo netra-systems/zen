@@ -5,7 +5,7 @@ CRITICAL E2E test for complete synthetic data generation workflows.
 Tests end-to-end user journeys from API request to data generation and storage.
 
 PRODUCTION CRITICAL - LAUNCH DEPENDENCY
-This test provides 0% → 100% E2E coverage for SyntheticDataSubAgent workflow.
+This test provides 0%  ->  100% E2E coverage for SyntheticDataSubAgent workflow.
 
 Business Value Justification (BVJ):
 1. Segment: Enterprise, Mid-tier
@@ -173,7 +173,7 @@ class TestSyntheticDataE2E:
     async def test_complete_data_generation_journey(
         self, authenticated_session, performance_timeout
     ):
-        """Test complete user journey: API request → generation → storage → response."""
+        """Test complete user journey: API request  ->  generation  ->  storage  ->  response."""
         start_time = time.time()
         session_data = authenticated_session
         
@@ -353,7 +353,7 @@ class TestSyntheticDataE2E:
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_multi_agent_collaboration_e2e(self, authenticated_session):
-        """Test complete multi-agent collaboration: Triage → Supervisor → SyntheticData."""
+        """Test complete multi-agent collaboration: Triage  ->  Supervisor  ->  SyntheticData."""
         session_data = authenticated_session
         
         try:

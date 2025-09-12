@@ -200,11 +200,11 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         assert engine.database_session_manager is not None, "Database session manager must be initialized"
         
         # Test infrastructure manager validation (main fix verification)
-        print(f"✅ CRITICAL FIX VERIFIED: UserExecutionEngine has database_session_manager: {type(engine.database_session_manager)}")
+        print(f" PASS:  CRITICAL FIX VERIFIED: UserExecutionEngine has database_session_manager: {type(engine.database_session_manager)}")
         
         # Skip database operations if stub implementation (no Docker)
         if db_session is None:
-            print("⚠️ Skipping real database operations - using stub implementation (no Docker)")
+            print(" WARNING: [U+FE0F] Skipping real database operations - using stub implementation (no Docker)")
             self.record_metric("database_operations_completed", 0)
             self.record_metric("agent_execution_with_db_success", True)
             self.record_metric("database_records_created", 0)
@@ -383,7 +383,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
         execution_time = time.time() - execution_start_time
         
         # Verify Redis operations work by testing Redis client directly
-        print(f"✅ REDIS TEST: Successfully created Redis client and verified infrastructure")
+        print(f" PASS:  REDIS TEST: Successfully created Redis client and verified infrastructure")
         
         # Record execution result
         test_ctx.agent_execution_results.append({
@@ -527,7 +527,7 @@ class TestAgentExecutionEngineIntegration(SSotAsyncTestCase):
                 
                 # Execute agent - SIMPLIFIED for testing infrastructure managers (main goal)
                 # The important part is that we can create engines and they have infrastructure managers
-                print(f"✅ CONCURRENT TEST: Agent {agent_index} - UserExecutionEngine created with infrastructure managers")
+                print(f" PASS:  CONCURRENT TEST: Agent {agent_index} - UserExecutionEngine created with infrastructure managers")
                 print(f"   - database_session_manager: {hasattr(engine, 'database_session_manager')}")
                 print(f"   - redis_manager: {hasattr(engine, 'redis_manager')}")
                 

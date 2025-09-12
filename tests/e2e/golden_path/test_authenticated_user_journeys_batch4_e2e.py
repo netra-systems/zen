@@ -123,7 +123,7 @@ class TestAuthenticatedUserJourneysBatch4E2E(SSotAsyncTestCase):
         assert "cost" in result_content.lower(), "Free tier should receive cost analysis"
         assert len(result_content) > 100, "Free tier should receive substantial analysis"
         
-        print("✅ Free tier user complete authentication journey E2E test passed")
+        print(" PASS:  Free tier user complete authentication journey E2E test passed")
 
     @pytest.mark.e2e
     @pytest.mark.golden_path
@@ -188,7 +188,7 @@ class TestAuthenticatedUserJourneysBatch4E2E(SSotAsyncTestCase):
             "Early tier should receive optimization recommendations"
         assert len(result_content) > 200, "Early tier should receive detailed analysis"
         
-        print("✅ Early tier user optimization authentication journey E2E test passed")
+        print(" PASS:  Early tier user optimization authentication journey E2E test passed")
 
     @pytest.mark.e2e 
     @pytest.mark.golden_path
@@ -253,7 +253,7 @@ class TestAuthenticatedUserJourneysBatch4E2E(SSotAsyncTestCase):
             "Enterprise tier should receive advanced analytics"
         assert len(result_content) > 300, "Enterprise tier should receive comprehensive analysis"
         
-        print("✅ Enterprise user advanced analytics authentication journey E2E test passed")
+        print(" PASS:  Enterprise user advanced analytics authentication journey E2E test passed")
 
     @pytest.mark.e2e
     @pytest.mark.golden_path
@@ -344,7 +344,7 @@ class TestAuthenticatedUserJourneysBatch4E2E(SSotAsyncTestCase):
             for other_user_id in other_user_ids:
                 assert other_user_id not in result_content, f"User isolation violated: {user_id_str} seeing {other_user_id} data"
         
-        print("✅ Multi-user concurrent authentication isolation E2E test passed")
+        print(" PASS:  Multi-user concurrent authentication isolation E2E test passed")
 
 
 if __name__ == "__main__":

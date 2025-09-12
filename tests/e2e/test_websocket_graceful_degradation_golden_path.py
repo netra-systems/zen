@@ -14,14 +14,14 @@ This E2E test validates the complete graceful degradation flow:
 4. Service recovery detection and transition to full functionality
 5. Business continuity - users never experience complete service failure
 
-🚨 MISSION CRITICAL: These tests validate revenue protection mechanisms.
+ ALERT:  MISSION CRITICAL: These tests validate revenue protection mechanisms.
 If these tests fail, the $500K+ ARR chat functionality is at risk during outages.
 
 Golden Path Flow Tested:
 ```
-WebSocket Connection → Services Available? 
-  → Supervisor Ready? → No → Wait 500ms x 3 → Still No → Create Fallback Handler → Limited Functionality
-  → Thread Service Ready? → No → Wait 500ms x 3 → Still No → Create Fallback Handler → Limited Functionality
+WebSocket Connection  ->  Services Available? 
+   ->  Supervisor Ready?  ->  No  ->  Wait 500ms x 3  ->  Still No  ->  Create Fallback Handler  ->  Limited Functionality
+   ->  Thread Service Ready?  ->  No  ->  Wait 500ms x 3  ->  Still No  ->  Create Fallback Handler  ->  Limited Functionality
 ```
 """
 
@@ -543,7 +543,7 @@ async def test_business_continuity_validation_e2e():
     ]
     
     for scenario in degradation_scenarios:
-        print(f"\n🧪 Testing Business Continuity: {scenario['name']}")
+        print(f"\n[U+1F9EA] Testing Business Continuity: {scenario['name']}")
         
         mock_app = MockAppWithDegradedServices(missing_services=scenario['missing_services'])
         
@@ -601,7 +601,7 @@ async def test_business_continuity_validation_e2e():
                 assert response["type"] == MessageType.AGENT_RESPONSE.value
                 assert "business continuity maintained" in response["content"]["content"]
                 
-                print(f"✅ {scenario['name']}: Business continuity validated - user received response")
+                print(f" PASS:  {scenario['name']}: Business continuity validated - user received response")
 
 
 if __name__ == "__main__":

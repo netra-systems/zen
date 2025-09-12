@@ -73,7 +73,7 @@ class TestWebSocketCloseCodes:
                 
                 assert welcome_data["type"] == "connection_established"
                 assert "connection_id" in welcome_data
-                print(f"✅ Connected: {welcome_data['connection_id']}")
+                print(f" PASS:  Connected: {welcome_data['connection_id']}")
                 
                 # Send close message
                 close_message = {
@@ -83,7 +83,7 @@ class TestWebSocketCloseCodes:
                 }
                 
                 await websocket.send_json(close_message)
-                print(f"📤 Sent close request: {close_message}")
+                print(f"[U+1F4E4] Sent close request: {close_message}")
                 
                 # Verify connection closes cleanly
                 try:
@@ -91,7 +91,7 @@ class TestWebSocketCloseCodes:
                     await websocket.recv()
                     assert False, "Should have been disconnected"
                 except ConnectionClosed:
-                    print("✅ Connection closed cleanly")
+                    print(" PASS:  Connection closed cleanly")
                     pass
                 
                 # Verify send_json was called for close message
@@ -133,7 +133,7 @@ class TestWebSocketCloseCodes:
                 invalid_protocol_message = b'\x00\x01\x02invalid_binary'
                 
                 await websocket.send(invalid_protocol_message)
-                print(f"📤 Sent invalid protocol message")
+                print(f"[U+1F4E4] Sent invalid protocol message")
                 
                 # Wait for error response
                 response = await websocket.recv()
@@ -144,14 +144,14 @@ class TestWebSocketCloseCodes:
                 assert response_data["error_code"] == "PROTOCOL_ERROR"
                 assert response_data["close_code"] == 1002
                 
-                print(f"📥 Received protocol error: {response_data}")
+                print(f"[U+1F4E5] Received protocol error: {response_data}")
                 
                 # Verify connection closes with protocol error
                 try:
                     await websocket.recv()
                     assert False, "Should have been disconnected"
                 except ConnectionClosedError:
-                    print("✅ Connection closed due to protocol error")
+                    print(" PASS:  Connection closed due to protocol error")
                     pass
     
     @pytest.mark.asyncio
@@ -189,7 +189,7 @@ class TestWebSocketCloseCodes:
                 unsupported_data = b'\xFF\xFE\xFD\xFC'  # Invalid UTF-8
                 
                 await websocket.send(unsupported_data)
-                print(f"📤 Sent unsupported data")
+                print(f"[U+1F4E4] Sent unsupported data")
                 
                 # Wait for error response
                 response = await websocket.recv()
@@ -200,14 +200,14 @@ class TestWebSocketCloseCodes:
                 assert response_data["error_code"] == "INVALID_DATA"
                 assert response_data["close_code"] == 1003
                 
-                print(f"📥 Received invalid data error: {response_data}")
+                print(f"[U+1F4E5] Received invalid data error: {response_data}")
                 
                 # Verify connection closes
                 try:
                     await websocket.recv()
                     assert False, "Should have been disconnected"
                 except ConnectionClosedError:
-                    print("✅ Connection closed due to invalid data")
+                    print(" PASS:  Connection closed due to invalid data")
                     pass
     
     @pytest.mark.asyncio
@@ -253,7 +253,7 @@ class TestWebSocketCloseCodes:
                     }
                     await websocket.send_json(spam_message)
                 
-                print(f"📤 Sent 50 rapid messages (exceeding rate limit)")
+                print(f"[U+1F4E4] Sent 50 rapid messages (exceeding rate limit)")
                 
                 # Wait for policy violation error
                 response = await websocket.recv()
@@ -265,14 +265,14 @@ class TestWebSocketCloseCodes:
                 assert response_data["close_code"] == 1008
                 assert "rate_limit" in response_data["details"]
                 
-                print(f"📥 Received policy violation: {response_data}")
+                print(f"[U+1F4E5] Received policy violation: {response_data}")
                 
                 # Verify connection closes due to policy violation
                 try:
                     await websocket.recv()
                     assert False, "Should have been disconnected"
                 except ConnectionClosedError:
-                    print("✅ Connection closed due to policy violation")
+                    print(" PASS:  Connection closed due to policy violation")
                     pass
     
     @pytest.mark.asyncio
@@ -318,7 +318,7 @@ class TestWebSocketCloseCodes:
                 }
                 
                 await websocket.send_json(oversized_message)
-                print(f"📤 Sent oversized message ({len(oversized_content)} bytes)")
+                print(f"[U+1F4E4] Sent oversized message ({len(oversized_content)} bytes)")
                 
                 # Wait for message too big error
                 response = await websocket.recv()
@@ -330,14 +330,14 @@ class TestWebSocketCloseCodes:
                 assert response_data["close_code"] == 1009
                 assert "max_size_bytes" in response_data["details"]
                 
-                print(f"📥 Received message too big error: {response_data}")
+                print(f"[U+1F4E5] Received message too big error: {response_data}")
                 
                 # Verify connection closes
                 try:
                     await websocket.recv()
                     assert False, "Should have been disconnected"
                 except ConnectionClosedError:
-                    print("✅ Connection closed due to message size")
+                    print(" PASS:  Connection closed due to message size")
                     pass
     
     @pytest.mark.asyncio
@@ -382,7 +382,7 @@ class TestWebSocketCloseCodes:
                 }
                 
                 await websocket.send_json(trigger_message)
-                print(f"📤 Sent internal error trigger")
+                print(f"[U+1F4E4] Sent internal error trigger")
                 
                 # Wait for internal error response
                 response = await websocket.recv()
@@ -394,14 +394,14 @@ class TestWebSocketCloseCodes:
                 assert response_data["close_code"] == 1011
                 assert "error_id" in response_data["details"]
                 
-                print(f"📥 Received internal error: {response_data}")
+                print(f"[U+1F4E5] Received internal error: {response_data}")
                 
                 # Verify connection closes due to internal error
                 try:
                     await websocket.recv()
                     assert False, "Should have been disconnected"
                 except ConnectionClosedError:
-                    print("✅ Connection closed due to internal error")
+                    print(" PASS:  Connection closed due to internal error")
                     pass
     
     @pytest.mark.asyncio
@@ -452,7 +452,7 @@ class TestWebSocketCloseCodes:
                 welcome = await websocket.recv()
                 welcome_data = json.loads(welcome)
                 connection_id = welcome_data["connection_id"]
-                print(f"✅ 1. Connected: {connection_id}")
+                print(f" PASS:  1. Connected: {connection_id}")
                 
                 # 2. Exchange some messages
                 ping_message = {"type": "ping"}
@@ -461,7 +461,7 @@ class TestWebSocketCloseCodes:
                 pong = await websocket.recv()
                 pong_data = json.loads(pong)
                 assert pong_data["type"] == "pong"
-                print(f"✅ 2. Message exchange successful")
+                print(f" PASS:  2. Message exchange successful")
                 
                 # 3. Initiate clean disconnect
                 disconnect_message = {
@@ -470,7 +470,7 @@ class TestWebSocketCloseCodes:
                     "cleanup_requested": True
                 }
                 await websocket.send_json(disconnect_message)
-                print(f"✅ 3. Disconnect initiated")
+                print(f" PASS:  3. Disconnect initiated")
                 
                 # 4. Wait for disconnect acknowledgment
                 disconnect_ack = await websocket.recv()
@@ -482,14 +482,14 @@ class TestWebSocketCloseCodes:
                 assert "resources_released" in disconnect_data
                 assert "connection" in disconnect_data["resources_released"]
                 
-                print(f"✅ 4. Disconnect acknowledged with cleanup")
+                print(f" PASS:  4. Disconnect acknowledged with cleanup")
                 
                 # 5. Verify connection closes cleanly
                 try:
                     await websocket.recv()
                     assert False, "Should have been disconnected"
                 except ConnectionClosed:
-                    print("✅ 5. Connection closed cleanly")
+                    print(" PASS:  5. Connection closed cleanly")
                     pass
                 
                 # Verify all expected calls were made
@@ -500,7 +500,7 @@ class TestWebSocketCloseCodes:
                 for expected, actual in zip(expected_calls, actual_calls):
                     assert expected == actual
                 
-                print("✅ 6. All message calls verified")
+                print(" PASS:  6. All message calls verified")
     
     @pytest.mark.asyncio
     async def test_unexpected_disconnection_handling(self):
@@ -533,7 +533,7 @@ class TestWebSocketCloseCodes:
                 # Receive welcome message
                 welcome = await websocket.recv()
                 welcome_data = json.loads(welcome)
-                print(f"✅ Connected: {welcome_data['connection_id']}")
+                print(f" PASS:  Connected: {welcome_data['connection_id']}")
                 
                 # Send a message
                 test_message = {
@@ -541,14 +541,14 @@ class TestWebSocketCloseCodes:
                     "payload": {"content": "This message may not get a response"}
                 }
                 await websocket.send_json(test_message)
-                print(f"📤 Sent message before unexpected disconnect")
+                print(f"[U+1F4E4] Sent message before unexpected disconnect")
                 
                 # Try to receive response - should get unexpected disconnect
                 try:
                     response = await websocket.recv()
                     assert False, "Should have been unexpectedly disconnected"
                 except ConnectionClosedError as e:
-                    print("⚠️  Unexpected disconnection detected")
+                    print(" WARNING: [U+FE0F]  Unexpected disconnection detected")
                     # In real implementation, this would trigger reconnection logic
                     assert True  # Expected behavior
                 

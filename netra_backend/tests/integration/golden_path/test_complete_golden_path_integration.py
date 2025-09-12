@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 This test validates the COMPLETE Golden Path from the GOLDEN_PATH_USER_FLOW_COMPLETE.md:
 1. WebSocket Connection & Authentication
 2. Message Routing & Agent Selection
-3. Agent Execution Pipeline (Triage→Data Helper→UVS Reporting)
+3. Agent Execution Pipeline (Triage -> Data Helper -> UVS Reporting)
 4. WebSocket Events & Real-time Updates
 5. Result Persistence & User Response
 
@@ -164,7 +164,7 @@ class TestCompleteGoldenPathIntegration(BaseIntegrationTest):
         
         self.assert_business_value_delivered(final_business_value, "cost_savings")
         
-        self.logger.info(f"✅ Complete Golden Path validated in {total_flow_time:.2f}s")
+        self.logger.info(f" PASS:  Complete Golden Path validated in {total_flow_time:.2f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -393,7 +393,7 @@ class TestCompleteGoldenPathIntegration(BaseIntegrationTest):
         websocket_events = []
         
         try:
-            # Execute Golden Path agent pipeline: Triage → Data Helper → UVS Reporting
+            # Execute Golden Path agent pipeline: Triage  ->  Data Helper  ->  UVS Reporting
             pipeline_agents = ["triage_agent", "data_helper_agent", "uvs_reporting_agent"]
             pipeline_results = []
             

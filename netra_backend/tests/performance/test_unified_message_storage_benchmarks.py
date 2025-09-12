@@ -49,7 +49,7 @@ class TestUnifiedMessageStoragePerformance:
         """Benchmark: Message save operations must be <50ms for real-time chat.
         
         Business Value: Users expect instant message appearance in chat UI.
-        Current blocking PostgreSQL: 500ms+ → Target Redis-first: <50ms
+        Current blocking PostgreSQL: 500ms+  ->  Target Redis-first: <50ms
         """
         # Arrange
         test_messages = [
@@ -89,13 +89,13 @@ class TestUnifiedMessageStoragePerformance:
         assert p95_time < 40, f"95th percentile {p95_time:.2f}ms should be below 40ms for consistency"
         assert p99_time < 50, f"99th percentile {p99_time:.2f}ms must be below 50ms business target"
         
-        print(f"📊 SAVE PERFORMANCE BENCHMARK RESULTS:")
+        print(f" CHART:  SAVE PERFORMANCE BENCHMARK RESULTS:")
         print(f"   Messages tested: {len(test_messages)}")
         print(f"   Average time: {avg_time:.2f}ms (target <25ms)")
         print(f"   Median time: {median_time:.2f}ms (target <25ms)")
         print(f"   95th percentile: {p95_time:.2f}ms (target <40ms)")
         print(f"   99th percentile: {p99_time:.2f}ms (target <50ms)")
-        print(f"   ✅ All targets met - Real-time chat experience validated!")
+        print(f"    PASS:  All targets met - Real-time chat experience validated!")
     
     async def test_message_retrieval_performance_target(self, benchmark_service):
         """Benchmark: Message retrieval must be <50ms for responsive chat UI.
@@ -137,11 +137,11 @@ class TestUnifiedMessageStoragePerformance:
         assert avg_retrieval < 25, f"Average retrieval {avg_retrieval:.2f}ms should be well below target"
         assert p95_retrieval < 40, f"95th percentile retrieval {p95_retrieval:.2f}ms should be consistent"
         
-        print(f"📊 RETRIEVAL PERFORMANCE BENCHMARK RESULTS:")
+        print(f" CHART:  RETRIEVAL PERFORMANCE BENCHMARK RESULTS:")
         print(f"   Retrievals tested: {len(retrieval_times)}")
         print(f"   Average time: {avg_retrieval:.2f}ms (target <25ms)")
         print(f"   95th percentile: {p95_retrieval:.2f}ms (target <40ms)")
-        print(f"   ✅ Responsive chat UI experience validated!")
+        print(f"    PASS:  Responsive chat UI experience validated!")
     
     async def test_concurrent_user_scalability(self, benchmark_service):
         """Benchmark: System must handle multiple concurrent users efficiently.
@@ -205,14 +205,14 @@ class TestUnifiedMessageStoragePerformance:
         assert avg_concurrent_time < 75, f"Concurrent performance degraded: {avg_concurrent_time:.2f}ms"
         assert throughput > 50, f"Throughput {throughput:.1f} ops/sec below target of 50 ops/sec"
         
-        print(f"📊 CONCURRENT SCALABILITY BENCHMARK RESULTS:")
+        print(f" CHART:  CONCURRENT SCALABILITY BENCHMARK RESULTS:")
         print(f"   Concurrent users: {user_count}")
         print(f"   Messages per user: {messages_per_user}")
         print(f"   Total operations: {total_operations}")
         print(f"   Total time: {total_time:.2f}s")
         print(f"   Average operation time: {avg_concurrent_time:.2f}ms (target <75ms)")
         print(f"   Throughput: {throughput:.1f} operations/sec (target >50 ops/sec)")
-        print(f"   ✅ Multi-user scalability validated!")
+        print(f"    PASS:  Multi-user scalability validated!")
     
     async def test_performance_metrics_accuracy(self, benchmark_service):
         """Benchmark: Performance metrics must accurately track business KPIs."""
@@ -248,12 +248,12 @@ class TestUnifiedMessageStoragePerformance:
         if metrics['avg_redis_latency_ms'] > 0:
             assert metrics['avg_redis_latency_ms'] < 50, "Measured latency exceeds business target"
         
-        print(f"📊 PERFORMANCE METRICS VALIDATION:")
+        print(f" CHART:  PERFORMANCE METRICS VALIDATION:")
         print(f"   Redis operations: {metrics['redis_operations']}")
         print(f"   Average Redis latency: {metrics['avg_redis_latency_ms']:.2f}ms")
         print(f"   Cache hit rate: {metrics.get('cache_hit_rate', 0):.1f}%")
         print(f"   Business targets: Redis <{targets['redis_target_ms']}ms")
-        print(f"   ✅ Performance monitoring validated!")
+        print(f"    PASS:  Performance monitoring validated!")
     
     async def test_business_value_comparison(self, benchmark_service):
         """Demonstrate quantified business value vs traditional approach.
@@ -305,17 +305,17 @@ class TestUnifiedMessageStoragePerformance:
         daily_messages = messages_per_user_per_day * active_users
         daily_time_saved_minutes = (daily_messages * time_saved_per_message) / 1000 / 60
         
-        print(f"💰 QUANTIFIED BUSINESS VALUE:")
+        print(f"[U+1F4B0] QUANTIFIED BUSINESS VALUE:")
         print(f"   Traditional PostgreSQL blocking: {avg_postgres_time:.0f}ms per message")
         print(f"   Redis-first implementation: {avg_redis_time:.1f}ms per message")
         print(f"   Improvement factor: {improvement_factor:.1f}x faster")
         print(f"   Time saved per message: {time_saved_per_message:.0f}ms")
         print(f"   ")
-        print(f"   📈 SCALED BUSINESS IMPACT:")
+        print(f"   [U+1F4C8] SCALED BUSINESS IMPACT:")
         print(f"   Daily messages (100 users): {daily_messages:,}")
         print(f"   Daily time saved: {daily_time_saved_minutes:.0f} minutes")
         print(f"   User experience: Instant vs {avg_postgres_time:.0f}ms delays")
-        print(f"   ✅ MASSIVE BUSINESS VALUE DEMONSTRATED!")
+        print(f"    PASS:  MASSIVE BUSINESS VALUE DEMONSTRATED!")
 
 
 @pytest.mark.performance 

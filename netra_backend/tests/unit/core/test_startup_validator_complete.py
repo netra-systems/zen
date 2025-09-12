@@ -793,8 +793,8 @@ class TestStartupValidatorSummaryAndOutput(BaseTestCase):
         
         # Verify summary content
         assert "VALIDATION SUMMARY" in output
-        assert "✓ Test 1: Success (100.0ms)" in output
-        assert "✗ Test 2: Failed (200.0ms)" in output
+        assert "[U+2713] Test 1: Success (100.0ms)" in output
+        assert "[U+2717] Test 2: Failed (200.0ms)" in output
         assert "Results: 1/2 passed, 1 failed" in output
         assert "Total time:" in output
         assert "Error: Test error" in output
@@ -820,11 +820,11 @@ class TestStartupValidatorSummaryAndOutput(BaseTestCase):
         output = output_buffer.getvalue()
         
         # Check symbols
-        assert "✓ Passed Test" in output
-        assert "✗ Failed Test" in output
-        assert "⊘ Skipped Test" in output
-        assert "⟳ Running Test" in output
-        assert "◯ Pending Test" in output
+        assert "[U+2713] Passed Test" in output
+        assert "[U+2717] Failed Test" in output
+        assert "[U+2298] Skipped Test" in output
+        assert "[U+27F3] Running Test" in output
+        assert "[U+25EF] Pending Test" in output
     
     def test_print_summary_empty_results(self):
         """Test _print_summary with no results."""
@@ -1021,9 +1021,9 @@ class TestStartupValidatorErrorEdgeCases(BaseTestCase):
     def test_validator_with_unicode_messages(self):
         """Test validator handles unicode and special characters."""
         result = ValidationResult(
-            name="Unicode Test 测试",
+            name="Unicode Test [U+6D4B][U+8BD5]",
             status=ValidationStatus.PASSED,
-            message="Success with émojis 🚀 and spécial chars",
+            message="Success with [U+00E9]mojis [U+1F680] and sp[U+00E9]cial chars",
             duration_ms=123.45
         )
         
@@ -1038,8 +1038,8 @@ class TestStartupValidatorErrorEdgeCases(BaseTestCase):
                 self.validator._print_summary()
             
             output = output_buffer.getvalue()
-            assert "Unicode Test 测试" in output
-            assert "émojis 🚀" in output
+            assert "Unicode Test [U+6D4B][U+8BD5]" in output
+            assert "[U+00E9]mojis [U+1F680]" in output
             
         except UnicodeEncodeError:
             # This is expected on some Windows systems

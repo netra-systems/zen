@@ -4,7 +4,7 @@ SSOT Transition Validation Test - Execution Engine Consolidation
 This test validates that the execution engine consolidation from 7 duplicate engines
 to UserExecutionEngine SSOT is working correctly and prevents SSOT violations.
 
-Business Value: Protects Golden Path (users login → get AI responses) by ensuring
+Business Value: Protects Golden Path (users login  ->  get AI responses) by ensuring
 execution engine SSOT compliance doesn't break agent execution flow.
 
 CRITICAL: This test should FAIL during transition, then PASS after consolidation.
@@ -285,7 +285,7 @@ class TestExecutionEngineSSotTransition(SSotBaseTestCase):
             print(f"Violations: {list(self.ssot_violations.keys())}")
             print("NOTE: Violations expected during transition, should be 0 after consolidation")
         else:
-            print("✅ SSOT Compliance: All tests passed")
+            print(" PASS:  SSOT Compliance: All tests passed")
         
         print("=" * 50)
         
@@ -297,7 +297,7 @@ class TestExecutionEngineGoldenPathProtection(SSotBaseTestCase):
     """Verify execution engine SSOT transition doesn't break Golden Path."""
     
     async def test_golden_path_user_login_to_ai_response(self):
-        """GOLDEN PATH: Verify users can still login → get AI responses during transition."""
+        """GOLDEN PATH: Verify users can still login  ->  get AI responses during transition."""
         self.record_metric("test_name", "golden_path_protection")
         
         # This test ensures SSOT consolidation doesn't break the core business value

@@ -296,7 +296,7 @@ class ComprehensiveE2EImportFixer:
             if fixes:
                 results['fixed_files'].append(str(rel_path))
                 results['fixes_by_file'][str(rel_path)] = fixes
-                logger.info(f"  ✓ Fixed {rel_path}:")
+                logger.info(f"  [U+2713] Fixed {rel_path}:")
                 for fix in fixes:
                     logger.info(f"    - {fix}")
                 self.issues_fixed += len(fixes)
@@ -307,9 +307,9 @@ class ComprehensiveE2EImportFixer:
                     with open(file_path, 'r') as f:
                         ast.parse(f.read())
                     # No syntax errors, might be other import issues
-                    logger.warning(f"  ⚠ No fixes applied to {rel_path}")
+                    logger.warning(f"   WARNING:  No fixes applied to {rel_path}")
                 except Exception as e:
-                    logger.error(f"  ✗ Still has issues: {rel_path}: {e}")
+                    logger.error(f"  [U+2717] Still has issues: {rel_path}: {e}")
                     results['still_broken'].append(str(rel_path))
         
         return results

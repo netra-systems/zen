@@ -6,7 +6,7 @@ This test validates the complete rate limiting pipeline using real Redis
 for rate limit counters. NO MOCKING - tests actual rate enforcement.
 
 BVJ (Business Value Justification):
-1. Segment: Free → Paid conversion through quota enforcement  
+1. Segment: Free  ->  Paid conversion through quota enforcement  
 2. Business Goal: Fair usage control + upgrade conversion = 15-25% conversion
 3. Value Impact: Prevents infrastructure abuse ($15K+ savings) + drives upgrades
 4. Revenue Impact: Strategic rate limits convert 20-30% free users to paid

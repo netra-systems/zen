@@ -1055,7 +1055,7 @@ if __name__ == "__main__":
         safe_data = _serialize_message_safely(test_data)
         json_output = json.dumps(safe_data)
         
-        print(f"✅ Basic serialization works: {len(json_output)} characters")
-        print("✅ All WebSocket systems serialization tests ready to run!")
+        print(f" PASS:  Basic serialization works: {len(json_output)} characters")
+        print(" PASS:  All WebSocket systems serialization tests ready to run!")
     
     asyncio.run(smoke_test())

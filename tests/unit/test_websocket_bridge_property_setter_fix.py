@@ -69,7 +69,7 @@ class TestWebSocketBridgePropertySetterFix:
         bridge.websocket_manager = None
         assert bridge.websocket_manager is None
         
-        logger.info("✅ Property setter exists and works with None")
+        logger.info(" PASS:  Property setter exists and works with None")
 
     def test_setter_accepts_valid_mock_manager(self, bridge, valid_mock_manager):
         """Test that setter accepts valid mock managers."""
@@ -77,7 +77,7 @@ class TestWebSocketBridgePropertySetterFix:
         bridge.websocket_manager = valid_mock_manager
         
         assert bridge.websocket_manager is valid_mock_manager
-        logger.info("✅ Setter accepts valid mock manager (original bug fixed)")
+        logger.info(" PASS:  Setter accepts valid mock manager (original bug fixed)")
 
     def test_setter_validates_interface(self, bridge, invalid_mock_manager):
         """Test that setter validates required interface."""
@@ -88,14 +88,14 @@ class TestWebSocketBridgePropertySetterFix:
         assert "send_to_thread method" in error_msg
         assert "factory methods" in error_msg
         
-        logger.info("✅ Setter properly validates interface requirements")
+        logger.info(" PASS:  Setter properly validates interface requirements")
 
     def test_setter_accepts_none(self, bridge):
         """Test that setter accepts None (clearing the manager)."""
         bridge.websocket_manager = None
         assert bridge.websocket_manager is None
         
-        logger.info("✅ Setter accepts None for clearing manager")
+        logger.info(" PASS:  Setter accepts None for clearing manager")
 
     def test_property_getter_still_works(self, bridge, valid_mock_manager):
         """Test that getter functionality is preserved."""
@@ -108,7 +108,7 @@ class TestWebSocketBridgePropertySetterFix:
         # Get via property
         assert bridge.websocket_manager is valid_mock_manager
         
-        logger.info("✅ Property getter functionality preserved")
+        logger.info(" PASS:  Property getter functionality preserved")
 
     @pytest.mark.asyncio
     async def test_mock_manager_integration(self, bridge, valid_mock_manager):
@@ -120,7 +120,7 @@ class TestWebSocketBridgePropertySetterFix:
         result = await valid_mock_manager.send_to_thread("test_thread", {"test": "message"})
         assert result is True
         
-        logger.info("✅ Mock manager integration works correctly")
+        logger.info(" PASS:  Mock manager integration works correctly")
 
     def test_architectural_integrity_maintained(self, bridge):
         """Test that architectural patterns are still enforced."""
@@ -131,7 +131,7 @@ class TestWebSocketBridgePropertySetterFix:
         bridge.websocket_manager = None
         assert bridge.websocket_manager is None
         
-        logger.info("✅ Architectural integrity maintained (per-request pattern)")
+        logger.info(" PASS:  Architectural integrity maintained (per-request pattern)")
 
     def test_error_messaging_quality(self, bridge, invalid_mock_manager):
         """Test that error messages guide users to correct patterns."""
@@ -145,7 +145,7 @@ class TestWebSocketBridgePropertySetterFix:
         assert "factory methods" in error_msg
         assert "user isolation" in error_msg
         
-        logger.info("✅ Error messaging provides clear guidance")
+        logger.info(" PASS:  Error messaging provides clear guidance")
 
     def test_original_bug_reproduction(self, bridge):
         """Test reproducing and fixing the original AttributeError bug."""
@@ -165,7 +165,7 @@ class TestWebSocketBridgePropertySetterFix:
         assert bug_fixed, "Original AttributeError bug should be fixed"
         assert bridge.websocket_manager is mock_manager
         
-        logger.info("✅ Original AttributeError bug successfully fixed")
+        logger.info(" PASS:  Original AttributeError bug successfully fixed")
 
     def test_thread_safety_basic(self, bridge, valid_mock_manager):
         """Basic test that property access is thread-safe."""
@@ -197,7 +197,7 @@ class TestWebSocketBridgePropertySetterFix:
         assert "set_complete" in results
         assert True in results  # Manager should be set when accessed
         
-        logger.info("✅ Basic thread safety verification passed")
+        logger.info(" PASS:  Basic thread safety verification passed")
 
 
 class TestIntegrationTestCompatibility:
@@ -215,7 +215,7 @@ class TestIntegrationTestCompatibility:
         # Verify it worked
         assert websocket_bridge.websocket_manager is mock_websocket_manager
         
-        logger.info("✅ base_agent_execution_test.py pattern now works correctly")
+        logger.info(" PASS:  base_agent_execution_test.py pattern now works correctly")
 
     def test_multiple_mock_injections(self):
         """Test that multiple mock injections work (test cleanup scenarios)."""
@@ -236,13 +236,13 @@ class TestIntegrationTestCompatibility:
         bridge.websocket_manager = None
         assert bridge.websocket_manager is None
         
-        logger.info("✅ Multiple mock injections work correctly")
+        logger.info(" PASS:  Multiple mock injections work correctly")
 
 
 if __name__ == "__main__":
     # Run the tests
-    logger.info("🚀 Running WebSocket Bridge Property Setter Fix Verification Tests")
+    logger.info("[U+1F680] Running WebSocket Bridge Property Setter Fix Verification Tests")
     
     pytest.main([__file__, "-v", "--tb=short"])
     
-    logger.info("✅ WebSocket Bridge Property Setter Fix Verification Complete")
+    logger.info(" PASS:  WebSocket Bridge Property Setter Fix Verification Complete")

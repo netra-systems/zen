@@ -2,7 +2,7 @@
 Comprehensive Unit Tests for WebSocket Connection Handler (Golden Path SSOT)
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core connection infrastructure for all users
+- Segment: All (Free  ->  Enterprise) - Core connection infrastructure for all users
 - Business Goal: User Isolation & Connection Reliability
 - Value Impact: Eliminates cross-user event leakage that destroys user trust and compliance
 - Revenue Impact: CRITICAL - Prevents $500K+ ARR loss from user isolation failures

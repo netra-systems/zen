@@ -359,7 +359,7 @@ env = get_env()
                                                     # REMOVED_SYNTAX_ERROR: continue
 
                                                     # REMOVED_SYNTAX_ERROR: if isinstance(result, dict):
-                                                        # REMOVED_SYNTAX_ERROR: status = "✅ SUCCESS" if result.get('success') else "❌ FAILED"
+                                                        # REMOVED_SYNTAX_ERROR: status = " PASS:  SUCCESS" if result.get('success') else " FAIL:  FAILED"
                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                         # REMOVED_SYNTAX_ERROR: if result.get('url'):
                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -446,7 +446,7 @@ env = get_env()
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: else:
                                         # REMOVED_SYNTAX_ERROR: print(" )
-                                        # REMOVED_SYNTAX_ERROR: ✅ No inconsistencies detected between environment access methods")
+                                        # REMOVED_SYNTAX_ERROR:  PASS:  No inconsistencies detected between environment access methods")
 
                                         # Environment access should be consistent - both methods should await asyncio.sleep(0)
                                         # REMOVED_SYNTAX_ERROR: return the same values
@@ -459,7 +459,7 @@ env = get_env()
                                                 # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
                                                 # REMOVED_SYNTAX_ERROR: else:
                                                     # REMOVED_SYNTAX_ERROR: print(" )
-                                                    # REMOVED_SYNTAX_ERROR: ✅ No inconsistencies detected between environment access methods")
+                                                    # REMOVED_SYNTAX_ERROR:  PASS:  No inconsistencies detected between environment access methods")
 
                                                     # Test passes regardless - this is documenting behavior
                                                     # REMOVED_SYNTAX_ERROR: assert True, "Environment consistency test completed"
@@ -515,7 +515,7 @@ env = get_env()
                                 # REMOVED_SYNTAX_ERROR: assert current_value == original_value, "formatted_string"
 
                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: ✅ Database configuration isolation working correctly")
+                                # REMOVED_SYNTAX_ERROR:  PASS:  Database configuration isolation working correctly")
 
 
                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

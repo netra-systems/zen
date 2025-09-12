@@ -128,9 +128,9 @@ class DockerDevLauncher:
         for key, value in env_vars.items():
             os.environ[key] = value
             
-        print(f"   → Backend port: {env_vars['BACKEND_PORT']}")
-        print(f"   → Frontend port: {env_vars['FRONTEND_PORT']}")
-        print(f"   → Auth port: {env_vars['AUTH_PORT']}")
+        print(f"    ->  Backend port: {env_vars['BACKEND_PORT']}")
+        print(f"    ->  Frontend port: {env_vars['FRONTEND_PORT']}")
+        print(f"    ->  Auth port: {env_vars['AUTH_PORT']}")
         
     def create_db_init_scripts(self):
         """Create database initialization scripts if they don't exist."""
@@ -155,7 +155,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO netra;
 -- Initial setup complete
 SELECT 'Database initialized successfully' as status;
 """, encoding='utf-8')
-            print("   → Created PostgreSQL initialization script")
+            print("    ->  Created PostgreSQL initialization script")
             
         # ClickHouse init script (optional)
         clickhouse_init = scripts_dir / "init_clickhouse.sql"
@@ -177,7 +177,7 @@ ORDER BY (timestamp, event_type, user_id);
 
 SELECT 'ClickHouse initialized successfully' as status;
 """, encoding='utf-8')
-            print("   → Created ClickHouse initialization script")
+            print("    ->  Created ClickHouse initialization script")
             
         # Wait for DB script
         wait_script = scripts_dir / "wait_for_db.py"
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     success = wait_for_db()
     sys.exit(0 if success else 1)
 """, encoding='utf-8')
-            print("   → Created database wait script")
+            print("    ->  Created database wait script")
             
     def build_services(self, services: Optional[List[str]] = None):
         """Build Docker images for services."""
@@ -356,7 +356,7 @@ if __name__ == "__main__":
         
         # Remove volumes if requested
         if self.config.get('clean_volumes'):
-            print("   → Removing volumes...")
+            print("    ->  Removing volumes...")
             subprocess.run(
                 ["docker", "compose", "-f", self.compose_file, "down", "-v"],
                 cwd=self.project_root
@@ -364,7 +364,7 @@ if __name__ == "__main__":
             
         # Prune if requested
         if self.config.get('prune'):
-            print("   → Pruning unused resources...")
+            print("    ->  Pruning unused resources...")
             subprocess.run(["docker", "system", "prune", "-f"])
             
         print("[OK] Cleanup completed")

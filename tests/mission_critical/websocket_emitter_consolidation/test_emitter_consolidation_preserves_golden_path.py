@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Proves consolidation doesn't break revenue-generating chat functionality
 
 CRITICAL: This test validates the complete Golden Path user flow after emitter consolidation:
-1. User login → WebSocket connection → Agent request → AI responses
+1. User login  ->  WebSocket connection  ->  Agent request  ->  AI responses
 2. All 5 critical events delivered from single emitter preserving chat value
 3. Business value metrics maintained through consolidation
 4. User experience quality preserved with single event source

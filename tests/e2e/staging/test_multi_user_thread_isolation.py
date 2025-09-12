@@ -114,7 +114,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
             self.user_auth_helpers[str(user_context.user_id)] = auth_helper
             self.user_websocket_helpers[str(user_context.user_id)] = websocket_helper
         
-        self.logger.info(f"✅ Multi-user staging authentication setup complete - {len(self.test_users)} users ready")
+        self.logger.info(f" PASS:  Multi-user staging authentication setup complete - {len(self.test_users)} users ready")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -130,7 +130,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         Business Value: Prevents catastrophic data breaches that would destroy customer trust
         and violate compliance requirements (GDPR, HIPAA, SOC 2).
         """
-        self.logger.info("🔒 Starting concurrent user thread creation isolation test")
+        self.logger.info("[U+1F512] Starting concurrent user thread creation isolation test")
         
         # Data structures to track user isolation
         user_threads = {}  # user_id -> [thread_ids]
@@ -237,7 +237,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
                 }
         
         # Execute concurrent thread creation for all users
-        self.logger.info(f"🚀 Starting concurrent thread creation for {len(self.test_users)} users")
+        self.logger.info(f"[U+1F680] Starting concurrent thread creation for {len(self.test_users)} users")
         start_time = time.time()
         
         results = await asyncio.gather(*[
@@ -246,7 +246,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         ], return_exceptions=True)
         
         concurrent_duration = time.time() - start_time
-        self.logger.info(f"⏱️ Concurrent operations completed in {concurrent_duration:.2f}s")
+        self.logger.info(f"[U+23F1][U+FE0F] Concurrent operations completed in {concurrent_duration:.2f}s")
         
         # Analyze results for isolation violations
         successful_results = [r for r in results if isinstance(r, dict) and r.get("success")]
@@ -314,7 +314,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         
         # Zero tolerance for isolation violations
         if cross_contamination_detected:
-            self.logger.error(f"❌ CRITICAL ISOLATION VIOLATIONS DETECTED: {cross_contamination_detected}")
+            self.logger.error(f" FAIL:  CRITICAL ISOLATION VIOLATIONS DETECTED: {cross_contamination_detected}")
             raise AssertionError(f"CRITICAL SECURITY FAILURE: {len(cross_contamination_detected)} isolation violations detected - platform compromised!")
         
         # Performance validation
@@ -326,12 +326,12 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         assert success_rate >= 0.8, \
             f"Concurrent success rate too low: {success_rate:.1%} - affects platform reliability"
         
-        self.logger.info("🎉 CONCURRENT USER THREAD ISOLATION TEST SUCCESS")
-        self.logger.info(f"👥 Users tested: {len(self.test_users)}")
-        self.logger.info(f"🔒 Isolation violations: {isolation_metrics['isolation_violations']} (MUST be 0)")
-        self.logger.info(f"✅ Successful isolations: {isolation_metrics['successful_isolations']}")
-        self.logger.info(f"⏱️ Concurrent performance: {concurrent_duration:.2f}s")
-        self.logger.info(f"💡 Business Value: Multi-user platform security verified - customer data protected")
+        self.logger.info(" CELEBRATION:  CONCURRENT USER THREAD ISOLATION TEST SUCCESS")
+        self.logger.info(f"[U+1F465] Users tested: {len(self.test_users)}")
+        self.logger.info(f"[U+1F512] Isolation violations: {isolation_metrics['isolation_violations']} (MUST be 0)")
+        self.logger.info(f" PASS:  Successful isolations: {isolation_metrics['successful_isolations']}")
+        self.logger.info(f"[U+23F1][U+FE0F] Concurrent performance: {concurrent_duration:.2f}s")
+        self.logger.info(f" IDEA:  Business Value: Multi-user platform security verified - customer data protected")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -347,7 +347,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         Business Value: Protects confidential business communications and prevents
         industrial espionage or competitive intelligence leaks.
         """
-        self.logger.info("🔐 Starting message privacy and data leakage prevention test")
+        self.logger.info("[U+1F510] Starting message privacy and data leakage prevention test")
         
         # Create distinct business scenarios for each user to test isolation
         business_scenarios = [
@@ -502,7 +502,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
                 }
         
         # Execute concurrent private conversations
-        self.logger.info(f"🚀 Starting {len(self.test_users)} concurrent private business conversations")
+        self.logger.info(f"[U+1F680] Starting {len(self.test_users)} concurrent private business conversations")
         
         conversation_tasks = [
             conduct_private_business_conversation(user_data, business_scenarios[i])
@@ -606,13 +606,13 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
             
             except Exception as e:
                 # Expected behavior - should fail to access other user's data
-                self.logger.info(f"✅ Unauthorized access correctly blocked: {e}")
+                self.logger.info(f" PASS:  Unauthorized access correctly blocked: {e}")
         
         # CRITICAL BUSINESS VALUE VALIDATION
         
         # Zero tolerance for privacy violations
         if contamination_violations:
-            self.logger.error(f"❌ CRITICAL PRIVACY VIOLATIONS DETECTED: {contamination_violations}")
+            self.logger.error(f" FAIL:  CRITICAL PRIVACY VIOLATIONS DETECTED: {contamination_violations}")
             raise AssertionError(f"CRITICAL PRIVACY FAILURE: {len(contamination_violations)} privacy violations detected - customer data compromised!")
         
         # Verify all conversations contained sector-specific responses
@@ -627,11 +627,11 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         assert sector_specific_responses >= len(successful_conversations) * 0.8, \
             f"Insufficient sector-specific responses: {sector_specific_responses}/{len(successful_conversations)} - agent context not properly isolated"
         
-        self.logger.info("🎉 MESSAGE PRIVACY AND DATA LEAKAGE PREVENTION TEST SUCCESS")
-        self.logger.info(f"👥 Private conversations: {len(successful_conversations)}")
-        self.logger.info(f"🔒 Privacy violations: {len(contamination_violations)} (MUST be 0)")
-        self.logger.info(f"🎯 Sector-specific responses: {sector_specific_responses}/{len(successful_conversations)}")
-        self.logger.info(f"💡 Business Value: Confidential business communications protected across all scenarios")
+        self.logger.info(" CELEBRATION:  MESSAGE PRIVACY AND DATA LEAKAGE PREVENTION TEST SUCCESS")
+        self.logger.info(f"[U+1F465] Private conversations: {len(successful_conversations)}")
+        self.logger.info(f"[U+1F512] Privacy violations: {len(contamination_violations)} (MUST be 0)")
+        self.logger.info(f" TARGET:  Sector-specific responses: {sector_specific_responses}/{len(successful_conversations)}")
+        self.logger.info(f" IDEA:  Business Value: Confidential business communications protected across all scenarios")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -643,7 +643,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         Business Value: Ensures AI agents provide personalized, context-aware responses
         without mixing user contexts, maintaining recommendation quality and trust.
         """
-        self.logger.info("🤖 Starting agent execution context isolation test")
+        self.logger.info("[U+1F916] Starting agent execution context isolation test")
         
         # Create distinct user profiles with conflicting preferences
         user_profiles = [
@@ -792,7 +792,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
                 }
         
         # Execute concurrent agent interactions with different contexts
-        self.logger.info(f"🚀 Starting concurrent agent context isolation test")
+        self.logger.info(f"[U+1F680] Starting concurrent agent context isolation test")
         
         # Use first 3 users with distinct profiles
         context_tasks = [
@@ -839,7 +839,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
                     for element in user2_specific_elements:
                         if element.lower() in user1_response:
                             context_isolation_metrics["context_bleeding_incidents"] += 1
-                            self.logger.warning(f"⚠️ Context bleeding detected: User {result1['user_index']} response contains User {result2['user_index']} details")
+                            self.logger.warning(f" WARNING: [U+FE0F] Context bleeding detected: User {result1['user_index']} response contains User {result2['user_index']} details")
         
         # 3. Validate response differentiation
         if len(successful_results) >= 2:
@@ -874,12 +874,12 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
             assert accuracy_rate >= 0.5, \
                 f"Low recommendation accuracy: {accuracy_rate:.1%} - preference alignment failed"
         
-        self.logger.info("🎉 AGENT EXECUTION CONTEXT ISOLATION TEST SUCCESS")
-        self.logger.info(f"🤖 Agent interactions: {len(successful_results)}")
-        self.logger.info(f"🎯 Personalized responses: {context_isolation_metrics['personalized_responses']}")
-        self.logger.info(f"🔒 Context bleeding incidents: {context_isolation_metrics['context_bleeding_incidents']} (MUST be 0)")
-        self.logger.info(f"📈 Recommendation accuracy: {context_isolation_metrics['recommendation_accuracy']}")
-        self.logger.info(f"💡 Business Value: Agent context isolation ensures personalized AI recommendations")
+        self.logger.info(" CELEBRATION:  AGENT EXECUTION CONTEXT ISOLATION TEST SUCCESS")
+        self.logger.info(f"[U+1F916] Agent interactions: {len(successful_results)}")
+        self.logger.info(f" TARGET:  Personalized responses: {context_isolation_metrics['personalized_responses']}")
+        self.logger.info(f"[U+1F512] Context bleeding incidents: {context_isolation_metrics['context_bleeding_incidents']} (MUST be 0)")
+        self.logger.info(f"[U+1F4C8] Recommendation accuracy: {context_isolation_metrics['recommendation_accuracy']}")
+        self.logger.info(f" IDEA:  Business Value: Agent context isolation ensures personalized AI recommendations")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -891,7 +891,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         Business Value: Validates platform scalability while maintaining security guarantees
         under realistic peak load conditions.
         """
-        self.logger.info("🏋️ Starting high concurrency thread isolation stress test")
+        self.logger.info("[U+1F3CB][U+FE0F] Starting high concurrency thread isolation stress test")
         
         # Stress test parameters
         concurrent_operations_per_user = 5
@@ -983,7 +983,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
                 }
         
         # Execute stress test across all users
-        self.logger.info(f"🚀 Starting stress test: {len(self.test_users)} users × {concurrent_operations_per_user} operations")
+        self.logger.info(f"[U+1F680] Starting stress test: {len(self.test_users)} users  x  {concurrent_operations_per_user} operations")
         stress_start_time = time.time()
         
         stress_results = await asyncio.gather(*[
@@ -1019,7 +1019,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         
         if operations_per_second < expected_min_ops_per_sec:
             stress_metrics["performance_degradation"] = 1
-            self.logger.warning(f"⚠️ Performance degradation detected: {operations_per_second:.1f} ops/sec < {expected_min_ops_per_sec}")
+            self.logger.warning(f" WARNING: [U+FE0F] Performance degradation detected: {operations_per_second:.1f} ops/sec < {expected_min_ops_per_sec}")
         
         # Isolation validation under stress
         # Verify no cross-user data access during high load
@@ -1028,13 +1028,13 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
             assert user_success_rate >= 0.6, \
                 f"User {user_result['user_index']} isolation compromised under stress: {user_success_rate:.1%} success rate"
         
-        self.logger.info("🎉 HIGH CONCURRENCY STRESS TEST SUCCESS")
-        self.logger.info(f"👥 Concurrent users: {len(self.test_users)}")
-        self.logger.info(f"⚡ Operations completed: {total_completed_operations}/{total_expected_operations}")
-        self.logger.info(f"✅ Completion rate: {completion_rate:.1%}")
-        self.logger.info(f"⏱️ Duration: {stress_duration_actual:.2f}s")
-        self.logger.info(f"📊 Operations/sec: {operations_per_second:.1f}")
-        self.logger.info(f"💡 Business Value: Platform maintains isolation and performance under peak concurrent load")
+        self.logger.info(" CELEBRATION:  HIGH CONCURRENCY STRESS TEST SUCCESS")
+        self.logger.info(f"[U+1F465] Concurrent users: {len(self.test_users)}")
+        self.logger.info(f" LIGHTNING:  Operations completed: {total_completed_operations}/{total_expected_operations}")
+        self.logger.info(f" PASS:  Completion rate: {completion_rate:.1%}")
+        self.logger.info(f"[U+23F1][U+FE0F] Duration: {stress_duration_actual:.2f}s")
+        self.logger.info(f" CHART:  Operations/sec: {operations_per_second:.1f}")
+        self.logger.info(f" IDEA:  Business Value: Platform maintains isolation and performance under peak concurrent load")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -1046,7 +1046,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         Business Value: Implements defense-in-depth strategy to detect and prevent
         any form of user data mixing, ensuring regulatory compliance and customer trust.
         """
-        self.logger.info("🛡️ Starting comprehensive cross-user contamination prevention test")
+        self.logger.info("[U+1F6E1][U+FE0F] Starting comprehensive cross-user contamination prevention test")
         
         # Create users with distinctly identifiable data patterns
         contamination_test_data = [
@@ -1182,7 +1182,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
                 }
         
         # Execute data injection across first 3 users
-        self.logger.info(f"🚀 Injecting trackable data across {min(3, len(self.test_users))} users")
+        self.logger.info(f"[U+1F680] Injecting trackable data across {min(3, len(self.test_users))} users")
         
         injection_tasks = [
             inject_trackable_data_and_monitor(self.test_users[i], contamination_test_data[i])
@@ -1238,7 +1238,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
             if expected_marker in user_response:
                 prevention_metrics["data_isolation_verified"] += 1
             else:
-                self.logger.warning(f"⚠️ User {result['user_index']} agent response missing their own data marker")
+                self.logger.warning(f" WARNING: [U+FE0F] User {result['user_index']} agent response missing their own data marker")
         
         # Additional contamination prevention test: Direct cross-user access attempts
         if len(successful_injections) >= 2:
@@ -1298,7 +1298,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
                             prevention_metrics["contamination_attempts_blocked"] += 1
                             
             except Exception as e:
-                self.logger.info(f"✅ Cross-reference attempt correctly blocked: {e}")
+                self.logger.info(f" PASS:  Cross-reference attempt correctly blocked: {e}")
                 prevention_metrics["contamination_attempts_blocked"] += 1
         
         # Calculate detection accuracy
@@ -1310,7 +1310,7 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         
         # Zero tolerance for contamination violations
         if contamination_violations:
-            self.logger.error(f"❌ CRITICAL CONTAMINATION VIOLATIONS: {contamination_violations}")
+            self.logger.error(f" FAIL:  CRITICAL CONTAMINATION VIOLATIONS: {contamination_violations}")
             raise AssertionError(f"CRITICAL CONTAMINATION FAILURE: {len(contamination_violations)} contamination violations detected - user data compromised!")
         
         # Data isolation verification
@@ -1326,10 +1326,10 @@ class TestMultiUserThreadIsolationStaging(BaseIntegrationTest):
         assert prevention_metrics["detection_accuracy"] >= 0.95, \
             f"Detection accuracy too low: {prevention_metrics['detection_accuracy']:.1%} - contamination detection system insufficient"
         
-        self.logger.info("🎉 CROSS-USER CONTAMINATION PREVENTION TEST SUCCESS")
-        self.logger.info(f"🔬 Data injections tested: {len(successful_injections)}")
-        self.logger.info(f"🔒 Contamination violations: {len(contamination_violations)} (MUST be 0)")
-        self.logger.info(f"✅ Data isolation verified: {prevention_metrics['data_isolation_verified']}/{len(successful_injections)}")
-        self.logger.info(f"🛡️ Contamination attempts blocked: {prevention_metrics['contamination_attempts_blocked']}")
-        self.logger.info(f"📊 Detection accuracy: {prevention_metrics['detection_accuracy']:.1%}")
-        self.logger.info(f"💡 Business Value: Comprehensive contamination prevention protects all user data with 100% isolation")
+        self.logger.info(" CELEBRATION:  CROSS-USER CONTAMINATION PREVENTION TEST SUCCESS")
+        self.logger.info(f"[U+1F52C] Data injections tested: {len(successful_injections)}")
+        self.logger.info(f"[U+1F512] Contamination violations: {len(contamination_violations)} (MUST be 0)")
+        self.logger.info(f" PASS:  Data isolation verified: {prevention_metrics['data_isolation_verified']}/{len(successful_injections)}")
+        self.logger.info(f"[U+1F6E1][U+FE0F] Contamination attempts blocked: {prevention_metrics['contamination_attempts_blocked']}")
+        self.logger.info(f" CHART:  Detection accuracy: {prevention_metrics['detection_accuracy']:.1%}")
+        self.logger.info(f" IDEA:  Business Value: Comprehensive contamination prevention protects all user data with 100% isolation")

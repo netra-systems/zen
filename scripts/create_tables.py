@@ -30,18 +30,18 @@ async def create_tables():
             password=password
         )
         
-        print("✅ Connected to database successfully")
+        print(" PASS:  Connected to database successfully")
         
         # Check current state
         try:
             tables = await conn.fetch("SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name;")
             existing_tables = [t['table_name'] for t in tables]
-            print(f"📋 Existing tables: {existing_tables}")
+            print(f"[U+1F4CB] Existing tables: {existing_tables}")
         except Exception as e:
-            print(f"⚠️  Error listing tables: {e}")
+            print(f" WARNING: [U+FE0F]  Error listing tables: {e}")
         
         # Create agent_executions table
-        print("🔧 Creating agent_executions table...")
+        print("[U+1F527] Creating agent_executions table...")
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS agent_executions (
                 id VARCHAR(50) PRIMARY KEY,
@@ -66,7 +66,7 @@ async def create_tables():
         """)
         
         # Create indexes for agent_executions
-        print("🔧 Creating indexes for agent_executions...")
+        print("[U+1F527] Creating indexes for agent_executions...")
         await conn.execute("CREATE INDEX IF NOT EXISTS ix_agent_executions_agent_id ON agent_executions(agent_id);")
         await conn.execute("CREATE INDEX IF NOT EXISTS ix_agent_executions_status ON agent_executions(status);")
         await conn.execute("CREATE INDEX IF NOT EXISTS ix_agent_executions_thread_id ON agent_executions(thread_id);")
@@ -74,7 +74,7 @@ async def create_tables():
         await conn.execute("CREATE INDEX IF NOT EXISTS ix_agent_executions_workflow_id ON agent_executions(workflow_id);")
         
         # Create credit_transactions table
-        print("🔧 Creating credit_transactions table...")
+        print("[U+1F527] Creating credit_transactions table...")
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS credit_transactions (
                 id SERIAL PRIMARY KEY,
@@ -87,7 +87,7 @@ async def create_tables():
         """)
         
         # Create subscriptions table
-        print("🔧 Creating subscriptions table...")
+        print("[U+1F527] Creating subscriptions table...")
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS subscriptions (
                 id SERIAL PRIMARY KEY,
@@ -100,26 +100,26 @@ async def create_tables():
         """)
         
         # Verify tables were created
-        print("✅ Verifying tables were created...")
+        print(" PASS:  Verifying tables were created...")
         missing_tables = ['agent_executions', 'credit_transactions', 'subscriptions']
         for table in missing_tables:
             exists = await conn.fetchval(f"SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema='public' AND table_name='{table}');")
-            print(f"📋 Table {table} exists: {'✅' if exists else '❌'}")
+            print(f"[U+1F4CB] Table {table} exists: {' PASS: ' if exists else ' FAIL: '}")
             
         # Update alembic version if table exists
         try:
             await conn.execute("CREATE TABLE IF NOT EXISTS alembic_version (version_num VARCHAR(32) PRIMARY KEY);")
             await conn.execute("INSERT INTO alembic_version (version_num) VALUES ('882759db46ce') ON CONFLICT (version_num) DO NOTHING;")
             current_version = await conn.fetchval("SELECT version_num FROM alembic_version;")
-            print(f"📋 Alembic version: {current_version}")
+            print(f"[U+1F4CB] Alembic version: {current_version}")
         except Exception as e:
-            print(f"⚠️  Error updating alembic version: {e}")
+            print(f" WARNING: [U+FE0F]  Error updating alembic version: {e}")
         
         await conn.close()
-        print("🎉 All tables created successfully! Staging should now start properly.")
+        print(" CELEBRATION:  All tables created successfully! Staging should now start properly.")
         
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" FAIL:  Error: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

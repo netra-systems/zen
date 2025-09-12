@@ -631,9 +631,9 @@ class TestExecutionEngineValidation(SSotAsyncTestCase):
     def test_validation_with_unicode_characters(self):
         """Test validation with Unicode characters in IDs."""
         context = AgentExecutionContext(
-            run_id="run_测试_🚀",
-            thread_id="thread_日本語",
-            user_id="user_العربية",
+            run_id="run_[U+6D4B][U+8BD5]_[U+1F680]",
+            thread_id="thread_[U+65E5][U+672C][U+8A9E]",
+            user_id="user_[U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]",
             agent_name="test_agent"
         )
         
@@ -807,7 +807,7 @@ class TestExecutionEngineWebSocketEvents(SSotAsyncTestCase):
         """Test that WebSocket event data is preserved correctly."""
         test_data = {
             "complex_data": {"nested": {"deeply": ["array", "items"]}, "number": 42},
-            "unicode": "测试数据 🚀",
+            "unicode": "[U+6D4B][U+8BD5][U+6570][U+636E] [U+1F680]",
             "special_chars": "@#$%^&*()"
         }
         

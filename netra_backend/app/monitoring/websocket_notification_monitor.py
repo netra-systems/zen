@@ -422,17 +422,17 @@ class WebSocketNotificationMonitor:
         self.monitor_task: Optional[asyncio.Task] = None
         self.health_check_task: Optional[asyncio.Task] = None
         
-        logger.info("🔍 WebSocket Notification Monitor initialized")
+        logger.info(" SEARCH:  WebSocket Notification Monitor initialized")
     
     async def start_monitoring(self) -> None:
         """Start background monitoring tasks."""
         if self.monitor_task is None:
             self.monitor_task = asyncio.create_task(self._monitor_loop())
-            logger.info("🔍 WebSocket monitoring started")
+            logger.info(" SEARCH:  WebSocket monitoring started")
         
         if self.health_check_task is None:
             self.health_check_task = asyncio.create_task(self._health_check_loop())
-            logger.info("🔍 Health check monitoring started")
+            logger.info(" SEARCH:  Health check monitoring started")
     
     async def stop_monitoring(self) -> None:
         """Stop background monitoring tasks."""
@@ -452,7 +452,7 @@ class WebSocketNotificationMonitor:
                 pass
             self.health_check_task = None
         
-        logger.info("🔍 WebSocket monitoring stopped")
+        logger.info(" SEARCH:  WebSocket monitoring stopped")
     
     # Event tracking methods
     
@@ -468,7 +468,7 @@ class WebSocketNotificationMonitor:
         self._add_event(event)
         self.system_metrics.total_bridge_initializations += 1
         
-        logger.debug(f"🔍 Bridge initialization started: {user_id}")
+        logger.debug(f" SEARCH:  Bridge initialization started: {user_id}")
         return event.correlation_id
     
     def track_bridge_initialization_success(self, correlation_id: str, duration_ms: float) -> None:
@@ -484,7 +484,7 @@ class WebSocketNotificationMonitor:
         self.system_metrics.successful_bridge_initializations += 1
         self._update_avg_bridge_init_time(duration_ms)
         
-        logger.debug(f"🔍 Bridge initialization success: {duration_ms:.1f}ms")
+        logger.debug(f" SEARCH:  Bridge initialization success: {duration_ms:.1f}ms")
     
     def track_bridge_initialization_failed(self, correlation_id: str, error: str, duration_ms: float) -> None:
         """Track failed bridge initialization."""
@@ -502,7 +502,7 @@ class WebSocketNotificationMonitor:
         # CRITICAL: Bridge initialization failure
         asyncio.create_task(self._alert_bridge_initialization_failed(event))
         
-        logger.error(f"🚨 Bridge initialization FAILED: {error} ({duration_ms:.1f}ms)")
+        logger.error(f" ALERT:  Bridge initialization FAILED: {error} ({duration_ms:.1f}ms)")
     
     def track_notification_attempted(self, user_id: str, thread_id: str, run_id: str, 
                                    agent_name: str, tool_name: Optional[str] = None,
@@ -529,7 +529,7 @@ class WebSocketNotificationMonitor:
         user_metrics = self._get_or_create_user_metrics(user_id, thread_id, connection_id)
         user_metrics.add_event(event)
         
-        logger.debug(f"🔍 Notification attempted: {user_id} -> {tool_name or agent_name}")
+        logger.debug(f" SEARCH:  Notification attempted: {user_id} -> {tool_name or agent_name}")
         return event.correlation_id
     
     def track_notification_delivered(self, correlation_id: str, delivery_time_ms: float) -> None:
@@ -563,7 +563,7 @@ class WebSocketNotificationMonitor:
             if user_key in self.user_metrics:
                 self.user_metrics[user_key].add_event(event)
         
-        logger.debug(f"🔍 Notification delivered: {event.user_id} ({delivery_time_ms:.1f}ms)")
+        logger.debug(f" SEARCH:  Notification delivered: {event.user_id} ({delivery_time_ms:.1f}ms)")
     
     def track_notification_failed(self, correlation_id: str, error: str, error_type: str) -> None:
         """Track failed notification delivery."""
@@ -600,7 +600,7 @@ class WebSocketNotificationMonitor:
                 # Check for alerting thresholds
                 asyncio.create_task(self._check_user_failure_alerts(user_metrics))
         
-        logger.warning(f"⚠️ Notification failed: {event.user_id} - {error}")
+        logger.warning(f" WARNING: [U+FE0F] Notification failed: {event.user_id} - {error}")
     
     def track_silent_failure_detected(self, user_id: str, thread_id: str, context: str) -> None:
         """Track detected silent failure."""
@@ -624,7 +624,7 @@ class WebSocketNotificationMonitor:
         # CRITICAL: Silent failure detected
         asyncio.create_task(self._alert_silent_failure_detected(event))
         
-        logger.critical(f"🚨 SILENT FAILURE DETECTED: {user_id} - {context}")
+        logger.critical(f" ALERT:  SILENT FAILURE DETECTED: {user_id} - {context}")
     
     def track_user_isolation_violation(self, user_a: str, user_b: str, event_type: str, context: str) -> None:
         """Track user isolation violation."""
@@ -644,7 +644,7 @@ class WebSocketNotificationMonitor:
         # CRITICAL: User isolation violation
         asyncio.create_task(self._alert_isolation_violation(event))
         
-        logger.critical(f"🚨 USER ISOLATION VIOLATION: {user_a} -> {user_b} ({event_type})")
+        logger.critical(f" ALERT:  USER ISOLATION VIOLATION: {user_a} -> {user_b} ({event_type})")
     
     def track_connection_lost(self, user_id: str, thread_id: str, connection_id: str, reason: str) -> None:
         """Track WebSocket connection loss."""
@@ -666,7 +666,7 @@ class WebSocketNotificationMonitor:
         if user_key in self.user_metrics:
             self.user_metrics[user_key].add_event(event)
         
-        logger.warning(f"🔌 Connection lost: {user_id} - {reason}")
+        logger.warning(f"[U+1F50C] Connection lost: {user_id} - {reason}")
     
     def track_connection_restored(self, user_id: str, thread_id: str, connection_id: str) -> None:
         """Track WebSocket connection restoration."""
@@ -687,7 +687,7 @@ class WebSocketNotificationMonitor:
         if user_key in self.user_metrics:
             self.user_metrics[user_key].add_event(event)
         
-        logger.info(f"🔌 Connection restored: {user_id}")
+        logger.info(f"[U+1F50C] Connection restored: {user_id}")
     
     # Monitoring and health check methods
     
@@ -701,10 +701,10 @@ class WebSocketNotificationMonitor:
                 await self._cleanup_stale_data()
                 
         except asyncio.CancelledError:
-            logger.info("🔍 Monitor loop cancelled")
+            logger.info(" SEARCH:  Monitor loop cancelled")
             raise
         except Exception as e:
-            logger.error(f"🚨 Monitor loop error: {e}", exc_info=True)
+            logger.error(f" ALERT:  Monitor loop error: {e}", exc_info=True)
             # Continue monitoring despite errors
             await asyncio.sleep(10)
     
@@ -716,10 +716,10 @@ class WebSocketNotificationMonitor:
                 await self._perform_health_check()
                 
         except asyncio.CancelledError:
-            logger.info("🔍 Health check loop cancelled")
+            logger.info(" SEARCH:  Health check loop cancelled")
             raise
         except Exception as e:
-            logger.error(f"🚨 Health check loop error: {e}", exc_info=True)
+            logger.error(f" ALERT:  Health check loop error: {e}", exc_info=True)
             await asyncio.sleep(10)
     
     async def _check_silent_failures(self) -> None:
@@ -744,7 +744,7 @@ class WebSocketNotificationMonitor:
             )
         
         if silent_failures:
-            logger.critical(f"🚨 Detected {len(silent_failures)} silent failures")
+            logger.critical(f" ALERT:  Detected {len(silent_failures)} silent failures")
     
     async def _check_performance_degradation(self) -> None:
         """Check for performance degradation indicators."""
@@ -780,7 +780,7 @@ class WebSocketNotificationMonitor:
         
         # Log health status
         if health_status["status"] != HealthStatus.HEALTHY:
-            logger.warning(f"🏥 System health: {health_status['status'].value} - Issues: {health_status.get('issues', [])}")
+            logger.warning(f"[U+1F3E5] System health: {health_status['status'].value} - Issues: {health_status.get('issues', [])}")
         
         # Check for degraded users
         unhealthy_users = []
@@ -789,9 +789,9 @@ class WebSocketNotificationMonitor:
                 unhealthy_users.append((user_key, user_metrics))
         
         if unhealthy_users:
-            logger.warning(f"🏥 Unhealthy users detected: {len(unhealthy_users)}")
+            logger.warning(f"[U+1F3E5] Unhealthy users detected: {len(unhealthy_users)}")
             for user_key, user_metrics in unhealthy_users:
-                logger.warning(f"🏥 User {user_metrics.user_id}: {user_metrics.health_status.value} (success_rate={user_metrics.success_rate:.3f})")
+                logger.warning(f"[U+1F3E5] User {user_metrics.user_id}: {user_metrics.health_status.value} (success_rate={user_metrics.success_rate:.3f})")
     
     def track_memory_leak_detected(self, growth_mb: float) -> None:
         """Track memory leak detection."""
@@ -808,7 +808,7 @@ class WebSocketNotificationMonitor:
         # Alert on significant memory growth
         asyncio.create_task(self._alert_memory_leak(event, growth_mb))
         
-        logger.warning(f"🧠 Memory leak detected: +{growth_mb:.1f}MB")
+        logger.warning(f"[U+1F9E0] Memory leak detected: +{growth_mb:.1f}MB")
     
     # Alert management methods
     
@@ -940,7 +940,7 @@ class WebSocketNotificationMonitor:
             }
             
             await self.alert_manager.deliver_notifications(alert, channels, {})
-            logger.info(f"🚨 Alert sent: {alert.title}")
+            logger.info(f" ALERT:  Alert sent: {alert.title}")
             
         except Exception as e:
             logger.error(f"Failed to send alert: {e}")
@@ -971,7 +971,7 @@ class WebSocketNotificationMonitor:
         self.recent_events.append(event)
         
         # Log structured event for analysis
-        logger.info(f"📊 WebSocket Event: {event.event_type.value} | {event.user_id} | {event.success} | {event.correlation_id}")
+        logger.info(f" CHART:  WebSocket Event: {event.event_type.value} | {event.user_id} | {event.success} | {event.correlation_id}")
     
     def _get_user_key(self, user_id: str, thread_id: str) -> str:
         """Generate unique user key for metrics tracking."""
@@ -1029,7 +1029,7 @@ class WebSocketNotificationMonitor:
                 stale_users.append(user_key)
         
         for user_key in stale_users:
-            logger.debug(f"🧹 Cleaning up stale user metrics: {user_key}")
+            logger.debug(f"[U+1F9F9] Cleaning up stale user metrics: {user_key}")
             del self.user_metrics[user_key]
     
     # Public API methods
@@ -1150,7 +1150,7 @@ async def start_websocket_monitoring() -> None:
     """Start global WebSocket monitoring."""
     monitor = get_websocket_notification_monitor()
     await monitor.start_monitoring()
-    logger.info("🔍 Global WebSocket monitoring started")
+    logger.info(" SEARCH:  Global WebSocket monitoring started")
 
 
 async def stop_websocket_monitoring() -> None:
@@ -1158,4 +1158,4 @@ async def stop_websocket_monitoring() -> None:
     global _websocket_notification_monitor
     if _websocket_notification_monitor:
         await _websocket_notification_monitor.stop_monitoring()
-        logger.info("🔍 Global WebSocket monitoring stopped")
+        logger.info(" SEARCH:  Global WebSocket monitoring stopped")

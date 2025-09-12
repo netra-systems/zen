@@ -19,7 +19,7 @@ sys.path.insert(0, str(project_root))
 
 def check_current_config() -> Dict[str, Any]:
     """Check current GCP Cloud Run configuration for staging."""
-    print("🔍 Checking current staging configuration...")
+    print(" SEARCH:  Checking current staging configuration...")
     
     try:
         # Get current service configuration
@@ -33,7 +33,7 @@ def check_current_config() -> Dict[str, Any]:
         
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"❌ Failed to get service config: {result.stderr}")
+            print(f" FAIL:  Failed to get service config: {result.stderr}")
             return {}
             
         config = json.loads(result.stdout)
@@ -56,13 +56,13 @@ def check_current_config() -> Dict[str, Any]:
         return env_vars
         
     except Exception as e:
-        print(f"❌ Error checking config: {e}")
+        print(f" FAIL:  Error checking config: {e}")
         return {}
 
 
 def validate_websocket_config(env_vars: Dict[str, str]) -> Dict[str, str]:
     """Validate WebSocket configuration and identify missing variables."""
-    print("\n📋 Validating WebSocket configuration...")
+    print("\n[U+1F4CB] Validating WebSocket configuration...")
     
     required_vars = {
         "WEBSOCKET_CONNECTION_TIMEOUT": "900",
@@ -78,27 +78,27 @@ def validate_websocket_config(env_vars: Dict[str, str]) -> Dict[str, str]:
     for var, expected_value in required_vars.items():
         if var not in env_vars:
             missing_vars[var] = expected_value
-            print(f"  ❌ MISSING: {var} (should be {expected_value})")
+            print(f"   FAIL:  MISSING: {var} (should be {expected_value})")
         elif env_vars[var] != expected_value:
             incorrect_vars[var] = {
                 "current": env_vars[var],
                 "expected": expected_value
             }
-            print(f"  ⚠️  INCORRECT: {var} = {env_vars[var]} (should be {expected_value})")
+            print(f"   WARNING: [U+FE0F]  INCORRECT: {var} = {env_vars[var]} (should be {expected_value})")
         else:
-            print(f"  ✅ OK: {var} = {env_vars[var]}")
+            print(f"   PASS:  OK: {var} = {env_vars[var]}")
     
     return missing_vars
 
 
 def update_deployment_script() -> bool:
     """Update the deployment script with correct WebSocket configuration."""
-    print("\n🔧 Updating deployment script...")
+    print("\n[U+1F527] Updating deployment script...")
     
     deploy_script = project_root / "scripts" / "deploy_to_gcp.py"
     
     if not deploy_script.exists():
-        print(f"❌ Deployment script not found: {deploy_script}")
+        print(f" FAIL:  Deployment script not found: {deploy_script}")
         return False
     
     # Read current script
@@ -106,7 +106,7 @@ def update_deployment_script() -> bool:
     
     # Check if WebSocket vars already added
     if "WEBSOCKET_CONNECTION_TIMEOUT" in content:
-        print("✅ Deployment script already updated with WebSocket configuration")
+        print(" PASS:  Deployment script already updated with WebSocket configuration")
         return True
     
     # Find the backend service config and add WebSocket vars
@@ -120,24 +120,24 @@ def update_deployment_script() -> bool:
                     "WEBSOCKET_STALE_TIMEOUT": "900",       # 15 minutes before marking connection stale'''
     
     if search_str not in content:
-        print("❌ Could not find insertion point in deployment script")
+        print(" FAIL:  Could not find insertion point in deployment script")
         return False
     
     updated_content = content.replace(search_str, replace_str)
     
     # Write updated script
     deploy_script.write_text(updated_content)
-    print("✅ Deployment script updated successfully")
+    print(" PASS:  Deployment script updated successfully")
     return True
 
 
 def update_cloud_run_env_vars(missing_vars: Dict[str, str]) -> bool:
     """Update Cloud Run service with missing environment variables."""
     if not missing_vars:
-        print("\n✅ No missing variables to update")
+        print("\n PASS:  No missing variables to update")
         return True
     
-    print(f"\n🚀 Updating Cloud Run service with {len(missing_vars)} missing variables...")
+    print(f"\n[U+1F680] Updating Cloud Run service with {len(missing_vars)} missing variables...")
     
     # Build gcloud command
     cmd = [
@@ -156,29 +156,29 @@ def update_cloud_run_env_vars(missing_vars: Dict[str, str]) -> bool:
     try:
         result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"❌ Failed to update service: {result.stderr}")
+            print(f" FAIL:  Failed to update service: {result.stderr}")
             return False
         
-        print("✅ Cloud Run service updated successfully")
+        print(" PASS:  Cloud Run service updated successfully")
         return True
         
     except Exception as e:
-        print(f"❌ Error updating service: {e}")
+        print(f" FAIL:  Error updating service: {e}")
         return False
 
 
 def verify_deployment() -> bool:
     """Verify the deployment has correct WebSocket configuration."""
-    print("\n🔍 Verifying deployment configuration...")
+    print("\n SEARCH:  Verifying deployment configuration...")
     
     env_vars = check_current_config()
     missing_vars = validate_websocket_config(env_vars)
     
     if not missing_vars:
-        print("\n✅ All WebSocket environment variables are correctly configured!")
+        print("\n PASS:  All WebSocket environment variables are correctly configured!")
         return True
     else:
-        print(f"\n❌ {len(missing_vars)} WebSocket variables still missing")
+        print(f"\n FAIL:  {len(missing_vars)} WebSocket variables still missing")
         return False
 
 
@@ -192,7 +192,7 @@ def main():
     env_vars = check_current_config()
     
     if not env_vars:
-        print("\n⚠️  Could not retrieve current configuration")
+        print("\n WARNING: [U+FE0F]  Could not retrieve current configuration")
         print("Make sure you're authenticated with gcloud:")
         print("  gcloud auth login")
         print("  gcloud config set project netra-staging")
@@ -206,31 +206,31 @@ def main():
     
     # Step 4: Update Cloud Run service immediately
     if missing_vars:
-        print("\n⚠️  Missing WebSocket configuration detected!")
+        print("\n WARNING: [U+FE0F]  Missing WebSocket configuration detected!")
         response = input("\nUpdate Cloud Run service now? (y/n): ")
         
         if response.lower() == 'y':
             if update_cloud_run_env_vars(missing_vars):
                 # Step 5: Verify the update
                 if verify_deployment():
-                    print("\n🎉 SUCCESS: WebSocket timeouts fixed in staging!")
+                    print("\n CELEBRATION:  SUCCESS: WebSocket timeouts fixed in staging!")
                     print("\nNext steps:")
                     print("1. Monitor WebSocket connections in staging")
                     print("2. Run E2E tests: python tests/unified_test_runner.py --category e2e --env staging")
                     print("3. Deploy to production when stable")
                     return 0
                 else:
-                    print("\n⚠️  Update may have partially succeeded. Please verify manually.")
+                    print("\n WARNING: [U+FE0F]  Update may have partially succeeded. Please verify manually.")
                     return 1
             else:
-                print("\n❌ Failed to update Cloud Run service")
+                print("\n FAIL:  Failed to update Cloud Run service")
                 return 1
         else:
-            print("\n⏭️  Skipping Cloud Run update")
+            print("\n[U+23ED][U+FE0F]  Skipping Cloud Run update")
             print("Run this script again when ready to update")
             return 0
     else:
-        print("\n✅ WebSocket configuration is already correct!")
+        print("\n PASS:  WebSocket configuration is already correct!")
         return 0
 
 

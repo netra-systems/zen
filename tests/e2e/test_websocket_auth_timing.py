@@ -13,7 +13,7 @@
     # REMOVED_SYNTAX_ERROR: 5. WebSocket recovery after initial auth failure
 
     # REMOVED_SYNTAX_ERROR: BVJ (Business Value Justification):
-        # REMOVED_SYNTAX_ERROR: - Segment: All tiers (Free → Enterprise)
+        # REMOVED_SYNTAX_ERROR: - Segment: All tiers (Free  ->  Enterprise)
         # REMOVED_SYNTAX_ERROR: - Business Goal: Real-time Communication Reliability
         # REMOVED_SYNTAX_ERROR: - Value Impact: Prevents WebSocket connection failures that break user experience
         # REMOVED_SYNTAX_ERROR: - Strategic Impact: Ensures DevLauncher startup robustness across all environments

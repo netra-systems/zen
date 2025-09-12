@@ -1,7 +1,7 @@
 """
 MISSION CRITICAL: WebSocket Events Never Fail Test for Golden Path
 
-🚨 MISSION CRITICAL TEST 🚨
+ ALERT:  MISSION CRITICAL TEST  ALERT: 
 This test MUST NEVER FAIL - it validates the core revenue-generating WebSocket events
 that enable the $500K+ ARR chat experience. Failure blocks deployment.
 
@@ -39,7 +39,7 @@ from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
     """
-    🚨 MISSION CRITICAL TEST 🚨
+     ALERT:  MISSION CRITICAL TEST  ALERT: 
     
     This test validates that the 5 critical WebSocket events are ALWAYS delivered
     for every Golden Path execution. This is non-negotiable for business operations.
@@ -88,7 +88,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
             
         except Exception as e:
             # Mission critical test cleanup failures are logged but don't fail test
-            print(f"⚠️  Mission Critical Cleanup Warning: {e}")
+            print(f" WARNING: [U+FE0F]  Mission Critical Cleanup Warning: {e}")
         
         await super().async_teardown_method(method)
     
@@ -97,7 +97,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_all_five_critical_events_must_be_delivered(self):
         """
-        🚨 MISSION CRITICAL: All 5 WebSocket events MUST be delivered.
+         ALERT:  MISSION CRITICAL: All 5 WebSocket events MUST be delivered.
         
         This test CANNOT FAIL without blocking deployment.
         Missing events = broken chat experience = revenue loss.
@@ -115,7 +115,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         )
         
         if not jwt_token:
-            pytest.fail("🚨 MISSION CRITICAL FAILURE: Cannot authenticate user - complete system breakdown")
+            pytest.fail(" ALERT:  MISSION CRITICAL FAILURE: Cannot authenticate user - complete system breakdown")
         
         # Get WebSocket headers
         ws_headers = self.websocket_helper.get_websocket_headers(jwt_token)
@@ -133,13 +133,13 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
             self.active_connections.append(connection)
             
         except Exception as e:
-            pytest.fail(f"🚨 MISSION CRITICAL FAILURE: WebSocket connection failed - {e}")
+            pytest.fail(f" ALERT:  MISSION CRITICAL FAILURE: WebSocket connection failed - {e}")
         
         connection_time = time.time() - mission_critical_start
         
         # Mission critical timing requirement
         if connection_time > 10.0:
-            pytest.fail(f"🚨 MISSION CRITICAL FAILURE: Connection too slow ({connection_time:.2f}s > 10s)")
+            pytest.fail(f" ALERT:  MISSION CRITICAL FAILURE: Connection too slow ({connection_time:.2f}s > 10s)")
         
         # Send Golden Path message
         golden_path_message = {
@@ -157,7 +157,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
                 connection, golden_path_message, timeout=5.0
             )
         except Exception as e:
-            pytest.fail(f"🚨 MISSION CRITICAL FAILURE: Cannot send message - {e}")
+            pytest.fail(f" ALERT:  MISSION CRITICAL FAILURE: Cannot send message - {e}")
         
         # Collect WebSocket events with ZERO tolerance for missing events
         events_collected = []
@@ -192,13 +192,13 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         event_collection_time = time.time() - event_collection_start
         total_mission_critical_time = time.time() - mission_critical_start
         
-        # 🚨 MISSION CRITICAL VALIDATIONS - ZERO TOLERANCE 🚨
+        #  ALERT:  MISSION CRITICAL VALIDATIONS - ZERO TOLERANCE  ALERT: 
         
         # Validation 1: All 5 critical events MUST be present
         missing_events = [event for event in self.CRITICAL_EVENTS if event not in event_types_received]
         if missing_events:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Missing critical events: {missing_events}\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: Missing critical events: {missing_events}\n"
                 f"Events received: {list(event_types_received)}\n"
                 f"This breaks the chat experience and blocks revenue generation!"
             )
@@ -206,7 +206,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         # Validation 2: Event collection MUST complete within time limit
         if event_collection_time >= max_collection_time:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Event collection timeout ({event_collection_time:.2f}s >= {max_collection_time}s)\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: Event collection timeout ({event_collection_time:.2f}s >= {max_collection_time}s)\n"
                 f"Received events: {list(event_types_received)}\n"
                 f"Users cannot wait this long for AI responses!"
             )
@@ -214,7 +214,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         # Validation 3: Total Golden Path time MUST be acceptable
         if total_mission_critical_time > 90.0:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Golden Path too slow ({total_mission_critical_time:.2f}s > 90s)\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: Golden Path too slow ({total_mission_critical_time:.2f}s > 90s)\n"
                 f"This degrades user experience below acceptable levels!"
             )
         
@@ -228,7 +228,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
             
             if started_index >= completed_index:
                 pytest.fail(
-                    f"🚨 MISSION CRITICAL FAILURE: Events in wrong order\n"
+                    f" ALERT:  MISSION CRITICAL FAILURE: Events in wrong order\n"
                     f"agent_started must come before agent_completed\n"
                     f"Order received: {event_order}"
                 )
@@ -236,11 +236,11 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         # Validation 5: Must have received substantial events (not just connection events)
         if len(events_collected) < 5:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Too few events received ({len(events_collected)} < 5)\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: Too few events received ({len(events_collected)} < 5)\n"
                 f"This indicates the agent pipeline is not working properly!"
             )
         
-        # 🚨 MISSION CRITICAL SUCCESS LOGGING 🚨
+        #  ALERT:  MISSION CRITICAL SUCCESS LOGGING  ALERT: 
         success_metrics = {
             "all_critical_events_received": True,
             "event_collection_time": event_collection_time,
@@ -259,19 +259,19 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         self.active_connections.remove(connection)
         
         # Mission Critical Success Report
-        print(f"\n🎯 MISSION CRITICAL SUCCESS:")
-        print(f"   ✅ ALL 5 Critical Events Delivered: {self.CRITICAL_EVENTS}")
-        print(f"   ⏱️  Event Collection Time: {event_collection_time:.2f}s")
-        print(f"   🚀 Total Execution Time: {total_mission_critical_time:.2f}s")
-        print(f"   📊 Total Events Received: {len(events_collected)}")
-        print(f"   💰 $500K+ ARR Revenue Stream: PROTECTED")
+        print(f"\n TARGET:  MISSION CRITICAL SUCCESS:")
+        print(f"    PASS:  ALL 5 Critical Events Delivered: {self.CRITICAL_EVENTS}")
+        print(f"   [U+23F1][U+FE0F]  Event Collection Time: {event_collection_time:.2f}s")
+        print(f"   [U+1F680] Total Execution Time: {total_mission_critical_time:.2f}s")
+        print(f"    CHART:  Total Events Received: {len(events_collected)}")
+        print(f"   [U+1F4B0] $500K+ ARR Revenue Stream: PROTECTED")
         
     @pytest.mark.mission_critical
     @pytest.mark.no_skip
     @pytest.mark.asyncio
     async def test_websocket_events_under_high_load_never_fail(self):
         """
-        🚨 MISSION CRITICAL: WebSocket events MUST be delivered even under high load.
+         ALERT:  MISSION CRITICAL: WebSocket events MUST be delivered even under high load.
         
         System must maintain event delivery reliability under stress conditions.
         """
@@ -293,7 +293,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         user_results = await asyncio.gather(*user_tasks, return_exceptions=True)
         high_load_time = time.time() - high_load_start
         
-        # 🚨 MISSION CRITICAL VALIDATION UNDER LOAD 🚨
+        #  ALERT:  MISSION CRITICAL VALIDATION UNDER LOAD  ALERT: 
         
         successful_users = 0
         failed_users = 0
@@ -315,7 +315,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         # ZERO TOLERANCE for event delivery failures under load
         if failed_users > 0:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Event delivery failed under load\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: Event delivery failed under load\n"
                 f"Failed users: {failed_users}/{concurrent_users}\n"
                 f"Failures: {event_delivery_failures}\n"
                 f"System cannot handle concurrent load - revenue at risk!"
@@ -324,7 +324,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         # Performance requirement under load
         if high_load_time > 120.0:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: High load test too slow ({high_load_time:.2f}s > 120s)\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: High load test too slow ({high_load_time:.2f}s > 120s)\n"
                 f"System cannot handle concurrent users effectively!"
             )
         
@@ -332,7 +332,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         success_rate = successful_users / concurrent_users
         if success_rate < 1.0:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Success rate {success_rate:.1%} < 100%\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: Success rate {success_rate:.1%} < 100%\n"
                 f"Mission critical systems must have 100% success rate!"
             )
         
@@ -342,10 +342,10 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         self.record_metric("load_test_success_rate", success_rate)
         self.record_metric("load_test_duration", high_load_time)
         
-        print(f"\n🚀 MISSION CRITICAL LOAD TEST SUCCESS:")
-        print(f"   ✅ Success Rate: {success_rate:.1%} ({successful_users}/{concurrent_users})")
-        print(f"   ⏱️  Load Test Duration: {high_load_time:.2f}s")
-        print(f"   💪 System Reliability: PROVEN UNDER LOAD")
+        print(f"\n[U+1F680] MISSION CRITICAL LOAD TEST SUCCESS:")
+        print(f"    PASS:  Success Rate: {success_rate:.1%} ({successful_users}/{concurrent_users})")
+        print(f"   [U+23F1][U+FE0F]  Load Test Duration: {high_load_time:.2f}s")
+        print(f"   [U+1F4AA] System Reliability: PROVEN UNDER LOAD")
         
     async def _execute_mission_critical_user_flow(
         self, 
@@ -455,7 +455,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_websocket_event_delivery_timing_never_exceeds_limits(self):
         """
-        🚨 MISSION CRITICAL: Event delivery timing MUST meet business requirements.
+         ALERT:  MISSION CRITICAL: Event delivery timing MUST meet business requirements.
         
         Events delivered too slowly = poor user experience = customer loss.
         """
@@ -530,15 +530,15 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         
         total_event_collection_time = time.time() - event_start
         
-        # 🚨 MISSION CRITICAL TIMING VALIDATIONS 🚨
+        #  ALERT:  MISSION CRITICAL TIMING VALIDATIONS  ALERT: 
         
         # Validation 1: First event must arrive quickly (user engagement)
         if first_event_time is None:
-            pytest.fail("🚨 MISSION CRITICAL FAILURE: No events received - system completely broken!")
+            pytest.fail(" ALERT:  MISSION CRITICAL FAILURE: No events received - system completely broken!")
         
         if first_event_time > 10.0:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: First event too slow ({first_event_time:.2f}s > 10s)\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: First event too slow ({first_event_time:.2f}s > 10s)\n"
                 f"Users will abandon chat if they don't see immediate response!"
             )
         
@@ -546,7 +546,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         missing_events = [event for event in self.CRITICAL_EVENTS if event not in events_received]
         if missing_events:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Missing critical events within time limit: {missing_events}\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: Missing critical events within time limit: {missing_events}\n"
                 f"Received: {list(events_received)}\n"
                 f"Time limit: {max_event_wait}s"
             )
@@ -554,7 +554,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         # Validation 3: Last event (completion) must arrive within business requirements
         if last_event_time > 60.0:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Complete flow too slow ({last_event_time:.2f}s > 60s)\n"
+                f" ALERT:  MISSION CRITICAL FAILURE: Complete flow too slow ({last_event_time:.2f}s > 60s)\n"
                 f"Users expect AI responses within 1 minute!"
             )
         
@@ -568,7 +568,7 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         
         if timing_failures:
             pytest.fail(
-                f"🚨 MISSION CRITICAL FAILURE: Event timing requirements not met:\n" +
+                f" ALERT:  MISSION CRITICAL FAILURE: Event timing requirements not met:\n" +
                 "\n".join(timing_failures)
             )
         
@@ -585,11 +585,11 @@ class TestWebSocketEventsNeverFail(SSotAsyncTestCase):
         await WebSocketTestHelpers.close_test_connection(connection)
         self.active_connections.remove(connection)
         
-        print(f"\n⏰ MISSION CRITICAL TIMING SUCCESS:")
-        print(f"   🚀 First Event: {first_event_time:.2f}s")
-        print(f"   🏁 Last Event: {last_event_time:.2f}s")
-        print(f"   📊 All Events Within Limits: {list(events_received)}")
-        print(f"   💰 User Experience: PRESERVED")
+        print(f"\n[U+23F0] MISSION CRITICAL TIMING SUCCESS:")
+        print(f"   [U+1F680] First Event: {first_event_time:.2f}s")
+        print(f"   [U+1F3C1] Last Event: {last_event_time:.2f}s")
+        print(f"    CHART:  All Events Within Limits: {list(events_received)}")
+        print(f"   [U+1F4B0] User Experience: PRESERVED")
 
 
 if __name__ == "__main__":

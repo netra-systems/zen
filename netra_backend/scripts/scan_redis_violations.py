@@ -193,7 +193,7 @@ class RedisViolationScanner:
     def generate_report(self, violations: List[Violation], detailed: bool = False) -> str:
         """Generate a human-readable violation report."""
         if not violations:
-            return "✅ No Redis import violations found! SSOT compliance achieved."
+            return " PASS:  No Redis import violations found! SSOT compliance achieved."
         
         # Group violations by type and file
         by_type = {}
@@ -211,7 +211,7 @@ class RedisViolationScanner:
             by_file[violation.file_path].append(violation)
         
         report_lines = [
-            "🚨 Redis SSOT Violation Report - Issue #226",
+            " ALERT:  Redis SSOT Violation Report - Issue #226",
             "=" * 60,
             f"Total Violations: {len(violations)}",
             f"Files Affected: {len(by_file)}",
@@ -219,28 +219,28 @@ class RedisViolationScanner:
         ]
         
         # Summary by type
-        report_lines.append("📊 Violations by Type:")
+        report_lines.append(" CHART:  Violations by Type:")
         for violation_type, type_violations in by_type.items():
             report_lines.append(f"  {violation_type}: {len(type_violations)}")
         report_lines.append("")
         
         if detailed:
             # Detailed breakdown by file
-            report_lines.append("📁 Detailed Violations by File:")
+            report_lines.append("[U+1F4C1] Detailed Violations by File:")
             for file_path, file_violations in sorted(by_file.items()):
                 report_lines.append(f"\n{file_path}")
                 for violation in file_violations:
-                    report_lines.append(f"  ❌ Line {violation.line_number}: {violation.line_content}")
+                    report_lines.append(f"   FAIL:  Line {violation.line_number}: {violation.line_content}")
                     report_lines.append(f"     Fix: {violation.suggested_fix}")
         else:
             # Summary by file
-            report_lines.append("📁 Files with Violations:")
+            report_lines.append("[U+1F4C1] Files with Violations:")
             for file_path, file_violations in sorted(by_file.items()):
                 report_lines.append(f"  {file_path}: {len(file_violations)} violations")
         
         report_lines.extend([
             "",
-            "🔧 Quick Fix Guide:",
+            "[U+1F527] Quick Fix Guide:",
             "=" * 30,
             "1. Replace deprecated imports with:",
             "   from netra_backend.app.redis_manager import redis_manager",

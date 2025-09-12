@@ -389,7 +389,7 @@ class GoalsTriageSubAgent(BaseAgent):
             line = line.strip()
             if line and not line.startswith('{') and not line.startswith('['):
                 # Remove common prefixes
-                for prefix in ['- ', '* ', '• ', '1. ', '2. ', '3. ', '4. ', '5. ']:
+                for prefix in ['- ', '* ', '[U+2022] ', '1. ', '2. ', '3. ', '4. ', '5. ']:
                     if line.startswith(prefix):
                         line = line[len(prefix):].strip()
                         break

@@ -94,9 +94,9 @@ class SupervisorAgent(BaseAgent):
         self.tool_dispatcher = tool_dispatcher
         
         if websocket_bridge:
-            logger.info(f"✅ SupervisorAgent initialized with WebSocket bridge type: {type(websocket_bridge).__name__}")
+            logger.info(f" PASS:  SupervisorAgent initialized with WebSocket bridge type: {type(websocket_bridge).__name__}")
         else:
-            logger.info("✅ SupervisorAgent initialized with lazy WebSocket bridge initialization")
+            logger.info(" PASS:  SupervisorAgent initialized with lazy WebSocket bridge initialization")
         
         self.agent_instance_factory = get_agent_instance_factory()
         self.agent_class_registry = get_agent_class_registry()
@@ -106,19 +106,19 @@ class SupervisorAgent(BaseAgent):
             logger.warning("Agent class registry is empty - initializing for golden path")
             from netra_backend.app.agents.supervisor.agent_class_initialization import initialize_agent_class_registry
             self.agent_class_registry = initialize_agent_class_registry()
-            logger.info(f"✅ Initialized agent class registry with {len(self.agent_class_registry)} agents")
+            logger.info(f" PASS:  Initialized agent class registry with {len(self.agent_class_registry)} agents")
         
         self.flow_logger = get_supervisor_flow_logger()
         
         # Initialize workflow executor for workflow orchestration
         from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
         self.workflow_executor = SupervisorWorkflowExecutor(self)
-        logger.info("✅ SupervisorAgent workflow_executor initialized")
+        logger.info(" PASS:  SupervisorAgent workflow_executor initialized")
         
         # ARCHITECTURE: Conditional factory pre-configuration
         # Only pre-configure if WebSocket bridge is available, otherwise defer to execute()
         if websocket_bridge:
-            logger.info(f"🔧 Pre-configuring agent instance factory with WebSocket bridge in supervisor init")
+            logger.info(f"[U+1F527] Pre-configuring agent instance factory with WebSocket bridge in supervisor init")
             try:
                 # Pre-configure with just the websocket bridge (registries will be added in execute())
                 # This is critical to prevent None bridge errors when creating sub-agents
@@ -130,13 +130,13 @@ class SupervisorAgent(BaseAgent):
                     llm_manager=llm_manager,
                     tool_dispatcher=None  # Will be set per-request in execute()
                 )
-                logger.info(f"✅ Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
+                logger.info(f" PASS:  Factory pre-configured with WebSocket bridge to prevent sub-agent event failures")
             except Exception as e:
                 # CRITICAL: Changed from warning to error - configuration failure should fail fast
-                logger.error(f"❌ Failed to pre-configure factory in init: {e}")
+                logger.error(f" FAIL:  Failed to pre-configure factory in init: {e}")
                 raise RuntimeError(f"Agent instance factory pre-configuration failed: {e}")
         else:
-            logger.info("⏳ WebSocket bridge is None - factory configuration deferred to execute() method")
+            logger.info("[U+23F3] WebSocket bridge is None - factory configuration deferred to execute() method")
         
         # Store LLM manager for creating request-scoped registries
         self._llm_manager = llm_manager
@@ -222,11 +222,11 @@ class SupervisorAgent(BaseAgent):
             RuntimeError: If execution fails
         """
         # Validate context at entry
-        logger.info(f"🚀 SupervisorAgent.execute() called for user={context.user_id}, run_id={context.run_id}")
-        logger.info(f"📊 Context details: thread_id={context.thread_id}, has_db_session={context.db_session is not None}")
+        logger.info(f"[U+1F680] SupervisorAgent.execute() called for user={context.user_id}, run_id={context.run_id}")
+        logger.info(f" CHART:  Context details: thread_id={context.thread_id}, has_db_session={context.db_session is not None}")
         
         context = validate_user_context(context)
-        logger.info(f"✅ Context validated successfully for user={context.user_id}")
+        logger.info(f" PASS:  Context validated successfully for user={context.user_id}")
         
         if not context.db_session:
             raise ValueError("UserExecutionContext must contain a database session")
@@ -252,18 +252,18 @@ class SupervisorAgent(BaseAgent):
                 
                 # Get the actual WebSocketManager to pass to ToolDispatcher
                 actual_websocket_manager = self.websocket_bridge.websocket_manager if hasattr(self.websocket_bridge, 'websocket_manager') else None
-                logger.info(f"🔍 WebSocket bridge type: {type(self.websocket_bridge)}")
-                logger.info(f"🔍 Has websocket_manager: {hasattr(self.websocket_bridge, 'websocket_manager')}")
-                logger.info(f"🔍 WebSocketManager type: {type(actual_websocket_manager) if actual_websocket_manager else 'None'}")
+                logger.info(f" SEARCH:  WebSocket bridge type: {type(self.websocket_bridge)}")
+                logger.info(f" SEARCH:  Has websocket_manager: {hasattr(self.websocket_bridge, 'websocket_manager')}")
+                logger.info(f" SEARCH:  WebSocketManager type: {type(actual_websocket_manager) if actual_websocket_manager else 'None'}")
                 
-                # 🚀 NEW: Use UserContext-based tool factory for complete isolation
-                logger.info(f"🔧 Creating UserContext-based tool system for {context.user_id}")
+                # [U+1F680] NEW: Use UserContext-based tool factory for complete isolation
+                logger.info(f"[U+1F527] Creating UserContext-based tool system for {context.user_id}")
                 
                 # Get tool classes from app state (configured at startup) or use fallback
                 tool_classes = self._get_tool_classes_from_context(context)
                 websocket_bridge_factory = self._get_websocket_bridge_factory(context)
                 
-                logger.info(f"🔧 Available tool classes: {len(tool_classes)}")
+                logger.info(f"[U+1F527] Available tool classes: {len(tool_classes)}")
                 
                 # Create completely isolated tool system for this user
                 from netra_backend.app.agents.user_context_tool_factory import UserContextToolFactory
@@ -274,7 +274,7 @@ class SupervisorAgent(BaseAgent):
                     websocket_bridge_factory=websocket_bridge_factory
                 )
                 
-                logger.info(f"✅ UserContext-based tool system created for {context.user_id}")
+                logger.info(f" PASS:  UserContext-based tool system created for {context.user_id}")
                 logger.info(f"   - Registry: {tool_system['registry'].name}")
                 logger.info(f"   - Tools: {len(tool_system['tools'])}")
                 logger.info(f"   - Dispatcher: {tool_system['dispatcher'].dispatcher_id}")
@@ -288,7 +288,7 @@ class SupervisorAgent(BaseAgent):
                 # Factory handles agent creation with proper isolation without AgentRegistry
                 
                 # CRITICAL: Configure agent instance factory directly for complete isolation
-                logger.info(f"🔧 Configuring agent instance factory for user {context.user_id}")
+                logger.info(f"[U+1F527] Configuring agent instance factory for user {context.user_id}")
                 self.agent_instance_factory.configure(
                     agent_class_registry=self.agent_class_registry,
                     websocket_bridge=self.websocket_bridge,
@@ -301,18 +301,18 @@ class SupervisorAgent(BaseAgent):
                 websocket_manager = getattr(self.websocket_bridge, 'websocket_manager', None)
                 if websocket_manager and hasattr(self.tool_dispatcher, 'set_websocket_manager'):
                     self.tool_dispatcher.set_websocket_manager(websocket_manager)
-                    logger.info(f"✅ Enhanced tool dispatcher with WebSocket for user {context.user_id}")
+                    logger.info(f" PASS:  Enhanced tool dispatcher with WebSocket for user {context.user_id}")
                 
                 # Use database session from context
-                logger.info(f"📂 Using database session for user {context.user_id}")
+                logger.info(f"[U+1F4C2] Using database session for user {context.user_id}")
                 session_manager = context.db_session
-                logger.info(f"✅ Database session ready, starting agent orchestration")
+                logger.info(f" PASS:  Database session ready, starting agent orchestration")
                 
                 # Execute supervisor orchestration
                 result = await self._orchestrate_agents(context, session_manager, stream_updates)
                 
-                logger.info(f"🎯 SupervisorAgent.execute() completed successfully for user {context.user_id}")
-                logger.info(f"📊 Result type: {type(result)}, has_content: {bool(result)}")
+                logger.info(f" TARGET:  SupervisorAgent.execute() completed successfully for user {context.user_id}")
+                logger.info(f" CHART:  Result type: {type(result)}, has_content: {bool(result)}")
                 return result
                     
             except Exception as e:
@@ -369,7 +369,7 @@ class SupervisorAgent(BaseAgent):
             if hasattr(self.flow_logger, 'fail_flow'):
                 self.flow_logger.fail_flow(flow_id, str(e))
             else:
-                logger.error(f"🚨 Flow {flow_id} failed (no fail_flow method): {e}")
+                logger.error(f" ALERT:  Flow {flow_id} failed (no fail_flow method): {e}")
             logger.error(f"Agent orchestration failed for user {context.user_id}: {e}")
             raise
     
@@ -402,7 +402,7 @@ class SupervisorAgent(BaseAgent):
                 )
                 
                 agent_instances[agent_name] = agent_instance
-                logger.info(f"✅ Created isolated {agent_name} instance for user {context.user_id}")
+                logger.info(f" PASS:  Created isolated {agent_name} instance for user {context.user_id}")
                 
             except Exception as e:
                 logger.error(f"Failed to create isolated {agent_name} instance: {e}")
@@ -412,7 +412,7 @@ class SupervisorAgent(BaseAgent):
         
         if not agent_instances:
             error_msg = f"Failed to create any isolated agent instances. Attempted agents: {agent_names}"
-            logger.error(f"❌ CRITICAL: {error_msg}")
+            logger.error(f" FAIL:  CRITICAL: {error_msg}")
             logger.error(f"   Factory configured: {self.agent_instance_factory is not None}")
             logger.error(f"   Class registry: {self.agent_class_registry is not None}")
             logger.error(f"   LLM manager: {self._llm_manager is not None}")
@@ -429,7 +429,7 @@ class SupervisorAgent(BaseAgent):
         1. Triage - Determines what the user needs
         2. Reporting (with UVS) - ALWAYS delivers value, handles all failures
         
-        Default flow: Triage → Data Helper → Reporting (UVS)
+        Default flow: Triage  ->  Data Helper  ->  Reporting (UVS)
         All other agents are optional based on triage assessment.
         """
         # CRITICAL: Only these 2 agents are required for UVS
@@ -467,7 +467,7 @@ class SupervisorAgent(BaseAgent):
         Returns:
             List of BaseTool instances available to this user
         """
-        logger.info(f"🔨 Getting tools for user {context.user_id}")
+        logger.info(f"[U+1F528] Getting tools for user {context.user_id}")
         
         # Import the proper LangChain tool wrappers
         from netra_backend.app.agents.tools.langchain_wrappers import (
@@ -477,7 +477,7 @@ class SupervisorAgent(BaseAgent):
         # Create tools with LLM manager if available
         llm_manager = getattr(self, 'llm_manager', None)
         
-        logger.info(f"🔧 Creating LangChain-wrapped tools with llm_manager={llm_manager is not None}")
+        logger.info(f"[U+1F527] Creating LangChain-wrapped tools with llm_manager={llm_manager is not None}")
         
         tools = create_langchain_tools(
             llm_manager=llm_manager,
@@ -486,8 +486,8 @@ class SupervisorAgent(BaseAgent):
             sandbox_docker_image=None  # Will use env defaults
         )
         
-        logger.info(f"✅ Created {len(tools)} tools for user {context.user_id}")
-        logger.info(f"📦 Tools registered: {[tool.name for tool in tools]}")
+        logger.info(f" PASS:  Created {len(tools)} tools for user {context.user_id}")
+        logger.info(f"[U+1F4E6] Tools registered: {[tool.name for tool in tools]}")
         
         return tools
     
@@ -499,7 +499,7 @@ class SupervisorAgent(BaseAgent):
             if hasattr(app, 'state') and hasattr(app.state, 'tool_classes'):
                 tool_classes = app.state.tool_classes
                 if tool_classes:
-                    logger.info(f"✅ Retrieved {len(tool_classes)} tool classes from app state")
+                    logger.info(f" PASS:  Retrieved {len(tool_classes)} tool classes from app state")
                     return tool_classes
         except Exception as e:
             logger.warning(f"Could not access app state tool classes: {e}")
@@ -507,7 +507,7 @@ class SupervisorAgent(BaseAgent):
         # Fallback to default tool classes
         from netra_backend.app.agents.user_context_tool_factory import get_app_tool_classes
         tool_classes = get_app_tool_classes()
-        logger.info(f"🔄 Using fallback tool classes: {len(tool_classes)}")
+        logger.info(f" CYCLE:  Using fallback tool classes: {len(tool_classes)}")
         return tool_classes
     
     def _get_websocket_bridge_factory(self, context: UserExecutionContext):
@@ -517,13 +517,13 @@ class SupervisorAgent(BaseAgent):
             from netra_backend.app.smd import app
             if hasattr(app, 'state') and hasattr(app.state, 'websocket_bridge_factory'):
                 factory = app.state.websocket_bridge_factory
-                logger.info("✅ Retrieved WebSocket bridge factory from app state")
+                logger.info(" PASS:  Retrieved WebSocket bridge factory from app state")
                 return factory
         except Exception as e:
             logger.warning(f"Could not access app state WebSocket bridge factory: {e}")
         
         # Fallback - return the existing bridge for this supervisor
-        logger.info("🔄 Using fallback WebSocket bridge factory")
+        logger.info(" CYCLE:  Using fallback WebSocket bridge factory")
         return lambda: self.websocket_bridge
 
     # Define agent dependencies with metadata keys (SSOT)
@@ -655,21 +655,21 @@ class SupervisorAgent(BaseAgent):
         # UVS SIMPLIFIED: Dynamic execution order based on triage
         # Core principle: System works with ANY subset of agents
         # Minimum viable: Just Reporting (with UVS enhancements)
-        # Optimal: Triage → (dynamic agents) → Reporting
+        # Optimal: Triage  ->  (dynamic agents)  ->  Reporting
         
         # Step 1: Attempt triage if available (can fail gracefully)
         triage_result = None
         if "triage" in agent_instances:
             try:
-                logger.info("📊 Executing triage agent to determine optimal workflow...")
+                logger.info(" CHART:  Executing triage agent to determine optimal workflow...")
                 triage_result = await self._execute_single_agent(
                     agent_instances["triage"], context, "triage", completed_agents, failed_agents
                 )
                 results["triage"] = triage_result
-                logger.info(f"✅ Triage completed. Data sufficiency: {triage_result.get('data_sufficiency', 'unknown')}")
+                logger.info(f" PASS:  Triage completed. Data sufficiency: {triage_result.get('data_sufficiency', 'unknown')}")
             except Exception as e:
-                logger.warning(f"⚠️ Triage failed (non-critical): {e}")
-                logger.info("📌 Continuing with UVS fallback workflow...")
+                logger.warning(f" WARNING: [U+FE0F] Triage failed (non-critical): {e}")
+                logger.info("[U+1F4CC] Continuing with UVS fallback workflow...")
                 results["triage"] = {
                     "error": str(e), 
                     "status": "failed",
@@ -692,7 +692,7 @@ class SupervisorAgent(BaseAgent):
             can_execute, missing_deps = self._can_execute_agent(agent_name, completed_agents, context.metadata)
             if not can_execute:
                 # UVS: Dependencies not met is not a failure - just skip
-                logger.info(f"⏭️ Skipping {agent_name}: optional dependencies not met: {missing_deps}")
+                logger.info(f"[U+23ED][U+FE0F] Skipping {agent_name}: optional dependencies not met: {missing_deps}")
                 results[agent_name] = {
                     "status": "skipped",
                     "reason": "Optional dependencies not available",
@@ -720,7 +720,7 @@ class SupervisorAgent(BaseAgent):
                 )
                 
                 execution_time = time.time() - start_time
-                logger.info(f"⏱️ Agent {agent_name} executed in {execution_time:.2f}s for user {context.user_id}")
+                logger.info(f"[U+23F1][U+FE0F] Agent {agent_name} executed in {execution_time:.2f}s for user {context.user_id}")
                 
                 # Validate result is not an error
                 if isinstance(agent_result, dict) and agent_result.get("status") == "failed":
@@ -736,7 +736,7 @@ class SupervisorAgent(BaseAgent):
                 # Store agent result under expected keys (SSOT)
                 self._store_agent_result(context, agent_name, agent_result)
                 
-                logger.info(f"✅ Agent {agent_name} completed successfully for user {context.user_id}")
+                logger.info(f" PASS:  Agent {agent_name} completed successfully for user {context.user_id}")
                 
                 # Add small delay between agents to prevent overwhelming the system
                 # Only if execution was very fast (< 0.5s)
@@ -752,7 +752,7 @@ class SupervisorAgent(BaseAgent):
                 
                 if can_fail:
                     # Non-critical agent - log and continue
-                    logger.warning(f"⚠️ Optional agent {agent_name} failed (non-critical): {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Optional agent {agent_name} failed (non-critical): {e}")
                     results[agent_name] = {
                         "error": str(e), 
                         "status": "failed",
@@ -766,17 +766,17 @@ class SupervisorAgent(BaseAgent):
                         f"Note: {agent_name} encountered an issue but we're continuing with alternative approaches...")
                 else:
                     # Critical agent (only reporting) - must handle specially
-                    logger.error(f"❌ CRITICAL: Required agent {agent_name} failed: {e}", exc_info=True)
+                    logger.error(f" FAIL:  CRITICAL: Required agent {agent_name} failed: {e}", exc_info=True)
                     
                     if agent_name == "reporting":
                         # Reporting MUST succeed - attempt fallback
-                        logger.info("🔄 Attempting fallback reporting...")
+                        logger.info(" CYCLE:  Attempting fallback reporting...")
                         try:
                             results["reporting"] = await self._create_fallback_report(context, results)
-                            logger.info("✅ Fallback reporting succeeded")
+                            logger.info(" PASS:  Fallback reporting succeeded")
                             completed_agents.add("reporting")
                         except Exception as fallback_error:
-                            logger.error(f"❌ Fallback reporting also failed: {fallback_error}")
+                            logger.error(f" FAIL:  Fallback reporting also failed: {fallback_error}")
                             # Last resort - create minimal report
                             results["reporting"] = {
                                 "status": "emergency_fallback",
@@ -835,7 +835,7 @@ class SupervisorAgent(BaseAgent):
                 
                 # Success - return result
                 if attempt > 0:
-                    logger.info(f"✅ {agent_name} succeeded after {attempt + 1} attempts")
+                    logger.info(f" PASS:  {agent_name} succeeded after {attempt + 1} attempts")
                 return result
                 
             except Exception as e:
@@ -1045,14 +1045,14 @@ class SupervisorAgent(BaseAgent):
                     execution_order = ["data_helper"]
         else:
             # Triage failed or no result - minimal flow
-            logger.info("Triage unavailable. Using minimal UVS flow: Data Helper → Reporting")
+            logger.info("Triage unavailable. Using minimal UVS flow: Data Helper  ->  Reporting")
             execution_order = ["data_helper"]
         
         # CRITICAL: ALWAYS end with Reporting (UVS - can handle ANY scenario)
         execution_order.append("reporting")
         
         # Log the dynamic workflow for debugging
-        logger.info(f"UVS Dynamic workflow determined: {' → '.join(execution_order)}")
+        logger.info(f"UVS Dynamic workflow determined: {'  ->  '.join(execution_order)}")
         logger.info(f"Workflow reasoning: data_sufficiency={triage_result.get('data_sufficiency', 'unknown') if triage_result else 'no_triage'}")
         
         return execution_order
@@ -1171,7 +1171,7 @@ class SupervisorAgent(BaseAgent):
             self._merge_child_metadata_to_parent(context, child_context, agent_name)
             self._store_agent_result(context, agent_name, result)
             
-            logger.info(f"✅ Agent {agent_name} completed successfully")
+            logger.info(f" PASS:  Agent {agent_name} completed successfully")
             return result
             
         except Exception as e:
@@ -1236,9 +1236,9 @@ class SupervisorAgent(BaseAgent):
                 "System is operating with limited capabilities.",
                 "Please try rephrasing your request or provide more specific details.",
                 "For immediate assistance, consider:",
-                "• Checking your data sources are accessible",
-                "• Ensuring your request includes necessary context",
-                "• Breaking down complex requests into simpler parts"
+                "[U+2022] Checking your data sources are accessible",
+                "[U+2022] Ensuring your request includes necessary context",
+                "[U+2022] Breaking down complex requests into simpler parts"
             ]
             
         report["metadata"] = {
@@ -1335,7 +1335,7 @@ class SupervisorAgent(BaseAgent):
         )
         
         # Agent instance factory will be configured per-request
-        logger.info("✅ Created SupervisorAgent with per-request tool dispatcher pattern")
+        logger.info(" PASS:  Created SupervisorAgent with per-request tool dispatcher pattern")
         
         return supervisor
 
@@ -1375,7 +1375,7 @@ class SupervisorAgent(BaseAgent):
         Returns:
             Agent execution result
         """
-        logger.info(f"🔄 Legacy run() method called for user {user_id}")
+        logger.info(f" CYCLE:  Legacy run() method called for user {user_id}")
         
         try:
             # Import necessary modules for context creation
@@ -1397,7 +1397,7 @@ class SupervisorAgent(BaseAgent):
             await self._emit_agent_started(user_context, user_request)
             
             # Execute using modern UserExecutionContext pattern
-            logger.info(f"🚀 Converting legacy run() to execute() with UserExecutionContext for user {user_id}")
+            logger.info(f"[U+1F680] Converting legacy run() to execute() with UserExecutionContext for user {user_id}")
             result = await self.execute(user_context, stream_updates=True)
             
             # CRITICAL BUSINESS VALUE: Send agent_completed event  
@@ -1415,7 +1415,7 @@ class SupervisorAgent(BaseAgent):
             return result
             
         except Exception as e:
-            logger.error(f"❌ Legacy run() method failed for user {user_id}: {e}")
+            logger.error(f" FAIL:  Legacy run() method failed for user {user_id}: {e}")
             
             # Send completion event even on error (best effort for user experience)
             try:
@@ -1451,13 +1451,13 @@ class SupervisorAgent(BaseAgent):
                     }
                     
                     await websocket_manager.send_to_user(context.user_id, event_data)
-                    logger.info(f"📤 Sent agent_started event for user {context.user_id}")
+                    logger.info(f"[U+1F4E4] Sent agent_started event for user {context.user_id}")
                 else:
-                    logger.warning(f"⚠️ WebSocket manager not available for agent_started event (user {context.user_id})")
+                    logger.warning(f" WARNING: [U+FE0F] WebSocket manager not available for agent_started event (user {context.user_id})")
             else:
-                logger.warning(f"⚠️ WebSocket bridge not available for agent_started event (user {context.user_id})")
+                logger.warning(f" WARNING: [U+FE0F] WebSocket bridge not available for agent_started event (user {context.user_id})")
         except Exception as e:
-            logger.error(f"❌ Failed to emit agent_started event for user {context.user_id}: {e}")
+            logger.error(f" FAIL:  Failed to emit agent_started event for user {context.user_id}: {e}")
             # Don't fail the entire operation due to WebSocket event failure
     
     async def _emit_agent_completed(self, context: UserExecutionContext, result: Any) -> None:
@@ -1494,11 +1494,11 @@ class SupervisorAgent(BaseAgent):
                     }
                     
                     await websocket_manager.send_to_user(context.user_id, event_data)
-                    logger.info(f"📤 Sent agent_completed event for user {context.user_id} (status: {status})")
+                    logger.info(f"[U+1F4E4] Sent agent_completed event for user {context.user_id} (status: {status})")
                 else:
-                    logger.warning(f"⚠️ WebSocket manager not available for agent_completed event (user {context.user_id})")
+                    logger.warning(f" WARNING: [U+FE0F] WebSocket manager not available for agent_completed event (user {context.user_id})")
             else:
-                logger.warning(f"⚠️ WebSocket bridge not available for agent_completed event (user {context.user_id})")
+                logger.warning(f" WARNING: [U+FE0F] WebSocket bridge not available for agent_completed event (user {context.user_id})")
         except Exception as e:
-            logger.error(f"❌ Failed to emit agent_completed event for user {context.user_id}: {e}")
+            logger.error(f" FAIL:  Failed to emit agent_completed event for user {context.user_id}: {e}")
             # Don't fail the entire operation due to WebSocket event failure

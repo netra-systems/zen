@@ -1,7 +1,7 @@
 """
 Mission Critical Tests for Golden Path WebSocket Authentication
 
-🚨🚨🚨 GOLDEN PATH MISSION CRITICAL 🚨🚨🚨
+ ALERT:  ALERT:  ALERT:  GOLDEN PATH MISSION CRITICAL  ALERT:  ALERT:  ALERT: 
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) - Golden Path delivers core platform value
@@ -10,11 +10,11 @@ Business Value Justification (BVJ):
 - Strategic Impact: Golden Path authentication enables end-to-end user success
 
 GOLDEN PATH CRITICAL REQUIREMENTS:
-🎯 Golden Path Flow: New user → Registration → Email verification → First successful chat
-🔐 Seamless Authentication: Zero friction authentication enabling Golden Path completion
-⚡ Sub-30 Second Journey: Complete Golden Path flow under 30 seconds
-🛡️ Business Value Delivery: Every Golden Path user receives actionable AI insights
-💎 First Impression Success: 95%+ Golden Path completion rate
+ TARGET:  Golden Path Flow: New user  ->  Registration  ->  Email verification  ->  First successful chat
+[U+1F510] Seamless Authentication: Zero friction authentication enabling Golden Path completion
+ LIGHTNING:  Sub-30 Second Journey: Complete Golden Path flow under 30 seconds
+[U+1F6E1][U+FE0F] Business Value Delivery: Every Golden Path user receives actionable AI insights
+[U+1F48E] First Impression Success: 95%+ Golden Path completion rate
 
 This test suite validates Mission Critical Golden Path Authentication:
 - Complete Golden Path user journey with seamless WebSocket authentication
@@ -24,12 +24,12 @@ This test suite validates Mission Critical Golden Path Authentication:
 - Business value measurement and Golden Path completion tracking
 
 GOLDEN PATH AUTHENTICATION FLOW:
-1. New User Registration → JWT token generation
-2. Email Verification → Account activation with WebSocket permissions
-3. First WebSocket Connection → Seamless authentication
-4. Welcome Chat Session → Real AI agent interaction
-5. Value Delivery Moment → Actionable insights received
-6. Golden Path Completion → User retention milestone achieved
+1. New User Registration  ->  JWT token generation
+2. Email Verification  ->  Account activation with WebSocket permissions
+3. First WebSocket Connection  ->  Seamless authentication
+4. Welcome Chat Session  ->  Real AI agent interaction
+5. Value Delivery Moment  ->  Actionable insights received
+6. Golden Path Completion  ->  User retention milestone achieved
 
 MISSION CRITICAL GOLDEN PATH SCENARIOS:
 New User Success:
@@ -68,7 +68,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.golden_path
 class TestGoldenPathWebSocketAuthentication:
     """
-    🎯 MISSION CRITICAL Golden Path WebSocket Authentication tests.
+     TARGET:  MISSION CRITICAL Golden Path WebSocket Authentication tests.
     
     CRITICAL: These tests ensure the Golden Path user journey succeeds
     with seamless authentication enabling $120K+ MRR value delivery.
@@ -114,27 +114,27 @@ class TestGoldenPathWebSocketAuthentication:
         from requests.exceptions import RequestException
         
         golden_path_services = [
-            ("🎯 Golden Path Auth Service", f"{cls.auth_config.auth_service_url}/health"),
-            ("💬 Golden Path Chat Backend", f"{cls.auth_config.backend_url}/health"),
-            ("🤖 Golden Path AI Agents", f"{cls.auth_config.backend_url}/api/agents/health"),
-            ("🌐 Golden Path WebSocket", f"{cls.auth_config.backend_url}/api/websocket/health")
+            (" TARGET:  Golden Path Auth Service", f"{cls.auth_config.auth_service_url}/health"),
+            ("[U+1F4AC] Golden Path Chat Backend", f"{cls.auth_config.backend_url}/health"),
+            ("[U+1F916] Golden Path AI Agents", f"{cls.auth_config.backend_url}/api/agents/health"),
+            ("[U+1F310] Golden Path WebSocket", f"{cls.auth_config.backend_url}/api/websocket/health")
         ]
         
         for service_name, service_url in golden_path_services:
             try:
                 response = requests.get(service_url, timeout=10)
                 if response.status_code >= 500:
-                    pytest.fail(f"❌ GOLDEN PATH CRITICAL FAILURE: {service_name} unhealthy - Golden Path blocked")
+                    pytest.fail(f" FAIL:  GOLDEN PATH CRITICAL FAILURE: {service_name} unhealthy - Golden Path blocked")
             except RequestException:
                 # Try base service for fallback validation
                 try:
                     base_url = "/".join(service_url.split("/")[:-1])
                     requests.get(base_url, timeout=5)
                 except RequestException as e:
-                    pytest.fail(f"❌ GOLDEN PATH CRITICAL FAILURE: {service_name} unavailable - Golden Path blocked: {e}")
+                    pytest.fail(f" FAIL:  GOLDEN PATH CRITICAL FAILURE: {service_name} unavailable - Golden Path blocked: {e}")
     
     def test_complete_golden_path_new_user_journey_with_authentication(self):
-        """🎯 GOLDEN PATH CRITICAL: Complete new user journey with seamless authentication."""
+        """ TARGET:  GOLDEN PATH CRITICAL: Complete new user journey with seamless authentication."""
         # Track Golden Path timing and success metrics
         golden_path_start = time.time()
         golden_path_milestones = []
@@ -339,21 +339,21 @@ class TestGoldenPathWebSocketAuthentication:
                     'golden_path_blocked': True
                 })
                 
-                pytest.fail(f"❌ GOLDEN PATH CRITICAL FAILURE: {e}")
+                pytest.fail(f" FAIL:  GOLDEN PATH CRITICAL FAILURE: {e}")
         
         # Execute complete Golden Path journey
         golden_path_result = asyncio.run(execute_complete_golden_path_journey())
         
-        # 🎯 GOLDEN PATH CRITICAL VALIDATIONS
+        #  TARGET:  GOLDEN PATH CRITICAL VALIDATIONS
         assert golden_path_result is not None, "Golden Path execution must complete"
-        assert golden_path_result['golden_path_success'] is True, "❌ GOLDEN PATH FAILURE: Complete journey must succeed"
+        assert golden_path_result['golden_path_success'] is True, " FAIL:  GOLDEN PATH FAILURE: Complete journey must succeed"
         
         # Performance validation - sub-30 second requirement
         total_time = golden_path_result['total_time_ms']
-        assert total_time < 30000, f"❌ GOLDEN PATH PERFORMANCE FAILURE: {total_time}ms exceeds 30s limit"
+        assert total_time < 30000, f" FAIL:  GOLDEN PATH PERFORMANCE FAILURE: {total_time}ms exceeds 30s limit"
         
         # Value delivery validation
-        assert golden_path_result['value_delivered'] is True, "❌ GOLDEN PATH VALUE FAILURE: AI insights must be delivered"
+        assert golden_path_result['value_delivered'] is True, " FAIL:  GOLDEN PATH VALUE FAILURE: AI insights must be delivered"
         
         # Milestone validation
         milestones = golden_path_result['milestones']
@@ -361,16 +361,16 @@ class TestGoldenPathWebSocketAuthentication:
         
         for critical_milestone in critical_milestones:
             milestone_data = next((m for m in milestones if m['milestone'] == critical_milestone), None)
-            assert milestone_data is not None, f"❌ GOLDEN PATH MISSING: {critical_milestone} milestone"
-            assert milestone_data['success'] is True, f"❌ GOLDEN PATH FAILURE: {critical_milestone} failed"
+            assert milestone_data is not None, f" FAIL:  GOLDEN PATH MISSING: {critical_milestone} milestone"
+            assert milestone_data['success'] is True, f" FAIL:  GOLDEN PATH FAILURE: {critical_milestone} failed"
         
         # Authentication performance validation
         auth_milestone = next((m for m in milestones if m['milestone'] == 'websocket_authentication'), None)
         auth_time = auth_milestone['duration_ms']
-        assert auth_time < 5000, f"❌ GOLDEN PATH AUTH SLOW: {auth_time}ms exceeds 5s limit"
+        assert auth_time < 5000, f" FAIL:  GOLDEN PATH AUTH SLOW: {auth_time}ms exceeds 5s limit"
     
     def test_golden_path_authentication_zero_friction_requirement(self):
-        """🛡️ GOLDEN PATH CRITICAL: Zero friction authentication requirement."""
+        """[U+1F6E1][U+FE0F] GOLDEN PATH CRITICAL: Zero friction authentication requirement."""
         # Create new user simulating Golden Path entry
         friction_test_user = self.auth_helper.create_authenticated_user(
             email=f'friction_test_user_{int(time.time())}@zero-friction.com',
@@ -480,11 +480,11 @@ class TestGoldenPathWebSocketAuthentication:
         friction_result = asyncio.run(test_zero_friction_authentication())
         
         # GOLDEN PATH zero friction validations
-        assert friction_result['successful_attempts'] == 3, "❌ GOLDEN PATH FRICTION: All authentication attempts must succeed"
+        assert friction_result['successful_attempts'] == 3, " FAIL:  GOLDEN PATH FRICTION: All authentication attempts must succeed"
         
         # Zero friction performance requirements
         avg_time_to_value = friction_result['average_time_to_value']
-        assert avg_time_to_value < 3000, f"❌ GOLDEN PATH FRICTION: Average time to value {avg_time_to_value}ms exceeds 3s limit"
+        assert avg_time_to_value < 3000, f" FAIL:  GOLDEN PATH FRICTION: Average time to value {avg_time_to_value}ms exceeds 3s limit"
         
         # Validate each attempt meets zero friction requirement
         for measurement in friction_result['friction_measurements']:
@@ -494,12 +494,12 @@ class TestGoldenPathWebSocketAuthentication:
                 auth_time = measurement['auth_time_ms']
                 total_time = measurement.get('total_time_to_value_ms', 0)
                 
-                assert auth_time < 2000, f"❌ FRICTION FAILURE Attempt {attempt}: Auth time {auth_time}ms exceeds 2s"
-                assert total_time < 3000, f"❌ FRICTION FAILURE Attempt {attempt}: Time to value {total_time}ms exceeds 3s"
-                assert measurement.get('zero_friction_achieved') is True, f"❌ FRICTION FAILURE Attempt {attempt}: Zero friction not achieved"
+                assert auth_time < 2000, f" FAIL:  FRICTION FAILURE Attempt {attempt}: Auth time {auth_time}ms exceeds 2s"
+                assert total_time < 3000, f" FAIL:  FRICTION FAILURE Attempt {attempt}: Time to value {total_time}ms exceeds 3s"
+                assert measurement.get('zero_friction_achieved') is True, f" FAIL:  FRICTION FAILURE Attempt {attempt}: Zero friction not achieved"
     
     def test_golden_path_business_value_delivery_measurement(self):
-        """💎 GOLDEN PATH CRITICAL: Business value delivery measurement."""
+        """[U+1F48E] GOLDEN PATH CRITICAL: Business value delivery measurement."""
         # Create Golden Path user for value measurement
         value_user = self.auth_helper.create_authenticated_user(
             email=f'value_measurement_user_{int(time.time())}@value.com',
@@ -653,7 +653,7 @@ class TestGoldenPathWebSocketAuthentication:
                     }
                     
             except Exception as e:
-                pytest.fail(f"❌ GOLDEN PATH VALUE FAILURE: Business value measurement failed: {e}")
+                pytest.fail(f" FAIL:  GOLDEN PATH VALUE FAILURE: Business value measurement failed: {e}")
         
         # Execute business value measurement
         value_result = asyncio.run(test_business_value_delivery_measurement())
@@ -662,16 +662,16 @@ class TestGoldenPathWebSocketAuthentication:
         value_metrics = value_result['value_metrics']
         
         # Core value delivery requirements
-        assert value_metrics['authentication_enabled_chat'] is True, "❌ VALUE FAILURE: Authentication must enable chat access"
-        assert value_metrics['ai_insights_delivered'] is True, "❌ VALUE FAILURE: AI insights must be delivered"
-        assert value_result['golden_path_value_delivered'] is True, "❌ VALUE FAILURE: Golden Path value not delivered"
+        assert value_metrics['authentication_enabled_chat'] is True, " FAIL:  VALUE FAILURE: Authentication must enable chat access"
+        assert value_metrics['ai_insights_delivered'] is True, " FAIL:  VALUE FAILURE: AI insights must be delivered"
+        assert value_result['golden_path_value_delivered'] is True, " FAIL:  VALUE FAILURE: Golden Path value not delivered"
         
         # Business impact scoring
         business_impact_score = value_result['business_impact_score']
-        assert business_impact_score >= 3, f"❌ VALUE FAILURE: Business impact score {business_impact_score} below minimum 3"
+        assert business_impact_score >= 3, f" FAIL:  VALUE FAILURE: Business impact score {business_impact_score} below minimum 3"
         
         # Value delivery success
-        assert value_result['value_delivery_success'] is True, "❌ VALUE FAILURE: Golden Path value delivery unsuccessful"
+        assert value_result['value_delivery_success'] is True, " FAIL:  VALUE FAILURE: Golden Path value delivery unsuccessful"
         
         # Validate specific business value events
         business_events = value_result['business_value_events']
@@ -679,14 +679,14 @@ class TestGoldenPathWebSocketAuthentication:
         
         for critical_event in critical_events:
             event_found = any(e['event'] == critical_event for e in business_events)
-            assert event_found is True, f"❌ VALUE FAILURE: Critical business value event '{critical_event}' not delivered"
+            assert event_found is True, f" FAIL:  VALUE FAILURE: Critical business value event '{critical_event}' not delivered"
         
         # All business value events must show actual value delivery
         for event in business_events:
-            assert event['value_delivered'] is True, f"❌ VALUE FAILURE: Event {event['event']} did not deliver value"
+            assert event['value_delivered'] is True, f" FAIL:  VALUE FAILURE: Event {event['event']} did not deliver value"
     
     def test_golden_path_95_percent_completion_rate_requirement(self):
-        """📊 GOLDEN PATH CRITICAL: 95% completion rate requirement validation."""
+        """ CHART:  GOLDEN PATH CRITICAL: 95% completion rate requirement validation."""
         # Simulate multiple Golden Path attempts to measure completion rate
         golden_path_attempts = 10  # Simulate 10 users for completion rate testing
         completion_results = []
@@ -852,12 +852,12 @@ class TestGoldenPathWebSocketAuthentication:
         completion_rate = (len(successful_completions) / total_attempts) * 100
         
         # GOLDEN PATH 95% completion rate validation
-        assert completion_rate >= 95.0, f"❌ GOLDEN PATH COMPLETION FAILURE: {completion_rate}% completion rate below 95% requirement"
+        assert completion_rate >= 95.0, f" FAIL:  GOLDEN PATH COMPLETION FAILURE: {completion_rate}% completion rate below 95% requirement"
         
         # Performance validation for successful completions
         for success in successful_completions:
             duration = success['duration_ms']
-            assert duration < 25000, f"❌ GOLDEN PATH PERFORMANCE: Attempt {success['attempt_id']} took {duration}ms (limit: 25s)"
+            assert duration < 25000, f" FAIL:  GOLDEN PATH PERFORMANCE: Attempt {success['attempt_id']} took {duration}ms (limit: 25s)"
         
         # Milestone analysis for failed attempts
         failed_attempts = [r for r in completion_results if isinstance(r, dict) and not r.get('completion_success')]
@@ -872,12 +872,12 @@ class TestGoldenPathWebSocketAuthentication:
             # No single failure point should cause more than 5% failures
             for failure_point, count in failure_points.items():
                 failure_rate = (count / total_attempts) * 100
-                assert failure_rate <= 5.0, f"❌ GOLDEN PATH FAILURE PATTERN: {failure_point} causes {failure_rate}% failures (limit: 5%)"
+                assert failure_rate <= 5.0, f" FAIL:  GOLDEN PATH FAILURE PATTERN: {failure_point} causes {failure_rate}% failures (limit: 5%)"
         
         # Validate authentication success rate specifically (should be 100%)
         auth_failures = [r for r in completion_results if isinstance(r, dict) and r.get('failed_at') == 'authentication']
         auth_failure_rate = (len(auth_failures) / total_attempts) * 100
-        assert auth_failure_rate == 0.0, f"❌ GOLDEN PATH AUTH FAILURE: {auth_failure_rate}% authentication failures not acceptable"
+        assert auth_failure_rate == 0.0, f" FAIL:  GOLDEN PATH AUTH FAILURE: {auth_failure_rate}% authentication failures not acceptable"
 
 
 if __name__ == "__main__":

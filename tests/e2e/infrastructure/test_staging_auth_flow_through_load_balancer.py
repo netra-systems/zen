@@ -532,28 +532,28 @@ if __name__ == "__main__":
         
         try:
             await test_instance.test_oauth_login_flow_through_load_balancer()
-            print("✅ OAuth login flow through load balancer working")
+            print(" PASS:  OAuth login flow through load balancer working")
         except AssertionError as e:
-            print(f"❌ OAuth flow failures:\n{e}")
+            print(f" FAIL:  OAuth flow failures:\n{e}")
             return False
         
         try:
             await test_instance.test_jwt_token_authentication_through_load_balancer()
-            print("✅ JWT token authentication through load balancer working")
+            print(" PASS:  JWT token authentication through load balancer working")
         except AssertionError as e:
-            print(f"❌ JWT authentication failures:\n{e}")
+            print(f" FAIL:  JWT authentication failures:\n{e}")
             return False
         
         try:
             await test_instance.test_session_management_through_load_balancer()
-            print("✅ Session management through load balancer working")
+            print(" PASS:  Session management through load balancer working")
         except AssertionError as e:
-            print(f"❌ Session management failures:\n{e}")
+            print(f" FAIL:  Session management failures:\n{e}")
             return False
         
         return True
     
     if asyncio.run(run_tests()):
-        print("✅ All auth flow through load balancer tests passed!")
+        print(" PASS:  All auth flow through load balancer tests passed!")
     else:
         exit(1)

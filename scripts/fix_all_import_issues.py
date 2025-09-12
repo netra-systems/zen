@@ -350,9 +350,9 @@ def main():
                 pass
         
         if remaining == 0:
-            print("  ✓ All relative imports have been successfully converted!")
+            print("  [U+2713] All relative imports have been successfully converted!")
         else:
-            print(f"  ✗ {remaining} files still have relative imports")
+            print(f"  [U+2717] {remaining} files still have relative imports")
             print("    These may need manual intervention")
 
 

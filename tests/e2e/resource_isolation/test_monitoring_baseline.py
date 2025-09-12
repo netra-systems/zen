@@ -114,7 +114,7 @@ async def test_per_tenant_resource_monitoring_baseline(resource_isolation_suite,
         cpu_increase = post_workload.get('avg_cpu_percent', 0) - baseline.get('avg_cpu_percent', 0)
         assert cpu_increase >= 0, f"CPU usage should increase with workload for {tenant_id}"
         
-        logger.info(f"✓ Resource monitoring validated for {tenant_id}")
+        logger.info(f"[U+2713] Resource monitoring validated for {tenant_id}")
     
     # Phase 5: Validate no resource violations occurred
     logger.info("Phase 5: Validating no resource violations occurred")

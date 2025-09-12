@@ -456,7 +456,7 @@ class DatabaseTestUtilities:
             
             results.append(scenario_result)
             
-            logger.info(f"Rollback scenario {scenario_name}: {'✓' if scenario_result['overall_success'] else '✗'}")
+            logger.info(f"Rollback scenario {scenario_name}: {'[U+2713]' if scenario_result['overall_success'] else '[U+2717]'}")
         
         return results
     
@@ -645,7 +645,7 @@ class DatabaseTestUtilities:
                 logger.warning(f"Recovery test for {scenario} failed: {e}")
             
             recovery_results[scenario] = recovery_success
-            logger.info(f"Recovery test {scenario}: {'✓' if recovery_success else '✗'}")
+            logger.info(f"Recovery test {scenario}: {'[U+2713]' if recovery_success else '[U+2717]'}")
         
         return recovery_results
     

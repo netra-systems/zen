@@ -16,7 +16,7 @@ GOLDEN PATH P0 INTEGRATION POINTS TESTED:
 3. Multi-user isolation during authentication (prevents data leakage)
 4. OAuth flow completion and token refresh mechanisms
 5. Authentication error handling and recovery patterns
-6. Cross-service authentication propagation (auth service → backend)
+6. Cross-service authentication propagation (auth service  ->  backend)
 7. Session state synchronization between services
 8. Authentication middleware order validation
 9. User profile and preferences loading
@@ -172,7 +172,7 @@ class TestUserAuthenticationFlowComprehensive(
             except aiohttp.ClientConnectorError:
                 logger.warning("Backend service not available for API test - acceptable in unit testing")
         
-        logger.info(f"✅ JWT validation and context creation completed in {total_time:.2f}s")
+        logger.info(f" PASS:  JWT validation and context creation completed in {total_time:.2f}s")
         self.assert_business_value_delivered(
             {"jwt_valid": True, "context_created": True, "auth_time": total_time},
             "authentication"
@@ -256,7 +256,7 @@ class TestUserAuthenticationFlowComprehensive(
             f"Session creation must be fast: {session_creation_time:.2f}s"
         
         total_time = time.time() - start_time
-        logger.info(f"✅ Session management test completed in {total_time:.2f}s")
+        logger.info(f" PASS:  Session management test completed in {total_time:.2f}s")
         self.assert_business_value_delivered(
             {
                 "session_created": True,
@@ -376,7 +376,7 @@ class TestUserAuthenticationFlowComprehensive(
             assert validation["email"] == user.email, f"User {i} token validation email correct"
         
         total_time = time.time() - start_time
-        logger.info(f"✅ Multi-user isolation test completed in {total_time:.2f}s")
+        logger.info(f" PASS:  Multi-user isolation test completed in {total_time:.2f}s")
         logger.info(f"   Tested {user_count} concurrent users with complete isolation")
         
         self.assert_business_value_delivered(
@@ -482,7 +482,7 @@ class TestUserAuthenticationFlowComprehensive(
             "Refreshed token must be stored in session"
         
         total_time = time.time() - start_time
-        logger.info(f"✅ OAuth flow and token refresh test completed in {total_time:.2f}s")
+        logger.info(f" PASS:  OAuth flow and token refresh test completed in {total_time:.2f}s")
         
         self.assert_business_value_delivered(
             {
@@ -529,11 +529,11 @@ class TestUserAuthenticationFlowComprehensive(
                     f"Invalid token {i} should include error message"
                 
                 error_cases_handled += 1
-                logger.info(f"✅ Invalid token case {i}: {validation_result['error']}")
+                logger.info(f" PASS:  Invalid token case {i}: {validation_result['error']}")
                 
             except Exception as e:
                 # Some error cases may raise exceptions - this is acceptable
-                logger.info(f"⚠️ Invalid token case {i} raised exception: {e}")
+                logger.info(f" WARNING: [U+FE0F] Invalid token case {i} raised exception: {e}")
                 error_cases_handled += 1
         
         assert error_cases_handled == len(invalid_tokens), \
@@ -553,11 +553,11 @@ class TestUserAuthenticationFlowComprehensive(
             
             # Should get fallback token or handle error gracefully
             assert result is not None, "Should provide fallback authentication or error handling"
-            logger.info("✅ Network failure handled with fallback authentication")
+            logger.info(" PASS:  Network failure handled with fallback authentication")
             
         except Exception as e:
             # Connection errors are acceptable - system should log and handle gracefully
-            logger.info(f"✅ Network failure handled with exception: {e}")
+            logger.info(f" PASS:  Network failure handled with exception: {e}")
             
         finally:
             # Restore original URL
@@ -606,13 +606,13 @@ class TestUserAuthenticationFlowComprehensive(
                     open_timeout=5.0
                 )
                 
-            logger.info("✅ WebSocket authentication error handled correctly")
+            logger.info(" PASS:  WebSocket authentication error handled correctly")
             
         except Exception as e:
-            logger.info(f"✅ WebSocket authentication failure handled: {e}")
+            logger.info(f" PASS:  WebSocket authentication failure handled: {e}")
         
         total_time = time.time() - start_time
-        logger.info(f"✅ Authentication error handling test completed in {total_time:.2f}s")
+        logger.info(f" PASS:  Authentication error handling test completed in {total_time:.2f}s")
         logger.info(f"   Handled {error_cases_handled} error scenarios gracefully")
         
         self.assert_business_value_delivered(
@@ -630,7 +630,7 @@ class TestUserAuthenticationFlowComprehensive(
     @pytest.mark.asyncio
     async def test_cross_service_authentication_propagation(self, real_services_fixture):
         """
-        Test P1: Cross-service authentication propagation (auth service → backend).
+        Test P1: Cross-service authentication propagation (auth service  ->  backend).
         
         Business Impact: Microservices must trust each other's authentication.
         Auth propagation failures = broken user experience = frustrated customers.
@@ -758,14 +758,14 @@ class TestUserAuthenticationFlowComprehensive(
                     assert response.status in [200, 401, 403, 404], \
                         f"Backend should process auth headers: {response.status}"
                     
-                    logger.info(f"✅ Cross-service API call received response: {response.status}")
+                    logger.info(f" PASS:  Cross-service API call received response: {response.status}")
                     
             except aiohttp.ClientConnectorError:
                 logger.warning("Backend service not available - acceptable in isolated testing")
                 # This is acceptable in integration testing where backend might not be running
         
         total_time = time.time() - start_time
-        logger.info(f"✅ Cross-service authentication test completed in {total_time:.2f}s")
+        logger.info(f" PASS:  Cross-service authentication test completed in {total_time:.2f}s")
         
         self.assert_business_value_delivered(
             {
@@ -937,7 +937,7 @@ class TestUserAuthenticationFlowComprehensive(
                     f"{service} should recognize valid auth session"
         
         total_time = time.time() - start_time
-        logger.info(f"✅ Session synchronization test completed in {total_time:.2f}s")
+        logger.info(f" PASS:  Session synchronization test completed in {total_time:.2f}s")
         logger.info(f"   Tested synchronization across {len(services)} services")
         
         self.assert_business_value_delivered(
@@ -1187,7 +1187,7 @@ class TestUserAuthenticationFlowComprehensive(
             "Authorization middleware should not execute after JWT failure"
         
         total_time = time.time() - start_time
-        logger.info(f"✅ Middleware order validation test completed in {total_time:.2f}s")
+        logger.info(f" PASS:  Middleware order validation test completed in {total_time:.2f}s")
         logger.info(f"   Validated execution order: {' -> '.join(actual_order)}")
         
         self.assert_business_value_delivered(
@@ -1269,7 +1269,7 @@ class TestUserAuthenticationFlowComprehensive(
                     theme = EXCLUDED.theme
             """, profile_user["user_id"], "America/New_York", "en-US", "dark", datetime.now(timezone.utc))
             
-            logger.info("✅ User profile and preferences stored in database")
+            logger.info(" PASS:  User profile and preferences stored in database")
             
         except Exception as e:
             logger.warning(f"Database tables may not exist in test environment: {e}")
@@ -1410,7 +1410,7 @@ class TestUserAuthenticationFlowComprehensive(
             f"Profile loading must be fast: {profile_load_time:.2f}s (source: {load_source})"
         
         total_time = time.time() - start_time
-        logger.info(f"✅ User profile and preferences test completed in {total_time:.2f}s")
+        logger.info(f" PASS:  User profile and preferences test completed in {total_time:.2f}s")
         logger.info(f"   Profile loaded from {load_source} in {profile_load_time:.2f}s")
         
         self.assert_business_value_delivered(
@@ -1457,7 +1457,7 @@ class TestUserAuthenticationFlowComprehensive(
         assert initial_validation["valid"], "Short-expiry token must initially be valid"
         
         # Wait for token to expire
-        logger.info("⏳ Waiting for token expiration (3 seconds)...")
+        logger.info("[U+23F3] Waiting for token expiration (3 seconds)...")
         await asyncio.sleep(3.5)
         
         # Verify token has expired
@@ -1495,7 +1495,7 @@ class TestUserAuthenticationFlowComprehensive(
         assert initial_session["active"], "Session must initially be active"
         
         # Wait for session timeout
-        logger.info("⏳ Waiting for session timeout (2 seconds)...")
+        logger.info("[U+23F3] Waiting for session timeout (2 seconds)...")
         await asyncio.sleep(2.5)
         
         # Verify session has expired
@@ -1535,7 +1535,7 @@ class TestUserAuthenticationFlowComprehensive(
             )
             
             # If connection succeeds, test timeout handling
-            logger.info("✅ WebSocket connection established for timeout test")
+            logger.info(" PASS:  WebSocket connection established for timeout test")
             
             # Send test message
             test_message = {
@@ -1546,7 +1546,7 @@ class TestUserAuthenticationFlowComprehensive(
             await websocket_conn.send(json.dumps(test_message))
             
             # Wait for token to expire
-            logger.info("⏳ Waiting for WebSocket token expiration...")
+            logger.info("[U+23F3] Waiting for WebSocket token expiration...")
             await asyncio.sleep(6.5)
             
             # Try to send another message after token expiration
@@ -1558,9 +1558,9 @@ class TestUserAuthenticationFlowComprehensive(
             try:
                 await websocket_conn.send(json.dumps(expired_message))
                 # May still work if server doesn't immediately check token expiration
-                logger.info("⚠️ WebSocket message sent with expired token (server may not check immediately)")
+                logger.info(" WARNING: [U+FE0F] WebSocket message sent with expired token (server may not check immediately)")
             except websockets.exceptions.ConnectionClosed:
-                logger.info("✅ WebSocket connection closed due to token expiration")
+                logger.info(" PASS:  WebSocket connection closed due to token expiration")
             
             # Close connection
             await websocket_conn.close()
@@ -1570,7 +1570,7 @@ class TestUserAuthenticationFlowComprehensive(
                 asyncio.TimeoutError,
                 ConnectionError, OSError) as e:
             # WebSocket connection failures are acceptable in unit testing
-            logger.info(f"✅ WebSocket timeout test handled connection error gracefully: {e}")
+            logger.info(f" PASS:  WebSocket timeout test handled connection error gracefully: {e}")
         
         # Test Case 4: Token refresh simulation
         refresh_user = await create_test_user_with_auth(
@@ -1657,12 +1657,12 @@ class TestUserAuthenticationFlowComprehensive(
             assert result is None, f"Cleanup session {i} must be expired and cleaned up"
         
         total_time = time.time() - start_time
-        logger.info(f"✅ Authentication timeout and expiration test completed in {total_time:.2f}s")
-        logger.info("   ✅ Token expiration detection working")
-        logger.info("   ✅ Session timeout handling working")
-        logger.info("   ✅ WebSocket timeout handling graceful")
-        logger.info("   ✅ Token refresh mechanism working")
-        logger.info("   ✅ Expired session cleanup working")
+        logger.info(f" PASS:  Authentication timeout and expiration test completed in {total_time:.2f}s")
+        logger.info("    PASS:  Token expiration detection working")
+        logger.info("    PASS:  Session timeout handling working")
+        logger.info("    PASS:  WebSocket timeout handling graceful")
+        logger.info("    PASS:  Token refresh mechanism working")
+        logger.info("    PASS:  Expired session cleanup working")
         
         self.assert_business_value_delivered(
             {

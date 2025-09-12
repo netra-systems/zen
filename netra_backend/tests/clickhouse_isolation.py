@@ -14,7 +14,7 @@ ClickHouse-specific isolation features:
 - MergeTree engine optimization
 - Test data generation
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 import random

@@ -245,14 +245,14 @@ class TestSSotAgentFactoryValidation:
         - Factory methods require proper user context
         - No service boundary violations detected
         """
-        logger.info("🧪 UNIT TEST: AgentRegistry SSOT compliance validation")
+        logger.info("[U+1F9EA] UNIT TEST: AgentRegistry SSOT compliance validation")
         
         # Validate AgentRegistry class
         validation_result = self.validator.validate_factory_class(AgentRegistry)
         
         # Assert SSOT compliance
         assert validation_result['is_ssot_compliant'], (
-            f"🚨 AGENT REGISTRY SSOT VIOLATION\n"
+            f" ALERT:  AGENT REGISTRY SSOT VIOLATION\n"
             f"Class: {validation_result['class_name']}\n"
             f"Violations: {validation_result['violations']}\n"
             f"BUSINESS IMPACT: Core agent factory not following SSOT patterns"
@@ -261,16 +261,16 @@ class TestSSotAgentFactoryValidation:
         # Validate no fallback factory patterns
         fallback_violations = [v for v in validation_result['violations'] if 'FALLBACK_FACTORY' in v]
         assert len(fallback_violations) == 0, (
-            f"🚨 FALLBACK FACTORY PATTERNS in AgentRegistry: {fallback_violations}"
+            f" ALERT:  FALLBACK FACTORY PATTERNS in AgentRegistry: {fallback_violations}"
         )
         
         # Validate no boundary violations
         boundary_violations = [v for v in validation_result['violations'] if 'BOUNDARY_VIOLATION' in v]
         assert len(boundary_violations) == 0, (
-            f"🚨 SERVICE BOUNDARY VIOLATIONS in AgentRegistry: {boundary_violations}"
+            f" ALERT:  SERVICE BOUNDARY VIOLATIONS in AgentRegistry: {boundary_violations}"
         )
         
-        logger.success("✅ AgentRegistry SSOT compliance validated")
+        logger.success(" PASS:  AgentRegistry SSOT compliance validated")
     
     def test_agent_creation_requires_typed_context(self):
         """
@@ -284,7 +284,7 @@ class TestSSotAgentFactoryValidation:
         - No agents created without proper user isolation
         - Context validation prevents fallback scenarios
         """
-        logger.info("🧪 UNIT TEST: Agent creation requires typed context")
+        logger.info("[U+1F9EA] UNIT TEST: Agent creation requires typed context")
         
         # Create proper user context
         user_id = self.id_generator.generate_user_id()
@@ -329,13 +329,13 @@ class TestSSotAgentFactoryValidation:
                 validation_result = self.validator.validate_agent_creation(agent, creation_context)
                 
                 assert validation_result['is_ssot_creation'], (
-                    f"🚨 AGENT CREATION VALIDATION FAILED\n"
+                    f" ALERT:  AGENT CREATION VALIDATION FAILED\n"
                     f"Agent type: {validation_result['agent_type']}\n"
                     f"Violations: {validation_result['violations']}\n"
                     f"BUSINESS IMPACT: Agent created without proper SSOT context"
                 )
                 
-                logger.success("✅ Agent creation with typed context validated")
+                logger.success(" PASS:  Agent creation with typed context validated")
         
         except Exception as e:
             # If AgentRegistry doesn't exist or has different interface, that's acceptable
@@ -354,7 +354,7 @@ class TestSSotAgentFactoryValidation:
         - No emergency agent factory classes
         - No mock agent factory classes in production code
         """
-        logger.info("🧪 UNIT TEST: No fallback agent factories in codebase")
+        logger.info("[U+1F9EA] UNIT TEST: No fallback agent factories in codebase")
         
         # This test would ideally scan the codebase for factory classes
         # For now, we'll validate the known patterns
@@ -377,11 +377,11 @@ class TestSSotAgentFactoryValidation:
                 detected_violations.append(pattern)
         
         assert len(detected_violations) == 0, (
-            f"🚨 FORBIDDEN FACTORY PATTERNS DETECTED: {detected_violations}\n"
+            f" ALERT:  FORBIDDEN FACTORY PATTERNS DETECTED: {detected_violations}\n"
             f"BUSINESS IMPACT: Fallback factories violate SSOT architecture"
         )
         
-        logger.success("✅ No fallback agent factories detected")
+        logger.success(" PASS:  No fallback agent factories detected")
     
     def test_agent_instantiation_follows_factory_pattern(self):
         """
@@ -395,7 +395,7 @@ class TestSSotAgentFactoryValidation:
         - No direct class instantiation bypassing factories
         - Factory methods enforce SSOT validation
         """
-        logger.info("🧪 UNIT TEST: Agent instantiation follows factory patterns")
+        logger.info("[U+1F9EA] UNIT TEST: Agent instantiation follows factory patterns")
         
         # Test that direct agent instantiation is detected as violation
         class TestDirectInstantiation:
@@ -420,11 +420,11 @@ class TestSSotAgentFactoryValidation:
         
         # We expect violations to be detected for direct instantiation
         assert len(boundary_violations) > 0, (
-            "🚨 VALIDATOR FAILURE: Direct agent instantiation not detected as violation"
+            " ALERT:  VALIDATOR FAILURE: Direct agent instantiation not detected as violation"
         )
         
-        logger.info(f"✅ Boundary violations correctly detected: {len(boundary_violations)}")
-        logger.success("✅ Factory pattern validation working correctly")
+        logger.info(f" PASS:  Boundary violations correctly detected: {len(boundary_violations)}")
+        logger.success(" PASS:  Factory pattern validation working correctly")
     
     def test_agent_context_isolation_validation(self):
         """
@@ -438,7 +438,7 @@ class TestSSotAgentFactoryValidation:
         - No shared context between different users
         - Context validation prevents cross-user contamination
         """
-        logger.info("🧪 UNIT TEST: Agent context isolation validation")
+        logger.info("[U+1F9EA] UNIT TEST: Agent context isolation validation")
         
         # Create two different user contexts
         user1_id = self.id_generator.generate_user_id()
@@ -490,10 +490,10 @@ class TestSSotAgentFactoryValidation:
         
         # Validate contexts are actually different
         assert agent1.user_context.user_id != agent2.user_context.user_id, (
-            "🚨 CONTEXT ISOLATION FAILURE: Agents have same user context"
+            " ALERT:  CONTEXT ISOLATION FAILURE: Agents have same user context"
         )
         
-        logger.success("✅ Agent context isolation validation passed")
+        logger.success(" PASS:  Agent context isolation validation passed")
 
 
 if __name__ == "__main__":
@@ -509,9 +509,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--pytest":
         pytest.main([__file__, "-v", "--tb=short"])
     else:
-        print("🧪 UNIT: SSOT Agent Factory Validation Tests")
-        print("📋 These tests ensure agent factories follow SSOT patterns")
-        print("🚀 Starting test execution...")
+        print("[U+1F9EA] UNIT: SSOT Agent Factory Validation Tests")
+        print("[U+1F4CB] These tests ensure agent factories follow SSOT patterns")
+        print("[U+1F680] Starting test execution...")
         
         exit_code = pytest.main([
             __file__,
@@ -523,8 +523,8 @@ if __name__ == "__main__":
         ])
         
         if exit_code == 0:
-            print("✅ ALL TESTS PASSED: Agent factories follow SSOT patterns")
+            print(" PASS:  ALL TESTS PASSED: Agent factories follow SSOT patterns")
         else:
-            print("🚨 TEST FAILURES: SSOT violations detected in agent factories")
+            print(" ALERT:  TEST FAILURES: SSOT violations detected in agent factories")
             
         sys.exit(exit_code)

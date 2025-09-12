@@ -144,8 +144,8 @@ This consolidation reduced {metrics['total_files']} core test files into 1 compr
 - **Security Validation**: Input validation, rate limiting, and protection patterns
 
 ## Improvements Achieved
-- **File Reduction**: {metrics['total_files']} → 1 ({100 - (1/max(metrics['total_files'], 1) * 100):.1f}% reduction)
-- **Function Optimization**: {metrics['total_functions']} → ~60 ({100 - (60/max(metrics['total_functions'], 1) * 100):.1f}% reduction)
+- **File Reduction**: {metrics['total_files']}  ->  1 ({100 - (1/max(metrics['total_files'], 1) * 100):.1f}% reduction)
+- **Function Optimization**: {metrics['total_functions']}  ->  ~60 ({100 - (60/max(metrics['total_functions'], 1) * 100):.1f}% reduction)
 - **Eliminated Duplicates**: {metrics['duplicate_patterns']} duplicate patterns removed
 - **Removed Stubs**: {metrics['stub_functions']} stub functions eliminated
 

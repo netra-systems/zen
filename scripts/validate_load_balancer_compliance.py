@@ -111,7 +111,7 @@ class ComplianceReportGenerator:
         report_lines.append("")
         
         # Compliance Status
-        status_emoji = "✅" if compliance_results['is_compliant'] else "❌"
+        status_emoji = " PASS: " if compliance_results['is_compliant'] else " FAIL: "
         report_lines.append(f"## Overall Status: {status_emoji} {'COMPLIANT' if compliance_results['is_compliant'] else 'NON-COMPLIANT'}")
         report_lines.append("")
         
@@ -136,7 +136,7 @@ class ComplianceReportGenerator:
         
         # Violations Details
         if violations:
-            report_lines.append("## ❌ Violations Found")
+            report_lines.append("##  FAIL:  Violations Found")
             report_lines.append("")
             report_lines.append("| File | Line | Violation | Severity |")
             report_lines.append("|------|------|-----------|----------|")
@@ -145,14 +145,14 @@ class ComplianceReportGenerator:
                 report_lines.append(f"| {violation.file_path} | {violation.line_number} | `{violation.violation_text}` | {violation.severity} |")
             
             report_lines.append("")
-            report_lines.append("### 🔧 Remediation")
+            report_lines.append("### [U+1F527] Remediation")
             report_lines.append("")
             report_lines.append("Run the migration script to fix violations:")
             report_lines.append("```bash")
             report_lines.append("python scripts/migrate_cloud_run_urls.py --execute")
             report_lines.append("```")
         else:
-            report_lines.append("## ✅ No Violations Found")
+            report_lines.append("##  PASS:  No Violations Found")
             report_lines.append("")
             report_lines.append("All endpoints are correctly using load balancer URLs.")
         
@@ -165,7 +165,7 @@ class ComplianceReportGenerator:
         report_lines.append("|---------|-----|--------|---------------|")
         
         for service, result in connectivity_results['results'].items():
-            status_emoji = "✅" if result['accessible'] else "❌"
+            status_emoji = " PASS: " if result['accessible'] else " FAIL: "
             response_time = f"{result.get('response_time', 0):.0f}ms" if result.get('response_time') else "N/A"
             report_lines.append(f"| {service.title()} | {result['url']} | {status_emoji} | {response_time} |")
         
@@ -189,37 +189,37 @@ class ComplianceReportGenerator:
 
 async def main():
     """Main validation function"""
-    logger.info("🔍 Starting Load Balancer Endpoint Compliance Validation...")
+    logger.info(" SEARCH:  Starting Load Balancer Endpoint Compliance Validation...")
     logger.info("=" * 60)
     
     exit_code = 0
     
     try:
         # Step 1: Codebase Compliance Scan
-        logger.info("📁 Scanning codebase for Cloud Run URL violations...")
+        logger.info("[U+1F4C1] Scanning codebase for Cloud Run URL violations...")
         compliance_validator = LoadBalancerComplianceValidator()
         compliance_results = compliance_validator.scan_codebase()
         
         if compliance_results['is_compliant']:
-            logger.info("✅ Codebase compliance: PASSED")
+            logger.info(" PASS:  Codebase compliance: PASSED")
         else:
-            logger.error("❌ Codebase compliance: FAILED")
+            logger.error(" FAIL:  Codebase compliance: FAILED")
             logger.error(f"Found {compliance_results['total_violations']} violations in {compliance_results['violation_files']} files")
             exit_code = 1
         
         # Step 2: Connectivity Test
-        logger.info("🌐 Testing load balancer endpoint connectivity...")
+        logger.info("[U+1F310] Testing load balancer endpoint connectivity...")
         connectivity_validator = LoadBalancerConnectivityValidator()
         connectivity_results = await connectivity_validator.test_load_balancer_connectivity()
         
         if connectivity_results['all_accessible']:
-            logger.info("✅ Connectivity test: PASSED")
+            logger.info(" PASS:  Connectivity test: PASSED")
         else:
-            logger.warning(f"⚠️  Connectivity test: PARTIAL ({connectivity_results['accessible_services']}/{connectivity_results['total_services']} accessible)")
+            logger.warning(f" WARNING: [U+FE0F]  Connectivity test: PARTIAL ({connectivity_results['accessible_services']}/{connectivity_results['total_services']} accessible)")
             # Don't fail on connectivity issues as they may be environment-specific
         
         # Step 3: Generate Reports
-        logger.info("📊 Generating compliance reports...")
+        logger.info(" CHART:  Generating compliance reports...")
         report_generator = ComplianceReportGenerator()
         
         json_report = report_generator.generate_json_report(
@@ -236,7 +236,7 @@ async def main():
         
         # Step 4: Summary
         logger.info("=" * 60)
-        logger.info("📋 COMPLIANCE VALIDATION SUMMARY")
+        logger.info("[U+1F4CB] COMPLIANCE VALIDATION SUMMARY")
         logger.info("=" * 60)
         logger.info(f"Files Scanned: {compliance_results['scanned_files']}")
         logger.info(f"Violations Found: {compliance_results['total_violations']}")
@@ -246,13 +246,13 @@ async def main():
         logger.info(f"Markdown Report: {markdown_report}")
         
         if exit_code == 0:
-            logger.info("🎉 VALIDATION PASSED: Load balancer compliance verified!")
+            logger.info(" CELEBRATION:  VALIDATION PASSED: Load balancer compliance verified!")
         else:
-            logger.error("💥 VALIDATION FAILED: Compliance violations detected!")
+            logger.error("[U+1F4A5] VALIDATION FAILED: Compliance violations detected!")
             logger.error("Run migration script: python scripts/migrate_cloud_run_urls.py --execute")
     
     except Exception as e:
-        logger.error(f"💥 Script execution error: {e}")
+        logger.error(f"[U+1F4A5] Script execution error: {e}")
         exit_code = 2
     
     logger.info("=" * 60)

@@ -161,7 +161,7 @@ class StandardWebSocketBridge:
             'last_event_time': None
         }
         
-        logger.info(f"🌉 Created StandardWebSocketBridge {self.bridge_id} for user {user_context.user_id}")
+        logger.info(f"[U+1F309] Created StandardWebSocketBridge {self.bridge_id} for user {user_context.user_id}")
     
     # ===================== ADAPTER CONFIGURATION METHODS =====================
     
@@ -174,8 +174,8 @@ class StandardWebSocketBridge:
         if self._has_active_adapter():
             self._metrics['adapter_switches'] += 1
             logger.warning(
-                f"🔄 Switching adapter types in {self.bridge_id}: "
-                f"{self._active_adapter_type} → AgentWebSocketBridge"
+                f" CYCLE:  Switching adapter types in {self.bridge_id}: "
+                f"{self._active_adapter_type}  ->  AgentWebSocketBridge"
             )
         
         self._agent_bridge = agent_bridge
@@ -183,7 +183,7 @@ class StandardWebSocketBridge:
         self._websocket_manager = None
         self._active_adapter_type = "AgentWebSocketBridge"
         
-        logger.info(f"🔌 StandardWebSocketBridge configured with AgentWebSocketBridge for {self.user_context.get_correlation_id()}")
+        logger.info(f"[U+1F50C] StandardWebSocketBridge configured with AgentWebSocketBridge for {self.user_context.get_correlation_id()}")
     
     def set_websocket_emitter(self, websocket_emitter: 'WebSocketEventEmitter') -> None:
         """Configure with WebSocketEventEmitter (new unified emitter pattern).
@@ -194,8 +194,8 @@ class StandardWebSocketBridge:
         if self._has_active_adapter():
             self._metrics['adapter_switches'] += 1
             logger.warning(
-                f"🔄 Switching adapter types in {self.bridge_id}: "
-                f"{self._active_adapter_type} → WebSocketEventEmitter"
+                f" CYCLE:  Switching adapter types in {self.bridge_id}: "
+                f"{self._active_adapter_type}  ->  WebSocketEventEmitter"
             )
         
         self._websocket_emitter = websocket_emitter
@@ -203,7 +203,7 @@ class StandardWebSocketBridge:
         self._websocket_manager = None
         self._active_adapter_type = "WebSocketEventEmitter"
         
-        logger.info(f"🔌 StandardWebSocketBridge configured with WebSocketEventEmitter for {self.user_context.get_correlation_id()}")
+        logger.info(f"[U+1F50C] StandardWebSocketBridge configured with WebSocketEventEmitter for {self.user_context.get_correlation_id()}")
     
     def set_websocket_manager(self, websocket_manager: 'WebSocketManager') -> None:
         """Configure with UnifiedWebSocketManager (direct manager access pattern).
@@ -214,8 +214,8 @@ class StandardWebSocketBridge:
         if self._has_active_adapter():
             self._metrics['adapter_switches'] += 1
             logger.warning(
-                f"🔄 Switching adapter types in {self.bridge_id}: "
-                f"{self._active_adapter_type} → UnifiedWebSocketManager"
+                f" CYCLE:  Switching adapter types in {self.bridge_id}: "
+                f"{self._active_adapter_type}  ->  UnifiedWebSocketManager"
             )
         
         self._websocket_manager = websocket_manager
@@ -223,7 +223,7 @@ class StandardWebSocketBridge:
         self._websocket_emitter = None
         self._active_adapter_type = "UnifiedWebSocketManager"
         
-        logger.info(f"🔌 StandardWebSocketBridge configured with UnifiedWebSocketManager for {self.user_context.get_correlation_id()}")
+        logger.info(f"[U+1F50C] StandardWebSocketBridge configured with UnifiedWebSocketManager for {self.user_context.get_correlation_id()}")
     
     def _has_active_adapter(self) -> bool:
         """Check if any adapter is currently configured."""
@@ -279,7 +279,7 @@ class StandardWebSocketBridge:
                 })
             else:
                 logger.critical(
-                    f"🚨 CRITICAL: No WebSocket adapter configured in {self.bridge_id} - "
+                    f" ALERT:  CRITICAL: No WebSocket adapter configured in {self.bridge_id} - "
                     f"agent_started event LOST for {agent_name}! User will not see AI working."
                 )
                 self._metrics['events_failed'] += 1
@@ -290,9 +290,9 @@ class StandardWebSocketBridge:
             self._update_event_metrics(success, execution_time_ms, 'agent_started')
             
             if success:
-                logger.debug(f"✅ agent_started: {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.debug(f" PASS:  agent_started: {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             else:
-                logger.error(f"❌ agent_started FAILED: {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.error(f" FAIL:  agent_started FAILED: {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             
             return success
             
@@ -301,7 +301,7 @@ class StandardWebSocketBridge:
             self._update_event_metrics(False, execution_time_ms, 'agent_started')
             
             logger.critical(
-                f"🚨 CRITICAL: agent_started event failed for {agent_name} in {self.bridge_id}: {e}. "
+                f" ALERT:  CRITICAL: agent_started event failed for {agent_name} in {self.bridge_id}: {e}. "
                 f"User will not see AI working!"
             )
             return False
@@ -356,7 +356,7 @@ class StandardWebSocketBridge:
                 })
             else:
                 logger.warning(
-                    f"⚠️ No WebSocket adapter configured in {self.bridge_id} - "
+                    f" WARNING: [U+FE0F] No WebSocket adapter configured in {self.bridge_id} - "
                     f"agent_thinking event LOST for {agent_name}! User will not see real-time reasoning."
                 )
                 self._metrics['events_failed'] += 1
@@ -367,9 +367,9 @@ class StandardWebSocketBridge:
             self._update_event_metrics(success, execution_time_ms, 'agent_thinking')
             
             if success:
-                logger.debug(f"💭 agent_thinking: {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.debug(f"[U+1F4AD] agent_thinking: {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             else:
-                logger.warning(f"⚠️ agent_thinking FAILED: {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.warning(f" WARNING: [U+FE0F] agent_thinking FAILED: {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             
             return success
             
@@ -378,7 +378,7 @@ class StandardWebSocketBridge:
             self._update_event_metrics(False, execution_time_ms, 'agent_thinking')
             
             logger.warning(
-                f"⚠️ agent_thinking event failed for {agent_name} in {self.bridge_id}: {e}. "
+                f" WARNING: [U+FE0F] agent_thinking event failed for {agent_name} in {self.bridge_id}: {e}. "
                 f"User will not see real-time reasoning."
             )
             return False
@@ -430,7 +430,7 @@ class StandardWebSocketBridge:
                 })
             else:
                 logger.error(
-                    f"❌ No WebSocket adapter configured in {self.bridge_id} - "
+                    f" FAIL:  No WebSocket adapter configured in {self.bridge_id} - "
                     f"tool_executing event LOST for {tool_name}! User will not see tool usage transparency."
                 )
                 self._metrics['events_failed'] += 1
@@ -441,9 +441,9 @@ class StandardWebSocketBridge:
             self._update_event_metrics(success, execution_time_ms, 'tool_executing')
             
             if success:
-                logger.debug(f"🔧 tool_executing: {tool_name} by {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.debug(f"[U+1F527] tool_executing: {tool_name} by {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             else:
-                logger.error(f"❌ tool_executing FAILED: {tool_name} by {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.error(f" FAIL:  tool_executing FAILED: {tool_name} by {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             
             return success
             
@@ -452,7 +452,7 @@ class StandardWebSocketBridge:
             self._update_event_metrics(False, execution_time_ms, 'tool_executing')
             
             logger.error(
-                f"❌ tool_executing event failed for {tool_name} by {agent_name} in {self.bridge_id}: {e}. "
+                f" FAIL:  tool_executing event failed for {tool_name} by {agent_name} in {self.bridge_id}: {e}. "
                 f"User will not see tool usage transparency."
             )
             return False
@@ -507,7 +507,7 @@ class StandardWebSocketBridge:
                 })
             else:
                 logger.error(
-                    f"❌ No WebSocket adapter configured in {self.bridge_id} - "
+                    f" FAIL:  No WebSocket adapter configured in {self.bridge_id} - "
                     f"tool_completed event LOST for {tool_name}! User will not see tool results."
                 )
                 self._metrics['events_failed'] += 1
@@ -518,9 +518,9 @@ class StandardWebSocketBridge:
             self._update_event_metrics(success, event_time_ms, 'tool_completed')
             
             if success:
-                logger.debug(f"✅ tool_completed: {tool_name} by {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.debug(f" PASS:  tool_completed: {tool_name} by {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             else:
-                logger.error(f"❌ tool_completed FAILED: {tool_name} by {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.error(f" FAIL:  tool_completed FAILED: {tool_name} by {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             
             return success
             
@@ -529,7 +529,7 @@ class StandardWebSocketBridge:
             self._update_event_metrics(False, event_time_ms, 'tool_completed')
             
             logger.error(
-                f"❌ tool_completed event failed for {tool_name} by {agent_name} in {self.bridge_id}: {e}. "
+                f" FAIL:  tool_completed event failed for {tool_name} by {agent_name} in {self.bridge_id}: {e}. "
                 f"User will not see tool results."
             )
             return False
@@ -581,7 +581,7 @@ class StandardWebSocketBridge:
                 })
             else:
                 logger.critical(
-                    f"🚨 CRITICAL: No WebSocket adapter configured in {self.bridge_id} - "
+                    f" ALERT:  CRITICAL: No WebSocket adapter configured in {self.bridge_id} - "
                     f"agent_completed event LOST for {agent_name}! User will not know response is ready."
                 )
                 self._metrics['events_failed'] += 1
@@ -592,9 +592,9 @@ class StandardWebSocketBridge:
             self._update_event_metrics(success, event_time_ms, 'agent_completed')
             
             if success:
-                logger.info(f"🎉 agent_completed: {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.info(f" CELEBRATION:  agent_completed: {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             else:
-                logger.critical(f"🚨 agent_completed FAILED: {agent_name} → user {self.user_context.user_id} via {self._active_adapter_type}")
+                logger.critical(f" ALERT:  agent_completed FAILED: {agent_name}  ->  user {self.user_context.user_id} via {self._active_adapter_type}")
             
             return success
             
@@ -603,7 +603,7 @@ class StandardWebSocketBridge:
             self._update_event_metrics(False, event_time_ms, 'agent_completed')
             
             logger.critical(
-                f"🚨 CRITICAL: agent_completed event failed for {agent_name} in {self.bridge_id}: {e}. "
+                f" ALERT:  CRITICAL: agent_completed event failed for {agent_name} in {self.bridge_id}: {e}. "
                 f"User will not know response is ready!"
             )
             return False
@@ -636,7 +636,7 @@ class StandardWebSocketBridge:
                 })
             return False
         except Exception as e:
-            logger.error(f"❌ Failed to send agent_error event: {e}")
+            logger.error(f" FAIL:  Failed to send agent_error event: {e}")
             return False
     
     async def notify_progress_update(
@@ -700,7 +700,7 @@ class StandardWebSocketBridge:
         """Validate that the run_id matches the user context for security."""
         if run_id != self.user_context.run_id:
             logger.warning(
-                f"⚠️ SECURITY: Run ID mismatch in {self.bridge_id}. "
+                f" WARNING: [U+FE0F] SECURITY: Run ID mismatch in {self.bridge_id}. "
                 f"Expected: {self.user_context.run_id}, Got: {run_id}. "
                 f"Event rejected for security."
             )
@@ -714,10 +714,10 @@ class StandardWebSocketBridge:
                 await self._websocket_manager.send_event(event_type, event_data)
                 return True
             else:
-                logger.error(f"❌ WebSocketManager missing send_event method in {self.bridge_id}")
+                logger.error(f" FAIL:  WebSocketManager missing send_event method in {self.bridge_id}")
                 return False
         except Exception as e:
-            logger.error(f"❌ Failed to send {event_type} via manager: {e}")
+            logger.error(f" FAIL:  Failed to send {event_type} via manager: {e}")
             return False
     
     def _update_event_metrics(self, success: bool, execution_time_ms: float, event_type: str) -> None:
@@ -889,7 +889,7 @@ class WebSocketBridgeAdapter(StandardWebSocketBridge):
         self.user_context = user_context
         
         logger.warning(
-            f"🔄 DEPRECATED: WebSocketBridgeAdapter created for {user_context.get_correlation_id()}. "
+            f" CYCLE:  DEPRECATED: WebSocketBridgeAdapter created for {user_context.get_correlation_id()}. "
             f"Use StandardWebSocketBridge for SSOT compliance."
         )
 

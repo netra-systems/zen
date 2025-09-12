@@ -1,7 +1,7 @@
 """
 Stage Validation Framework for E2E Agent Testing
 Validates input, processing, and output at each agent stage.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from typing import Any, Dict, List, Optional, Union

@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core validation of $3M+ ARR business model
 
 This test validates the COMPLETE business value chain:
-User sends prompt → Agent processes → Tool execution → Final report with actionable insights
+User sends prompt  ->  Agent processes  ->  Tool execution  ->  Final report with actionable insights
 
 REQUIREMENTS FROM CLAUDE.md:
 - NO MOCKS AT ALL - Uses REAL services only (WebSocket, Database, LLM)
@@ -420,7 +420,7 @@ class CompleteUserPromptToReportTester:
         if not connected:
             raise RuntimeError("Failed to establish authenticated WebSocket connection")
             
-        logger.info("✅ Real services setup complete with authentication")
+        logger.info(" PASS:  Real services setup complete with authentication")
         
     async def test_complete_prompt_to_report_flow(
         self, 
@@ -443,7 +443,7 @@ class CompleteUserPromptToReportTester:
         validator = CompleteFlowEventValidator()
         final_report_content = None
         
-        logger.info(f"🚀 Starting complete flow test with prompt: '{user_prompt[:50]}...'")
+        logger.info(f"[U+1F680] Starting complete flow test with prompt: '{user_prompt[:50]}...'")
         
         # Start event collection task
         event_task = asyncio.create_task(
@@ -452,13 +452,13 @@ class CompleteUserPromptToReportTester:
         
         # Send user prompt through WebSocket
         await self.ws_client.send_chat(text=user_prompt)
-        logger.info("📤 User prompt sent via WebSocket")
+        logger.info("[U+1F4E4] User prompt sent via WebSocket")
         
         # Wait for complete flow to finish
         try:
             await event_task
         except asyncio.TimeoutError:
-            logger.error(f"⏰ Complete flow timed out after {timeout}s")
+            logger.error(f"[U+23F0] Complete flow timed out after {timeout}s")
             
         # Extract final report content
         final_report_content = self._extract_final_report(validator.events)
@@ -467,9 +467,9 @@ class CompleteUserPromptToReportTester:
         is_valid, failures = validator.validate_complete_flow()
         
         if is_valid and final_report_content:
-            logger.info("✅ Complete prompt-to-report flow PASSED")
+            logger.info(" PASS:  Complete prompt-to-report flow PASSED")
         else:
-            logger.error(f"❌ Complete flow FAILED: {failures}")
+            logger.error(f" FAIL:  Complete flow FAILED: {failures}")
             
         return is_valid, validator, final_report_content
         
@@ -497,7 +497,7 @@ class CompleteUserPromptToReportTester:
                         # Wait a bit more for any trailing events
                         await asyncio.sleep(1.0)
                         flow_completed = True
-                        logger.info(f"🏁 Flow completed with event: {event_type}")
+                        logger.info(f"[U+1F3C1] Flow completed with event: {event_type}")
                         
             except asyncio.TimeoutError:
                 # Continue collecting - brief timeouts are expected
@@ -507,7 +507,7 @@ class CompleteUserPromptToReportTester:
                 break
                 
         if not flow_completed:
-            logger.warning(f"⚠️ Flow did not complete within {timeout}s")
+            logger.warning(f" WARNING: [U+FE0F] Flow did not complete within {timeout}s")
             
     def _extract_final_report(self, events: List[Dict[str, Any]]) -> Optional[str]:
         """Extract the final report content from events."""
@@ -549,7 +549,7 @@ class CompleteUserPromptToReportTester:
         if self.auth_client:
             await self.auth_client.close()
             
-        logger.info("🧹 Cleanup completed")
+        logger.info("[U+1F9F9] Cleanup completed")
 
 
 # ============================================================================
@@ -568,8 +568,8 @@ class TestCompleteUserPromptToReportFlow:
         MISSION CRITICAL: Basic Optimization Query to Complete Report
         
         Tests the core business value proposition:
-        User asks "How can I optimize my cloud costs?" → 
-        Agent processes → Tools execute → 
+        User asks "How can I optimize my cloud costs?"  ->  
+        Agent processes  ->  Tools execute  ->  
         Final report with actionable cost optimization recommendations
         
         This is the #1 most important test - validates core $3M+ ARR value prop.
@@ -622,13 +622,13 @@ class TestCompleteUserPromptToReportFlow:
             tool_count = validator.event_counts.get("tool_executing", 0)
             assert tool_count >= 1, f"No tools executed for analysis (got {tool_count})"
             
-            logger.info(f"✅ CRITICAL TEST PASSED: Optimization query → report in {execution_time:.1f}s")
-            logger.info(f"📊 Business Value Score: {business_score:.1f}/100")
-            logger.info(f"📝 Report Length: {len(final_report)} chars")
-            logger.info(f"🔧 Tools Used: {tool_count}")
+            logger.info(f" PASS:  CRITICAL TEST PASSED: Optimization query  ->  report in {execution_time:.1f}s")
+            logger.info(f" CHART:  Business Value Score: {business_score:.1f}/100")
+            logger.info(f"[U+1F4DD] Report Length: {len(final_report)} chars")
+            logger.info(f"[U+1F527] Tools Used: {tool_count}")
             
         except Exception as e:
-            logger.error(f"❌ CRITICAL TEST FAILED: {e}")
+            logger.error(f" FAIL:  CRITICAL TEST FAILED: {e}")
             raise
         finally:
             await tester.cleanup()
@@ -641,8 +641,8 @@ class TestCompleteUserPromptToReportFlow:
         CRITICAL: Infrastructure Analysis Query to Comprehensive Report
         
         Tests complex analysis capability:
-        User asks for infrastructure analysis → Agent processes multiple dimensions →
-        Tools gather data → Final report with architectural recommendations
+        User asks for infrastructure analysis  ->  Agent processes multiple dimensions  -> 
+        Tools gather data  ->  Final report with architectural recommendations
         """
         tester = CompleteUserPromptToReportTester()
         
@@ -688,9 +688,9 @@ class TestCompleteUserPromptToReportFlow:
             tool_count = validator.event_counts.get("tool_executing", 0)
             assert tool_count >= 2, f"Complex analysis needs multiple tools (got {tool_count})"
             
-            logger.info(f"✅ Infrastructure analysis test PASSED: {execution_time:.1f}s")
-            logger.info(f"📊 Business Score: {business_score:.1f}/100")
-            logger.info(f"🏗️ AWS Services Mentioned: {mentioned_services}")
+            logger.info(f" PASS:  Infrastructure analysis test PASSED: {execution_time:.1f}s")
+            logger.info(f" CHART:  Business Score: {business_score:.1f}/100")
+            logger.info(f"[U+1F3D7][U+FE0F] AWS Services Mentioned: {mentioned_services}")
             
         finally:
             await tester.cleanup()
@@ -746,9 +746,9 @@ class TestCompleteUserPromptToReportFlow:
             assert all(event in validator.event_counts for event in validator.REQUIRED_EVENTS), \
                 f"Missing events: {validator.REQUIRED_EVENTS - set(validator.event_counts.keys())}"
                 
-            logger.info(f"✅ Performance test PASSED: {execution_time:.1f}s")
-            logger.info(f"⚡ Max event gap: {max_gap:.1f}s")
-            logger.info(f"📈 Event sequence length: {len(timeline)}")
+            logger.info(f" PASS:  Performance test PASSED: {execution_time:.1f}s")
+            logger.info(f" LIGHTNING:  Max event gap: {max_gap:.1f}s")
+            logger.info(f"[U+1F4C8] Event sequence length: {len(timeline)}")
             
         finally:
             await tester.cleanup()
@@ -811,9 +811,9 @@ class TestCompleteUserPromptToReportFlow:
             assert len(validator.business_content_events) >= 3, \
                 f"Insufficient business content events: {len(validator.business_content_events)}"
                 
-            logger.info(f"✅ WebSocket event sequence validation PASSED")
-            logger.info(f"🔄 Event sequence: {' → '.join(event_sequence[:10])}...")  # First 10 events
-            logger.info(f"📊 Total events: {len(event_sequence)}")
+            logger.info(f" PASS:  WebSocket event sequence validation PASSED")
+            logger.info(f" CYCLE:  Event sequence: {'  ->  '.join(event_sequence[:10])}...")  # First 10 events
+            logger.info(f" CHART:  Total events: {len(event_sequence)}")
             
         finally:
             await tester.cleanup()
@@ -834,9 +834,9 @@ if __name__ == "__main__":
         pytest test_complete_user_prompt_to_report_flow.py -v -s
     """
     
-    logger.info("🚀 Starting MISSION CRITICAL complete user prompt to report tests")
-    logger.info("⚠️  USING REAL SERVICES ONLY - NO MOCKS")
-    logger.info("💼 Testing complete business value delivery chain")
+    logger.info("[U+1F680] Starting MISSION CRITICAL complete user prompt to report tests")
+    logger.info(" WARNING: [U+FE0F]  USING REAL SERVICES ONLY - NO MOCKS")
+    logger.info("[U+1F4BC] Testing complete business value delivery chain")
     
     # Run with pytest
     exit_code = pytest.main([
@@ -848,8 +848,8 @@ if __name__ == "__main__":
     ])
     
     if exit_code == 0:
-        logger.info("✅ ALL COMPLETE FLOW TESTS PASSED - Business value delivery verified")
+        logger.info(" PASS:  ALL COMPLETE FLOW TESTS PASSED - Business value delivery verified")
     else:
-        logger.error("❌ COMPLETE FLOW TESTS FAILED - Business value delivery broken")
+        logger.error(" FAIL:  COMPLETE FLOW TESTS FAILED - Business value delivery broken")
     
     sys.exit(exit_code)

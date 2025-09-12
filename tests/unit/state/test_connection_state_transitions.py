@@ -11,15 +11,15 @@ This test suite validates the WebSocket connection state machine that manages
 connection lifecycle and ensures reliable communication channels for agent events.
 
 CONNECTION STATE MACHINE:
-- CONNECTING → CONNECTED (successful connection)
-- CONNECTING → FAILED (connection failure)
-- CONNECTED → DISCONNECTED (clean disconnect)
-- CONNECTED → CLOSING (initiated disconnect)
-- DISCONNECTED → RECONNECTING (reconnection attempt)
-- RECONNECTING → CONNECTED (successful reconnection)
-- RECONNECTING → FAILED (reconnection failure)
-- FAILED → RECONNECTING (retry attempt)
-- CLOSING → DISCONNECTED (graceful close completion)
+- CONNECTING  ->  CONNECTED (successful connection)
+- CONNECTING  ->  FAILED (connection failure)
+- CONNECTED  ->  DISCONNECTED (clean disconnect)
+- CONNECTED  ->  CLOSING (initiated disconnect)
+- DISCONNECTED  ->  RECONNECTING (reconnection attempt)
+- RECONNECTING  ->  CONNECTED (successful reconnection)
+- RECONNECTING  ->  FAILED (reconnection failure)
+- FAILED  ->  RECONNECTING (retry attempt)
+- CLOSING  ->  DISCONNECTED (graceful close completion)
 
 CRITICAL VALIDATION AREAS:
 - Valid state transitions according to business logic
@@ -138,7 +138,7 @@ class TestConnectionStateTransitions(unittest.TestCase):
         self.assertFalse(self.state_machine.is_terminal())
     
     def test_successful_connection_flow(self):
-        """Test successful connection: CONNECTING → CONNECTED."""
+        """Test successful connection: CONNECTING  ->  CONNECTED."""
         # Should be able to transition from CONNECTING to CONNECTED
         self.assertTrue(self.state_machine.can_transition_to(ConnectionState.CONNECTED))
         self.assertTrue(self.state_machine.transition_to(ConnectionState.CONNECTED))
@@ -150,7 +150,7 @@ class TestConnectionStateTransitions(unittest.TestCase):
         self.assertFalse(self.state_machine.is_terminal())
     
     def test_connection_failure_flow(self):
-        """Test connection failure: CONNECTING → FAILED."""
+        """Test connection failure: CONNECTING  ->  FAILED."""
         # Should be able to transition from CONNECTING to FAILED
         self.assertTrue(self.state_machine.can_transition_to(ConnectionState.FAILED))
         self.assertTrue(self.state_machine.transition_to(ConnectionState.FAILED))
@@ -162,7 +162,7 @@ class TestConnectionStateTransitions(unittest.TestCase):
         self.assertTrue(self.state_machine.is_terminal())
     
     def test_graceful_disconnect_flow(self):
-        """Test graceful disconnect: CONNECTED → CLOSING → DISCONNECTED."""
+        """Test graceful disconnect: CONNECTED  ->  CLOSING  ->  DISCONNECTED."""
         # First connect
         self.state_machine.transition_to(ConnectionState.CONNECTED)
         
@@ -178,7 +178,7 @@ class TestConnectionStateTransitions(unittest.TestCase):
         self.assertTrue(self.state_machine.is_terminal())
     
     def test_direct_disconnect_flow(self):
-        """Test direct disconnect: CONNECTED → DISCONNECTED."""
+        """Test direct disconnect: CONNECTED  ->  DISCONNECTED."""
         # First connect
         self.state_machine.transition_to(ConnectionState.CONNECTED)
         
@@ -189,7 +189,7 @@ class TestConnectionStateTransitions(unittest.TestCase):
         self.assertTrue(self.state_machine.is_terminal())
     
     def test_reconnection_success_flow(self):
-        """Test successful reconnection: DISCONNECTED → RECONNECTING → CONNECTED."""
+        """Test successful reconnection: DISCONNECTED  ->  RECONNECTING  ->  CONNECTED."""
         # Start from disconnected state
         self.state_machine.transition_to(ConnectionState.FAILED)
         
@@ -206,7 +206,7 @@ class TestConnectionStateTransitions(unittest.TestCase):
         self.assertTrue(self.state_machine.is_connected())
     
     def test_reconnection_failure_flow(self):
-        """Test failed reconnection: DISCONNECTED → RECONNECTING → FAILED."""
+        """Test failed reconnection: DISCONNECTED  ->  RECONNECTING  ->  FAILED."""
         # Start from disconnected state
         self.state_machine.transition_to(ConnectionState.FAILED)
         
@@ -220,7 +220,7 @@ class TestConnectionStateTransitions(unittest.TestCase):
         self.assertTrue(self.state_machine.is_terminal())
     
     def test_retry_after_failure(self):
-        """Test retry attempt after failure: FAILED → RECONNECTING."""
+        """Test retry attempt after failure: FAILED  ->  RECONNECTING."""
         # Start from failed state
         self.state_machine.transition_to(ConnectionState.FAILED)
         
@@ -240,8 +240,8 @@ class TestInvalidStateTransitions(unittest.TestCase):
     
     def test_invalid_transitions_from_connecting(self):
         """Test that invalid transitions from CONNECTING are rejected."""
-        # Valid: CONNECTING → CONNECTED, FAILED
-        # Invalid: CONNECTING → DISCONNECTED, RECONNECTING, CLOSING
+        # Valid: CONNECTING  ->  CONNECTED, FAILED
+        # Invalid: CONNECTING  ->  DISCONNECTED, RECONNECTING, CLOSING
         
         invalid_transitions = [
             ConnectionState.DISCONNECTED,
@@ -261,8 +261,8 @@ class TestInvalidStateTransitions(unittest.TestCase):
         # Move to connected state first
         self.state_machine.transition_to(ConnectionState.CONNECTED)
         
-        # Valid: CONNECTED → DISCONNECTED, CLOSING, FAILED
-        # Invalid: CONNECTED → CONNECTING, RECONNECTING
+        # Valid: CONNECTED  ->  DISCONNECTED, CLOSING, FAILED
+        # Invalid: CONNECTED  ->  CONNECTING, RECONNECTING
         
         invalid_transitions = [
             ConnectionState.CONNECTING,
@@ -282,8 +282,8 @@ class TestInvalidStateTransitions(unittest.TestCase):
         self.state_machine.transition_to(ConnectionState.CONNECTED)
         self.state_machine.transition_to(ConnectionState.DISCONNECTED)
         
-        # Valid: DISCONNECTED → RECONNECTING, CONNECTING
-        # Invalid: DISCONNECTED → CONNECTED, FAILED, CLOSING
+        # Valid: DISCONNECTED  ->  RECONNECTING, CONNECTING
+        # Invalid: DISCONNECTED  ->  CONNECTED, FAILED, CLOSING
         
         invalid_transitions = [
             ConnectionState.CONNECTED,
@@ -450,7 +450,7 @@ class TestStateTransitionHistory(unittest.TestCase):
         """Test tracking of complex state transition sequence."""
         state_machine = WebSocketConnectionStateMachine()
         
-        # Complex sequence: CONNECTING → CONNECTED → CLOSING → DISCONNECTED → RECONNECTING → CONNECTED
+        # Complex sequence: CONNECTING  ->  CONNECTED  ->  CLOSING  ->  DISCONNECTED  ->  RECONNECTING  ->  CONNECTED
         transitions = [
             ConnectionState.CONNECTED,
             ConnectionState.CLOSING,

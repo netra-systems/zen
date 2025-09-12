@@ -743,10 +743,10 @@ def test_websocket_integration_comprehensive_smoke_test():
     router = MockWebSocketEventRouter(ws_manager)
     assert router.websocket_manager is ws_manager, "Router should use provided manager"
     
-    print("✅ WebSocket integration test infrastructure validated")
+    print(" PASS:  WebSocket integration test infrastructure validated")
 
 
 if __name__ == "__main__":
     # Run basic smoke test
     test_websocket_integration_comprehensive_smoke_test()
-    print("🎉 WebSocket Integration Comprehensive Tests Ready!")
+    print(" CELEBRATION:  WebSocket Integration Comprehensive Tests Ready!")

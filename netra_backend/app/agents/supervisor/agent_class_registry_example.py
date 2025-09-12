@@ -63,11 +63,11 @@ def demonstrate_startup_phase():
             metadata={"category": "example", "priority": "medium"}
         )
         
-        print(f"✅ Registered {len(registry)} agent classes")
+        print(f" PASS:  Registered {len(registry)} agent classes")
         print(f"   Agent names: {registry.list_agent_names()}")
         
     except Exception as e:
-        print(f"❌ Registration failed: {e}")
+        print(f" FAIL:  Registration failed: {e}")
         return None
     
     return registry
@@ -92,10 +92,10 @@ def demonstrate_freeze_phase(registry):
             pass
             
         registry.register("post_freeze", PostFreezeAgent, "Should fail")
-        print("❌ Registration after freeze should have failed!")
+        print(" FAIL:  Registration after freeze should have failed!")
         
     except RuntimeError as e:
-        print(f"✅ Correctly prevented post-freeze registration: {e}")
+        print(f" PASS:  Correctly prevented post-freeze registration: {e}")
 
 
 def demonstrate_runtime_phase(registry):
@@ -105,35 +105,35 @@ def demonstrate_runtime_phase(registry):
     # Get agent class for instantiation
     demo_agent_class = registry.get_agent_class("demo_agent")
     if demo_agent_class:
-        print(f"✅ Retrieved agent class: {demo_agent_class.__name__}")
+        print(f" PASS:  Retrieved agent class: {demo_agent_class.__name__}")
         
         # Instantiate the agent (this is what happens at runtime)
         agent_instance = demo_agent_class("runtime_demo_instance")
-        print(f"✅ Created agent instance: {agent_instance.name}")
+        print(f" PASS:  Created agent instance: {agent_instance.name}")
     else:
-        print("❌ Failed to retrieve demo_agent class")
+        print(" FAIL:  Failed to retrieve demo_agent class")
     
     # Get agent information
     agent_info = registry.get_agent_info("demo_agent")
     if agent_info:
-        print(f"✅ Agent info: {agent_info.name} v{agent_info.version}")
+        print(f" PASS:  Agent info: {agent_info.name} v{agent_info.version}")
         print(f"   Description: {agent_info.description}")
         print(f"   Metadata: {agent_info.metadata}")
     
     # List all available agents
     all_agents = registry.get_all_agent_classes()
-    print(f"✅ Available agent classes: {len(all_agents)}")
+    print(f" PASS:  Available agent classes: {len(all_agents)}")
     
     # Check dependencies
     missing_deps = registry.validate_dependencies()
     if missing_deps:
-        print(f"⚠️  Missing dependencies: {missing_deps}")
+        print(f" WARNING: [U+FE0F]  Missing dependencies: {missing_deps}")
     else:
-        print("✅ All dependencies satisfied")
+        print(" PASS:  All dependencies satisfied")
     
     # Get registry statistics
     stats = registry.get_registry_stats()
-    print(f"✅ Registry health: {stats['health_status']}")
+    print(f" PASS:  Registry health: {stats['health_status']}")
     print(f"   Total agents: {stats['total_agent_classes']}")
 
 
@@ -185,11 +185,11 @@ def demonstrate_thread_safety(registry):
     end_time = time.time()
     
     if errors:
-        print(f"❌ Thread safety test failed with {len(errors)} errors:")
+        print(f" FAIL:  Thread safety test failed with {len(errors)} errors:")
         for error in errors[:3]:  # Show first 3 errors
             print(f"   {error}")
     else:
-        print(f"✅ Thread safety test passed!")
+        print(f" PASS:  Thread safety test passed!")
         print(f"   {len(results)} operations completed by {len(threads)} threads")
         print(f"   Duration: {end_time - start_time:.3f} seconds")
         
@@ -204,9 +204,9 @@ def demonstrate_thread_safety(registry):
                 break
         
         if inconsistent:
-            print("❌ Results were inconsistent across threads")
+            print(" FAIL:  Results were inconsistent across threads")
         else:
-            print("✅ All thread results were consistent")
+            print(" PASS:  All thread results were consistent")
 
 
 def demonstrate_error_handling(registry):
@@ -216,40 +216,40 @@ def demonstrate_error_handling(registry):
     # Test non-existent agent
     nonexistent = registry.get_agent_class("nonexistent_agent")
     if nonexistent is None:
-        print("✅ Correctly returned None for non-existent agent")
+        print(" PASS:  Correctly returned None for non-existent agent")
     else:
-        print("❌ Should return None for non-existent agent")
+        print(" FAIL:  Should return None for non-existent agent")
     
     # Test agent info for non-existent agent
     info = registry.get_agent_info("nonexistent_agent")
     if info is None:
-        print("✅ Correctly returned None for non-existent agent info")
+        print(" PASS:  Correctly returned None for non-existent agent info")
     else:
-        print("❌ Should return None for non-existent agent info")
+        print(" FAIL:  Should return None for non-existent agent info")
     
     # Test has_agent_class for non-existent agent
     has_agent = registry.has_agent_class("nonexistent_agent")
     if not has_agent:
-        print("✅ Correctly returned False for non-existent agent")
+        print(" PASS:  Correctly returned False for non-existent agent")
     else:
-        print("❌ Should return False for non-existent agent")
+        print(" FAIL:  Should return False for non-existent agent")
     
     # Test 'in' operator
     if "nonexistent_agent" not in registry:
-        print("✅ 'in' operator works correctly")
+        print(" PASS:  'in' operator works correctly")
     else:
-        print("❌ 'in' operator should return False")
+        print(" FAIL:  'in' operator should return False")
 
 
 async def demonstrate_full_lifecycle():
     """Demonstrate the complete lifecycle of AgentClassRegistry."""
-    print("🚀 AgentClassRegistry Demonstration")
+    print("[U+1F680] AgentClassRegistry Demonstration")
     print("="*50)
     
     # Phase 1: Startup Registration
     registry = demonstrate_startup_phase()
     if not registry:
-        print("❌ Startup phase failed, aborting demonstration")
+        print(" FAIL:  Startup phase failed, aborting demonstration")
         return
     
     # Phase 2: Freeze (Startup Completion)
@@ -265,13 +265,13 @@ async def demonstrate_full_lifecycle():
     demonstrate_error_handling(registry)
     
     print("\n" + "="*50)
-    print("✅ AgentClassRegistry demonstration completed successfully!")
+    print(" PASS:  AgentClassRegistry demonstration completed successfully!")
     print(f"Final registry state: {registry}")
 
 
 def demonstrate_real_initialization():
     """Demonstrate initialization with real agent classes."""
-    print("\n🔧 Real Agent Initialization Example")
+    print("\n[U+1F527] Real Agent Initialization Example")
     print("="*40)
     
     try:
@@ -290,10 +290,10 @@ def demonstrate_real_initialization():
         print("  - is_agent_type_available(name) -> bool")
         print("  - get_agent_types_summary() -> Dict[str, Any]")
         
-        print("\n✅ Real initialization example completed")
+        print("\n PASS:  Real initialization example completed")
         
     except Exception as e:
-        print(f"❌ Real initialization example failed: {e}")
+        print(f" FAIL:  Real initialization example failed: {e}")
 
 
 if __name__ == "__main__":
@@ -303,7 +303,7 @@ if __name__ == "__main__":
     # Show real initialization example
     demonstrate_real_initialization()
     
-    print("\n🎯 Key Takeaways:")
+    print("\n TARGET:  Key Takeaways:")
     print("1. Register agent classes ONLY during startup")
     print("2. Freeze registry after registration to make it immutable")
     print("3. Use registry for thread-safe, concurrent agent class retrieval")

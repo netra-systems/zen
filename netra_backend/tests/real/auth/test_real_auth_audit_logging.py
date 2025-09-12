@@ -83,7 +83,7 @@ class TestRealAuthAuditLogging:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for audit logging testing."""
-        print("🐳 Starting Docker services for audit logging tests...")
+        print("[U+1F433] Starting Docker services for audit logging tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -95,13 +95,13 @@ class TestRealAuthAuditLogging:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for audit logging tests")
+            print(" PASS:  Docker services ready for audit logging tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for audit logging tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for audit logging tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after audit logging tests...")
+            print("[U+1F9F9] Cleaning up Docker services after audit logging tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -126,7 +126,7 @@ class TestRealAuthAuditLogging:
             await client.ping()
             yield client
         except Exception as e:
-            pytest.fail(f"❌ Failed to connect to Redis for audit logging tests: {e}")
+            pytest.fail(f" FAIL:  Failed to connect to Redis for audit logging tests: {e}")
         finally:
             if 'client' in locals():
                 await client.aclose()
@@ -205,7 +205,7 @@ class TestRealAuthAuditLogging:
                 assert audit_event["result"] == "success"
                 assert audit_event["details"]["email"] == user["email"]
                 
-                print(f"✅ Login success audit logged for user {user['user_id']}")
+                print(f" PASS:  Login success audit logged for user {user['user_id']}")
             
             # Verify all audit events are stored
             for audit_key in audit_keys:
@@ -217,7 +217,7 @@ class TestRealAuthAuditLogging:
                 assert "timestamp" in parsed_event
                 assert "correlation_id" in parsed_event
             
-            print("✅ Authentication success audit logging validated")
+            print(" PASS:  Authentication success audit logging validated")
             
         finally:
             for audit_key in audit_keys:
@@ -296,7 +296,7 @@ class TestRealAuthAuditLogging:
                 assert audit_event["result"] == "failure"
                 assert audit_event["details"]["failure_reason"] == scenario["failure_reason"]
                 
-                print(f"❌ Login failure audit logged - Reason: {scenario['failure_reason']}")
+                print(f" FAIL:  Login failure audit logged - Reason: {scenario['failure_reason']}")
             
             # Analyze failure patterns for security insights
             failure_events = []
@@ -315,7 +315,7 @@ class TestRealAuthAuditLogging:
             
             assert len(high_risk_ips) > 0, "Should detect high-risk IPs from multiple failures"
             
-            print(f"✅ Authentication failure audit logging validated - {len(high_risk_ips)} high-risk IPs detected")
+            print(f" PASS:  Authentication failure audit logging validated - {len(high_risk_ips)} high-risk IPs detected")
             
         finally:
             for audit_key in audit_keys:
@@ -391,7 +391,7 @@ class TestRealAuthAuditLogging:
                 assert audit_event["action"] == scenario["action"]
                 assert audit_event["result"] == scenario["result"]
                 
-                print(f"🔐 Permission audit logged - {scenario['action']} {scenario['resource']}: {scenario['result']}")
+                print(f"[U+1F510] Permission audit logged - {scenario['action']} {scenario['resource']}: {scenario['result']}")
             
             # Analyze permission denials for security patterns
             denial_events = []
@@ -406,7 +406,7 @@ class TestRealAuthAuditLogging:
             assert len(denial_events) == 2, "Should log permission denials"
             assert len(sensitive_denials) == 1, "Should identify sensitive resource access attempts"
             
-            print(f"✅ Permission audit logging validated - {len(denial_events)} denials, {len(sensitive_denials)} sensitive")
+            print(f" PASS:  Permission audit logging validated - {len(denial_events)} denials, {len(sensitive_denials)} sensitive")
             
         finally:
             for audit_key in audit_keys:
@@ -500,7 +500,7 @@ class TestRealAuthAuditLogging:
                 assert audit_event["risk_score"] == scenario["risk_score"]
                 assert audit_event["details"]["activity_type"] == scenario["activity"]
                 
-                print(f"🚨 Suspicious activity audit logged - {scenario['activity']} (Risk: {scenario['risk_score']})")
+                print(f" ALERT:  Suspicious activity audit logged - {scenario['activity']} (Risk: {scenario['risk_score']})")
             
             # Analyze suspicious activities for threat intelligence
             critical_activities = []
@@ -518,7 +518,7 @@ class TestRealAuthAuditLogging:
             assert len(critical_activities) == 2, "Should identify critical suspicious activities"
             assert len(high_risk_activities) >= 2, "Should identify high-risk activities"
             
-            print(f"✅ Suspicious activity audit logging validated - {len(critical_activities)} critical, {len(high_risk_activities)} high-risk")
+            print(f" PASS:  Suspicious activity audit logging validated - {len(critical_activities)} critical, {len(high_risk_activities)} high-risk")
             
         finally:
             for audit_key in audit_keys:
@@ -557,7 +557,7 @@ class TestRealAuthAuditLogging:
             verification_hash = hashlib.sha256(verification_string.encode()).hexdigest()
             
             assert stored_hash == verification_hash, "Original audit log should have valid integrity hash"
-            print("✅ Original audit log integrity verified")
+            print(" PASS:  Original audit log integrity verified")
             
             # Simulate tampering attempt
             tampered_event = stored_event.copy()
@@ -578,7 +578,7 @@ class TestRealAuthAuditLogging:
             tampering_detected = claimed_hash != actual_hash
             
             assert tampering_detected, "Should detect audit log tampering"
-            print("🚨 Audit log tampering detected successfully")
+            print(" ALERT:  Audit log tampering detected successfully")
             
             # Log tampering detection event
             tampering_audit = self.create_audit_event(
@@ -597,7 +597,7 @@ class TestRealAuthAuditLogging:
             tampering_key = f"audit_log:{tampering_audit['event_id']}"
             await redis_client.setex(tampering_key, 3600, json.dumps(tampering_audit))
             
-            print("✅ Audit log integrity and tampering detection validated")
+            print(" PASS:  Audit log integrity and tampering detection validated")
             
         finally:
             await redis_client.delete(audit_key)
@@ -710,7 +710,7 @@ class TestRealAuthAuditLogging:
             assert stored_report["compliance_status"]["gdpr_compliant"] is True
             assert stored_report["events_to_purge"] == 1  # Only the very old event
             
-            print("✅ Compliance reporting and data retention validated")
+            print(" PASS:  Compliance reporting and data retention validated")
             print(f"   Total events: {stored_report['total_audit_events']}")
             print(f"   Events to purge: {stored_report['events_to_purge']}")
             print(f"   GDPR compliant: {stored_report['compliance_status']['gdpr_compliant']}")

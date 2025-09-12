@@ -165,21 +165,21 @@ class ChatBusinessValueValidator:
         
         report_lines.extend([
             f"Total Scenarios: {total_scenarios}",
-            f"Passing Quality Threshold (≥70%): {passing_scenarios}",
+            f"Passing Quality Threshold ( >= 70%): {passing_scenarios}",
             f"Success Rate: {(passing_scenarios/total_scenarios*100):.1f}%" if total_scenarios > 0 else "No scenarios tested",
             ""
         ])
         
         # Individual scenario results
         for scenario_name, result in self.validation_results.items():
-            status = "✅ PASS" if result["quality_score"] >= 70 else "❌ FAIL"
+            status = " PASS:  PASS" if result["quality_score"] >= 70 else " FAIL:  FAIL"
             report_lines.extend([
                 f"{status} {scenario_name}:",
                 f"  Quality Score: {result['quality_score']:.1f}%",
                 f"  Response Length: {result['response_length']} chars",
-                f"  Actionable Content: {'✓' if result['has_actionable_content'] else '✗'}",
-                f"  Specific Insights: {'✓' if result['has_specific_insights'] else '✗'}",
-                f"  Recommendations: {'✓' if result['has_recommendations'] else '✗'}",
+                f"  Actionable Content: {'[U+2713]' if result['has_actionable_content'] else '[U+2717]'}",
+                f"  Specific Insights: {'[U+2713]' if result['has_specific_insights'] else '[U+2717]'}",
+                f"  Recommendations: {'[U+2713]' if result['has_recommendations'] else '[U+2717]'}",
                 ""
             ])
         
@@ -380,11 +380,11 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
             These improvements should reduce response times by 50-70% and improve user experience significantly."""
         elif "status" in message_lower or "health" in message_lower:
             return """Current system status overview:
-            ✅ All core services operational (99.8% uptime)
-            ✅ Database performance within normal parameters
-            ✅ API response times averaging 120ms
-            ⚠️  Storage utilization at 78% - recommend cleanup soon
-            ⚠️  Memory usage peaks during business hours
+             PASS:  All core services operational (99.8% uptime)
+             PASS:  Database performance within normal parameters
+             PASS:  API response times averaging 120ms
+             WARNING: [U+FE0F]  Storage utilization at 78% - recommend cleanup soon
+             WARNING: [U+FE0F]  Memory usage peaks during business hours
             
             Overall system health: GOOD. Recommend proactive monitoring for storage and memory."""
         else:
@@ -401,7 +401,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
     @pytest.mark.real_services
     async def test_single_turn_chat_with_business_value(self):
         """Test single-turn chat interaction delivers real business value."""
-        logger.info("🚀 Starting single-turn chat business value test")
+        logger.info("[U+1F680] Starting single-turn chat business value test")
         
         scenarios = self.get_test_scenarios()[:2]  # Test first 2 scenarios
         validator = ChatBusinessValueValidator()
@@ -430,7 +430,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
                     is_quality_response = validator.validate_response_quality(final_response, scenario)
                     assert is_quality_response, f"Response quality too low for {scenario.name}"
                     
-                    logger.success(f"✅ {scenario.name}: Quality response received")
+                    logger.success(f" PASS:  {scenario.name}: Quality response received")
                     logger.info(f"Response preview: {final_response[:200]}...")
                 else:
                     pytest.fail(f"No final response received for {scenario.name}")
@@ -446,7 +446,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
     @pytest.mark.real_services 
     async def test_multi_turn_conversation_with_context(self):
         """Test multi-turn conversation maintains context and provides value."""
-        logger.info("🚀 Starting multi-turn conversation context test")
+        logger.info("[U+1F680] Starting multi-turn conversation context test")
         
         conversation_turns = [
             "What are the main cost drivers in my AI infrastructure?",
@@ -506,7 +506,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
         if context_indicators:
             context_maintained = sum(context_indicators) >= len(context_indicators) // 2
             assert context_maintained, "Context not maintained across conversation turns"
-            logger.success("✅ Context maintained across conversation turns")
+            logger.success(" PASS:  Context maintained across conversation turns")
         
         logger.info(validator.get_validation_report())
     
@@ -525,7 +525,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
     @pytest.mark.real_services
     async def test_websocket_event_transparency(self):
         """Test that all 5 critical WebSocket events are sent for agent transparency."""
-        logger.info("🚀 Starting WebSocket event transparency test")
+        logger.info("[U+1F680] Starting WebSocket event transparency test")
         
         async with self.chat_session() as (client, user_id):
             message = "Analyze my system performance and provide optimization recommendations"
@@ -543,9 +543,9 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
             
             # Report results
             if has_critical_events:
-                logger.success("✅ All 5 critical WebSocket events received")
+                logger.success(" PASS:  All 5 critical WebSocket events received")
             else:
-                logger.error(f"❌ Missing critical events: {missing_events}")
+                logger.error(f" FAIL:  Missing critical events: {missing_events}")
                 
                 # For this specific test, we require all events
                 assert has_critical_events, f"Missing critical WebSocket events: {missing_events}"
@@ -577,7 +577,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
     @pytest.mark.real_services
     async def test_error_handling_and_recovery(self):
         """Test chat handles malformed messages and recovers gracefully."""
-        logger.info("🚀 Starting error handling and recovery test")
+        logger.info("[U+1F680] Starting error handling and recovery test")
         
         error_scenarios = [
             {
@@ -592,7 +592,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
             },
             {
                 "name": "Invalid characters",
-                "message": "Test message with émojis and spëcial chars: 🚀💡",
+                "message": "Test message with [U+00E9]mojis and sp[U+00EB]cial chars: [U+1F680] IDEA: ",
                 "should_recover": True
             }
         ]
@@ -611,7 +611,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
                         assert len(events) > 0, f"No events for recoverable scenario: {scenario['name']}"
                         # Validate critical events even in error scenarios
                         has_critical_events, missing_events = validate_critical_websocket_events(events)
-                        logger.success(f"✅ Recovered from: {scenario['name']}, Events: {has_critical_events}")
+                        logger.success(f" PASS:  Recovered from: {scenario['name']}, Events: {has_critical_events}")
                     
                 except Exception as e:
                     if scenario["should_recover"]:
@@ -632,14 +632,14 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
             assert len(normal_events) > 0, "System not working normally after error scenarios"
             assert normal_response is not None, "No normal response after error recovery"
             
-            logger.success("✅ System recovered and working normally after errors")
+            logger.success(" PASS:  System recovered and working normally after errors")
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_concurrent_chat_sessions(self):
         """Test multiple concurrent chat sessions work without interference."""
-        logger.info("🚀 Starting concurrent chat sessions test")
+        logger.info("[U+1F680] Starting concurrent chat sessions test")
         
         user_scenarios = [
             ("user1", "Help me optimize my AWS costs"),
@@ -691,20 +691,20 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
             elif result.get("success", False):
                 successful_sessions += 1
                 event_status = "All events" if result.get("has_critical_events", False) else "Missing events"
-                logger.success(f"✅ Session {result['user_id']}: {result['events_count']} events, {event_status}, response: {result['response_preview']}")
+                logger.success(f" PASS:  Session {result['user_id']}: {result['events_count']} events, {event_status}, response: {result['response_preview']}")
             else:
-                logger.error(f"❌ Session {result['user_id']} failed: {result}")
+                logger.error(f" FAIL:  Session {result['user_id']} failed: {result}")
         
         # Require at least 2 out of 3 concurrent sessions to succeed
         assert successful_sessions >= 2, f"Only {successful_sessions}/3 concurrent sessions succeeded"
-        logger.success(f"✅ Concurrent sessions test passed: {successful_sessions}/3 sessions successful")
+        logger.success(f" PASS:  Concurrent sessions test passed: {successful_sessions}/3 sessions successful")
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
     @pytest.mark.real_services
     async def test_agent_specialization_and_routing(self):
         """Test that different query types route to appropriate specialized agents."""
-        logger.info("🚀 Starting agent specialization and routing test")
+        logger.info("[U+1F680] Starting agent specialization and routing test")
         
         specialization_tests = [
             {
@@ -753,7 +753,7 @@ class TestRealE2EChatInteraction(SSotAsyncTestCase):
                 assert capability_matches >= min_capabilities, \
                     f"Agent didn't demonstrate expected specialization for {test_case['agent_category']}"
                 
-                logger.success(f"✅ Agent specialization validated for {test_case['agent_category']}")
+                logger.success(f" PASS:  Agent specialization validated for {test_case['agent_category']}")
                 logger.info(f"Response shows {capability_matches}/{len(test_case['expected_capabilities'])} expected capabilities")
                 
                 # Brief pause between specialization tests
@@ -780,10 +780,10 @@ if __name__ == "__main__":
             logger.info("Running WebSocket transparency test...")
             await test_instance.test_websocket_event_transparency()
             
-            logger.success("🎉 All chat interaction E2E tests passed!")
+            logger.success(" CELEBRATION:  All chat interaction E2E tests passed!")
             
         except Exception as e:
-            logger.error(f"❌ Test failed: {e}")
+            logger.error(f" FAIL:  Test failed: {e}")
             raise
         finally:
             await test_instance.teardown_method()

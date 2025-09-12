@@ -92,7 +92,7 @@ class WebSocketEventsValidator:
         event_data['user_id'] = user_id
         event_data['source'] = 'websocket_manager'
         self.collected_events.append(event_data)
-        logger.info(f"📨 Captured WebSocket event: {event_data.get('type')} for user {user_id}")
+        logger.info(f"[U+1F4E8] Captured WebSocket event: {event_data.get('type')} for user {user_id}")
         
     async def _capture_agent_event(self, event_type: str, data: Dict, run_id: str = None, agent_name: str = None):
         """Capture agent events for validation."""
@@ -105,7 +105,7 @@ class WebSocketEventsValidator:
             'source': 'agent_bridge'
         }
         self.collected_events.append(event_data)
-        logger.info(f"🤖 Captured agent event: {event_type} from {agent_name}")
+        logger.info(f"[U+1F916] Captured agent event: {event_type} from {agent_name}")
         
     def create_test_user_context(self) -> UserExecutionContext:
         """Create test user context for agent execution."""
@@ -132,7 +132,7 @@ class WebSocketEventsValidator:
         
     async def test_complete_agent_execution_with_events(self) -> Dict:
         """Test complete agent execution with WebSocket event validation."""
-        logger.info("🚀 Starting WebSocket events validation test...")
+        logger.info("[U+1F680] Starting WebSocket events validation test...")
         
         # Create supervisor with mocked dependencies
         supervisor = SupervisorAgent(
@@ -149,11 +149,11 @@ class WebSocketEventsValidator:
             result = await supervisor.execute(user_context, stream_updates=True)
             execution_time = asyncio.get_event_loop().time() - start_time
             
-            logger.info(f"✅ Agent execution completed in {execution_time:.2f}s")
+            logger.info(f" PASS:  Agent execution completed in {execution_time:.2f}s")
             
         except Exception as e:
             execution_time = asyncio.get_event_loop().time() - start_time
-            logger.error(f"❌ Agent execution failed after {execution_time:.2f}s: {e}")
+            logger.error(f" FAIL:  Agent execution failed after {execution_time:.2f}s: {e}")
             result = {"error": str(e), "execution_failed": True}
         
         # Analyze collected events
@@ -191,15 +191,15 @@ class WebSocketEventsValidator:
         
         # Log results
         if test_passed:
-            logger.info("🎉 SUCCESS: All required WebSocket events received!")
-            logger.info(f"📊 Events received: {sorted(list(event_types & self.required_events))}")
+            logger.info(" CELEBRATION:  SUCCESS: All required WebSocket events received!")
+            logger.info(f" CHART:  Events received: {sorted(list(event_types & self.required_events))}")
         else:
-            logger.error("❌ FAILURE: Missing WebSocket events!")
-            logger.error(f"📊 Missing: {missing_events}")
-            logger.error(f"📊 Received: {sorted(list(event_types))}")
+            logger.error(" FAIL:  FAILURE: Missing WebSocket events!")
+            logger.error(f" CHART:  Missing: {missing_events}")
+            logger.error(f" CHART:  Received: {sorted(list(event_types))}")
             
-        logger.info(f"📈 Total events captured: {len(self.collected_events)}")
-        logger.info(f"⏱️ Execution time: {execution_time:.2f}s")
+        logger.info(f"[U+1F4C8] Total events captured: {len(self.collected_events)}")
+        logger.info(f"[U+23F1][U+FE0F] Execution time: {execution_time:.2f}s")
         
         return analysis
 
@@ -207,7 +207,7 @@ class WebSocketEventsValidator:
 async def run_websocket_events_validation():
     """Run the WebSocket events validation test."""
     print("=" * 80)
-    print("🧪 GOLDEN PATH INTEGRATION TEST: WebSocket Agent Events Validation")
+    print("[U+1F9EA] GOLDEN PATH INTEGRATION TEST: WebSocket Agent Events Validation")
     print("=" * 80)
     
     validator = WebSocketEventsValidator()
@@ -216,40 +216,40 @@ async def run_websocket_events_validation():
         analysis = await validator.test_complete_agent_execution_with_events()
         
         print(f"\n{'=' * 50}")
-        print("📋 TEST RESULTS SUMMARY")
+        print("[U+1F4CB] TEST RESULTS SUMMARY")
         print(f"{'=' * 50}")
-        print(f"✅ Test Passed: {analysis['test_passed']}")
-        print(f"⏱️ Execution Time: {analysis['execution_time']:.2f}s")
-        print(f"📊 Total Events: {analysis['total_events_captured']}")
-        print(f"🎯 Required Events Received: {analysis['required_events_received']}/5")
+        print(f" PASS:  Test Passed: {analysis['test_passed']}")
+        print(f"[U+23F1][U+FE0F] Execution Time: {analysis['execution_time']:.2f}s")
+        print(f" CHART:  Total Events: {analysis['total_events_captured']}")
+        print(f" TARGET:  Required Events Received: {analysis['required_events_received']}/5")
         
         if analysis['missing_events']:
-            print(f"❌ Missing Events: {analysis['missing_events']}")
+            print(f" FAIL:  Missing Events: {analysis['missing_events']}")
         else:
-            print("✅ All 5 critical events received!")
+            print(" PASS:  All 5 critical events received!")
             
-        print(f"📈 Event Sequence: {' → '.join(analysis['event_sequence'])}")
+        print(f"[U+1F4C8] Event Sequence: {'  ->  '.join(analysis['event_sequence'])}")
         
         # Show event details
         print(f"\n{'=' * 30}")
-        print("📋 EVENT DETAILS")
+        print("[U+1F4CB] EVENT DETAILS")
         print(f"{'=' * 30}")
         for event_type, count in analysis['event_counts'].items():
             print(f"  {event_type}: {count} events")
             
         # Success/failure message
         if analysis['test_passed']:
-            print(f"\n🚀 SUCCESS: Agent execution progressed beyond 'start agent' to deliver complete user responses!")
-            print(f"💰 Business Value: Users will see substantive AI interactions with real-time progress")
+            print(f"\n[U+1F680] SUCCESS: Agent execution progressed beyond 'start agent' to deliver complete user responses!")
+            print(f"[U+1F4B0] Business Value: Users will see substantive AI interactions with real-time progress")
             return True
         else:
-            print(f"\n💥 FAILURE: Agent execution did not complete properly or missing WebSocket events")
-            print(f"🚨 Business Impact: Users won't see agent progress, breaking core chat value")
+            print(f"\n[U+1F4A5] FAILURE: Agent execution did not complete properly or missing WebSocket events")
+            print(f" ALERT:  Business Impact: Users won't see agent progress, breaking core chat value")
             return False
             
     except Exception as e:
-        print(f"\n💥 CRITICAL ERROR: Test execution failed: {e}")
-        print(f"🚨 This indicates fundamental issues with agent execution pipeline")
+        print(f"\n[U+1F4A5] CRITICAL ERROR: Test execution failed: {e}")
+        print(f" ALERT:  This indicates fundamental issues with agent execution pipeline")
         return False
 
 

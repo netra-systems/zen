@@ -98,8 +98,8 @@ async def test_cross_service_permission_boundaries():
     Cross-Service Permission Boundary Validation
     
     BVJ: Ensure permission checks are enforced at all service boundaries
-    - Auth Service → Backend permission validation
-    - Frontend → Backend permission enforcement
+    - Auth Service  ->  Backend permission validation
+    - Frontend  ->  Backend permission enforcement
     - Service-to-service permission verification
     """
     manager = AuthCompleteFlowManager()
@@ -116,8 +116,8 @@ async def test_cross_service_permission_boundaries():
         
         # Validate service boundary tests
         boundaries = boundary_results["service_boundaries"]
-        assert boundaries["auth_to_backend"]["permission_checks_enforced"], "Auth→Backend boundary should enforce permissions"
-        assert boundaries["frontend_to_backend"]["permission_checks_enforced"], "Frontend→Backend boundary should enforce permissions"
+        assert boundaries["auth_to_backend"]["permission_checks_enforced"], "Auth -> Backend boundary should enforce permissions"
+        assert boundaries["frontend_to_backend"]["permission_checks_enforced"], "Frontend -> Backend boundary should enforce permissions"
         assert boundaries["service_to_service"]["permission_checks_enforced"], "Service-to-service boundary should enforce permissions"
         
         # Validate no permission bypass attempts succeed

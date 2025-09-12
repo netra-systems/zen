@@ -8,12 +8,12 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core platform functionality that enables business value through AI optimization
 
 CRITICAL: These tests validate the complete business flow from user request to delivered value:
-1. User submits optimization request → Agent execution starts
-2. ExecutionEngineFactory creates isolated engine → User isolation guaranteed  
-3. SupervisorAgent orchestrates sub-agents → Pipeline coordination working
-4. Agents execute in correct order → Data → Optimization → Reporting
-5. WebSocket events stream progress → User sees AI working on their problem
-6. Final response delivered → User receives actionable business insights
+1. User submits optimization request  ->  Agent execution starts
+2. ExecutionEngineFactory creates isolated engine  ->  User isolation guaranteed  
+3. SupervisorAgent orchestrates sub-agents  ->  Pipeline coordination working
+4. Agents execute in correct order  ->  Data  ->  Optimization  ->  Reporting
+5. WebSocket events stream progress  ->  User sees AI working on their problem
+6. Final response delivered  ->  User receives actionable business insights
 
 This test suite validates the complete golden path that delivers our core business value.
 """
@@ -102,7 +102,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             """Collect WebSocket events for test validation."""
             event_data['collected_at'] = datetime.now(timezone.utc).isoformat()
             self.websocket_events.append(event_data)
-            self.logger.info(f"📊 Collected WebSocket event: {event_data.get('type', 'unknown')}")
+            self.logger.info(f" CHART:  Collected WebSocket event: {event_data.get('type', 'unknown')}")
             
         self.mock_websocket_manager.send_to_user.side_effect = collect_websocket_event
         
@@ -117,7 +117,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
                 'collected_at': datetime.now(timezone.utc).isoformat()
             }
             self.websocket_events.append(event_data)
-            self.logger.info(f"📊 Collected agent event: {event_type} from {agent_name}")
+            self.logger.info(f" CHART:  Collected agent event: {event_type} from {agent_name}")
             
         self.mock_websocket_bridge.emit_agent_event.side_effect = collect_agent_event
     
@@ -155,7 +155,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
                 f"This breaks the user chat experience - users won't see agent progress."
             )
         
-        self.logger.info(f"✅ All expected WebSocket events validated: {expected_events}")
+        self.logger.info(f" PASS:  All expected WebSocket events validated: {expected_events}")
 
     # ============================================================================
     # ExecutionEngineFactory Tests - User Isolation and Engine Creation
@@ -233,7 +233,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             assert metrics['active_engines_count'] >= 2
             assert metrics['total_engines_created'] >= 2
             
-            self.logger.info("✅ ExecutionEngineFactory user isolation validated")
+            self.logger.info(" PASS:  ExecutionEngineFactory user isolation validated")
             
         finally:
             # Clean up engines
@@ -277,7 +277,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         metrics = factory.get_factory_metrics()
         assert metrics['total_engines_cleaned'] >= 1
         
-        self.logger.info("✅ ExecutionEngineFactory context manager cleanup validated")
+        self.logger.info(" PASS:  ExecutionEngineFactory context manager cleanup validated")
     
     @pytest.mark.integration 
     @pytest.mark.real_services
@@ -348,7 +348,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         assert metrics['total_engines_cleaned'] >= 5
         assert metrics['active_engines_count'] == 0
         
-        self.logger.info(f"✅ Concurrent user execution validated in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Concurrent user execution validated in {execution_time:.2f}s")
 
     # ============================================================================
     # SupervisorAgent Orchestration Tests
@@ -432,13 +432,13 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         # Validate business value delivered
         self.assert_business_value_delivered(result, 'cost_savings')
         
-        self.logger.info(f"✅ SupervisorAgent orchestration validated in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  SupervisorAgent orchestration validated in {execution_time:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_supervisor_agent_pipeline_execution_order(self, real_services_fixture):
         """
-        Test agent pipeline executes in correct order: Triage → Data Helper → Optimization → Reporting.
+        Test agent pipeline executes in correct order: Triage  ->  Data Helper  ->  Optimization  ->  Reporting.
         
         Business Value: Ensures logical flow that builds insights progressively.
         Critical Path: Agents execute in dependency order to maximize analysis quality.
@@ -508,7 +508,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         assert result.get('orchestration_successful') == True
         self.assert_business_value_delivered(result, 'insights')
         
-        self.logger.info(f"✅ Agent pipeline execution order validated: {' → '.join(execution_order)}")
+        self.logger.info(f" PASS:  Agent pipeline execution order validated: {'  ->  '.join(execution_order)}")
 
     # ============================================================================
     # Agent Failure Recovery and Error Handling Tests  
@@ -587,7 +587,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             assert 'summary' in reporting_result or 'recommendations' in reporting_result, \
                 "UVS: Reporting must provide some guidance even with upstream failures"
         
-        self.logger.info("✅ Agent failure recovery with UVS principle validated")
+        self.logger.info(" PASS:  Agent failure recovery with UVS principle validated")
 
     # ============================================================================
     # Multi-User Isolation and Concurrent Execution Tests
@@ -743,7 +743,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         assert not any('anthropic' in str(response) for response in user1_data), "User 1 should not see User 2's data"
         assert not any('openai' in str(response) for response in user2_data), "User 2 should not see User 1's data"
         
-        self.logger.info("✅ Multi-user isolation and concurrent execution validated")
+        self.logger.info(" PASS:  Multi-user isolation and concurrent execution validated")
 
     # ============================================================================
     # WebSocket Event Integration Tests (5 Critical Events)
@@ -776,7 +776,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             event_data['captured_at'] = datetime.now(timezone.utc).isoformat()
             event_data['user_id'] = user_id
             detailed_events.append(event_data)
-            self.logger.info(f"📊 Captured detailed WebSocket event: {event_data.get('type')} for user {user_id}")
+            self.logger.info(f" CHART:  Captured detailed WebSocket event: {event_data.get('type')} for user {user_id}")
         
         async def capture_detailed_agent_events(event_type: str, data: Dict, run_id: str = None, agent_name: str = None):
             """Capture detailed agent events for validation."""
@@ -788,7 +788,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
                 'captured_at': datetime.now(timezone.utc).isoformat()
             }
             detailed_events.append(event_data)
-            self.logger.info(f"📊 Captured detailed agent event: {event_type} from {agent_name}")
+            self.logger.info(f" CHART:  Captured detailed agent event: {event_type} from {agent_name}")
         
         self.mock_websocket_manager.send_to_user.side_effect = capture_detailed_websocket_events
         self.mock_websocket_bridge.emit_agent_event.side_effect = capture_detailed_agent_events
@@ -878,9 +878,9 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             if 'user_id' in event:
                 assert event['user_id'] == self.test_user_id, "Events must be associated with correct user"
         
-        self.logger.info(f"✅ All 5 critical WebSocket events validated in {execution_time:.2f}s")
-        self.logger.info(f"📊 Total events captured: {len(detailed_events)}")
-        self.logger.info(f"🎯 Event types: {list(set(captured_event_types))}")
+        self.logger.info(f" PASS:  All 5 critical WebSocket events validated in {execution_time:.2f}s")
+        self.logger.info(f" CHART:  Total events captured: {len(detailed_events)}")
+        self.logger.info(f" TARGET:  Event types: {list(set(captured_event_types))}")
 
     # ============================================================================
     # Real Business Scenario Tests
@@ -1065,8 +1065,8 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         # Validate business value metrics
         self.assert_business_value_delivered(result, 'cost_savings')
         
-        self.logger.info(f"✅ Real business scenario validation completed in {execution_time:.2f}s")
-        self.logger.info("💰 Business value: Cost optimization analysis with actionable recommendations")
+        self.logger.info(f" PASS:  Real business scenario validation completed in {execution_time:.2f}s")
+        self.logger.info("[U+1F4B0] Business value: Cost optimization analysis with actionable recommendations")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1158,7 +1158,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             # Validate user experience (WebSocket events)
             assert len(self.websocket_events) >= 2, f"Scenario '{scenario['name']}' must send progress events"
             
-            self.logger.info(f"⏱️ Performance validated: {scenario['name']} completed in {execution_time:.2f}s")
+            self.logger.info(f"[U+23F1][U+FE0F] Performance validated: {scenario['name']} completed in {execution_time:.2f}s")
         
         # Calculate overall performance metrics
         avg_execution_time = sum(r['execution_time'] for r in performance_results) / len(performance_results)
@@ -1168,9 +1168,9 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         assert all_within_limits, "All scenarios must meet performance requirements"
         assert avg_execution_time < 30.0, f"Average execution time too high: {avg_execution_time:.2f}s"
         
-        self.logger.info("✅ Agent execution performance validation completed")
-        self.logger.info(f"📊 Average execution time: {avg_execution_time:.2f}s")
-        self.logger.info(f"🎯 All scenarios within performance limits: {all_within_limits}")
+        self.logger.info(" PASS:  Agent execution performance validation completed")
+        self.logger.info(f" CHART:  Average execution time: {avg_execution_time:.2f}s")
+        self.logger.info(f" TARGET:  All scenarios within performance limits: {all_within_limits}")
 
     # ============================================================================
     # Edge Cases and Error Conditions
@@ -1205,7 +1205,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         error_message = str(exc_info.value)
         assert len(error_message) > 10, "Error message too brief for invalid user_id"
         assert "user_id" in error_message.lower(), "Error message should mention user_id issue"
-        self.logger.info(f"✅ Invalid user_id properly rejected at creation: {error_message}")
+        self.logger.info(f" PASS:  Invalid user_id properly rejected at creation: {error_message}")
         
         # Test 2: Missing database session - create context and test execution
         invalid_context_no_db = UserExecutionContext(
@@ -1221,7 +1221,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         
         error_message = str(exc_info.value)
         assert len(error_message) > 10, "Error message too brief for missing session"
-        self.logger.info(f"✅ Invalid missing session properly rejected: {error_message}")
+        self.logger.info(f" PASS:  Invalid missing session properly rejected: {error_message}")
         
         # Test 3: Invalid thread_id format at creation time
         with pytest.raises(InvalidContextError) as exc_info:
@@ -1236,7 +1236,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         error_message = str(exc_info.value)
         assert len(error_message) > 10, "Error message too brief for invalid thread_id"
         assert "thread_id" in error_message.lower(), "Error message should mention thread_id issue"
-        self.logger.info(f"✅ Invalid thread_id properly rejected at creation: {error_message}")
+        self.logger.info(f" PASS:  Invalid thread_id properly rejected at creation: {error_message}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1281,7 +1281,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         # Validate business value still delivered
         self.assert_business_value_delivered(result, 'insights')
         
-        self.logger.info("✅ Graceful WebSocket failure handling validated")
+        self.logger.info(" PASS:  Graceful WebSocket failure handling validated")
 
     # ============================================================================
     # Cleanup and Utility Methods  
@@ -1301,7 +1301,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
             if hasattr(self, 'mock_websocket_bridge'):
                 self.mock_websocket_bridge.reset_mock()
             
-            self.logger.info("✅ Test cleanup completed")
+            self.logger.info(" PASS:  Test cleanup completed")
             
         except Exception as e:
             self.logger.warning(f"Error during test cleanup: {e}")

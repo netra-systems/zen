@@ -74,10 +74,10 @@ class TestAgentExecutionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 AGENT FACTORY FAILURE: ExecutionEngineFactory failed for user {self.user_id[:8]}... run {self.run_id}"
+                f" ALERT:  AGENT FACTORY FAILURE: ExecutionEngineFactory failed for user {self.user_id[:8]}... run {self.run_id}"
             )
             self.mock_logger.critical(
-                f"🔍 FACTORY FAILURE CONTEXT: {json.dumps(factory_failure_context, indent=2)}"
+                f" SEARCH:  FACTORY FAILURE CONTEXT: {json.dumps(factory_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -131,10 +131,10 @@ class TestAgentExecutionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.error(
-                f"🔧 TOOL EXECUTION FAILURE: {tool_name} failed in {self.agent_name} for run {self.run_id}"
+                f"[U+1F527] TOOL EXECUTION FAILURE: {tool_name} failed in {self.agent_name} for run {self.run_id}"
             )
             self.mock_logger.error(
-                f"🔍 TOOL FAILURE CONTEXT: {json.dumps(tool_failure_context, indent=2)}"
+                f" SEARCH:  TOOL FAILURE CONTEXT: {json.dumps(tool_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -167,10 +167,10 @@ class TestAgentExecutionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 AGENT STATE FAILURE: State management failed for {self.agent_name} run {self.run_id}"
+                f" ALERT:  AGENT STATE FAILURE: State management failed for {self.agent_name} run {self.run_id}"
             )
             self.mock_logger.critical(
-                f"🔍 STATE FAILURE CONTEXT: {json.dumps(state_failure_context, indent=2)}"
+                f" SEARCH:  STATE FAILURE CONTEXT: {json.dumps(state_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -204,10 +204,10 @@ class TestAgentExecutionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 AGENT EVENT FAILURE: Failed to deliver {event_type} event from {self.agent_name} for run {self.run_id}"
+                f" ALERT:  AGENT EVENT FAILURE: Failed to deliver {event_type} event from {self.agent_name} for run {self.run_id}"
             )
             self.mock_logger.critical(
-                f"🔍 EVENT FAILURE CONTEXT: {json.dumps(event_failure_context, indent=2)}"
+                f" SEARCH:  EVENT FAILURE CONTEXT: {json.dumps(event_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -241,11 +241,11 @@ class TestAgentExecutionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.warning(
-                f"⏰ AGENT TIMEOUT: {self.agent_name} execution timed out for run {self.run_id} "
+                f"[U+23F0] AGENT TIMEOUT: {self.agent_name} execution timed out for run {self.run_id} "
                 f"(duration: {execution_duration}s, limit: {timeout_duration}s)"
             )
             self.mock_logger.info(
-                f"🔍 TIMEOUT CONTEXT: {json.dumps(timeout_context, indent=2)}"
+                f" SEARCH:  TIMEOUT CONTEXT: {json.dumps(timeout_context, indent=2)}"
             )
         
         # Validate logging
@@ -279,11 +279,11 @@ class TestAgentExecutionFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 AGENT MEMORY EXHAUSTION: {self.agent_name} exceeded memory limit for run {self.run_id} "
+                f" ALERT:  AGENT MEMORY EXHAUSTION: {self.agent_name} exceeded memory limit for run {self.run_id} "
                 f"(used: {memory_used}GB, limit: {memory_limit}GB)"
             )
             self.mock_logger.critical(
-                f"🔍 MEMORY FAILURE CONTEXT: {json.dumps(memory_failure_context, indent=2)}"
+                f" SEARCH:  MEMORY FAILURE CONTEXT: {json.dumps(memory_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -384,10 +384,10 @@ class TestAgentOrchestrationFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 SUPERVISOR FAILURE: SupervisorAgent orchestration failed for run {self.run_id} at step '{failed_step}'"
+                f" ALERT:  SUPERVISOR FAILURE: SupervisorAgent orchestration failed for run {self.run_id} at step '{failed_step}'"
             )
             self.mock_logger.critical(
-                f"🔍 SUPERVISOR FAILURE CONTEXT: {json.dumps(supervisor_failure_context, indent=2)}"
+                f" SEARCH:  SUPERVISOR FAILURE CONTEXT: {json.dumps(supervisor_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -421,10 +421,10 @@ class TestAgentOrchestrationFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.error(
-                f"🔄 AGENT COORDINATION FAILURE: Handoff failed from {source_agent} to {target_agent} for run {self.run_id}"
+                f" CYCLE:  AGENT COORDINATION FAILURE: Handoff failed from {source_agent} to {target_agent} for run {self.run_id}"
             )
             self.mock_logger.error(
-                f"🔍 COORDINATION FAILURE CONTEXT: {json.dumps(coordination_failure_context, indent=2)}"
+                f" SEARCH:  COORDINATION FAILURE CONTEXT: {json.dumps(coordination_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -457,10 +457,10 @@ class TestAgentOrchestrationFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.critical(
-                f"🚨 SECURITY VIOLATION: Execution context isolation failure for run {self.run_id}"
+                f" ALERT:  SECURITY VIOLATION: Execution context isolation failure for run {self.run_id}"
             )
             self.mock_logger.critical(
-                f"🔍 ISOLATION FAILURE CONTEXT: {json.dumps(isolation_failure_context, indent=2)}"
+                f" SEARCH:  ISOLATION FAILURE CONTEXT: {json.dumps(isolation_failure_context, indent=2)}"
             )
         
         # Validate logging
@@ -492,11 +492,11 @@ class TestAgentOrchestrationFailureLogging(SSotAsyncTestCase):
             }
             
             self.mock_logger.info(
-                f"✅ AGENT SUCCESS: SupervisorAgent completed successfully for run {self.run_id} "
+                f" PASS:  AGENT SUCCESS: SupervisorAgent completed successfully for run {self.run_id} "
                 f"(duration: {execution_duration}s, events: {events_delivered}/5)"
             )
             self.mock_logger.info(
-                f"🔍 SUCCESS CONTEXT: {json.dumps(success_context, indent=2)}"
+                f" SEARCH:  SUCCESS CONTEXT: {json.dumps(success_context, indent=2)}"
             )
         
         # Validate success logging

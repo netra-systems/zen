@@ -42,7 +42,7 @@ class TestPortBindingRaceCondition(unittest.TestCase):
         Test that demonstrates the race condition between port check and actual bind.
         
         This test reproduces the actual error:
-        [AUTH] ❌ ERROR: [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8081)
+        [AUTH]  FAIL:  ERROR: [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8081)
         
         The issue is that is_port_available() binds to check, then immediately releases,
         but the OS may not have fully released the port when uvicorn tries to bind.

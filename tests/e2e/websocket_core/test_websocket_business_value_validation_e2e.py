@@ -49,7 +49,7 @@ class TestWebSocketBusinessValueValidationE2E(SSotBaseTestCase):
     async def test_complete_cost_optimization_business_value_e2e(self, auth_helper, websocket_utility):
         """Test complete cost optimization business value delivery with authentication.
         
-        Validates end-to-end value: user business problem → AI analysis → actionable savings recommendations.
+        Validates end-to-end value: user business problem  ->  AI analysis  ->  actionable savings recommendations.
         """
         # STEP 1: Authenticate business user (MANDATORY for E2E)
         business_user_auth = await auth_helper.authenticate_test_user(
@@ -185,7 +185,7 @@ class TestWebSocketBusinessValueValidationE2E(SSotBaseTestCase):
     async def test_end_to_end_user_journey_value_delivery_e2e(self, auth_helper, websocket_utility):
         """Test complete user journey from problem to solution with authentication.
         
-        Validates the entire user experience: problem identification → AI assistance → valuable outcome.
+        Validates the entire user experience: problem identification  ->  AI assistance  ->  valuable outcome.
         """
         # Authenticate end user (MANDATORY for E2E)
         end_user_auth = await auth_helper.authenticate_test_user(

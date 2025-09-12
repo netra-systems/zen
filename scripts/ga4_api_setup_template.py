@@ -212,7 +212,7 @@ class GA4Configurator:
         }
         
         for component, is_valid in validations.items():
-            status = "✓" if is_valid else "✗"
+            status = "[U+2713]" if is_valid else "[U+2717]"
             logger.info(f"{status} {component}")
         
         return all(validations.values())
@@ -285,9 +285,9 @@ class GA4Configurator:
             
             # Validate configuration
             if self.validate_configuration():
-                logger.info("✓ GA4 configuration completed successfully!")
+                logger.info("[U+2713] GA4 configuration completed successfully!")
             else:
-                logger.warning("⚠ Some configurations may need manual review")
+                logger.warning(" WARNING:  Some configurations may need manual review")
             
             return True
             

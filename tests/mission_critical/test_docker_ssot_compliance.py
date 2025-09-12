@@ -146,7 +146,7 @@ class TestDockerSSOTInfrastructure:
     
     def test_ssot_architecture_enforcement(self):
         """Test SSOT architecture enforcement across all Docker operations."""
-        logger.info("🏗️ Testing SSOT architecture enforcement")
+        logger.info("[U+1F3D7][U+FE0F] Testing SSOT architecture enforcement")
         
         compliance_metrics = SSOTComplianceMetrics()
         
@@ -172,12 +172,12 @@ class TestDockerSSOTInfrastructure:
         compliance_metrics.ssot_compliant_operations += 1
         
         # Verify compliance percentage
-        logger.info(f"✅ SSOT compliance: {compliance_metrics.compliance_percentage:.1f}%")
+        logger.info(f" PASS:  SSOT compliance: {compliance_metrics.compliance_percentage:.1f}%")
         assert compliance_metrics.compliance_percentage >= 100.0, f"SSOT compliance below 100%: {compliance_metrics.compliance_percentage:.1f}%"
     
     def test_ssot_performance_overhead_measurement(self):
         """Measure performance overhead of SSOT pattern implementation."""
-        logger.info("📊 Measuring SSOT performance overhead")
+        logger.info(" CHART:  Measuring SSOT performance overhead")
         
         # Baseline - Direct UnifiedDockerManager operations
         baseline_times = []
@@ -220,7 +220,7 @@ class TestDockerSSOTInfrastructure:
         overhead_ms = (ssot_avg - baseline_avg) * 1000 if baseline_avg > 0 else 0
         overhead_percentage = ((ssot_avg / baseline_avg) - 1) * 100 if baseline_avg > 0 else 0
         
-        logger.info(f"✅ SSOT performance analysis:")
+        logger.info(f" PASS:  SSOT performance analysis:")
         logger.info(f"   Baseline average: {baseline_avg:.4f}s")
         logger.info(f"   SSOT average: {ssot_avg:.4f}s")
         logger.info(f"   Overhead: {overhead_ms:.2f}ms ({overhead_percentage:.1f}%)")
@@ -231,7 +231,7 @@ class TestDockerSSOTInfrastructure:
     
     def test_ssot_resource_efficiency(self):
         """Test resource efficiency of SSOT pattern implementation."""
-        logger.info("💾 Testing SSOT resource efficiency")
+        logger.info("[U+1F4BE] Testing SSOT resource efficiency")
         
         initial_memory = psutil.virtual_memory().used / (1024 * 1024)  # MB
         initial_threads = threading.active_count()
@@ -271,7 +271,7 @@ class TestDockerSSOTInfrastructure:
         total_memory_delta = final_memory - initial_memory
         total_thread_delta = final_threads - initial_threads
         
-        logger.info(f"✅ SSOT resource efficiency analysis:")
+        logger.info(f" PASS:  SSOT resource efficiency analysis:")
         logger.info(f"   Average memory per utility: {avg_memory_per_utility:.2f}MB")
         logger.info(f"   Maximum memory per utility: {max_memory_per_utility:.2f}MB")
         logger.info(f"   Total memory delta: {total_memory_delta:.2f}MB")
@@ -289,7 +289,7 @@ class TestDockerSSOTInfrastructure:
     
     def test_compliance_violation_detection(self):
         """Test detection of SSOT compliance violations."""
-        logger.info("🔍 Testing compliance violation detection")
+        logger.info(" SEARCH:  Testing compliance violation detection")
         
         violations_detected = []
         
@@ -315,7 +315,7 @@ class TestDockerSSOTInfrastructure:
         if manager1 is manager2:
             violations_detected.append("UnifiedDockerManager is singleton when it should allow multiple instances")
         
-        logger.info(f"✅ Compliance violation detection:")
+        logger.info(f" PASS:  Compliance violation detection:")
         if violations_detected:
             logger.warning(f"   Violations detected: {len(violations_detected)}")
             for violation in violations_detected:
@@ -328,7 +328,7 @@ class TestDockerSSOTInfrastructure:
     
     def test_architecture_boundary_validation(self):
         """Test validation of architecture boundaries in SSOT pattern."""
-        logger.info("🏰 Testing architecture boundary validation")
+        logger.info("[U+1F3F0] Testing architecture boundary validation")
         
         boundary_checks = {
             'unified_docker_manager_interface': False,
@@ -398,10 +398,10 @@ class TestDockerSSOTInfrastructure:
         total_checks = len(boundary_checks)
         boundary_compliance = (passed_checks / total_checks) * 100
         
-        logger.info(f"✅ Architecture boundary validation:")
+        logger.info(f" PASS:  Architecture boundary validation:")
         logger.info(f"   Passed checks: {passed_checks}/{total_checks} ({boundary_compliance:.1f}%)")
         for check, result in boundary_checks.items():
-            status = "✓" if result else "✗"
+            status = "[U+2713]" if result else "[U+2717]"
             logger.info(f"     {status} {check}")
         
         # Validate boundary compliance
@@ -410,7 +410,7 @@ class TestDockerSSOTInfrastructure:
     @pytest.mark.asyncio
     async def test_multi_environment_ssot_consistency(self):
         """Test SSOT consistency across multiple environments."""
-        logger.info("🌍 Testing multi-environment SSOT consistency")
+        logger.info("[U+1F30D] Testing multi-environment SSOT consistency")
         
         environments = []
         consistency_metrics = {
@@ -475,10 +475,10 @@ class TestDockerSSOTInfrastructure:
         total_aspects = len(consistency_metrics)
         consistency_percentage = (consistent_aspects / total_aspects) * 100
         
-        logger.info(f"✅ Multi-environment SSOT consistency:")
+        logger.info(f" PASS:  Multi-environment SSOT consistency:")
         logger.info(f"   Overall consistency: {consistency_percentage:.1f}%")
         for aspect, is_consistent in consistency_metrics.items():
-            status = "✓" if is_consistent else "✗"
+            status = "[U+2713]" if is_consistent else "[U+2717]"
             logger.info(f"     {status} {aspect}")
         
         # Validate consistency requirements
@@ -487,7 +487,7 @@ class TestDockerSSOTInfrastructure:
     
     def test_ssot_concurrent_access_safety(self):
         """Test SSOT pattern safety under concurrent access."""
-        logger.info("🔄 Testing SSOT concurrent access safety")
+        logger.info(" CYCLE:  Testing SSOT concurrent access safety")
         
         concurrent_results = []
         error_count = 0
@@ -551,7 +551,7 @@ class TestDockerSSOTInfrastructure:
         
         success_rate = (success_count / (success_count + error_count)) * 100 if (success_count + error_count) > 0 else 0
         
-        logger.info(f"✅ SSOT concurrent access safety:")
+        logger.info(f" PASS:  SSOT concurrent access safety:")
         logger.info(f"   Success rate: {success_rate:.1f}% ({success_count}/{success_count + error_count})")
         logger.info(f"   Average operation time: {avg_operation_time:.3f}s")
         logger.info(f"   Maximum operation time: {max_operation_time:.3f}s")

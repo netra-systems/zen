@@ -2,7 +2,7 @@
 Token Security Validator - SSOT for Authentication Token Security
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Prevent unauthorized access and protect user data
 - Value Impact: Security breaches cause customer churn and regulatory issues
 - Strategic Impact: Enterprise security compliance enables high-value customers

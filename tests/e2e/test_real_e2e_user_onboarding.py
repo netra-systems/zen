@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
 - Uses REAL services only: Auth, Backend, PostgreSQL, Redis, WebSocket (NO MOCKS per "MOCKS = Abomination")
-- Tests complete business value delivery: signup → profile → AI setup → optimization goals → first task
+- Tests complete business value delivery: signup  ->  profile  ->  AI setup  ->  optimization goals  ->  first task
 - Validates ALL 5 required WebSocket events for agent interactions
 - Delivers REAL business value through actual AI-powered cost optimization
 - Progressive disclosure validation ensures smooth user experience
@@ -131,7 +131,7 @@ class UserOnboardingJourney:
             "data": data or {}
         }
         self.journey_steps.append(step)
-        logger.info(f"Onboarding step '{step_name}': {'✓' if success else '✗'} ({duration:.2f}s)")
+        logger.info(f"Onboarding step '{step_name}': {'[U+2713]' if success else '[U+2717]'} ({duration:.2f}s)")
 
     def record_websocket_event(self, event: Dict[str, Any]):
         """Record WebSocket event for validation."""
@@ -164,7 +164,7 @@ class UserOnboardingJourney:
         journey_successful = all(required_steps)
         self.total_journey_duration = time.time() - self.start_time
         
-        logger.info(f"Journey validation: {'✓ SUCCESS' if journey_successful else '✗ FAILED'}")
+        logger.info(f"Journey validation: {'[U+2713] SUCCESS' if journey_successful else '[U+2717] FAILED'}")
         logger.info(f"Total duration: {self.total_journey_duration:.2f}s")
         logger.info(f"WebSocket events: {len(self.events_received)}/{len(self.required_events)} required")
         
@@ -218,11 +218,11 @@ class RealUserOnboardingTester(BaseE2ETest):
             try:
                 response = await self.http_client.get(health_url, timeout=10.0)
                 if response.status_code == 200:
-                    logger.info(f"✓ {service_name} is ready")
+                    logger.info(f"[U+2713] {service_name} is ready")
                 else:
-                    logger.warning(f"⚠️ {service_name} returned {response.status_code}")
+                    logger.warning(f" WARNING: [U+FE0F] {service_name} returned {response.status_code}")
             except Exception as e:
-                logger.warning(f"⚠️ {service_name} check failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] {service_name} check failed: {e}")
                 
     async def cleanup_test_environment(self):
         """Clean up test resources."""
@@ -264,7 +264,7 @@ class RealUserOnboardingTester(BaseE2ETest):
                 user_data = response.json()
                 journey.user_id = user_data.get("id") or user_data.get("user_id")
                 journey.account_created = True
-                logger.info(f"✓ User account created: {journey.email}")
+                logger.info(f"[U+2713] User account created: {journey.email}")
             else:
                 logger.error(f"Account creation failed: {response.status_code} - {response.text}")
                 
@@ -302,7 +302,7 @@ class RealUserOnboardingTester(BaseE2ETest):
             if response.status_code == 200:
                 token_data = response.json()
                 journey.jwt_token = token_data.get("access_token")
-                logger.info("✓ User authenticated successfully")
+                logger.info("[U+2713] User authenticated successfully")
             else:
                 logger.error(f"Authentication failed: {response.status_code}")
                 
@@ -339,7 +339,7 @@ class RealUserOnboardingTester(BaseE2ETest):
             
             if response.status_code in [200, 204]:
                 journey.profile_completed = True
-                logger.info(f"✓ Profile setup completed for {journey.full_name} at {journey.company}")
+                logger.info(f"[U+2713] Profile setup completed for {journey.full_name} at {journey.company}")
             else:
                 logger.warning(f"Profile setup returned {response.status_code}")
                 # Consider partial success for business flow
@@ -387,7 +387,7 @@ class RealUserOnboardingTester(BaseE2ETest):
             
             if response.status_code in [200, 201]:
                 journey.ai_provider_connected = True
-                logger.info(f"✓ AI provider connected: {provider_config['provider']}")
+                logger.info(f"[U+2713] AI provider connected: {provider_config['provider']}")
             else:
                 logger.warning(f"AI provider connection returned {response.status_code}")
                 # For business flow, assume successful setup
@@ -520,7 +520,7 @@ class RealUserOnboardingTester(BaseE2ETest):
                           {"summary": onboarding_summary})
         
         if journey.onboarding_completed:
-            logger.info("✓ Onboarding completed - user ready for optimization tasks")
+            logger.info("[U+2713] Onboarding completed - user ready for optimization tasks")
 
     async def _step_execute_first_optimization_task(self, journey: UserOnboardingJourney):
         """Step 7: Complete first optimization task with real WebSocket and business value."""
@@ -606,13 +606,13 @@ class RealUserOnboardingTester(BaseE2ETest):
                         if has_cost_analysis or has_recommendations:
                             journey.real_business_value_delivered = True
                             journey.first_optimization_successful = True
-                            logger.info("✓ First optimization delivered real business value")
+                            logger.info("[U+2713] First optimization delivered real business value")
                         break
                         
                     # Check for other critical events
                     event_type = event.get("type")
                     if event_type in journey.required_events:
-                        logger.info(f"✓ Received required event: {event_type}")
+                        logger.info(f"[U+2713] Received required event: {event_type}")
                         
                 except asyncio.TimeoutError:
                     logger.warning("WebSocket event timeout - continuing to wait")
@@ -646,7 +646,7 @@ class RealUserOnboardingTester(BaseE2ETest):
         journey = UserOnboardingJourney("complete_user_onboarding")
         
         try:
-            logger.info("🚀 Starting complete user onboarding journey")
+            logger.info("[U+1F680] Starting complete user onboarding journey")
             
             # Step 1: Create user account
             await self._step_create_user_account(journey)
@@ -669,7 +669,7 @@ class RealUserOnboardingTester(BaseE2ETest):
             # Step 7: Execute first optimization task
             await self._step_execute_first_optimization_task(journey)
             
-            logger.info("🏁 User onboarding journey completed")
+            logger.info("[U+1F3C1] User onboarding journey completed")
             
         except Exception as e:
             logger.error(f"Onboarding journey failed: {e}")
@@ -700,14 +700,14 @@ class TestRealE2EUserOnboarding:
         Every step must work for business success and customer conversion.
         
         Flow:
-        1. User creates account ✓
-        2. User completes profile (name, company, role) ✓
-        3. User connects AI provider (OpenAI/Anthropic) ✓
-        4. User sets team preferences ✓
-        5. User configures optimization goals ✓
-        6. User completes onboarding ✓
-        7. User executes first optimization task ✓
-        8. System delivers real AI-powered business value ✓
+        1. User creates account [U+2713]
+        2. User completes profile (name, company, role) [U+2713]
+        3. User connects AI provider (OpenAI/Anthropic) [U+2713]
+        4. User sets team preferences [U+2713]
+        5. User configures optimization goals [U+2713]
+        6. User completes onboarding [U+2713]
+        7. User executes first optimization task [U+2713]
+        8. System delivers real AI-powered business value [U+2713]
         
         Success Criteria:
         - All onboarding steps complete successfully
@@ -779,7 +779,7 @@ class TestRealE2EUserOnboarding:
             # Complete Journey Validation
             assert journey.validate_complete_journey(), "Complete onboarding journey must be successful"
             
-            logger.info("🎉 COMPLETE USER ONBOARDING SUCCESS - BUSINESS VALUE DELIVERED")
+            logger.info(" CELEBRATION:  COMPLETE USER ONBOARDING SUCCESS - BUSINESS VALUE DELIVERED")
             logger.info(f"Journey completed in {journey.total_journey_duration:.2f}s")
             logger.info(f"WebSocket events: {len(journey.events_received)}/{len(journey.required_events)}")
             logger.info(f"Business value delivered: {journey.real_business_value_delivered}")
@@ -822,7 +822,7 @@ class TestRealE2EUserOnboarding:
                         f"Profile name mismatch: expected {journey.full_name}, got {profile_data.get('full_name')}"
                     assert profile_data.get("company") == journey.company, \
                         f"Company mismatch: expected {journey.company}, got {profile_data.get('company')}"
-                    logger.info("✓ Profile data persisted correctly - customer context maintained")
+                    logger.info("[U+2713] Profile data persisted correctly - customer context maintained")
                 else:
                     logger.error(f"BUSINESS IMPACT: Profile data not accessible ({profile_response.status_code})")
                     logger.error("Customer personalization data may be lost")
@@ -840,12 +840,12 @@ class TestRealE2EUserOnboarding:
                     actual_goal = goals_data.get("primary_goal")
                     assert actual_goal == expected_goal, \
                         f"Optimization goal mismatch: expected {expected_goal}, got {actual_goal}"
-                    logger.info("✓ Optimization goals persisted correctly - business context maintained")
+                    logger.info("[U+2713] Optimization goals persisted correctly - business context maintained")
                 else:
                     logger.error(f"BUSINESS IMPACT: Optimization goals not accessible ({goals_response.status_code})")
                     logger.error("Customer optimization preferences may be lost - impacts value delivery")
             
-            logger.info("✓ Data persistence validation successful - customer data survives system transitions")
+            logger.info("[U+2713] Data persistence validation successful - customer data survives system transitions")
             logger.info("Business impact: User experience continuity maintained across sessions")
             
         finally:
@@ -899,14 +899,14 @@ class TestRealE2EUserOnboarding:
             # Additional business metrics validation
             slowest_journey = max(successful_journeys, key=lambda j: j.total_journey_duration)
             if slowest_journey.total_journey_duration > max_acceptable:
-                logger.warning(f"⚠️ Slowest journey: {slowest_journey.total_journey_duration:.2f}s - may impact conversion")
+                logger.warning(f" WARNING: [U+FE0F] Slowest journey: {slowest_journey.total_journey_duration:.2f}s - may impact conversion")
                 
             # Validate all journeys received business value
             value_delivered_count = sum(1 for j in successful_journeys if j.real_business_value_delivered)
             assert value_delivered_count == len(successful_journeys), \
                 f"BUSINESS CRITICAL: Only {value_delivered_count}/{len(successful_journeys)} journeys delivered value"
             
-            logger.info(f"🎉 BUSINESS SUCCESS: {len(successful_journeys)} concurrent onboarding journeys successful")
+            logger.info(f" CELEBRATION:  BUSINESS SUCCESS: {len(successful_journeys)} concurrent onboarding journeys successful")
             logger.info(f"Average duration under load: {avg_duration:.2f}s (threshold: {max_acceptable:.2f}s)")
             logger.info(f"Business value delivery rate: {value_delivered_count}/{len(successful_journeys)} (100%)")
             

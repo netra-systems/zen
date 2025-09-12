@@ -1,7 +1,7 @@
 """
 Integration Tests for Agent Execution and Tool Dispatcher Issues Reproduction
 
-🚨 **IMPORTANT NOTE**: These are DEMONSTRATION tests for bugs that have ALREADY BEEN FIXED.
+ ALERT:  **IMPORTANT NOTE**: These are DEMONSTRATION tests for bugs that have ALREADY BEEN FIXED.
 The original bug (periodic_update_manager = None) has been resolved with proper MinimalPeriodicUpdateManager 
 initialization. These tests artificially recreate the bug conditions to validate the fix works.
 
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Value Impact: Validates that proper initialization prevents cascade failures
 - Strategic Impact: Educational - Shows importance of proper component lifecycle management
 
-**CURRENT STATUS**: ✅ BUG FIXED - Components are properly initialized in current codebase
+**CURRENT STATUS**:  PASS:  BUG FIXED - Components are properly initialized in current codebase
 - periodic_update_manager: Properly initialized as MinimalPeriodicUpdateManager
 - fallback_manager: Properly initialized as MinimalFallbackManager  
 - Both components have required methods and work correctly
@@ -185,8 +185,8 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             assert len(self.websocket_events) == 0, "No WebSocket events sent due to immediate failure"
             assert len(self.tool_events) == 0, "Zero tool events - execution never reached tool dispatch"
             
-            print("[BUG REPRODUCED] ✓ Confirmed: periodic_update_manager None causes immediate AttributeError")
-            print("[BUSINESS IMPACT] ✓ Zero tool events, zero WebSocket events, zero content generation")
+            print("[BUG REPRODUCED] [U+2713] Confirmed: periodic_update_manager None causes immediate AttributeError")
+            print("[BUSINESS IMPACT] [U+2713] Zero tool events, zero WebSocket events, zero content generation")
             
         except Exception as e:
             # Unexpected error - not the bug we're trying to reproduce
@@ -262,14 +262,14 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             
             # This assertion MUST fail to prove the bug
             if tool_count == 0:
-                print("[BUG REPRODUCED] ✓ Zero tool events - execution never reached tool dispatch")
+                print("[BUG REPRODUCED] [U+2713] Zero tool events - execution never reached tool dispatch")
                 
                 # Validate the complete cascade failure
                 assert len(self.websocket_events) == 0, "WebSocket events never fired due to upstream failure"
                 assert len(self.tool_events) == 0, "Tool events never recorded"
                 assert tool_count == 0, "Tool dispatcher never called - proves cascade failure"
                 
-                print("[BUSINESS IMPACT] ✓ Complete breakdown: No tools, no events, no content")
+                print("[BUSINESS IMPACT] [U+2713] Complete breakdown: No tools, no events, no content")
             else:
                 pytest.fail(f"BUG REPRODUCTION FAILURE: Expected 0 tool events but got {tool_count}")
 
@@ -339,14 +339,14 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             
             # This assertion reproduces: assert 0 >= 0.7 (Quality SLA violation)
             if quality_score < quality_threshold:
-                print(f"[BUG REPRODUCED] ✓ Quality SLA violation: {quality_score} < {quality_threshold}")
+                print(f"[BUG REPRODUCED] [U+2713] Quality SLA violation: {quality_score} < {quality_threshold}")
                 
                 # Validate the business impact
                 assert len(content_generated) == 0, "Zero content generation due to execution failure"
                 assert final_history_length == initial_history_length, "No new execution results"
                 assert final_stats['total_executions'] == initial_stats['total_executions'], "No executions completed"
                 
-                print("[BUSINESS IMPACT] ✓ Complete failure of AI value delivery to users")
+                print("[BUSINESS IMPACT] [U+2713] Complete failure of AI value delivery to users")
             else:
                 pytest.fail(f"BUG REPRODUCTION FAILURE: Quality score {quality_score} should be 0.0")
 
@@ -421,7 +421,7 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             
             # This reproduces the analysis finding
             if len(websocket_method_calls) == 0 and len(self.websocket_events) == 0:
-                print("[BUG REPRODUCED] ✓ No WebSocket events fired - execution dies before event emission")
+                print("[BUG REPRODUCED] [U+2713] No WebSocket events fired - execution dies before event emission")
                 
                 # Validate WebSocket infrastructure is actually intact
                 # by testing direct method calls
@@ -433,7 +433,7 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
                 assert len(websocket_method_calls) == 0, "No WebSocket methods called during execution"
                 assert len(self.websocket_events) == 0, "No events emitted due to upstream failure"
                 
-                print("[BUSINESS IMPACT] ✓ Users receive no real-time updates on AI processing")
+                print("[BUSINESS IMPACT] [U+2713] Users receive no real-time updates on AI processing")
             else:
                 pytest.fail(
                     f"BUG REPRODUCTION FAILURE: Expected 0 WebSocket events but got "
@@ -521,7 +521,7 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             should_provide_content_or_analysis = has_content or has_analysis
             
             if not should_provide_content_or_analysis:
-                print("[BUG REPRODUCED] ✓ Agent provides NO content or analysis")
+                print("[BUG REPRODUCED] [U+2713] Agent provides NO content or analysis")
                 
                 # Validate complete business value failure
                 assert content_analysis['content_length'] == 0, "Zero content generated"
@@ -529,8 +529,8 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
                 assert len(content_analysis['recommendations']) == 0, "Zero recommendations"
                 assert len(content_analysis['insights']) == 0, "Zero insights"
                 
-                print("[BUSINESS IMPACT] ✓ Complete failure of AI-powered value delivery")
-                print("[STAGING IMPACT] ✓ Users in staging get zero meaningful responses")
+                print("[BUSINESS IMPACT] [U+2713] Complete failure of AI-powered value delivery")
+                print("[STAGING IMPACT] [U+2713] Users in staging get zero meaningful responses")
             else:
                 pytest.fail(
                     f"BUG REPRODUCTION FAILURE: Agent should provide no content but "
@@ -545,14 +545,14 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
         BVJ: REPRODUCE complete execution flow breakdown showing cascade failure
         
         This test reproduces the COMPLETE failure flow identified in the analysis:
-        1. WebSocket Message Received ✅
-        2. UserExecutionEngine.execute_agent() Called ✅  
-        3. _execute_with_error_handling() ✅
-        4. async with self.periodic_update_manager.track_operation() ❌ FAILURE
+        1. WebSocket Message Received  PASS: 
+        2. UserExecutionEngine.execute_agent() Called  PASS:   
+        3. _execute_with_error_handling()  PASS: 
+        4. async with self.periodic_update_manager.track_operation()  FAIL:  FAILURE
         5. [EXECUTION STOPS HERE - NO FURTHER PROCESSING]
-        6. Tool Dispatch: Never Reached ❌
-        7. WebSocket Events: Never Sent ❌
-        8. Response Generation: Never Occurs ❌
+        6. Tool Dispatch: Never Reached  FAIL: 
+        7. WebSocket Events: Never Sent  FAIL: 
+        8. Response Generation: Never Occurs  FAIL: 
         """
         # Skip auth setup for bug reproduction focus
         
@@ -595,13 +595,13 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
         
         # Step 1: WebSocket Message Received (simulated as successful)
         track_step('websocket_message_received', 'completed')
-        print(f"[FLOW STEP 1] ✅ WebSocket Message Received")
+        print(f"[FLOW STEP 1]  PASS:  WebSocket Message Received")
         
         try:
             # Step 2: UserExecutionEngine.execute_agent() Called
             track_step('execute_agent_called', 'started')
             execution_flow['execute_agent_called'] = True
-            print(f"[FLOW STEP 2] ✅ UserExecutionEngine.execute_agent() Called")
+            print(f"[FLOW STEP 2]  PASS:  UserExecutionEngine.execute_agent() Called")
             
             # This should fail at Step 4: periodic_update_manager.track_operation()
             result = await engine.execute_agent(self.agent_context, self.agent_state)
@@ -621,7 +621,7 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             execution_flow['error_details'] = str(e)
             track_step('execution_failed', 'failed', str(e))
             
-            print(f"[FLOW STEP 4] ❌ FAILURE: {e}")
+            print(f"[FLOW STEP 4]  FAIL:  FAILURE: {e}")
             print(f"[COMPLETE BREAKDOWN] Execution stopped at: {execution_flow['failure_point']}")
             
             # Analyze what was never reached
@@ -647,9 +647,9 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             assert len(self.websocket_events) == 0, "No WebSocket events due to cascade failure"
             assert len(self.tool_events) == 0, "No tool events due to upstream failure"
             
-            print("[BUG REPRODUCED] ✓ Complete execution flow breakdown confirmed")
+            print("[BUG REPRODUCED] [U+2713] Complete execution flow breakdown confirmed")
             print(f"[EXECUTION STEPS] Total steps attempted: {len(execution_steps)}")
-            print(f"[BUSINESS IMPACT] ✓ Zero value delivery - complete platform failure")
+            print(f"[BUSINESS IMPACT] [U+2713] Zero value delivery - complete platform failure")
             
             # Print detailed execution flow for debugging
             for step in execution_steps:
@@ -702,7 +702,7 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             
             # Validate this is the expected fallback manager error
             if "'NoneType' object has no attribute 'create_fallback_result'" in error_msg:
-                print("[BUG REPRODUCED] ✓ Fallback manager None AttributeError confirmed")
+                print("[BUG REPRODUCED] [U+2713] Fallback manager None AttributeError confirmed")
                 
                 # This represents the cascade where:
                 # 1. Agent execution fails (RuntimeError) 
@@ -713,11 +713,11 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
                 assert len(engine.run_history) == 0, "No results due to fallback failure"
                 assert len(self.websocket_events) == 0, "No events due to fallback failure"
                 
-                print("[BUSINESS IMPACT] ✓ Fallback mechanism completely broken")
-                print("[CASCADE IMPACT] ✓ No graceful degradation - complete failure")
+                print("[BUSINESS IMPACT] [U+2713] Fallback mechanism completely broken")
+                print("[CASCADE IMPACT] [U+2713] No graceful degradation - complete failure")
                 
             elif "'NoneType' object has no attribute 'track_operation'" in error_msg:
-                print("[BUG REPRODUCED] ✓ Failed at periodic_update_manager (earlier in chain)")
+                print("[BUG REPRODUCED] [U+2713] Failed at periodic_update_manager (earlier in chain)")
                 print("[ANALYSIS] Periodic manager failure prevents reaching fallback logic")
                 
                 # This is actually the more common failure mode - periodic manager
@@ -775,4 +775,4 @@ class TestAgentExecutionToolDispatcherReproduction(BaseIntegrationTest):
             "This may indicate network timeouts or other issues."
         )
         
-        print(f"[VALIDATION] ✓ Bug reproduction has realistic timing: {execution_time:.4f}s")
+        print(f"[VALIDATION] [U+2713] Bug reproduction has realistic timing: {execution_time:.4f}s")

@@ -293,9 +293,9 @@ class DatabaseIntegrationTestRunner:
         )
         
         if all_independent:
-            logger.info("✓ All tests are independent and deterministic")
+            logger.info("[U+2713] All tests are independent and deterministic")
         else:
-            logger.error("✗ Some tests are not independent or deterministic")
+            logger.error("[U+2717] Some tests are not independent or deterministic")
         
         return all_independent
     
@@ -331,7 +331,7 @@ class DatabaseIntegrationTestRunner:
                 
             report_lines.extend([
                 f"{suite_name.upper().replace('_', ' ')} TESTS:",
-                f"  Status: {'✓ PASSED' if result.get('success') else '✗ FAILED'}",
+                f"  Status: {'[U+2713] PASSED' if result.get('success') else '[U+2717] FAILED'}",
                 f"  Execution Time: {result.get('execution_time', 0):.2f}s",
             ])
             
@@ -366,17 +366,17 @@ class DatabaseIntegrationTestRunner:
         ])
         
         if successful_suites == total_suites:
-            report_lines.append("  ✓ All database integration tests are passing")
-            report_lines.append("  ✓ Database layer is ready for production deployment")
+            report_lines.append("  [U+2713] All database integration tests are passing")
+            report_lines.append("  [U+2713] Database layer is ready for production deployment")
         else:
-            report_lines.append("  ✗ Some tests failed - investigate and fix before deployment")
-            report_lines.append("  ✗ Database layer may have reliability issues")
+            report_lines.append("  [U+2717] Some tests failed - investigate and fix before deployment")
+            report_lines.append("  [U+2717] Database layer may have reliability issues")
         
         if (self.test_results.get("independence_validation") and 
             all(r["deterministic"] for r in self.test_results["independence_validation"].values())):
-            report_lines.append("  ✓ Tests are deterministic and can be run reliably in CI/CD")
+            report_lines.append("  [U+2713] Tests are deterministic and can be run reliably in CI/CD")
         else:
-            report_lines.append("  ⚠ Some tests may have non-deterministic behavior")
+            report_lines.append("   WARNING:  Some tests may have non-deterministic behavior")
         
         report_lines.extend([
             "",
@@ -500,9 +500,9 @@ def main():
         
         # Log overall results
         if overall_success:
-            logger.info("🎉 All selected test suites PASSED!")
+            logger.info(" CELEBRATION:  All selected test suites PASSED!")
         else:
-            logger.error("❌ Some test suites FAILED!")
+            logger.error(" FAIL:  Some test suites FAILED!")
     
     # Generate and save report
     report = runner.generate_test_report()

@@ -49,8 +49,8 @@ class GCPAuditLoop:
     
     def get_service_status(self):
         """Get Cloud Run services status"""
-        print("\n📡 Cloud Run Services Status:")
-        print("━" * 50)
+        print("\n[U+1F4E1] Cloud Run Services Status:")
+        print("[U+2501]" * 50)
         
         cmd = f"gcloud run services list --region {self.region} --format=json"
         stdout, stderr, code = self.run_gcloud_command(cmd)
@@ -62,12 +62,12 @@ class GCPAuditLoop:
                     name = svc.get('metadata', {}).get('name', 'Unknown')
                     status = svc.get('status', {}).get('conditions', [{}])[0].get('status', 'Unknown')
                     url = svc.get('status', {}).get('url', 'N/A')
-                    print(f"  • {name}: {status} - {url}")
+                    print(f"  [U+2022] {name}: {status} - {url}")
                 return services
             except json.JSONDecodeError:
-                print("  ⚠️ Could not parse service status")
+                print("   WARNING: [U+FE0F] Could not parse service status")
         else:
-            print(f"  ⚠️ Error getting services: {stderr}")
+            print(f"   WARNING: [U+FE0F] Error getting services: {stderr}")
         return []
     
     def collect_logs(self, service_name=None):
@@ -87,7 +87,7 @@ class GCPAuditLoop:
             services = ["backend-staging", "auth-staging", "frontend-staging"]
         
         for service in services:
-            print(f"\n🔍 Collecting logs from {service}...")
+            print(f"\n SEARCH:  Collecting logs from {service}...")
             
             # Collect errors by severity
             for severity in ['CRITICAL', 'ERROR', 'WARNING']:
@@ -181,7 +181,7 @@ class GCPAuditLoop:
     
     def trigger_auto_debug(self, error_info):
         """Trigger automatic debugging for an error"""
-        print(f"\n🚨 AUTO-DEBUGGING: {error_info['priority']} error in {error_info['service']}")
+        print(f"\n ALERT:  AUTO-DEBUGGING: {error_info['priority']} error in {error_info['service']}")
         print(f"   Error: {error_info['error'][:200]}...")
         
         # Prepare debug context
@@ -205,7 +205,7 @@ class GCPAuditLoop:
     
     def deploy_fix(self, service):
         """Deploy fix to staging"""
-        print(f"\n🚀 Deploying fix to {service}...")
+        print(f"\n[U+1F680] Deploying fix to {service}...")
         
         if service == "backend-staging":
             deploy_cmd = "python scripts/deploy_to_gcp.py --service backend --project netra-staging --build-local"
@@ -220,7 +220,7 @@ class GCPAuditLoop:
         stdout, stderr, code = self.run_gcloud_command(deploy_cmd)
         
         if code == 0:
-            print("   ✅ Deployment successful")
+            print("    PASS:  Deployment successful")
             self.fixes_applied.append({
                 'iteration': self.iteration_count,
                 'service': service,
@@ -228,7 +228,7 @@ class GCPAuditLoop:
             })
             return True
         else:
-            print(f"   ⚠️ Deployment failed: {stderr}")
+            print(f"    WARNING: [U+FE0F] Deployment failed: {stderr}")
             return False
     
     def run_iteration(self):
@@ -236,7 +236,7 @@ class GCPAuditLoop:
         self.iteration_count += 1
         
         print(f"\n{'=' * 60}")
-        print(f"🔄 AUDIT ITERATION {self.iteration_count}/{self.iterations}")
+        print(f" CYCLE:  AUDIT ITERATION {self.iteration_count}/{self.iterations}")
         print(f"   Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"{'=' * 60}")
         
@@ -250,7 +250,7 @@ class GCPAuditLoop:
         priority_errors = self.analyze_errors(errors)
         
         # Step 4: Display summary
-        print("\n📊 ERROR SUMMARY:")
+        print("\n CHART:  ERROR SUMMARY:")
         print(f"   Critical: {len(errors['critical'])}")
         print(f"   Errors: {len(errors['error'])}")
         print(f"   Warnings: {len(errors['warning'])}")
@@ -258,32 +258,32 @@ class GCPAuditLoop:
         
         # Step 5: Auto-debug if errors found
         if priority_errors:
-            print(f"\n⚠️ Found {len(priority_errors)} priority errors")
+            print(f"\n WARNING: [U+FE0F] Found {len(priority_errors)} priority errors")
             
             for i, error in enumerate(priority_errors[:1]):  # Debug top error
-                print(f"\n🔧 Debugging error {i+1}/{len(priority_errors)}")
+                print(f"\n[U+1F527] Debugging error {i+1}/{len(priority_errors)}")
                 debug_context = self.trigger_auto_debug(error)
                 
                 # Simulate fix based on error type
                 if 'JWT' in error['error'] or 'auth' in error['error'].lower():
-                    print("   📝 Identified as authentication issue")
+                    print("   [U+1F4DD] Identified as authentication issue")
                     # Would trigger auth fix here
                 elif 'memory' in error['error'].lower() or 'OOM' in error['error']:
-                    print("   📝 Identified as memory issue")
+                    print("   [U+1F4DD] Identified as memory issue")
                     # Would trigger memory optimization
                 elif 'timeout' in error['error'].lower():
-                    print("   📝 Identified as timeout issue")
+                    print("   [U+1F4DD] Identified as timeout issue")
                     # Would trigger timeout fix
                 
                 # Deploy fix
                 time.sleep(2)  # Brief pause
                 self.deploy_fix(error['service'])
         else:
-            print("\n✅ No critical errors found")
+            print("\n PASS:  No critical errors found")
         
         # Step 6: Wait before next iteration
         wait_time = 60 if priority_errors else 180  # 1 min if errors, 3 min if healthy
-        print(f"\n⏳ Waiting {wait_time} seconds before next iteration...")
+        print(f"\n[U+23F3] Waiting {wait_time} seconds before next iteration...")
         time.sleep(wait_time)
     
     def run(self):
@@ -306,13 +306,13 @@ class GCPAuditLoop:
                 
                 # Every 10 iterations, show progress
                 if (i + 1) % 10 == 0:
-                    print(f"\n📈 PROGRESS REPORT:")
+                    print(f"\n[U+1F4C8] PROGRESS REPORT:")
                     print(f"   Iterations: {self.iteration_count}/{self.iterations}")
                     print(f"   Fixes Applied: {len(self.fixes_applied)}")
                     print(f"   Total Errors Found: {len(self.errors_found)}")
         
         except KeyboardInterrupt:
-            print("\n\n⚠️ Audit loop interrupted by user")
+            print("\n\n WARNING: [U+FE0F] Audit loop interrupted by user")
         
         finally:
             self.print_final_summary()
@@ -331,9 +331,9 @@ class GCPAuditLoop:
         """)
         
         if self.fixes_applied:
-            print("\n📝 FIXES APPLIED:")
+            print("\n[U+1F4DD] FIXES APPLIED:")
             for fix in self.fixes_applied[-10:]:  # Last 10 fixes
-                print(f"   • Iteration {fix['iteration']}: {fix['service']} at {fix['timestamp']}")
+                print(f"   [U+2022] Iteration {fix['iteration']}: {fix['service']} at {fix['timestamp']}")
         
         # Save summary to file
         summary_file = Path(f'reports/gcp_audit_summary_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
@@ -347,7 +347,7 @@ class GCPAuditLoop:
                 'end_time': datetime.now().isoformat()
             }, f, indent=2)
         
-        print(f"\n💾 Summary saved to {summary_file}")
+        print(f"\n[U+1F4BE] Summary saved to {summary_file}")
 
 
 if __name__ == "__main__":

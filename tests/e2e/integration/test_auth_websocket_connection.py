@@ -7,7 +7,7 @@ connection establishment, and basic messaging functionality.
 Business Value Justification (BVJ):
 - Segment: ALL | Goal: Core Chat | Impact: $300K MRR
 - Ensures reliable WebSocket authentication for real-time AI interactions
-- Validates token validation consistency across Auth → Backend → WebSocket
+- Validates token validation consistency across Auth  ->  Backend  ->  WebSocket
 - Prevents authentication failures during critical AI workflows
 
 Test Coverage:
@@ -168,7 +168,7 @@ class TestWebSocketAuthConnection:
             # Test multiple message types
             test_messages = [
                 "Basic test message",
-                "Message with special characters: éñ™",
+                "Message with special characters: [U+00E9][U+00F1][U+2122]",
                 '{"type": "json", "content": "JSON formatted message"}',
                 "Long message: " + "A" * 500  # Test longer content
             ]

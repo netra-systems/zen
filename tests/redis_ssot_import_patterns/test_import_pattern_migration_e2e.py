@@ -66,9 +66,9 @@ class ImportPatternMigrationE2ETest(SSotAsyncTestCase):
             client = await self.ssot_redis.get_client()
             if client:
                 await client.ping()
-                logger.info("✅ SSOT Redis connection verified")
+                logger.info(" PASS:  SSOT Redis connection verified")
             else:
-                logger.warning("❌ SSOT Redis connection failed")
+                logger.warning(" FAIL:  SSOT Redis connection failed")
                 
         except Exception as e:
             logger.error(f"Redis setup failed: {e}")
@@ -108,7 +108,7 @@ class ImportPatternMigrationE2ETest(SSotAsyncTestCase):
         self.assertEqual(parsed_data['user_id'], self.test_user_id)
         self.assertTrue(parsed_data['authenticated'])
         
-        logger.info("✅ Auth service Redis operations validated")
+        logger.info(" PASS:  Auth service Redis operations validated")
 
     async def test_cache_manager_redis_operations_after_migration(self):
         """Test cache manager Redis operations work after import pattern changes."""
@@ -142,7 +142,7 @@ class ImportPatternMigrationE2ETest(SSotAsyncTestCase):
         self.assertEqual(len(parsed_cache['conversation_history']), 2)
         self.assertEqual(len(parsed_cache['active_agents']), 3)
         
-        logger.info("✅ Cache manager Redis operations validated")
+        logger.info(" PASS:  Cache manager Redis operations validated")
 
     async def test_websocket_session_management_continuity(self):
         """Test WebSocket session management continues functioning after migration."""
@@ -180,7 +180,7 @@ class ImportPatternMigrationE2ETest(SSotAsyncTestCase):
         user_connections = await self.ssot_redis.smembers(user_connections_key)
         self.assertIn(connection_data['connection_id'], user_connections)
         
-        logger.info("✅ WebSocket session management continuity validated")
+        logger.info(" PASS:  WebSocket session management continuity validated")
 
     async def test_golden_path_chat_functionality_preservation(self):
         """Test that Golden Path chat functionality is preserved after migration."""
@@ -228,7 +228,7 @@ class ImportPatternMigrationE2ETest(SSotAsyncTestCase):
         self.assertEqual(len(failed_operations), 0, 
                         f"Golden Path operations failed: {failed_operations}")
         
-        logger.info("✅ Golden Path chat functionality preservation validated")
+        logger.info(" PASS:  Golden Path chat functionality preservation validated")
 
     async def test_user_isolation_maintained_during_redis_operations(self):
         """Test that user isolation is maintained during Redis operations after migration."""
@@ -267,7 +267,7 @@ class ImportPatternMigrationE2ETest(SSotAsyncTestCase):
         self.assertNotEqual(parsed_user1['name'], parsed_user2['name'])
         self.assertNotEqual(parsed_user1['active_session'], parsed_user2['active_session'])
         
-        logger.info("✅ User isolation maintained during Redis operations")
+        logger.info(" PASS:  User isolation maintained during Redis operations")
 
     async def test_no_redis_connection_pool_conflicts_after_migration(self):
         """Test that Redis connection pool conflicts are eliminated after migration."""
@@ -298,7 +298,7 @@ class ImportPatternMigrationE2ETest(SSotAsyncTestCase):
         successes = [r for r in results if r is True]
         self.assertEqual(len(successes), 10, "Not all concurrent operations succeeded")
         
-        logger.info("✅ No Redis connection pool conflicts after migration")
+        logger.info(" PASS:  No Redis connection pool conflicts after migration")
 
     async def asyncTearDown(self):
         """Clean up test data."""

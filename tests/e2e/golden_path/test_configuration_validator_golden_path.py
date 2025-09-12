@@ -2,7 +2,7 @@
 PHASE 3: Golden Path Protection Tests
 Tests that ensure Golden Path stability throughout SSOT consolidation.
 
-These tests protect the critical Golden Path user flow (login → WebSocket → AI response)
+These tests protect the critical Golden Path user flow (login  ->  WebSocket  ->  AI response)
 during ConfigurationValidator SSOT consolidation. They should PASS throughout the process.
 
 CRITICAL: These tests ensure that SSOT consolidation doesn't break the core business flow
@@ -373,7 +373,7 @@ class TestConfigurationValidatorGoldenPath(SSotAsyncTestCase, unittest.TestCase)
 
     def test_oauth_login_websocket_ai_response_full_flow(self):
         """
-        Test complete Golden Path flow: OAuth login → WebSocket → AI response.
+        Test complete Golden Path flow: OAuth login  ->  WebSocket  ->  AI response.
         
         Validates the complete Golden Path user journey with SSOT configuration.
         This test must PASS throughout SSOT consolidation to protect core business value.

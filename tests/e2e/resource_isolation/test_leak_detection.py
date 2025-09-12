@@ -80,7 +80,7 @@ async def test_resource_leak_detection_and_prevention(resource_isolation_suite, 
     assert not normal_leak_results["memory_leaks_detected"], \
         f"Memory leaks detected during normal operation: {normal_leak_results['leaking_tenants']}"
     
-    logger.info("✓ No leaks detected during normal sustained workload")
+    logger.info("[U+2713] No leaks detected during normal sustained workload")
     
     # Phase 3: Test leak detection with problematic workload
     logger.info("Phase 3: Testing leak detection with resource-intensive workload")

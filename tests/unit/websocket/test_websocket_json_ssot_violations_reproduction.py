@@ -168,7 +168,7 @@ class TestWebSocketJSONSSOTViolationsReproduction(BaseIntegrationTest):
                     "level_3": {
                         "circular_ref": None,  # Will be set to create circular reference
                         "large_data": "x" * 10000,  # Large data that might cause issues
-                        "special_chars": "🚨💀🔥",  # Unicode that might break JSON
+                        "special_chars": " ALERT: [U+1F480] FIRE: ",  # Unicode that might break JSON
                         "null_values": None,
                         "empty_structures": {"empty_list": [], "empty_dict": {}}
                     }

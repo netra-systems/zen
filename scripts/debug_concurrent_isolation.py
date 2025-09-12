@@ -44,13 +44,13 @@ async def test_single_engine_creation():
             mock_factory_class.return_value = mock_factory
             
             engine = await factory.create_for_user(context)
-            print(f"✅ Successfully created engine: {engine.engine_id}")
+            print(f" PASS:  Successfully created engine: {engine.engine_id}")
             print(f"   User ID: {engine.context.user_id}")
             print(f"   Run ID: {engine.context.run_id}")
             return True
             
     except Exception as e:
-        print(f"❌ Engine creation failed: {e}")
+        print(f" FAIL:  Engine creation failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -89,11 +89,11 @@ async def test_concurrent_engine_creation():
                 mock_factory_class.return_value = mock_factory
                 
                 engine = await factory.create_for_user(context)
-                print(f"✅ User {user_id}: Created engine {engine.engine_id}")
+                print(f" PASS:  User {user_id}: Created engine {engine.engine_id}")
                 return (user_id, engine)
                 
         except Exception as e:
-            print(f"❌ User {user_id}: Engine creation failed: {e}")
+            print(f" FAIL:  User {user_id}: Engine creation failed: {e}")
             return (user_id, None)
     
     # Create engines for multiple users concurrently
@@ -109,12 +109,12 @@ async def test_concurrent_engine_creation():
             if engine is not None:
                 successful_engines.append((user_id, engine))
     
-    print(f"\n📊 Results: {len(successful_engines)}/{len(user_ids)} engines created successfully")
+    print(f"\n CHART:  Results: {len(successful_engines)}/{len(user_ids)} engines created successfully")
     
     # Check isolation
     if len(successful_engines) > 1:
         user_ids_created = [user_id for user_id, _ in successful_engines]
-        print(f"✅ User isolation check: {len(set(user_ids_created))} unique users")
+        print(f" PASS:  User isolation check: {len(set(user_ids_created))} unique users")
         
         # Check that each engine has unique context
         contexts = [engine.context for _, engine in successful_engines]
@@ -125,19 +125,19 @@ async def test_concurrent_engine_creation():
         print(f"   Unique run IDs: {len(unique_run_ids)}")
         
         if len(unique_user_ids) == len(successful_engines) and len(unique_run_ids) == len(successful_engines):
-            print("✅ Isolation verified: All contexts are unique")
+            print(" PASS:  Isolation verified: All contexts are unique")
             return True
         else:
-            print("❌ Isolation failure: Shared contexts detected")
+            print(" FAIL:  Isolation failure: Shared contexts detected")
             return False
     else:
-        print("❌ Cannot test isolation: Too few engines created")
+        print(" FAIL:  Cannot test isolation: Too few engines created")
         return False
 
 
 async def main():
     """Main debug function."""
-    print("🔍 Debug: Concurrent User Isolation Issues")
+    print(" SEARCH:  Debug: Concurrent User Isolation Issues")
     print("=" * 50)
     
     # Test single engine creation first
@@ -148,11 +148,11 @@ async def main():
         concurrent_success = await test_concurrent_engine_creation()
         
         if concurrent_success:
-            print("\n✅ All tests passed - isolation working correctly")
+            print("\n PASS:  All tests passed - isolation working correctly")
         else:
-            print("\n❌ Concurrent isolation test failed")
+            print("\n FAIL:  Concurrent isolation test failed")
     else:
-        print("\n❌ Basic engine creation failed - check dependencies")
+        print("\n FAIL:  Basic engine creation failed - check dependencies")
 
 
 if __name__ == "__main__":

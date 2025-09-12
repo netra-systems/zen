@@ -13,7 +13,7 @@ Expected Behavior:
 - FAIL: Initially with unstable auth due to SERVICE_ID inconsistency
 - PASS: After SSOT remediation ensures stable auth flow
 
-CRITICAL: This test validates the Golden Path: users login → get AI responses
+CRITICAL: This test validates the Golden Path: users login  ->  get AI responses
 """
 
 import asyncio
@@ -140,7 +140,7 @@ class TestServiceIdAuthFlowStability(SSotAsyncTestCase):
         # This should PASS after SSOT remediation (consistent validation)
         assert validation_stability["success_rate"] >= 0.99, (
             f"Auth service validation stability insufficient: "
-            f"{validation_stability['success_rate']:.3f} (required: ≥0.99)"
+            f"{validation_stability['success_rate']:.3f} (required:  >= 0.99)"
         )
         
         # Validate no validation errors due to SERVICE_ID mismatch
@@ -176,7 +176,7 @@ class TestServiceIdAuthFlowStability(SSotAsyncTestCase):
         # This should PASS after SSOT remediation (stable under load)
         assert concurrency_results["success_rate"] >= 0.95, (
             f"Concurrent authentication stability insufficient: "
-            f"{concurrency_results['success_rate']:.3f} (required: ≥0.95)"
+            f"{concurrency_results['success_rate']:.3f} (required:  >= 0.95)"
         )
         
         # Validate no race conditions or conflicts
@@ -237,7 +237,7 @@ class TestServiceIdAuthFlowStability(SSotAsyncTestCase):
         # This should PASS after SSOT remediation (reliable E2E flow)
         assert e2e_results["success_rate"] >= 0.98, (
             f"End-to-end auth flow success rate insufficient: "
-            f"{e2e_results['success_rate']:.3f} (required: ≥0.98)"
+            f"{e2e_results['success_rate']:.3f} (required:  >= 0.98)"
         )
         
         # Validate reasonable flow completion time

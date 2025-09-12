@@ -15,7 +15,7 @@ CRITICAL OAuth Real Service Flow Test - Enterprise SSO Integration
 5. Include comprehensive error handling for OAuth failures
 6. Clean up all resources after test completion
 
-**ARCHITECTURE:** Real services integration, <300 lines, ≤8 line functions
+**ARCHITECTURE:** Real services integration, <300 lines,  <= 8 line functions
 """
 
 import asyncio

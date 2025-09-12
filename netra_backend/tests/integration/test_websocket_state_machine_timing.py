@@ -89,7 +89,7 @@ class TestWebSocketStateMachineTiming(SSotBaseTestCase):
                             'error': error_str,
                             'error_type': type(result).__name__
                         })
-                        print(f"✅ IMPORT SCOPE BUG REPRODUCED in connection {i}: {error_str}")
+                        print(f" PASS:  IMPORT SCOPE BUG REPRODUCED in connection {i}: {error_str}")
             
             if import_failures:
                 failure_details = json.dumps(import_failures, indent=2)
@@ -107,7 +107,7 @@ class TestWebSocketStateMachineTiming(SSotBaseTestCase):
         except ConnectionClosed as e:
             # Connection issues might indicate the import scope bug
             if "get_connection_state_machine" in str(e):
-                print(f"✅ IMPORT SCOPE BUG REPRODUCED via ConnectionClosed: {e}")
+                print(f" PASS:  IMPORT SCOPE BUG REPRODUCED via ConnectionClosed: {e}")
                 raise AssertionError(f"CONNECTION FAILURE DUE TO IMPORT BUG: {e}")
             else:
                 # Normal connection error, re-raise
@@ -115,7 +115,7 @@ class TestWebSocketStateMachineTiming(SSotBaseTestCase):
         except Exception as e:
             # Any exception mentioning the import scope issue
             if "get_connection_state_machine" in str(e) and "not defined" in str(e):
-                print(f"✅ IMPORT SCOPE BUG REPRODUCED in integration test: {e}")
+                print(f" PASS:  IMPORT SCOPE BUG REPRODUCED in integration test: {e}")
                 raise AssertionError(f"INTEGRATION IMPORT BUG CONFIRMED: {e}")
             else:
                 # Re-raise other exceptions
@@ -266,7 +266,7 @@ class TestWebSocketStateMachineTiming(SSotBaseTestCase):
             # Analyze results for race condition import scope failures
             for result in results:
                 if isinstance(result, dict) and result.get("import_scope_race"):
-                    print(f"✅ RACE CONDITION IMPORT SCOPE BUG: {result}")
+                    print(f" PASS:  RACE CONDITION IMPORT SCOPE BUG: {result}")
                 elif isinstance(result, Exception):
                     if "get_connection_state_machine" in str(result):
                         race_condition_errors.append({
@@ -294,7 +294,7 @@ class TestWebSocketStateMachineTiming(SSotBaseTestCase):
         except Exception as e:
             # Any other exception might indicate the import scope race bug
             if "get_connection_state_machine" in str(e) and "not defined" in str(e):
-                print(f"✅ CONCURRENT CONNECTION IMPORT SCOPE BUG: {e}")
+                print(f" PASS:  CONCURRENT CONNECTION IMPORT SCOPE BUG: {e}")
                 raise AssertionError(f"CONCURRENT IMPORT SCOPE BUG CONFIRMED: {e}")
             else:
                 raise

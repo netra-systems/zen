@@ -166,7 +166,7 @@ class TestStartupSequenceIntegration(SSotAsyncTestCase):
         during Phase 5 (SERVICES).
         
         Expected Phase Order:
-        INIT → DEPENDENCIES → DATABASE → CACHE → SERVICES → WEBSOCKET → FINALIZE
+        INIT  ->  DEPENDENCIES  ->  DATABASE  ->  CACHE  ->  SERVICES  ->  WEBSOCKET  ->  FINALIZE
         """
         from fastapi import FastAPI
         

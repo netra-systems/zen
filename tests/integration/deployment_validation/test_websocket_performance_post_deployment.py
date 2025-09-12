@@ -47,7 +47,7 @@ class TestWebSocketPerformancePostDeployment:
                     # AFTER DEPLOYMENT: This should pass
                     pytest.fail(f"DEPLOYMENT GAP: Timeout configs not yet active in staging: {missing_configs}")
                 
-                print("✅ All Issue #128 timeout optimizations are active in staging")
+                print(" PASS:  All Issue #128 timeout optimizations are active in staging")
                 
         except httpx.RequestError as e:
             pytest.fail(f"DEPLOYMENT GAP: Cannot connect to staging: {e}")
@@ -79,7 +79,7 @@ class TestWebSocketPerformancePostDeployment:
             if status != "healthy":
                 pytest.fail(f"DEPLOYMENT GAP: Staging not healthy: {status}")
             
-            print(f"✅ Staging backend responding in {response_time:.2f}s with healthy status")
+            print(f" PASS:  Staging backend responding in {response_time:.2f}s with healthy status")
             
             # Check for deployment indicators in health response
             deployment_info = health_data.get("deployment", {})
@@ -89,7 +89,7 @@ class TestWebSocketPerformancePostDeployment:
             
             # Look for signs that the new deployment is active
             if "netra-backend-staging" not in str(revision):
-                print(f"⚠️  Warning: Deployment revision may not reflect recent changes: {revision}")
+                print(f" WARNING: [U+FE0F]  Warning: Deployment revision may not reflect recent changes: {revision}")
             
         except requests.exceptions.RequestException as e:
             pytest.fail(f"DEPLOYMENT GAP: Cannot connect to staging backend: {e}")
@@ -113,7 +113,7 @@ class TestWebSocketPerformancePostDeployment:
             if connection_time > 3.0:
                 pytest.fail(f"DEPLOYMENT GAP: TCP connection too slow ({connection_time:.2f}s), may indicate deployment not active")
             
-            print(f"✅ TCP connection to staging WebSocket endpoint: {connection_time:.2f}s")
+            print(f" PASS:  TCP connection to staging WebSocket endpoint: {connection_time:.2f}s")
             
         except socket.timeout:
             pytest.fail("DEPLOYMENT GAP: TCP connection timeout to staging WebSocket endpoint")
@@ -151,7 +151,7 @@ class TestWebSocketPerformancePostDeployment:
             if total_time > 10.0:
                 pytest.fail(f"DEPLOYMENT GAP: Concurrent requests too slow ({total_time:.2f}s total), resource scaling may not be active")
             
-            print(f"✅ 5 concurrent requests completed in {total_time:.2f}s (avg: {avg_time_per_request:.2f}s each)")
+            print(f" PASS:  5 concurrent requests completed in {total_time:.2f}s (avg: {avg_time_per_request:.2f}s each)")
             
             # Check for any resource-related indicators in responses
             for response in responses:

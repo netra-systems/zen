@@ -6,14 +6,14 @@ MISSION: Test authentication scenarios that protect $500K+ ARR functionality.
 This comprehensive test file validates critical authentication flows that enable
 revenue-generating features. Unlike the previous disabled version, this implementation:
 
-✅ FIXED PATTERNS (No longer cheating):
+ PASS:  FIXED PATTERNS (No longer cheating):
 - Uses REAL auth service connections (no mocks)
 - Tests actual business-critical authentication flows  
 - Uses proper SSOT imports from registry
 - Implements real error conditions that cause proper test failures
 - Follows proper test naming conventions
 
-❌ REMOVED CHEATING PATTERNS:
+ FAIL:  REMOVED CHEATING PATTERNS:
 - Mock WebSocket connections replaced with real WebSocket testing
 - Fake token validation replaced with real auth service calls
 - Synthetic error scenarios replaced with actual service failure conditions
@@ -211,12 +211,12 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                         self.record_metric('token_expiration_handled', True)
                         self.record_metric('refresh_mechanism_available', 'refresh_token' in response_data)
                         
-                        logger.info("✅ BUSINESS SUCCESS: Token expiration properly handled with refresh guidance")
+                        logger.info(" PASS:  BUSINESS SUCCESS: Token expiration properly handled with refresh guidance")
                     
                     elif response.status_code == 200:
                         # Token refresh happened automatically (ideal scenario)
                         self.record_metric('automatic_token_refresh', True)
-                        logger.info("✅ BUSINESS SUCCESS: Automatic token refresh prevented expiration")
+                        logger.info(" PASS:  BUSINESS SUCCESS: Automatic token refresh prevented expiration")
                     
                     else:
                         # Unexpected response - this could indicate a system problem
@@ -277,7 +277,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
             ('sql_injection_attempt', "admin'; DROP TABLE users; --", "password"),
             ('xss_attempt', '<script>alert("auth")</script>', 'password'),
             ('buffer_overflow_attempt', 'A' * 1000, 'B' * 1000),  # Long credentials
-            ('unicode_attack', '𝒶𝒹𝓂𝒾𝓃', '𝓅𝒶𝓈𝓈𝓌𝑜𝓇𝒹'),  # Unicode homograph attack
+            ('unicode_attack', '[U+1D4B6][U+1D4B9][U+1D4C2][U+1D4BE][U+1D4C3]', '[U+1D4C5][U+1D4B6][U+1D4C8][U+1D4C8][U+1D4CC][U+1D45C][U+1D4C7][U+1D4B9]'),  # Unicode homograph attack
             ('format_string_attack', '%n%n%n%n', '%x%x%x%x'),
             ('ldap_injection', 'admin)(|(objectClass=*)', 'password'),
             ('json_injection', '{"admin": true}', '{"bypass": true}')
@@ -337,7 +337,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                     successful_defenses += 1
                     self.record_metric(f'defense_success_{scenario_name}', True)
                     
-                    logger.info(f"✅ Successfully defended against {scenario_name} in {scenario_duration:.3f}s")
+                    logger.info(f" PASS:  Successfully defended against {scenario_name} in {scenario_duration:.3f}s")
                 
                 except httpx.TimeoutException:
                     pytest.fail(
@@ -374,7 +374,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
         test_duration = time.time() - start_time
         self.record_metric('security_test_duration', test_duration)
         
-        logger.info(f"✅ BUSINESS SUCCESS: {successful_defenses}/{total_scenarios} security defenses successful in {test_duration:.2f}s")
+        logger.info(f" PASS:  BUSINESS SUCCESS: {successful_defenses}/{total_scenarios} security defenses successful in {test_duration:.2f}s")
 
     async def test_network_connectivity_failures_enable_graceful_degradation(self):
         """
@@ -431,25 +431,25 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                     self.record_metric(f'connectivity_{source_service}_to_{target_service}', 'success')
                     self.record_metric(f'response_time_{source_service}_to_{target_service}', connection_duration)
                     
-                    logger.info(f"✅ Connectivity OK: {source_service}->{target_service} in {connection_duration:.3f}s")
+                    logger.info(f" PASS:  Connectivity OK: {source_service}->{target_service} in {connection_duration:.3f}s")
             
             except httpx.ConnectError as e:
                 issue_description = f"Connection failed: {source_service}->{target_service} - {str(e)}"
                 connectivity_issues.append(issue_description)
                 self.record_metric(f'connectivity_{source_service}_to_{target_service}', 'failed')
-                logger.error(f"❌ {issue_description}")
+                logger.error(f" FAIL:  {issue_description}")
             
             except httpx.TimeoutException:
                 issue_description = f"Connection timeout: {source_service}->{target_service} (>{3.0}s)"
                 connectivity_issues.append(issue_description)
                 self.record_metric(f'connectivity_{source_service}_to_{target_service}', 'timeout')
-                logger.error(f"❌ {issue_description}")
+                logger.error(f" FAIL:  {issue_description}")
             
             except Exception as e:
                 issue_description = f"Unexpected connectivity error: {source_service}->{target_service} - {str(e)}"
                 connectivity_issues.append(issue_description)
                 self.record_metric(f'connectivity_{source_service}_to_{target_service}', 'error')
-                logger.error(f"❌ {issue_description}")
+                logger.error(f" FAIL:  {issue_description}")
         
         test_duration = time.time() - start_time
         self.record_metric('network_connectivity_test_duration', test_duration)
@@ -475,7 +475,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                     f"This may impact some features but core authentication should work."
                 )
         else:
-            logger.info(f"✅ BUSINESS SUCCESS: All service connectivity tests passed in {test_duration:.2f}s")
+            logger.info(f" PASS:  BUSINESS SUCCESS: All service connectivity tests passed in {test_duration:.2f}s")
 
     async def test_websocket_authentication_integration_with_chat(self):
         """
@@ -533,7 +533,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                     self.record_metric('websocket_connection_time', connection_duration)
                     self.record_metric('websocket_authentication', 'success')
                     
-                    logger.info(f"✅ WebSocket authenticated successfully in {connection_duration:.3f}s")
+                    logger.info(f" PASS:  WebSocket authenticated successfully in {connection_duration:.3f}s")
                     
                     # Step 4: Test actual chat message with authentication context
                     test_message = {
@@ -565,7 +565,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                         self.record_metric('chat_message_response_time', message_duration)
                         self.record_metric('websocket_chat_integration', 'success')
                         
-                        logger.info(f"✅ BUSINESS SUCCESS: WebSocket chat authentication integration working ({message_duration:.3f}s)")
+                        logger.info(f" PASS:  BUSINESS SUCCESS: WebSocket chat authentication integration working ({message_duration:.3f}s)")
                     
                     except asyncio.TimeoutError:
                         pytest.fail(
@@ -663,14 +663,14 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                     if attempt_duration < 0.5:  # Very fast failure indicates circuit breaker active
                         circuit_breaker_triggered = True
                         self.record_metric('circuit_breaker_fast_failure', True)
-                        logger.info(f"✅ Circuit breaker detected - fast failure in {attempt_duration:.3f}s")
+                        logger.info(f" PASS:  Circuit breaker detected - fast failure in {attempt_duration:.3f}s")
                 
                 except Exception as e:
                     # Circuit breaker exceptions are expected
                     if "circuit breaker" in str(e).lower() or "CircuitBreakerOpen" in str(type(e).__name__):
                         circuit_breaker_triggered = True
                         self.record_metric('circuit_breaker_exception', True)
-                        logger.info(f"✅ Circuit breaker activated with exception: {type(e).__name__}")
+                        logger.info(f" PASS:  Circuit breaker activated with exception: {type(e).__name__}")
                         break
                     else:
                         # Other exceptions might indicate real issues
@@ -682,7 +682,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
             
             # BUSINESS VALIDATION: Circuit breaker should protect system
             if circuit_breaker_triggered:
-                logger.info("✅ BUSINESS SUCCESS: Circuit breaker protecting authentication system")
+                logger.info(" PASS:  BUSINESS SUCCESS: Circuit breaker protecting authentication system")
                 self.record_metric('circuit_breaker_protection', 'active')
                 
                 # Test recovery - wait for circuit breaker to reset
@@ -699,7 +699,7 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                     recovery_result = await self.auth_client.validate_token(recovery_token)
                     
                     if recovery_result and recovery_result.get('valid'):
-                        logger.info("✅ BUSINESS SUCCESS: Circuit breaker recovery successful")
+                        logger.info(" PASS:  BUSINESS SUCCESS: Circuit breaker recovery successful")
                         self.record_metric('circuit_breaker_recovery', 'success')
                     else:
                         logger.warning("Circuit breaker may not have recovered properly")
@@ -758,10 +758,10 @@ class TestAuthenticationEdgeCasesBusinessCritical(SSotAsyncTestCase):
                 logger.error(f"Test completed with error: {metrics.get('test_error')}")
             
             if metrics.get('websocket_authentication') == 'success':
-                logger.info("✅ WebSocket authentication validated - chat functionality protected")
+                logger.info(" PASS:  WebSocket authentication validated - chat functionality protected")
             
             if metrics.get('defense_success_rate', 0) >= 0.9:
-                logger.info("✅ Security defenses validated - system protected from attacks")
+                logger.info(" PASS:  Security defenses validated - system protected from attacks")
         
         except Exception as e:
             logger.error(f"Teardown error: {e}")

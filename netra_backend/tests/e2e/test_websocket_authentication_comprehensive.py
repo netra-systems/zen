@@ -72,7 +72,7 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
             async with httpx.AsyncClient() as client:
                 response = await client.get(health_url, timeout=5.0)
                 if response.status_code == 200:
-                    self.logger.info(f"✓ Backend service available at port {backend_port}")
+                    self.logger.info(f"[U+2713] Backend service available at port {backend_port}")
                     return True
                 else:
                     self.logger.warning(f"Backend service returned {response.status_code} at port {backend_port}")
@@ -205,7 +205,7 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
         assert response["type"] != "error", f"Authentication failed: {response}"
         assert "user_id" in response or response["type"] == "ack", f"Response should contain user context or acknowledgment: {response}"
         
-        self.logger.info("✓ Valid JWT authentication succeeded - WebSocket ready for business value delivery")
+        self.logger.info("[U+2713] Valid JWT authentication succeeded - WebSocket ready for business value delivery")
     
     @pytest.mark.e2e  
     @pytest.mark.real_services
@@ -229,10 +229,10 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
                 
             except Exception as e:
                 # Connection properly rejected invalid token
-                self.logger.info(f"✓ Invalid JWT properly rejected: {e}")
+                self.logger.info(f"[U+2713] Invalid JWT properly rejected: {e}")
         else:
             # Connection was properly rejected
-            self.logger.info("✓ Invalid JWT authentication properly failed")
+            self.logger.info("[U+2713] Invalid JWT authentication properly failed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -272,7 +272,7 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
                 # Connection properly handled expired token
                 pass
         
-        self.logger.info("✓ Expired JWT authentication properly failed")
+        self.logger.info("[U+2713] Expired JWT authentication properly failed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -299,7 +299,7 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
         
         except Exception as e:
             # Connection was properly rejected due to missing auth
-            self.logger.info(f"✓ Missing JWT properly rejected: {e}")
+            self.logger.info(f"[U+2713] Missing JWT properly rejected: {e}")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -337,7 +337,7 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
         # Token exchange should either succeed or echo back the message
         assert response["type"] in ["token_exchange", "ack"], f"Unexpected response: {response}"
         
-        self.logger.info("✓ OAuth token exchange works properly")
+        self.logger.info("[U+2713] OAuth token exchange works properly")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -396,7 +396,7 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
         if "sensitive_data" in str(response2):
             assert "user1_secret_info" not in str(response2), "User isolation violated!"
         
-        self.logger.info("✓ Multi-user isolation working properly")
+        self.logger.info("[U+2713] Multi-user isolation working properly")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -440,7 +440,7 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
             assert new_token != original_token, "New token should be different from original"
             self.test_tokens.append(new_token)
         
-        self.logger.info("✓ Token refresh during active connection works")
+        self.logger.info("[U+2713] Token refresh during active connection works")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -493,7 +493,7 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
         reconnect_response = await WebSocketTestHelpers.receive_test_message(new_connection, timeout=10.0)
         assert reconnect_response["type"] != "error", f"Reconnection failed: {reconnect_response}"
         
-        self.logger.info("✓ WebSocket disconnection handling works gracefully")
+        self.logger.info("[U+2713] WebSocket disconnection handling works gracefully")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -542,4 +542,4 @@ class TestWebSocketAuthenticationComprehensive(BaseE2ETest):
             response = await WebSocketTestHelpers.receive_test_message(connection, timeout=5.0)
             assert response["type"] != "error", f"Concurrent connection {i} failed: {response}"
         
-        self.logger.info(f"✓ Concurrent authentication handled successfully ({len(successful_connections)} connections)")
+        self.logger.info(f"[U+2713] Concurrent authentication handled successfully ({len(successful_connections)} connections)")

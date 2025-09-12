@@ -11,15 +11,15 @@ Every service, every database connection, every data operation depends on Databa
 ANY bug in this class cascades to COMPLETE SYSTEM OUTAGES affecting ALL customers.
 
 Testing Coverage Goals:
-✓ 100% line coverage - Every single line must be tested
-✓ 100% branch coverage - Every conditional path must be validated  
-✓ 100% business logic coverage - Every database connectivity scenario must pass
-✓ Performance critical paths - Validated with benchmarks
-✓ Thread safety under heavy load - Concurrent access validation
-✓ Error handling - All failure modes tested
-✓ Windows compatibility - UTF-8 encoding and path support
-✓ Multi-environment system support - Service independence verified
-✓ Security validation - Credential protection and URL sanitization
+[U+2713] 100% line coverage - Every single line must be tested
+[U+2713] 100% branch coverage - Every conditional path must be validated  
+[U+2713] 100% business logic coverage - Every database connectivity scenario must pass
+[U+2713] Performance critical paths - Validated with benchmarks
+[U+2713] Thread safety under heavy load - Concurrent access validation
+[U+2713] Error handling - All failure modes tested
+[U+2713] Windows compatibility - UTF-8 encoding and path support
+[U+2713] Multi-environment system support - Service independence verified
+[U+2713] Security validation - Credential protection and URL sanitization
 
 ULTRA CRITICAL IMPORTANCE: 
 - URL construction MUST work for ALL database types and configurations
@@ -1641,7 +1641,7 @@ class TestErrorHandlingAndEdgeCases:
             # Very long values
             {"POSTGRES_HOST": "h" * 1000, "POSTGRES_USER": "u" * 500, "POSTGRES_PASSWORD": "p" * 2000},
             # Unicode characters
-            {"POSTGRES_HOST": "хост.example.com", "POSTGRES_USER": "用户", "POSTGRES_PASSWORD": "密码"},
+            {"POSTGRES_HOST": "xoct.example.com", "POSTGRES_USER": "[U+7528][U+6237]", "POSTGRES_PASSWORD": "[U+5BC6][U+7801]"},
         ]
         
         for edge_env in edge_cases:
@@ -1701,27 +1701,27 @@ class TestWindowsCompatibility:
         unicode_test_cases = [
             {
                 "name": "Chinese characters",
-                "user": "用户名",
-                "password": "密码123",
-                "db": "数据库"
+                "user": "[U+7528][U+6237][U+540D]",
+                "password": "[U+5BC6][U+7801]123",
+                "db": "[U+6570][U+636E][U+5E93]"
             },
             {
                 "name": "Cyrillic characters",
-                "user": "пользователь",
-                "password": "пароль123",
-                "db": "база_данных"
+                "user": "[U+043F]o[U+043B][U+044C][U+0437]ovate[U+043B][U+044C]",
+                "password": "[U+043F]apo[U+043B][U+044C]123",
+                "db": "[U+0431]a[U+0437]a_[U+0434]ann[U+044B]x"
             },
             {
                 "name": "Emoji and special Unicode",
-                "user": "user🚀",
-                "password": "pass🔒word",
-                "db": "db⚡name"
+                "user": "user[U+1F680]",
+                "password": "pass[U+1F512]word",
+                "db": "db LIGHTNING: name"
             },
             {
                 "name": "Mixed scripts",
-                "user": "user用户",
-                "password": "pass密码123",
-                "db": "db数据库_name"
+                "user": "user[U+7528][U+6237]",
+                "password": "pass[U+5BC6][U+7801]123",
+                "db": "db[U+6570][U+636E][U+5E93]_name"
             }
         ]
         

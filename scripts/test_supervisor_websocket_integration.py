@@ -19,7 +19,7 @@ from netra_backend.app.agents.state import DeepAgentState
 async def test_supervisor_websocket_integration():
     """Test if supervisor is properly integrated with WebSocket notifications."""
     
-    print("🔍 Testing Supervisor WebSocket Integration...")
+    print(" SEARCH:  Testing Supervisor WebSocket Integration...")
     print("=" * 60)
     
     # Create mock database session
@@ -43,40 +43,40 @@ async def test_supervisor_websocket_integration():
             websocket_manager=websocket_manager,
             tool_dispatcher=tool_dispatcher
         )
-        print("✅ SupervisorAgent created successfully")
+        print(" PASS:  SupervisorAgent created successfully")
         
         # Check WebSocket manager integration
         print("\n2. Checking WebSocket Manager Integration...")
         assert supervisor.websocket_manager == websocket_manager, "WebSocket manager not set"
-        print("✅ WebSocket manager is set on supervisor")
+        print(" PASS:  WebSocket manager is set on supervisor")
         
         # Check registry WebSocket integration
         print("\n3. Checking Registry WebSocket Integration...")
         assert supervisor.registry.websocket_manager == websocket_manager, "Registry doesn't have WebSocket manager"
-        print("✅ Registry has WebSocket manager")
+        print(" PASS:  Registry has WebSocket manager")
         
         # Check tool dispatcher enhancement
         print("\n4. Checking Tool Dispatcher Enhancement...")
         if hasattr(tool_dispatcher, '_websocket_enhanced'):
             enhancement_status = tool_dispatcher._websocket_enhanced
-            print(f"✅ Tool dispatcher WebSocket enhancement: {enhancement_status}")
+            print(f" PASS:  Tool dispatcher WebSocket enhancement: {enhancement_status}")
         else:
-            print("❌ Tool dispatcher WebSocket enhancement status unknown")
+            print(" FAIL:  Tool dispatcher WebSocket enhancement status unknown")
         
         # Check ExecutionEngine WebSocket integration
         print("\n5. Checking ExecutionEngine WebSocket Integration...")
         if hasattr(supervisor, 'engine'):
             engine = supervisor.engine
             if hasattr(engine, 'websocket_manager'):
-                print("✅ ExecutionEngine has WebSocket manager")
+                print(" PASS:  ExecutionEngine has WebSocket manager")
                 if hasattr(engine, 'websocket_notifier'):
-                    print("✅ ExecutionEngine has WebSocket notifier")
+                    print(" PASS:  ExecutionEngine has WebSocket notifier")
                 else:
-                    print("❌ ExecutionEngine missing WebSocket notifier")
+                    print(" FAIL:  ExecutionEngine missing WebSocket notifier")
             else:
-                print("❌ ExecutionEngine missing WebSocket manager")
+                print(" FAIL:  ExecutionEngine missing WebSocket manager")
         else:
-            print("❌ Supervisor missing ExecutionEngine")
+            print(" FAIL:  Supervisor missing ExecutionEngine")
         
         # Test WebSocket notification methods
         print("\n6. Testing WebSocket Notification Methods...")
@@ -93,17 +93,17 @@ async def test_supervisor_websocket_integration():
             missing_methods = []
             for method_name in notification_methods:
                 if hasattr(notifier, method_name):
-                    print(f"✅ {method_name} method available")
+                    print(f" PASS:  {method_name} method available")
                 else:
                     missing_methods.append(method_name)
-                    print(f"❌ {method_name} method missing")
+                    print(f" FAIL:  {method_name} method missing")
             
             if missing_methods:
-                print(f"\n❌ Missing critical notification methods: {missing_methods}")
+                print(f"\n FAIL:  Missing critical notification methods: {missing_methods}")
             else:
-                print(f"\n✅ All critical notification methods available")
+                print(f"\n PASS:  All critical notification methods available")
         else:
-            print("❌ Cannot test notification methods - no WebSocket notifier")
+            print(" FAIL:  Cannot test notification methods - no WebSocket notifier")
         
         # Check supervisor execution path
         print("\n7. Checking Supervisor Execution Path...")
@@ -114,12 +114,12 @@ async def test_supervisor_websocket_integration():
         
         # Check if supervisor uses the WebSocket-enhanced engine
         if hasattr(supervisor, 'engine'):
-            print("✅ Supervisor has ExecutionEngine for WebSocket events")
+            print(" PASS:  Supervisor has ExecutionEngine for WebSocket events")
         else:
-            print("❌ Supervisor missing ExecutionEngine - events may not be sent")
+            print(" FAIL:  Supervisor missing ExecutionEngine - events may not be sent")
         
         print("\n" + "=" * 60)
-        print("🏁 INTEGRATION TEST SUMMARY:")
+        print("[U+1F3C1] INTEGRATION TEST SUMMARY:")
         print("=" * 60)
         
         # Final assessment
@@ -139,38 +139,38 @@ async def test_supervisor_websocket_integration():
         passed = sum(1 for check, _ in critical_components if check)
         total = len(critical_components)
         
-        print(f"\nCritical Components: {passed}/{total} ✅")
+        print(f"\nCritical Components: {passed}/{total}  PASS: ")
         for check, description in critical_components:
-            status = "✅" if check else "❌"
+            status = " PASS: " if check else " FAIL: "
             print(f"  {status} {description}")
         
         if passed == total:
-            print("\n🎉 SUPERVISOR WEBSOCKET INTEGRATION: FULLY CONFIGURED")
+            print("\n CELEBRATION:  SUPERVISOR WEBSOCKET INTEGRATION: FULLY CONFIGURED")
             print("   All WebSocket events should be sent during agent execution")
             return True
         else:
-            print(f"\n⚠️  SUPERVISOR WEBSOCKET INTEGRATION: PARTIAL ({passed}/{total})")
+            print(f"\n WARNING: [U+FE0F]  SUPERVISOR WEBSOCKET INTEGRATION: PARTIAL ({passed}/{total})")
             print("   Some WebSocket events may not be sent")
             return False
             
     except Exception as e:
-        print(f"\n❌ ERROR during integration test: {e}")
+        print(f"\n FAIL:  ERROR during integration test: {e}")
         import traceback
         traceback.print_exc()
         return False
 
 
 async def main():
-    print("🧪 Quick Supervisor WebSocket Integration Test")
+    print("[U+1F9EA] Quick Supervisor WebSocket Integration Test")
     print("=" * 60)
     
     success = await test_supervisor_websocket_integration()
     
     if success:
-        print("\n✅ SUCCESS: WebSocket integration is properly configured")
+        print("\n PASS:  SUCCESS: WebSocket integration is properly configured")
         sys.exit(0)
     else:
-        print("\n❌ ISSUES: WebSocket integration needs fixes")
+        print("\n FAIL:  ISSUES: WebSocket integration needs fixes")
         sys.exit(1)
 
 

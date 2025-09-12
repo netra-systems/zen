@@ -404,7 +404,7 @@ async def main():
         
         # Validate current connectivity
         status = await validator.validate_vpc_connectivity(service_name)
-        print(f"VPC Connectivity Status: {'✅ Healthy' if status.is_healthy else '❌ Issues Found'}")
+        print(f"VPC Connectivity Status: {' PASS:  Healthy' if status.is_healthy else ' FAIL:  Issues Found'}")
         
         if status.issues:
             print("Issues found:")
@@ -417,7 +417,7 @@ async def main():
             print(f"Fixes applied: {fixes['total_fixes']}")
             
             for fix in fixes["fixes_applied"]:
-                print(f"  ✅ {fix['fix_type']}")
+                print(f"   PASS:  {fix['fix_type']}")
         else:
             print("No issues found - VPC connectivity is healthy")
 

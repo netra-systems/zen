@@ -1,7 +1,7 @@
 """Database repository test helper functions.
 
 This module provides helper functions for common test operations
-on database repositories. All functions are ≤8 lines.
+on database repositories. All functions are  <= 8 lines.
 """
 
 from datetime import datetime, timedelta

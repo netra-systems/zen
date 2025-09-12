@@ -129,8 +129,8 @@ class TestRealWebSocketSerialization:
             {
                 "type": "user_message",
                 "user_id": user_id, 
-                "content": "Unicode test: 🚀 📝 💡 ✅ 🔥",
-                "unicode_text": "Various languages: Hello, Hola, Bonjour, 你好, こんにちは, Здравствуйте"
+                "content": "Unicode test: [U+1F680] [U+1F4DD]  IDEA:   PASS:   FIRE: ",
+                "unicode_text": "Various languages: Hello, Hola, Bonjour, [U+4F60][U+597D], [U+3053][U+3093][U+306B][U+3061][U+306F], [U+0417][U+0434]pavctvu[U+0439]te"
             },
             {
                 "type": "user_message",

@@ -144,14 +144,14 @@ class ErrorHandlingIntegrationTest(BaseIntegrationTest):
         }
         self.injected_errors.append(error_event)
         
-        self.logger.info(f"🚨 Injecting {failure_type} failure in {service_name} for {duration}s")
+        self.logger.info(f" ALERT:  Injecting {failure_type} failure in {service_name} for {duration}s")
         
         # Return cleanup function for later recovery
         async def cleanup_failure():
             error_event['recovered_at'] = datetime.now(timezone.utc).isoformat()
             error_event['actual_duration'] = time.time() - error_event['start_time']
             self.recovery_events.append(error_event)
-            self.logger.info(f"🔄 Recovered from {failure_type} failure in {service_name}")
+            self.logger.info(f" CYCLE:  Recovered from {failure_type} failure in {service_name}")
         
         return cleanup_failure
 
@@ -191,7 +191,7 @@ class ErrorHandlingIntegrationTest(BaseIntegrationTest):
             'validated_at': datetime.now(timezone.utc).isoformat()
         })
         
-        self.logger.info(f"✅ Graceful degradation validated: {expected_degradation_type}")
+        self.logger.info(f" PASS:  Graceful degradation validated: {expected_degradation_type}")
 
     def create_error_test_context(self, scenario_name: str, additional_metadata: Optional[Dict] = None, db_session=None) -> UserExecutionContext:
         """Create user context optimized for error handling scenarios."""
@@ -241,7 +241,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test system fallback to database when Redis cache fails.
         
         Business Value: Users continue getting responses even with cache failures.
-        Critical Path: Cache failure → Database fallback → Slower but functional service.
+        Critical Path: Cache failure  ->  Database fallback  ->  Slower but functional service.
         """
         if not real_services_fixture["redis_available"]:
             pytest.skip("Redis required for cache failure testing")
@@ -316,7 +316,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         # Validate business value still delivered  
         self.assert_business_value_delivered(failure_result, 'insights')
         
-        self.logger.info(f"✅ Redis failure fallback validated - Performance ratio: {performance_ratio:.2f}x")
+        self.logger.info(f" PASS:  Redis failure fallback validated - Performance ratio: {performance_ratio:.2f}x")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -326,7 +326,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test database connection pool exhaustion and recovery.
         
         Business Value: System handles high load gracefully without complete failure.
-        Critical Path: Pool exhaustion → Queue requests → Release connections → Resume normal service.
+        Critical Path: Pool exhaustion  ->  Queue requests  ->  Release connections  ->  Resume normal service.
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for connection pool testing")
@@ -353,7 +353,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         
         try:
             # Step 1: Exhaust connection pool
-            self.logger.info("🔥 Exhausting database connection pool...")
+            self.logger.info(" FIRE:  Exhausting database connection pool...")
             for i in range(10):  # Create more connections than typical pool size
                 try:
                     if hasattr(db_manager, 'connection'):
@@ -400,7 +400,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             # Validate business value maintained
             self.assert_business_value_delivered(recovery_result, 'insights')
             
-            self.logger.info(f"✅ Database pool exhaustion recovery validated - Exhaustion: {exhaustion_time:.2f}s, Recovery: {recovery_time:.2f}s")
+            self.logger.info(f" PASS:  Database pool exhaustion recovery validated - Exhaustion: {exhaustion_time:.2f}s, Recovery: {recovery_time:.2f}s")
         
         finally:
             # Ensure cleanup
@@ -418,7 +418,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test graceful degradation when auth service fails.
         
         Business Value: Users with existing sessions can continue working even if auth service is down.
-        Critical Path: Auth failure → Use cached tokens → Limited functionality → Restore when auth recovers.
+        Critical Path: Auth failure  ->  Use cached tokens  ->  Limited functionality  ->  Restore when auth recovers.
         """
         # Setup components - use global mocks
         supervisor = SupervisorAgent(
@@ -490,7 +490,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         self.assert_business_value_delivered(auth_results_to_check, 'insights') 
         self.assert_business_value_delivered(recovery_results_to_check, 'insights')
         
-        self.logger.info(f"✅ Auth service failure degradation validated - Failure: {auth_failure_time:.2f}s, Recovery: {recovery_time:.2f}s")
+        self.logger.info(f" PASS:  Auth service failure degradation validated - Failure: {auth_failure_time:.2f}s, Recovery: {recovery_time:.2f}s")
 
     # ============================================================================
     # WebSocket Connection Failure and Recovery Tests
@@ -504,7 +504,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test WebSocket connection failure and automatic recovery.
         
         Business Value: Agent execution continues even with WebSocket issues, users get results.
-        Critical Path: WebSocket failure → Agent continues → Results delivered → WebSocket reconnects.
+        Critical Path: WebSocket failure  ->  Agent continues  ->  Results delivered  ->  WebSocket reconnects.
         """
         # Setup components with WebSocket tracking
         # Use global mock_llm_manager
@@ -520,7 +520,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             if websocket_call_count <= 3:  # First few calls fail
                 raise ConnectionError("WebSocket connection lost")
             # Later calls succeed (recovery)
-            self.logger.info(f"🔄 WebSocket recovered, sending event: {event_type}")
+            self.logger.info(f" CYCLE:  WebSocket recovered, sending event: {event_type}")
         
         failing_websocket_bridge.emit_agent_event = AsyncMock(side_effect=failing_websocket_emit)
         
@@ -579,7 +579,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         websocket_results_to_check = websocket_failure_result.get('results', websocket_failure_result)
         self.assert_business_value_delivered(websocket_results_to_check, 'insights')
         
-        self.logger.info(f"✅ WebSocket failure recovery validated - Execution time: {websocket_failure_time:.2f}s, WebSocket attempts: {websocket_call_count}")
+        self.logger.info(f" PASS:  WebSocket failure recovery validated - Execution time: {websocket_failure_time:.2f}s, WebSocket attempts: {websocket_call_count}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -589,7 +589,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test handling of oversized WebSocket messages with graceful degradation.
         
         Business Value: Large agent responses are handled gracefully without system failure.
-        Critical Path: Large message → Size check → Truncate/summarize → Send manageable chunks.
+        Critical Path: Large message  ->  Size check  ->  Truncate/summarize  ->  Send manageable chunks.
         """
         # Setup components
         # Use global mock_llm_manager
@@ -608,7 +608,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             
             if message_size > 10000:  # 10KB limit simulation
                 # Simulate message size limit handling
-                self.logger.info(f"📦 Large message detected: {message_size} bytes, event: {event_type}")
+                self.logger.info(f"[U+1F4E6] Large message detected: {message_size} bytes, event: {event_type}")
                 # System would normally truncate or chunk the message
                 truncated_data = {**data}
                 if 'large_content' in truncated_data:
@@ -681,7 +681,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         large_message_results_to_check = large_message_result.get('results', large_message_result)
         self.assert_business_value_delivered(large_message_results_to_check, 'insights')
         
-        self.logger.info(f"✅ WebSocket message size limit handling validated - {len(large_messages_handled)} large messages processed")
+        self.logger.info(f" PASS:  WebSocket message size limit handling validated - {len(large_messages_handled)} large messages processed")
 
     # ============================================================================
     # Agent Execution Timeout and Cancellation Tests  
@@ -695,7 +695,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test agent execution timeout with graceful cancellation.
         
         Business Value: Users don't wait indefinitely, get partial results when possible.
-        Critical Path: Long execution → Timeout → Cancel gracefully → Return partial results.
+        Critical Path: Long execution  ->  Timeout  ->  Cancel gracefully  ->  Return partial results.
         """
         
         # Create simple async functions to test timeout behavior directly
@@ -718,7 +718,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         timeout_result = None
         
         try:
-            self.logger.info("🚀 Starting slow operation that should timeout...")
+            self.logger.info("[U+1F680] Starting slow operation that should timeout...")
             timeout_result = await asyncio.wait_for(
                 slow_operation(),
                 timeout=10.0  # 10 second timeout
@@ -726,11 +726,11 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             timeout_time = time.time() - timeout_start
             
             # If we get here, something is wrong - the operation should have timed out
-            self.logger.error(f"❌ Operation completed unexpectedly in {timeout_time:.2f}s: {timeout_result}")
+            self.logger.error(f" FAIL:  Operation completed unexpectedly in {timeout_time:.2f}s: {timeout_result}")
             
         except asyncio.TimeoutError:
             timeout_time = time.time() - timeout_start
-            self.logger.info(f"🕐 Operation timed out as expected after {timeout_time:.2f}s")
+            self.logger.info(f"[U+1F550] Operation timed out as expected after {timeout_time:.2f}s")
             
             # Create a graceful timeout result
             timeout_result = {
@@ -743,7 +743,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         
         # Step 2: Test quick recovery after timeout
         recovery_start = time.time()
-        self.logger.info("🔄 Testing recovery operation...")
+        self.logger.info(" CYCLE:  Testing recovery operation...")
         
         recovery_result = await asyncio.wait_for(
             quick_operation(),
@@ -771,7 +771,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         assert recovery_result["status"] == "recovery_successful", "Recovery should be successful"
         assert "message" in recovery_result, "Recovery should provide feedback"
         
-        self.logger.info(f"✅ Timeout graceful cancellation validated - Timeout: {timeout_time:.2f}s, Recovery: {recovery_time:.2f}s")
+        self.logger.info(f" PASS:  Timeout graceful cancellation validated - Timeout: {timeout_time:.2f}s, Recovery: {recovery_time:.2f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -781,7 +781,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test concurrent user limits with backpressure handling.
         
         Business Value: System remains stable under high load, fair resource allocation.
-        Critical Path: High load → Detect limits → Apply backpressure → Queue/throttle new requests.
+        Critical Path: High load  ->  Detect limits  ->  Apply backpressure  ->  Queue/throttle new requests.
         """
         if not real_services_fixture["database_available"]:
             pytest.skip("Database required for concurrent user testing")
@@ -896,9 +896,9 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             if result['result']:
                 self.assert_business_value_delivered(result['result'], 'insights')
         
-        self.logger.info(f"✅ Concurrent user limits and backpressure validated")
-        self.logger.info(f"📊 Successful requests: {len(successful_requests)}, Failed: {len(failed_requests)}")
-        self.logger.info(f"🔄 Max concurrent: {max_concurrent_reached}, Backpressure events: {len(backpressure_applied)}")
+        self.logger.info(f" PASS:  Concurrent user limits and backpressure validated")
+        self.logger.info(f" CHART:  Successful requests: {len(successful_requests)}, Failed: {len(failed_requests)}")
+        self.logger.info(f" CYCLE:  Max concurrent: {max_concurrent_reached}, Backpressure events: {len(backpressure_applied)}")
 
     # ============================================================================
     # Network Interruption and Recovery Tests
@@ -912,7 +912,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test system resilience to network interruptions and recovery.
         
         Business Value: Users can continue working despite temporary network issues.
-        Critical Path: Network interruption → Use cached data → Retry connections → Resume when network recovers.
+        Critical Path: Network interruption  ->  Use cached data  ->  Retry connections  ->  Resume when network recovers.
         """
         # Setup components with network simulation that focuses on business continuity
         # Use global mock_llm_manager
@@ -1004,7 +1004,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         self.assert_business_value_delivered(network_result_2, 'insights') 
         self.assert_business_value_delivered(network_result_3, 'insights')
         
-        self.logger.info(f"✅ Network interruption resilience validated - Recovery after {network_attempts} attempts in {network_interruption_time:.2f}s")
+        self.logger.info(f" PASS:  Network interruption resilience validated - Recovery after {network_attempts} attempts in {network_interruption_time:.2f}s")
 
     # ============================================================================
     # Malicious Payload and Security Tests
@@ -1018,7 +1018,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test detection and sanitization of malicious payloads.
         
         Business Value: System security protects all users from malicious content.
-        Critical Path: Malicious input → Detect → Sanitize → Safe processing → Secure response.
+        Critical Path: Malicious input  ->  Detect  ->  Sanitize  ->  Safe processing  ->  Secure response.
         """
         # Setup components
         # Use global mock_llm_manager
@@ -1125,7 +1125,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             if result.get('result'):
                 self.assert_graceful_degradation(result['result'], "security_sanitization")
         
-        self.logger.info(f"✅ Malicious payload detection validated - {len(successful_sanitizations)} sanitized, {len(blocked_threats)} blocked")
+        self.logger.info(f" PASS:  Malicious payload detection validated - {len(successful_sanitizations)} sanitized, {len(blocked_threats)} blocked")
 
     # ============================================================================
     # System Overload and Circuit Breaker Tests
@@ -1139,7 +1139,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test circuit breaker activation under system overload.
         
         Business Value: System protects itself from cascade failures under extreme load.
-        Critical Path: Overload detected → Circuit breaker opens → Fail fast → Circuit breaker resets when load decreases.
+        Critical Path: Overload detected  ->  Circuit breaker opens  ->  Fail fast  ->  Circuit breaker resets when load decreases.
         """
         # Setup components with circuit breaker simulation
         # Use global mock_llm_manager
@@ -1162,14 +1162,14 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                     'activated_at': current_time,
                     'failure_count': circuit_breaker_state['failure_count']
                 })
-                self.logger.info("🔴 Circuit breaker OPENED due to overload")
+                self.logger.info("[U+1F534] Circuit breaker OPENED due to overload")
                 
             if circuit_breaker_state['open']:
                 # Check if circuit breaker should close (after cooldown period)
                 if current_time - circuit_breaker_state['last_failure_time'] > 5.0:  # 5 second cooldown
                     circuit_breaker_state['open'] = False
                     circuit_breaker_state['failure_count'] = 0
-                    self.logger.info("🟢 Circuit breaker CLOSED - system recovered")
+                    self.logger.info("[U+1F7E2] Circuit breaker CLOSED - system recovered")
                     return {
                         "status": "circuit_breaker_recovered",
                         "system_load": "normal",
@@ -1266,7 +1266,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             if result.get('result'):
                 self.assert_graceful_degradation(result['result'], "circuit_breaker_recovery")
         
-        self.logger.info(f"✅ Circuit breaker activation validated - {len(circuit_breaker_failures)} blocked, {len(successful_recoveries)} recovered")
+        self.logger.info(f" PASS:  Circuit breaker activation validated - {len(circuit_breaker_failures)} blocked, {len(successful_recoveries)} recovered")
 
     # ============================================================================
     # Memory Pressure and Resource Cleanup Tests
@@ -1280,7 +1280,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test system behavior under memory pressure with proper resource cleanup.
         
         Business Value: System remains stable under resource constraints.
-        Critical Path: Memory pressure → Trigger cleanup → Free resources → Continue operation.
+        Critical Path: Memory pressure  ->  Trigger cleanup  ->  Free resources  ->  Continue operation.
         """
         import psutil
         import os
@@ -1320,7 +1320,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         memory_pressure_objects = []
         
         try:
-            self.logger.info(f"📊 Initial memory usage: {initial_memory:.1f} MB")
+            self.logger.info(f" CHART:  Initial memory usage: {initial_memory:.1f} MB")
             
             # Allocate memory to create pressure (but not crash the system)
             for i in range(10):
@@ -1333,7 +1333,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
                     break
             
             peak_memory = process.memory_info().rss / 1024 / 1024
-            self.logger.info(f"📊 Peak memory usage: {peak_memory:.1f} MB (+{peak_memory - initial_memory:.1f} MB)")
+            self.logger.info(f" CHART:  Peak memory usage: {peak_memory:.1f} MB (+{peak_memory - initial_memory:.1f} MB)")
             
             # Mock LLM response that simulates memory cleanup
             self.mock_llm_manager.generate_response.side_effect = [
@@ -1366,7 +1366,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             final_memory = process.memory_info().rss / 1024 / 1024
             memory_recovered = peak_memory - final_memory
             
-            self.logger.info(f"📊 Final memory usage: {final_memory:.1f} MB (recovered {memory_recovered:.1f} MB)")
+            self.logger.info(f" CHART:  Final memory usage: {final_memory:.1f} MB (recovered {memory_recovered:.1f} MB)")
             
             # Validate results
             assert memory_result is not None, "System must function under memory pressure"
@@ -1384,7 +1384,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             # Validate business value delivered
             self.assert_business_value_delivered(memory_result, 'insights')
             
-            self.logger.info(f"✅ Memory pressure resource cleanup validated - Recovered {memory_recovered:.1f} MB in {memory_pressure_time:.2f}s")
+            self.logger.info(f" PASS:  Memory pressure resource cleanup validated - Recovered {memory_recovered:.1f} MB in {memory_pressure_time:.2f}s")
             
         finally:
             # Ensure cleanup
@@ -1403,7 +1403,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         Test ultimate system resilience with multiple simultaneous failures.
         
         Business Value: System continues delivering value even under catastrophic conditions.
-        Critical Path: Multiple failures → Detect all → Apply multiple mitigations → Deliver degraded but valuable service.
+        Critical Path: Multiple failures  ->  Detect all  ->  Apply multiple mitigations  ->  Deliver degraded but valuable service.
         """
         # Setup components
         # Use global mock_llm_manager
@@ -1446,7 +1446,7 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         failure_cleanup_functions.append(network_cleanup)
         active_failures.append('network_interruption')
         
-        self.logger.info(f"🚨 ULTIMATE RESILIENCE TEST: {len(active_failures)} simultaneous failures injected")
+        self.logger.info(f" ALERT:  ULTIMATE RESILIENCE TEST: {len(active_failures)} simultaneous failures injected")
         
         # Mock LLM response for catastrophic scenario
         catastrophic_response_count = 0
@@ -1540,9 +1540,9 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
         # Validate full recovery
         self.assert_business_value_delivered(recovery_result, 'insights')
         
-        self.logger.info(f"🏆 ULTIMATE RESILIENCE VALIDATED - Survived {len(active_failures)} simultaneous failures")
-        self.logger.info(f"⏱️ Catastrophic execution: {catastrophic_time:.2f}s, Recovery: {recovery_time:.2f}s")
-        self.logger.info(f"💪 Business continuity maintained under extreme conditions")
+        self.logger.info(f" TROPHY:  ULTIMATE RESILIENCE VALIDATED - Survived {len(active_failures)} simultaneous failures")
+        self.logger.info(f"[U+23F1][U+FE0F] Catastrophic execution: {catastrophic_time:.2f}s, Recovery: {recovery_time:.2f}s")
+        self.logger.info(f"[U+1F4AA] Business continuity maintained under extreme conditions")
 
     # ============================================================================
     # Test Summary and Performance Metrics
@@ -1554,24 +1554,24 @@ class TestErrorHandlingEdgeCasesComprehensive(ErrorHandlingIntegrationTest):
             # Calculate performance metrics
             if self.performance_metrics['error_recovery_times']:
                 avg_recovery_time = sum(self.performance_metrics['error_recovery_times']) / len(self.performance_metrics['error_recovery_times'])
-                self.logger.info(f"📊 Average error recovery time: {avg_recovery_time:.2f}s")
+                self.logger.info(f" CHART:  Average error recovery time: {avg_recovery_time:.2f}s")
             
             if self.degradation_modes:
-                self.logger.info(f"🔄 Degradation modes tested: {len(self.degradation_modes)}")
+                self.logger.info(f" CYCLE:  Degradation modes tested: {len(self.degradation_modes)}")
                 for mode in self.degradation_modes:
                     self.logger.info(f"  - {mode['type']}: {mode.get('has_degradation_indicator', 'N/A')}")
             
             if self.injected_errors:
-                self.logger.info(f"🚨 Error scenarios tested: {len(self.injected_errors)}")
+                self.logger.info(f" ALERT:  Error scenarios tested: {len(self.injected_errors)}")
                 for error in self.injected_errors:
                     duration = error.get('actual_duration', error.get('duration', 'N/A'))
                     self.logger.info(f"  - {error['service']} {error['failure_type']}: {duration:.2f}s" if isinstance(duration, (int, float)) else f"  - {error['service']} {error['failure_type']}: {duration}")
             
             # Summary report
             self.logger.info("=" * 80)
-            self.logger.info("🏆 GOLDEN PATH ERROR HANDLING TEST SUITE COMPLETED")
-            self.logger.info("💪 SYSTEM RESILIENCE VALIDATED ACROSS 15+ FAILURE SCENARIOS")
-            self.logger.info("🚀 BUSINESS CONTINUITY MAINTAINED UNDER ADVERSE CONDITIONS")
+            self.logger.info(" TROPHY:  GOLDEN PATH ERROR HANDLING TEST SUITE COMPLETED")
+            self.logger.info("[U+1F4AA] SYSTEM RESILIENCE VALIDATED ACROSS 15+ FAILURE SCENARIOS")
+            self.logger.info("[U+1F680] BUSINESS CONTINUITY MAINTAINED UNDER ADVERSE CONDITIONS")
             self.logger.info("=" * 80)
             
         except Exception as e:

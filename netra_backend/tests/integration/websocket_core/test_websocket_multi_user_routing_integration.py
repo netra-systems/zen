@@ -46,7 +46,7 @@ class TestWebSocketMultiUserRoutingIntegration(SSotBaseTestCase):
     Integration tests for multi-user WebSocket routing with complete isolation.
     
     Tests critical multi-user scenarios that affect chat business value:
-    - Message routing accuracy (User A → User A only)
+    - Message routing accuracy (User A  ->  User A only)
     - Connection multiplexing (8+ concurrent users)
     - Cross-user isolation verification
     - High-volume message routing under load

@@ -61,7 +61,7 @@ class SyntheticDataGenerationFlow:
         
         await self._send_update(run_id, {
             "status": "starting",
-            "message": "🎲 Initializing synthetic data generation...",
+            "message": "[U+1F3B2] Initializing synthetic data generation...",
             "agent": "SyntheticDataSubAgent"
         })
     
@@ -86,7 +86,7 @@ class SyntheticDataGenerationFlow:
         
         await self._send_update(run_id, {
             "status": "generating",
-            "message": f"🔄 Generating {profile.volume:,} synthetic records...",
+            "message": f" CYCLE:  Generating {profile.volume:,} synthetic records...",
             "progress": 0
         })
     
@@ -146,7 +146,7 @@ class SyntheticDataGenerationFlow:
     
     def _format_completion_message(self, records_count: int, duration: int) -> str:
         """Format completion message"""
-        return f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms"
+        return f" PASS:  Successfully generated {records_count:,} synthetic records in {duration}ms"
     
     def _calculate_duration(self, start_time: float) -> int:
         """Calculate duration in milliseconds"""

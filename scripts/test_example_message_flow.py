@@ -36,7 +36,7 @@ class ExampleMessageFlowTestRunner:
     def run_all_tests(self) -> bool:
         """Run all example message flow tests"""
         
-        print("🚀 Starting Example Message Flow Test Suite")
+        print("[U+1F680] Starting Example Message Flow Test Suite")
         print("=" * 60)
         
         success = True
@@ -56,7 +56,7 @@ class ExampleMessageFlowTestRunner:
         ]
         
         for suite in test_suites:
-            print(f"\n📋 Running {suite['name']}: {suite['description']}")
+            print(f"\n[U+1F4CB] Running {suite['name']}: {suite['description']}")
             print("-" * 50)
             
             suite_success = self._run_test_suite(suite)
@@ -64,7 +64,7 @@ class ExampleMessageFlowTestRunner:
                 success = False
                 
         # Run validation checks
-        print(f"\n🔍 Running Validation Checks")
+        print(f"\n SEARCH:  Running Validation Checks")
         print("-" * 50)
         validation_success = self._run_validation_checks()
         if not validation_success:
@@ -81,7 +81,7 @@ class ExampleMessageFlowTestRunner:
         test_file = self.project_root / suite['file']
         
         if not test_file.exists():
-            print(f"❌ Test file not found: {test_file}")
+            print(f" FAIL:  Test file not found: {test_file}")
             self.errors.append(f"Missing test file: {suite['file']}")
             return False
             
@@ -110,20 +110,20 @@ class ExampleMessageFlowTestRunner:
             self.test_results[suite['name']] = suite_results
             
             if result.returncode == 0:
-                print(f"✅ {suite['name']} passed")
+                print(f" PASS:  {suite['name']} passed")
                 return True
             else:
-                print(f"❌ {suite['name']} failed")
+                print(f" FAIL:  {suite['name']} failed")
                 print(f"   Output: {result.stdout}")
                 print(f"   Errors: {result.stderr}")
                 return False
                 
         except subprocess.TimeoutExpired:
-            print(f"⏰ {suite['name']} timed out")
+            print(f"[U+23F0] {suite['name']} timed out")
             self.errors.append(f"Timeout in {suite['name']}")
             return False
         except Exception as e:
-            print(f"💥 Error running {suite['name']}: {e}")
+            print(f"[U+1F4A5] Error running {suite['name']}: {e}")
             self.errors.append(f"Exception in {suite['name']}: {str(e)}")
             return False
             
@@ -218,10 +218,10 @@ class ExampleMessageFlowTestRunner:
                 ExampleMessageHandler,
             )
             
-            print("     ✅ All imports successful")
+            print("      PASS:  All imports successful")
             return True
         except Exception as e:
-            print(f"     ❌ Import error: {e}")
+            print(f"      FAIL:  Import error: {e}")
             self.errors.append(f"Import validation failed: {str(e)}")
             return False
             
@@ -234,13 +234,13 @@ class ExampleMessageFlowTestRunner:
             ws_manager = get_websocket_manager()
             
             if ws_manager is None:
-                print("     ❌ WebSocket manager not available")
+                print("      FAIL:  WebSocket manager not available")
                 return False
                 
-            print("     ✅ Configuration validation passed")
+            print("      PASS:  Configuration validation passed")
             return True
         except Exception as e:
-            print(f"     ❌ Configuration error: {e}")
+            print(f"      FAIL:  Configuration error: {e}")
             self.errors.append(f"Configuration validation failed: {str(e)}")
             return False
             
@@ -259,13 +259,13 @@ class ExampleMessageFlowTestRunner:
             supervisor = ExampleMessageSupervisor()
             
             if handler is None or supervisor is None:
-                print("     ❌ Handler initialization failed")
+                print("      FAIL:  Handler initialization failed")
                 return False
                 
-            print("     ✅ Handler initialization successful")
+            print("      PASS:  Handler initialization successful")
             return True
         except Exception as e:
-            print(f"     ❌ Handler initialization error: {e}")
+            print(f"      FAIL:  Handler initialization error: {e}")
             self.errors.append(f"Handler initialization failed: {str(e)}")
             return False
             
@@ -295,13 +295,13 @@ class ExampleMessageFlowTestRunner:
             request = ExampleMessageRequest(**valid_message)
             
             if request.content != "Test message for validation":
-                print("     ❌ Message validation failed")
+                print("      FAIL:  Message validation failed")
                 return False
                 
-            print("     ✅ Message validation successful")
+            print("      PASS:  Message validation successful")
             return True
         except Exception as e:
-            print(f"     ❌ Message validation error: {e}")
+            print(f"      FAIL:  Message validation error: {e}")
             self.errors.append(f"Message validation failed: {str(e)}")
             return False
             
@@ -309,7 +309,7 @@ class ExampleMessageFlowTestRunner:
         """Generate comprehensive test report"""
         
         print("\n" + "=" * 60)
-        print("📊 TEST RESULTS SUMMARY")
+        print(" CHART:  TEST RESULTS SUMMARY")
         print("=" * 60)
         
         # Overall statistics
@@ -319,9 +319,9 @@ class ExampleMessageFlowTestRunner:
         total_tests = total_passed + total_failed + total_errors
         
         print(f"Total Tests: {total_tests}")
-        print(f"Passed: {total_passed} ✅")
-        print(f"Failed: {total_failed} ❌")
-        print(f"Errors: {total_errors} 💥")
+        print(f"Passed: {total_passed}  PASS: ")
+        print(f"Failed: {total_failed}  FAIL: ")
+        print(f"Errors: {total_errors} [U+1F4A5]")
         
         if total_tests > 0:
             success_rate = (total_passed / total_tests) * 100
@@ -347,19 +347,19 @@ class ExampleMessageFlowTestRunner:
         if self.errors:
             print("\nErrors Encountered:")
             for error in self.errors:
-                print(f"  • {error}")
+                print(f"  [U+2022] {error}")
                 
         print("\n" + "=" * 60)
         
         # Overall result
         if total_failed == 0 and total_errors == 0 and total_tests > 0:
-            print("🎉 ALL TESTS PASSED!")
+            print(" CELEBRATION:  ALL TESTS PASSED!")
             print("Example Message Flow system is ready for production.")
         elif total_tests == 0:
-            print("⚠️  NO TESTS WERE RUN")
+            print(" WARNING: [U+FE0F]  NO TESTS WERE RUN")
             print("Please check test configuration.")
         else:
-            print("❌ SOME TESTS FAILED")
+            print(" FAIL:  SOME TESTS FAILED")
             print("Please review failures before deploying.")
             
         print("=" * 60)
@@ -368,7 +368,7 @@ class ExampleMessageFlowTestRunner:
 def run_quick_validation():
     """Run quick validation checks only"""
     
-    print("🔍 Running Quick Validation Checks")
+    print(" SEARCH:  Running Quick Validation Checks")
     print("-" * 40)
     
     try:
@@ -386,13 +386,13 @@ def run_quick_validation():
         from netra_backend.app.handlers.example_message_handler import (
             ExampleMessageHandler,
         )
-        print("✅ Imports successful")
+        print(" PASS:  Imports successful")
         
         # Test initialization
         print("Testing initialization...")
         handler = ExampleMessageHandler()
         processor = ExampleMessageProcessor()
-        print("✅ Initialization successful")
+        print(" PASS:  Initialization successful")
         
         # Test basic functionality
         print("Testing message validation...")
@@ -415,13 +415,13 @@ def run_quick_validation():
         }
         
         request = ExampleMessageRequest(**test_message)
-        print("✅ Message validation successful")
+        print(" PASS:  Message validation successful")
         
-        print("\n🎉 Quick validation passed!")
+        print("\n CELEBRATION:  Quick validation passed!")
         return True
         
     except Exception as e:
-        print(f"\n❌ Quick validation failed: {e}")
+        print(f"\n FAIL:  Quick validation failed: {e}")
         return False
 
 

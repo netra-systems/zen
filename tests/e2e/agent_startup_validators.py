@@ -1,6 +1,6 @@
 """Agent Startup Response Validation Utilities
 BVJ: Enterprise/Growth segment - $100K+ MRR protection from agent failures
-Architecture: ≤300 lines, ≤8 lines per function, modular validators
+Architecture:  <= 300 lines,  <= 8 lines per function, modular validators
 """
 
 import asyncio

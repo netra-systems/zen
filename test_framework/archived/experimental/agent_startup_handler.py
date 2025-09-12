@@ -157,13 +157,13 @@ class AgentPerformanceSummaryReporter:
             return
             
         if total_duration < 30:
-            print("✓ EXCELLENT - Total duration under 30s")
+            print("[U+2713] EXCELLENT - Total duration under 30s")
         elif total_duration < 60:
-            print("✓ GOOD - Total duration under 60s")
+            print("[U+2713] GOOD - Total duration under 60s")
         elif total_duration < 120:
-            print(f"⚠ ACCEPTABLE - Duration {total_duration:.1f}s (consider optimization)")
+            print(f" WARNING:  ACCEPTABLE - Duration {total_duration:.1f}s (consider optimization)")
         else:
-            print(f"✗ NEEDS OPTIMIZATION - Duration {total_duration:.1f}s exceeds target")
+            print(f"[U+2717] NEEDS OPTIMIZATION - Duration {total_duration:.1f}s exceeds target")
     
     def _print_summary_footer(self):
         """Print performance summary footer."""

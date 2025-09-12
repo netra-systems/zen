@@ -1,7 +1,7 @@
 """
 Async Performance Analyzer
 Analyzes async test performance and provides recommendations
-Maximum 300 lines, functions ≤8 lines
+Maximum 300 lines, functions  <= 8 lines
 """
 
 import asyncio

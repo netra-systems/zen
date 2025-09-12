@@ -469,19 +469,19 @@ class PerformanceMonitor:
         latest = self.samples[-1]
         health = self._assess_system_health()
         
-        print(f"\n📊 Performance Monitor Status - {latest['datetime']}")
+        print(f"\n CHART:  Performance Monitor Status - {latest['datetime']}")
         print("-" * 60)
-        print(f"🖥️  System Memory: {latest['system']['memory_percent']:.1f}% "
+        print(f"[U+1F5A5][U+FE0F]  System Memory: {latest['system']['memory_percent']:.1f}% "
               f"({latest['system']['memory_used_mb']:.0f}MB used)")
-        print(f"🔧 Process Memory: {latest['process']['memory_rss_mb']:.1f}MB RSS")
-        print(f"⚡ System CPU: {latest['system']['cpu_percent']:.1f}%")
-        print(f"🎯 Process CPU: {latest['process']['cpu_percent']:.1f}%")
-        print(f"🔗 Connections: {latest['process']['connections']}")
-        print(f"📁 Open Files: {latest['process']['open_files']}")
-        print(f"🧵 Threads: {latest['process']['threads']}")
+        print(f"[U+1F527] Process Memory: {latest['process']['memory_rss_mb']:.1f}MB RSS")
+        print(f" LIGHTNING:  System CPU: {latest['system']['cpu_percent']:.1f}%")
+        print(f" TARGET:  Process CPU: {latest['process']['cpu_percent']:.1f}%")
+        print(f"[U+1F517] Connections: {latest['process']['connections']}")
+        print(f"[U+1F4C1] Open Files: {latest['process']['open_files']}")
+        print(f"[U+1F9F5] Threads: {latest['process']['threads']}")
         
         # Health status
-        status_emoji = {"HEALTHY": "✅", "WARNING": "⚠️", "CRITICAL": "❌"}.get(health['status'], "❓")
+        status_emoji = {"HEALTHY": " PASS: ", "WARNING": " WARNING: [U+FE0F]", "CRITICAL": " FAIL: "}.get(health['status'], "[U+2753]")
         print(f"\n{status_emoji} Health Status: {health['status']}")
         
         if health['health_issues']:
@@ -492,7 +492,7 @@ class PerformanceMonitor:
         if self.alerts_generated:
             recent_alerts = [a for a in self.alerts_generated if time.time() - a['timestamp'] < 300]  # Last 5 minutes
             if recent_alerts:
-                print(f"\n🚨 Recent Alerts (last 5 min): {len(recent_alerts)}")
+                print(f"\n ALERT:  Recent Alerts (last 5 min): {len(recent_alerts)}")
                 for alert in recent_alerts[-3:]:  # Show last 3
                     print(f"  {alert['level']}: {alert['message']}")
         
@@ -504,7 +504,7 @@ async def run_continuous_monitoring(duration: int, interval: float, output_file:
     monitor = PerformanceMonitor(sample_interval=interval)
     
     try:
-        print(f"🚀 Starting performance monitoring for {duration} seconds (interval: {interval}s)")
+        print(f"[U+1F680] Starting performance monitoring for {duration} seconds (interval: {interval}s)")
         print("Press Ctrl+C to stop monitoring early\n")
         
         # Start monitoring
@@ -523,7 +523,7 @@ async def run_continuous_monitoring(duration: int, interval: float, output_file:
                 if alerts:
                     monitor.alerts_generated.extend(alerts)
                     for alert in alerts:
-                        print(f"🚨 {alert['level']}: {alert['message']}")
+                        print(f" ALERT:  {alert['level']}: {alert['message']}")
                 
                 # Print periodic status
                 if len(monitor.samples) % 60 == 0:  # Every 60 samples
@@ -533,7 +533,7 @@ async def run_continuous_monitoring(duration: int, interval: float, output_file:
                 await asyncio.sleep(interval)
                 
             except KeyboardInterrupt:
-                print("\n⚠️  Monitoring interrupted by user")
+                print("\n WARNING: [U+FE0F]  Monitoring interrupted by user")
                 break
             except Exception as e:
                 logger.error(f"Error during monitoring: {e}")
@@ -542,16 +542,16 @@ async def run_continuous_monitoring(duration: int, interval: float, output_file:
         monitor.stop_monitoring()
         
         # Generate final report
-        print("\n📊 Generating final monitoring report...")
+        print("\n CHART:  Generating final monitoring report...")
         report_file = monitor.save_monitoring_data(output_file)
         
         # Print summary
         report = monitor.generate_monitoring_report()
-        print(f"\n✅ Monitoring Complete")
-        print(f"📈 Duration: {report['monitoring_summary']['duration_seconds']:.1f}s")
-        print(f"📋 Samples: {report['monitoring_summary']['total_samples']}")
-        print(f"🚨 Alerts: {report['monitoring_summary']['alerts_generated']}")
-        print(f"💾 Report saved: {report_file}")
+        print(f"\n PASS:  Monitoring Complete")
+        print(f"[U+1F4C8] Duration: {report['monitoring_summary']['duration_seconds']:.1f}s")
+        print(f"[U+1F4CB] Samples: {report['monitoring_summary']['total_samples']}")
+        print(f" ALERT:  Alerts: {report['monitoring_summary']['alerts_generated']}")
+        print(f"[U+1F4BE] Report saved: {report_file}")
         
         return report
         
@@ -607,21 +607,21 @@ def main():
         status = health.get('status', 'UNKNOWN')
         
         if status == 'HEALTHY':
-            print("\n✅ System performance is healthy")
+            print("\n PASS:  System performance is healthy")
             return 0
         elif status == 'WARNING':
-            print("\n⚠️  System performance has warnings")
+            print("\n WARNING: [U+FE0F]  System performance has warnings")
             return 1
         else:
-            print("\n❌ Critical performance issues detected")
+            print("\n FAIL:  Critical performance issues detected")
             return 2
             
     except KeyboardInterrupt:
-        print("\n⚠️  Monitoring interrupted")
+        print("\n WARNING: [U+FE0F]  Monitoring interrupted")
         return 130
     except Exception as e:
         logger.error(f"Error running performance monitor: {e}")
-        print(f"❌ Error: {e}")
+        print(f" FAIL:  Error: {e}")
         return 1
 
 

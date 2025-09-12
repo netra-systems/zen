@@ -300,14 +300,14 @@ class StagingAPIEndpointsTestRunner:
         
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all API endpoint tests."""
-        print(f"🔌 Running Critical API Endpoints Tests")
+        print(f"[U+1F50C] Running Critical API Endpoints Tests")
         print(f"Environment: {self.environment}")
         print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
         print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
         print()
         
         # Get test token first
-        print("🔑 Getting test token...")
+        print("[U+1F511] Getting test token...")
         self.access_token = await self.get_test_token()
         print(f"     Token obtained: {bool(self.access_token)}")
         print()
@@ -355,12 +355,12 @@ class StagingAPIEndpointsTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed")
-        print(f"🏥 Health checks: {'✅ All services healthy' if results['summary']['services_available'] else '❌ Service issues detected'}")
-        print(f"🚨 Critical failures: {results['summary']['critical_failures']}")
+        print(f" CHART:  Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed")
+        print(f"[U+1F3E5] Health checks: {' PASS:  All services healthy' if results['summary']['services_available'] else ' FAIL:  Service issues detected'}")
+        print(f" ALERT:  Critical failures: {results['summary']['critical_failures']}")
         
         if not results["summary"]["services_available"]:
-            print("🚨 CRITICAL: Service health check failures detected!")
+            print(" ALERT:  CRITICAL: Service health check failures detected!")
             
         return results
 

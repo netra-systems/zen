@@ -11,7 +11,7 @@ Business Value Justification:
 - Value Impact: Validates complete user journeys with 3+ agents and state preservation
 - Strategic Impact: Protects AI optimization workflows generating $2M+ annual value
 
-🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
+ ALERT:  CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 
 Test Architecture:
@@ -41,7 +41,7 @@ from shared.isolated_environment import IsolatedEnvironment
 import pytest
 from loguru import logger
 
-# 🚨 MANDATORY: SSOT E2E Authentication imports - CHEATING violation fix
+#  ALERT:  MANDATORY: SSOT E2E Authentication imports - CHEATING violation fix
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, E2EWebSocketAuthHelper, create_authenticated_user
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 
@@ -395,7 +395,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers for comprehensive E2E tests
+        #  ALERT:  MANDATORY: Create authenticated helpers for comprehensive E2E tests
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
@@ -418,7 +418,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
         setup = orchestration_setup
         validator = ComprehensiveOrchestrationValidator()
         
-        # 🚨 MANDATORY: Create authenticated user for complex workflow
+        #  ALERT:  MANDATORY: Create authenticated user for complex workflow
         token, user_data = await create_authenticated_user(
             environment=self.test_environment,
             email="e2e.complex.workflow@example.com",
@@ -484,7 +484,7 @@ class TestCompleteAgentWorkflow(SSotBaseTestCase):
             assert result.final_response, "No final response generated"
             assert len(result.final_response) > 100, "Response too short for complex request"
             
-            # 🚨 CRITICAL: Validate execution time indicates real processing (no CHEATING)
+            #  ALERT:  CRITICAL: Validate execution time indicates real processing (no CHEATING)
             assert execution_time >= 0.5, f"Execution time {execution_time:.3f}s indicates fake execution (CHEATING violation)"
             
             # Validate all captured events are for authenticated user
@@ -525,7 +525,7 @@ class TestAgentHandoffAndContextPreservation(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers
+        #  ALERT:  MANDATORY: Create authenticated helpers
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
@@ -644,7 +644,7 @@ class TestErrorRecoveryDuringExecution(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers for error recovery tests
+        #  ALERT:  MANDATORY: Create authenticated helpers for error recovery tests
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     
@@ -788,7 +788,7 @@ class TestPerformanceAndProductionReadiness(SSotBaseTestCase):
         # Determine test environment
         self.test_environment = self.env.get("TEST_ENV", self.env.get("ENVIRONMENT", "test"))
         
-        # 🚨 MANDATORY: Create authenticated helpers for performance tests
+        #  ALERT:  MANDATORY: Create authenticated helpers for performance tests
         self.auth_helper = E2EAuthHelper(environment=self.test_environment)
         self.websocket_auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
     

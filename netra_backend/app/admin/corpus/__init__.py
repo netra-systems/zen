@@ -5,7 +5,7 @@ This module consolidates 30+ corpus admin files into a single unified implementa
 with proper user isolation and factory pattern support.
 
 Business Value:
-- Simplified maintenance (30 files → 1 file)
+- Simplified maintenance (30 files  ->  1 file)
 - Improved multi-user isolation
 - Thread-safe corpus operations
 - Consistent metadata handling via BaseAgent SSOT methods

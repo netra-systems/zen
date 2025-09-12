@@ -834,9 +834,9 @@ class PreDeploymentValidator:
         report = self.validation_report
         
         status_symbols = {
-            "passed": "✓ PASS",
-            "warning": "⚠ WARN",
-            "failed": "✗ FAIL",
+            "passed": "[U+2713] PASS",
+            "warning": " WARNING:  WARN",
+            "failed": "[U+2717] FAIL",
             "unknown": "? UNKNOWN"
         }
         
@@ -850,19 +850,19 @@ class PreDeploymentValidator:
         print(f"Timestamp: {report['timestamp']}")
         
         if report["critical_issues"]:
-            print(f"\n🚨 CRITICAL ISSUES ({len(report['critical_issues'])}):")
+            print(f"\n ALERT:  CRITICAL ISSUES ({len(report['critical_issues'])}):")
             for issue in report["critical_issues"]:
-                print(f"   ✗ {issue}")
+                print(f"   [U+2717] {issue}")
         
         if report["warnings"]:
-            print(f"\n⚠️  WARNINGS ({len(report['warnings'])}):")
+            print(f"\n WARNING: [U+FE0F]  WARNINGS ({len(report['warnings'])}):")
             for warning in report["warnings"]:
-                print(f"   ⚠ {warning}")
+                print(f"    WARNING:  {warning}")
         
         # Show validation details
-        print(f"\n📋 VALIDATION DETAILS:")
+        print(f"\n[U+1F4CB] VALIDATION DETAILS:")
         for check_name, check_result in report["validations"].items():
-            status_icon = "✓" if check_result["status"] == "passed" else "✗" if check_result["status"] == "failed" else "⚠"
+            status_icon = "[U+2713]" if check_result["status"] == "passed" else "[U+2717]" if check_result["status"] == "failed" else " WARNING: "
             print(f"   {status_icon} {check_name.upper()}: {check_result['status']}")
             
             if check_result.get("issues"):
@@ -871,22 +871,22 @@ class PreDeploymentValidator:
             
             if check_result.get("warnings"):
                 for warning in check_result["warnings"]:
-                    print(f"      ⚠ {warning}")
+                    print(f"       WARNING:  {warning}")
         
         if report["recommendations"]:
-            print(f"\n💡 RECOMMENDATIONS ({len(report['recommendations'])}):")
+            print(f"\n IDEA:  RECOMMENDATIONS ({len(report['recommendations'])}):")
             for rec in report["recommendations"]:
-                print(f"   → {rec}")
+                print(f"    ->  {rec}")
         
         print("\n" + "=" * 80)
         
         # Summary
         if report["overall_status"] == "passed":
-            print("✅ AUTH SERVICE IS READY FOR DEPLOYMENT")
+            print(" PASS:  AUTH SERVICE IS READY FOR DEPLOYMENT")
         elif report["overall_status"] == "warning":
-            print("⚠️  AUTH SERVICE CAN DEPLOY WITH WARNINGS - REVIEW RECOMMENDED")
+            print(" WARNING: [U+FE0F]  AUTH SERVICE CAN DEPLOY WITH WARNINGS - REVIEW RECOMMENDED")
         else:
-            print("🚫 AUTH SERVICE NOT READY FOR DEPLOYMENT - FIX CRITICAL ISSUES")
+            print("[U+1F6AB] AUTH SERVICE NOT READY FOR DEPLOYMENT - FIX CRITICAL ISSUES")
         
         print("=" * 80)
 

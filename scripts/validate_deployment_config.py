@@ -106,7 +106,7 @@ class DeploymentValidator:
             
     def validate_environment_vars(self, config: Dict) -> bool:
         """Validate environment variables match working configuration."""
-        print("\n🔍 Validating Environment Variables...")
+        print("\n SEARCH:  Validating Environment Variables...")
         
         env_vars = config.get('env_vars', {})
         valid = True
@@ -131,7 +131,7 @@ class DeploymentValidator:
         
     def validate_secrets(self, config: Dict) -> bool:
         """Validate all required secrets are configured."""
-        print("\n🔐 Validating Secrets Configuration...")
+        print("\n[U+1F510] Validating Secrets Configuration...")
         
         secrets = config.get('secrets', {})
         valid = True
@@ -158,7 +158,7 @@ class DeploymentValidator:
         
     def check_gcp_secrets(self) -> bool:
         """Check if secrets actually exist in GCP Secret Manager."""
-        print("\n☁️ Checking GCP Secret Manager...")
+        print("\n[U+2601][U+FE0F] Checking GCP Secret Manager...")
         
         gcloud_cmd = "gcloud.cmd" if sys.platform == "win32" else "gcloud"
         
@@ -192,7 +192,7 @@ class DeploymentValidator:
                 )
                 return False
                 
-            print(f"✅ All {len(self.WORKING_CONFIG['required_secrets'])} required secrets exist in GCP")
+            print(f" PASS:  All {len(self.WORKING_CONFIG['required_secrets'])} required secrets exist in GCP")
             return True
             
         except Exception as e:
@@ -201,7 +201,7 @@ class DeploymentValidator:
             
     def validate_cloud_run_config(self, config: Dict) -> bool:
         """Validate Cloud Run configuration settings."""
-        print("\n🚀 Validating Cloud Run Configuration...")
+        print("\n[U+1F680] Validating Cloud Run Configuration...")
         
         cloud_run = config.get('cloud_run', {})
         valid = True
@@ -221,7 +221,7 @@ class DeploymentValidator:
     def run_validation(self, check_secrets: bool = False) -> bool:
         """Run full validation suite."""
         print(f"\n{'='*60}")
-        print(f"🔧 Deployment Configuration Validator")
+        print(f"[U+1F527] Deployment Configuration Validator")
         print(f"Environment: {self.environment}")
         print(f"Config File: {self.config_file}")
         print(f"{'='*60}")
@@ -250,29 +250,29 @@ class DeploymentValidator:
     def print_results(self):
         """Print validation results."""
         print(f"\n{'='*60}")
-        print("📊 Validation Results")
+        print(" CHART:  Validation Results")
         print(f"{'='*60}")
         
         if self.errors:
-            print("\n❌ ERRORS (must fix):")
+            print("\n FAIL:  ERRORS (must fix):")
             for error in self.errors:
-                print(f"  • {error}")
+                print(f"  [U+2022] {error}")
                 
         if self.warnings:
-            print("\n⚠️ WARNINGS (review):")
+            print("\n WARNING: [U+FE0F] WARNINGS (review):")
             for warning in self.warnings:
-                print(f"  • {warning}")
+                print(f"  [U+2022] {warning}")
                 
         if not self.errors and not self.warnings:
-            print("\n✅ All validations passed!")
+            print("\n PASS:  All validations passed!")
             print("Configuration matches the proven working setup.")
             
         print(f"\n{'='*60}")
         
         if self.errors:
-            print("❌ VALIDATION FAILED - Fix errors before deploying")
+            print(" FAIL:  VALIDATION FAILED - Fix errors before deploying")
         else:
-            print("✅ VALIDATION PASSED - Safe to deploy")
+            print(" PASS:  VALIDATION PASSED - Safe to deploy")
             
         print(f"{'='*60}\n")
 

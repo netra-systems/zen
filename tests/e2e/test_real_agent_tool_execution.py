@@ -432,9 +432,9 @@ class RealAgentToolExecutionTester:
             # Check for REQUIRED WebSocket events
             missing_events = self.REQUIRED_EVENTS - val.event_types_seen
             if missing_events:
-                report.append(f"⚠️ MISSING REQUIRED EVENTS: {missing_events}")
+                report.append(f" WARNING: [U+FE0F] MISSING REQUIRED EVENTS: {missing_events}")
             else:
-                report.append("✓ All required WebSocket events received")
+                report.append("[U+2713] All required WebSocket events received")
                 
             # Performance metrics
             report.append("\nPerformance Metrics:")
@@ -447,7 +447,7 @@ class RealAgentToolExecutionTester:
             report.append("\nTool Execution Analysis:")
             report.append(f"  - Total tools executed: {len(val.tool_executions)}")
             report.append(f"  - Max parallel tools: {val.parallel_tool_count}")
-            report.append(f"  - Tool chain sequence: {' → '.join(val.tool_chain_sequence[:5])}")  # Show first 5
+            report.append(f"  - Tool chain sequence: {'  ->  '.join(val.tool_chain_sequence[:5])}")  # Show first 5
             
             if val.tool_executions:
                 successful = sum(1 for t in val.tool_executions if t.success)
@@ -468,10 +468,10 @@ class RealAgentToolExecutionTester:
                     
             # Business logic validation
             report.append("\nBusiness Logic Validation:")
-            report.append(f"  ✓ Tool chain coherent: {val.tool_chain_coherent}")
-            report.append(f"  ✓ Tools successful: {val.tools_successful}")
-            report.append(f"  ✓ Error handling robust: {val.error_handling_robust}")
-            report.append(f"  ✓ Results actionable: {val.results_actionable}")
+            report.append(f"  [U+2713] Tool chain coherent: {val.tool_chain_coherent}")
+            report.append(f"  [U+2713] Tools successful: {val.tools_successful}")
+            report.append(f"  [U+2713] Error handling robust: {val.error_handling_robust}")
+            report.append(f"  [U+2713] Results actionable: {val.results_actionable}")
             
         report.append("\n" + "=" * 80)
         return "\n".join(report)
@@ -564,7 +564,7 @@ class TestRealAgentToolExecution:
         # Tool sequence validation
         if validation.tool_chain_sequence:
             assert len(validation.tool_chain_sequence) > 0, "Should have tool execution sequence"
-            logger.info(f"Tool execution sequence: {' → '.join(validation.tool_chain_sequence)}")
+            logger.info(f"Tool execution sequence: {'  ->  '.join(validation.tool_chain_sequence)}")
             
     async def test_error_recovery_tool_chain(self, tool_execution_tester):
         """Test error recovery in tool execution chains."""

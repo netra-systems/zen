@@ -7,7 +7,7 @@ Real Critical User Journey Helpers - Consolidated imports for REAL E2E testing
 3. **Value Impact**: Modular helpers reduce test maintenance by 60%
 4. **Revenue Impact**: Faster test development = quicker iteration on conversion optimization
 
-**ARCHITECTURE**: ≤300 lines, consolidated imports to maintain architectural compliance
+**ARCHITECTURE**:  <= 300 lines, consolidated imports to maintain architectural compliance
 Provides unified access to all helper classes while maintaining modular design.
 """
 

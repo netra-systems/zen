@@ -2,7 +2,7 @@
 Cryptographic Security - SSOT for Cryptographic Operations
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Provide secure cryptographic operations for data protection
 - Value Impact: Ensures data confidentiality and integrity across the platform
 - Strategic Impact: Critical for regulatory compliance and enterprise security requirements

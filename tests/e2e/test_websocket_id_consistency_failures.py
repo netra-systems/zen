@@ -5,7 +5,7 @@ MISSION CRITICAL: This test suite validates end-to-end WebSocket ID generation
 consistency and routing integrity across the full system stack.
 
 Business Value Justification:
-- Segment: ALL (Free → Enterprise)  
+- Segment: ALL (Free  ->  Enterprise)  
 - Business Goal: Ensure WebSocket message routing reliability and user isolation
 - Value Impact: Prevents message misdelivery and user data leakage via WebSocket
 - Strategic Impact: Critical for real-time chat functionality and multi-user isolation

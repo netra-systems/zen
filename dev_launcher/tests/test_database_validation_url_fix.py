@@ -60,12 +60,12 @@ class TestDatabaseValidationURLFix:
                     
                     for service_name, (db_url, db_type) in db_configs.items():
                         if not db_url:
-                            self._print("ℹ️", "DB-RESILIENT", f"No {service_name.upper()}_URL configured, skipping")
+                            self._print("[U+2139][U+FE0F]", "DB-RESILIENT", f"No {service_name.upper()}_URL configured, skipping")
                             continue
                             
                         # Skip mock databases
                         if 'mock' in db_url.lower():
-                            self._print("🎭", "DB-RESILIENT", f"{service_name.capitalize()} in mock mode, skipping")
+                            self._print("[U+1F3AD]", "DB-RESILIENT", f"{service_name.capitalize()} in mock mode, skipping")
                             successful_connections.append(service_name)
                             continue
                         
@@ -77,17 +77,17 @@ class TestDatabaseValidationURLFix:
                         
                         if success:
                             successful_connections.append(service_name)
-                            self._print("✅", "DB-RESILIENT", f"{service_name.capitalize()} connection validated")
+                            self._print(" PASS: ", "DB-RESILIENT", f"{service_name.capitalize()} connection validated")
                         else:
                             failed_connections.append((service_name, error))
-                            self._print("⚠️", "DB-RESILIENT", f"{service_name.capitalize()} connection failed: {error}")
+                            self._print(" WARNING: [U+FE0F]", "DB-RESILIENT", f"{service_name.capitalize()} connection failed: {error}")
                     
                     # Report resilience results
                     if successful_connections:
-                        self._print("✅", "RESILIENCE", f"Connected to {len(successful_connections)} database service(s)")
+                        self._print(" PASS: ", "RESILIENCE", f"Connected to {len(successful_connections)} database service(s)")
                     
                     if failed_connections:
-                        self._print("⚠️", "RESILIENCE", f"{len(failed_connections)} database service(s) failed - using fallback validation")
+                        self._print(" WARNING: [U+FE0F]", "RESILIENCE", f"{len(failed_connections)} database service(s) failed - using fallback validation")
                         # Fallback to standard validation for failed services
                         return await self._validate_databases()
                     

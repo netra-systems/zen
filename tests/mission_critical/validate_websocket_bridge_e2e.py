@@ -64,7 +64,7 @@ class WebSocketBridgeE2EValidator:
         Returns True if all validations pass.
         """
         self.logger.info("=" * 80)
-        self.logger.info("🚀 STARTING E2E WEBSOCKET BRIDGE VALIDATION")
+        self.logger.info("[U+1F680] STARTING E2E WEBSOCKET BRIDGE VALIDATION")
         self.logger.info("=" * 80)
         
         try:
@@ -87,20 +87,20 @@ class WebSocketBridgeE2EValidator:
             success = await self._generate_final_report()
             
             if success:
-                self.logger.info("✅ ALL E2E WEBSOCKET BRIDGE VALIDATIONS PASSED")
+                self.logger.info(" PASS:  ALL E2E WEBSOCKET BRIDGE VALIDATIONS PASSED")
             else:
-                self.logger.error("❌ E2E WEBSOCKET BRIDGE VALIDATION FAILED")
+                self.logger.error(" FAIL:  E2E WEBSOCKET BRIDGE VALIDATION FAILED")
                 
             return success
             
         except Exception as e:
-            self.logger.error(f"💥 E2E VALIDATION CRASHED: {e}")
+            self.logger.error(f"[U+1F4A5] E2E VALIDATION CRASHED: {e}")
             self._add_validation("E2E Validation", False, f"Validation crashed: {e}")
             return False
     
     async def _validate_startup_initialization(self) -> None:
         """Phase 1: Validate startup creates all required components."""
-        self.logger.info("📋 PHASE 1: Startup Initialization")
+        self.logger.info("[U+1F4CB] PHASE 1: Startup Initialization")
         
         try:
             # Create a minimal FastAPI app for testing
@@ -123,25 +123,25 @@ class WebSocketBridgeE2EValidator:
             all_components_exist = True
             for attr_name, display_name in components_to_check:
                 if hasattr(app.state, attr_name) and getattr(app.state, attr_name) is not None:
-                    self.logger.info(f"   ✅ {display_name}: Present")
+                    self.logger.info(f"    PASS:  {display_name}: Present")
                     self._add_validation(f"Startup: {display_name}", True, "Component created during startup")
                 else:
-                    self.logger.error(f"   ❌ {display_name}: Missing or None")
+                    self.logger.error(f"    FAIL:  {display_name}: Missing or None")
                     self._add_validation(f"Startup: {display_name}", False, f"{display_name} not created or is None")
                     all_components_exist = False
             
             if all_components_exist:
-                self.logger.info("✅ Phase 1: All startup components initialized successfully")
+                self.logger.info(" PASS:  Phase 1: All startup components initialized successfully")
             else:
-                self.logger.error("❌ Phase 1: Critical startup components missing")
+                self.logger.error(" FAIL:  Phase 1: Critical startup components missing")
                 
         except Exception as e:
-            self.logger.error(f"❌ Phase 1 failed: {e}")
+            self.logger.error(f" FAIL:  Phase 1 failed: {e}")
             self._add_validation("Startup Initialization", False, f"Phase failed: {e}")
     
     async def _validate_component_integration(self) -> None:
         """Phase 2: Validate components are properly integrated."""
-        self.logger.info("🔗 PHASE 2: Component Integration")
+        self.logger.info("[U+1F517] PHASE 2: Component Integration")
         
         try:
             # Test AgentWebSocketBridge integration
@@ -153,15 +153,15 @@ class WebSocketBridgeE2EValidator:
             # Test Tool Dispatcher integration
             await self._test_tool_dispatcher_integration()
             
-            self.logger.info("✅ Phase 2: Component integration validated")
+            self.logger.info(" PASS:  Phase 2: Component integration validated")
             
         except Exception as e:
-            self.logger.error(f"❌ Phase 2 failed: {e}")
+            self.logger.error(f" FAIL:  Phase 2 failed: {e}")
             self._add_validation("Component Integration", False, f"Phase failed: {e}")
     
     async def _validate_bridge_propagation(self) -> None:
         """Phase 3: Validate bridge is properly propagated to agents."""
-        self.logger.info("🌉 PHASE 3: Bridge Propagation")
+        self.logger.info("[U+1F309] PHASE 3: Bridge Propagation")
         
         try:
             # Test bridge propagation through registry
@@ -173,15 +173,15 @@ class WebSocketBridgeE2EValidator:
             # Test AgentExecutionCore bridge setting
             await self._test_agent_execution_core_bridge()
             
-            self.logger.info("✅ Phase 3: Bridge propagation validated")
+            self.logger.info(" PASS:  Phase 3: Bridge propagation validated")
             
         except Exception as e:
-            self.logger.error(f"❌ Phase 3 failed: {e}")
+            self.logger.error(f" FAIL:  Phase 3 failed: {e}")
             self._add_validation("Bridge Propagation", False, f"Phase failed: {e}")
     
     async def _validate_event_flow(self) -> None:
         """Phase 4: Validate events flow through the bridge correctly."""
-        self.logger.info("📡 PHASE 4: Event Flow")
+        self.logger.info("[U+1F4E1] PHASE 4: Event Flow")
         
         try:
             # Test basic event emission
@@ -193,15 +193,15 @@ class WebSocketBridgeE2EValidator:
             # Test agent lifecycle events
             await self._test_agent_lifecycle_events()
             
-            self.logger.info("✅ Phase 4: Event flow validated")
+            self.logger.info(" PASS:  Phase 4: Event flow validated")
             
         except Exception as e:
-            self.logger.error(f"❌ Phase 4 failed: {e}")
+            self.logger.error(f" FAIL:  Phase 4 failed: {e}")
             self._add_validation("Event Flow", False, f"Phase failed: {e}")
     
     async def _validate_e2e_message_delivery(self) -> None:
         """Phase 5: Validate end-to-end message delivery to WebSocket."""
-        self.logger.info("🎯 PHASE 5: E2E Message Delivery")
+        self.logger.info(" TARGET:  PHASE 5: E2E Message Delivery")
         
         try:
             # Test complete message path: Agent -> Bridge -> WebSocket Manager
@@ -213,10 +213,10 @@ class WebSocketBridgeE2EValidator:
             # Test message queuing when no connections
             await self._test_message_queuing()
             
-            self.logger.info("✅ Phase 5: E2E message delivery validated")
+            self.logger.info(" PASS:  Phase 5: E2E message delivery validated")
             
         except Exception as e:
-            self.logger.error(f"❌ Phase 5 failed: {e}")
+            self.logger.error(f" FAIL:  Phase 5 failed: {e}")
             self._add_validation("E2E Message Delivery", False, f"Phase failed: {e}")
     
     async def _mock_minimal_startup(self, app) -> None:
@@ -625,14 +625,14 @@ class WebSocketBridgeE2EValidator:
         self.validations.append(validation)
         
         if passed:
-            self.logger.info(f"   ✅ {component}: {details}")
+            self.logger.info(f"    PASS:  {component}: {details}")
         else:
-            self.logger.error(f"   ❌ {component}: {details}")
+            self.logger.error(f"    FAIL:  {component}: {details}")
     
     async def _generate_final_report(self) -> bool:
         """Generate comprehensive final report."""
         self.logger.info("=" * 80)
-        self.logger.info("📊 E2E VALIDATION FINAL REPORT")
+        self.logger.info(" CHART:  E2E VALIDATION FINAL REPORT")
         self.logger.info("=" * 80)
         
         total_validations = len(self.validations)
@@ -640,7 +640,7 @@ class WebSocketBridgeE2EValidator:
         failed_validations = total_validations - passed_validations
         success_rate = (passed_validations / total_validations) * 100 if total_validations > 0 else 0
         
-        self.logger.info(f"📈 OVERALL RESULTS:")
+        self.logger.info(f"[U+1F4C8] OVERALL RESULTS:")
         self.logger.info(f"   Total Validations: {total_validations}")
         self.logger.info(f"   Passed: {passed_validations}")
         self.logger.info(f"   Failed: {failed_validations}")
@@ -648,28 +648,28 @@ class WebSocketBridgeE2EValidator:
         
         if failed_validations > 0:
             self.logger.error("=" * 80)
-            self.logger.error("❌ FAILED VALIDATIONS:")
+            self.logger.error(" FAIL:  FAILED VALIDATIONS:")
             self.logger.error("=" * 80)
             
             for validation in self.validations:
                 if not validation["passed"]:
-                    self.logger.error(f"   ❌ {validation['component']}: {validation['details']}")
+                    self.logger.error(f"    FAIL:  {validation['component']}: {validation['details']}")
         
         # Business impact assessment
         critical_failures = self._assess_critical_failures()
         
         if critical_failures:
             self.logger.error("=" * 80)
-            self.logger.error("🚨 CRITICAL BUSINESS IMPACT DETECTED")
+            self.logger.error(" ALERT:  CRITICAL BUSINESS IMPACT DETECTED")
             self.logger.error("=" * 80)
             for failure in critical_failures:
-                self.logger.error(f"   💥 {failure}")
-            self.logger.error("🔴 CHAT FUNCTIONALITY WILL NOT WORK PROPERLY")
+                self.logger.error(f"   [U+1F4A5] {failure}")
+            self.logger.error("[U+1F534] CHAT FUNCTIONALITY WILL NOT WORK PROPERLY")
             success = False
         else:
             self.logger.info("=" * 80)
-            self.logger.info("🟢 ALL CRITICAL PATHS VALIDATED SUCCESSFULLY")
-            self.logger.info("✅ CHAT FUNCTIONALITY READY FOR BUSINESS VALUE DELIVERY")
+            self.logger.info("[U+1F7E2] ALL CRITICAL PATHS VALIDATED SUCCESSFULLY")
+            self.logger.info(" PASS:  CHAT FUNCTIONALITY READY FOR BUSINESS VALUE DELIVERY")
             self.logger.info("=" * 80)
             success = failed_validations == 0
         
@@ -708,14 +708,14 @@ async def main():
         success = await validator.validate_complete_flow()
         
         if success:
-            print("\n🎉 E2E WebSocket Bridge validation PASSED - Chat functionality is ready!")
+            print("\n CELEBRATION:  E2E WebSocket Bridge validation PASSED - Chat functionality is ready!")
             return 0
         else:
-            print("\n💥 E2E WebSocket Bridge validation FAILED - Chat will not work properly!")
+            print("\n[U+1F4A5] E2E WebSocket Bridge validation FAILED - Chat will not work properly!")
             return 1
             
     except Exception as e:
-        print(f"\n💀 E2E validation crashed: {e}")
+        print(f"\n[U+1F480] E2E validation crashed: {e}")
         return 2
 
 

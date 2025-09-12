@@ -1,7 +1,7 @@
 """
 Golden Path SSOT Logging Integration Tests (Issue #368)
 
-PURPOSE: Ensure login → AI responses flow has proper SSOT logging.
+PURPOSE: Ensure login  ->  AI responses flow has proper SSOT logging.
 EXPECTATION: These tests will validate or expose Golden Path logging gaps.
 BUSINESS IMPACT: Protects Golden Path ($500K+ ARR) from logging-related failures.
 
@@ -137,7 +137,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
                     
                     if missing_fields:
                         self.fail(f"""
-                        🚨 AUDIT TRAIL GAP: Authentication log missing required fields
+                         ALERT:  AUDIT TRAIL GAP: Authentication log missing required fields
                         
                         Log Entry: {audit_log['message']}
                         Missing Fields: {missing_fields}
@@ -161,7 +161,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: SSOT logging infrastructure missing
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): SSOT logging infrastructure not available
+             ALERT:  EXPECTED FAILURE (Issue #368): SSOT logging infrastructure not available
             
             Import Error: {str(e)}
             Auth Steps Attempted: {len(auth_steps)}
@@ -253,7 +253,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
                 # Validate correlation tracking
                 if correlation_violations:
                     self.fail(f"""
-                    🚨 CORRELATION TRACKING FAILURE: Agent execution has correlation ID gaps
+                     ALERT:  CORRELATION TRACKING FAILURE: Agent execution has correlation ID gaps
                     
                     Correlation Violations: {len(correlation_violations)}
                     Violations: {correlation_violations}
@@ -286,7 +286,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
                 
                 if timeline_gaps:
                     self.fail(f"""
-                    🚨 EXECUTION TIMELINE GAPS: Agent execution has logging gaps
+                     ALERT:  EXECUTION TIMELINE GAPS: Agent execution has logging gaps
                     
                     Timeline Gaps: {timeline_gaps}
                     Total Execution Events: {len(execution_timeline)}
@@ -300,7 +300,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: Structured logging infrastructure missing
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Structured logging infrastructure not available
+             ALERT:  EXPECTED FAILURE (Issue #368): Structured logging infrastructure not available
             
             Import Error: {str(e)}
             Execution Steps Attempted: {len(execution_timeline)}
@@ -414,7 +414,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
                 
                 if missing_event_types:
                     self.fail(f"""
-                    🚨 WEBSOCKET LOGGING GAPS: Missing critical event types
+                     ALERT:  WEBSOCKET LOGGING GAPS: Missing critical event types
                     
                     Missing Event Types: {missing_event_types}
                     Event Metrics: {websocket_metrics}
@@ -429,7 +429,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
                 # Validate performance monitoring
                 if performance_issues:
                     self.fail(f"""
-                    🚨 PERFORMANCE MONITORING FAILURE: WebSocket performance issues not logged
+                     ALERT:  PERFORMANCE MONITORING FAILURE: WebSocket performance issues not logged
                     
                     Performance Issues: {performance_issues}
                     Performance Events Logged: {websocket_metrics['performance_events']}
@@ -446,7 +446,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
                     for error_event in critical_events:
                         if 'correlation_id' not in error_event['metadata']:
                             self.fail(f"""
-                            🚨 ERROR LOGGING INCOMPLETE: WebSocket errors missing correlation IDs
+                             ALERT:  ERROR LOGGING INCOMPLETE: WebSocket errors missing correlation IDs
                             
                             Error Event: {error_event['message']}
                             Available Metadata: {list(error_event['metadata'].keys())}
@@ -460,7 +460,7 @@ class TestGoldenPathLoggingIntegration(SSotAsyncTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: Correlation manager infrastructure missing
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Correlation management infrastructure not available
+             ALERT:  EXPECTED FAILURE (Issue #368): Correlation management infrastructure not available
             
             Import Error: {str(e)}
             WebSocket Metrics: {websocket_metrics}
@@ -539,7 +539,7 @@ class TestGoldenPathLoggingPerformance(SSotAsyncTestCase):
             
             if overhead_violations:
                 self.fail(f"""
-                🚨 LOGGING PERFORMANCE VIOLATION: Logging overhead impacts user experience
+                 ALERT:  LOGGING PERFORMANCE VIOLATION: Logging overhead impacts user experience
                 
                 Overhead Violations: {len(overhead_violations)}
                 Average Request Time: {avg_request_time:.2f}ms
@@ -636,7 +636,7 @@ class TestGoldenPathLoggingPerformance(SSotAsyncTestCase):
             # Validate cross-service correlation
             if broken_correlations:
                 self.fail(f"""
-                🚨 CROSS-SERVICE CORRELATION FAILURE: Correlation IDs not propagated properly
+                 ALERT:  CROSS-SERVICE CORRELATION FAILURE: Correlation IDs not propagated properly
                 
                 Broken Correlations: {len(broken_correlations)}
                 Expected Correlation ID: {self.correlation_id}
@@ -656,7 +656,7 @@ class TestGoldenPathLoggingPerformance(SSotAsyncTestCase):
             
             if missing_services:
                 self.fail(f"""
-                🚨 SERVICE CORRELATION GAPS: Some services not participating in correlation
+                 ALERT:  SERVICE CORRELATION GAPS: Some services not participating in correlation
                 
                 Missing Services: {missing_services}
                 Services in Chain: {services_in_chain}
@@ -677,7 +677,7 @@ class TestGoldenPathLoggingPerformance(SSotAsyncTestCase):
             
         except Exception as e:
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Cross-service correlation infrastructure not available
+             ALERT:  EXPECTED FAILURE (Issue #368): Cross-service correlation infrastructure not available
             
             Error: {str(e)}
             Service Logs: {dict((k, len(v)) for k, v in service_logs.items())}

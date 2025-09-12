@@ -33,7 +33,7 @@ class BasicEventValidator:
     def record_event(self, event: Dict) -> None:
         """Record a WebSocket event."""
         self.events.append(event)
-        logger.info(f"📡 Event recorded: {event.get('type', 'unknown')}")
+        logger.info(f"[U+1F4E1] Event recorded: {event.get('type', 'unknown')}")
         
     def has_event(self, event_type: str) -> bool:
         """Check if we have an event of the given type."""

@@ -17,8 +17,8 @@ heartbeat management, and error handling. Extracted from SyntheticDataSubAgent
 to maintain single responsibility principle.
 
 Module follows CLAUDE.md constraints:
-- File ≤300 lines
-- Functions ≤8 lines  
+- File  <= 300 lines
+- Functions  <= 8 lines  
 - Strong typing
 - Single responsibility
 """

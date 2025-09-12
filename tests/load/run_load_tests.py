@@ -99,9 +99,9 @@ env = get_env()
 
                     # REMOVED_SYNTAX_ERROR: if args.quick:
                         # REMOVED_SYNTAX_ERROR: env["LOAD_TEST_QUICK_MODE"] = "1"
-                        # REMOVED_SYNTAX_ERROR: print("🏃 Running in quick mode (reduced load)")
+                        # REMOVED_SYNTAX_ERROR: print("[U+1F3C3] Running in quick mode (reduced load)")
 
-                        # REMOVED_SYNTAX_ERROR: print(f"🚀 Starting production load tests...")
+                        # REMOVED_SYNTAX_ERROR: print(f"[U+1F680] Starting production load tests...")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print()
@@ -120,15 +120,15 @@ env = get_env()
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                             # REMOVED_SYNTAX_ERROR: if result.returncode == 0:
-                                # REMOVED_SYNTAX_ERROR: print("✅ All load tests passed!")
+                                # REMOVED_SYNTAX_ERROR: print(" PASS:  All load tests passed!")
                                 # REMOVED_SYNTAX_ERROR: else:
-                                    # REMOVED_SYNTAX_ERROR: print("❌ Some load tests failed!")
+                                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  Some load tests failed!")
 
                                     # REMOVED_SYNTAX_ERROR: return result.returncode
 
                                     # REMOVED_SYNTAX_ERROR: except KeyboardInterrupt:
                                         # REMOVED_SYNTAX_ERROR: print(" )
-                                        # REMOVED_SYNTAX_ERROR: 🛑 Load tests interrupted by user")
+                                        # REMOVED_SYNTAX_ERROR: [U+1F6D1] Load tests interrupted by user")
                                         # REMOVED_SYNTAX_ERROR: return 1
                                         # REMOVED_SYNTAX_ERROR: except Exception as e:
                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")

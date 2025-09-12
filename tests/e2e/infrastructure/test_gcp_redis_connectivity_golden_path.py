@@ -142,7 +142,7 @@ class TestGCPRedisConnectivityGoldenPath:
         Business Impact: Chat functionality requires Redis for session management.
         Without Redis, WebSocket connections and chat state management fail.
         """
-        logger.info("🔍 Testing Redis basic connectivity for chat functionality")
+        logger.info(" SEARCH:  Testing Redis basic connectivity for chat functionality")
         
         # Get authenticated token for real environment
         token, user_data = await e2e_auth_helper.authenticate_user()
@@ -156,9 +156,9 @@ class TestGCPRedisConnectivityGoldenPath:
             # Real Redis ping - this MUST succeed for chat functionality
             ping_result = await real_redis_client.ping()
             assert ping_result is True, f"Redis ping failed: {ping_result}"
-            logger.info("✅ Redis ping successful")
+            logger.info(" PASS:  Redis ping successful")
         except Exception as e:
-            logger.error(f"❌ REDIS FAILURE: Basic connectivity failed: {e}")
+            logger.error(f" FAIL:  REDIS FAILURE: Basic connectivity failed: {e}")
             # Test FAILS when Redis unavailable - NO assert True cheating
             raise AssertionError(f"Redis connectivity test FAILED - chat functionality unavailable: {e}")
         
@@ -179,14 +179,14 @@ class TestGCPRedisConnectivityGoldenPath:
             del_result = await real_redis_client.delete(test_key)
             assert del_result == 1, f"Redis DELETE failed: {del_result}"
             
-            logger.info("✅ Redis operations successful - chat session management working")
+            logger.info(" PASS:  Redis operations successful - chat session management working")
         except Exception as e:
-            logger.error(f"❌ REDIS OPERATION FAILURE: Chat session management broken: {e}")
+            logger.error(f" FAIL:  REDIS OPERATION FAILURE: Chat session management broken: {e}")
             # Test FAILS when Redis operations fail - NO assert True cheating
             raise AssertionError(f"Redis operations test FAILED - chat session management unavailable: {e}")
         
         # Test passes ONLY when Redis is fully operational
-        logger.info("✅ Redis connectivity validated - chat functionality can work")
+        logger.info(" PASS:  Redis connectivity validated - chat functionality can work")
 
     @pytest.mark.e2e
     @pytest.mark.infrastructure
@@ -207,7 +207,7 @@ class TestGCPRedisConnectivityGoldenPath:
         - User state management 
         - Real-time message routing
         """
-        logger.info("🔌 Testing WebSocket session management Redis dependency")
+        logger.info("[U+1F50C] Testing WebSocket session management Redis dependency")
         
         # Get authenticated WebSocket connection parameters
         environment = websocket_auth_helper.environment
@@ -236,10 +236,10 @@ class TestGCPRedisConnectivityGoldenPath:
             # Cleanup test session
             await real_redis_client.delete(session_key)
             
-            logger.info("✅ Redis session management operations successful")
+            logger.info(" PASS:  Redis session management operations successful")
             
         except Exception as e:
-            logger.error(f"❌ REDIS SESSION FAILURE: WebSocket session management broken: {e}")
+            logger.error(f" FAIL:  REDIS SESSION FAILURE: WebSocket session management broken: {e}")
             # Test FAILS when Redis session management is broken - NO assert True cheating
             raise AssertionError(f"WebSocket session management test FAILED - Redis unavailable: {e}")
         
@@ -250,7 +250,7 @@ class TestGCPRedisConnectivityGoldenPath:
                 timeout=15.0
             )
             
-            logger.info("✅ WebSocket connection established")
+            logger.info(" PASS:  WebSocket connection established")
             
             # Test message that would require Redis for state management
             test_message = json.dumps({
@@ -262,12 +262,12 @@ class TestGCPRedisConnectivityGoldenPath:
             })
             
             await websocket.send(test_message)
-            logger.info("✅ Message sent to WebSocket")
+            logger.info(" PASS:  Message sent to WebSocket")
             
             # WebSocket functionality depends on Redis being operational
             # If we got this far, Redis is working and supporting WebSocket operations
             await websocket.close()
-            logger.info("✅ WebSocket connection and Redis-dependent operations successful")
+            logger.info(" PASS:  WebSocket connection and Redis-dependent operations successful")
             
         except (
             websockets.exceptions.ConnectionClosedError,
@@ -277,7 +277,7 @@ class TestGCPRedisConnectivityGoldenPath:
             OSError,
             asyncio.TimeoutError
         ) as e:
-            logger.error(f"❌ WEBSOCKET FAILURE: Connection failed, likely due to Redis unavailability: {e}")
+            logger.error(f" FAIL:  WEBSOCKET FAILURE: Connection failed, likely due to Redis unavailability: {e}")
             # Test FAILS when WebSocket cannot establish Redis-dependent connections
             raise AssertionError(f"WebSocket connection test FAILED - Redis dependency not met: {e}")
         
@@ -303,7 +303,7 @@ class TestGCPRedisConnectivityGoldenPath:
         - Agent execution context
         - Real-time communication coordination
         """
-        logger.info("💬 Testing golden path chat functionality Redis dependency")
+        logger.info("[U+1F4AC] Testing golden path chat functionality Redis dependency")
         
         # Get authenticated session
         token, user_data = await e2e_auth_helper.authenticate_user()
@@ -345,10 +345,10 @@ class TestGCPRedisConnectivityGoldenPath:
             await real_redis_client.delete(thread_state_key)
             await real_redis_client.delete(message_routing_key)
             
-            logger.info("✅ Redis operations for chat functionality successful")
+            logger.info(" PASS:  Redis operations for chat functionality successful")
             
         except Exception as e:
-            logger.error(f"❌ REDIS CHAT OPERATIONS FAILURE: {e}")
+            logger.error(f" FAIL:  REDIS CHAT OPERATIONS FAILURE: {e}")
             # Test FAILS when Redis operations required by chat are broken
             raise AssertionError(f"Chat Redis operations test FAILED - chat functionality unavailable: {e}")
         
@@ -372,7 +372,7 @@ class TestGCPRedisConnectivityGoldenPath:
                 ) as resp:
                     if resp.status != 200:
                         error_text = await resp.text()
-                        logger.error(f"❌ CHAT API FAILURE: Thread creation failed: {resp.status} - {error_text}")
+                        logger.error(f" FAIL:  CHAT API FAILURE: Thread creation failed: {resp.status} - {error_text}")
                         # Test FAILS when chat API cannot create threads (likely Redis unavailable)
                         raise AssertionError(f"Chat API thread creation FAILED - Redis dependency not met: {resp.status} - {error_text}")
                     
@@ -380,7 +380,7 @@ class TestGCPRedisConnectivityGoldenPath:
                     thread_id = thread_result.get("thread_id")
                     
                     assert thread_id, f"Thread creation returned no thread_id: {thread_result}"
-                    logger.info(f"✅ Thread created successfully: {thread_id}")
+                    logger.info(f" PASS:  Thread created successfully: {thread_id}")
                     
                     # Test message sending (requires Redis for message routing)
                     message_url = f"{config.backend_url}/api/v1/threads/{thread_id}/messages"
@@ -397,20 +397,20 @@ class TestGCPRedisConnectivityGoldenPath:
                     ) as msg_resp:
                         if msg_resp.status != 200:
                             error_text = await msg_resp.text()
-                            logger.error(f"❌ CHAT MESSAGE FAILURE: Message sending failed: {msg_resp.status} - {error_text}")
+                            logger.error(f" FAIL:  CHAT MESSAGE FAILURE: Message sending failed: {msg_resp.status} - {error_text}")
                             # Test FAILS when message sending fails (Redis required for routing)
                             raise AssertionError(f"Chat message sending FAILED - Redis routing unavailable: {msg_resp.status} - {error_text}")
                         
                         message_result = await msg_resp.json()
-                        logger.info(f"✅ Message sent successfully: {message_result}")
+                        logger.info(f" PASS:  Message sent successfully: {message_result}")
                         
             except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                logger.error(f"❌ CHAT API CONNECTION FAILURE: {type(e).__name__}: {e}")
+                logger.error(f" FAIL:  CHAT API CONNECTION FAILURE: {type(e).__name__}: {e}")
                 # Test FAILS when chat API is unreachable (possibly due to Redis dependency failure)
                 raise AssertionError(f"Chat API connection test FAILED - Redis infrastructure may be unavailable: {e}")
         
         # Test passes ONLY when both Redis operations AND chat API functionality work
-        logger.info("✅ Golden path chat functionality with Redis dependency validated")
+        logger.info(" PASS:  Golden path chat functionality with Redis dependency validated")
 
     @pytest.mark.e2e
     @pytest.mark.infrastructure
@@ -428,7 +428,7 @@ class TestGCPRedisConnectivityGoldenPath:
         Business Impact: Chat functionality requires Redis operations to be fast enough
         for real-time user experience. Slow Redis degrades chat quality.
         """
-        logger.info("⚡ Testing Redis performance requirements for chat functionality")
+        logger.info(" LIGHTNING:  Testing Redis performance requirements for chat functionality")
         
         # Test 1: Basic operation latency (must be < 100ms for good chat experience)
         operation_times = []
@@ -461,7 +461,7 @@ class TestGCPRedisConnectivityGoldenPath:
                 logger.info(f"Operation {i+1}: SET {set_latency:.1f}ms + GET {get_latency:.1f}ms = {total_latency:.1f}ms")
                 
             except Exception as e:
-                logger.error(f"❌ REDIS PERFORMANCE FAILURE: Operation {i+1} failed: {e}")
+                logger.error(f" FAIL:  REDIS PERFORMANCE FAILURE: Operation {i+1} failed: {e}")
                 raise AssertionError(f"Redis performance test FAILED - operation {i+1} failed: {e}")
         
         # Analyze performance results
@@ -479,11 +479,11 @@ class TestGCPRedisConnectivityGoldenPath:
         CHAT_AVERAGE_REQUIREMENT = 100.0  # ms - target average for good user experience
         
         if avg_latency > CHAT_LATENCY_REQUIREMENT:
-            logger.error(f"❌ REDIS PERFORMANCE FAILURE: Average latency {avg_latency:.1f}ms exceeds chat requirement {CHAT_LATENCY_REQUIREMENT}ms")
+            logger.error(f" FAIL:  REDIS PERFORMANCE FAILURE: Average latency {avg_latency:.1f}ms exceeds chat requirement {CHAT_LATENCY_REQUIREMENT}ms")
             raise AssertionError(f"Redis performance test FAILED - too slow for chat: {avg_latency:.1f}ms > {CHAT_LATENCY_REQUIREMENT}ms")
         
         if max_latency > CHAT_LATENCY_REQUIREMENT * 2:  # Allow some spikes but not too high
-            logger.error(f"❌ REDIS PERFORMANCE FAILURE: Max latency {max_latency:.1f}ms too high for reliable chat")
+            logger.error(f" FAIL:  REDIS PERFORMANCE FAILURE: Max latency {max_latency:.1f}ms too high for reliable chat")
             raise AssertionError(f"Redis performance test FAILED - max latency too high for chat: {max_latency:.1f}ms")
         
         # Test 2: Concurrent operations (chat has multiple users)
@@ -512,15 +512,15 @@ class TestGCPRedisConnectivityGoldenPath:
             logger.info(f"Concurrent operations average: {concurrent_avg:.1f}ms")
             
             if concurrent_avg > CHAT_LATENCY_REQUIREMENT:
-                logger.error(f"❌ REDIS CONCURRENT PERFORMANCE FAILURE: {concurrent_avg:.1f}ms > {CHAT_LATENCY_REQUIREMENT}ms")
+                logger.error(f" FAIL:  REDIS CONCURRENT PERFORMANCE FAILURE: {concurrent_avg:.1f}ms > {CHAT_LATENCY_REQUIREMENT}ms")
                 raise AssertionError(f"Redis concurrent performance test FAILED - too slow for multi-user chat: {concurrent_avg:.1f}ms")
                 
         except Exception as e:
-            logger.error(f"❌ REDIS CONCURRENT OPERATIONS FAILURE: {e}")
+            logger.error(f" FAIL:  REDIS CONCURRENT OPERATIONS FAILURE: {e}")
             raise AssertionError(f"Redis concurrent operations test FAILED - multi-user chat not supported: {e}")
         
         # Test passes ONLY when Redis performance meets chat requirements
-        logger.info("✅ Redis performance meets chat functionality requirements")
+        logger.info(" PASS:  Redis performance meets chat functionality requirements")
 
     @pytest.mark.e2e
     @pytest.mark.infrastructure
@@ -538,7 +538,7 @@ class TestGCPRedisConnectivityGoldenPath:
         Business Impact: Chat must handle Redis connection variations gracefully
         to maintain reliable user experience across network conditions.
         """
-        logger.info("🔄 Testing Redis connection resilience for chat reliability")
+        logger.info(" CYCLE:  Testing Redis connection resilience for chat reliability")
         
         # Test 1: Connection health monitoring (chat needs to know Redis status)
         try:
@@ -565,13 +565,13 @@ class TestGCPRedisConnectivityGoldenPath:
             HEALTH_CHECK_REQUIREMENT = 50.0  # ms - health checks must be very fast
             
             if avg_health_time > HEALTH_CHECK_REQUIREMENT:
-                logger.error(f"❌ REDIS HEALTH CHECK FAILURE: Average {avg_health_time:.1f}ms > {HEALTH_CHECK_REQUIREMENT}ms")
+                logger.error(f" FAIL:  REDIS HEALTH CHECK FAILURE: Average {avg_health_time:.1f}ms > {HEALTH_CHECK_REQUIREMENT}ms")
                 raise AssertionError(f"Redis health check test FAILED - too slow for chat monitoring: {avg_health_time:.1f}ms")
             
-            logger.info(f"✅ Redis health checks: avg {avg_health_time:.1f}ms, max {max_health_time:.1f}ms")
+            logger.info(f" PASS:  Redis health checks: avg {avg_health_time:.1f}ms, max {max_health_time:.1f}ms")
             
         except Exception as e:
-            logger.error(f"❌ REDIS HEALTH MONITORING FAILURE: {e}")
+            logger.error(f" FAIL:  REDIS HEALTH MONITORING FAILURE: {e}")
             raise AssertionError(f"Redis health monitoring test FAILED - chat reliability compromised: {e}")
         
         # Test 2: Key expiration handling (chat sessions have TTL)
@@ -595,7 +595,7 @@ class TestGCPRedisConnectivityGoldenPath:
             ttl = await real_redis_client.ttl(session_key)
             assert 1 <= ttl <= 5, f"TTL not set correctly: {ttl}"
             
-            logger.info(f"✅ Session key created with TTL: {ttl}s remaining")
+            logger.info(f" PASS:  Session key created with TTL: {ttl}s remaining")
             
             # Wait for expiration
             logger.info("Waiting for key expiration...")
@@ -604,13 +604,13 @@ class TestGCPRedisConnectivityGoldenPath:
             # Verify expiration worked
             expired_result = await real_redis_client.get(session_key)
             if expired_result is not None:
-                logger.error(f"❌ REDIS EXPIRATION FAILURE: Key should have expired but still exists: {expired_result}")
+                logger.error(f" FAIL:  REDIS EXPIRATION FAILURE: Key should have expired but still exists: {expired_result}")
                 raise AssertionError(f"Redis expiration test FAILED - session cleanup not working: {expired_result}")
             
-            logger.info("✅ Redis key expiration working correctly")
+            logger.info(" PASS:  Redis key expiration working correctly")
             
         except Exception as e:
-            logger.error(f"❌ REDIS EXPIRATION FAILURE: {e}")
+            logger.error(f" FAIL:  REDIS EXPIRATION FAILURE: {e}")
             raise AssertionError(f"Redis expiration test FAILED - session management unreliable: {e}")
         
         # Test 3: Transaction consistency (chat needs atomic operations)
@@ -640,18 +640,18 @@ class TestGCPRedisConnectivityGoldenPath:
             assert results[2] is True, f"Thread TTL set failed: {results[2]}"
             assert results[3] is True, f"Message count TTL set failed: {results[3]}"
             
-            logger.info(f"✅ Redis transaction successful: {results}")
+            logger.info(f" PASS:  Redis transaction successful: {results}")
             
             # Cleanup
             await real_redis_client.delete(thread_key)
             await real_redis_client.delete(message_count_key)
             
         except Exception as e:
-            logger.error(f"❌ REDIS TRANSACTION FAILURE: {e}")
+            logger.error(f" FAIL:  REDIS TRANSACTION FAILURE: {e}")
             raise AssertionError(f"Redis transaction test FAILED - chat state consistency unreliable: {e}")
         
         # Test passes ONLY when Redis demonstrates reliable connection patterns
-        logger.info("✅ Redis connection resilience meets chat reliability requirements")
+        logger.info(" PASS:  Redis connection resilience meets chat reliability requirements")
 
 
     @pytest.mark.e2e
@@ -670,7 +670,7 @@ class TestGCPRedisConnectivityGoldenPath:
         Business Impact: Chat functionality requires Redis to maintain conversation
         state and user sessions across reconnections and server restarts.
         """
-        logger.info("💾 Testing Redis data persistence across connections for chat continuity")
+        logger.info("[U+1F4BE] Testing Redis data persistence across connections for chat continuity")
         
         # Test 1: Data survives connection cycles
         test_data = {
@@ -691,13 +691,13 @@ class TestGCPRedisConnectivityGoldenPath:
             set_result = await real_redis_client.set(persistence_key, test_value, ex=3600)
             assert set_result is True, f"Failed to store chat data: {set_result}"
             
-            logger.info("✅ Chat data stored successfully")
+            logger.info(" PASS:  Chat data stored successfully")
             
             # Verify immediate retrieval
             immediate_data = await real_redis_client.get(persistence_key)
             assert immediate_data == test_value, f"Data corruption on immediate read: {immediate_data}"
             
-            logger.info("✅ Chat data retrieved successfully after storage")
+            logger.info(" PASS:  Chat data retrieved successfully after storage")
             
             # Create new Redis client connection (simulate reconnection)
             env = get_env()
@@ -721,12 +721,12 @@ class TestGCPRedisConnectivityGoldenPath:
                 reconnected_data = await new_client.get(persistence_key)
                 
                 if reconnected_data != test_value:
-                    logger.error(f"❌ REDIS PERSISTENCE FAILURE: Data corruption across connections")
+                    logger.error(f" FAIL:  REDIS PERSISTENCE FAILURE: Data corruption across connections")
                     logger.error(f"   Original: {test_value[:100]}...")
                     logger.error(f"   Retrieved: {reconnected_data}")
                     raise AssertionError(f"Redis persistence test FAILED - data corruption across connections")
                 
-                logger.info("✅ Chat data persisted correctly across connection cycle")
+                logger.info(" PASS:  Chat data persisted correctly across connection cycle")
                 
                 # Test complex data structure retrieval
                 parsed_data = json.loads(reconnected_data)
@@ -735,7 +735,7 @@ class TestGCPRedisConnectivityGoldenPath:
                 assert len(parsed_data["messages"]) == 2, f"Message count corruption: {len(parsed_data['messages'])}"
                 assert parsed_data["chat_state"] == "active", f"Chat state corruption: {parsed_data['chat_state']}"
                 
-                logger.info("✅ Complex chat data structure integrity maintained")
+                logger.info(" PASS:  Complex chat data structure integrity maintained")
                 
             finally:
                 await new_client.close()
@@ -744,7 +744,7 @@ class TestGCPRedisConnectivityGoldenPath:
             await real_redis_client.delete(persistence_key)
             
         except Exception as e:
-            logger.error(f"❌ REDIS PERSISTENCE FAILURE: {e}")
+            logger.error(f" FAIL:  REDIS PERSISTENCE FAILURE: {e}")
             # Cleanup on failure
             try:
                 await real_redis_client.delete(persistence_key)
@@ -772,7 +772,7 @@ class TestGCPRedisConnectivityGoldenPath:
                 result = await real_redis_client.set(key, value, ex=1800)
                 assert result is True, f"Failed to store conversation {i}: {result}"
             
-            logger.info(f"✅ Stored {len(conversations)} separate conversations")
+            logger.info(f" PASS:  Stored {len(conversations)} separate conversations")
             
             # Verify data isolation - each conversation should be intact
             for i, conv in enumerate(conversations):
@@ -780,15 +780,15 @@ class TestGCPRedisConnectivityGoldenPath:
                 retrieved = await real_redis_client.get(key)
                 
                 if retrieved is None:
-                    logger.error(f"❌ REDIS ISOLATION FAILURE: Conversation {i} data lost")
+                    logger.error(f" FAIL:  REDIS ISOLATION FAILURE: Conversation {i} data lost")
                     raise AssertionError(f"Redis isolation test FAILED - conversation {i} data lost")
                 
                 parsed = json.loads(retrieved)
                 if parsed["conversation_id"] != conv["conversation_id"]:
-                    logger.error(f"❌ REDIS ISOLATION FAILURE: Conversation {i} ID corruption")
+                    logger.error(f" FAIL:  REDIS ISOLATION FAILURE: Conversation {i} ID corruption")
                     raise AssertionError(f"Redis isolation test FAILED - conversation {i} data corrupted")
             
-            logger.info("✅ Multiple conversation data isolation verified")
+            logger.info(" PASS:  Multiple conversation data isolation verified")
             
             # Cleanup all test conversations
             for conv in conversations:
@@ -796,7 +796,7 @@ class TestGCPRedisConnectivityGoldenPath:
                 await real_redis_client.delete(key)
             
         except Exception as e:
-            logger.error(f"❌ REDIS ISOLATION FAILURE: {e}")
+            logger.error(f" FAIL:  REDIS ISOLATION FAILURE: {e}")
             # Cleanup on failure
             try:
                 for conv in conversations:
@@ -807,7 +807,7 @@ class TestGCPRedisConnectivityGoldenPath:
             raise AssertionError(f"Redis isolation test FAILED - multi-user chat data integrity compromised: {e}")
         
         # Test passes ONLY when Redis demonstrates reliable data persistence
-        logger.info("✅ Redis data persistence meets chat continuity requirements")
+        logger.info(" PASS:  Redis data persistence meets chat continuity requirements")
 
 
 # Test execution metadata for reporting

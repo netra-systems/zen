@@ -79,7 +79,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
         """
         await self.initialize_test_environment()
         
-        # Create scenario requiring data→optimization sequence
+        # Create scenario requiring data -> optimization sequence
         optimization_request = {
             "user_id": self.test_user_id,
             "message": "Analyze my infrastructure costs and provide optimization recommendations",
@@ -108,7 +108,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
         # Validate WebSocket events reflect proper order
         self._assert_websocket_events_reflect_order(execution_result)
         
-        self.logger.info("✅ CRITICAL data-before-optimization order validated")
+        self.logger.info(" PASS:  CRITICAL data-before-optimization order validated")
 
     @pytest.mark.e2e
     @pytest.mark.real_services  
@@ -163,7 +163,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
             # Reset for next scenario
             self._reset_execution_state()
         
-        self.logger.info("✅ Triage-first execution order validated for all scenarios")
+        self.logger.info(" PASS:  Triage-first execution order validated for all scenarios")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -202,7 +202,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
         # Validate final result quality with proper coordination
         self._assert_coordinated_result_quality(execution_result)
         
-        self.logger.info("✅ Supervisor coordination with dependency respect validated")
+        self.logger.info(" PASS:  Supervisor coordination with dependency respect validated")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -271,7 +271,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
         # Validate performance under concurrent load
         self._assert_concurrent_execution_performance(execution_time, len(concurrent_users))
         
-        self.logger.info(f"✅ Concurrent execution order validated for {len(concurrent_users)} users")
+        self.logger.info(f" PASS:  Concurrent execution order validated for {len(concurrent_users)} users")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -313,7 +313,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
         # Validate business value delivery with degraded sequence
         self._assert_degraded_sequence_value_delivery(execution_result)
         
-        self.logger.info("✅ Execution order failure recovery validated")
+        self.logger.info(" PASS:  Execution order failure recovery validated")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -360,7 +360,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
         # Validate quality not compromised for speed
         self._assert_quality_maintained_with_speed(execution_result)
         
-        self.logger.info(f"✅ Execution order performance optimization validated in {total_time:.2f}s")
+        self.logger.info(f" PASS:  Execution order performance optimization validated in {total_time:.2f}s")
 
     # =============================================================================
     # HELPER METHODS
@@ -863,7 +863,7 @@ class TestRealAgentExecutionOrder(BaseE2ETest):
                 "Optimization Agent indicates business value not possible - sequence may be wrong"
             )
         
-        self.logger.info("✅ CRITICAL: Data-before-optimization order validated")
+        self.logger.info(" PASS:  CRITICAL: Data-before-optimization order validated")
 
     def _assert_dependency_satisfaction(self, execution_result: Dict[str, Any]):
         """Assert all agent dependencies were satisfied."""

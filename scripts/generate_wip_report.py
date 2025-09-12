@@ -218,14 +218,14 @@ class WIPReportGenerator:
         medium = self.compliance_data.get('medium_count', 0)
         
         if critical > 0:
-            items.append(f"- [ ] 🚨 **CRITICAL:** Fix {critical} violations blocking deployment")
+            items.append(f"- [ ]  ALERT:  **CRITICAL:** Fix {critical} violations blocking deployment")
         if high > 0:
-            items.append(f"- [ ] 🔴 **HIGH:** Address {high} violations within 24 hours")
+            items.append(f"- [ ] [U+1F534] **HIGH:** Address {high} violations within 24 hours")
         if medium > 0:
-            items.append(f"- [ ] 🟡 **MEDIUM:** Resolve {medium} violations this sprint")
+            items.append(f"- [ ] [U+1F7E1] **MEDIUM:** Resolve {medium} violations this sprint")
         
         if not items:
-            items.append("- [x] ✅ No blocking violations detected")
+            items.append("- [x]  PASS:  No blocking violations detected")
         
         return "\n".join(items)
     
@@ -238,17 +238,17 @@ class WIPReportGenerator:
         def get_severity_status(count, limit):
             """Get status emoji for severity tier"""
             if count <= limit:
-                return "✅ PASS"
+                return " PASS:  PASS"
             else:
-                return f"❌ FAIL (+{count - limit})"
+                return f" FAIL:  FAIL (+{count - limit})"
         
         def get_status(score):
             if score >= 75:
-                return "✅ GOOD"
+                return " PASS:  GOOD"
             elif score >= 60:
-                return "⚠️ NEEDS ATTENTION"
+                return " WARNING: [U+FE0F] NEEDS ATTENTION"
             else:
-                return "🔴 CRITICAL"
+                return "[U+1F534] CRITICAL"
         
         # Get violation details
         prod_violations = self.compliance_data.get('production_violations', 0)
@@ -259,23 +259,23 @@ class WIPReportGenerator:
         high_count = self.compliance_data.get('high_count', 0)
         
         if critical_count > 0:
-            risk_level = "🚨 CRITICAL - Immediate action required"
+            risk_level = " ALERT:  CRITICAL - Immediate action required"
             customer_impact = "High risk of customer-facing failures"
             tech_debt_status = "Severe - System stability compromised"
         elif high_count > 10:
-            risk_level = "🔴 HIGH - Urgent attention needed"
+            risk_level = "[U+1F534] HIGH - Urgent attention needed"
             customer_impact = "Service degradation likely"
             tech_debt_status = "High - Accumulating rapidly"
         elif high_count > 5 or self.compliance_data.get('medium_count', 0) > 50:
-            risk_level = "🟡 MODERATE - Schedule remediation"
+            risk_level = "[U+1F7E1] MODERATE - Schedule remediation"
             customer_impact = "Performance issues possible"
             tech_debt_status = "Moderate - Needs management"
         else:
-            risk_level = "🟢 LOW - System healthy"
+            risk_level = "[U+1F7E2] LOW - System healthy"
             customer_impact = "Minimal risk"
             tech_debt_status = "Low - Well managed"
         
-        deployment_status = "🚫 BLOCKED" if self.compliance_data.get('deployment_blocked', False) else "✅ READY"
+        deployment_status = "[U+1F6AB] BLOCKED" if self.compliance_data.get('deployment_blocked', False) else " PASS:  READY"
         
         report = f"""# Master Work-In-Progress and System Status Index
 
@@ -304,10 +304,10 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 ### Violation Summary by Severity
 | Severity | Count | Limit | Status | Business Impact |
 |----------|-------|-------|--------|-----------------|
-| 🚨 CRITICAL | {self.compliance_data.get('critical_count', 0)} | 5 | {get_severity_status(self.compliance_data.get('critical_count', 0), 5)} | System stability at risk |
-| 🔴 HIGH | {self.compliance_data.get('high_count', 0)} | 20 | {get_severity_status(self.compliance_data.get('high_count', 0), 20)} | Service degradation possible |
-| 🟡 MEDIUM | {self.compliance_data.get('medium_count', 0)} | 100 | {get_severity_status(self.compliance_data.get('medium_count', 0), 100)} | Technical debt accumulating |
-| 🟢 LOW | {self.compliance_data.get('low_count', 0)} | ∞ | ✅ | Code quality improvements |
+|  ALERT:  CRITICAL | {self.compliance_data.get('critical_count', 0)} | 5 | {get_severity_status(self.compliance_data.get('critical_count', 0), 5)} | System stability at risk |
+| [U+1F534] HIGH | {self.compliance_data.get('high_count', 0)} | 20 | {get_severity_status(self.compliance_data.get('high_count', 0), 20)} | Service degradation possible |
+| [U+1F7E1] MEDIUM | {self.compliance_data.get('medium_count', 0)} | 100 | {get_severity_status(self.compliance_data.get('medium_count', 0), 100)} | Technical debt accumulating |
+| [U+1F7E2] LOW | {self.compliance_data.get('low_count', 0)} |  infinity  |  PASS:  | Code quality improvements |
 
 ### Violation Distribution
 | Category | Count | Status |
@@ -317,7 +317,7 @@ The Netra Apex AI Optimization Platform shows improving compliance and test cove
 | **Total** | **{prod_violations + test_violations}** | - |
 
 ### Business Impact Assessment
-- **Deployment Readiness:** {"🚫 BLOCKED" if self.compliance_data.get('deployment_blocked', False) else "✅ READY"}
+- **Deployment Readiness:** {"[U+1F6AB] BLOCKED" if self.compliance_data.get('deployment_blocked', False) else " PASS:  READY"}
 - **Risk Level:** {risk_level}
 - **Customer Impact:** {customer_impact}
 - **Technical Debt:** {tech_debt_status}

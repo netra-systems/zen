@@ -148,7 +148,7 @@ def _fetch_all_secrets(client: secretmanager.SecretManagerServiceClient, project
 def _check_env_file_exists(file_path: str) -> bool:
     """Check if env file exists and warn user if it does."""
     if os.path.exists(file_path):
-        print(f"\n⚠️  WARNING: {file_path} already exists!")
+        print(f"\n WARNING: [U+FE0F]  WARNING: {file_path} already exists!")
         print("To protect your existing configuration, this script will not overwrite it.")
         print("Options:")
         print("  1. Rename or backup your existing .env file")
@@ -204,7 +204,7 @@ def _process_and_write_env(env_vars: dict[str, str], secret_mappings: dict[str, 
 
 def list_all_secrets(client: secretmanager.SecretManagerServiceClient, project_id: str) -> List[str]:
     """List all available secrets in the project."""
-    print("\n📋 Listing all secrets in Secret Manager...")
+    print("\n[U+1F4CB] Listing all secrets in Secret Manager...")
     parent = f"projects/{project_id}"
     
     try:
@@ -241,12 +241,12 @@ def main():
     if args.list:
         # Just list secrets and exit
         secrets = list_all_secrets(client, project_id)
-        print(f"\n✅ Found {len(secrets)} secrets in project {project_id}")
+        print(f"\n PASS:  Found {len(secrets)} secrets in project {project_id}")
         return
     
     # Check for force flag
     if args.force and os.path.exists(".env"):
-        print("⚠️ Force flag set - backing up existing .env to .env.backup")
+        print(" WARNING: [U+FE0F] Force flag set - backing up existing .env to .env.backup")
         import shutil
         shutil.copy(".env", ".env.backup")
         os.remove(".env")

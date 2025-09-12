@@ -144,7 +144,7 @@ class TestComprehensiveAuthSecurityValidation(SSotBaseTestCase):
         self.record_metric("test_scope", "end_to_end_security")
         
         # Phase 1: Rate Limiting and Abuse Prevention
-        logger.info("🔒 Phase 1: Testing rate limiting and abuse prevention")
+        logger.info("[U+1F512] Phase 1: Testing rate limiting and abuse prevention")
         rate_limiting_effective = await self._test_comprehensive_rate_limiting(
             auth_manager, comprehensive_security_config["rate_limiting"], "phase1_rate_limiting"
         )
@@ -153,7 +153,7 @@ class TestComprehensiveAuthSecurityValidation(SSotBaseTestCase):
         self.record_metric("phase1_rate_limiting", "effective")
         
         # Phase 2: Attack Pattern Detection and Response
-        logger.info("🛡️ Phase 2: Testing attack pattern detection and response")
+        logger.info("[U+1F6E1][U+FE0F] Phase 2: Testing attack pattern detection and response")
         attack_detection_working = await self._test_attack_pattern_detection(
             auth_manager, comprehensive_security_config["attack_detection"], "phase2_attack_detection"
         )
@@ -162,7 +162,7 @@ class TestComprehensiveAuthSecurityValidation(SSotBaseTestCase):
         self.record_metric("phase2_attack_detection", "working")
         
         # Phase 3: Security Boundary Integrity Under Attack
-        logger.info("🏰 Phase 3: Testing security boundary integrity under attack")
+        logger.info("[U+1F3F0] Phase 3: Testing security boundary integrity under attack")
         boundaries_intact = await self._test_security_boundaries_under_attack(
             auth_manager, comprehensive_security_config["security_boundaries"], "phase3_boundary_integrity"
         )
@@ -171,7 +171,7 @@ class TestComprehensiveAuthSecurityValidation(SSotBaseTestCase):
         self.record_metric("phase3_boundary_integrity", "intact")
         
         # Phase 4: System Resilience and Recovery
-        logger.info("🔄 Phase 4: Testing system resilience and recovery")
+        logger.info(" CYCLE:  Phase 4: Testing system resilience and recovery")
         resilience_validated = await self._test_system_resilience_recovery(
             auth_manager, comprehensive_security_config["resilience"], "phase4_resilience"
         )
@@ -180,7 +180,7 @@ class TestComprehensiveAuthSecurityValidation(SSotBaseTestCase):
         self.record_metric("phase4_resilience", "validated")
         
         # Phase 5: Error Behind Error Analysis
-        logger.info("🔍 Phase 5: Testing error behind error analysis capabilities")
+        logger.info(" SEARCH:  Phase 5: Testing error behind error analysis capabilities")
         error_analysis_effective = await self._test_comprehensive_error_analysis(
             auth_manager, "phase5_error_analysis"
         )
@@ -189,7 +189,7 @@ class TestComprehensiveAuthSecurityValidation(SSotBaseTestCase):
         self.record_metric("phase5_error_analysis", "effective")
         
         # Final Validation: Complete Security Posture
-        logger.info("✅ Final: Validating complete security posture")
+        logger.info(" PASS:  Final: Validating complete security posture")
         security_posture_valid = await self._validate_complete_security_posture(
             auth_manager, comprehensive_security_config, "final_security_posture"
         )
@@ -197,7 +197,7 @@ class TestComprehensiveAuthSecurityValidation(SSotBaseTestCase):
         assert security_posture_valid, "Complete security posture must be valid and comprehensive"
         self.record_metric("comprehensive_security_validation", "complete")
         
-        logger.info("🏆 Comprehensive authentication security validation PASSED")
+        logger.info(" TROPHY:  Comprehensive authentication security validation PASSED")
     
     async def _test_comprehensive_rate_limiting(
         self, 

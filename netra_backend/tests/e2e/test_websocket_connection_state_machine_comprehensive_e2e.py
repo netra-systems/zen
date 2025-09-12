@@ -11,7 +11,7 @@ This E2E test suite validates WebSocket connection state machine behavior with r
 real WebSocket connections, and complete user journeys. These tests ensure the Golden Path
 user flow works end-to-end with proper state management and recovery.
 
-🚨 CRITICAL E2E AUTH REQUIREMENT: ALL tests use real authentication flows.
+ ALERT:  CRITICAL E2E AUTH REQUIREMENT: ALL tests use real authentication flows.
 """
 
 import pytest

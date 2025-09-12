@@ -71,7 +71,7 @@ class ColdStartE2ETest:
         
     async def run_full_test(self) -> bool:
         """Run the complete E2E test suite."""
-        logger.info("🚀 Starting Cold Start E2E Test Suite")
+        logger.info("[U+1F680] Starting Cold Start E2E Test Suite")
         
         try:
             # Phase 1: Start services
@@ -98,11 +98,11 @@ class ColdStartE2ETest:
             if not await self.test_model_response():
                 return False
                 
-            logger.info("✅ All E2E tests passed successfully!")
+            logger.info(" PASS:  All E2E tests passed successfully!")
             return True
             
         except Exception as e:
-            logger.error(f"❌ E2E test failed: {e}")
+            logger.error(f" FAIL:  E2E test failed: {e}")
             return False
             
         finally:
@@ -110,7 +110,7 @@ class ColdStartE2ETest:
             
     async def start_services(self) -> bool:
         """Start all services using dev launcher."""
-        logger.info("📦 Starting services with dev launcher...")
+        logger.info("[U+1F4E6] Starting services with dev launcher...")
         
         try:
             # Start dev launcher
@@ -134,7 +134,7 @@ class ColdStartE2ETest:
                 logger.error(f"Stderr: {stderr}")
                 return False
                 
-            logger.info("✅ Services started successfully")
+            logger.info(" PASS:  Services started successfully")
             return True
             
         except Exception as e:
@@ -143,7 +143,7 @@ class ColdStartE2ETest:
             
     async def wait_for_services(self) -> bool:
         """Wait for all services to be healthy."""
-        logger.info("⏳ Waiting for services to be healthy...")
+        logger.info("[U+23F3] Waiting for services to be healthy...")
         
         start_time = time.time()
         timeout = TEST_CONFIG['startup_timeout']
@@ -161,12 +161,12 @@ class ColdStartE2ETest:
                         break
                         
                 if all_healthy:
-                    logger.info("✅ All services are healthy")
+                    logger.info(" PASS:  All services are healthy")
                     return True
                     
             await asyncio.sleep(2)
             
-        logger.error("❌ Services failed to become healthy within timeout")
+        logger.error(" FAIL:  Services failed to become healthy within timeout")
         return False
         
     def read_service_discovery(self) -> Dict[str, Dict[str, Any]]:
@@ -204,19 +204,19 @@ class ColdStartE2ETest:
                     timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
                     if response.status == 200:
-                        logger.debug(f"✅ {name} service is healthy")
+                        logger.debug(f" PASS:  {name} service is healthy")
                         return True
                     else:
-                        logger.debug(f"⚠️ {name} service returned {response.status}")
+                        logger.debug(f" WARNING: [U+FE0F] {name} service returned {response.status}")
                         return False
                         
         except Exception as e:
-            logger.debug(f"⚠️ {name} service health check failed: {e}")
+            logger.debug(f" WARNING: [U+FE0F] {name} service health check failed: {e}")
             return False
             
     async def test_authentication(self) -> bool:
         """Test authentication flow."""
-        logger.info("🔐 Testing authentication...")
+        logger.info("[U+1F510] Testing authentication...")
         
         try:
             # Get auth service URL
@@ -245,7 +245,7 @@ class ColdStartE2ETest:
                         self.user_id = data.get('user_id', 'test_user')
                         
                         if self.auth_token:
-                            logger.info(f"✅ Authentication successful (user: {self.user_id})")
+                            logger.info(f" PASS:  Authentication successful (user: {self.user_id})")
                             return True
                         else:
                             logger.error("No access token received")
@@ -261,7 +261,7 @@ class ColdStartE2ETest:
             
     async def test_websocket(self) -> bool:
         """Test WebSocket connection."""
-        logger.info("🔌 Testing WebSocket connection...")
+        logger.info("[U+1F50C] Testing WebSocket connection...")
         
         try:
             ws_url = self.get_websocket_url()
@@ -297,7 +297,7 @@ class ColdStartE2ETest:
                 
                 data = json.loads(response)
                 if data.get('type') == 'auth_success':
-                    logger.info("✅ WebSocket connection authenticated")
+                    logger.info(" PASS:  WebSocket connection authenticated")
                     return True
                 else:
                     logger.error(f"WebSocket auth failed: {data}")
@@ -309,7 +309,7 @@ class ColdStartE2ETest:
             
     async def test_chat_flow(self) -> bool:
         """Test sending a chat message."""
-        logger.info("💬 Testing chat message flow...")
+        logger.info("[U+1F4AC] Testing chat message flow...")
         
         try:
             api_url = self.get_api_url()
@@ -341,7 +341,7 @@ class ColdStartE2ETest:
                         
                     thread = await response.json()
                     thread_id = thread['id']
-                    logger.info(f"✅ Thread created: {thread_id}")
+                    logger.info(f" PASS:  Thread created: {thread_id}")
                     
                 # Send message
                 message_url = f"{api_url}/api/threads/{thread_id}/messages"
@@ -357,7 +357,7 @@ class ColdStartE2ETest:
                     timeout=aiohttp.ClientTimeout(total=TEST_CONFIG['request_timeout'])
                 ) as response:
                     if response.status == 200:
-                        logger.info("✅ Message sent successfully")
+                        logger.info(" PASS:  Message sent successfully")
                         return True
                     else:
                         text = await response.text()
@@ -370,7 +370,7 @@ class ColdStartE2ETest:
             
     async def test_model_response(self) -> bool:
         """Test receiving model response via WebSocket."""
-        logger.info("🤖 Testing model response...")
+        logger.info("[U+1F916] Testing model response...")
         
         try:
             ws_url = self.get_websocket_url()
@@ -410,7 +410,7 @@ class ColdStartE2ETest:
                         
                         # Check for model response types
                         if msg_type in ['agent_started', 'partial_result', 'agent_completed']:
-                            logger.info(f"✅ Received model event: {msg_type}")
+                            logger.info(f" PASS:  Received model event: {msg_type}")
                             
                             # Check if response contains expected patterns
                             payload = data.get('payload', {})
@@ -418,13 +418,13 @@ class ColdStartE2ETest:
                             
                             for pattern in TEST_CONFIG['expected_patterns']:
                                 if pattern.lower() in content.lower():
-                                    logger.info(f"✅ Model response contains expected pattern: {pattern}")
+                                    logger.info(f" PASS:  Model response contains expected pattern: {pattern}")
                                     return True
                                     
                     except asyncio.TimeoutError:
                         continue
                         
-            logger.warning("⚠️ No model response received within timeout")
+            logger.warning(" WARNING: [U+FE0F] No model response received within timeout")
             return True  # Consider this a soft pass if services are up
             
         except Exception as e:
@@ -461,7 +461,7 @@ class ColdStartE2ETest:
         
     async def cleanup(self):
         """Clean up resources."""
-        logger.info("🧹 Cleaning up...")
+        logger.info("[U+1F9F9] Cleaning up...")
         
         if self.launcher_process:
             try:
@@ -473,7 +473,7 @@ class ColdStartE2ETest:
                     # Force kill if still running
                     self.launcher_process.kill()
                     
-                logger.info("✅ Services stopped")
+                logger.info(" PASS:  Services stopped")
             except Exception as e:
                 logger.warning(f"Cleanup error: {e}")
                 
@@ -484,16 +484,16 @@ class ColdStartE2ETest:
         print("="*60)
         
         for test_name, passed in self.test_results.items():
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             print(f"{test_name}: {status}")
             
         print("="*60)
         
         all_passed = all(self.test_results.values())
         if all_passed:
-            print("🎉 ALL TESTS PASSED!")
+            print(" CELEBRATION:  ALL TESTS PASSED!")
         else:
-            print("⚠️ SOME TESTS FAILED")
+            print(" WARNING: [U+FE0F] SOME TESTS FAILED")
             
         print("="*60 + "\n")
 

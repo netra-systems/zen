@@ -189,7 +189,7 @@ class StartupValidator:
                 )
                 
                 self.validations.append(validation)
-                self.logger.info("✓ Agent Factory: Supervisor ready for per-request agent creation")
+                self.logger.info("[U+2713] Agent Factory: Supervisor ready for per-request agent creation")
                 
                 # Check for legacy registry (backward compatibility)
                 if hasattr(app.state.agent_supervisor, 'registry'):
@@ -204,15 +204,15 @@ class StartupValidator:
                     expected_min = len(expected_agents)
                     
                     if agent_count == 0:
-                        self.logger.info(f"ℹ️ Legacy registry empty - agents will be created per-request (factory pattern)")
+                        self.logger.info(f"[U+2139][U+FE0F] Legacy registry empty - agents will be created per-request (factory pattern)")
                         self.logger.debug(f"   Legacy expected agents: {', '.join(expected_agents)}")
                     elif agent_count < expected_min:
-                        self.logger.info(f"ℹ️ Legacy registry has {agent_count}/{expected_min} agents - transitioning to factory pattern")
+                        self.logger.info(f"[U+2139][U+FE0F] Legacy registry has {agent_count}/{expected_min} agents - transitioning to factory pattern")
                         missing = set(expected_agents) - set(registry.agents.keys() if hasattr(registry, 'agents') else [])
                         if missing:
                             self.logger.debug(f"   Not in legacy registry: {', '.join(missing)}")
                     else:
-                        self.logger.info(f"✓ Agent Registry: {agent_count} agents registered")
+                        self.logger.info(f"[U+2713] Agent Registry: {agent_count} agents registered")
                 # else: No registry - this is expected with factory pattern (already validated above)
             else:
                 self._add_failed_validation("Agent Supervisor", "Agents", "Supervisor not initialized")
@@ -231,7 +231,7 @@ class StartupValidator:
                 tool_classes = app.state.tool_classes
                 tool_count = len(tool_classes) if tool_classes else 0
                 
-                self.logger.info(f"🔍 UserContext mode: {tool_count} tool classes configured")
+                self.logger.info(f" SEARCH:  UserContext mode: {tool_count} tool classes configured")
                 
                 # Check for websocket_bridge_factory (CRITICAL for per-user WebSocket)
                 has_bridge_factory = hasattr(app.state, 'websocket_bridge_factory') and app.state.websocket_bridge_factory is not None
@@ -242,7 +242,7 @@ class StartupValidator:
                     expected_min=4,  # Expected: DataHelperTool, DeepResearchTool, ReliabilityScorerTool, SandboxedInterpreterTool
                     actual_count=tool_count,
                     status=self._get_status(tool_count, 4, is_critical=True),
-                    message=f"Configured {tool_count} tool classes for UserContext, Bridge Factory: {'✓' if has_bridge_factory else '✗'}",
+                    message=f"Configured {tool_count} tool classes for UserContext, Bridge Factory: {'[U+2713]' if has_bridge_factory else '[U+2717]'}",
                     is_critical=True,
                     metadata={
                         "mode": "UserContext",
@@ -254,18 +254,18 @@ class StartupValidator:
                 self.validations.append(validation)
                 
                 if tool_count > 0:
-                    self.logger.info(f"✓ Tool Configuration: {tool_count} tools ready for UserContext creation")
+                    self.logger.info(f"[U+2713] Tool Configuration: {tool_count} tools ready for UserContext creation")
                     if has_bridge_factory:
-                        self.logger.info(f"✓ WebSocketBridgeFactory configured for per-user WebSocket handling")
+                        self.logger.info(f"[U+2713] WebSocketBridgeFactory configured for per-user WebSocket handling")
                     else:
-                        self.logger.warning("⚠️ WebSocketBridgeFactory NOT configured - per-user WebSocket isolation may fail")
+                        self.logger.warning(" WARNING: [U+FE0F] WebSocketBridgeFactory NOT configured - per-user WebSocket isolation may fail")
                 else:
-                    self.logger.warning("⚠️ NO TOOLS CONFIGURED for UserContext")
+                    self.logger.warning(" WARNING: [U+FE0F] NO TOOLS CONFIGURED for UserContext")
                     
             # Legacy fallback path - should not be used in UserContext architecture
             elif hasattr(app.state, 'tool_dispatcher') and app.state.tool_dispatcher:
                 # This indicates incorrect configuration - should be None in UserContext mode
-                self.logger.warning("⚠️ LEGACY: Global tool_dispatcher found - should be None in UserContext architecture")
+                self.logger.warning(" WARNING: [U+FE0F] LEGACY: Global tool_dispatcher found - should be None in UserContext architecture")
                 dispatcher = app.state.tool_dispatcher
                 
                 # Still validate it if it exists (for backward compatibility during migration)
@@ -291,7 +291,7 @@ class StartupValidator:
                 )
                 
                 self.validations.append(validation)
-                self.logger.warning(f"⚠️ LEGACY Tool Dispatcher: {tool_count} tools - MIGRATE TO UserContext")
+                self.logger.warning(f" WARNING: [U+FE0F] LEGACY Tool Dispatcher: {tool_count} tools - MIGRATE TO UserContext")
                     
             else:
                 # Neither UserContext nor legacy configuration found
@@ -306,7 +306,7 @@ class StartupValidator:
             if hasattr(app.state, 'db_session_factory'):
                 if app.state.db_session_factory is None:
                     if getattr(app.state, 'database_mock_mode', False):
-                        self.logger.info("ℹ️ Database in mock mode")
+                        self.logger.info("[U+2139][U+FE0F] Database in mock mode")
                         validation = ComponentValidation(
                             name="Database",
                             category="Database",
@@ -317,7 +317,7 @@ class StartupValidator:
                             is_critical=False
                         )
                     else:
-                        self.logger.warning("⚠️ Database session factory is None but not in mock mode")
+                        self.logger.warning(" WARNING: [U+FE0F] Database session factory is None but not in mock mode")
                         validation = ComponentValidation(
                             name="Database",
                             category="Database",
@@ -344,9 +344,9 @@ class StartupValidator:
                     )
                     
                     if table_count == 0:
-                        self.logger.warning(f"⚠️ ZERO DATABASE TABLES found - expected ~{expected_tables}")
+                        self.logger.warning(f" WARNING: [U+FE0F] ZERO DATABASE TABLES found - expected ~{expected_tables}")
                     else:
-                        self.logger.info(f"✓ Database: {table_count} tables found")
+                        self.logger.info(f"[U+2713] Database: {table_count} tables found")
                         
                 self.validations.append(validation)
             else:
@@ -392,7 +392,7 @@ class StartupValidator:
                             "connections": "managed_per_user"
                         }
                     )
-                    self.logger.info("✓ WebSocket Factory: Available for per-user manager creation")
+                    self.logger.info("[U+2713] WebSocket Factory: Available for per-user manager creation")
                 else:
                     # Legacy singleton manager validation
                     connection_count = 0
@@ -424,9 +424,9 @@ class StartupValidator:
                     )
                     
                     if handler_count == 0:
-                        self.logger.info("ℹ️ WebSocket handlers will be created per-user (factory pattern)")
+                        self.logger.info("[U+2139][U+FE0F] WebSocket handlers will be created per-user (factory pattern)")
                     else:
-                        self.logger.info(f"✓ WebSocket: {handler_count} handlers, {connection_count} connections")
+                        self.logger.info(f"[U+2713] WebSocket: {handler_count} handlers, {connection_count} connections")
                 
                 self.validations.append(validation)
             else:
@@ -462,7 +462,7 @@ class StartupValidator:
                             message=f"{display_name} initialized",
                             is_critical=is_critical
                         )
-                        self.logger.info(f"✓ {display_name}: Initialized")
+                        self.logger.info(f"[U+2713] {display_name}: Initialized")
                     else:
                         validation = ComponentValidation(
                             name=display_name,
@@ -473,7 +473,7 @@ class StartupValidator:
                             message=f"{display_name} is None",
                             is_critical=is_critical
                         )
-                        self.logger.warning(f"⚠️ {display_name} is None")
+                        self.logger.warning(f" WARNING: [U+FE0F] {display_name} is None")
                 else:
                     validation = ComponentValidation(
                         name=display_name,
@@ -484,7 +484,7 @@ class StartupValidator:
                         message=f"{display_name} not found",
                         is_critical=is_critical
                     )
-                    self.logger.warning(f"⚠️ {display_name} not found in app.state")
+                    self.logger.warning(f" WARNING: [U+FE0F] {display_name} not found in app.state")
                     
                 self.validations.append(validation)
                 
@@ -516,7 +516,7 @@ class StartupValidator:
                             message=f"{display_name} initialized - {description}",
                             is_critical=is_critical
                         )
-                        self.logger.info(f"✓ {display_name}: Initialized - {description}")
+                        self.logger.info(f"[U+2713] {display_name}: Initialized - {description}")
                     else:
                         validation = ComponentValidation(
                             name=display_name,
@@ -527,7 +527,7 @@ class StartupValidator:
                             message=f"{display_name} is None - {description} unavailable",
                             is_critical=is_critical
                         )
-                        self.logger.warning(f"⚠️ {display_name} is None - {description} unavailable")
+                        self.logger.warning(f" WARNING: [U+FE0F] {display_name} is None - {description} unavailable")
                 else:
                     validation = ComponentValidation(
                         name=display_name,
@@ -539,9 +539,9 @@ class StartupValidator:
                         is_critical=is_critical
                     )
                     if is_critical:
-                        self.logger.warning(f"⚠️ {display_name} not found - {description} missing")
+                        self.logger.warning(f" WARNING: [U+FE0F] {display_name} not found - {description} missing")
                     else:
-                        self.logger.info(f"ℹ️ {display_name} not configured - {description} optional")
+                        self.logger.info(f"[U+2139][U+FE0F] {display_name} not configured - {description} optional")
                     
                 self.validations.append(validation)
                 
@@ -582,9 +582,9 @@ class StartupValidator:
             )
             
             if middleware_count == 0:
-                self.logger.warning(f"⚠️ ZERO middleware components - expected at least {expected_middleware}")
+                self.logger.warning(f" WARNING: [U+FE0F] ZERO middleware components - expected at least {expected_middleware}")
             else:
-                self.logger.info(f"✓ Middleware: {middleware_count} components")
+                self.logger.info(f"[U+2713] Middleware: {middleware_count} components")
                 
             self.validations.append(validation)
             
@@ -614,7 +614,7 @@ class StartupValidator:
                         metadata={"task_count": task_count}
                     )
                     
-                    self.logger.info(f"✓ Background Tasks: {task_count} tasks")
+                    self.logger.info(f"[U+2713] Background Tasks: {task_count} tasks")
                 else:
                     validation = ComponentValidation(
                         name="Background Tasks",
@@ -625,11 +625,11 @@ class StartupValidator:
                         message="Manager is None",
                         is_critical=False
                     )
-                    self.logger.warning("⚠️ Background task manager is None")
+                    self.logger.warning(" WARNING: [U+FE0F] Background task manager is None")
                     
                 self.validations.append(validation)
             else:
-                self.logger.info("ℹ️ Background task manager not configured")
+                self.logger.info("[U+2139][U+FE0F] Background task manager not configured")
                 
         except Exception as e:
             self._add_failed_validation("Background Task Validation", "Tasks", str(e))
@@ -663,7 +663,7 @@ class StartupValidator:
                         metadata={"has_cleanup_task": is_monitoring}
                     )
                     
-                    self.logger.info("✓ Performance Monitor: Configured")
+                    self.logger.info("[U+2713] Performance Monitor: Configured")
                 else:
                     validation = ComponentValidation(
                         name="Performance Monitor",
@@ -674,11 +674,11 @@ class StartupValidator:
                         message="Monitor is None",
                         is_critical=False
                     )
-                    self.logger.warning("⚠️ Performance monitor is None")
+                    self.logger.warning(" WARNING: [U+FE0F] Performance monitor is None")
                     
                 self.validations.append(validation)
             else:
-                self.logger.info("ℹ️ Performance monitoring not configured")
+                self.logger.info("[U+2139][U+FE0F] Performance monitoring not configured")
                 
         except Exception as e:
             self._add_failed_validation("Monitoring Validation", "Monitoring", str(e))
@@ -721,7 +721,7 @@ class StartupValidator:
                         "warnings": warnings
                     }
                 )
-                self.logger.error(f"❌ CRITICAL: {chat_breaking} chat-breaking communication failures!")
+                self.logger.error(f" FAIL:  CRITICAL: {chat_breaking} chat-breaking communication failures!")
             elif degraded > 0:
                 validation = ComponentValidation(
                     name="Critical Communication Paths",
@@ -737,7 +737,7 @@ class StartupValidator:
                         "warnings": warnings
                     }
                 )
-                self.logger.warning(f"⚠️ {degraded} degraded communication paths")
+                self.logger.warning(f" WARNING: [U+FE0F] {degraded} degraded communication paths")
             else:
                 validation = ComponentValidation(
                     name="Critical Communication Paths",
@@ -753,7 +753,7 @@ class StartupValidator:
                         "warnings": warnings
                     }
                 )
-                self.logger.info("✓ Critical communication paths: All validated")
+                self.logger.info("[U+2713] Critical communication paths: All validated")
             
             self.validations.append(validation)
             
@@ -802,7 +802,7 @@ class StartupValidator:
                     is_critical=False
                 )
                 self.validations.append(validation)
-                self.logger.warning("⚠️ No services found for dependency validation")
+                self.logger.warning(" WARNING: [U+FE0F] No services found for dependency validation")
                 return
             
             # Run service dependency validation
@@ -831,7 +831,7 @@ class StartupValidator:
                         "golden_path_validated": True
                     }
                 )
-                self.logger.info(f"✓ Service dependencies validated - {dependency_result.services_healthy}/{len(services_to_check)} services healthy")
+                self.logger.info(f"[U+2713] Service dependencies validated - {dependency_result.services_healthy}/{len(services_to_check)} services healthy")
             else:
                 # Critical failure - service dependencies not satisfied
                 failed_count = dependency_result.services_failed
@@ -855,7 +855,7 @@ class StartupValidator:
                     }
                 )
                 
-                self.logger.error(f"❌ CRITICAL: Service dependency validation FAILED")
+                self.logger.error(f" FAIL:  CRITICAL: Service dependency validation FAILED")
                 self.logger.error(f"   - {failed_count} services failed validation")
                 self.logger.error(f"   - Critical failures: {len(critical_failures)}")
                 for failure in critical_failures:
@@ -905,7 +905,7 @@ class StartupValidator:
             is_critical=True
         )
         self.validations.append(validation)
-        self.logger.error(f"❌ {name}: {error}")
+        self.logger.error(f" FAIL:  {name}: {error}")
     
     def _generate_report(self) -> Dict[str, Any]:
         """Generate validation report."""
@@ -964,7 +964,7 @@ class StartupValidator:
         self.logger.info("=" * 60)
         
         # Log summary
-        self.logger.info(f"Overall Status: {'✅ PASSED' if success else '❌ FAILED'}")
+        self.logger.info(f"Overall Status: {' PASS:  PASSED' if success else ' FAIL:  FAILED'}")
         self.logger.info(f"Total Validations: {report['total_validations']}")
         self.logger.info(f"Healthy: {report['status_counts']['healthy']}")
         self.logger.info(f"Warnings: {report['status_counts']['warning']}")
@@ -972,7 +972,7 @@ class StartupValidator:
         self.logger.info(f"Failed: {report['status_counts']['failed']}")
         
         if report['critical_failures'] > 0:
-            self.logger.error(f"⚠️ {report['critical_failures']} CRITICAL FAILURES DETECTED")
+            self.logger.error(f" WARNING: [U+FE0F] {report['critical_failures']} CRITICAL FAILURES DETECTED")
             
         # Log zero-count warnings
         zero_count_components = [v for v in self.validations 

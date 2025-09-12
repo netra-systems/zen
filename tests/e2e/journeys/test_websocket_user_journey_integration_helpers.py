@@ -2,7 +2,7 @@
 
 Business Value Justification (BVJ):
 Segment: ALL | Goal: User Journey Optimization & Retention | Impact: $50K+ MRR Protection
-- Validates thread creation for first-time users (Free→Paid conversion critical)
+- Validates thread creation for first-time users (Free -> Paid conversion critical)
 - Ensures message queuing during auth transitions (prevents message loss)
 - Tests session persistence across page refreshes (Mid/Enterprise retention)
 - Validates reconnection flow when auth tokens expire (prevents session drops)

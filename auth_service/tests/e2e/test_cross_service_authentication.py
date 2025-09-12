@@ -58,7 +58,7 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         
     async def setup_full_service_stack(self):
         """Set up complete service stack for cross-service testing."""
-        self.logger.info("🔧 Setting up complete service stack for cross-service E2E testing")
+        self.logger.info("[U+1F527] Setting up complete service stack for cross-service E2E testing")
         
         # Initialize Docker manager with Alpine containers for performance
         self.docker_manager = UnifiedDockerManager()
@@ -79,7 +79,7 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         self.postgres_port = env_info.get('postgres_port', 5434)
         self.redis_port = env_info.get('redis_port', 6381)
         
-        self.logger.info(f"✅ Complete service stack started:")
+        self.logger.info(f" PASS:  Complete service stack started:")
         self.logger.info(f"   - Auth Service: {self.auth_service_url}")
         self.logger.info(f"   - Backend Service: {self.backend_service_url}")
         self.logger.info(f"   - PostgreSQL: port {self.postgres_port}")
@@ -97,9 +97,9 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         if self.docker_manager:
             try:
                 await self.docker_manager.release_environment("test")
-                self.logger.info("✅ Complete service stack cleaned up successfully")
+                self.logger.info(" PASS:  Complete service stack cleaned up successfully")
             except Exception as e:
-                self.logger.error(f"❌ Error cleaning up service stack: {e}")
+                self.logger.error(f" FAIL:  Error cleaning up service stack: {e}")
     
     async def wait_for_service_ready(self, health_url: str, timeout: float = 30.0):
         """Wait for service to be ready with comprehensive health check."""
@@ -121,7 +121,7 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         ):
             raise RuntimeError(f"Service not ready at {health_url} within {timeout}s")
         
-        self.logger.info(f"✅ Service ready and healthy: {health_url}")
+        self.logger.info(f" PASS:  Service ready and healthy: {health_url}")
 
     async def create_cross_service_test_user(self) -> Tuple[Dict[str, Any], str]:
         """Create a test user and return user data and access token."""
@@ -167,14 +167,14 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         
         await self.setup_full_service_stack()
         
-        self.logger.info("🔗 Testing Auth Service + Backend Service integration")
+        self.logger.info("[U+1F517] Testing Auth Service + Backend Service integration")
         
         # Create authenticated user
         user_data, access_token = await self.create_cross_service_test_user()
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Step 1: Validate token works with Auth Service
-            self.logger.info("🔐 Step 1: Validate token with Auth Service")
+            self.logger.info("[U+1F510] Step 1: Validate token with Auth Service")
             
             auth_validation = await client.post(
                 f"{self.auth_service_url}/auth/validate",
@@ -185,10 +185,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             auth_data = auth_validation.json()
             assert auth_data["user"]["email"] == user_data["email"]
             
-            self.logger.info("✅ Step 1 Complete: Auth Service validates token successfully")
+            self.logger.info(" PASS:  Step 1 Complete: Auth Service validates token successfully")
             
             # Step 2: Use token with Backend Service
-            self.logger.info("🔗 Step 2: Cross-service token validation with Backend")
+            self.logger.info("[U+1F517] Step 2: Cross-service token validation with Backend")
             
             # Backend service should validate the token through Auth Service
             backend_protected_request = await client.get(
@@ -200,7 +200,7 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             if backend_protected_request.status_code == 200:
                 backend_user_data = backend_protected_request.json()
                 assert backend_user_data["email"] == user_data["email"]
-                self.logger.info("✅ Step 2 Complete: Backend validates token via Auth Service")
+                self.logger.info(" PASS:  Step 2 Complete: Backend validates token via Auth Service")
             elif backend_protected_request.status_code == 404:
                 # Endpoint might not exist - try alternative approach
                 self.logger.info("Note: /api/user/profile endpoint not found, trying health check with auth")
@@ -212,14 +212,14 @@ class TestCrossServiceAuthentication(BaseE2ETest):
                 
                 # Health endpoint should work regardless
                 assert backend_auth_health.status_code in [200, 401, 403]  # 200 = works, 401/403 = auth checked
-                self.logger.info("✅ Step 2 Complete: Backend processes auth headers correctly")
+                self.logger.info(" PASS:  Step 2 Complete: Backend processes auth headers correctly")
             else:
                 # Check if it's an auth-related error (expected behavior)
                 assert backend_protected_request.status_code in [401, 403, 404]
-                self.logger.info("✅ Step 2 Complete: Backend properly handles auth validation")
+                self.logger.info(" PASS:  Step 2 Complete: Backend properly handles auth validation")
             
             # Step 3: Test cross-service user context propagation
-            self.logger.info("👤 Step 3: Testing user context propagation across services")
+            self.logger.info("[U+1F464] Step 3: Testing user context propagation across services")
             
             # Make requests to both services with same token
             auth_user_response = await client.get(
@@ -241,14 +241,14 @@ class TestCrossServiceAuthentication(BaseE2ETest):
                     backend_user_profile = backend_user_response.json()
                     # User context should be consistent across services
                     assert backend_user_profile["email"] == auth_user_profile["email"]
-                    self.logger.info("✅ Step 3 Complete: User context consistent across services")
+                    self.logger.info(" PASS:  Step 3 Complete: User context consistent across services")
                 else:
-                    self.logger.info("✅ Step 3 Complete: Backend handles auth context appropriately")
+                    self.logger.info(" PASS:  Step 3 Complete: Backend handles auth context appropriately")
             except Exception:
-                self.logger.info("✅ Step 3 Complete: Cross-service auth integration functional")
+                self.logger.info(" PASS:  Step 3 Complete: Cross-service auth integration functional")
             
             # Step 4: Test service dependency validation
-            self.logger.info("🔍 Step 4: Testing service dependency health validation")
+            self.logger.info(" SEARCH:  Step 4: Testing service dependency health validation")
             
             # Both services should report healthy status
             auth_health = await client.get(f"{self.auth_service_url}/health")
@@ -263,9 +263,9 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             assert auth_health_data["status"] == "healthy"
             assert backend_health_data["status"] == "healthy"
             
-            self.logger.info("✅ Step 4 Complete: All services reporting healthy status")
+            self.logger.info(" PASS:  Step 4 Complete: All services reporting healthy status")
             
-            self.logger.info("✅ AUTH + BACKEND SERVICE INTEGRATION COMPLETE")
+            self.logger.info(" PASS:  AUTH + BACKEND SERVICE INTEGRATION COMPLETE")
             self.logger.info(f"   - Cross-service token validation: working")
             self.logger.info(f"   - User context propagation: validated")
             self.logger.info(f"   - Service health: all healthy")
@@ -275,7 +275,7 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.2, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Auth+Backend integration test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Auth+Backend integration test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -286,13 +286,13 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         
         await self.setup_full_service_stack()
         
-        self.logger.info("🔌 Testing WebSocket authentication integration")
+        self.logger.info("[U+1F50C] Testing WebSocket authentication integration")
         
         # Create authenticated user
         user_data, access_token = await self.create_cross_service_test_user()
         
         # Step 1: Test WebSocket connection with authentication
-        self.logger.info("🔗 Step 1: Testing authenticated WebSocket connection")
+        self.logger.info("[U+1F517] Step 1: Testing authenticated WebSocket connection")
         
         try:
             # WebSocket URL for backend service
@@ -318,19 +318,19 @@ class TestCrossServiceAuthentication(BaseE2ETest):
                     # Should receive successful authentication
                     if response_data.get("type") == "auth_success":
                         assert response_data.get("user_email") == user_data["email"]
-                        self.logger.info("✅ Step 1 Complete: WebSocket authentication successful")
+                        self.logger.info(" PASS:  Step 1 Complete: WebSocket authentication successful")
                     else:
-                        self.logger.info("✅ Step 1 Complete: WebSocket connection established")
+                        self.logger.info(" PASS:  Step 1 Complete: WebSocket connection established")
                     
                 except asyncio.TimeoutError:
-                    self.logger.info("✅ Step 1 Complete: WebSocket connection established (no immediate response)")
+                    self.logger.info(" PASS:  Step 1 Complete: WebSocket connection established (no immediate response)")
                 
         except Exception as e:
             # WebSocket endpoint might not be available in test environment
-            self.logger.info(f"✅ Step 1 Complete: WebSocket integration handled gracefully ({type(e).__name__})")
+            self.logger.info(f" PASS:  Step 1 Complete: WebSocket integration handled gracefully ({type(e).__name__})")
         
         # Step 2: Test real-time authentication validation
-        self.logger.info("⚡ Step 2: Testing real-time authentication validation")
+        self.logger.info(" LIGHTNING:  Step 2: Testing real-time authentication validation")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Simulate real-time authentication checks that would happen during WebSocket usage
@@ -353,10 +353,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             for check in realtime_checks:
                 assert check["user"]["email"] == user_data["email"]
             
-            self.logger.info("✅ Step 2 Complete: Real-time authentication validation working")
+            self.logger.info(" PASS:  Step 2 Complete: Real-time authentication validation working")
         
         # Step 3: Test WebSocket message authentication context
-        self.logger.info("💬 Step 3: Testing WebSocket message authentication context")
+        self.logger.info("[U+1F4AC] Step 3: Testing WebSocket message authentication context")
         
         # Simulate WebSocket message flow that requires authentication
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -379,9 +379,9 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             # Business tier information should be available for WebSocket message handling
             # This enables proper access control for real-time features
             
-            self.logger.info("✅ Step 3 Complete: WebSocket message authentication context available")
+            self.logger.info(" PASS:  Step 3 Complete: WebSocket message authentication context available")
         
-        self.logger.info("✅ WEBSOCKET AUTHENTICATION INTEGRATION COMPLETE")
+        self.logger.info(" PASS:  WEBSOCKET AUTHENTICATION INTEGRATION COMPLETE")
         self.logger.info(f"   - WebSocket authentication: implemented")
         self.logger.info(f"   - Real-time validation: working")
         self.logger.info(f"   - Message context: available")
@@ -390,7 +390,7 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.2, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ WebSocket authentication test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  WebSocket authentication test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -401,11 +401,11 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         
         await self.setup_full_service_stack()
         
-        self.logger.info("🏥 Testing service health monitoring and dependency management")
+        self.logger.info("[U+1F3E5] Testing service health monitoring and dependency management")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Step 1: Validate all services are healthy and ready
-            self.logger.info("✅ Step 1: Comprehensive service health validation")
+            self.logger.info(" PASS:  Step 1: Comprehensive service health validation")
             
             # Check Auth Service health with dependencies
             auth_health = await client.get(f"{self.auth_service_url}/health")
@@ -421,10 +421,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             backend_health_data = backend_health.json()
             assert backend_health_data["status"] == "healthy"
             
-            self.logger.info("✅ Step 1 Complete: All services report healthy status")
+            self.logger.info(" PASS:  Step 1 Complete: All services report healthy status")
             
             # Step 2: Test OAuth provider health validation
-            self.logger.info("🔐 Step 2: OAuth provider health validation")
+            self.logger.info("[U+1F510] Step 2: OAuth provider health validation")
             
             oauth_status = await client.get(f"{self.auth_service_url}/oauth/status")
             assert oauth_status.status_code == 200
@@ -435,12 +435,12 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             
             # Google OAuth should be available and healthy
             if "google" in oauth_data.get("available_providers", []):
-                self.logger.info("✅ Step 2 Complete: OAuth providers healthy and available")
+                self.logger.info(" PASS:  Step 2 Complete: OAuth providers healthy and available")
             else:
-                self.logger.info("✅ Step 2 Complete: OAuth status endpoint functional")
+                self.logger.info(" PASS:  Step 2 Complete: OAuth status endpoint functional")
             
             # Step 3: Test database dependency health
-            self.logger.info("🗄️ Step 3: Database dependency health validation")
+            self.logger.info("[U+1F5C4][U+FE0F] Step 3: Database dependency health validation")
             
             # Auth service readiness check validates database connectivity
             auth_readiness = await client.get(f"{self.auth_service_url}/health/ready")
@@ -453,12 +453,12 @@ class TestCrossServiceAuthentication(BaseE2ETest):
                 if "database_status" in readiness_data:
                     assert readiness_data["database_status"] == "connected"
                 
-                self.logger.info("✅ Step 3 Complete: Database dependencies healthy")
+                self.logger.info(" PASS:  Step 3 Complete: Database dependencies healthy")
             else:
-                self.logger.info("✅ Step 3 Complete: Database dependency checking functional")
+                self.logger.info(" PASS:  Step 3 Complete: Database dependency checking functional")
             
             # Step 4: Test cross-service dependency validation
-            self.logger.info("🔗 Step 4: Cross-service dependency validation")
+            self.logger.info("[U+1F517] Step 4: Cross-service dependency validation")
             
             # Create user to test cross-service functionality
             user_data, access_token = await self.create_cross_service_test_user()
@@ -480,10 +480,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             # Should handle auth headers appropriately
             assert backend_with_auth.status_code in [200, 401, 403]
             
-            self.logger.info("✅ Step 4 Complete: Cross-service dependencies validated")
+            self.logger.info(" PASS:  Step 4 Complete: Cross-service dependencies validated")
             
             # Step 5: Test service resilience under load
-            self.logger.info("⚡ Step 5: Service resilience and performance validation")
+            self.logger.info(" LIGHTNING:  Step 5: Service resilience and performance validation")
             
             # Simulate multiple concurrent authentication requests
             concurrent_requests = []
@@ -506,10 +506,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             # Should handle concurrent load successfully
             assert successful_responses >= 4, f"Only {successful_responses}/5 concurrent requests succeeded"
             
-            self.logger.info("✅ Step 5 Complete: Service resilience validated under concurrent load")
+            self.logger.info(" PASS:  Step 5 Complete: Service resilience validated under concurrent load")
             
             # Step 6: Test error handling and recovery
-            self.logger.info("🚨 Step 6: Error handling and recovery validation")
+            self.logger.info(" ALERT:  Step 6: Error handling and recovery validation")
             
             # Test invalid token handling
             invalid_token_test = await client.post(
@@ -534,9 +534,9 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             health_after_errors = post_error_health.json()
             assert health_after_errors["status"] == "healthy"
             
-            self.logger.info("✅ Step 6 Complete: Error handling and recovery validated")
+            self.logger.info(" PASS:  Step 6 Complete: Error handling and recovery validated")
             
-            self.logger.info("✅ SERVICE HEALTH AND DEPENDENCY MANAGEMENT COMPLETE")
+            self.logger.info(" PASS:  SERVICE HEALTH AND DEPENDENCY MANAGEMENT COMPLETE")
             self.logger.info(f"   - Service health monitoring: comprehensive")
             self.logger.info(f"   - Dependency validation: complete")
             self.logger.info(f"   - OAuth health: validated")
@@ -549,7 +549,7 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.3, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Service health and dependency test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Service health and dependency test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -560,13 +560,13 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         
         await self.setup_full_service_stack()
         
-        self.logger.info("🌐 Testing complete platform authentication flow")
+        self.logger.info("[U+1F310] Testing complete platform authentication flow")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
-            # COMPLETE PLATFORM FLOW: User authentication → Platform access → Feature usage
+            # COMPLETE PLATFORM FLOW: User authentication  ->  Platform access  ->  Feature usage
             
             # Phase 1: User authentication through Auth Service
-            self.logger.info("🔐 Phase 1: User authentication through Auth Service")
+            self.logger.info("[U+1F510] Phase 1: User authentication through Auth Service")
             
             platform_user, platform_token = await self.create_cross_service_test_user()
             
@@ -580,10 +580,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             auth_data = auth_validation.json()
             assert auth_data["user"]["email"] == platform_user["email"]
             
-            self.logger.info("✅ Phase 1 Complete: User authenticated successfully")
+            self.logger.info(" PASS:  Phase 1 Complete: User authenticated successfully")
             
             # Phase 2: Cross-service platform access
-            self.logger.info("🔗 Phase 2: Cross-service platform access validation")
+            self.logger.info("[U+1F517] Phase 2: Cross-service platform access validation")
             
             # User should be able to access Backend Service with same token
             try:
@@ -596,15 +596,15 @@ class TestCrossServiceAuthentication(BaseE2ETest):
                 assert backend_access.status_code in [200, 401, 403, 404]
                 
                 if backend_access.status_code == 200:
-                    self.logger.info("✅ Phase 2 Complete: Cross-service access validated")
+                    self.logger.info(" PASS:  Phase 2 Complete: Cross-service access validated")
                 else:
-                    self.logger.info("✅ Phase 2 Complete: Cross-service auth handling validated")
+                    self.logger.info(" PASS:  Phase 2 Complete: Cross-service auth handling validated")
                     
             except Exception as e:
-                self.logger.info(f"✅ Phase 2 Complete: Cross-service integration handled ({type(e).__name__})")
+                self.logger.info(f" PASS:  Phase 2 Complete: Cross-service integration handled ({type(e).__name__})")
             
             # Phase 3: Real-time feature authentication (WebSocket simulation)
-            self.logger.info("⚡ Phase 3: Real-time feature authentication")
+            self.logger.info(" LIGHTNING:  Phase 3: Real-time feature authentication")
             
             # Simulate real-time features that require continuous authentication
             realtime_validations = []
@@ -626,10 +626,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             for validation in realtime_validations:
                 assert validation["user"]["email"] == platform_user["email"]
             
-            self.logger.info("✅ Phase 3 Complete: Real-time feature authentication working")
+            self.logger.info(" PASS:  Phase 3 Complete: Real-time feature authentication working")
             
             # Phase 4: Session management and continuity
-            self.logger.info("🔄 Phase 4: Session management and business continuity")
+            self.logger.info(" CYCLE:  Phase 4: Session management and business continuity")
             
             # User continues working - session should remain valid
             continued_session = await client.post(
@@ -651,10 +651,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             profile_data = user_profile.json()
             assert profile_data["email"] == platform_user["email"]
             
-            self.logger.info("✅ Phase 4 Complete: Session continuity maintained")
+            self.logger.info(" PASS:  Phase 4 Complete: Session continuity maintained")
             
             # Phase 5: Multi-service feature coordination
-            self.logger.info("🎯 Phase 5: Multi-service feature coordination")
+            self.logger.info(" TARGET:  Phase 5: Multi-service feature coordination")
             
             # Simulate features that require coordination between services
             coordination_tasks = []
@@ -688,10 +688,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             # Auth service should always work
             assert task_results["auth"] == 200
             
-            self.logger.info("✅ Phase 5 Complete: Multi-service coordination functional")
+            self.logger.info(" PASS:  Phase 5 Complete: Multi-service coordination functional")
             
             # Phase 6: Business value validation
-            self.logger.info("💼 Phase 6: Business value validation")
+            self.logger.info("[U+1F4BC] Phase 6: Business value validation")
             
             # Complete platform authentication should enable business features
             business_validation = await client.post(
@@ -710,20 +710,20 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             # Business tier information should enable proper feature access
             # This is critical for revenue-generating features
             
-            self.logger.info("✅ COMPLETE PLATFORM AUTHENTICATION FLOW SUCCESSFUL")
-            self.logger.info(f"   - User authentication: Auth Service → SUCCESS")
-            self.logger.info(f"   - Cross-service access: Auth ↔ Backend → VALIDATED")
-            self.logger.info(f"   - Real-time features: WebSocket auth → WORKING")
-            self.logger.info(f"   - Session continuity: Multi-request → MAINTAINED")
-            self.logger.info(f"   - Service coordination: Multi-service → FUNCTIONAL")
-            self.logger.info(f"   - Business value: Platform access → ENABLED")
+            self.logger.info(" PASS:  COMPLETE PLATFORM AUTHENTICATION FLOW SUCCESSFUL")
+            self.logger.info(f"   - User authentication: Auth Service  ->  SUCCESS")
+            self.logger.info(f"   - Cross-service access: Auth [U+2194] Backend  ->  VALIDATED")
+            self.logger.info(f"   - Real-time features: WebSocket auth  ->  WORKING")
+            self.logger.info(f"   - Session continuity: Multi-request  ->  MAINTAINED")
+            self.logger.info(f"   - Service coordination: Multi-service  ->  FUNCTIONAL")
+            self.logger.info(f"   - Business value: Platform access  ->  ENABLED")
             self.logger.info(f"   - Complete platform experience: DELIVERED")
         
         # Validate test timing (must not be 0-second execution)
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.3, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Complete platform authentication test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Complete platform authentication test completed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -734,14 +734,14 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         
         await self.setup_full_service_stack()
         
-        self.logger.info("⚡ Testing authentication performance and scalability")
+        self.logger.info(" LIGHTNING:  Testing authentication performance and scalability")
         
         # Create authenticated user
         user_data, access_token = await self.create_cross_service_test_user()
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             # Performance Test 1: Single request latency
-            self.logger.info("📊 Performance Test 1: Single request latency")
+            self.logger.info(" CHART:  Performance Test 1: Single request latency")
             
             start_time = time.time()
             
@@ -755,10 +755,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             assert performance_validation.status_code == 200
             assert latency < 2.0, f"Authentication latency too high: {latency:.3f}s"
             
-            self.logger.info(f"✅ Single request latency: {latency:.3f}s (target: <2.0s)")
+            self.logger.info(f" PASS:  Single request latency: {latency:.3f}s (target: <2.0s)")
             
             # Performance Test 2: Concurrent request handling
-            self.logger.info("🔄 Performance Test 2: Concurrent request handling")
+            self.logger.info(" CYCLE:  Performance Test 2: Concurrent request handling")
             
             concurrent_start = time.time()
             concurrent_requests = []
@@ -786,10 +786,10 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             assert success_rate >= 0.8, f"Concurrent success rate too low: {success_rate:.2f}"
             assert concurrent_duration < 10.0, f"Concurrent requests took too long: {concurrent_duration:.3f}s"
             
-            self.logger.info(f"✅ Concurrent handling: {successful_count}/10 successful in {concurrent_duration:.3f}s")
+            self.logger.info(f" PASS:  Concurrent handling: {successful_count}/10 successful in {concurrent_duration:.3f}s")
             
             # Performance Test 3: Sustained load
-            self.logger.info("🏃 Performance Test 3: Sustained load handling")
+            self.logger.info("[U+1F3C3] Performance Test 3: Sustained load handling")
             
             sustained_start = time.time()
             sustained_requests = 0
@@ -819,11 +819,11 @@ class TestCrossServiceAuthentication(BaseE2ETest):
             
             assert sustained_success_rate >= 0.8, f"Sustained load success rate too low: {sustained_success_rate:.2f}"
             
-            self.logger.info(f"✅ Sustained load: {sustained_requests} successful requests, "
+            self.logger.info(f" PASS:  Sustained load: {sustained_requests} successful requests, "
                            f"{sustained_success_rate:.2%} success rate")
             
             # Performance Test 4: Cross-service latency
-            self.logger.info("🔗 Performance Test 4: Cross-service authentication latency")
+            self.logger.info("[U+1F517] Performance Test 4: Cross-service authentication latency")
             
             cross_service_start = time.time()
             
@@ -842,14 +842,14 @@ class TestCrossServiceAuthentication(BaseE2ETest):
                 cross_service_latency = time.time() - cross_service_start
                 
                 assert cross_service_latency < 5.0, f"Cross-service latency too high: {cross_service_latency:.3f}s"
-                self.logger.info(f"✅ Cross-service latency: {cross_service_latency:.3f}s")
+                self.logger.info(f" PASS:  Cross-service latency: {cross_service_latency:.3f}s")
             except Exception:
-                self.logger.info("✅ Cross-service latency test handled gracefully")
+                self.logger.info(" PASS:  Cross-service latency test handled gracefully")
             
-            self.logger.info("✅ AUTHENTICATION PERFORMANCE AND SCALABILITY VALIDATED")
+            self.logger.info(" PASS:  AUTHENTICATION PERFORMANCE AND SCALABILITY VALIDATED")
             self.logger.info(f"   - Single request latency: <2.0s")
-            self.logger.info(f"   - Concurrent handling: ≥80% success rate")
-            self.logger.info(f"   - Sustained load: ≥80% success rate")
+            self.logger.info(f"   - Concurrent handling:  >= 80% success rate")
+            self.logger.info(f"   - Sustained load:  >= 80% success rate")
             self.logger.info(f"   - Cross-service latency: <5.0s")
             self.logger.info(f"   - Performance requirements: MET")
         
@@ -857,7 +857,7 @@ class TestCrossServiceAuthentication(BaseE2ETest):
         execution_time = time.time() - self.test_start_time
         assert execution_time > 0.5, f"E2E test executed too fast: {execution_time}s (likely mocked)"
         
-        self.logger.info(f"✅ Authentication performance test completed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Authentication performance test completed in {execution_time:.2f}s")
 
 
 if __name__ == "__main__":

@@ -235,7 +235,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('errors_extracted', 1)
         self.record_metric('extraction_success_rate', 100.0)
         
-        logger.info("✅ Basic error extraction validation completed")
+        logger.info(" PASS:  Basic error extraction validation completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -286,7 +286,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('error_types_classified', len(error_types))
         self.record_metric('critical_errors_detected', len(critical_errors))
         
-        logger.info("✅ Error type identification and classification completed")
+        logger.info(" PASS:  Error type identification and classification completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -332,7 +332,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         escalation_count = sum(1 for _, _, escalate in severity_tests if escalate)
         self.record_metric('escalation_rules_validated', escalation_count)
         
-        logger.info("✅ Error severity mapping and prioritization completed")
+        logger.info(" PASS:  Error severity mapping and prioritization completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -382,7 +382,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('message_fields_validated', len(required_fields))
         self.record_metric('json_serialization_success', True)
         
-        logger.info("✅ Error message formatting and structure validation completed")
+        logger.info(" PASS:  Error message formatting and structure validation completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -430,7 +430,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('timestamps_processed', 1)
         self.record_metric('services_identified', 1)
         
-        logger.info("✅ Error timestamp and service identification completed")
+        logger.info(" PASS:  Error timestamp and service identification completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -492,7 +492,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('errors_correlated', len(processed_errors))
         self.record_metric('correlation_groups_created', len(correlation_groups))
         
-        logger.info("✅ Error correlation and grouping logic completed")
+        logger.info(" PASS:  Error correlation and grouping logic completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -555,7 +555,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('errors_persisted', 1)
         self.record_metric('database_write_time', query_time)
         
-        logger.info("✅ Error message persistence to database completed")
+        logger.info(" PASS:  Error message persistence to database completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -627,7 +627,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('test_errors_created', len(test_errors))
         self.record_metric('query_variations_tested', 4)
         
-        logger.info("✅ Error message retrieval and querying completed")
+        logger.info(" PASS:  Error message retrieval and querying completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -690,7 +690,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('duplicates_processed', duplicate_count)
         self.record_metric('duplicate_detection_accuracy', 100.0)
         
-        logger.info("✅ Error message duplicate detection and handling completed")
+        logger.info(" PASS:  Error message duplicate detection and handling completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -771,7 +771,7 @@ class TestGCPBasicErrorMessageCreation(SSotAsyncTestCase):
         self.record_metric('retention_policies_applied', 1)
         self.record_metric('errors_cleaned_up', cleanup_result['errors_processed'])
         
-        logger.info("✅ Error message cleanup and retention policies completed")
+        logger.info(" PASS:  Error message cleanup and retention policies completed")
     
     # Helper methods for error processing simulation
     

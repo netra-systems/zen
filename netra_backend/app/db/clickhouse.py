@@ -719,7 +719,7 @@ def _handle_connection_error(e: Exception, service_context: Optional[Dict[str, A
     CONTEXT-AWARE LOGGING FIX for GitHub issue #134:
     - Optional services log WARNING instead of ERROR (80% log noise reduction)
     - Required services still log ERROR appropriately
-    - Single coherent log message eliminates contradictory ERROR→WARNING pairs
+    - Single coherent log message eliminates contradictory ERROR -> WARNING pairs
     - Service layer context propagated to connection layer for proper log level selection
     
     Args:
@@ -1037,8 +1037,8 @@ class ClickHouseService:
         query_type = query.lower().strip().split()[0] if query.strip() else "unknown"
         query_preview = query[:100] + "..." if len(query) > 100 else query
         
-        logger.info(f"🏢 ClickHouse EXECUTE: {query_type.upper()} query for user {user_id or 'system'} - Context: {operation_context}")
-        logger.debug(f"📝 Query preview: {query_preview}")
+        logger.info(f"[U+1F3E2] ClickHouse EXECUTE: {query_type.upper()} query for user {user_id or 'system'} - Context: {operation_context}")
+        logger.debug(f"[U+1F4DD] Query preview: {query_preview}")
         
         # Check cache first for read queries
         if query_type == "select":
@@ -1048,11 +1048,11 @@ class ClickHouseService:
             
             if cached_result is not None:
                 total_duration = time.time() - execute_start
-                logger.info(f"🎯 ClickHouse CACHE HIT for user {user_id or 'system'} - "
+                logger.info(f" TARGET:  ClickHouse CACHE HIT for user {user_id or 'system'} - "
                            f"Context: {operation_context}, Rows: {len(cached_result)}, Duration: {total_duration:.3f}s")
                 return cached_result
             else:
-                logger.debug(f"📭 ClickHouse cache miss for user {user_id or 'system'} (cache check: {cache_duration:.3f}s)")
+                logger.debug(f"[U+1F4ED] ClickHouse cache miss for user {user_id or 'system'} (cache check: {cache_duration:.3f}s)")
         
         # Try to use connection manager if available
         try:
@@ -1089,7 +1089,7 @@ class ClickHouseService:
             execute_duration = time.time() - execute_start
             self._metrics["failures"] += 1
             
-            logger.critical(f"💥 ClickHouse EXECUTION FAILED for user {user_id or 'system'} after {execute_duration:.3f}s")
+            logger.critical(f"[U+1F4A5] ClickHouse EXECUTION FAILED for user {user_id or 'system'} after {execute_duration:.3f}s")
             logger.error(f"Context: {operation_context}, Query type: {query_type.upper()}")
             logger.error(f"Error details: {type(e).__name__}: {str(e)}")
             logger.error(f"ANALYTICS IMPACT: User {user_id or 'system'} data operation failed - {operation_context}")

@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 async def run_golden_path_test():
     """Run the WebSocket message routing golden path test."""
-    print("🚀 Starting WebSocket Message Routing Golden Path Test")
+    print("[U+1F680] Starting WebSocket Message Routing Golden Path Test")
     print("=" * 80)
     print("Expected Result: Test should FAIL initially to prove system issues")
     print("=" * 80)
@@ -45,16 +45,16 @@ async def run_golden_path_test():
     
     try:
         # Setup test
-        print("🔧 Setting up test instance...")
+        print("[U+1F527] Setting up test instance...")
         test_instance.setup_method()
         
         # Run the main golden path test
-        print("🎯 Running golden path test...")
+        print(" TARGET:  Running golden path test...")
         await test_instance.test_websocket_message_to_agent_complete_golden_path()
         
         # If we get here, the test passed unexpectedly
         print("=" * 80)
-        print("✅ UNEXPECTED: Golden Path Test PASSED")
+        print(" PASS:  UNEXPECTED: Golden Path Test PASSED")
         print("This suggests the WebSocket message routing system is working correctly!")
         print("The system may have been fixed since this test was created.")
         print("=" * 80)
@@ -62,7 +62,7 @@ async def run_golden_path_test():
         
     except AssertionError as e:
         print("=" * 80)
-        print("❌ EXPECTED: Golden Path Test FAILED")
+        print(" FAIL:  EXPECTED: Golden Path Test FAILED")
         print(f"Failure Details: {e}")
         print("")
         print("This failure PROVES the current system issues exist:")
@@ -80,7 +80,7 @@ async def run_golden_path_test():
         
     except Exception as e:
         print("=" * 80)
-        print("💥 UNEXPECTED ERROR in Golden Path Test")
+        print("[U+1F4A5] UNEXPECTED ERROR in Golden Path Test")
         print(f"Error: {e}")
         print("")
         print("Stack Trace:")
@@ -96,27 +96,27 @@ async def run_golden_path_test():
     finally:
         # Always cleanup
         try:
-            print("🧹 Cleaning up test resources...")
+            print("[U+1F9F9] Cleaning up test resources...")
             await test_instance.cleanup_method()
-            print("✅ Cleanup completed")
+            print(" PASS:  Cleanup completed")
         except Exception as cleanup_error:
-            print(f"⚠️  Cleanup warning: {cleanup_error}")
+            print(f" WARNING: [U+FE0F]  Cleanup warning: {cleanup_error}")
 
 
 async def run_failure_modes_test():
     """Run the WebSocket failure modes test."""
-    print("🔧 Running WebSocket Message Routing Failure Modes Test...")
+    print("[U+1F527] Running WebSocket Message Routing Failure Modes Test...")
     
     test_instance = TestWebSocketMessageToAgentGoldenPath()
     
     try:
         test_instance.setup_method()
         await test_instance.test_websocket_message_routing_failure_modes()
-        print("✅ Failure modes test completed successfully")
+        print(" PASS:  Failure modes test completed successfully")
         return True
         
     except Exception as e:
-        print(f"❌ Failure modes test failed: {e}")
+        print(f" FAIL:  Failure modes test failed: {e}")
         return False
         
     finally:
@@ -125,18 +125,18 @@ async def run_failure_modes_test():
 
 async def run_concurrent_test():
     """Run the concurrent message handling test."""
-    print("🔧 Running WebSocket Concurrent Message Handling Test...")
+    print("[U+1F527] Running WebSocket Concurrent Message Handling Test...")
     
     test_instance = TestWebSocketMessageToAgentGoldenPath()
     
     try:
         test_instance.setup_method()
         await test_instance.test_websocket_concurrent_message_handling()
-        print("✅ Concurrent handling test completed successfully")
+        print(" PASS:  Concurrent handling test completed successfully")
         return True
         
     except Exception as e:
-        print(f"❌ Concurrent handling test failed: {e}")
+        print(f" FAIL:  Concurrent handling test failed: {e}")
         return False
         
     finally:
@@ -191,17 +191,17 @@ async def main():
     print("=" * 80)
     
     for test_name, passed in results:
-        status = "✅ PASSED" if passed else "❌ FAILED"
+        status = " PASS:  PASSED" if passed else " FAIL:  FAILED"
         print(f"{test_name:30} {status}")
     
     # Determine exit code
     failed_tests = [name for name, passed in results if not passed]
     
     if not failed_tests:
-        print("\n🎉 All tests completed successfully!")
+        print("\n CELEBRATION:  All tests completed successfully!")
         return 0
     else:
-        print(f"\n⚠️  {len(failed_tests)} test(s) failed: {', '.join(failed_tests)}")
+        print(f"\n WARNING: [U+FE0F]  {len(failed_tests)} test(s) failed: {', '.join(failed_tests)}")
         print("Note: Golden Path test failure is EXPECTED initially.")
         return 1
 
@@ -211,9 +211,9 @@ if __name__ == "__main__":
         exit_code = asyncio.run(main())
         sys.exit(exit_code)
     except KeyboardInterrupt:
-        print("\n🛑 Test execution interrupted by user")
+        print("\n[U+1F6D1] Test execution interrupted by user")
         sys.exit(130)
     except Exception as e:
-        print(f"\n💥 Unexpected error: {e}")
+        print(f"\n[U+1F4A5] Unexpected error: {e}")
         traceback.print_exc()
         sys.exit(1)

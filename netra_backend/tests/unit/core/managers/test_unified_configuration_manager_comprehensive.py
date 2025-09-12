@@ -1543,7 +1543,7 @@ class TestErrorHandlingAndEdgeCases:
         """Test handling of Unicode and special characters."""
         # Test Unicode characters
         unicode_key = "unicode.test"
-        unicode_value = "测试值 with émojis 🚀 and spëcial chars"
+        unicode_value = "[U+6D4B][U+8BD5][U+503C] with [U+00E9]mojis [U+1F680] and sp[U+00EB]cial chars"
         
         config_manager.set(unicode_key, unicode_value)
         retrieved = config_manager.get(unicode_key)

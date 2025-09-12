@@ -23,8 +23,8 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
             # This should fail - it's the broken import path that was causing issues
             from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge
             
-        print("✅ REGRESSION PROTECTION: Broken import path correctly remains broken")
-        print("✅ CONFUSION PREVENTION: Old path cannot accidentally be used")
+        print(" PASS:  REGRESSION PROTECTION: Broken import path correctly remains broken")
+        print(" PASS:  CONFUSION PREVENTION: Old path cannot accidentally be used")
     
     def test_websocket_ssot_correct_import_services_path_works(self):
         """
@@ -43,8 +43,8 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
         sig = inspect.signature(create_agent_websocket_bridge)
         assert 'user_context' in sig.parameters, "Function should accept user_context parameter"
         
-        print("✅ SSOT PATH SUCCESS: Correct services import path working")
-        print("✅ FUNCTION VALIDATION: Function is callable with proper signature")
+        print(" PASS:  SSOT PATH SUCCESS: Correct services import path working")
+        print(" PASS:  FUNCTION VALIDATION: Function is callable with proper signature")
     
     def test_websocket_agent_bridge_class_import_works(self):
         """
@@ -62,9 +62,9 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
         # Basic class validation
         assert hasattr(AgentWebSocketBridge, '__init__'), "Class should have constructor"
         
-        print("✅ CLASS IMPORT SUCCESS: AgentWebSocketBridge class importable")
-        print("✅ FUNCTION IMPORT SUCCESS: create_agent_websocket_bridge function available")
-        print("✅ SSOT COMPLIANCE: Both function and class available via services path")
+        print(" PASS:  CLASS IMPORT SUCCESS: AgentWebSocketBridge class importable")
+        print(" PASS:  FUNCTION IMPORT SUCCESS: create_agent_websocket_bridge function available")
+        print(" PASS:  SSOT COMPLIANCE: Both function and class available via services path")
     
     def test_correct_service_module_exists_and_functional(self):
         """
@@ -86,9 +86,9 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
         param_names = [p.name for p in params]
         assert 'user_context' in param_names, "Function should have user_context parameter"
         
-        print("✅ MODULE VALIDATION: SSOT services module functional")
-        print("✅ SIGNATURE VALIDATION: Function has expected parameters")
-        print(f"✅ PARAMETERS: {param_names}")
+        print(" PASS:  MODULE VALIDATION: SSOT services module functional")
+        print(" PASS:  SIGNATURE VALIDATION: Function has expected parameters")
+        print(f" PASS:  PARAMETERS: {param_names}")
     
     def test_websocket_ssot_import_success_requirements(self):
         """
@@ -105,14 +105,14 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
             "implementation": "SSOT pattern successfully applied"
         }
         
-        print(f"✅ SUCCESS STATUS: {success_status}")
+        print(f" PASS:  SUCCESS STATUS: {success_status}")
         
         # Validate the documented imports actually work
         from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
         assert create_agent_websocket_bridge is not None
         assert AgentWebSocketBridge is not None
         
-        print("✅ VALIDATION: All documented imports working correctly")
+        print(" PASS:  VALIDATION: All documented imports working correctly")
 
     def test_import_path_consistency_across_modules(self):
         """
@@ -137,8 +137,8 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
                 AgentWebSocketBridge is not None
             ])
             
-            print("✅ CONSISTENCY VALIDATION: All SSOT import variations work")
-            print("✅ PATH STANDARDIZATION: Single source of truth established")
+            print(" PASS:  CONSISTENCY VALIDATION: All SSOT import variations work")
+            print(" PASS:  PATH STANDARDIZATION: Single source of truth established")
             
         except ImportError as e:
             pytest.fail(f"SSOT import consistency failed: {e}")
@@ -175,8 +175,8 @@ class TestWebSocketSSOTImportPathValidation(SSotBaseTestCase):
             assert callable(create_func), "create_agent_websocket_bridge should be callable"
             assert inspect.isclass(bridge_class), "AgentWebSocketBridge should be a class"
             
-            print("✅ MODULE COMPLETENESS: All required components present")
-            print(f"✅ COMPONENTS VALIDATED: {required_components}")
+            print(" PASS:  MODULE COMPLETENESS: All required components present")
+            print(f" PASS:  COMPONENTS VALIDATED: {required_components}")
             
         except ImportError as e:
             pytest.fail(f"Module completeness validation failed: {e}")
@@ -198,9 +198,9 @@ class TestWebSocketSSOTImportSuccessAnalysis(SSotBaseTestCase):
             # This success means agent handlers can be set up
             assert create_agent_websocket_bridge is not None
             
-            print("✅ SUCCESS: Agent handler setup enabled by SSOT import")
-            print("✅ CAPABILITY: WebSocket connections can route agent messages")
-            print("✅ RESULT: Golden Path fully functional")
+            print(" PASS:  SUCCESS: Agent handler setup enabled by SSOT import")
+            print(" PASS:  CAPABILITY: WebSocket connections can route agent messages")
+            print(" PASS:  RESULT: Golden Path fully functional")
             
         except ImportError as e:
             pytest.fail(f"Agent handler setup should work with SSOT imports: {e}")
@@ -218,9 +218,9 @@ class TestWebSocketSSOTImportSuccessAnalysis(SSotBaseTestCase):
             # This success means agent bridges can be created
             assert create_agent_websocket_bridge is not None
             
-            print("✅ SUCCESS: Agent WebSocket bridge creation enabled")
-            print("✅ CAPABILITY: Communication channel between agents and WebSocket established")
-            print("✅ RESULT: 200 OK responses on /api/agent/v2/execute")
+            print(" PASS:  SUCCESS: Agent WebSocket bridge creation enabled")
+            print(" PASS:  CAPABILITY: Communication channel between agents and WebSocket established")
+            print(" PASS:  RESULT: 200 OK responses on /api/agent/v2/execute")
             
         except ImportError as e:
             pytest.fail(f"Agent bridge creation should work with SSOT imports: {e}")
@@ -246,7 +246,7 @@ class TestWebSocketSSOTImportSuccessAnalysis(SSotBaseTestCase):
             except ImportError:
                 failed_imports.append(import_path)
         
-        print("✅ GOLDEN PATH IMPORT VALIDATION:")
+        print(" PASS:  GOLDEN PATH IMPORT VALIDATION:")
         print(f"  Total imports: {len(golden_path_imports)}")
         print(f"  Working imports: {len(working_imports)}")
         print(f"  Failed imports: {len(failed_imports)}")
@@ -255,7 +255,7 @@ class TestWebSocketSSOTImportSuccessAnalysis(SSotBaseTestCase):
         assert len(failed_imports) == 0, f"All Golden Path imports should work, failed: {failed_imports}"
         assert len(working_imports) == len(golden_path_imports), "All imports must be available"
         
-        print("✅ RESULT: Complete Golden Path import dependency chain functional")
+        print(" PASS:  RESULT: Complete Golden Path import dependency chain functional")
 
     def test_business_value_enablement_validation(self):
         """
@@ -281,15 +281,15 @@ class TestWebSocketSSOTImportSuccessAnalysis(SSotBaseTestCase):
             except ImportError:
                 pass
         
-        print("✅ BUSINESS VALUE ENABLEMENT:")
-        print(f"  Chat infrastructure: {'✅ ENABLED' if 'agent_websocket_bridge' in enabled_components else '❌ DISABLED'}")
-        print(f"  User isolation: {'✅ ENABLED' if 'user_execution_context' in enabled_components else '❌ DISABLED'}")
+        print(" PASS:  BUSINESS VALUE ENABLEMENT:")
+        print(f"  Chat infrastructure: {' PASS:  ENABLED' if 'agent_websocket_bridge' in enabled_components else ' FAIL:  DISABLED'}")
+        print(f"  User isolation: {' PASS:  ENABLED' if 'user_execution_context' in enabled_components else ' FAIL:  DISABLED'}")
         print(f"  Platform value: {len(enabled_components)}/{len(business_value_components) * 100}% enabled")
         
         # All business value components should be enabled
         assert len(enabled_components) == len(business_value_components), "All business value components must be enabled"
         
-        print("✅ BUSINESS IMPACT: $500K+ ARR protected - Chat functionality fully operational")
+        print(" PASS:  BUSINESS IMPACT: $500K+ ARR protected - Chat functionality fully operational")
 
     def test_regression_prevention_monitoring(self):
         """
@@ -324,12 +324,12 @@ class TestWebSocketSSOTImportSuccessAnalysis(SSotBaseTestCase):
         except ImportError:
             import_health_check["broken_import_blocked"] = True
         
-        print("✅ REGRESSION MONITORING:")
-        print(f"  SSOT function import: {'✅ WORKING' if import_health_check['ssot_function_import'] else '❌ BROKEN'}")
-        print(f"  SSOT class import: {'✅ WORKING' if import_health_check['ssot_class_import'] else '❌ BROKEN'}")
-        print(f"  Broken import blocked: {'✅ BLOCKED' if import_health_check['broken_import_blocked'] else '❌ ACCESSIBLE'}")
+        print(" PASS:  REGRESSION MONITORING:")
+        print(f"  SSOT function import: {' PASS:  WORKING' if import_health_check['ssot_function_import'] else ' FAIL:  BROKEN'}")
+        print(f"  SSOT class import: {' PASS:  WORKING' if import_health_check['ssot_class_import'] else ' FAIL:  BROKEN'}")
+        print(f"  Broken import blocked: {' PASS:  BLOCKED' if import_health_check['broken_import_blocked'] else ' FAIL:  ACCESSIBLE'}")
         
         # All health checks should pass
         assert all(import_health_check.values()), f"Import health check failed: {import_health_check}"
         
-        print("✅ MONITORING STATUS: All import regression indicators healthy")
+        print(" PASS:  MONITORING STATUS: All import regression indicators healthy")

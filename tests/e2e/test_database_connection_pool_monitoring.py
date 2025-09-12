@@ -149,7 +149,7 @@ class TestDatabaseConnectionPoolMonitoring:
         execution_time = time.time() - start_time
         assert execution_time > 0.2, f"Pool metrics test executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real connection pool metrics collection validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real connection pool metrics collection validated in {execution_time:.2f}s")
 
     def test_real_connection_pool_performance_monitoring(self, monitored_engine):
         """
@@ -261,7 +261,7 @@ class TestDatabaseConnectionPoolMonitoring:
         execution_time = time.time() - start_time
         assert execution_time > 1.0, f"Performance monitoring executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real connection pool performance monitoring completed in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real connection pool performance monitoring completed in {execution_time:.2f}s")
         logger.info(f"Performance metrics: {performance_metrics}")
 
     @pytest.mark.asyncio
@@ -353,7 +353,7 @@ class TestDatabaseConnectionPoolMonitoring:
         execution_time = time.time() - start_time
         assert execution_time > 0.5, f"Leak detection executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real connection leak detection validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real connection leak detection validated in {execution_time:.2f}s")
 
     def test_real_pool_configuration_validation(self, database_config):
         """
@@ -443,7 +443,7 @@ class TestDatabaseConnectionPoolMonitoring:
                 test_engine.dispose()
                 
                 if should_work:
-                    logger.info(f"✓ Configuration {config_name} validated successfully")
+                    logger.info(f"[U+2713] Configuration {config_name} validated successfully")
                 else:
                     logger.warning(f"Configuration {config_name} worked but was expected to fail")
                     
@@ -454,10 +454,10 @@ class TestDatabaseConnectionPoolMonitoring:
                 }
                 
                 if should_work:
-                    logger.error(f"❌ Configuration {config_name} failed: {e}")
+                    logger.error(f" FAIL:  Configuration {config_name} failed: {e}")
                     pytest.fail(f"Expected configuration {config_name} to work but it failed: {e}")
                 else:
-                    logger.info(f"✓ Configuration {config_name} correctly failed: {e}")
+                    logger.info(f"[U+2713] Configuration {config_name} correctly failed: {e}")
         
         # Validate that at least standard configuration works
         assert validation_results.get("standard", {}).get("success", False), \
@@ -467,7 +467,7 @@ class TestDatabaseConnectionPoolMonitoring:
         execution_time = time.time() - start_time
         assert execution_time > 0.3, f"Configuration validation executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real pool configuration validation completed in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real pool configuration validation completed in {execution_time:.2f}s")
         logger.info(f"Validation results: {validation_results}")
 
     @pytest.mark.asyncio
@@ -597,7 +597,7 @@ class TestDatabaseConnectionPoolMonitoring:
         execution_time = time.time() - start_time
         assert execution_time > 2.0, f"Concurrent monitoring executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real concurrent pool monitoring validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real concurrent pool monitoring validated in {execution_time:.2f}s")
 
 
 # Mark all tests as requiring real database services

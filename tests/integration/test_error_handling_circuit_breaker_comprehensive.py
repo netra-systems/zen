@@ -384,7 +384,7 @@ class TestCircuitBreakerErrorHandling(BaseIntegrationTest):
         assert service.state == "closed"
         assert service.failure_count == 0
         
-        logger.info("✅ Circuit breaker state transitions test passed")
+        logger.info(" PASS:  Circuit breaker state transitions test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -419,7 +419,7 @@ class TestCircuitBreakerErrorHandling(BaseIntegrationTest):
             assert result["success"] is True
             assert result["business_value"]["service_available"] is True
         
-        logger.info("✅ Cascade failure prevention test passed")
+        logger.info(" PASS:  Cascade failure prevention test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -473,7 +473,7 @@ class TestCircuitBreakerErrorHandling(BaseIntegrationTest):
             assert call["duration_ms"] > 0
             assert call["duration_ms"] < 100  # Should be fast
         
-        logger.info("✅ Circuit breaker performance monitoring test passed")
+        logger.info(" PASS:  Circuit breaker performance monitoring test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -550,7 +550,7 @@ class TestCircuitBreakerErrorHandling(BaseIntegrationTest):
             # Clean up test table
             await postgres.execute("DROP TABLE IF EXISTS circuit_breaker_state")
         
-        logger.info("✅ Circuit breaker with real database errors test passed")
+        logger.info(" PASS:  Circuit breaker with real database errors test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -630,7 +630,7 @@ class TestCircuitBreakerErrorHandling(BaseIntegrationTest):
                     # Each context should maintain its operation naming
                     assert f"concurrent_op_{i//2}_{int(results.index((success_type, result)) % 20)}" in str(result)
         
-        logger.info("✅ Concurrent circuit breaker isolation test passed")
+        logger.info(" PASS:  Concurrent circuit breaker isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -701,7 +701,7 @@ class TestCircuitBreakerErrorHandling(BaseIntegrationTest):
         # Store recovered state
         await redis.set_json(f"{health_key}:recovered", recovered_health, ex=300)
         
-        logger.info("✅ System health monitoring integration test passed")
+        logger.info(" PASS:  System health monitoring integration test passed")
 
 
 if __name__ == "__main__":

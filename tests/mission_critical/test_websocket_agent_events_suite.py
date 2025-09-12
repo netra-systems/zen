@@ -299,7 +299,7 @@ class MissionCriticalEventValidator:
             "=" * 80,
             "MISSION CRITICAL REAL WEBSOCKET VALIDATION REPORT",
             "=" * 80,
-            f"Status: {'✅ PASSED' if is_valid else '❌ FAILED'}",
+            f"Status: {' PASS:  PASSED' if is_valid else ' FAIL:  FAILED'}",
             f"Total Events: {len(self.events)}",
             f"Unique Types: {len(self.event_counts)}",
             f"Duration: {self.event_timeline[-1][0] if self.event_timeline else 0:.2f}s",
@@ -309,7 +309,7 @@ class MissionCriticalEventValidator:
         
         for event in self.REQUIRED_EVENTS:
             count = self.event_counts.get(event, 0)
-            status = "✅" if count > 0 else "❌"
+            status = " PASS: " if count > 0 else " FAIL: "
             report.append(f"  {status} {event}: {count}")
         
         if failures:
@@ -1582,7 +1582,7 @@ class TestConcurrentUserIsolation:
                         unique_user_ids.add(result.get("user_id"))
                         
                     logger.info(f"User {i}: {result.get('events_sent', 0)} events, "
-                               f"isolation={'✅' if result.get('isolation_success') else '❌'}")
+                               f"isolation={' PASS: ' if result.get('isolation_success') else ' FAIL: '}")
                 elif isinstance(result, Exception):
                     logger.warning(f"User {i} isolation test exception: {result}")
             
@@ -2269,9 +2269,9 @@ async def test_reconnection_within_3_seconds():
                     }
                     await test_context.send_message(confirmation_message)
                     
-                    logger.info(f"✅ Reconnection {attempt} successful in {reconnection_time:.3f}s")
+                    logger.info(f" PASS:  Reconnection {attempt} successful in {reconnection_time:.3f}s")
                 else:
-                    logger.warning(f"❌ Reconnection {attempt} took {reconnection_time:.3f}s (exceeds {MissionCriticalEventValidator.MAX_RECONNECTION_TIME}s limit)")
+                    logger.warning(f" FAIL:  Reconnection {attempt} took {reconnection_time:.3f}s (exceeds {MissionCriticalEventValidator.MAX_RECONNECTION_TIME}s limit)")
                 
             except Exception as e:
                 logger.error(f"Reconnection attempt {attempt} failed: {e}")
@@ -2866,7 +2866,7 @@ class TestAgentWebSocketIntegrationEnhanced:
         # Verify WebSocket integration in tool dispatcher
         assert hasattr(tool_dispatcher, '_websocket_notifier'), "Tool dispatcher missing WebSocket notifier"
         
-        logger.info("✅ AgentRegistry WebSocket integration validated")
+        logger.info(" PASS:  AgentRegistry WebSocket integration validated")
 
     @pytest.mark.asyncio 
     @pytest.mark.critical
@@ -2907,7 +2907,7 @@ class TestAgentWebSocketIntegrationEnhanced:
         # Verify WebSocket integration in agent context
         assert agent_context.websocket_notifier is websocket_notifier, "Agent context WebSocket integration failed"
         
-        logger.info("✅ ExecutionEngine WebSocket integration validated")
+        logger.info(" PASS:  ExecutionEngine WebSocket integration validated")
 
     @pytest.mark.asyncio
     @pytest.mark.critical  
@@ -2969,7 +2969,7 @@ class TestAgentWebSocketIntegrationEnhanced:
         # Should have tool_executing and tool_completed events at minimum
         assert "tool_executing" in event_types, "Missing tool_executing WebSocket event"
         
-        logger.info(f"✅ Enhanced tool execution WebSocket wrapping validated - Events: {event_types}")
+        logger.info(f" PASS:  Enhanced tool execution WebSocket wrapping validated - Events: {event_types}")
 
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -3010,11 +3010,11 @@ class TestAgentWebSocketIntegrationEnhanced:
         
         try:
             await websocket_manager.emit_to_user(user_id, test_event)
-            logger.info("✅ WebSocket agent event emission successful")
+            logger.info(" PASS:  WebSocket agent event emission successful")
         except Exception as e:
             logger.info(f"WebSocket emission test completed: {e}")
         
-        logger.info("✅ UnifiedWebSocketManager agent coordination validated")
+        logger.info(" PASS:  UnifiedWebSocketManager agent coordination validated")
 
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -3068,7 +3068,7 @@ class TestAgentWebSocketIntegrationEnhanced:
         assert isinstance(health_status, dict), "Health status should be a dictionary"
         assert "integration_state" in health_status, "Health status missing integration state"
         
-        logger.info("✅ AgentWebSocketBridge SSOT coordination validated")
+        logger.info(" PASS:  AgentWebSocketBridge SSOT coordination validated")
 
 
 # ============================================================================

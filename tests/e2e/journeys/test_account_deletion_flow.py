@@ -1,5 +1,5 @@
 """
-CRITICAL E2E Test #6: User Deletes Account → REAL GDPR Compliance Validation
+CRITICAL E2E Test #6: User Deletes Account  ->  REAL GDPR Compliance Validation
 
 CRITICAL BUSINESS CONTEXT:
 - Legal Risk: EXTREME - GDPR violations could result in fines up to 4% of annual revenue
@@ -45,7 +45,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.e2e
 async def test_real_account_deletion_flow():
     """
-    Test Real Account Deletion → GDPR Compliance Validation with NO MOCKS
+    Test Real Account Deletion  ->  GDPR Compliance Validation with NO MOCKS
     
     CRITICAL: This test uses REAL services and will FAIL until backend deletion is implemented.
     
@@ -72,7 +72,7 @@ async def test_real_account_deletion_flow():
         
         assert test_context.test_user_id, "Failed to create real test user"
         assert test_context.access_token, "Failed to obtain real access token"
-        logger.info(f"✓ Created real user: {test_context.test_user_id}")
+        logger.info(f"[U+2713] Created real user: {test_context.test_user_id}")
         
         # Step 2: Execute REAL account deletion through backend API
         logger.info("Step 2: Executing REAL account deletion via backend API")
@@ -92,7 +92,7 @@ async def test_real_account_deletion_flow():
         
         # If deletion was successful (when implemented), verify it
         elif deletion_result["success"]:
-            logger.info("✓ Account deletion succeeded - verifying data removal")
+            logger.info("[U+2713] Account deletion succeeded - verifying data removal")
             
             # Step 3: Verify REAL data deletion across all services
             verification_result = await deletion_tester.verify_real_data_deletion()
@@ -100,14 +100,14 @@ async def test_real_account_deletion_flow():
             assert verification_result["gdpr_compliant"], f"GDPR compliance failed: {verification_result}"
             assert verification_result["auth_service"]["user_deleted"], "Auth service user not deleted"
             
-            logger.info("✓ GDPR compliance verified with real database queries")
+            logger.info("[U+2713] GDPR compliance verified with real database queries")
             
             # Step 4: Validate GDPR compliance with real verification
             gdpr_validator = GDPRComplianceValidator(deletion_tester)
             compliance_result = await gdpr_validator.validate_complete_gdpr_compliance(test_context.test_user_id)
             
             assert compliance_result["overall_gdpr_compliant"], f"GDPR compliance validation failed: {compliance_result}"
-            logger.info("✓ Complete GDPR compliance validated")
+            logger.info("[U+2713] Complete GDPR compliance validated")
             
             print(f"[SUCCESS] Real Account Deletion Flow: {deletion_result['execution_time']:.2f}s")
             print(f"[PROTECTED] GDPR compliance validated with real verification")
@@ -171,7 +171,7 @@ async def test_real_gdpr_compliance_validation():
         auth_compliance = compliance_result["gdpr_requirements"]["right_to_erasure"]
         assert auth_compliance.get("compliant", False), f"GDPR compliance validation failed: {compliance_result}"
         
-        logger.info("✓ Auth service GDPR compliance verified with real verification")
+        logger.info("[U+2713] Auth service GDPR compliance verified with real verification")
         print(f"[SUCCESS] GDPR Compliance Validated for Auth Service")
         print(f"[LEGAL] Personal data removed from auth service")
         print(f"[PENDING] Backend GDPR compliance awaiting implementation (501)")

@@ -49,7 +49,7 @@ class FormattingUtils:
             Formatted currency string
         """
         if isinstance(value, (int, float)):
-            symbols = {"USD": "$", "EUR": "€"}
+            symbols = {"USD": "$", "EUR": "[U+20AC]"}
             symbol = symbols.get(currency, currency)
             return f"{symbol}{value:,.2f}"
         return str(value)

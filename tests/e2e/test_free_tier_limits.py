@@ -1,9 +1,9 @@
 """
-CRITICAL E2E Test #7: Free Tier Limit Enforcement → Upgrade Prompt
+CRITICAL E2E Test #7: Free Tier Limit Enforcement  ->  Upgrade Prompt
 Business Value: $300K+ MRR - Free-to-paid conversion through strategic limit enforcement
 
 BVJ (Business Value Justification):
-1. Segment: Free → Paid conversion (100% of new revenue generation)
+1. Segment: Free  ->  Paid conversion (100% of new revenue generation)
 2. Business Goal: Optimize conversion timing at moment users see value
 3. Value Impact: Well-timed limits convert 25-35% free users to paid
 4. Revenue Impact: Each conversion = $348-3588/year in recurring revenue
@@ -33,7 +33,7 @@ from tests.e2e.free_tier_limit_tester import FreeTierLimitTester
 @pytest.mark.e2e
 async def test_free_tier_limit_enforcement_upgrade_flow():
     """
-    CRITICAL E2E Test #7: Free Tier Limit Enforcement → Upgrade Prompt
+    CRITICAL E2E Test #7: Free Tier Limit Enforcement  ->  Upgrade Prompt
     
     Validates complete free-to-paid conversion flow:
     1. Free user operates normally within daily limits

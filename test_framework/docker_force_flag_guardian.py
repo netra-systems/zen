@@ -32,7 +32,7 @@ class DockerForceFlagViolation(Exception):
         self.timestamp = datetime.datetime.now().isoformat()
         
         message = (
-            f"🚨 CRITICAL SECURITY VIOLATION 🚨\n"
+            f" ALERT:  CRITICAL SECURITY VIOLATION  ALERT: \n"
             f"FORBIDDEN: Docker force flag (-f) is prohibited\n"
             f"Command: {command}\n"
             f"Violation: {violation_details}\n"
@@ -211,7 +211,7 @@ class DockerForceFlagGuardian:
         
         # Log to console
         logger.critical(
-            f"🚨 DOCKER FORCE FLAG VIOLATION DETECTED 🚨\n"
+            f" ALERT:  DOCKER FORCE FLAG VIOLATION DETECTED  ALERT: \n"
             f"Command: {command}\n"
             f"Violations: {violation_summary}"
         )

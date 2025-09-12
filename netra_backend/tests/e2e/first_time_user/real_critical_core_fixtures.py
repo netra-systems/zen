@@ -7,7 +7,7 @@ Real Critical User Journey Core Fixtures - Core environment and auth fixtures
 3. **Value Impact**: Shared fixtures reduce test duplication by 70%
 4. **Revenue Impact**: Consistent test environment = reliable conversion testing
 
-**ARCHITECTURE**: ≤300 lines, ≤8 lines per function as per CLAUDE.md requirements
+**ARCHITECTURE**:  <= 300 lines,  <= 8 lines per function as per CLAUDE.md requirements
 Provides pytest fixtures for real service testing of critical user journeys.
 """
 

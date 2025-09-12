@@ -88,15 +88,15 @@ def test_error_detection():
         if errors:
             error = errors[0]
             if error.category == expected_category and error.severity == expected_severity:
-                print(f"  ✓ Correctly detected {expected_category.value} with {expected_severity.value}")
+                print(f"  [U+2713] Correctly detected {expected_category.value} with {expected_severity.value}")
                 passed += 1
             else:
-                print(f"  ✗ Wrong detection for: {log_line[:50]}...")
+                print(f"  [U+2717] Wrong detection for: {log_line[:50]}...")
                 print(f"    Expected: {expected_category.value}/{expected_severity.value}")
                 print(f"    Got: {error.category.value}/{error.severity.value}")
                 failed += 1
         else:
-            print(f"  ✗ Failed to detect error in: {log_line[:50]}...")
+            print(f"  [U+2717] Failed to detect error in: {log_line[:50]}...")
             failed += 1
     
     print(f"\nError Detection Results: {passed} passed, {failed} failed")
@@ -162,7 +162,7 @@ def test_error_grouping():
     assert "ERRORS BY CATEGORY" in report
     assert "Total Errors: 6" in report
     
-    print("  ✓ Error grouping and reporting works correctly")
+    print("  [U+2713] Error grouping and reporting works correctly")
     return True
 
 
@@ -210,7 +210,7 @@ def test_issue_creation():
         assert "bug" in template.labels
         assert "severity:error" in template.labels
         
-        print("  ✓ Issue template creation works correctly")
+        print("  [U+2713] Issue template creation works correctly")
         
         # Test deduplication
         error_hash = creator.get_error_hash(
@@ -239,7 +239,7 @@ def test_issue_creation():
             ErrorSeverity.ERROR
         ) == False
         
-        print("  ✓ Issue deduplication works correctly")
+        print("  [U+2713] Issue deduplication works correctly")
         
     return True
 
@@ -254,10 +254,10 @@ def test_docker_compose_integration():
     returncode, stdout, stderr = introspector.run_docker_compose(["--version"])
     
     if returncode != 0:
-        print("  ⚠ Docker Compose not available, skipping integration test")
+        print("   WARNING:  Docker Compose not available, skipping integration test")
         return True
     
-    print(f"  ✓ Docker Compose version: {stdout.strip()}")
+    print(f"  [U+2713] Docker Compose version: {stdout.strip()}")
     
     # Try to get service list (may be empty if no services running)
     returncode, stdout, stderr = introspector.run_docker_compose(["ps", "--services"])
@@ -265,19 +265,19 @@ def test_docker_compose_integration():
     if returncode == 0:
         services = [s.strip() for s in stdout.split('\n') if s.strip()]
         if services:
-            print(f"  ✓ Found {len(services)} running service(s): {', '.join(services)}")
+            print(f"  [U+2713] Found {len(services)} running service(s): {', '.join(services)}")
             
             # Try to get logs for first service
             service = services[0]
             logs = introspector.get_service_logs(service, tail=10)
-            print(f"  ✓ Retrieved {logs.total_lines} log lines from {service}")
+            print(f"  [U+2713] Retrieved {logs.total_lines} log lines from {service}")
             
             if logs.errors:
-                print(f"  ✓ Detected {len(logs.errors)} error(s) in {service} logs")
+                print(f"  [U+2713] Detected {len(logs.errors)} error(s) in {service} logs")
         else:
-            print("  ⚠ No services running, cannot test log retrieval")
+            print("   WARNING:  No services running, cannot test log retrieval")
     else:
-        print("  ⚠ Could not get service list")
+        print("   WARNING:  Could not get service list")
     
     return True
 
@@ -368,19 +368,19 @@ def test_report_generation():
     
     for check_text, description in checks:
         if check_text in report:
-            print(f"  ✓ Report contains {description}")
+            print(f"  [U+2713] Report contains {description}")
         else:
-            print(f"  ✗ Report missing {description}")
+            print(f"  [U+2717] Report missing {description}")
             return False
     
     # Auth service should not appear in detailed section (no errors)
     if "AUTH\n" not in report.upper() or "auth" not in report.lower().split("analyzed"):
-        print("  ✓ Empty service not in detailed section")
+        print("  [U+2713] Empty service not in detailed section")
     else:
-        print("  ✗ Empty service incorrectly appears in detailed section")
+        print("  [U+2717] Empty service incorrectly appears in detailed section")
         return False
     
-    print("  ✓ Report generation works correctly")
+    print("  [U+2713] Report generation works correctly")
     return True
 
 
@@ -404,7 +404,7 @@ def main():
             success = test_func()
             results.append((test_name, success))
         except Exception as e:
-            print(f"\n✗ {test_name} failed with exception: {e}")
+            print(f"\n[U+2717] {test_name} failed with exception: {e}")
             results.append((test_name, False))
     
     # Summary
@@ -416,16 +416,16 @@ def main():
     failed = len(results) - passed
     
     for test_name, success in results:
-        status = "✓ PASSED" if success else "✗ FAILED"
+        status = "[U+2713] PASSED" if success else "[U+2717] FAILED"
         print(f"{test_name:20} {status}")
     
     print(f"\nTotal: {passed} passed, {failed} failed")
     
     if failed == 0:
-        print("\n🎉 All tests passed!")
+        print("\n CELEBRATION:  All tests passed!")
         return 0
     else:
-        print(f"\n❌ {failed} test(s) failed")
+        print(f"\n FAIL:  {failed} test(s) failed")
         return 1
 
 

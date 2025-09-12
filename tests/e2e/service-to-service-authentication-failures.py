@@ -5,9 +5,9 @@ This test file focuses on the complete breakdown of service-to-service authentic
 identified in the Iteration 2 audit across the entire Netra system:
 
 **CRITICAL FINDINGS:**
-1. Frontend ↔ Backend authentication completely non-functional (100% 403 rate)
-2. Backend ↔ Auth Service communication failures
-3. Auth Service ↔ Database authentication state corruption  
+1. Frontend [U+2194] Backend authentication completely non-functional (100% 403 rate)
+2. Backend [U+2194] Auth Service communication failures
+3. Auth Service [U+2194] Database authentication state corruption  
 4. All service-to-service authentication taking 6.2+ seconds before failing
 5. No authentication recovery between any services
 
@@ -70,7 +70,7 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
         """
         EXPECTED TO FAIL - CRITICAL CROSS-SERVICE ISSUE
         Frontend should authenticate with Backend but 100% failure rate with 403
-        Root cause: Complete breakdown of frontend → backend authentication
+        Root cause: Complete breakdown of frontend  ->  backend authentication
         """
         async with httpx.AsyncClient() as client:
             # Frontend trying to authenticate with Backend
@@ -101,9 +101,9 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
             except httpx.ConnectError:
                 pytest.fail("Backend service not reachable from Frontend")
             except httpx.TimeoutException:
-                pytest.fail("Frontend → Backend authentication timeout (> 10 seconds)")
+                pytest.fail("Frontend  ->  Backend authentication timeout (> 10 seconds)")
             except Exception as e:
-                pytest.fail(f"Frontend → Backend authentication failed: {str(e)}")
+                pytest.fail(f"Frontend  ->  Backend authentication failed: {str(e)}")
 
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -144,9 +144,9 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
             except httpx.ConnectError:
                 pytest.fail("Auth Service not reachable from Backend")
             except httpx.TimeoutException:
-                pytest.fail("Backend → Auth Service communication timeout")
+                pytest.fail("Backend  ->  Auth Service communication timeout")
             except Exception as e:
-                pytest.fail(f"Backend → Auth Service communication failed: {str(e)}")
+                pytest.fail(f"Backend  ->  Auth Service communication failed: {str(e)}")
 
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -193,9 +193,9 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                 assert 'corrupted' not in str(state_data)
                 
             except httpx.TimeoutException:
-                pytest.fail("Auth Service → Database operation timeout")
+                pytest.fail("Auth Service  ->  Database operation timeout")
             except Exception as e:
-                pytest.fail(f"Auth Service → Database state corruption: {str(e)}")
+                pytest.fail(f"Auth Service  ->  Database state corruption: {str(e)}")
 
     @pytest.mark.critical
     @pytest.mark.asyncio
@@ -234,19 +234,19 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                     latency_results[f"{source}_to_{target}"] = latency
                     
                     # Each authentication should complete within 2 seconds
-                    assert latency < 2.0, f"{source} → {target} took {latency:.2f}s (should be < 2.0s)"
+                    assert latency < 2.0, f"{source}  ->  {target} took {latency:.2f}s (should be < 2.0s)"
                     
                 except httpx.TimeoutException:
                     end_time = time.time()
                     latency = end_time - start_time
                     latency_results[f"{source}_to_{target}"] = latency
-                    pytest.fail(f"{source} → {target} authentication timeout after {latency:.2f}s")
+                    pytest.fail(f"{source}  ->  {target} authentication timeout after {latency:.2f}s")
                 
                 except Exception as e:
                     end_time = time.time() 
                     latency = end_time - start_time
                     latency_results[f"{source}_to_{target}"] = latency
-                    pytest.fail(f"{source} → {target} failed after {latency:.2f}s: {str(e)}")
+                    pytest.fail(f"{source}  ->  {target} failed after {latency:.2f}s: {str(e)}")
         
         # Report latency issues for debugging
         slow_services = {k: v for k, v in latency_results.items() if v > 2.0}
@@ -494,12 +494,12 @@ class TestServiceToServiceAuthenticationFailures(BaseE2ETest):
                     
                 except httpx.ConnectError as e:
                     if 'Connection refused' in str(e) or 'blocked' in str(e):
-                        pytest.fail(f"Network policy blocking {source} → {target} communication: {str(e)}")
+                        pytest.fail(f"Network policy blocking {source}  ->  {target} communication: {str(e)}")
                     else:
-                        pytest.fail(f"Network connectivity issue {source} → {target}: {str(e)}")
+                        pytest.fail(f"Network connectivity issue {source}  ->  {target}: {str(e)}")
                         
                 except Exception as e:
-                    pytest.fail(f"Service communication failure {source} → {target}: {str(e)}")
+                    pytest.fail(f"Service communication failure {source}  ->  {target}: {str(e)}")
 
     @pytest.mark.critical
     @pytest.mark.asyncio

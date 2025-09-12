@@ -123,7 +123,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         self.env.enable_isolation()
         assert self.env.is_isolated()
         
-        self.logger.info("✅ IsolatedEnvironment lifecycle management validated")
+        self.logger.info(" PASS:  IsolatedEnvironment lifecycle management validated")
     
     @pytest.mark.integration
     def test_environment_variable_isolation_boundary_enforcement(self):
@@ -170,7 +170,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         assert self.env.get("ISOLATION_TEST_1") is None
         assert not self.env.exists("ISOLATION_TEST_1")
         
-        self.logger.info("✅ Environment variable isolation boundaries enforced")
+        self.logger.info(" PASS:  Environment variable isolation boundaries enforced")
     
     @pytest.mark.integration
     def test_configuration_loading_and_validation_across_services(self):
@@ -231,7 +231,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
             source = self.env.get_variable_source(key)
             assert source == "service_integration_test"
         
-        self.logger.info("✅ Multi-service configuration loading validated")
+        self.logger.info(" PASS:  Multi-service configuration loading validated")
     
     @pytest.mark.integration  
     def test_service_specific_configuration_patterns(self):
@@ -294,7 +294,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
             if service_specific_count > 0:
                 assert len(prefix_configs) >= service_specific_count
         
-        self.logger.info("✅ Service-specific configuration patterns validated")
+        self.logger.info(" PASS:  Service-specific configuration patterns validated")
     
     @pytest.mark.integration
     def test_environment_switching_scenarios(self):
@@ -354,7 +354,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
             # Clean up temp file
             Path(env_file_path).unlink(missing_ok=True)
         
-        self.logger.info("✅ Environment switching scenarios validated")
+        self.logger.info(" PASS:  Environment switching scenarios validated")
     
     @pytest.mark.integration
     def test_configuration_cascade_and_inheritance_patterns(self):
@@ -427,7 +427,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
             if test_key in os.environ:
                 del os.environ[test_key]
         
-        self.logger.info("✅ Configuration cascade and inheritance validated")
+        self.logger.info(" PASS:  Configuration cascade and inheritance validated")
     
     @pytest.mark.integration
     def test_environment_variable_precedence_and_resolution(self):
@@ -486,7 +486,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         if test_precedence_key in os.environ:
             del os.environ[test_precedence_key]
         
-        self.logger.info("✅ Environment variable precedence and resolution validated")
+        self.logger.info(" PASS:  Environment variable precedence and resolution validated")
     
     @pytest.mark.integration
     def test_configuration_error_handling_and_validation(self):
@@ -566,7 +566,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
             validator.clear_environment_cache()
             validator.get_environment()
         
-        self.logger.info("✅ Configuration error handling and validation tested")
+        self.logger.info(" PASS:  Configuration error handling and validation tested")
     
     @pytest.mark.integration
     def test_environment_cleanup_and_resource_management(self):
@@ -660,7 +660,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         self.env.set("CALLBACK_TEST_2", "callback_value_2", "cleanup_test")
         assert len(callback_called) == initial_callback_count
         
-        self.logger.info("✅ Environment cleanup and resource management validated")
+        self.logger.info(" PASS:  Environment cleanup and resource management validated")
     
     @pytest.mark.integration
     def test_configuration_hot_reloading_and_updates(self):
@@ -768,7 +768,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         
         self.env.remove_change_callback(track_batch_changes)
         
-        self.logger.info("✅ Configuration hot reloading and updates validated")
+        self.logger.info(" PASS:  Configuration hot reloading and updates validated")
     
     @pytest.mark.integration
     def test_cross_service_configuration_coordination(self):
@@ -863,7 +863,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         
         self.env.remove_change_callback(track_coordination_changes)
         
-        self.logger.info("✅ Cross-service configuration coordination validated")
+        self.logger.info(" PASS:  Cross-service configuration coordination validated")
     
     @pytest.mark.integration
     def test_environment_security_and_sanitization(self):
@@ -953,7 +953,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         assert "issues" in staging_db_validation
         assert "warnings" in staging_db_validation
         
-        self.logger.info("✅ Environment security and sanitization validated")
+        self.logger.info(" PASS:  Environment security and sanitization validated")
     
     @pytest.mark.integration
     def test_configuration_performance_and_caching(self):
@@ -1051,7 +1051,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         # Environment switching should be fast
         assert env_switch_time < 1.0, f"Environment switching too slow: {env_switch_time}s for 20 switches"
         
-        self.logger.info("✅ Configuration performance and caching validated")
+        self.logger.info(" PASS:  Configuration performance and caching validated")
     
     @pytest.mark.integration
     def test_environment_integration_with_agent_contexts(self):
@@ -1174,7 +1174,7 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         # Verify tenant 1 data is no longer accessible
         assert self.env.get("TENANT_ID") != tenant1_id
         
-        self.logger.info("✅ Environment integration with agent contexts validated")
+        self.logger.info(" PASS:  Environment integration with agent contexts validated")
     
     @pytest.mark.integration
     def test_configuration_observability_and_debugging(self):
@@ -1320,4 +1320,4 @@ class TestConfigurationEnvironment(BaseIntegrationTest):
         # Should have encountered validation error for staging without proper configs
         assert validation_error_occurred, "Expected validation error for incomplete staging config"
         
-        self.logger.info("✅ Configuration observability and debugging validated")
+        self.logger.info(" PASS:  Configuration observability and debugging validated")

@@ -53,7 +53,7 @@
         
 
         # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession() as session:
-            # REMOVED_SYNTAX_ERROR: print("🔄 Testing API version negotiation...")
+            # REMOVED_SYNTAX_ERROR: print(" CYCLE:  Testing API version negotiation...")
 
             # REMOVED_SYNTAX_ERROR: for test_case in version_test_cases:
                 # REMOVED_SYNTAX_ERROR: version_str = test_case["version"]
@@ -116,7 +116,7 @@
                                                                                 # REMOVED_SYNTAX_ERROR: versioning_failures.append("formatted_string")
 
                                                                                 # REMOVED_SYNTAX_ERROR: if versioning_failures:
-                                                                                    # REMOVED_SYNTAX_ERROR: failure_report = ["🔄 API Version Negotiation Failures:"]
+                                                                                    # REMOVED_SYNTAX_ERROR: failure_report = [" CYCLE:  API Version Negotiation Failures:"]
                                                                                     # REMOVED_SYNTAX_ERROR: for failure in versioning_failures:
                                                                                         # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
 
@@ -124,7 +124,7 @@
                                                                                         # REMOVED_SYNTAX_ERROR: " + "
                                                                                         # REMOVED_SYNTAX_ERROR: ".join(failure_report))
 
-                                                                                        # REMOVED_SYNTAX_ERROR: print("✅ API version negotiation test passed")
+                                                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  API version negotiation test passed")
 
 
                                                                                         # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
@@ -164,7 +164,7 @@
                                                                                             
 
                                                                                             # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession() as session:
-                                                                                                # REMOVED_SYNTAX_ERROR: print("⚠️ Testing backward compatibility for deprecated endpoints...")
+                                                                                                # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F] Testing backward compatibility for deprecated endpoints...")
 
                                                                                                 # REMOVED_SYNTAX_ERROR: for endpoint in deprecated_endpoints:
                                                                                                     # REMOVED_SYNTAX_ERROR: path = endpoint["path"]
@@ -210,7 +210,7 @@
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: compatibility_failures.append("formatted_string")
 
                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if compatibility_failures:
-                                                                                                                                                        # REMOVED_SYNTAX_ERROR: failure_report = ["⚠️ Backward Compatibility Failures:"]
+                                                                                                                                                        # REMOVED_SYNTAX_ERROR: failure_report = [" WARNING: [U+FE0F] Backward Compatibility Failures:"]
                                                                                                                                                         # REMOVED_SYNTAX_ERROR: for failure in compatibility_failures:
                                                                                                                                                             # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
 
@@ -218,7 +218,7 @@
                                                                                                                                                             # REMOVED_SYNTAX_ERROR: " + "
                                                                                                                                                             # REMOVED_SYNTAX_ERROR: ".join(failure_report))
 
-                                                                                                                                                            # REMOVED_SYNTAX_ERROR: print("✅ Backward compatibility test passed")
+                                                                                                                                                            # REMOVED_SYNTAX_ERROR: print(" PASS:  Backward compatibility test passed")
 
 
 # REMOVED_SYNTAX_ERROR: async def _check_deprecated_response(response, endpoint, compatibility_failures):
@@ -289,7 +289,7 @@
                         
 
                         # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession() as session:
-                            # REMOVED_SYNTAX_ERROR: print("📋 Testing API schema evolution...")
+                            # REMOVED_SYNTAX_ERROR: print("[U+1F4CB] Testing API schema evolution...")
 
                             # REMOVED_SYNTAX_ERROR: for test_case in schema_test_cases:
                                 # REMOVED_SYNTAX_ERROR: endpoint = test_case["endpoint"]
@@ -351,7 +351,7 @@
                                                                                                         # REMOVED_SYNTAX_ERROR: schema_failures.append("formatted_string")
 
                                                                                                         # REMOVED_SYNTAX_ERROR: if schema_failures:
-                                                                                                            # REMOVED_SYNTAX_ERROR: failure_report = ["📋 API Schema Evolution Failures:"]
+                                                                                                            # REMOVED_SYNTAX_ERROR: failure_report = ["[U+1F4CB] API Schema Evolution Failures:"]
                                                                                                             # REMOVED_SYNTAX_ERROR: for failure in schema_failures:
                                                                                                                 # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
 
@@ -359,7 +359,7 @@
                                                                                                                 # REMOVED_SYNTAX_ERROR: " + "
                                                                                                                 # REMOVED_SYNTAX_ERROR: ".join(failure_report))
 
-                                                                                                                # REMOVED_SYNTAX_ERROR: print("✅ API schema evolution test passed")
+                                                                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  API schema evolution test passed")
 
 
                                                                                                                 # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
@@ -404,7 +404,7 @@
                                                                                                                     
 
                                                                                                                     # REMOVED_SYNTAX_ERROR: async with aiohttp.ClientSession() as session:
-                                                                                                                        # REMOVED_SYNTAX_ERROR: print("🔄 Testing content negotiation...")
+                                                                                                                        # REMOVED_SYNTAX_ERROR: print(" CYCLE:  Testing content negotiation...")
 
                                                                                                                         # REMOVED_SYNTAX_ERROR: for endpoint in test_endpoints:
                                                                                                                             # REMOVED_SYNTAX_ERROR: for test_case in content_test_cases:
@@ -445,7 +445,7 @@
                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: negotiation_failures.append("formatted_string")
 
                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: if negotiation_failures:
-                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: failure_report = ["🔄 Content Negotiation Failures:"]
+                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: failure_report = [" CYCLE:  Content Negotiation Failures:"]
                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: for failure in negotiation_failures:
                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: failure_report.append("formatted_string")
 
@@ -453,7 +453,7 @@
                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: " + "
                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: ".join(failure_report))
 
-                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: print("✅ Content negotiation test passed")
+                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  Content negotiation test passed")
 
 
                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

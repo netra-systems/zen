@@ -97,7 +97,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
         
     async def test_concurrent_user_execution_isolation(self):
         """Test that concurrent users are completely isolated during execution"""
-        print("\n🔍 Testing concurrent user execution isolation...")
+        print("\n SEARCH:  Testing concurrent user execution isolation...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -126,7 +126,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
             except Exception as e:
                 isolation_violations.append(f"Failed to create engine for {user_id}: {e}")
         
-        print(f"  ✅ Created {len(user_engines)} user execution engines")
+        print(f"   PASS:  Created {len(user_engines)} user execution engines")
         
         # Define realistic user execution scenarios
         user_scenarios = [
@@ -198,7 +198,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 return f"error_{user_id}"
         
         # Execute scenarios concurrently for all users
-        print(f"  🔄 Executing scenarios for {len(user_engines)} users concurrently...")
+        print(f"   CYCLE:  Executing scenarios for {len(user_engines)} users concurrently...")
         
         concurrent_tasks = []
         for i, user_data in enumerate(self.test_users):
@@ -212,7 +212,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
         results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
         execution_time = time.time() - start_time
         
-        print(f"  ✅ Concurrent execution completed in {execution_time:.2f} seconds")
+        print(f"   PASS:  Concurrent execution completed in {execution_time:.2f} seconds")
         
         # Validate execution results
         successful_executions = sum(1 for result in results if isinstance(result, str) and result.startswith('success'))
@@ -221,7 +221,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
         if failed_executions > len(results) * 0.1:  # Allow up to 10% failures
             isolation_violations.append(f"Too many failed executions: {failed_executions}/{len(results)}")
         
-        print(f"  ✅ {successful_executions}/{len(results)} executions successful")
+        print(f"   PASS:  {successful_executions}/{len(results)} executions successful")
         
         # Validate user isolation - check for cross-user contamination
         for user_id, websocket in user_websockets.items():
@@ -237,14 +237,14 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 if '_source_user' in event_data and event_data['_source_user'] != user_id:
                     isolation_violations.append(f"User {user_id} received event from {event_data['_source_user']}")
         
-        print(f"  ✅ Cross-user contamination check completed")
+        print(f"   PASS:  Cross-user contamination check completed")
         
         # Validate event distribution
         total_events = sum(len(ws.get_user_events()) for ws in user_websockets.values())
         avg_events_per_user = total_events / len(user_websockets) if user_websockets else 0
         
-        print(f"  ✅ Total events processed: {total_events}")
-        print(f"  ✅ Average events per user: {avg_events_per_user:.1f}")
+        print(f"   PASS:  Total events processed: {total_events}")
+        print(f"   PASS:  Average events per user: {avg_events_per_user:.1f}")
         
         # Check for reasonable event distribution
         event_counts = [len(ws.get_user_events()) for ws in user_websockets.values()]
@@ -259,11 +259,11 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
         if isolation_violations:
             self.fail(f"Multi-user execution isolation violations: {isolation_violations}")
         
-        print(f"  ✅ Multi-user execution isolation validated for {len(user_engines)} concurrent users")
+        print(f"   PASS:  Multi-user execution isolation validated for {len(user_engines)} concurrent users")
     
     def test_user_context_data_isolation_integration(self):
         """Test that user context data is properly isolated in integration scenarios"""
-        print("\n🔍 Testing user context data isolation in integration scenarios...")
+        print("\n SEARCH:  Testing user context data isolation in integration scenarios...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -303,7 +303,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
             except Exception as e:
                 context_violations.append(f"Failed to create/test engine for {user_id}: {e}")
         
-        print(f"  ✅ Created and validated context for {len(user_contexts)} users")
+        print(f"   PASS:  Created and validated context for {len(user_contexts)} users")
         
         # Test context isolation - no shared references
         context_ids = {}
@@ -313,7 +313,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 context_violations.append(f"Shared context object detected between {context_ids[context_id]} and {user_id}")
             context_ids[context_id] = user_id
         
-        print(f"  ✅ Context object isolation validated")
+        print(f"   PASS:  Context object isolation validated")
         
         # Test context data integrity
         for user_id, context in user_contexts.items():
@@ -333,7 +333,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 if other_user_id != user_id and other_user_id in str(context):
                     context_violations.append(f"User {user_id} context contains reference to {other_user_id}")
         
-        print(f"  ✅ Context data integrity validated")
+        print(f"   PASS:  Context data integrity validated")
         
         # Test concurrent context access
         def access_user_context(user_id: str, iterations: int = 100):
@@ -367,7 +367,7 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 return f"error_exception_{user_id}_{e}"
         
         # Run concurrent context access tests
-        print(f"  🔄 Testing concurrent context access...")
+        print(f"   CYCLE:  Testing concurrent context access...")
         
         with ThreadPoolExecutor(max_workers=len(self.test_users)) as executor:
             context_futures = {
@@ -389,17 +389,17 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
             if not result.startswith('success'):
                 context_violations.append(f"Concurrent context access failed for {user_id}: {result}")
         
-        print(f"  ✅ Concurrent context access completed for {len(concurrent_results)} users")
+        print(f"   PASS:  Concurrent context access completed for {len(concurrent_results)} users")
         
         # CRITICAL: Context isolation prevents data leaks between users
         if context_violations:
             self.fail(f"User context data isolation violations: {context_violations}")
         
-        print(f"  ✅ User context data isolation validated in integration scenarios")
+        print(f"   PASS:  User context data isolation validated in integration scenarios")
     
     async def test_performance_under_multi_user_load(self):
         """Test UserExecutionEngine performance under realistic multi-user load"""
-        print("\n🔍 Testing performance under multi-user load...")
+        print("\n SEARCH:  Testing performance under multi-user load...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -466,13 +466,13 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 }
         
         # Run load test
-        print(f"  🔄 Running load test with {load_users} concurrent users...")
+        print(f"   CYCLE:  Running load test with {load_users} concurrent users...")
         
         load_start_time = time.perf_counter()
         load_results = await asyncio.gather(*[simulate_user_load(i) for i in range(load_users)], return_exceptions=True)
         total_load_time = time.perf_counter() - load_start_time
         
-        print(f"  ✅ Load test completed in {total_load_time:.2f} seconds")
+        print(f"   PASS:  Load test completed in {total_load_time:.2f} seconds")
         
         # Analyze performance results
         successful_results = [r for r in load_results if isinstance(r, dict) and r.get('success')]
@@ -493,10 +493,10 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
             avg_cleanup_time = sum(cleanup_times) / len(cleanup_times)
             total_events = sum(events_sent)
             
-            print(f"  ✅ Average creation time: {avg_creation_time:.3f}s per user")
-            print(f"  ✅ Average processing time: {avg_processing_time:.3f}s per user")
-            print(f"  ✅ Average cleanup time: {avg_cleanup_time:.3f}s per user")
-            print(f"  ✅ Total events processed: {total_events}")
+            print(f"   PASS:  Average creation time: {avg_creation_time:.3f}s per user")
+            print(f"   PASS:  Average processing time: {avg_processing_time:.3f}s per user")
+            print(f"   PASS:  Average cleanup time: {avg_cleanup_time:.3f}s per user")
+            print(f"   PASS:  Total events processed: {total_events}")
             
             # Performance thresholds for multi-user scenarios
             if avg_creation_time > 0.5:  # 500ms per user creation is too slow
@@ -514,13 +514,13 @@ class TestMultiUserExecutionValidation(SSotAsyncTestCase):
                 if result['events_sent'] != expected_events_per_user:
                     performance_violations.append(f"User {result['user_index']} sent {result['events_sent']} events, expected {expected_events_per_user}")
         
-        print(f"  ✅ {len(successful_results)}/{load_users} users completed successfully")
+        print(f"   PASS:  {len(successful_results)}/{load_users} users completed successfully")
         
         # CRITICAL: Performance under load is essential for production readiness
         if performance_violations:
             self.fail(f"Multi-user load performance violations: {performance_violations}")
         
-        print(f"  ✅ Performance validated under {load_users}-user load")
+        print(f"   PASS:  Performance validated under {load_users}-user load")
 
 
 if __name__ == '__main__':

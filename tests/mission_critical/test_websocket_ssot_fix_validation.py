@@ -154,7 +154,7 @@
                 # Test that enforce limits method exists
                 # REMOVED_SYNTAX_ERROR: assert hasattr(manager, '_enforce_connection_limits')
 
-                # REMOVED_SYNTAX_ERROR: print("✓ Connection eviction methods present")
+                # REMOVED_SYNTAX_ERROR: print("[U+2713] Connection eviction methods present")
 
                 # Removed problematic line: async def test_periodic_cleanup_functionality(self, manager):
                     # REMOVED_SYNTAX_ERROR: """CRITICAL: Verify periodic cleanup is working."""
@@ -166,7 +166,7 @@
                     # Test cleanup lock exists
                     # REMOVED_SYNTAX_ERROR: assert hasattr(manager, 'cleanup_lock')
 
-                    # REMOVED_SYNTAX_ERROR: print("✓ Periodic cleanup functionality intact")
+                    # REMOVED_SYNTAX_ERROR: print("[U+2713] Periodic cleanup functionality intact")
 
                     # Removed problematic line: async def test_enhanced_statistics_preserved(self, manager):
                         # REMOVED_SYNTAX_ERROR: """CRITICAL: Verify enhanced statistics from TTL implementation."""
@@ -205,7 +205,7 @@
                                 # REMOVED_SYNTAX_ERROR: assert 'connected_at' in conn_data
                                 # REMOVED_SYNTAX_ERROR: assert 'last_activity' in conn_data
 
-                                # REMOVED_SYNTAX_ERROR: print("✓ Connection data structure valid")
+                                # REMOVED_SYNTAX_ERROR: print("[U+2713] Connection data structure valid")
 
                                 # Removed problematic line: async def test_websocket_notifier_integration(self, manager, agent_context):
                                     # REMOVED_SYNTAX_ERROR: """CRITICAL: Verify WebSocketNotifier integration works."""
@@ -280,7 +280,7 @@
                                                     # REMOVED_SYNTAX_ERROR: assert user_id not in manager.user_connections or not manager.user_connections[user_id]
                                                     # REMOVED_SYNTAX_ERROR: assert mock_websocket.is_closed
 
-                                                    # REMOVED_SYNTAX_ERROR: print("✓ Connection cleanup and recovery working")
+                                                    # REMOVED_SYNTAX_ERROR: print("[U+2713] Connection cleanup and recovery working")
 
                                                     # Removed problematic line: async def test_broadcast_functionality_intact(self, manager):
                                                         # REMOVED_SYNTAX_ERROR: """CRITICAL: Test broadcast functionality works."""
@@ -330,7 +330,7 @@
                                                                     # REMOVED_SYNTAX_ERROR: success = manager.leave_room(user_id, room_id)
                                                                     # REMOVED_SYNTAX_ERROR: assert success
 
-                                                                    # REMOVED_SYNTAX_ERROR: print("✓ Room management functionality preserved")
+                                                                    # REMOVED_SYNTAX_ERROR: print("[U+2713] Room management functionality preserved")
 
                                                                     # Removed problematic line: async def test_run_id_association_preserved(self, manager, mock_websocket):
                                                                         # REMOVED_SYNTAX_ERROR: """CRITICAL: Test run_id association functionality."""
@@ -370,7 +370,7 @@
                                                                             # REMOVED_SYNTAX_ERROR: manager3 = WebSocketManager()
                                                                             # REMOVED_SYNTAX_ERROR: assert manager1 is manager3
 
-                                                                            # REMOVED_SYNTAX_ERROR: print("✓ Singleton pattern maintained")
+                                                                            # REMOVED_SYNTAX_ERROR: print("[U+2713] Singleton pattern maintained")
 
                                                                             # Removed problematic line: async def test_comprehensive_stats_available(self, manager):
                                                                                 # REMOVED_SYNTAX_ERROR: """CRITICAL: Test comprehensive statistics are available."""
@@ -418,7 +418,7 @@
                                                                                             # REMOVED_SYNTAX_ERROR: assert result is not True  # Should await asyncio.sleep(0)
                                                                                             # REMOVED_SYNTAX_ERROR: return validation error
 
-                                                                                            # REMOVED_SYNTAX_ERROR: print("✓ Error handling robust: Invalid inputs handled gracefully")
+                                                                                            # REMOVED_SYNTAX_ERROR: print("[U+2713] Error handling robust: Invalid inputs handled gracefully")
 
 
                                                                                             # Removed problematic line: @pytest.mark.asyncio
@@ -448,8 +448,8 @@
                                                                                                     # REMOVED_SYNTAX_ERROR: assert hasattr(manager, 'send_agent_update')
                                                                                                     # REMOVED_SYNTAX_ERROR: assert hasattr(manager, 'associate_run_id')
 
-                                                                                                    # REMOVED_SYNTAX_ERROR: print("✓ ALL CRITICAL BUSINESS REQUIREMENTS MET")
-                                                                                                    # REMOVED_SYNTAX_ERROR: print("✓ WebSocket SSOT fix successful - $500K+ ARR protected")
+                                                                                                    # REMOVED_SYNTAX_ERROR: print("[U+2713] ALL CRITICAL BUSINESS REQUIREMENTS MET")
+                                                                                                    # REMOVED_SYNTAX_ERROR: print("[U+2713] WebSocket SSOT fix successful - $500K+ ARR protected")
 
                                                                                                     # REMOVED_SYNTAX_ERROR: finally:
                                                                                                         # REMOVED_SYNTAX_ERROR: await manager.shutdown()
@@ -459,6 +459,6 @@
                                                                                                             # Run critical validation
                                                                                                             # REMOVED_SYNTAX_ERROR: asyncio.run(test_critical_business_requirements())
                                                                                                             # REMOVED_SYNTAX_ERROR: print(" )
-                                                                                                            # REMOVED_SYNTAX_ERROR: 🎯 CRITICAL WebSocket SSOT Fix Validation: PASSED")
-                                                                                                            # REMOVED_SYNTAX_ERROR: print("💰 Business Value Protected: $500K+ ARR from chat functionality")
-                                                                                                            # REMOVED_SYNTAX_ERROR: print("🔧 Technical Debt Eliminated: Duplicate manager removed safely")
+                                                                                                            # REMOVED_SYNTAX_ERROR:  TARGET:  CRITICAL WebSocket SSOT Fix Validation: PASSED")
+                                                                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F4B0] Business Value Protected: $500K+ ARR from chat functionality")
+                                                                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F527] Technical Debt Eliminated: Duplicate manager removed safely")

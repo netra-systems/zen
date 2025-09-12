@@ -110,7 +110,7 @@ class AgentPerformanceMonitor:
                     "timestamp": time.time()
                 }
                 self.performance_violations.append(violation)
-                logger.warning(f"⚠️ Performance SLA violation: {event_type} took {latency_ms:.1f}ms > 200ms")
+                logger.warning(f" WARNING: [U+FE0F] Performance SLA violation: {event_type} took {latency_ms:.1f}ms > 200ms")
     
     def record_execution_timing(self, execution_id: str, duration_s: float) -> None:
         """Record agent execution timing."""
@@ -404,7 +404,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
         monitor = AgentPerformanceMonitor()
         tester = RealAgentPerformanceTester(monitor)
         
-        logger.info("🚀 Starting agent event latency SLA compliance test")
+        logger.info("[U+1F680] Starting agent event latency SLA compliance test")
         
         # Start resource monitoring
         async def resource_monitor():
@@ -460,7 +460,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
         sla_compliance = performance_report["sla_compliance"]
         
         assert sla_compliance["meets_95_percent_sla"], \
-            f"🚨 SLA VIOLATION: {sla_compliance['compliance_rate']:.1%} compliance < 95% required\n" \
+            f" ALERT:  SLA VIOLATION: {sla_compliance['compliance_rate']:.1%} compliance < 95% required\n" \
             f"Violations: {sla_compliance['total_violations']}/{sla_compliance['total_events']}"
         
         # Validate event performance
@@ -473,7 +473,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
                 assert event_stats["p95_ms"] <= 200.0, \
                     f"Event {event_type} P95 latency {event_stats['p95_ms']:.1f}ms > 200ms SLA"
         
-        logger.info("✅ MISSION CRITICAL: Agent Event Latency SLA Compliance VALIDATED")
+        logger.info(" PASS:  MISSION CRITICAL: Agent Event Latency SLA Compliance VALIDATED")
         logger.info(f"  Users: {len(successful_users)}/{user_count}")
         logger.info(f"  Workflows: {total_workflows}")
         logger.info(f"  SLA Compliance: {sla_compliance['compliance_rate']:.1%}")
@@ -497,7 +497,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
         monitor = AgentPerformanceMonitor()
         tester = RealAgentPerformanceTester(monitor)
         
-        logger.info("🚀 Starting concurrent user performance scaling test")
+        logger.info("[U+1F680] Starting concurrent user performance scaling test")
         
         scaling_results = {}
         
@@ -560,7 +560,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
         assert min_throughput >= max_throughput * 0.5, \
             f"Throughput degraded significantly: {min_throughput:.1f} vs {max_throughput:.1f} users/s"
         
-        logger.info("✅ Concurrent user performance scaling VALIDATED")
+        logger.info(" PASS:  Concurrent user performance scaling VALIDATED")
         for user_count in user_scaling:
             result = scaling_results[user_count]
             logger.info(f"  {user_count} users: {result['throughput_users_per_s']:.1f} users/s, "
@@ -581,7 +581,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
         monitor = AgentPerformanceMonitor()
         tester = RealAgentPerformanceTester(monitor)
         
-        logger.info("🚀 Starting high-throughput agent execution performance test")
+        logger.info("[U+1F680] Starting high-throughput agent execution performance test")
         
         async def high_throughput_agent(agent_index: int) -> Dict[str, Any]:
             """High-throughput agent execution."""
@@ -640,7 +640,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
             assert resource_performance["memory_max"] <= 85.0, \
                 f"Memory usage too high: {resource_performance['memory_max']:.1f}% > 85%"
         
-        logger.info("✅ High-throughput agent execution performance VALIDATED")
+        logger.info(" PASS:  High-throughput agent execution performance VALIDATED")
         logger.info(f"  Agents: {len(successful_agents)}/{concurrent_executions}")
         logger.info(f"  Executions: {total_executions}")
         logger.info(f"  Throughput: {throughput_per_second:.1f} executions/s")
@@ -665,7 +665,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
         
         monitor = AgentPerformanceMonitor()
         
-        logger.info("🚀 Starting WebSocket connection performance under agent load test")
+        logger.info("[U+1F680] Starting WebSocket connection performance under agent load test")
         
         async def loaded_websocket_connection(connection_index: int) -> Dict[str, Any]:
             """WebSocket connection under agent load."""
@@ -755,7 +755,7 @@ class TestWebSocketAgentPerformanceBenchmarks:
         assert overall_avg_latency <= 150.0, \
             f"Average latency too high under load: {overall_avg_latency:.1f}ms > 150ms"
         
-        logger.info("✅ WebSocket connection performance under agent load VALIDATED")
+        logger.info(" PASS:  WebSocket connection performance under agent load VALIDATED")
         logger.info(f"  Connections: {len(successful_connections)}/{connection_count}")
         logger.info(f"  Events: {total_events}")
         logger.info(f"  Event Rate: {event_rate:.1f} events/s")

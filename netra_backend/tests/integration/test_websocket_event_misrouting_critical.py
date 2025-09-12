@@ -132,7 +132,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
         EXPECTED RESULT: FAIL - Events delivered to wrong user connections
         BUSINESS RISK: User A sees User B's agent execution progress and results
         """
-        print("🚨 TESTING: WebSocket event cross-user delivery detection")
+        print(" ALERT:  TESTING: WebSocket event cross-user delivery detection")
         
         # Create multiple users with WebSocket connections
         test_users = []
@@ -174,10 +174,10 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                 )
                 self.websocket_connections[user["connection_id"]] = connection
                 
-                print(f"✓ Created WebSocket setup for user: {user['user_id']}")
+                print(f"[U+2713] Created WebSocket setup for user: {user['user_id']}")
                 
             except Exception as e:
-                print(f"❌ Failed to create WebSocket setup for user {user['user_id']}: {e}")
+                print(f" FAIL:  Failed to create WebSocket setup for user {user['user_id']}: {e}")
         
         print(f"Created WebSocket infrastructure for {len(self.websocket_managers)} users")
         
@@ -294,7 +294,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                 # Event routing mismatch (critical violation)
                 misrouting = f"Event from user {sender_user} routed to {intended_recipient}"
                 cross_user_deliveries.append(misrouting)
-                print(f"❌ Critical routing violation: {misrouting}")
+                print(f" FAIL:  Critical routing violation: {misrouting}")
             
             # Check if event data contains references to other users
             event_str = str(event).lower()
@@ -307,17 +307,17 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                     if other_user_id.lower() in event_str:
                         misrouting = f"Event from {sender_user} contains other user ID: {other_user_id}"
                         cross_user_deliveries.append(misrouting)
-                        print(f"❌ Cross-user data leak: {misrouting}")
+                        print(f" FAIL:  Cross-user data leak: {misrouting}")
                     
                     if other_project in event_str:
                         misrouting = f"Event from {sender_user} contains other user's project data: {other_project}"
                         cross_user_deliveries.append(misrouting)
-                        print(f"❌ Sensitive project leak: {misrouting}")
+                        print(f" FAIL:  Sensitive project leak: {misrouting}")
                     
                     if other_security in event_str and "level" in event_str:
                         misrouting = f"Event from {sender_user} contains other user's security level: {other_security}"
                         cross_user_deliveries.append(misrouting)
-                        print(f"❌ Security classification leak: {misrouting}")
+                        print(f" FAIL:  Security classification leak: {misrouting}")
         
         # Check 2: Verify WebSocket managers don't share event state
         manager_state_violations = []
@@ -330,7 +330,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                     if event_user and event_user != user_id_a:
                         violation = f"Manager for {user_id_a} contains event for {event_user}"
                         manager_state_violations.append(violation)
-                        print(f"❌ Manager state violation: {violation}")
+                        print(f" FAIL:  Manager state violation: {violation}")
         
         # Check 3: Look for WebSocket connection ID collisions (should be impossible with proper typing)
         connection_collisions = []
@@ -340,7 +340,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
         if len(connection_ids) != len(unique_connection_ids):
             collision = f"Connection ID collisions: {len(connection_ids)} connections, {len(unique_connection_ids)} unique IDs"
             connection_collisions.append(collision)
-            print(f"❌ Connection ID collision: {collision}")
+            print(f" FAIL:  Connection ID collision: {collision}")
         
         # Check 4: Verify connection user association integrity
         connection_integrity_violations = []
@@ -354,7 +354,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                     if event_user != connection_user:
                         violation = f"Connection {conn_id} for user {connection_user} received event from user {event_user}"
                         connection_integrity_violations.append(violation)
-                        print(f"❌ Connection integrity violation: {violation}")
+                        print(f" FAIL:  Connection integrity violation: {violation}")
         
         # Combine all mis-routing incidents
         all_misrouting_incidents = (
@@ -391,7 +391,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                 f"real-time cross-user data exposure: {all_misrouting_incidents}"
             )
         
-        print("✅ No WebSocket event mis-routing detected (unexpected - test designed to fail)")
+        print(" PASS:  No WebSocket event mis-routing detected (unexpected - test designed to fail)")
     
     async def test_websocket_connection_isolation_boundary_violations(self):
         """
@@ -400,7 +400,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
         EXPECTED RESULT: FAIL - Connection isolation boundaries violated
         BUSINESS RISK: User connections interfere with each other causing data corruption
         """
-        print("🚨 TESTING: WebSocket connection isolation boundary violations")
+        print(" ALERT:  TESTING: WebSocket connection isolation boundary violations")
         
         isolation_boundary_violations = []
         
@@ -468,7 +468,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                 self.websocket_connections[user["connection_id"]] = connection
                 
             except Exception as e:
-                print(f"❌ Failed to setup WebSocket infrastructure for {user['user_id']}: {e}")
+                print(f" FAIL:  Failed to setup WebSocket infrastructure for {user['user_id']}: {e}")
         
         print(f"Setup WebSocket infrastructure for {len(user_websocket_setups)} users with different access levels")
         
@@ -578,12 +578,12 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                     if other_access_level.upper() in event_str:
                         contamination = f"User {user_id} ({user_access_level}) event contains {other_access_level} data"
                         access_level_contamination.append(contamination)
-                        print(f"❌ Access level contamination: {contamination}")
+                        print(f" FAIL:  Access level contamination: {contamination}")
                     
                     if other_classification.upper() in event_str:
                         contamination = f"User {user_id} event contains {other_classification} classification data"
                         access_level_contamination.append(contamination)
-                        print(f"❌ Classification contamination: {contamination}")
+                        print(f" FAIL:  Classification contamination: {contamination}")
         
         # Check 2: Privilege escalation through event data
         privilege_escalations = []
@@ -596,7 +596,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
             if any(keyword in event_str for keyword in ["ENTERPRISE", "PREMIUM", "CONFIDENTIAL", "CLASSIFIED", "GOVERNMENT"]):
                 escalation = f"Free user {free_event_log['user_id']} event contains privileged data"
                 privilege_escalations.append(escalation)
-                print(f"❌ Privilege escalation detected: {escalation}")
+                print(f" FAIL:  Privilege escalation detected: {escalation}")
         
         # Check 3: Connection boundary integrity
         connection_boundary_violations = []
@@ -617,7 +617,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                     if event_access_level != connection_access_level:
                         violation = f"Connection {conn_id} ({connection_access_level}) received {event_access_level} event"
                         connection_boundary_violations.append(violation)
-                        print(f"❌ Connection boundary violation: {violation}")
+                        print(f" FAIL:  Connection boundary violation: {violation}")
         
         # Check 4: WebSocket manager isolation boundaries
         manager_isolation_violations = []
@@ -639,7 +639,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                             if other_access in event_str:
                                 violation = f"Manager for {user_id} ({user_access_level}) contains {other_access} data"
                                 manager_isolation_violations.append(violation)
-                                print(f"❌ Manager isolation violation: {violation}")
+                                print(f" FAIL:  Manager isolation violation: {violation}")
         
         # Combine all boundary violations
         all_boundary_violations = (
@@ -674,7 +674,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                 f"isolation boundaries, causing cross-access-level data exposure: {all_boundary_violations}"
             )
         
-        print("✅ WebSocket isolation boundaries appear intact")
+        print(" PASS:  WebSocket isolation boundaries appear intact")
     
     async def test_websocket_event_serialization_user_data_mixing(self):
         """
@@ -683,7 +683,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
         EXPECTED RESULT: FAIL - Event serialization mixes user data
         BUSINESS RISK: Serialized events contain mixed user data causing confusion and data leaks
         """
-        print("🚨 TESTING: WebSocket event serialization user data mixing")
+        print(" ALERT:  TESTING: WebSocket event serialization user data mixing")
         
         serialization_violations = []
         
@@ -733,7 +733,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                 self.websocket_managers[user["user_id"]] = manager
                 
             except Exception as e:
-                print(f"❌ Failed to setup serialization test for user {user['user_id']}: {e}")
+                print(f" FAIL:  Failed to setup serialization test for user {user['user_id']}: {e}")
         
         # Generate events with user-specific data for serialization testing
         async def generate_user_specific_events(user_data: Dict) -> Dict:
@@ -856,22 +856,22 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                         if other_project in serialized_lower:
                             violation = f"Event for {user_id} serialization contains other project: {other_project}"
                             serialization_violations.append(violation)
-                            print(f"❌ Project data mixing: {violation}")
+                            print(f" FAIL:  Project data mixing: {violation}")
                         
                         if other_target in serialized_lower:
                             violation = f"Event for {user_id} serialization contains other target: {other_target}"
                             serialization_violations.append(violation)
-                            print(f"❌ Target data mixing: {violation}")
+                            print(f" FAIL:  Target data mixing: {violation}")
                         
                         if other_context in serialized_lower:
                             violation = f"Event for {user_id} serialization contains other context: {other_context}"
                             serialization_violations.append(violation)
-                            print(f"❌ Context data mixing: {violation}")
+                            print(f" FAIL:  Context data mixing: {violation}")
                         
                         if other_user_id in serialized_lower and "user" in serialized_lower:
                             violation = f"Event for {user_id} serialization contains other user_id: {other_user_id}"
                             serialization_violations.append(violation)
-                            print(f"❌ User ID mixing: {violation}")
+                            print(f" FAIL:  User ID mixing: {violation}")
         
         # Check 2: JSON serialization structure integrity 
         json_structure_violations = []
@@ -889,7 +889,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                     if original_user != deserialized_user:
                         violation = f"Serialization changed user_id from {original_user} to {deserialized_user}"
                         json_structure_violations.append(violation)
-                        print(f"❌ JSON structure violation: {violation}")
+                        print(f" FAIL:  JSON structure violation: {violation}")
                     
                     # Check for unexpected nested user references
                     serialized_str = str(deserialized)
@@ -903,12 +903,12 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                             if other_count > 0:
                                 violation = f"Event for {user_id} JSON contains {other_count} references to {other_user_id}"
                                 json_structure_violations.append(violation)
-                                print(f"❌ JSON user reference violation: {violation}")
+                                print(f" FAIL:  JSON user reference violation: {violation}")
                 
                 except json.JSONEncodeError as e:
                     violation = f"Event for {user_id} failed JSON serialization: {e}"
                     json_structure_violations.append(violation)
-                    print(f"❌ JSON serialization error: {violation}")
+                    print(f" FAIL:  JSON serialization error: {violation}")
         
         # Check 3: Manager state serialization integrity
         manager_serialization_violations = []
@@ -932,7 +932,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                                 if marker in manager_data_lower:
                                     violation = f"Manager {user_id} serialization contains other user data: {marker}"
                                     manager_serialization_violations.append(violation)
-                                    print(f"❌ Manager serialization violation: {violation}")
+                                    print(f" FAIL:  Manager serialization violation: {violation}")
                 
                 except Exception as e:
                     violation = f"Manager {user_id} serialization failed: {e}"
@@ -968,7 +968,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
                 f"cross-user information leakage in WebSocket communications: {all_serialization_violations}"
             )
         
-        print("✅ WebSocket event serialization appears secure")
+        print(" PASS:  WebSocket event serialization appears secure")
     
     async def async_teardown_method(self, method):
         """Enhanced async teardown with mis-routing incident reporting."""
@@ -976,7 +976,7 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
         
         # Report all mis-routing incidents found during test
         if self.misrouting_incidents:
-            print(f"\n🚨 CRITICAL WEBSOCKET MIS-ROUTING INCIDENTS: {len(self.misrouting_incidents)}")
+            print(f"\n ALERT:  CRITICAL WEBSOCKET MIS-ROUTING INCIDENTS: {len(self.misrouting_incidents)}")
             for i, incident in enumerate(self.misrouting_incidents, 1):
                 print(f"  {i}. {incident}")
             
@@ -995,12 +995,12 @@ class TestWebSocketEventMisroutingViolations(SSotAsyncTestCase):
             self.record_metric("boundary_isolation_violations", len(boundary_violations))
             self.record_metric("serialization_mixing_violations", len(serialization_violations))
         else:
-            print("\n✅ No WebSocket event mis-routing detected (unexpected - tests designed to fail)")
+            print("\n PASS:  No WebSocket event mis-routing detected (unexpected - tests designed to fail)")
             self.record_metric("total_misrouting_incidents", 0)
         
         # Generate WebSocket mis-routing summary report
         test_metrics = self.get_all_metrics()
-        print(f"\n📊 WebSocket Event Mis-routing Test Metrics:")
+        print(f"\n CHART:  WebSocket Event Mis-routing Test Metrics:")
         for metric, value in test_metrics.items():
             if any(keyword in metric for keyword in ["misrouting", "violation", "leak", "boundary", "serialization"]):
                 print(f"  {metric}: {value}")

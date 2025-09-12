@@ -426,9 +426,9 @@ class MockToContextMigrator:
             
             if result.status == MigrationStatus.COMPLETED:
                 successful_migrations.append(file_path)
-                logger.info(f"✅ Successfully migrated: {file_path}")
+                logger.info(f" PASS:  Successfully migrated: {file_path}")
             else:
-                logger.error(f"❌ Failed to migrate: {file_path} - {result.error_message}")
+                logger.error(f" FAIL:  Failed to migrate: {file_path} - {result.error_message}")
         
         # Auto-commit successful migrations if requested
         if auto_commit and successful_migrations and not dry_run:
@@ -458,13 +458,13 @@ Business Impact:
 - Ensures proper user isolation security patterns
 - Unblocks testing infrastructure for development velocity
 
-🤖 Generated with Claude Code"""
+[U+1F916] Generated with Claude Code"""
             
             subprocess.run(['git', 'commit', '-m', commit_message], check=True)
-            logger.info(f"✅ Committed {len(file_paths)} migrations for Batch {batch_number}")
+            logger.info(f" PASS:  Committed {len(file_paths)} migrations for Batch {batch_number}")
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Failed to commit migrations: {e}")
+            logger.error(f" FAIL:  Failed to commit migrations: {e}")
     
     def _print_batch_summary(self, batch_number: int, results: Dict[str, MigrationResult]):
         """Print summary of batch migration results."""
@@ -490,7 +490,7 @@ Business Impact:
             print("FAILED MIGRATIONS:")
             for file_path, result in results.items():
                 if result.status == MigrationStatus.FAILED:
-                    print(f"❌ {file_path}: {result.error_message}")
+                    print(f" FAIL:  {file_path}: {result.error_message}")
             print()
 
 
@@ -542,7 +542,7 @@ def main():
                 for pattern in patterns[:5]:  # Show first 5 patterns
                     print(f"  Line {pattern.line_number}: {pattern.pattern_type} ({pattern.confidence:.1f})")
                     print(f"    {pattern.original_code}")
-                    print(f"    → {pattern.suggested_replacement}")
+                    print(f"     ->  {pattern.suggested_replacement}")
                 if len(patterns) > 5:
                     print(f"    ... and {len(patterns) - 5} more patterns")
         
@@ -562,7 +562,7 @@ def main():
             
         # Print results
         for file_path, result in results.items():
-            status_icon = "✅" if result.status == MigrationStatus.COMPLETED else "❌"
+            status_icon = " PASS: " if result.status == MigrationStatus.COMPLETED else " FAIL: "
             print(f"{status_icon} {file_path}: {result.status.value}")
             if result.error_message:
                 print(f"   Error: {result.error_message}")

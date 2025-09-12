@@ -585,7 +585,7 @@ class TestSecretLoaderErrorHandling:
         """Test OAuth credential loading handles Unicode credentials properly."""
         mock_validator = MagicMock()
         # Test with Unicode characters that might appear in secrets
-        unicode_client_id = "test_client_ідентифікатор_12345"
+        unicode_client_id = "test_client_[U+0456][U+0434]ent[U+0438][U+0444][U+0456]katop_12345"
         mock_validator.get_oauth_client_id.return_value = unicode_client_id
         mock_validator.get_environment.return_value.value = "test"
         

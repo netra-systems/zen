@@ -16,9 +16,9 @@ ARCHITECTURE:
 - Ensures service-to-service communication works
 
 COMPLIANCE:
-- Module ≤300 lines ✓
-- Functions ≤8 lines ✓
-- Strong typing with Pydantic ✓
+- Module  <= 300 lines [U+2713]
+- Functions  <= 8 lines [U+2713]
+- Strong typing with Pydantic [U+2713]
 """
 
 import sys

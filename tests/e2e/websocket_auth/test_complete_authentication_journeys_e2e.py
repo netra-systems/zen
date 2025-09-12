@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures end-to-end authentication flow delivers business value
 - Strategic Impact: Foundation for reliable multi-user chat platform
 
-🚨 CRITICAL E2E REQUIREMENTS:
+ ALERT:  CRITICAL E2E REQUIREMENTS:
 1. Tests MUST use REAL authentication (JWT/OAuth) - NO MOCKS
 2. Tests MUST use REAL WebSocket connections to running services
 3. Tests MUST use REAL database and authentication service
@@ -24,10 +24,10 @@ This test suite validates Complete WebSocket Authentication Journeys:
 
 E2E USER JOURNEY SCENARIOS:
 Complete Authentication Journeys:
-- New user registration → email verification → WebSocket authentication → chat session
-- Existing user login → JWT token generation → WebSocket connection → agent interaction
-- OAuth social login → token exchange → WebSocket authentication → multi-user chat
-- Session expiration → automatic token refresh → seamless WebSocket reconnection
+- New user registration  ->  email verification  ->  WebSocket authentication  ->  chat session
+- Existing user login  ->  JWT token generation  ->  WebSocket connection  ->  agent interaction
+- OAuth social login  ->  token exchange  ->  WebSocket authentication  ->  multi-user chat
+- Session expiration  ->  automatic token refresh  ->  seamless WebSocket reconnection
 
 Real Service Integration:
 - Authentication service running on real ports (8083)
@@ -67,7 +67,7 @@ class TestCompleteWebSocketAuthenticationJourneys:
     """
     E2E tests for complete WebSocket authentication user journeys.
     
-    🚨 CRITICAL: These tests validate real user authentication journeys
+     ALERT:  CRITICAL: These tests validate real user authentication journeys
     from registration/login through WebSocket connection to chat interaction.
     
     Tests focus on:
@@ -121,7 +121,7 @@ class TestCompleteWebSocketAuthenticationJourneys:
                 response = requests.get(f"{service_url}/health", timeout=5)
                 assert response.status_code < 500, f"{service_name} returned error: {response.status_code}"
             except RequestException as e:
-                pytest.fail(f"❌ CRITICAL: {service_name} at {service_url} is not available for E2E testing: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: {service_name} at {service_url} is not available for E2E testing: {e}")
     
     def test_new_user_registration_to_websocket_authentication_journey(self):
         """Test complete new user registration to WebSocket authentication journey."""
@@ -196,7 +196,7 @@ class TestCompleteWebSocketAuthenticationJourneys:
                     return True
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: WebSocket authentication failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: WebSocket authentication failed: {e}")
         
         # Execute WebSocket connection test
         websocket_success = asyncio.run(test_websocket_connection())
@@ -282,7 +282,7 @@ class TestCompleteWebSocketAuthenticationJourneys:
                     return True
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: Authenticated chat session failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Authenticated chat session failed: {e}")
         
         # Execute authenticated chat session test
         chat_success = asyncio.run(test_authenticated_chat_session())
@@ -370,7 +370,7 @@ class TestCompleteWebSocketAuthenticationJourneys:
                     return True
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: OAuth WebSocket chat failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: OAuth WebSocket chat failed: {e}")
         
         # Execute OAuth WebSocket chat test
         oauth_chat_success = asyncio.run(test_oauth_websocket_chat())
@@ -463,7 +463,7 @@ class TestCompleteWebSocketAuthenticationJourneys:
                     return True
                     
             except Exception as e:
-                pytest.fail(f"❌ CRITICAL: Token refresh journey failed: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Token refresh journey failed: {e}")
         
         # Execute token refresh journey
         refresh_success = asyncio.run(test_token_refresh_journey())
@@ -587,7 +587,7 @@ class TestCompleteWebSocketAuthenticationJourneys:
                         successful_recovery = True
                         
                 except Exception as e:
-                    pytest.fail(f"❌ CRITICAL: Recovery authentication failed: {e}")
+                    pytest.fail(f" FAIL:  CRITICAL: Recovery authentication failed: {e}")
             
             return successful_recovery
         

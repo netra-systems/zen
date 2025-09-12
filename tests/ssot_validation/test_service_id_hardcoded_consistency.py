@@ -14,7 +14,7 @@ Expected Behavior:
 - FAIL: Initially with mixed hardcoded values and environment access
 - PASS: After SSOT remediation with single hardcoded constant
 
-CRITICAL: This test validates the Golden Path: users login → get AI responses
+CRITICAL: This test validates the Golden Path: users login  ->  get AI responses
 """
 
 import ast
@@ -72,7 +72,7 @@ class TestServiceIdHardcodedConsistency(SSotBaseTestCase):
         
         assert constant_analysis["quality_score"] >= 0.9, (
             f"SERVICE_ID SSOT constant definition quality insufficient: "
-            f"{constant_analysis['quality_score']} (expected: ≥0.9). "
+            f"{constant_analysis['quality_score']} (expected:  >= 0.9). "
             f"Issues: {constant_analysis['quality_issues']}"
         )
     

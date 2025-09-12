@@ -148,7 +148,7 @@ def get_canonical_import_guide() -> str:
     return """
 CANONICAL WEBSOCKET IMPORT GUIDE
 
-✅ CORRECT (Use these patterns):
+ PASS:  CORRECT (Use these patterns):
 ```python
 from netra_backend.app.websocket_core.canonical_imports import (
     WebSocketManagerFactory,
@@ -160,7 +160,7 @@ factory = WebSocketManagerFactory()
 manager = await factory.create_isolated_manager(user_id, connection_id)
 ```
 
-❌ INCORRECT (Don't use these patterns):
+ FAIL:  INCORRECT (Don't use these patterns):
 ```python
 # Multiple import paths (causes SSOT violations)
 from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketManagerFactory
@@ -169,7 +169,7 @@ from netra_backend.app.core.interfaces_websocket import WebSocketManagerProtocol
 
 # Singleton patterns (security risk)
 from netra_backend.app.websocket_core.unified_manager import get_websocket_manager
-manager = get_websocket_manager()  # 🚨 SECURITY VIOLATION
+manager = get_websocket_manager()  #  ALERT:  SECURITY VIOLATION
 ```
 
 MIGRATION STEPS:
@@ -184,17 +184,17 @@ if __name__ == "__main__":
     # Self-validation
     results = validate_canonical_import_usage()
     print("Canonical Import Validation Results:")
-    print(f"✅ Canonical imports available: {results['canonical_imports_available']}")
-    print(f"📊 SSOT compliance score: {results['ssot_compliance_score']}%")
+    print(f" PASS:  Canonical imports available: {results['canonical_imports_available']}")
+    print(f" CHART:  SSOT compliance score: {results['ssot_compliance_score']}%")
     
     if results['deprecated_patterns_detected']:
-        print("⚠️  Deprecated patterns detected:")
+        print(" WARNING: [U+FE0F]  Deprecated patterns detected:")
         for pattern in results['deprecated_patterns_detected']:
             print(f"   - {pattern}")
     
     if results['recommended_migrations']:
-        print("🔧 Recommended migrations:")
+        print("[U+1F527] Recommended migrations:")
         for migration in results['recommended_migrations']:
             print(f"   - {migration}")
     else:
-        print("✅ No migrations needed - using canonical imports")
+        print(" PASS:  No migrations needed - using canonical imports")

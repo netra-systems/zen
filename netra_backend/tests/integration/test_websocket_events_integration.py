@@ -305,7 +305,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         if missing_events:
             pytest.fail(f"Missing critical WebSocket events: {missing_events}")
         
-        logger.info(f"✅ All {len(CRITICAL_WEBSOCKET_EVENTS)} critical events emitted: {emitted_event_types}")
+        logger.info(f" PASS:  All {len(CRITICAL_WEBSOCKET_EVENTS)} critical events emitted: {emitted_event_types}")
         
         # Validate events were received via WebSocket
         received_event_types = set()
@@ -317,7 +317,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         # Should receive at least some events via WebSocket
         received_critical_events = CRITICAL_WEBSOCKET_EVENTS.intersection(received_event_types)
         
-        logger.info(f"✅ Received {len(received_critical_events)} critical events via WebSocket: {received_critical_events}")
+        logger.info(f" PASS:  Received {len(received_critical_events)} critical events via WebSocket: {received_critical_events}")
         
         # Verify timing
         test_duration = time.time() - start_time
@@ -398,7 +398,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
             assert avg_time_diff >= 0.1, f"Events too close together (avg {avg_time_diff:.3f}s)"
             assert avg_time_diff <= 2.0, f"Events too far apart (avg {avg_time_diff:.3f}s)"
             
-            logger.info(f"✅ Event timing validated - average interval: {avg_time_diff:.3f}s")
+            logger.info(f" PASS:  Event timing validated - average interval: {avg_time_diff:.3f}s")
         
         # Verify execution timing
         execution_duration = execution_end - execution_start
@@ -406,7 +406,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         assert execution_duration <= 8.0, f"Execution too slow ({execution_duration:.2f}s)"
         
         test_duration = time.time() - start_time  
-        logger.info(f"✅ Event sequence validation completed in {test_duration:.2f}s")
+        logger.info(f" PASS:  Event sequence validation completed in {test_duration:.2f}s")
 
     async def test_003_websocket_events_under_load(self):
         """
@@ -479,7 +479,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         assert total_events_emitted >= concurrent_users * len(CRITICAL_WEBSOCKET_EVENTS) * 0.8, \
                f"Expected at least 80% of events emitted, got {total_events_emitted}"
         
-        logger.info(f"✅ Load test results:")
+        logger.info(f" PASS:  Load test results:")
         logger.info(f"   Successful executions: {successful_executions}/{concurrent_users}")
         logger.info(f"   Total events emitted: {total_events_emitted}")
         logger.info(f"   Total events received: {total_events_received}")
@@ -587,15 +587,15 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
             assert len(unauth_critical_events) == 0, \
                    f"Unauthenticated connection received {len(unauth_critical_events)} critical events"
             
-            logger.info("✅ Unauthenticated connection properly isolated")
+            logger.info(" PASS:  Unauthenticated connection properly isolated")
             
         except websockets.exceptions.ConnectionClosedError:
-            logger.info("✅ Unauthenticated connection rejected (proper security)")
+            logger.info(" PASS:  Unauthenticated connection rejected (proper security)")
         except Exception as e:
             logger.info(f"Unauthenticated connection test: {e}")
         
         test_duration = time.time() - start_time
-        logger.info(f"✅ Authentication isolation test completed in {test_duration:.2f}s")
+        logger.info(f" PASS:  Authentication isolation test completed in {test_duration:.2f}s")
 
     async def test_005_websocket_event_persistence_and_recovery(self):
         """
@@ -648,7 +648,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         # Try to retrieve missed events or verify recovery
         recovery_events = await self.collect_websocket_events(new_websocket, timeout=5.0)
         
-        logger.info(f"✅ Event persistence test:")
+        logger.info(f" PASS:  Event persistence test:")
         logger.info(f"   Initial events received: {len(initial_events)}")
         logger.info(f"   Total events emitted: {execution_result['total_events']}")
         logger.info(f"   Recovery events received: {len(recovery_events)}")
@@ -662,9 +662,9 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         try:
             await new_websocket.send(json.dumps(test_message))
             response = await asyncio.wait_for(new_websocket.recv(), timeout=3.0)
-            logger.info("✅ Connection recovery successful")
+            logger.info(" PASS:  Connection recovery successful")
         except asyncio.TimeoutError:
-            logger.info("✅ Connection recovery - no immediate response (acceptable)")
+            logger.info(" PASS:  Connection recovery - no immediate response (acceptable)")
         
         test_duration = time.time() - start_time
         assert test_duration < 15.0, f"Persistence test took {test_duration:.2f}s (expected < 15s)"
@@ -734,11 +734,11 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
                     event_data=scenario["data"]
                 )
                 successful_events += 1
-                logger.info(f"✅ Error scenario '{scenario['name']}' handled gracefully")
+                logger.info(f" PASS:  Error scenario '{scenario['name']}' handled gracefully")
                 
             except Exception as e:
                 failed_events += 1
-                logger.info(f"✅ Error scenario '{scenario['name']}' failed as expected: {str(e)[:100]}")
+                logger.info(f" PASS:  Error scenario '{scenario['name']}' failed as expected: {str(e)[:100]}")
             
             # Small delay between tests
             await asyncio.sleep(0.3)
@@ -755,14 +755,14 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
                 }
             )
             successful_events += 1
-            logger.info("✅ System continues functioning after error scenarios")
+            logger.info(" PASS:  System continues functioning after error scenarios")
         except Exception as e:
             logger.warning(f"Final event emission failed: {e}")
         
         # Collect events and analyze
         received_events = await event_collection_task
         
-        logger.info(f"✅ Error handling test results:")
+        logger.info(f" PASS:  Error handling test results:")
         logger.info(f"   Successful events: {successful_events}")
         logger.info(f"   Failed events: {failed_events}")
         logger.info(f"   Events received: {len(received_events)}")
@@ -772,7 +772,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         
         # Should receive some events via WebSocket
         if len(received_events) > 0:
-            logger.info("✅ WebSocket event delivery continues during error conditions")
+            logger.info(" PASS:  WebSocket event delivery continues during error conditions")
         
         test_duration = time.time() - start_time
         assert test_duration < 12.0, f"Error handling test took {test_duration:.2f}s (expected < 12s)"
@@ -862,7 +862,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
             max_emission_time = max(performance_metrics["emission_times"])
             min_emission_time = min(performance_metrics["emission_times"])
             
-            logger.info(f"✅ Event emission performance:")
+            logger.info(f" PASS:  Event emission performance:")
             logger.info(f"   Average: {avg_emission_time:.3f}s")
             logger.info(f"   Min: {min_emission_time:.3f}s")
             logger.info(f"   Max: {max_emission_time:.3f}s")
@@ -888,7 +888,7 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
                 max_latency = max(delivery_latencies)
                 min_latency = min(delivery_latencies)
                 
-                logger.info(f"✅ Event delivery performance:")
+                logger.info(f" PASS:  Event delivery performance:")
                 logger.info(f"   Average latency: {avg_latency:.3f}s")
                 logger.info(f"   Min latency: {min_latency:.3f}s")
                 logger.info(f"   Max latency: {max_latency:.3f}s")
@@ -901,4 +901,4 @@ class TestWebSocketEventsIntegration(BaseIntegrationTest):
         test_duration = time.time() - start_time
         assert test_duration < 15.0, f"Performance test took {test_duration:.2f}s (expected < 15s)"
         
-        logger.info(f"✅ WebSocket events performance baseline established in {test_duration:.2f}s")
+        logger.info(f" PASS:  WebSocket events performance baseline established in {test_duration:.2f}s")

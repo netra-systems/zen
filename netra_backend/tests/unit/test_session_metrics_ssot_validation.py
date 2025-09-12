@@ -59,7 +59,7 @@ class TestSessionMetricsSSotValidation:
         assert SharedSessionMetrics is not None, "SharedSessionMetrics should be importable"
         
         # Log the discovered classes for debugging
-        print(f"\n🔍 DISCOVERED SESSIONMETRICS CLASSES:")
+        print(f"\n SEARCH:  DISCOVERED SESSIONMETRICS CLASSES:")
         print(f"  RequestScoped: {RequestScopedSessionMetrics}")
         print(f"  Shared: {SharedSessionMetrics}")
     
@@ -116,7 +116,7 @@ class TestSessionMetricsSSotValidation:
         request_scoped_fields = set(RequestScopedSessionMetrics.__annotations__.keys())
         shared_fields = set(SharedSessionMetrics.__annotations__.keys())
         
-        print(f"\n📋 FIELD COMPARISON:")
+        print(f"\n[U+1F4CB] FIELD COMPARISON:")
         print(f"  RequestScoped fields: {sorted(request_scoped_fields)}")
         print(f"  Shared fields: {sorted(shared_fields)}")
         print(f"  Common fields: {sorted(request_scoped_fields & shared_fields)}")
@@ -168,7 +168,7 @@ class TestSessionMetricsSSotValidation:
             assert "last_activity" in str(e) or "operations_count" in str(e) or "errors" in str(e), (
                 f"AttributeError should mention the missing fields, got: {e}"
             )
-            print(f"\n✅ BUG REPRODUCED: {e}")
+            print(f"\n PASS:  BUG REPRODUCED: {e}")
             print("This proves the SSOT violation in request_scoped_session_factory.py line 383-385")
     
     def test_session_metrics_correct_field_names(self):
@@ -209,7 +209,7 @@ class TestSessionMetricsSSotValidation:
         assert correct_context["session_metrics"]["error_count"] == 1
         assert correct_context["session_metrics"]["last_error"] == "Test error"
         
-        print(f"\n✅ CORRECT USAGE EXAMPLE:")
+        print(f"\n PASS:  CORRECT USAGE EXAMPLE:")
         print(f"  Use: last_activity_at (not last_activity)")
         print(f"  Use: error_count (not errors)")
         print(f"  Use: query_count + transaction_count (operations_count doesn't exist)")
@@ -233,7 +233,7 @@ class TestSessionMetricsSSotValidation:
             'memory_usage_mb': shared_metrics.memory_usage_mb
         }
         
-        print(f"\n📊 SHARED SESSIONMETRICS STRUCTURE:")
+        print(f"\n CHART:  SHARED SESSIONMETRICS STRUCTURE:")
         for field_name, field_value in fields.items():
             print(f"  {field_name}: {field_value} ({type(field_value).__name__})")
         
@@ -268,7 +268,7 @@ class TestSessionMetricsArchitecturalIssues:
         # SharedSessionMetrics: Global session statistics
         shared_metrics = SharedSessionMetrics()
         
-        print(f"\n🎯 PURPOSE ANALYSIS:")
+        print(f"\n TARGET:  PURPOSE ANALYSIS:")
         print(f"  RequestScoped: Single session lifecycle tracking")
         print(f"  Shared: Global session statistics and metrics")
         print(f"  ISSUE: Same class name, completely different purposes!")
@@ -294,7 +294,7 @@ class TestSessionMetricsArchitecturalIssues:
         request_metrics_name = RequestScopedSessionMetrics.__name__
         shared_metrics_name = SharedSessionMetrics.__name__
         
-        print(f"\n🏷️ NAMING ANALYSIS:")
+        print(f"\n[U+1F3F7][U+FE0F] NAMING ANALYSIS:")
         print(f"  Current RequestScoped class name: {request_metrics_name}")
         print(f"  Current Shared class name: {shared_metrics_name}")
         print(f"  PROBLEM: Both named 'SessionMetrics' - no differentiation")

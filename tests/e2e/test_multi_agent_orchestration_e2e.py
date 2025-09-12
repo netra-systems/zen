@@ -62,13 +62,13 @@ COORDINATION_EVENTS = {
 
 # Expected orchestration workflow patterns
 ORCHESTRATION_PATTERNS = [
-    # Pattern 1: Sequential orchestration (Supervisor → Agent1 → Agent2 → Result)
+    # Pattern 1: Sequential orchestration (Supervisor  ->  Agent1  ->  Agent2  ->  Result)
     ["agent_started", "supervisor_decision", "agent_handoff", "agent_completed"],
     
-    # Pattern 2: Parallel orchestration (Supervisor → Agent1 & Agent2 parallel → Merge)
+    # Pattern 2: Parallel orchestration (Supervisor  ->  Agent1 & Agent2 parallel  ->  Merge)
     ["agent_started", "parallel_execution", "agent_completed", "orchestration_complete"],
     
-    # Pattern 3: Complex workflow (Triage → Analysis → Optimization → Reporting)
+    # Pattern 3: Complex workflow (Triage  ->  Analysis  ->  Optimization  ->  Reporting)
     ["agent_started", "agent_thinking", "tool_executing", "agent_handoff", "agent_completed"]
 ]
 
@@ -203,7 +203,7 @@ class MultiAgentOrchestrationValidator:
             "=" * 80,
             "MULTI-AGENT ORCHESTRATION VALIDATION REPORT",
             "=" * 80,
-            f"Validation Result: {'✅ ORCHESTRATION SUCCESS' if is_valid else '❌ ORCHESTRATION FAILED'}",
+            f"Validation Result: {' PASS:  ORCHESTRATION SUCCESS' if is_valid else ' FAIL:  ORCHESTRATION FAILED'}",
             f"Total Events: {len(self.events)}",
             f"Active Agents: {len(self.active_agents)} | Completed: {len(self.completed_agents)}",
             f"Agent Handoffs: {len(self.handoff_events)}",
@@ -213,20 +213,20 @@ class MultiAgentOrchestrationValidator:
         ]
 
         for event in CRITICAL_ORCHESTRATION_EVENTS:
-            status = "✅" if event in self.event_types else "❌"
+            status = " PASS: " if event in self.event_types else " FAIL: "
             report.append(f"  {status} {event}")
 
         if errors:
-            report.extend(["", "❌ ORCHESTRATION FAILURES:"] + [f"  - {e}" for e in errors])
+            report.extend(["", " FAIL:  ORCHESTRATION FAILURES:"] + [f"  - {e}" for e in errors])
 
         report.extend([
             "",
-            "📊 Orchestration Metrics:",
+            " CHART:  Orchestration Metrics:",
             f"  Total Duration: {metrics['total_duration']:.2f}s",
             f"  Coordination Efficiency: {metrics['coordination_efficiency']:.2f}",
             f"  Completion Rate: {metrics['completion_rate']:.2f}",
             "",
-            "🔄 Orchestration Flow:",
+            " CYCLE:  Orchestration Flow:",
         ])
         
         for i, step in enumerate(self.orchestration_flow[:15]):  # Show first 15 steps
@@ -237,7 +237,7 @@ class MultiAgentOrchestrationValidator:
 
         report.extend([
             "",
-            f"🤖 Agent Summary: {sorted(self.active_agents)}",
+            f"[U+1F916] Agent Summary: {sorted(self.active_agents)}",
             "=" * 80
         ])
 
@@ -269,19 +269,19 @@ class TestMultiAgentOrchestrationE2E:
         """Test REAL multi-agent orchestration for enterprise AI cost optimization.
         
         Business Scenario: Enterprise customer with $50K/month AI spend needs optimization.
-        This requires coordination between Triage → Data Analysis → Optimization → Reporting agents.
+        This requires coordination between Triage  ->  Data Analysis  ->  Optimization  ->  Reporting agents.
         
         CRITICAL: Uses REAL authentication, REAL WebSocket, REAL agent coordination.
         Will FAIL HARD if orchestration system is broken. NO MOCKS.
         """
-        logger.info("🚀 Starting REAL enterprise AI cost optimization orchestration test")
+        logger.info("[U+1F680] Starting REAL enterprise AI cost optimization orchestration test")
         
         # STEP 1: Connect to WebSocket with REAL authentication
-        logger.info("📡 Connecting to WebSocket with REAL authentication...")
+        logger.info("[U+1F4E1] Connecting to WebSocket with REAL authentication...")
         websocket = await auth_helper.connect_authenticated_websocket(timeout=20.0)
         
-        assert websocket is not None, "❌ CRITICAL: Failed to establish authenticated WebSocket connection"
-        logger.info("✅ Real WebSocket connection established")
+        assert websocket is not None, " FAIL:  CRITICAL: Failed to establish authenticated WebSocket connection"
+        logger.info(" PASS:  Real WebSocket connection established")
 
         # STEP 2: Send REAL enterprise optimization request that requires multi-agent coordination
         enterprise_request = {
@@ -300,11 +300,11 @@ class TestMultiAgentOrchestrationE2E:
             }
         }
         
-        logger.info(f"📨 Sending enterprise optimization request requiring multi-agent coordination")
+        logger.info(f"[U+1F4E8] Sending enterprise optimization request requiring multi-agent coordination")
         await websocket.send(json.dumps(enterprise_request))
         
         # STEP 3: Listen for REAL multi-agent orchestration events for up to 60 seconds
-        logger.info("👂 Listening for REAL multi-agent orchestration events...")
+        logger.info("[U+1F442] Listening for REAL multi-agent orchestration events...")
         start_time = time.time()
         max_wait_time = 60.0  # Longer timeout for complex orchestration
         
@@ -321,13 +321,13 @@ class TestMultiAgentOrchestrationE2E:
                 orchestration_validator.record_event(event)
                 
                 event_type = event.get("type", "unknown")
-                logger.info(f"📥 Orchestration event: {event_type}")
+                logger.info(f"[U+1F4E5] Orchestration event: {event_type}")
                 
                 # Track agent activity
                 if event_type in ["agent_started", "agent_thinking", "agent_handoff"]:
                     agent_activity_detected = True
                     agent_name = event.get("data", {}).get("agent_name", "unknown")
-                    logger.info(f"🤖 Agent activity: {event_type} from {agent_name}")
+                    logger.info(f"[U+1F916] Agent activity: {event_type} from {agent_name}")
                 
                 # Check for orchestration completion
                 if event_type in ["orchestration_complete", "final_report", "agent_completed"]:
@@ -335,7 +335,7 @@ class TestMultiAgentOrchestrationE2E:
                     completion_data = event.get("data", {})
                     if completion_data.get("workflow_complete") or event_type == "final_report":
                         received_orchestration_complete = True
-                        logger.info(f"🎯 Orchestration completion detected: {event_type}")
+                        logger.info(f" TARGET:  Orchestration completion detected: {event_type}")
                         
                         # Continue listening for a few more seconds to catch any final events
                         await asyncio.sleep(2.0)
@@ -345,65 +345,65 @@ class TestMultiAgentOrchestrationE2E:
                 if event_type in CRITICAL_ORCHESTRATION_EVENTS:
                     data = event.get("data", {})
                     content_preview = str(data.get("content", ""))[:100]
-                    logger.info(f"📋 Critical orchestration: {event_type} - {content_preview}...")
+                    logger.info(f"[U+1F4CB] Critical orchestration: {event_type} - {content_preview}...")
                     
             except asyncio.TimeoutError:
-                logger.info("⏱️ WebSocket receive timeout - checking if we have sufficient orchestration events")
+                logger.info("[U+23F1][U+FE0F] WebSocket receive timeout - checking if we have sufficient orchestration events")
                 if len(orchestration_validator.events) > 5 and agent_activity_detected:
-                    logger.info("✅ Sufficient orchestration activity detected, proceeding with validation")
+                    logger.info(" PASS:  Sufficient orchestration activity detected, proceeding with validation")
                     break
             except Exception as e:
-                logger.error(f"❌ Error receiving orchestration event: {e}")
+                logger.error(f" FAIL:  Error receiving orchestration event: {e}")
                 break
         
         # STEP 4: Close WebSocket connection
         await websocket.close()
-        logger.info("🔌 WebSocket connection closed")
+        logger.info("[U+1F50C] WebSocket connection closed")
         
         # STEP 5: Generate comprehensive orchestration validation report
         report = orchestration_validator.generate_orchestration_report()
-        logger.info(f"📊 Orchestration Validation Report:\n{report}")
+        logger.info(f" CHART:  Orchestration Validation Report:\n{report}")
         
         # STEP 6: CRITICAL ASSERTIONS - Will FAIL HARD if orchestration is broken
         is_valid, errors = orchestration_validator.validate_orchestration_integrity()
         
         # Assert we received orchestration events
-        assert len(orchestration_validator.events) > 0, "❌ CRITICAL FAILURE: No orchestration events received!"
+        assert len(orchestration_validator.events) > 0, " FAIL:  CRITICAL FAILURE: No orchestration events received!"
         
         # Assert we detected agent activity  
-        assert agent_activity_detected, "❌ CRITICAL FAILURE: No agent activity detected - orchestration not working"
+        assert agent_activity_detected, " FAIL:  CRITICAL FAILURE: No agent activity detected - orchestration not working"
         
         # Assert critical orchestration events occurred
         missing_critical = CRITICAL_ORCHESTRATION_EVENTS - orchestration_validator.event_types
-        assert len(missing_critical) <= 3, f"❌ CRITICAL FAILURE: Too many missing orchestration events: {missing_critical}"
+        assert len(missing_critical) <= 3, f" FAIL:  CRITICAL FAILURE: Too many missing orchestration events: {missing_critical}"
         
         # Assert multi-agent coordination occurred
-        assert len(orchestration_validator.active_agents) >= 2, f"❌ ORCHESTRATION FAILURE: Only {len(orchestration_validator.active_agents)} agents active, need 2+ for coordination"
+        assert len(orchestration_validator.active_agents) >= 2, f" FAIL:  ORCHESTRATION FAILURE: Only {len(orchestration_validator.active_agents)} agents active, need 2+ for coordination"
         
         # Assert agent handoffs occurred (critical for orchestration)
-        assert len(orchestration_validator.handoff_events) > 0, "❌ ORCHESTRATION FAILURE: No agent handoffs - agents not coordinating"
+        assert len(orchestration_validator.handoff_events) > 0, " FAIL:  ORCHESTRATION FAILURE: No agent handoffs - agents not coordinating"
         
         # Assert orchestration timeline is logical
-        assert orchestration_validator._validate_orchestration_timeline(), "❌ ORCHESTRATION FAILURE: Invalid orchestration timeline"
+        assert orchestration_validator._validate_orchestration_timeline(), " FAIL:  ORCHESTRATION FAILURE: Invalid orchestration timeline"
         
         # Assert overall orchestration integrity
         if not is_valid:
             failure_details = "\n".join(errors)
-            assert False, f"❌ ORCHESTRATION INTEGRITY FAILURE:\n{failure_details}"
+            assert False, f" FAIL:  ORCHESTRATION INTEGRITY FAILURE:\n{failure_details}"
         
-        logger.info("✅ REAL multi-agent orchestration validation PASSED!")
+        logger.info(" PASS:  REAL multi-agent orchestration validation PASSED!")
         
         # Performance validation
         metrics = orchestration_validator.get_orchestration_metrics()
         total_duration = metrics.get("total_duration", 0)
         
-        assert total_duration > 0, "❌ PERFORMANCE FAILURE: No orchestration timing recorded"
-        assert total_duration < 120.0, f"❌ PERFORMANCE FAILURE: Orchestration too slow: {total_duration:.2f}s"
+        assert total_duration > 0, " FAIL:  PERFORMANCE FAILURE: No orchestration timing recorded"
+        assert total_duration < 120.0, f" FAIL:  PERFORMANCE FAILURE: Orchestration too slow: {total_duration:.2f}s"
         
         coordination_efficiency = metrics.get("coordination_efficiency", 0)
-        assert coordination_efficiency > 0, "❌ COORDINATION FAILURE: No coordination efficiency measured"
+        assert coordination_efficiency > 0, " FAIL:  COORDINATION FAILURE: No coordination efficiency measured"
         
-        logger.info(f"⚡ Orchestration Performance: {metrics['total_events']} events, {len(orchestration_validator.active_agents)} agents, {total_duration:.2f}s")
+        logger.info(f" LIGHTNING:  Orchestration Performance: {metrics['total_events']} events, {len(orchestration_validator.active_agents)} agents, {total_duration:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e  
@@ -417,7 +417,7 @@ class TestMultiAgentOrchestrationE2E:
         Business Scenario: Planning capacity for 300% traffic growth across EU and APAC.
         Requires coordination between multiple specialized agents with real data dependencies.
         """
-        logger.info("🌍 Starting multi-region capacity planning orchestration test")
+        logger.info("[U+1F30D] Starting multi-region capacity planning orchestration test")
         
         # Connect with real authentication
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
@@ -438,7 +438,7 @@ class TestMultiAgentOrchestrationE2E:
             }
         }
         
-        logger.info("📨 Sending capacity planning request")
+        logger.info("[U+1F4E8] Sending capacity planning request")
         await websocket.send(json.dumps(capacity_request))
         
         # Listen for orchestration events
@@ -457,16 +457,16 @@ class TestMultiAgentOrchestrationE2E:
                 # Track orchestration patterns
                 if event_type in ["agent_handoff", "state_propagated", "parallel_execution"]:
                     orchestration_detected = True
-                    logger.info(f"🔄 Orchestration pattern: {event_type}")
+                    logger.info(f" CYCLE:  Orchestration pattern: {event_type}")
                 
                 # Stop on completion
                 if event_type in ["final_report", "orchestration_complete"]:
-                    logger.info(f"🎯 Capacity planning orchestration complete: {event_type}")
+                    logger.info(f" TARGET:  Capacity planning orchestration complete: {event_type}")
                     break
                     
             except asyncio.TimeoutError:
                 if orchestration_detected and len(orchestration_validator.events) > 3:
-                    logger.info("✅ Sufficient capacity planning orchestration detected")
+                    logger.info(" PASS:  Sufficient capacity planning orchestration detected")
                     break
             except Exception as e:
                 logger.warning(f"Event reception error: {e}")
@@ -476,7 +476,7 @@ class TestMultiAgentOrchestrationE2E:
         
         # Validate capacity planning orchestration
         report = orchestration_validator.generate_orchestration_report()
-        logger.info(f"📊 Capacity Planning Report:\n{report}")
+        logger.info(f" CHART:  Capacity Planning Report:\n{report}")
         
         # Assertions
         assert len(orchestration_validator.events) > 0, "No capacity planning events received"
@@ -487,7 +487,7 @@ class TestMultiAgentOrchestrationE2E:
         assert metrics["total_events"] >= 3, f"Insufficient orchestration complexity: {metrics['total_events']} events"
         assert metrics["total_duration"] > 0, "No timing data for capacity planning orchestration"
         
-        logger.info("✅ Multi-region capacity planning orchestration PASSED!")
+        logger.info(" PASS:  Multi-region capacity planning orchestration PASSED!")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -500,7 +500,7 @@ class TestMultiAgentOrchestrationE2E:
         
         Sends a request that may trigger agent errors to validate error recovery.
         """
-        logger.info("🔧 Testing orchestration failure resilience")
+        logger.info("[U+1F527] Testing orchestration failure resilience")
         
         websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
         assert websocket is not None, "Failed to establish WebSocket connection"
@@ -517,7 +517,7 @@ class TestMultiAgentOrchestrationE2E:
             }
         }
         
-        logger.info("📨 Sending stress test request to test failure resilience")
+        logger.info("[U+1F4E8] Sending stress test request to test failure resilience")
         await websocket.send(json.dumps(stress_request))
         
         # Listen for events, expecting some failures but overall system stability
@@ -538,19 +538,19 @@ class TestMultiAgentOrchestrationE2E:
                 # Track error and recovery patterns
                 if event_type in ["agent_fallback", "error_recovery", "agent_error"]:
                     error_events.append(event)
-                    logger.info(f"🚨 Error handling: {event_type}")
+                    logger.info(f" ALERT:  Error handling: {event_type}")
                     
                 if event_type in ["agent_restart", "fallback_complete", "system_stable"]:
                     recovery_events.append(event)
-                    logger.info(f"🔄 Recovery event: {event_type}")
+                    logger.info(f" CYCLE:  Recovery event: {event_type}")
                 
                 # System should eventually stabilize or provide some response
                 if event_type in ["final_report", "system_message", "error_report"]:
-                    logger.info(f"📋 System response to stress test: {event_type}")
+                    logger.info(f"[U+1F4CB] System response to stress test: {event_type}")
                     break
                     
             except asyncio.TimeoutError:
-                logger.info("⏱️ Timeout - checking if system handled stress test appropriately")
+                logger.info("[U+23F1][U+FE0F] Timeout - checking if system handled stress test appropriately")
                 break
             except Exception as e:
                 logger.error(f"Error during stress test: {e}")
@@ -560,7 +560,7 @@ class TestMultiAgentOrchestrationE2E:
         
         # Generate resilience report
         report = orchestration_validator.generate_orchestration_report()
-        logger.info(f"📊 Failure Resilience Report:\n{report}")
+        logger.info(f" CHART:  Failure Resilience Report:\n{report}")
         
         # Validate resilience - system should handle failures gracefully
         assert len(orchestration_validator.events) > 0, "System completely failed - no events received"
@@ -570,8 +570,8 @@ class TestMultiAgentOrchestrationE2E:
         metrics = orchestration_validator.get_orchestration_metrics()
         assert metrics["total_duration"] < 45.0, "System took too long to handle impossible request"
         
-        logger.info("✅ Orchestration failure resilience test PASSED!")
-        logger.info(f"🔧 Resilience metrics: {len(error_events)} errors, {len(recovery_events)} recoveries")
+        logger.info(" PASS:  Orchestration failure resilience test PASSED!")
+        logger.info(f"[U+1F527] Resilience metrics: {len(error_events)} errors, {len(recovery_events)} recoveries")
 
 
 if __name__ == "__main__":

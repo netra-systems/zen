@@ -243,11 +243,11 @@ class TestRedisCriticalConfigurationFailure:
             failure_details.extend([
                 "",
                 "SOLUTION STATUS: RedisConfigurationBuilder implemented with:",
-                "  ✓ Unified configuration source for all services",
-                "  ✓ Environment-aware fallback behavior", 
-                "  ✓ Integrated Secret Manager support",
-                "  ✓ Composable SSL/TLS configuration",
-                "  ✓ Standardized connection pooling",
+                "  [U+2713] Unified configuration source for all services",
+                "  [U+2713] Environment-aware fallback behavior", 
+                "  [U+2713] Integrated Secret Manager support",
+                "  [U+2713] Composable SSL/TLS configuration",
+                "  [U+2713] Standardized connection pooling",
                 "",
                 "This test should now PASS with the new implementation."
             ])

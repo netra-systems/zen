@@ -1,5 +1,5 @@
 """
-🌟 E2E TEST SUITE: Authentication Session Persistence Journey
+[U+1F31F] E2E TEST SUITE: Authentication Session Persistence Journey
 
 Tests user session persistence across browser refreshes, tab switches, and reconnections.
 This validates that authenticated users maintain their session state for seamless UX.
@@ -176,7 +176,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
         
         BUSINESS VALUE: Users don't lose context when connection drops.
         """
-        logger.info("🔄 E2E: Testing WebSocket reconnection session persistence")
+        logger.info(" CYCLE:  E2E: Testing WebSocket reconnection session persistence")
         
         # Create authenticated user
         timestamp = int(time.time())
@@ -199,7 +199,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
         
         try:
             # STEP 1: Initial connection and context establishment
-            logger.info("📡 STEP 1: Initial WebSocket connection")
+            logger.info("[U+1F4E1] STEP 1: Initial WebSocket connection")
             websocket_url = f"{self.ws_auth_helper.config.websocket_url}?token={token}"
             
             # First connection
@@ -240,14 +240,14 @@ class TestAuthSessionPersistence(BaseE2ETest):
                 logger.warning("No response to initial message - continuing test")
             
             # STEP 2: Simulate connection drop
-            logger.info("❌ STEP 2: Simulate connection drop")
+            logger.info(" FAIL:  STEP 2: Simulate connection drop")
             await websocket1.close()
             self.validator.record_session_event("connection_dropped", {"intentional": True})
             
             await asyncio.sleep(1.0)  # Brief pause to simulate network issue
             
             # STEP 3: Reconnection with same token
-            logger.info("🔄 STEP 3: Reconnect with same session token")
+            logger.info(" CYCLE:  STEP 3: Reconnect with same session token")
             reconnect_start = time.time()
             
             try:
@@ -268,7 +268,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
                 })
                 
                 # STEP 4: Verify session context persistence
-                logger.info("🔍 STEP 4: Verify session context maintained")
+                logger.info(" SEARCH:  STEP 4: Verify session context maintained")
                 
                 # Send continuation message in same thread
                 continuation_message = {
@@ -319,7 +319,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
             if not validation["context_preserved"]:
                 pytest.fail(f"CONTEXT PERSISTENCE FAILURE: {validation['business_impact']}")
             
-            logger.info(f"✅ WebSocket session persistence validated")
+            logger.info(f" PASS:  WebSocket session persistence validated")
             logger.info(f"   Session duration: {validation['session_duration']:.1f}s")
             logger.info(f"   Reconnections: {len(self.validator.reconnection_attempts)}")
             
@@ -333,7 +333,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
         
         BUSINESS VALUE: Users stay authenticated seamlessly during token refresh.
         """
-        logger.info("🔑 E2E: Testing token refresh session continuity")
+        logger.info("[U+1F511] E2E: Testing token refresh session continuity")
         
         timestamp = int(time.time())
         user_id = f"token-refresh-session-{timestamp}"
@@ -363,7 +363,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
             ) as websocket:
                 
                 # STEP 1: Establish session with initial token
-                logger.info("🔐 STEP 1: Establish session with initial token")
+                logger.info("[U+1F510] STEP 1: Establish session with initial token")
                 
                 initial_context = {
                     "user_id": user_id,
@@ -384,7 +384,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
                 self.validator.record_session_event("pre_refresh_message", {"sent": True})
                 
                 # STEP 2: Simulate token refresh
-                logger.info("🔄 STEP 2: Token refresh")
+                logger.info(" CYCLE:  STEP 2: Token refresh")
                 self.validator.record_session_event("token_refresh_started", {})
                 
                 # Create refreshed token
@@ -405,7 +405,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
                 self.validator.record_session_event("token_refresh_sent", {})
                 
                 # STEP 3: Continue session with refreshed context
-                logger.info("✅ STEP 3: Continue session post-refresh")
+                logger.info(" PASS:  STEP 3: Continue session post-refresh")
                 
                 post_refresh_message = {
                     "type": "chat_message",
@@ -446,7 +446,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
             if not validation["context_preserved"]:
                 pytest.fail(f"SESSION CONTINUITY FAILURE: {validation['business_impact']}")
             
-            logger.info("✅ Token refresh session continuity validated")
+            logger.info(" PASS:  Token refresh session continuity validated")
             
         except Exception as e:
             self.validator.record_session_event("token_refresh_failure", {"error": str(e)})
@@ -458,7 +458,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
         
         BUSINESS VALUE: Users can have multiple tabs open without conflicts.
         """
-        logger.info("📑 E2E: Testing multi-tab session sharing")
+        logger.info("[U+1F4D1] E2E: Testing multi-tab session sharing")
         
         timestamp = int(time.time())
         user_id = f"multi-tab-{timestamp}"
@@ -482,7 +482,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
         
         try:
             # STEP 1: Open multiple connections (simulate multiple tabs)
-            logger.info("🔗 STEP 1: Opening multiple WebSocket connections")
+            logger.info("[U+1F517] STEP 1: Opening multiple WebSocket connections")
             
             connection_count = 3
             websocket_url = f"{self.ws_auth_helper.config.websocket_url}?token={token}"
@@ -500,7 +500,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
                 })
             
             # STEP 2: Send messages from different "tabs"
-            logger.info("💬 STEP 2: Send messages from different tabs")
+            logger.info("[U+1F4AC] STEP 2: Send messages from different tabs")
             
             thread_id = f"shared-session-{uuid.uuid4().hex[:8]}"
             
@@ -524,7 +524,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
                 await asyncio.sleep(0.5)
             
             # STEP 3: Verify messages are handled correctly
-            logger.info("📨 STEP 3: Verify multi-tab message handling")
+            logger.info("[U+1F4E8] STEP 3: Verify multi-tab message handling")
             
             responses_received = 0
             
@@ -544,7 +544,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
                     logger.warning(f"No response from tab {i+1} connection")
             
             # STEP 4: Test connection isolation (close one tab)
-            logger.info("❌ STEP 4: Test tab closure isolation")
+            logger.info(" FAIL:  STEP 4: Test tab closure isolation")
             
             if len(websocket_connections) > 1:
                 # Close first connection
@@ -583,7 +583,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
             connection_events = [e for e in self.validator.session_events if "connection_" in e["event"] and "opened" in e["event"]]
             assert len(connection_events) >= 2, "Should have opened multiple connections successfully"
             
-            logger.info(f"✅ Multi-tab session sharing validated")
+            logger.info(f" PASS:  Multi-tab session sharing validated")
             logger.info(f"   Connections opened: {len(connection_events)}")
             logger.info(f"   Responses received: {responses_received}")
             
@@ -601,7 +601,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
         
         BUSINESS VALUE: Users get clear feedback when session expires.
         """
-        logger.info("⏰ E2E: Testing session timeout graceful handling")
+        logger.info("[U+23F0] E2E: Testing session timeout graceful handling")
         
         timestamp = int(time.time())
         user_id = f"timeout-test-{timestamp}"
@@ -675,7 +675,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
                 })
                 
             # Test recovery with valid token
-            logger.info("🔄 Testing recovery with valid token")
+            logger.info(" CYCLE:  Testing recovery with valid token")
             
             valid_token = self.auth_helper.create_test_jwt_token(
                 user_id=user_id,
@@ -710,7 +710,7 @@ class TestAuthSessionPersistence(BaseE2ETest):
             except Exception as e:
                 logger.warning(f"Recovery attempt failed: {e}")
             
-            logger.info("✅ Session timeout handling validated")
+            logger.info(" PASS:  Session timeout handling validated")
             
         except Exception as e:
             self.validator.record_session_event("timeout_test_failure", {"error": str(e)})
@@ -729,7 +729,7 @@ class TestSessionPersistenceEdgeCases(BaseE2ETest):
         
         BUSINESS VALUE: System handles unstable network connections gracefully.
         """
-        logger.info("⚡ E2E: Testing rapid reconnection session stability")
+        logger.info(" LIGHTNING:  E2E: Testing rapid reconnection session stability")
         
         timestamp = int(time.time())
         user_id = f"rapid-reconnect-{timestamp}"
@@ -777,7 +777,7 @@ class TestSessionPersistenceEdgeCases(BaseE2ETest):
         success_rate = successful_connections / reconnection_count
         assert success_rate >= 0.8, f"Rapid reconnection success rate {success_rate:.1%} too low"
         
-        logger.info(f"✅ Rapid reconnection stability: {successful_connections}/{reconnection_count} successful")
+        logger.info(f" PASS:  Rapid reconnection stability: {successful_connections}/{reconnection_count} successful")
 
 
 if __name__ == "__main__":

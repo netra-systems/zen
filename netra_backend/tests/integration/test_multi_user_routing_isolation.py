@@ -2,7 +2,7 @@
 Test Multi-User WebSocket Routing Isolation
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)  
+- Segment: All (Free  ->  Enterprise)  
 - Business Goal: Ensure secure multi-user chat isolation
 - Value Impact: Prevents cross-user message leakage that destroys user trust and violates privacy
 - Strategic Impact: CRITICAL - Cross-user routing failures are security vulnerabilities
@@ -302,7 +302,7 @@ class TestMultiUserRoutingIsolation(BaseIntegrationTest):
         isolation_stats = validator.get_isolation_stats()
         cross_user_leakages = validator.check_cross_user_leakage()
         
-        print(f"🚨 MULTI-USER ISOLATION TEST RESULTS:")
+        print(f" ALERT:  MULTI-USER ISOLATION TEST RESULTS:")
         print(f"   Total connections: {isolation_stats['total_connections']}")
         print(f"   Total messages: {isolation_stats['total_messages']}")  
         print(f"   Routing violations: {isolation_stats['routing_violations']}")
@@ -480,7 +480,7 @@ class TestMultiUserRoutingIsolation(BaseIntegrationTest):
         # Assert: Validate concurrent stress results
         success_rate = len(successful_messages) / total_messages if total_messages > 0 else 0
         
-        print(f"🚨 CONCURRENT STRESS TEST RESULTS:")
+        print(f" ALERT:  CONCURRENT STRESS TEST RESULTS:")
         print(f"   Total users: {concurrent_users}")
         print(f"   Messages per user: {messages_per_user}")
         print(f"   Total messages: {total_messages}")
@@ -492,7 +492,7 @@ class TestMultiUserRoutingIsolation(BaseIntegrationTest):
         isolation_stats = validator.get_isolation_stats()
         cross_user_leakages = validator.check_cross_user_leakage()
         
-        print(f"🚨 ISOLATION UNDER STRESS:")
+        print(f" ALERT:  ISOLATION UNDER STRESS:")
         print(f"   Cross-user leakages: {len(cross_user_leakages)}")
         print(f"   Isolation success rate: {isolation_stats['isolation_success_rate']:.1%}")
         
@@ -693,7 +693,7 @@ class TestMultiUserRoutingIsolation(BaseIntegrationTest):
                 })
         
         # Assert: Validate authentication context routing
-        print(f"🚨 AUTHENTICATION CONTEXT ROUTING RESULTS:")
+        print(f" ALERT:  AUTHENTICATION CONTEXT ROUTING RESULTS:")
         for result in routing_results:
             print(f"   Scenario: {result['scenario']}")
             print(f"   Target user: {result['target_user']}")
@@ -708,7 +708,7 @@ class TestMultiUserRoutingIsolation(BaseIntegrationTest):
         total_scenarios = len(routing_results)
         accuracy_rate = correct_results / total_scenarios if total_scenarios > 0 else 0
         
-        print(f"🚨 AUTHENTICATION ROUTING ACCURACY: {accuracy_rate:.1%}")
+        print(f" ALERT:  AUTHENTICATION ROUTING ACCURACY: {accuracy_rate:.1%}")
         
         # CRITICAL: Authentication context validation should be 100% accurate
         assert accuracy_rate == 1.0, \
@@ -851,7 +851,7 @@ class TestMultiUserRoutingIsolation(BaseIntegrationTest):
                 })
         
         # Assert: Validate token-based authentication and routing
-        print(f"🚨 TOKEN VALIDATION ROUTING RESULTS:")
+        print(f" ALERT:  TOKEN VALIDATION ROUTING RESULTS:")
         for result in test_results:
             print(f"   Scenario: {result['scenario']}")
             print(f"   Token valid: {result['token_valid']}")
@@ -867,7 +867,7 @@ class TestMultiUserRoutingIsolation(BaseIntegrationTest):
         auth_accuracy = sum(1 for r in test_results if r["auth_correct"]) / len(test_results)
         routing_accuracy = sum(1 for r in test_results if r["routing_correct"]) / len(test_results)
         
-        print(f"🚨 TOKEN VALIDATION ACCURACY:")
+        print(f" ALERT:  TOKEN VALIDATION ACCURACY:")
         print(f"   Authentication accuracy: {auth_accuracy:.1%}")
         print(f"   Routing accuracy: {routing_accuracy:.1%}")
         

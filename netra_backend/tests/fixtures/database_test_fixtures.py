@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Value Impact: Consistent database testing patterns across 200+ test files
 - Revenue Impact: Faster bug detection and fix cycles, improved code quality
 
-All functions are ≤8 lines, file is ≤300 lines total.
+All functions are  <= 8 lines, file is  <= 300 lines total.
 """
 
 import json

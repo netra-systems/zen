@@ -122,10 +122,10 @@ if __name__ == "__main__":
     print("   TEST_FEATURE_SMART_CACHING=enabled (test must pass)")
     
     print("\n3. CI/CD Integration:")
-    print("   ✓ Enabled features: must pass (100% pass rate)")
-    print("   ⏸ In development: xfail (doesn't break build)")
-    print("   ⏭ Disabled: skipped (clean output)")
-    print("   🧪 Experimental: optional (controlled execution)")
+    print("   [U+2713] Enabled features: must pass (100% pass rate)")
+    print("   [U+23F8] In development: xfail (doesn't break build)")
+    print("   [U+23ED] Disabled: skipped (clean output)")
+    print("   [U+1F9EA] Experimental: optional (controlled execution)")
     
     # Run tests to demonstrate behavior
     pytest.main([__file__, "-v", "--tb=short"])

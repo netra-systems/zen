@@ -50,7 +50,7 @@ class WebSocketStagingAuthReproduction:
         
         try:
             # STEP 1: Get staging JWT token using CURRENT method
-            print("📝 STEP 1: Creating staging JWT token...")
+            print("[U+1F4DD] STEP 1: Creating staging JWT token...")
             
             step1_result = {"step": "token_creation", "success": False}
             
@@ -61,12 +61,12 @@ class WebSocketStagingAuthReproduction:
             )
             
             if token:
-                print(f"✅ JWT token created: {token[:20]}...")
+                print(f" PASS:  JWT token created: {token[:20]}...")
                 step1_result["success"] = True
                 step1_result["token_length"] = len(token)
                 step1_result["token_prefix"] = token[:20]
             else:
-                print("❌ Failed to create JWT token")
+                print(" FAIL:  Failed to create JWT token")
                 step1_result["error"] = "Token creation failed"
                 results["steps"].append(step1_result)
                 return results
@@ -74,13 +74,13 @@ class WebSocketStagingAuthReproduction:
             results["steps"].append(step1_result)
             
             # STEP 2: Test WebSocket connection with token
-            print("📝 STEP 2: Testing WebSocket connection...")
+            print("[U+1F4DD] STEP 2: Testing WebSocket connection...")
             
             step2_result = {"step": "websocket_connection", "success": False}
             
             # This should reproduce the exact HTTP 403 failure
             websocket_url = f"{self.config.websocket_url}?token={token}"
-            print(f"🔗 Connecting to: {websocket_url}")
+            print(f"[U+1F517] Connecting to: {websocket_url}")
             
             try:
                 # Timeout after 10 seconds to avoid hanging
@@ -95,14 +95,14 @@ class WebSocketStagingAuthReproduction:
                 ) as websocket:
                     # If we get here, connection succeeded
                     await websocket.ping()
-                    print("✅ WebSocket connection successful!")
+                    print(" PASS:  WebSocket connection successful!")
                     step2_result["success"] = True
                     step2_result["connection_state"] = "established"
                     results["success"] = True
                     
             except websockets.exceptions.ConnectionClosedError as e:
                 # This is the expected failure
-                print(f"❌ WebSocket connection rejected: {e}")
+                print(f" FAIL:  WebSocket connection rejected: {e}")
                 step2_result["error"] = f"Connection closed: {e.code} - {e.reason}"
                 step2_result["close_code"] = e.code
                 step2_result["close_reason"] = e.reason
@@ -113,7 +113,7 @@ class WebSocketStagingAuthReproduction:
                     
             except websockets.exceptions.InvalidStatus as e:
                 # Also expected for HTTP 403 responses
-                print(f"❌ WebSocket connection rejected with HTTP status: {e.status_code}")
+                print(f" FAIL:  WebSocket connection rejected with HTTP status: {e.status_code}")
                 step2_result["error"] = f"HTTP {e.status_code}: {e.response.reason_phrase}"
                 step2_result["http_status"] = e.status_code
                 
@@ -122,13 +122,13 @@ class WebSocketStagingAuthReproduction:
                     step2_result["reproduced_issue"] = True
                     
             except Exception as e:
-                print(f"❌ WebSocket connection failed: {e}")
+                print(f" FAIL:  WebSocket connection failed: {e}")
                 step2_result["error"] = str(e)
                 
             results["steps"].append(step2_result)
             
             # STEP 3: Analyze JWT token structure  
-            print("📝 STEP 3: Analyzing JWT token structure...")
+            print("[U+1F4DD] STEP 3: Analyzing JWT token structure...")
             
             step3_result = {"step": "jwt_analysis", "success": False}
             
@@ -138,7 +138,7 @@ class WebSocketStagingAuthReproduction:
                 # Decode without verification to see payload
                 payload = jwt.decode(token, options={"verify_signature": False})
                 
-                print("🔍 JWT Token Payload:")
+                print(" SEARCH:  JWT Token Payload:")
                 for key, value in payload.items():
                     if key in ['exp', 'iat']:
                         # Convert timestamps to readable dates
@@ -154,13 +154,13 @@ class WebSocketStagingAuthReproduction:
                 step3_result["permissions"] = payload.get("permissions", [])
                 
             except Exception as e:
-                print(f"❌ JWT analysis failed: {e}")
+                print(f" FAIL:  JWT analysis failed: {e}")
                 step3_result["error"] = str(e)
                 
             results["steps"].append(step3_result)
             
             # STEP 4: Test if user exists in staging database (if possible)
-            print("📝 STEP 4: Testing staging user existence...")
+            print("[U+1F4DD] STEP 4: Testing staging user existence...")
             
             step4_result = {"step": "user_validation", "success": False}
             
@@ -174,47 +174,47 @@ class WebSocketStagingAuthReproduction:
                     
                     if response.status_code == 200:
                         user_data = response.json()
-                        print(f"✅ User exists in staging: {user_data.get('email', 'unknown')}")
+                        print(f" PASS:  User exists in staging: {user_data.get('email', 'unknown')}")
                         step4_result["success"] = True
                         step4_result["user_data"] = user_data
                     elif response.status_code == 401:
-                        print("❌ JWT token invalid for staging backend API")
+                        print(" FAIL:  JWT token invalid for staging backend API")
                         step4_result["error"] = "JWT token rejected by backend API"
                     elif response.status_code == 404:
-                        print("❌ User does not exist in staging database")
+                        print(" FAIL:  User does not exist in staging database")
                         step4_result["error"] = "User not found in staging database"
                     else:
-                        print(f"❌ Unexpected API response: {response.status_code}")
+                        print(f" FAIL:  Unexpected API response: {response.status_code}")
                         step4_result["error"] = f"HTTP {response.status_code}: {response.text}"
                         
             except Exception as e:
-                print(f"❌ User validation test failed: {e}")
+                print(f" FAIL:  User validation test failed: {e}")
                 step4_result["error"] = str(e)
                 
             results["steps"].append(step4_result)
             
         except Exception as e:
-            print(f"❌ Test execution failed: {e}")
+            print(f" FAIL:  Test execution failed: {e}")
             results["error_details"] = str(e)
             
         finally:
             print("\n" + "=" * 60)
-            print("🔍 REPRODUCTION TEST SUMMARY")
+            print(" SEARCH:  REPRODUCTION TEST SUMMARY")
             print("=" * 60)
             
             for step in results["steps"]:
-                status = "✅" if step["success"] else "❌"
+                status = " PASS: " if step["success"] else " FAIL: "
                 print(f"{status} {step['step']}: {'SUCCESS' if step['success'] else 'FAILED'}")
                 if "error" in step:
                     print(f"   Error: {step['error']}")
                 if "reproduced_issue" in step:
-                    print(f"   🎯 Successfully reproduced the staging WebSocket auth issue!")
+                    print(f"    TARGET:  Successfully reproduced the staging WebSocket auth issue!")
             
             if results["success"]:
-                print("\n🎉 TEST PASSED: WebSocket authentication is working!")
+                print("\n CELEBRATION:  TEST PASSED: WebSocket authentication is working!")
                 print("   This means the bug has been FIXED.")
             else:
-                print("\n❌ TEST FAILED: WebSocket authentication is failing!")
+                print("\n FAIL:  TEST FAILED: WebSocket authentication is failing!")
                 print("   This confirms the bug is still present.")
                 
         return results
@@ -238,12 +238,12 @@ async def main():
     print("=" * 60)
     
     if not results["success"]:
-        print("✅ BUG SUCCESSFULLY REPRODUCED")
+        print(" PASS:  BUG SUCCESSFULLY REPRODUCED")
         print("   - WebSocket connection fails with authentication error")
         print("   - This confirms the staging authentication issue exists")
         print("   - Ready to apply fix and retest")
     else:
-        print("❌ BUG NOT REPRODUCED")
+        print(" FAIL:  BUG NOT REPRODUCED")
         print("   - WebSocket connection succeeded unexpectedly")
         print("   - Either bug is already fixed or test needs adjustment")
         
@@ -272,14 +272,14 @@ if __name__ == "__main__":
         
         # Exit with appropriate code for CI/CD pipeline
         if results["success"]:
-            print("\n✅ Test completed successfully")
+            print("\n PASS:  Test completed successfully")
             sys.exit(0)  # Success - bug is fixed
         else:
-            print("\n❌ Test failed - bug reproduced")
+            print("\n FAIL:  Test failed - bug reproduced")
             sys.exit(1)  # Failure - bug exists (expected before fix)
             
     except KeyboardInterrupt:
-        print("\n🛑 Test interrupted by user")
+        print("\n[U+1F6D1] Test interrupted by user")
         sys.exit(130)
     except Exception as e:
         print(f"\n[CRASHED] Test crashed: {e}")

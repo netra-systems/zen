@@ -36,19 +36,19 @@ class TestStagingWebSocketBaseline:
                 # BEFORE DEPLOYMENT: Should not have optimized timeout (360)
                 # AFTER DEPLOYMENT: Should have optimized timeout (360)
                 if current_ws_timeout == "360":
-                    print("✅ Optimized WebSocket timeout (360s) is active - deployment successful")
+                    print(" PASS:  Optimized WebSocket timeout (360s) is active - deployment successful")
                 else:
-                    print(f"📊 BASELINE: WebSocket timeout not yet optimized: {current_ws_timeout}")
+                    print(f" CHART:  BASELINE: WebSocket timeout not yet optimized: {current_ws_timeout}")
                     # Don't fail - this is expected before deployment
                 
             # Document response time for comparison after deployment
             if response_time > 3.0:
-                print(f"📊 BASELINE: Slow response time ({response_time:.2f}s) - expect improvement after deployment")
+                print(f" CHART:  BASELINE: Slow response time ({response_time:.2f}s) - expect improvement after deployment")
             else:
-                print(f"✅ Good response time: {response_time:.2f}s")
+                print(f" PASS:  Good response time: {response_time:.2f}s")
                 
         except requests.exceptions.RequestException as e:
-            print(f"📊 BASELINE: Staging connectivity issue: {e}")
+            print(f" CHART:  BASELINE: Staging connectivity issue: {e}")
             # Don't fail - this documents the current state
             
     def test_websocket_endpoint_tcp_connectivity_baseline(self):
@@ -83,17 +83,17 @@ class TestStagingWebSocketBaseline:
             avg_connection_time = sum(successful_connections) / len(successful_connections)
             success_rate = len(successful_connections) / len(connection_attempts)
             
-            print(f"📊 BASELINE: TCP connection success rate: {success_rate * 100:.1f}% ({len(successful_connections)}/3)")
-            print(f"📊 BASELINE: Average TCP connection time: {avg_connection_time:.2f}s")
+            print(f" CHART:  BASELINE: TCP connection success rate: {success_rate * 100:.1f}% ({len(successful_connections)}/3)")
+            print(f" CHART:  BASELINE: Average TCP connection time: {avg_connection_time:.2f}s")
             
             # Document baseline performance
             if avg_connection_time > 2.0:
-                print(f"📊 BASELINE: Slow TCP connections - expect improvement after deployment")
+                print(f" CHART:  BASELINE: Slow TCP connections - expect improvement after deployment")
             if success_rate < 1.0:
-                print(f"📊 BASELINE: Inconsistent TCP connectivity - expect improvement after deployment")
+                print(f" CHART:  BASELINE: Inconsistent TCP connectivity - expect improvement after deployment")
                 
         else:
-            print("📊 BASELINE: All TCP connection attempts failed - significant connectivity issues")
+            print(" CHART:  BASELINE: All TCP connection attempts failed - significant connectivity issues")
     
     @pytest.mark.asyncio
     async def test_websocket_handshake_baseline(self):
@@ -111,9 +111,9 @@ class TestStagingWebSocketBaseline:
             # Get authentication headers
             ws_headers = config.get_websocket_headers()
             if ws_headers.get("Authorization"):
-                print("✅ WebSocket authentication headers available")
+                print(" PASS:  WebSocket authentication headers available")
             else:
-                print("⚠️  No WebSocket authentication headers - may cause connection failures")
+                print(" WARNING: [U+FE0F]  No WebSocket authentication headers - may cause connection failures")
             
             # Attempt WebSocket connection
             start_time = time.time()
@@ -134,7 +134,7 @@ class TestStagingWebSocketBaseline:
                     connection_time = time.time() - start_time
                     connection_successful = True
                     
-                    print(f"✅ WebSocket connection successful in {connection_time:.2f}s")
+                    print(f" PASS:  WebSocket connection successful in {connection_time:.2f}s")
                     print(f"Welcome message received: {welcome_response[:100]}...")
                     
             except asyncio.TimeoutError:
@@ -147,18 +147,18 @@ class TestStagingWebSocketBaseline:
             
             # Document the baseline result
             if connection_successful:
-                print(f"📊 BASELINE: WebSocket connection working - {connection_time:.2f}s")
+                print(f" CHART:  BASELINE: WebSocket connection working - {connection_time:.2f}s")
                 if connection_time > 5.0:
-                    print(f"📊 BASELINE: Slow WebSocket connection - expect improvement after deployment")
+                    print(f" CHART:  BASELINE: Slow WebSocket connection - expect improvement after deployment")
             else:
-                print(f"📊 BASELINE: WebSocket connection failed - {error_message}")
-                print("📊 BASELINE: This failure is expected before deployment of Issue #128 fixes")
+                print(f" CHART:  BASELINE: WebSocket connection failed - {error_message}")
+                print(" CHART:  BASELINE: This failure is expected before deployment of Issue #128 fixes")
                 # Don't fail the test - this documents current state
                 
         except ImportError as e:
-            print(f"📊 BASELINE: Cannot test WebSocket connection - missing dependencies: {e}")
+            print(f" CHART:  BASELINE: Cannot test WebSocket connection - missing dependencies: {e}")
         except Exception as e:
-            print(f"📊 BASELINE: WebSocket test error: {e}")
+            print(f" CHART:  BASELINE: WebSocket test error: {e}")
             
     def test_staging_environment_resource_baseline(self):
         """INTEGRATION: Document current staging resource utilization baseline"""
@@ -186,16 +186,16 @@ class TestStagingWebSocketBaseline:
             total_time = time.time() - start_time
             successful_responses = [r for r in responses if r and r.status_code == 200]
             
-            print(f"📊 BASELINE: 3 concurrent requests completed in {total_time:.2f}s")
-            print(f"📊 BASELINE: Success rate: {len(successful_responses)}/3")
+            print(f" CHART:  BASELINE: 3 concurrent requests completed in {total_time:.2f}s")
+            print(f" CHART:  BASELINE: Success rate: {len(successful_responses)}/3")
             
             if total_time > 8.0:
-                print("📊 BASELINE: Slow concurrent request handling - expect improvement with 4Gi/4CPU scaling")
+                print(" CHART:  BASELINE: Slow concurrent request handling - expect improvement with 4Gi/4CPU scaling")
             if len(successful_responses) < 3:
-                print("📊 BASELINE: Some concurrent requests failed - expect improvement with resource scaling")
+                print(" CHART:  BASELINE: Some concurrent requests failed - expect improvement with resource scaling")
                 
         except Exception as e:
-            print(f"📊 BASELINE: Cannot test concurrent load: {e}")
+            print(f" CHART:  BASELINE: Cannot test concurrent load: {e}")
             
     def test_document_current_deployment_state(self):
         """INTEGRATION: Document current deployment state for comparison"""
@@ -211,7 +211,7 @@ class TestStagingWebSocketBaseline:
                 deployment_info = health_data.get("deployment", {})
                 revision = deployment_info.get("revision", "unknown")
                 
-                print(f"📊 BASELINE DEPLOYMENT STATE:")
+                print(f" CHART:  BASELINE DEPLOYMENT STATE:")
                 print(f"  Revision: {revision}")
                 print(f"  Health Status: {health_data.get('status', 'unknown')}")
                 
@@ -232,11 +232,11 @@ class TestStagingWebSocketBaseline:
                 # Check if this looks like the pre-deployment state
                 ws_connection_timeout = config_data.get("websocket_connection_timeout")
                 if ws_connection_timeout == "360":
-                    print("🎉 DEPLOYMENT DETECTED: Optimized WebSocket timeout (360s) is already active!")
+                    print(" CELEBRATION:  DEPLOYMENT DETECTED: Optimized WebSocket timeout (360s) is already active!")
                     print("This suggests Issue #128 fixes have been deployed successfully.")
                 else:
-                    print(f"📊 PRE-DEPLOYMENT STATE: WebSocket connection timeout: {ws_connection_timeout}")
+                    print(f" CHART:  PRE-DEPLOYMENT STATE: WebSocket connection timeout: {ws_connection_timeout}")
                     print("This suggests Issue #128 fixes have not yet been deployed.")
                     
         except Exception as e:
-            print(f"📊 BASELINE: Cannot document deployment state: {e}")
+            print(f" CHART:  BASELINE: Cannot document deployment state: {e}")

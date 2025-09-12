@@ -224,7 +224,7 @@ def print_validation_summary(report: Dict[str, Any]):
     areas = report.get('validation_areas', {})
     for area, status in areas.items():
         area_name = area.replace('_', ' ').title()
-        status_marker = "✓" if status == "PASS" else "✗"
+        status_marker = "[U+2713]" if status == "PASS" else "[U+2717]"
         print(f"{status_marker} {area_name}: {status}")
     
     # Performance metrics
@@ -241,21 +241,21 @@ def print_validation_summary(report: Dict[str, Any]):
     # Issues summary
     issues = report.get('issues_summary', {})
     if issues.get('total_errors', 0) > 0:
-        print(f"\n❌ ERRORS ({issues['total_errors']}):")
+        print(f"\n FAIL:  ERRORS ({issues['total_errors']}):")
         for error in issues.get('top_errors', [])[:5]:
-            print(f"  • {error}")
+            print(f"  [U+2022] {error}")
     
     if issues.get('total_warnings', 0) > 0:
-        print(f"\n⚠️  WARNINGS ({issues['total_warnings']}):")
+        print(f"\n WARNING: [U+FE0F]  WARNINGS ({issues['total_warnings']}):")
         for warning in issues.get('top_warnings', [])[:5]:
-            print(f"  • {warning}")
+            print(f"  [U+2022] {warning}")
     
     # Recommendations
     recommendations = report.get('recommendations', [])
     if recommendations:
-        print(f"\n💡 RECOMMENDATIONS:")
+        print(f"\n IDEA:  RECOMMENDATIONS:")
         for rec in recommendations:
-            print(f"  • {rec}")
+            print(f"  [U+2022] {rec}")
 
 
 def save_validation_report(report: Dict[str, Any], output_path: Optional[str] = None) -> str:
@@ -298,7 +298,7 @@ def main():
         # Save report
         report_path = save_validation_report(report)
         
-        print(f"\n📄 Detailed report saved to: {report_path}")
+        print(f"\n[U+1F4C4] Detailed report saved to: {report_path}")
         
         # Exit with appropriate code
         success = report.get('validation_summary', {}).get('overall_success', False)
@@ -306,7 +306,7 @@ def main():
         
     except Exception as e:
         logger.error(f"Validation runner failed: {e}")
-        print(f"\n❌ Validation failed with error: {e}")
+        print(f"\n FAIL:  Validation failed with error: {e}")
         return 1
 
 

@@ -925,8 +925,8 @@ class TestRepositoryBoundaryConditionsAndErrorHandling:
     @pytest.mark.asyncio
     async def test_operations_with_unicode_characters_handle_correctly(self, user_repo, db_session):
         """Test operations with Unicode characters handle correctly"""
-        unicode_email = "тест@пример.com"
-        unicode_name = "José 山田 Müller"
+        unicode_email = "tect@[U+043F]p[U+0438]mep.com"
+        unicode_name = "Jos[U+00E9] [U+5C71][U+7530] M[U+00FC]ller"
         
         try:
             result = await user_repo.create_local_user(unicode_email, "hash", unicode_name)
@@ -947,7 +947,7 @@ class TestRepositoryBoundaryConditionsAndErrorHandling:
         special_details = {
             "message": 'Contains "quotes" and \\backslashes\\ and \\n newlines',
             "json": '{"nested": "json"}',
-            "unicode": "Special: ñáéíóú"
+            "unicode": "Special: [U+00F1][U+00E1][U+00E9][U+00ED][U+00F3][U+00FA]"
         }
         
         # Should handle JSON serialization correctly

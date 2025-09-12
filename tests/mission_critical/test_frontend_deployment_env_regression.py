@@ -1,5 +1,5 @@
 # REMOVED_SYNTAX_ERROR: '''
-# REMOVED_SYNTAX_ERROR: 🚨 MISSION CRITICAL: Frontend Deployment Environment Variables Regression Test
+# REMOVED_SYNTAX_ERROR:  ALERT:  MISSION CRITICAL: Frontend Deployment Environment Variables Regression Test
 # REMOVED_SYNTAX_ERROR: ===============================================================================
 # REMOVED_SYNTAX_ERROR: This test PREVENTS regression of critical frontend environment variables that have
 # REMOVED_SYNTAX_ERROR: repeatedly been removed, causing complete frontend failure.
@@ -120,7 +120,7 @@
     # REMOVED_SYNTAX_ERROR: Test that deploy_to_gcp.py ServiceConfig includes ALL critical frontend variables.
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔍 Testing deployment script includes all critical variables...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing deployment script includes all critical variables...")
 
     # Create a GCPDeployer with correct initialization
     # REMOVED_SYNTAX_ERROR: deployer = GCPDeployer(project_id="netra-staging")
@@ -134,7 +134,7 @@
 
             # REMOVED_SYNTAX_ERROR: self.assertIsNotNone( )
             # REMOVED_SYNTAX_ERROR: frontend_service,
-            # REMOVED_SYNTAX_ERROR: "❌ Frontend service not found in deployment configuration!"
+            # REMOVED_SYNTAX_ERROR: " FAIL:  Frontend service not found in deployment configuration!"
             
 
             # Check each critical variable is present
@@ -150,7 +150,7 @@
                             # REMOVED_SYNTAX_ERROR: self.assertEqual( )
                             # REMOVED_SYNTAX_ERROR: len(missing_vars), 0,
                             # REMOVED_SYNTAX_ERROR: f"
-                            # REMOVED_SYNTAX_ERROR: 🔴 CRITICAL REGRESSION DETECTED!
+                            # REMOVED_SYNTAX_ERROR: [U+1F534] CRITICAL REGRESSION DETECTED!
                             # REMOVED_SYNTAX_ERROR: "
                             # REMOVED_SYNTAX_ERROR: "formatted_string" +
                                 # REMOVED_SYNTAX_ERROR: "
@@ -167,7 +167,7 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔍 Testing validation method checks all variables...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing validation method checks all variables...")
 
     # REMOVED_SYNTAX_ERROR: deployer = GCPDeployer(project_id="netra-staging")
 
@@ -175,7 +175,7 @@
     # REMOVED_SYNTAX_ERROR: result = deployer.validate_frontend_environment_variables()
     # REMOVED_SYNTAX_ERROR: self.assertTrue( )
     # REMOVED_SYNTAX_ERROR: result,
-    # REMOVED_SYNTAX_ERROR: "❌ Validation failed even with all variables present!"
+    # REMOVED_SYNTAX_ERROR: " FAIL:  Validation failed even with all variables present!"
     
 
     # Test with missing critical variable (should fail)
@@ -195,7 +195,7 @@
 
                 # REMOVED_SYNTAX_ERROR: self.assertFalse( )
                 # REMOVED_SYNTAX_ERROR: result,
-                # REMOVED_SYNTAX_ERROR: "❌ Validation passed despite missing critical NEXT_PUBLIC_WS_URL variable!"
+                # REMOVED_SYNTAX_ERROR: " FAIL:  Validation passed despite missing critical NEXT_PUBLIC_WS_URL variable!"
                 
 
                 # Restore the variable
@@ -208,7 +208,7 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔍 Testing frontend/.env.staging file consistency...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing frontend/.env.staging file consistency...")
 
     # REMOVED_SYNTAX_ERROR: env_staging_path = project_root / "frontend" / ".env.staging"
 
@@ -232,7 +232,7 @@
                             # REMOVED_SYNTAX_ERROR: self.assertEqual( )
                             # REMOVED_SYNTAX_ERROR: len(missing_in_env), 0,
                             # REMOVED_SYNTAX_ERROR: f"
-                            # REMOVED_SYNTAX_ERROR: 🔴 .env.staging is missing critical variables:
+                            # REMOVED_SYNTAX_ERROR: [U+1F534] .env.staging is missing critical variables:
                                 # REMOVED_SYNTAX_ERROR: " +
                                 # REMOVED_SYNTAX_ERROR: "
                                 # REMOVED_SYNTAX_ERROR: ".join("formatted_string" for var in missing_in_env)
@@ -244,7 +244,7 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔍 Testing frontend/.env.production file consistency...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing frontend/.env.production file consistency...")
 
     # REMOVED_SYNTAX_ERROR: env_prod_path = project_root / "frontend" / ".env.production"
 
@@ -268,7 +268,7 @@
                             # REMOVED_SYNTAX_ERROR: self.assertEqual( )
                             # REMOVED_SYNTAX_ERROR: len(missing_in_env), 0,
                             # REMOVED_SYNTAX_ERROR: f"
-                            # REMOVED_SYNTAX_ERROR: 🔴 .env.production is missing critical variables:
+                            # REMOVED_SYNTAX_ERROR: [U+1F534] .env.production is missing critical variables:
                                 # REMOVED_SYNTAX_ERROR: " +
                                 # REMOVED_SYNTAX_ERROR: "
                                 # REMOVED_SYNTAX_ERROR: ".join("formatted_string" for var in missing_in_env)
@@ -280,7 +280,7 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔍 Testing WebSocket URL consistency...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing WebSocket URL consistency...")
 
     # REMOVED_SYNTAX_ERROR: deployer = GCPDeployer(project_id="netra-staging")
 
@@ -294,8 +294,8 @@
                 # REMOVED_SYNTAX_ERROR: ws_url = frontend_service.environment_vars.get("NEXT_PUBLIC_WS_URL")
                 # REMOVED_SYNTAX_ERROR: websocket_url = frontend_service.environment_vars.get("NEXT_PUBLIC_WEBSOCKET_URL")
 
-                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(ws_url, "❌ NEXT_PUBLIC_WS_URL is not set!")
-                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(websocket_url, "❌ NEXT_PUBLIC_WEBSOCKET_URL is not set!")
+                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(ws_url, " FAIL:  NEXT_PUBLIC_WS_URL is not set!")
+                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(websocket_url, " FAIL:  NEXT_PUBLIC_WEBSOCKET_URL is not set!")
 
                 # Both should be WebSocket URLs
                 # REMOVED_SYNTAX_ERROR: self.assertTrue( )
@@ -303,7 +303,7 @@
                 # REMOVED_SYNTAX_ERROR: "formatted_string"
                 
 
-                # REMOVED_SYNTAX_ERROR: print(f"  ✅ WebSocket URLs configured correctly")
+                # REMOVED_SYNTAX_ERROR: print(f"   PASS:  WebSocket URLs configured correctly")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -313,7 +313,7 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔍 Testing Auth URL consistency...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing Auth URL consistency...")
 
     # REMOVED_SYNTAX_ERROR: deployer = GCPDeployer(project_id="netra-staging")
 
@@ -328,9 +328,9 @@
                 # REMOVED_SYNTAX_ERROR: auth_service_url = frontend_service.environment_vars.get("NEXT_PUBLIC_AUTH_SERVICE_URL")
                 # REMOVED_SYNTAX_ERROR: auth_api_url = frontend_service.environment_vars.get("NEXT_PUBLIC_AUTH_API_URL")
 
-                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(auth_url, "❌ NEXT_PUBLIC_AUTH_URL is not set!")
-                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(auth_service_url, "❌ NEXT_PUBLIC_AUTH_SERVICE_URL is not set!")
-                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(auth_api_url, "❌ NEXT_PUBLIC_AUTH_API_URL is not set!")
+                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(auth_url, " FAIL:  NEXT_PUBLIC_AUTH_URL is not set!")
+                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(auth_service_url, " FAIL:  NEXT_PUBLIC_AUTH_SERVICE_URL is not set!")
+                # REMOVED_SYNTAX_ERROR: self.assertIsNotNone(auth_api_url, " FAIL:  NEXT_PUBLIC_AUTH_API_URL is not set!")
 
                 # All should be HTTPS URLs
                 # REMOVED_SYNTAX_ERROR: for url, name in [(auth_url, "AUTH_URL"),
@@ -341,7 +341,7 @@
                     # REMOVED_SYNTAX_ERROR: "formatted_string"
                     
 
-                    # REMOVED_SYNTAX_ERROR: print(f"  ✅ Auth URLs configured correctly")
+                    # REMOVED_SYNTAX_ERROR: print(f"   PASS:  Auth URLs configured correctly")
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -353,7 +353,7 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔍 Meta-test: Validating this test file covers all variables...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Meta-test: Validating this test file covers all variables...")
 
     # Read this test file with UTF-8 encoding
     # REMOVED_SYNTAX_ERROR: test_file_content = Path(__file__).read_text(encoding='utf-8')
@@ -366,11 +366,11 @@
         # REMOVED_SYNTAX_ERROR: "formatted_string"
         
 
-        # REMOVED_SYNTAX_ERROR: print("  ✅ All critical variables are covered by this test suite")
+        # REMOVED_SYNTAX_ERROR: print("   PASS:  All critical variables are covered by this test suite")
 
 # REMOVED_SYNTAX_ERROR: def test_discovery_endpoint_configuration_critical_for_chat(self):
     # REMOVED_SYNTAX_ERROR: '''
-    # REMOVED_SYNTAX_ERROR: 🚨 ULTRA CRITICAL: Test that discovery endpoint URLs are properly configured.
+    # REMOVED_SYNTAX_ERROR:  ALERT:  ULTRA CRITICAL: Test that discovery endpoint URLs are properly configured.
     # REMOVED_SYNTAX_ERROR: WITHOUT proper discovery URLs, the ENTIRE chat value delivery system BREAKS!
 
     # REMOVED_SYNTAX_ERROR: The discovery endpoint provides:
@@ -387,7 +387,7 @@
             # REMOVED_SYNTAX_ERROR: '''
             # REMOVED_SYNTAX_ERROR: pass
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: 🚨 CRITICAL: Testing discovery endpoint configuration for chat value...")
+            # REMOVED_SYNTAX_ERROR:  ALERT:  CRITICAL: Testing discovery endpoint configuration for chat value...")
 
             # REMOVED_SYNTAX_ERROR: deployer = GCPDeployer(project_id="netra-staging")
 
@@ -400,14 +400,14 @@
 
                     # REMOVED_SYNTAX_ERROR: self.assertIsNotNone( )
                     # REMOVED_SYNTAX_ERROR: frontend_service,
-                    # REMOVED_SYNTAX_ERROR: "❌ Frontend service not found - CHAT VALUE COMPLETELY BROKEN!"
+                    # REMOVED_SYNTAX_ERROR: " FAIL:  Frontend service not found - CHAT VALUE COMPLETELY BROKEN!"
                     
 
                     # Check API URL is set (discovery endpoint is at API_URL/api/discovery)
                     # REMOVED_SYNTAX_ERROR: api_url = frontend_service.environment_vars.get("NEXT_PUBLIC_API_URL")
                     # REMOVED_SYNTAX_ERROR: self.assertIsNotNone( )
                     # REMOVED_SYNTAX_ERROR: api_url,
-                    # REMOVED_SYNTAX_ERROR: "❌ NEXT_PUBLIC_API_URL not set - Discovery endpoint unreachable! "
+                    # REMOVED_SYNTAX_ERROR: " FAIL:  NEXT_PUBLIC_API_URL not set - Discovery endpoint unreachable! "
                     # REMOVED_SYNTAX_ERROR: "ENTIRE CHAT VALUE DELIVERY BROKEN!"
                     
 
@@ -415,7 +415,7 @@
                     # REMOVED_SYNTAX_ERROR: ws_url = frontend_service.environment_vars.get("NEXT_PUBLIC_WS_URL")
                     # REMOVED_SYNTAX_ERROR: self.assertIsNotNone( )
                     # REMOVED_SYNTAX_ERROR: ws_url,
-                    # REMOVED_SYNTAX_ERROR: "❌ NEXT_PUBLIC_WS_URL not set - No real-time agent updates! "
+                    # REMOVED_SYNTAX_ERROR: " FAIL:  NEXT_PUBLIC_WS_URL not set - No real-time agent updates! "
                     # REMOVED_SYNTAX_ERROR: "Users cannot see agent thinking/progress!"
                     
 
@@ -433,7 +433,7 @@
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: print(" )
-                    # REMOVED_SYNTAX_ERROR: 💡 Chat value delivery chain verified:")
+                    # REMOVED_SYNTAX_ERROR:  IDEA:  Chat value delivery chain verified:")
                     # REMOVED_SYNTAX_ERROR: print("     1. Frontend connects to discovery endpoint")
                     # REMOVED_SYNTAX_ERROR: print("     2. Discovery provides agent/tool configurations")
                     # REMOVED_SYNTAX_ERROR: print("     3. WebSocket enables real-time agent updates")
@@ -445,7 +445,7 @@
     # REMOVED_SYNTAX_ERROR: '''
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔍 Testing discovery endpoint URL format consistency...")
+    # REMOVED_SYNTAX_ERROR:  SEARCH:  Testing discovery endpoint URL format consistency...")
 
     # Test staging configuration
     # REMOVED_SYNTAX_ERROR: staging_deployer = GCPDeployer(project_id="netra-staging")
@@ -463,19 +463,19 @@
                     # REMOVED_SYNTAX_ERROR: self.assertIn( )
                     # REMOVED_SYNTAX_ERROR: "staging",
                     # REMOVED_SYNTAX_ERROR: staging_api_url.lower(),
-                    # REMOVED_SYNTAX_ERROR: f"⚠️ Staging API URL doesn"t contain "staging": {staging_api_url}"
+                    # REMOVED_SYNTAX_ERROR: f" WARNING: [U+FE0F] Staging API URL doesn"t contain "staging": {staging_api_url}"
                     
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                     # Test production configuration - Note: GCPDeployer may default to staging URLs
                     # This is expected behavior in the deployment script
-                    # REMOVED_SYNTAX_ERROR: print("  ℹ️  Production URL format test skipped (deployment script defaults to staging)")
+                    # REMOVED_SYNTAX_ERROR: print("  [U+2139][U+FE0F]  Production URL format test skipped (deployment script defaults to staging)")
 
 
 # REMOVED_SYNTAX_ERROR: def main():
     # REMOVED_SYNTAX_ERROR: """Run the frontend deployment environment regression tests."""
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
-    # REMOVED_SYNTAX_ERROR: print("🚨 MISSION CRITICAL: Frontend Deployment Environment Regression Test")
+    # REMOVED_SYNTAX_ERROR: print(" ALERT:  MISSION CRITICAL: Frontend Deployment Environment Regression Test")
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
     # REMOVED_SYNTAX_ERROR: print(" )
     # REMOVED_SYNTAX_ERROR: This test prevents regression of critical frontend environment variables")
@@ -494,13 +494,13 @@
     # REMOVED_SYNTAX_ERROR: print(" )
     # REMOVED_SYNTAX_ERROR: " + "=" * 80)
     # REMOVED_SYNTAX_ERROR: if result.wasSuccessful():
-        # REMOVED_SYNTAX_ERROR: print("✅ SUCCESS: All frontend deployment environment checks passed!")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  SUCCESS: All frontend deployment environment checks passed!")
         # REMOVED_SYNTAX_ERROR: print("The deployment configuration contains all critical variables.")
         # REMOVED_SYNTAX_ERROR: else:
-            # REMOVED_SYNTAX_ERROR: print("🔴 FAILURE: Frontend deployment environment regression detected!")
+            # REMOVED_SYNTAX_ERROR: print("[U+1F534] FAILURE: Frontend deployment environment regression detected!")
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: ⚠️  CRITICAL: Do NOT deploy without fixing these issues!")
+            # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  CRITICAL: Do NOT deploy without fixing these issues!")
             # REMOVED_SYNTAX_ERROR: print("Missing variables will cause complete frontend failure!")
             # REMOVED_SYNTAX_ERROR: print("=" * 80)
 

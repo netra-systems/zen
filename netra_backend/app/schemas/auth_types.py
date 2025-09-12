@@ -14,7 +14,7 @@ Usage:
     from netra_backend.app.schemas.auth_types import Token, TokenData, AuthEndpoints
     
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Eliminate $5K MRR loss from auth inconsistencies 
 - Value Impact: 5-10% conversion improvement
 - Revenue Impact: +$5K MRR recovered

@@ -55,7 +55,7 @@ class UnifiedConfigurationManagerTestSuiteValidator:
         
     def validate_test_suite(self) -> Dict[str, Any]:
         """Validate the complete test suite."""
-        print("🚀 Validating Comprehensive UnifiedConfigurationManager Test Suite")
+        print("[U+1F680] Validating Comprehensive UnifiedConfigurationManager Test Suite")
         print("=" * 80)
         
         validation_start_time = time.time()
@@ -98,7 +98,7 @@ class UnifiedConfigurationManagerTestSuiteValidator:
     
     def _validate_unit_tests(self) -> Dict[str, Any]:
         """Validate unit test suite."""
-        print("\n📋 Validating Unit Test Suite (35 tests, 12 high difficulty)")
+        print("\n[U+1F4CB] Validating Unit Test Suite (35 tests, 12 high difficulty)")
         
         unit_test_file = self.base_path / "netra_backend" / "tests" / "unit" / "core" / "managers" / "test_unified_configuration_manager_ssot_business_critical.py"
         
@@ -176,13 +176,13 @@ class UnifiedConfigurationManagerTestSuiteValidator:
         if validation_issues:
             unit_results["validation_issues"] = validation_issues
             
-        print(f"✅ Unit Tests: {len(test_methods)} total, {len(high_difficulty_tests)} high difficulty, {len(business_critical_tests)} business critical")
+        print(f" PASS:  Unit Tests: {len(test_methods)} total, {len(high_difficulty_tests)} high difficulty, {len(business_critical_tests)} business critical")
         
         return unit_results
     
     def _validate_integration_tests(self) -> Dict[str, Any]:
         """Validate integration test suite."""
-        print("\n🔗 Validating Integration Test Suite (25 tests, 9 high difficulty)")
+        print("\n[U+1F517] Validating Integration Test Suite (25 tests, 9 high difficulty)")
         
         integration_test_file = self.base_path / "netra_backend" / "tests" / "integration" / "test_unified_configuration_manager_real_services_critical.py"
         
@@ -229,13 +229,13 @@ class UnifiedConfigurationManagerTestSuiteValidator:
             "syntax_validation": "PASSED"
         }
         
-        print(f"✅ Integration Tests: {len(test_methods)} total, {real_services_usage} real service patterns")
+        print(f" PASS:  Integration Tests: {len(test_methods)} total, {real_services_usage} real service patterns")
         
         return integration_results
     
     def _validate_e2e_tests(self) -> Dict[str, Any]:
         """Validate E2E GCP staging test suite."""
-        print("\n🌐 Validating E2E GCP Staging Test Suite (10 tests, 4 high difficulty)")
+        print("\n[U+1F310] Validating E2E GCP Staging Test Suite (10 tests, 4 high difficulty)")
         
         e2e_test_file = self.base_path / "tests" / "e2e" / "test_unified_configuration_manager_gcp_staging_production_critical.py"
         
@@ -285,13 +285,13 @@ class UnifiedConfigurationManagerTestSuiteValidator:
             "syntax_validation": "PASSED"
         }
         
-        print(f"✅ E2E Tests: {len(test_methods)} total, {gcp_integration_count} GCP integrations")
+        print(f" PASS:  E2E Tests: {len(test_methods)} total, {gcp_integration_count} GCP integrations")
         
         return e2e_results
     
     def _validate_business_logic_protection(self) -> Dict[str, Any]:
         """Validate business logic and revenue protection across all tests."""
-        print("\n💰 Validating Business Logic and Revenue Protection")
+        print("\n[U+1F4B0] Validating Business Logic and Revenue Protection")
         
         # Key business value patterns to validate
         revenue_protection_patterns = {
@@ -342,7 +342,7 @@ class UnifiedConfigurationManagerTestSuiteValidator:
             f"Chat criticality: {overall_business_protection['chat_criticality']}"
         ])
         
-        print(f"✅ Business Logic Protection: {sum(1 for v in overall_business_protection.values() if v)}/3 criteria met")
+        print(f" PASS:  Business Logic Protection: {sum(1 for v in overall_business_protection.values() if v)}/3 criteria met")
         
         return {
             "overall_protection": overall_business_protection,
@@ -352,7 +352,7 @@ class UnifiedConfigurationManagerTestSuiteValidator:
     
     def _validate_ssot_compliance(self) -> Dict[str, Any]:
         """Validate SSOT compliance across all test files."""
-        print("\n🏗️ Validating SSOT Compliance")
+        print("\n[U+1F3D7][U+FE0F] Validating SSOT Compliance")
         
         ssot_compliance_checks = {
             "correct_imports": [
@@ -410,7 +410,7 @@ class UnifiedConfigurationManagerTestSuiteValidator:
             )
         }
         
-        print(f"✅ SSOT Compliance: {sum(1 for v in overall_ssot_compliance.values() if v)}/3 criteria met")
+        print(f" PASS:  SSOT Compliance: {sum(1 for v in overall_ssot_compliance.values() if v)}/3 criteria met")
         
         return {
             "overall_compliance": overall_ssot_compliance,
@@ -420,7 +420,7 @@ class UnifiedConfigurationManagerTestSuiteValidator:
     
     def _validate_functionality_coverage(self) -> Dict[str, Any]:
         """Validate comprehensive functionality coverage."""
-        print("\n📊 Validating Functionality Coverage")
+        print("\n CHART:  Validating Functionality Coverage")
         
         # Critical functionality areas that must be tested
         critical_functionality = {
@@ -481,7 +481,7 @@ class UnifiedConfigurationManagerTestSuiteValidator:
             )
         }
         
-        print(f"✅ Functionality Coverage: {overall_coverage_score:.1f}% overall")
+        print(f" PASS:  Functionality Coverage: {overall_coverage_score:.1f}% overall")
         
         return coverage_validation
     
@@ -606,57 +606,57 @@ class UnifiedConfigurationManagerTestSuiteValidator:
     def _generate_validation_report(self, results: Dict[str, Any]) -> None:
         """Generate comprehensive validation report."""
         print("\n" + "="*80)
-        print("📊 COMPREHENSIVE TEST SUITE VALIDATION REPORT")
+        print(" CHART:  COMPREHENSIVE TEST SUITE VALIDATION REPORT")
         print("="*80)
         
         # Overall health summary
         health = results["overall_health"]
-        print(f"\n🎯 Overall Health Score: {health['health_score']:.1f}% ({health['status']})")
+        print(f"\n TARGET:  Overall Health Score: {health['health_score']:.1f}% ({health['status']})")
         
         if self.critical_issues:
-            print(f"\n🚨 Critical Issues ({len(self.critical_issues)}):")
+            print(f"\n ALERT:  Critical Issues ({len(self.critical_issues)}):")
             for issue in self.critical_issues:
-                print(f"   ❌ {issue}")
+                print(f"    FAIL:  {issue}")
         
         # Test category summary
-        print(f"\n📋 Test Category Summary:")
+        print(f"\n[U+1F4CB] Test Category Summary:")
         for category, category_results in results["test_categories"].items():
             if category_results.get("status") == "PASSED":
                 test_count = category_results.get("total_test_methods", 0)
-                print(f"   ✅ {category.replace('_', ' ').title()}: {test_count} tests")
+                print(f"    PASS:  {category.replace('_', ' ').title()}: {test_count} tests")
             else:
-                print(f"   ❌ {category.replace('_', ' ').title()}: {category_results.get('reason', 'Failed')}")
+                print(f"    FAIL:  {category.replace('_', ' ').title()}: {category_results.get('reason', 'Failed')}")
         
         # Business value summary
-        print(f"\n💰 Business Value Protection:")
+        print(f"\n[U+1F4B0] Business Value Protection:")
         for validation in self.business_value_validations:
-            print(f"   ✅ {validation}")
+            print(f"    PASS:  {validation}")
         
         # Coverage summary
         coverage_result = results["business_validations"]["functionality_coverage"]
         coverage_score = coverage_result.get("overall_coverage_score", 0)
-        print(f"\n📊 Functionality Coverage: {coverage_score:.1f}%")
+        print(f"\n CHART:  Functionality Coverage: {coverage_score:.1f}%")
         
         # SSOT compliance summary
         ssot_result = results["business_validations"]["ssot_compliance"]
         ssot_status = ssot_result.get("validation_status", "UNKNOWN")
-        print(f"\n🏗️ SSOT Compliance: {ssot_status}")
+        print(f"\n[U+1F3D7][U+FE0F] SSOT Compliance: {ssot_status}")
         
         # Final recommendations
-        print(f"\n📋 Recommendations:")
+        print(f"\n[U+1F4CB] Recommendations:")
         if health["health_score"] >= 90:
-            print("   ✅ Test suite is comprehensive and production-ready")
-            print("   ✅ All critical business value areas are protected")
-            print("   ✅ SSOT compliance is maintained")
+            print("    PASS:  Test suite is comprehensive and production-ready")
+            print("    PASS:  All critical business value areas are protected")
+            print("    PASS:  SSOT compliance is maintained")
         elif health["health_score"] >= 75:
-            print("   ⚠️ Test suite is good but has minor improvement areas")
-            print("   ⚠️ Consider adding more edge case coverage")
+            print("    WARNING: [U+FE0F] Test suite is good but has minor improvement areas")
+            print("    WARNING: [U+FE0F] Consider adding more edge case coverage")
         else:
-            print("   🚨 Test suite needs significant improvements")
-            print("   🚨 Address critical issues before production deployment")
+            print("    ALERT:  Test suite needs significant improvements")
+            print("    ALERT:  Address critical issues before production deployment")
         
         print("\n" + "="*80)
-        print("📝 Validation Complete - Review results above")
+        print("[U+1F4DD] Validation Complete - Review results above")
         print("="*80)
 
 
@@ -672,7 +672,7 @@ def main():
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2, default=str)
         
-        print(f"\n💾 Validation results saved to: {results_file}")
+        print(f"\n[U+1F4BE] Validation results saved to: {results_file}")
         
         # Exit with appropriate code
         if results["overall_health"]["status"] == "HEALTHY":
@@ -683,7 +683,7 @@ def main():
             return 2
             
     except Exception as e:
-        print(f"\n🚨 Validation failed with error: {str(e)}")
+        print(f"\n ALERT:  Validation failed with error: {str(e)}")
         return 3
 
 

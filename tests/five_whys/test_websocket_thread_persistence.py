@@ -128,7 +128,7 @@ class TestWebSocketThreadPersistence:
                         assert captured_thread_ids[1] == captured_thread_ids[2], \
                             f"Thread ID changed between messages: {captured_thread_ids[1]} != {captured_thread_ids[2]}"
                         
-                        print(f"✅ Thread ID persisted across all messages: {captured_thread_ids[0]}")
+                        print(f" PASS:  Thread ID persisted across all messages: {captured_thread_ids[0]}")
     
     @pytest.mark.asyncio
     async def test_thread_id_explicit_override(self, handler, mock_websocket):
@@ -196,7 +196,7 @@ class TestWebSocketThreadPersistence:
                         assert captured_contexts[1].thread_id == explicit_thread_id, \
                             f"Second message should reuse the same thread_id: {captured_contexts[1].thread_id}"
                         
-                        print(f"✅ Explicit thread ID {explicit_thread_id} persisted across messages")
+                        print(f" PASS:  Explicit thread ID {explicit_thread_id} persisted across messages")
     
     @pytest.mark.asyncio
     async def test_websocket_context_creation_with_persistent_thread(self):
@@ -223,7 +223,7 @@ class TestWebSocketThreadPersistence:
         assert context.run_id == persistent_run_id
         assert context.connection_id is not None
         
-        print(f"✅ WebSocketContext created with persistent thread_id: {persistent_thread_id}")
+        print(f" PASS:  WebSocketContext created with persistent thread_id: {persistent_thread_id}")
     
     @pytest.mark.asyncio
     async def test_unified_id_generator_session_persistence(self):
@@ -261,7 +261,7 @@ class TestWebSocketThreadPersistence:
         assert session1["run_id"] == session2["run_id"], \
             "Run ID should persist when not explicitly changed"
         
-        print(f"✅ UnifiedIdGenerator maintains session persistence: thread={session1['thread_id']}")
+        print(f" PASS:  UnifiedIdGenerator maintains session persistence: thread={session1['thread_id']}")
 
 
 if __name__ == "__main__":

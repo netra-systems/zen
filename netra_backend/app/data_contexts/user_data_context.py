@@ -12,7 +12,7 @@ Implements the three-tier architecture's data isolation requirements:
 - Thread-safe concurrent operations with proper resource management
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)  
+- Segment: ALL (Free  ->  Enterprise)  
 - Business Goal: Complete data isolation for multi-tenant security
 - Value Impact: Zero risk of cross-user data leakage, enterprise compliance
 - Revenue Impact: Critical for Enterprise revenue, prevents security incidents

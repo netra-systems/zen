@@ -134,7 +134,7 @@ class TestStaging404ErrorReproduction:
         )
         
         logger.info(
-            f"🎯 REPRODUCING STAGING ERROR: Starting test to reproduce 404 'Thread not found' "
+            f" TARGET:  REPRODUCING STAGING ERROR: Starting test to reproduce 404 'Thread not found' "
             f"error for system user. User: {user_id}, Request: {request_id}"
         )
         
@@ -149,7 +149,7 @@ class TestStaging404ErrorReproduction:
             if session:
                 # If we get here, the bug may be fixed or test environment differs from staging
                 logger.info(
-                    f"✅ UNEXPECTED SUCCESS: System user session created successfully. "
+                    f" PASS:  UNEXPECTED SUCCESS: System user session created successfully. "
                     f"This suggests the 404 error bug may be fixed or environment differs from staging. "
                     f"Session: {id(session)}, User: {user_id}"
                 )
@@ -173,7 +173,7 @@ class TestStaging404ErrorReproduction:
             # This is the expected error we're trying to reproduce
             if e.status_code == 404 and "Thread not found" in str(e.detail):
                 logger.error(
-                    f"🎯 ERROR REPRODUCED: Successfully reproduced the staging 404 'Thread not found' error! "
+                    f" TARGET:  ERROR REPRODUCED: Successfully reproduced the staging 404 'Thread not found' error! "
                     f"User: {user_id}, Error: {e.detail}, Status: {e.status_code}"
                 )
                 
@@ -190,7 +190,7 @@ class TestStaging404ErrorReproduction:
                 
             else:
                 logger.error(
-                    f"❌ UNEXPECTED ERROR: Got different error than expected 404. "
+                    f" FAIL:  UNEXPECTED ERROR: Got different error than expected 404. "
                     f"Error: {e}, Status: {e.status_code}"
                 )
                 auth_tracer.log_failure(auth_context, e, {
@@ -202,7 +202,7 @@ class TestStaging404ErrorReproduction:
                 
         except Exception as e:
             logger.error(
-                f"❌ UNEXPECTED EXCEPTION: Got unexpected exception type. Error: {e}, Type: {type(e)}"
+                f" FAIL:  UNEXPECTED EXCEPTION: Got unexpected exception type. Error: {e}, Type: {type(e)}"
             )
             auth_tracer.log_failure(auth_context, e, {
                 "unexpected_exception": True,
@@ -222,7 +222,7 @@ class TestStaging404ErrorReproduction:
         request_id = UnifiedIdGenerator.generate_base_id("req_system_bypass")
         
         logger.info(
-            f"🔧 TESTING SYSTEM USER BYPASS: Validating that system user can operate "
+            f"[U+1F527] TESTING SYSTEM USER BYPASS: Validating that system user can operate "
             f"without thread validation. User: {user_id}"
         )
         
@@ -244,7 +244,7 @@ class TestStaging404ErrorReproduction:
                 
                 # System user should have session without thread dependency
                 logger.info(
-                    f"✅ SYSTEM BYPASS SUCCESS: System user session created without thread dependency. "
+                    f" PASS:  SYSTEM BYPASS SUCCESS: System user session created without thread dependency. "
                     f"Session info: {session_info}"
                 )
                 
@@ -255,13 +255,13 @@ class TestStaging404ErrorReproduction:
                 assert test_value == 1
                 
                 logger.info(
-                    f"✅ SYSTEM OPERATIONS SUCCESS: System user can perform database operations. "
+                    f" PASS:  SYSTEM OPERATIONS SUCCESS: System user can perform database operations. "
                     f"Test query result: {test_value}"
                 )
                 
         except Exception as e:
             logger.error(
-                f"❌ SYSTEM BYPASS FAILED: System user failed to bypass thread validation. "
+                f" FAIL:  SYSTEM BYPASS FAILED: System user failed to bypass thread validation. "
                 f"Error: {e}, Type: {type(e)}"
             )
             
@@ -291,7 +291,7 @@ class TestStaging404ErrorReproduction:
         regular_user_id = regular_user_context["user_id"]
         
         logger.info(
-            f"⚖️ COMPARING USER BEHAVIORS: Testing system user '{system_user_id}' vs "
+            f"[U+2696][U+FE0F] COMPARING USER BEHAVIORS: Testing system user '{system_user_id}' vs "
             f"regular user '{regular_user_id}' authentication requirements"
         )
         
@@ -305,10 +305,10 @@ class TestStaging404ErrorReproduction:
             ) as system_session:
                 assert system_session is not None
                 system_success = True
-                logger.info(f"✅ SYSTEM USER SUCCESS: Works without thread setup")
+                logger.info(f" PASS:  SYSTEM USER SUCCESS: Works without thread setup")
                 
         except Exception as e:
-            logger.error(f"❌ SYSTEM USER FAILED: {e}")
+            logger.error(f" FAIL:  SYSTEM USER FAILED: {e}")
             system_success = False
         
         # Test 2: Regular user with proper thread setup
@@ -324,15 +324,15 @@ class TestStaging404ErrorReproduction:
             ) as regular_session:
                 assert regular_session is not None
                 regular_success = True
-                logger.info(f"✅ REGULAR USER SUCCESS: Works with proper thread setup")
+                logger.info(f" PASS:  REGULAR USER SUCCESS: Works with proper thread setup")
                 
         except Exception as e:
-            logger.error(f"❌ REGULAR USER FAILED: {e}")
+            logger.error(f" FAIL:  REGULAR USER FAILED: {e}")
             regular_success = False
         
         # Analyze results
         logger.info(
-            f"📊 COMPARISON RESULTS: System user success: {system_success}, "
+            f" CHART:  COMPARISON RESULTS: System user success: {system_success}, "
             f"Regular user success: {regular_success}"
         )
         
@@ -352,7 +352,7 @@ class TestStaging404ErrorReproduction:
         request_id = UnifiedIdGenerator.generate_base_id("req_auto_creation_test")
         
         logger.info(
-            f"🐛 TESTING THREAD AUTO-CREATION BUG: Checking if session factory "
+            f"[U+1F41B] TESTING THREAD AUTO-CREATION BUG: Checking if session factory "
             f"inappropriately creates threads for system user: {user_id}"
         )
         
@@ -376,7 +376,7 @@ class TestStaging404ErrorReproduction:
                 
                 if thread_id_created:
                     logger.warning(
-                        f"⚠️ POTENTIAL BUG: Session factory created thread_id '{thread_id_created}' "
+                        f" WARNING: [U+FE0F] POTENTIAL BUG: Session factory created thread_id '{thread_id_created}' "
                         f"for system user '{user_id}'. System users should not require threads!"
                     )
                     
@@ -385,7 +385,7 @@ class TestStaging404ErrorReproduction:
                         thread_record = await thread_repo.get_by_id(session, thread_id_created)
                         if thread_record:
                             logger.error(
-                                f"🐛 BUG CONFIRMED: Session factory created unnecessary thread record "
+                                f"[U+1F41B] BUG CONFIRMED: Session factory created unnecessary thread record "
                                 f"'{thread_id_created}' for system user. This is the root cause of 404 errors!"
                             )
                             
@@ -400,7 +400,7 @@ class TestStaging404ErrorReproduction:
                         )
                 else:
                     logger.info(
-                        f"✅ CORRECT BEHAVIOR: Session factory did not create thread_id for system user"
+                        f" PASS:  CORRECT BEHAVIOR: Session factory did not create thread_id for system user"
                     )
                 
                 # Verify session works regardless
@@ -409,14 +409,14 @@ class TestStaging404ErrorReproduction:
                 
         except Exception as e:
             logger.error(
-                f"❌ SESSION FACTORY TEST FAILED: Error testing thread auto-creation behavior. "
+                f" FAIL:  SESSION FACTORY TEST FAILED: Error testing thread auto-creation behavior. "
                 f"Error: {e}"
             )
             
             # This could be the 404 error we're trying to reproduce
             if "404" in str(e) and "Thread not found" in str(e):
                 logger.error(
-                    f"🎯 REPRODUCED 404 ERROR: Session factory thread auto-creation bug caused "
+                    f" TARGET:  REPRODUCED 404 ERROR: Session factory thread auto-creation bug caused "
                     f"'Thread not found' error for system user!"
                 )
                 
@@ -447,7 +447,7 @@ class TestStaging404ErrorReproduction:
         user_id = system_user_context["user_id"]
         
         logger.info(
-            f"🧪 TESTING DEPENDENCY INJECTION PATH: Following exact staging error path "
+            f"[U+1F9EA] TESTING DEPENDENCY INJECTION PATH: Following exact staging error path "
             f"for system user: {user_id}"
         )
         
@@ -466,7 +466,7 @@ class TestStaging404ErrorReproduction:
         }
         
         logger.info(
-            f"📍 EXACT STAGING PATH: Following dependencies.py path with context: {session_init_context}"
+            f" PIN:  EXACT STAGING PATH: Following dependencies.py path with context: {session_init_context}"
         )
         
         try:
@@ -478,7 +478,7 @@ class TestStaging404ErrorReproduction:
             # This is the exact call from dependencies.py line 239
             async with factory.get_request_scoped_session(user_id, request_id) as session:
                 logger.info(
-                    f"✅ DEPENDENCY PATH SUCCESS: System user session created through "
+                    f" PASS:  DEPENDENCY PATH SUCCESS: System user session created through "
                     f"exact staging dependency path. Session: {id(session)}"
                 )
                 
@@ -489,7 +489,7 @@ class TestStaging404ErrorReproduction:
         except Exception as e:
             if "404" in str(e) and "Thread not found" in str(e):
                 logger.error(
-                    f"🎯 STAGING ERROR REPRODUCED: Exact dependency injection path "
+                    f" TARGET:  STAGING ERROR REPRODUCED: Exact dependency injection path "
                     f"caused 404 'Thread not found' error for system user!"
                 )
                 
@@ -516,7 +516,7 @@ class TestStaging404ErrorReproduction:
                 assert "Thread not found" in str(e)
                 
             else:
-                logger.error(f"❌ UNEXPECTED ERROR in dependency path: {e}")
+                logger.error(f" FAIL:  UNEXPECTED ERROR in dependency path: {e}")
                 raise
     
     @pytest.mark.asyncio
@@ -532,7 +532,7 @@ class TestStaging404ErrorReproduction:
         user_id = system_user_context["user_id"]
         
         logger.info(
-            f"🔧 TESTING FIX VALIDATION: Verifying system user authentication bypass "
+            f"[U+1F527] TESTING FIX VALIDATION: Verifying system user authentication bypass "
             f"works correctly for user: {user_id}"
         )
         
@@ -559,7 +559,7 @@ class TestStaging404ErrorReproduction:
         
         for scenario in test_scenarios:
             scenario_name = scenario["name"]
-            logger.info(f"🧪 Testing scenario: {scenario_name}")
+            logger.info(f"[U+1F9EA] Testing scenario: {scenario_name}")
             
             try:
                 request_id = UnifiedIdGenerator.generate_base_id(f"req_{scenario_name}")
@@ -580,16 +580,16 @@ class TestStaging404ErrorReproduction:
                     result = await session.execute(text("SELECT 1 as system_test"))
                     assert result.scalar() == 1
                     
-                    logger.info(f"✅ Scenario {scenario_name} PASSED")
+                    logger.info(f" PASS:  Scenario {scenario_name} PASSED")
                     
             except Exception as e:
-                logger.error(f"❌ Scenario {scenario_name} FAILED: {e}")
+                logger.error(f" FAIL:  Scenario {scenario_name} FAILED: {e}")
                 all_scenarios_passed = False
                 
                 # If we still get 404 errors, the fix is not complete
                 if "404" in str(e) and "Thread not found" in str(e):
                     logger.error(
-                        f"🐛 FIX INCOMPLETE: Still getting 404 'Thread not found' "
+                        f"[U+1F41B] FIX INCOMPLETE: Still getting 404 'Thread not found' "
                         f"error for system user in scenario {scenario_name}"
                     )
         
@@ -597,7 +597,7 @@ class TestStaging404ErrorReproduction:
         assert all_scenarios_passed, "System user authentication fix validation failed"
         
         logger.info(
-            f"✅ FIX VALIDATION SUCCESS: All system user authentication scenarios passed. "
+            f" PASS:  FIX VALIDATION SUCCESS: All system user authentication scenarios passed. "
             f"404 'Thread not found' error appears to be fixed."
         )
 

@@ -20,13 +20,13 @@ def test_chat_first_load():
     try:
         response = requests.get("http://localhost:3000/health")
         if response.status_code != 200:
-            print("❌ Frontend not responding on port 3000")
+            print(" FAIL:  Frontend not responding on port 3000")
             return False
     except:
-        print("❌ Frontend not accessible. Make sure dev environment is running.")
+        print(" FAIL:  Frontend not accessible. Make sure dev environment is running.")
         return False
     
-    print("✅ Frontend is accessible")
+    print(" PASS:  Frontend is accessible")
     
     # Setup Chrome driver
     options = Options()
@@ -36,9 +36,9 @@ def test_chat_first_load():
     
     try:
         driver = webdriver.Chrome(options=options)
-        print("✅ Chrome driver initialized")
+        print(" PASS:  Chrome driver initialized")
     except:
-        print("❌ Failed to initialize Chrome driver. Install chromedriver if needed.")
+        print(" FAIL:  Failed to initialize Chrome driver. Install chromedriver if needed.")
         return False
     
     try:
@@ -54,9 +54,9 @@ def test_chat_first_load():
             loading_element = wait.until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='loading']"))
             )
-            print("✅ Loading state detected")
+            print(" PASS:  Loading state detected")
         except:
-            print("⚠️  No loading state detected (might be too fast)")
+            print(" WARNING: [U+FE0F]  No loading state detected (might be too fast)")
         
         # Wait for main chat to appear
         try:
@@ -64,14 +64,14 @@ def test_chat_first_load():
                 EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='main-chat']"))
             )
             load_time = time.time() - loading_start
-            print(f"✅ Main chat loaded in {load_time:.2f} seconds")
+            print(f" PASS:  Main chat loaded in {load_time:.2f} seconds")
             
             if load_time < 2:
-                print("✅ Load time is within acceptable range (<2s)")
+                print(" PASS:  Load time is within acceptable range (<2s)")
             else:
-                print(f"⚠️  Load time is higher than expected: {load_time:.2f}s")
+                print(f" WARNING: [U+FE0F]  Load time is higher than expected: {load_time:.2f}s")
         except:
-            print("❌ Main chat failed to load")
+            print(" FAIL:  Main chat failed to load")
             return False
         
         # Check console for multiple initialization logs
@@ -79,22 +79,22 @@ def test_chat_first_load():
         init_count = sum(1 for log in logs if 'initialization' in log.get('message', '').lower())
         
         if init_count <= 1:
-            print(f"✅ Single initialization detected (count: {init_count})")
+            print(f" PASS:  Single initialization detected (count: {init_count})")
         else:
-            print(f"⚠️  Multiple initializations detected (count: {init_count})")
+            print(f" WARNING: [U+FE0F]  Multiple initializations detected (count: {init_count})")
         
         # Check for React development warnings about re-renders
         react_warnings = [log for log in logs if 'render' in log.get('message', '').lower()]
         if len(react_warnings) == 0:
-            print("✅ No excessive re-render warnings")
+            print(" PASS:  No excessive re-render warnings")
         else:
-            print(f"⚠️  Found {len(react_warnings)} render-related warnings")
+            print(f" WARNING: [U+FE0F]  Found {len(react_warnings)} render-related warnings")
         
         return True
         
     finally:
         driver.quit()
-        print("✅ Test completed")
+        print(" PASS:  Test completed")
 
 if __name__ == "__main__":
     print("=" * 60)
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     
     print("=" * 60)
     if success:
-        print("✅ FIXES VERIFIED: Chat loads without glitches")
+        print(" PASS:  FIXES VERIFIED: Chat loads without glitches")
     else:
-        print("❌ ISSUES DETECTED: Further investigation needed")
+        print(" FAIL:  ISSUES DETECTED: Further investigation needed")
     print("=" * 60)

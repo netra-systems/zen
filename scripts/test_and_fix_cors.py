@@ -114,7 +114,7 @@ async def main():
     for frontend_origin, backend_url in test_cases:
         result = await test_cors_preflight(frontend_origin, backend_url)
         
-        status = "✅ PASS" if result["success"] else "❌ FAIL"
+        status = " PASS:  PASS" if result["success"] else " FAIL:  FAIL"
         print(f"\n{status} Frontend: {frontend_origin}")
         print(f"     Backend:  {backend_url}")
         
@@ -130,7 +130,7 @@ async def main():
     for frontend_origin, backend_url in test_cases:
         result = await test_actual_request(frontend_origin, backend_url)
         
-        status = "✅ PASS" if result["success"] else "❌ FAIL"
+        status = " PASS:  PASS" if result["success"] else " FAIL:  FAIL"
         print(f"\n{status} Frontend: {frontend_origin}")
         print(f"     Backend:  {backend_url}")
         
@@ -149,8 +149,8 @@ even though they resolve to the same address.
 
 IMMEDIATE FIX (Choose one):
 1. Use consistent hostnames - access both frontend and backend via either:
-   - http://localhost:3000 → http://localhost:8000
-   - http://127.0.0.1:3000 → http://127.0.0.1:8000
+   - http://localhost:3000  ->  http://localhost:8000
+   - http://127.0.0.1:3000  ->  http://127.0.0.1:8000
 
 2. Set environment variable to allow all local origins:
    export CORS_ORIGINS="*"  (for development only)

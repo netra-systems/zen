@@ -312,7 +312,7 @@ class TestWebSocketEventStructure:
         # Should validate at least agent_started
         assert len(validated_events) > 0, "No events were schema validated"
     
-    # Schema validation helpers (each ≤8 lines)
+    # Schema validation helpers (each  <= 8 lines)
     def _validate_agent_started_payload(self, payload: Dict[str, Any]):
         """Validate agent_started payload schema."""
         assert "run_id" in payload and isinstance(payload["run_id"], str)

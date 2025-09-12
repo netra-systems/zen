@@ -189,7 +189,7 @@ class AutomatedRollbackSystem:
             plan.end_time = time.time()
             
             duration = plan.end_time - plan.start_time
-            logger.critical(f"✅ EMERGENCY ROLLBACK completed in {duration:.2f} seconds")
+            logger.critical(f" PASS:  EMERGENCY ROLLBACK completed in {duration:.2f} seconds")
             
             # Log to audit trail
             await self.log_rollback_audit(plan)
@@ -199,7 +199,7 @@ class AutomatedRollbackSystem:
         except Exception as e:
             plan.status = RollbackStatus.FAILED
             plan.end_time = time.time()
-            logger.critical(f"❌ EMERGENCY ROLLBACK FAILED: {e}")
+            logger.critical(f" FAIL:  EMERGENCY ROLLBACK FAILED: {e}")
             
             # Even if rollback fails, try to log for debugging
             try:
@@ -245,7 +245,7 @@ class AutomatedRollbackSystem:
             plan.end_time = time.time()
             
             duration = plan.end_time - plan.start_time
-            logger.info(f"✅ GRADUAL ROLLBACK completed in {duration:.2f} seconds")
+            logger.info(f" PASS:  GRADUAL ROLLBACK completed in {duration:.2f} seconds")
             
             await self.log_rollback_audit(plan)
             
@@ -254,7 +254,7 @@ class AutomatedRollbackSystem:
         except Exception as e:
             plan.status = RollbackStatus.FAILED
             plan.end_time = time.time()
-            logger.error(f"❌ GRADUAL ROLLBACK FAILED: {e}")
+            logger.error(f" FAIL:  GRADUAL ROLLBACK FAILED: {e}")
             
             await self.log_rollback_audit(plan)
             raise
@@ -286,7 +286,7 @@ class AutomatedRollbackSystem:
             plan.end_time = time.time()
             
             duration = plan.end_time - plan.start_time
-            logger.info(f"✅ SERVICE ROLLBACK ({service_name}) completed in {duration:.2f} seconds")
+            logger.info(f" PASS:  SERVICE ROLLBACK ({service_name}) completed in {duration:.2f} seconds")
             
             await self.log_rollback_audit(plan)
             
@@ -295,7 +295,7 @@ class AutomatedRollbackSystem:
         except Exception as e:
             plan.status = RollbackStatus.FAILED
             plan.end_time = time.time()
-            logger.error(f"❌ SERVICE ROLLBACK FAILED: {e}")
+            logger.error(f" FAIL:  SERVICE ROLLBACK FAILED: {e}")
             
             await self.log_rollback_audit(plan)
             raise
@@ -311,7 +311,7 @@ class AutomatedRollbackSystem:
         plan.steps.append(step)
         
         try:
-            logger.critical("🚨 EMERGENCY: Disabling all isolation feature flags...")
+            logger.critical(" ALERT:  EMERGENCY: Disabling all isolation feature flags...")
             
             success = self.feature_flags.emergency_disable_all(
                 reason=f"Emergency rollback: {plan.reason}",
@@ -322,15 +322,15 @@ class AutomatedRollbackSystem:
                 step.completed = True
                 step.output = "All feature flags disabled successfully"
                 plan.feature_flags_disabled = self.isolation_flags.copy()
-                logger.critical("✅ Feature flags disabled")
+                logger.critical(" PASS:  Feature flags disabled")
             else:
                 step.error = "Failed to disable feature flags"
-                logger.critical("❌ Failed to disable feature flags")
+                logger.critical(" FAIL:  Failed to disable feature flags")
                 raise Exception("Feature flag emergency disable failed")
             
         except Exception as e:
             step.error = str(e)
-            logger.critical(f"❌ Feature flag disable error: {e}")
+            logger.critical(f" FAIL:  Feature flag disable error: {e}")
             raise
         finally:
             step.end_time = time.time()
@@ -346,7 +346,7 @@ class AutomatedRollbackSystem:
         plan.steps.append(step)
         
         try:
-            logger.critical("🚨 EMERGENCY: Rolling back all services in parallel...")
+            logger.critical(" ALERT:  EMERGENCY: Rolling back all services in parallel...")
             
             # Create rollback tasks for all services
             tasks = []
@@ -374,11 +374,11 @@ class AutomatedRollbackSystem:
             if len(successful_rollbacks) > 0:
                 step.completed = True
                 step.output = f"Successfully rolled back: {[r[0] for r in successful_rollbacks]}"
-                logger.critical(f"✅ Rolled back {len(successful_rollbacks)} services")
+                logger.critical(f" PASS:  Rolled back {len(successful_rollbacks)} services")
             
             if len(failed_rollbacks) > 0:
                 step.error = f"Failed rollbacks: {failed_rollbacks}"
-                logger.critical(f"❌ {len(failed_rollbacks)} services failed to rollback")
+                logger.critical(f" FAIL:  {len(failed_rollbacks)} services failed to rollback")
                 
                 # Don't fail the entire rollback if some services succeeded
                 if len(successful_rollbacks) == 0:
@@ -386,7 +386,7 @@ class AutomatedRollbackSystem:
             
         except Exception as e:
             step.error = str(e)
-            logger.critical(f"❌ Parallel service rollback error: {e}")
+            logger.critical(f" FAIL:  Parallel service rollback error: {e}")
             raise
         finally:
             step.end_time = time.time()
@@ -461,11 +461,11 @@ class AutomatedRollbackSystem:
             if rollback_result.returncode != 0:
                 raise Exception(f"Rollback failed: {rollback_result.stderr}")
             
-            logger.info(f"✅ Successfully rolled back {cloud_run_name} to {previous_stable_revision}")
+            logger.info(f" PASS:  Successfully rolled back {cloud_run_name} to {previous_stable_revision}")
             return f"Rolled back to revision {previous_stable_revision}"
             
         except Exception as e:
-            logger.error(f"❌ Failed to rollback {cloud_run_name}: {e}")
+            logger.error(f" FAIL:  Failed to rollback {cloud_run_name}: {e}")
             raise
 
     async def gradual_disable_feature_flags(self, plan: RollbackPlan, 
@@ -499,17 +499,17 @@ class AutomatedRollbackSystem:
                         await asyncio.sleep(2)
                         flag_config = self.feature_flags.get_flag(flag_name)
                         if flag_config and not flag_config.enabled:
-                            logger.info(f"✅ Verified {flag_name} disabled")
+                            logger.info(f" PASS:  Verified {flag_name} disabled")
                         else:
                             step.error = f"Flag {flag_name} still appears enabled"
-                            logger.warning(f"⚠️ Flag {flag_name} disable not verified")
+                            logger.warning(f" WARNING: [U+FE0F] Flag {flag_name} disable not verified")
                 else:
                     step.error = f"Failed to disable {flag_name}"
-                    logger.error(f"❌ Failed to disable {flag_name}")
+                    logger.error(f" FAIL:  Failed to disable {flag_name}")
                 
             except Exception as e:
                 step.error = str(e)
-                logger.error(f"❌ Error disabling {flag_name}: {e}")
+                logger.error(f" FAIL:  Error disabling {flag_name}: {e}")
             finally:
                 step.end_time = time.time()
 
@@ -539,14 +539,14 @@ class AutomatedRollbackSystem:
                 # Wait for service to stabilize and check health
                 await asyncio.sleep(10)
                 if await self.check_service_health(service_name):
-                    logger.info(f"✅ {service_name} health check passed")
+                    logger.info(f" PASS:  {service_name} health check passed")
                 else:
                     step.error = f"Health check failed for {service_name}"
-                    logger.warning(f"⚠️ {service_name} health check failed")
+                    logger.warning(f" WARNING: [U+FE0F] {service_name} health check failed")
             
         except Exception as e:
             step.error = str(e)
-            logger.error(f"❌ Error rolling back {service_name}: {e}")
+            logger.error(f" FAIL:  Error rolling back {service_name}: {e}")
             raise
         finally:
             step.end_time = time.time()
@@ -579,10 +579,10 @@ class AutomatedRollbackSystem:
             if flags_ok:
                 step.output = f"Feature flags disabled. {services_ok}/{len(self.services)} services healthy"
                 step.completed = True
-                logger.info("✅ Quick validation passed")
+                logger.info(" PASS:  Quick validation passed")
             else:
                 step.error = "Some feature flags still enabled"
-                logger.warning("⚠️ Quick validation: flags still enabled")
+                logger.warning(" WARNING: [U+FE0F] Quick validation: flags still enabled")
                 
             plan.validation_results = {
                 "feature_flags_disabled": flags_ok,
@@ -592,7 +592,7 @@ class AutomatedRollbackSystem:
             
         except Exception as e:
             step.error = str(e)
-            logger.error(f"❌ Quick validation error: {e}")
+            logger.error(f" FAIL:  Quick validation error: {e}")
         finally:
             step.end_time = time.time()
 
@@ -651,16 +651,16 @@ class AutomatedRollbackSystem:
             if flags_ok and services_ok:
                 step.completed = True
                 step.output = "All validations passed"
-                logger.info("✅ Comprehensive validation passed")
+                logger.info(" PASS:  Comprehensive validation passed")
             else:
                 step.error = f"Validation failed: flags_ok={flags_ok}, services_ok={services_ok}"
-                logger.warning("⚠️ Some validations failed")
+                logger.warning(" WARNING: [U+FE0F] Some validations failed")
             
             plan.validation_results = validation_results
             
         except Exception as e:
             step.error = str(e)
-            logger.error(f"❌ Comprehensive validation error: {e}")
+            logger.error(f" FAIL:  Comprehensive validation error: {e}")
         finally:
             step.end_time = time.time()
 
@@ -751,10 +751,10 @@ class AutomatedRollbackSystem:
             if health_ok:
                 step.completed = True
                 step.output = f"Service healthy, running revision: {current_revision}"
-                logger.info(f"✅ {service_name} rollback validated")
+                logger.info(f" PASS:  {service_name} rollback validated")
             else:
                 step.error = f"Service health check failed, revision: {current_revision}"
-                logger.warning(f"⚠️ {service_name} validation failed")
+                logger.warning(f" WARNING: [U+FE0F] {service_name} validation failed")
             
             plan.validation_results[f"{service_name}_validation"] = {
                 "health_ok": health_ok,
@@ -763,7 +763,7 @@ class AutomatedRollbackSystem:
             
         except Exception as e:
             step.error = str(e)
-            logger.error(f"❌ Error validating {service_name}: {e}")
+            logger.error(f" FAIL:  Error validating {service_name}: {e}")
         finally:
             step.end_time = time.time()
 
@@ -873,15 +873,15 @@ class AutomatedRollbackSystem:
         
         print(f"\nFeature Flags Disabled: {len(plan.feature_flags_disabled)}")
         for flag in plan.feature_flags_disabled:
-            print(f"  ✅ {flag}")
+            print(f"   PASS:  {flag}")
         
         print(f"\nServices Affected: {len(plan.services_affected)}")
         for service in plan.services_affected:
-            print(f"  ✅ {service}")
+            print(f"   PASS:  {service}")
         
         print(f"\nExecution Steps: {len(plan.steps)}")
         for step in plan.steps:
-            status = "✅" if step.completed else "❌"
+            status = " PASS: " if step.completed else " FAIL: "
             duration = ""
             if step.start_time and step.end_time:
                 duration = f" ({step.end_time - step.start_time:.2f}s)"
@@ -962,11 +962,11 @@ Examples:
     
     # Validate required arguments
     if args.command in ["emergency", "gradual", "service-only"] and not args.reason:
-        print("❌ --reason is required for rollback operations")
+        print(" FAIL:  --reason is required for rollback operations")
         sys.exit(1)
     
     if args.command == "service-only" and not args.service:
-        print("❌ --service is required for service-only rollback")
+        print(" FAIL:  --service is required for service-only rollback")
         sys.exit(1)
     
     # Initialize rollback system
@@ -1002,7 +1002,7 @@ Examples:
             print("="*60)
             
             if "error" in verification:
-                print(f"❌ Verification failed: {verification['error']}")
+                print(f" FAIL:  Verification failed: {verification['error']}")
                 sys.exit(1)
             
             status = verification["overall_status"]
@@ -1014,29 +1014,29 @@ Examples:
             
             print(f"\nFeature Flags: {summary['flags_disabled_count']}/{len(verification['feature_flags'])} disabled")
             for flag_name, flag_status in verification["feature_flags"].items():
-                status_icon = "✅" if not flag_status["enabled"] else "❌"
+                status_icon = " PASS: " if not flag_status["enabled"] else " FAIL: "
                 print(f"  {status_icon} {flag_name}: {'disabled' if not flag_status['enabled'] else 'enabled'}")
             
             print(f"\nServices: {summary['healthy_services_count']}/{len(verification['services'])} healthy")
             for service_name, service_status in verification["services"].items():
-                status_icon = "✅" if service_status["healthy"] else "❌"
+                status_icon = " PASS: " if service_status["healthy"] else " FAIL: "
                 print(f"  {status_icon} {service_name}: {'healthy' if service_status['healthy'] else 'unhealthy'}")
             
             print("\n" + "="*60)
             
             # Exit code based on verification status
             if status == "rollback_complete":
-                print("✅ Rollback verification: PASSED")
+                print(" PASS:  Rollback verification: PASSED")
                 sys.exit(0)
             else:
-                print("❌ Rollback verification: FAILED or INCOMPLETE")
+                print(" FAIL:  Rollback verification: FAILED or INCOMPLETE")
                 sys.exit(1)
             
     except KeyboardInterrupt:
-        print("\n⚠️ Rollback interrupted by user")
+        print("\n WARNING: [U+FE0F] Rollback interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Rollback error: {e}")
+        print(f" FAIL:  Rollback error: {e}")
         logger.exception("Unexpected error in automated rollback")
         sys.exit(1)
 

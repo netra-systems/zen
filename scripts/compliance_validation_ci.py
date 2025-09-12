@@ -102,7 +102,7 @@ def run_compliance_validation(args) -> Dict[str, Any]:
         )
         
         if args.verbose:
-            print("🔍 Starting comprehensive compliance validation...")
+            print(" SEARCH:  Starting comprehensive compliance validation...")
         
         validator = ComprehensiveComplianceValidator()
         metrics = validator.run_full_compliance_validation()
@@ -144,25 +144,25 @@ def evaluate_compliance(metrics, threshold: float, fail_fast: bool) -> Dict[str,
         status = "PASS"
         exit_code = 0
         deployment_safe = True
-        message = f"✅ Full compliance achieved ({compliance_percentage:.1f}%)"
+        message = f" PASS:  Full compliance achieved ({compliance_percentage:.1f}%)"
         
     elif critical_issues > 0:
         status = "CRITICAL_FAILURE"
         exit_code = 2
         deployment_safe = False
-        message = f"❌ Critical failures detected ({critical_issues} issues)"
+        message = f" FAIL:  Critical failures detected ({critical_issues} issues)"
         
     elif compliance_percentage < threshold:
         status = "BELOW_THRESHOLD"
         exit_code = 1
         deployment_safe = False
-        message = f"⚠️ Compliance below threshold ({compliance_percentage:.1f}% < {threshold}%)"
+        message = f" WARNING: [U+FE0F] Compliance below threshold ({compliance_percentage:.1f}% < {threshold}%)"
         
     else:
         status = "UNKNOWN"
         exit_code = 1
         deployment_safe = False
-        message = "❓ Unknown compliance state"
+        message = "[U+2753] Unknown compliance state"
     
     # Apply fail-fast logic
     if fail_fast and not deployment_safe:
@@ -243,16 +243,16 @@ def generate_ci_report(metrics, evaluation, args) -> str:
 def print_compliance_summary(evaluation, metrics, verbose=False):
     """Print human-readable compliance summary."""
     print("\n" + "=" * 60)
-    print("🏗️ CI/CD COMPLIANCE VALIDATION RESULTS")
+    print("[U+1F3D7][U+FE0F] CI/CD COMPLIANCE VALIDATION RESULTS")
     print("=" * 60)
     
     print(f"Status: {evaluation['status']}")
     print(f"Message: {evaluation['message']}")
-    print(f"Deployment Safe: {'✅ YES' if evaluation['deployment_safe'] else '❌ NO'}")
+    print(f"Deployment Safe: {' PASS:  YES' if evaluation['deployment_safe'] else ' FAIL:  NO'}")
     print(f"Exit Code: {evaluation['exit_code']}")
     
     if metrics:
-        print(f"\n📊 Key Metrics:")
+        print(f"\n CHART:  Key Metrics:")
         print(f"  Overall Compliance: {evaluation['compliance_percentage']:.1f}%")
         print(f"  Mock Violations: {metrics.mock_violations}")
         print(f"  Environment Issues: {metrics.isolated_environment_violations}")
@@ -261,14 +261,14 @@ def print_compliance_summary(evaluation, metrics, verbose=False):
         print(f"  Real Services: {metrics.real_service_connection_status}")
         
         if verbose and metrics.critical_issues:
-            print(f"\n❌ Critical Issues:")
+            print(f"\n FAIL:  Critical Issues:")
             for issue in metrics.critical_issues:
-                print(f"  • {issue}")
+                print(f"  [U+2022] {issue}")
         
         if verbose and metrics.recommendations:
-            print(f"\n🔧 Recommendations:")
+            print(f"\n[U+1F527] Recommendations:")
             for rec in metrics.recommendations:
-                print(f"  • {rec}")
+                print(f"  [U+2022] {rec}")
     
     print("=" * 60)
 
@@ -278,7 +278,7 @@ def main():
     args = parse_arguments()
     
     if args.verbose:
-        print("🚀 CI/CD Compliance Validation Starting...")
+        print("[U+1F680] CI/CD Compliance Validation Starting...")
         print(f"   Threshold: {args.threshold}%")
         print(f"   Fail Fast: {args.fail_fast}")
         print(f"   Report Path: {args.report_path}")
@@ -287,7 +287,7 @@ def main():
     validation_result = run_compliance_validation(args)
     
     if not validation_result["success"]:
-        print(f"❌ Validation execution failed: {validation_result['error']}")
+        print(f" FAIL:  Validation execution failed: {validation_result['error']}")
         if args.json_output:
             print(json.dumps({
                 "status": "ERROR",
@@ -326,11 +326,11 @@ def main():
     else:
         # Human-readable output
         print_compliance_summary(evaluation, validation_result["metrics"], args.verbose)
-        print(f"\n📋 Detailed report saved: {report_path}")
+        print(f"\n[U+1F4CB] Detailed report saved: {report_path}")
     
     # Set appropriate exit code for CI/CD
     if args.verbose:
-        print(f"\n🏁 Exiting with code: {evaluation['exit_code']}")
+        print(f"\n[U+1F3C1] Exiting with code: {evaluation['exit_code']}")
     
     sys.exit(evaluation["exit_code"])
 

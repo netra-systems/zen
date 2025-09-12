@@ -1,6 +1,6 @@
 """
 Tests for formatting, math, and network utilities (Tests 92-94).
-Each function ≤8 lines, using helper functions for setup and assertions.
+Each function  <= 8 lines, using helper functions for setup and assertions.
 """
 
 import sys

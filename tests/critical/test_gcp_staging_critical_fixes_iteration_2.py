@@ -443,7 +443,7 @@ class TestCriticalFixesIntegration:
 
 # Test execution metadata
 if __name__ == "__main__":
-    print("🚨 CRITICAL TEST SUITE - GCP STAGING ITERATION 2")
+    print(" ALERT:  CRITICAL TEST SUITE - GCP STAGING ITERATION 2")
     print("Testing three critical issues from GCP staging logs:")
     print("1. Redis asyncio event loop error")
     print("2. Google OAuth user ID format validation") 

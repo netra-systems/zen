@@ -5,7 +5,7 @@ These tests are DESIGNED TO FAIL initially to prove golden path violations exist
 They will PASS after proper LLM manager SSOT remediation is implemented.
 
 Business Value: Platform/Enterprise - $500K+ ARR Protection
-Protects critical user journey: login → agent execution → AI response delivery.
+Protects critical user journey: login  ->  agent execution  ->  AI response delivery.
 
 Test Categories:
 1. Golden Path LLM Reliability E2E - Complete AI response validation

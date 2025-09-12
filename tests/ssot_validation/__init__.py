@@ -16,7 +16,7 @@ PHASE 2: PASSING TESTS (Validate Ideal SSOT State)
 - test_service_id_hardcoded_consistency.py: Verify all services use same constant
 - test_service_id_auth_flow_stability.py: Confirm auth works with SSOT
 - test_service_id_environment_independence.py: Validate independence from env vars
-- test_golden_path_post_ssot_remediation.py: End-to-end login → AI responses
+- test_golden_path_post_ssot_remediation.py: End-to-end login  ->  AI responses
 
 Business Value: Platform/Critical - Protects Golden Path user journey that delivers
 90% of platform value through reliable authentication and AI response delivery.

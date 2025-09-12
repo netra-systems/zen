@@ -1,7 +1,7 @@
 from shared.isolated_environment import get_env
 """
 Shared fixtures and data models for real services tests.
-All functions ≤8 lines per requirements.
+All functions  <= 8 lines per requirements.
 """
 
 # @marked: Test infrastructure - checks test configuration flags

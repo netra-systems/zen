@@ -687,7 +687,7 @@ class TestWebSocketStressValidation:
         assert memory_growth <= stress_config.max_memory_growth_mb, \
             f"Memory growth {memory_growth}MB exceeds limit {stress_config.max_memory_growth_mb}MB"
         
-        logger.info(f"✓ Concurrent connection stress test passed:")
+        logger.info(f"[U+2713] Concurrent connection stress test passed:")
         logger.info(f"  Successful connections: {result['connections_successful']}/{result['connections_requested']}")
         logger.info(f"  Connection success rate: {result['connection_success_rate']:.1f}%")
         logger.info(f"  Memory growth: {memory_growth:.1f}MB")
@@ -721,7 +721,7 @@ class TestWebSocketStressValidation:
         assert message_success_rate >= 95.0, \
             f"Message success rate {message_success_rate:.1f}% below 95%"
         
-        logger.info(f"✓ Message throughput stress test passed:")
+        logger.info(f"[U+2713] Message throughput stress test passed:")
         logger.info(f"  Throughput: {throughput:.1f} msgs/sec")
         logger.info(f"  Message success rate: {message_success_rate:.1f}%")
         if performance["messages"]["latency_stats"]:
@@ -758,7 +758,7 @@ class TestWebSocketStressValidation:
             assert final_growth_rate <= 50.0, \
                 f"Final cycle memory growth {final_growth_rate:.1f}MB indicates potential leak"
         
-        logger.info(f"✓ Memory leak test passed:")
+        logger.info(f"[U+2713] Memory leak test passed:")
         logger.info(f"  Cycles completed: {result['cycles_completed']}")
         logger.info(f"  Memory growth: {memory_growth:.1f}MB")
         logger.info(f"  Final memory: {result['final_memory_mb']:.1f}MB")
@@ -779,7 +779,7 @@ class TestWebSocketStressValidation:
         # Validate that at least some connections were dropped (test is working)
         assert result["connections_dropped"] > 0, "No connections were dropped - test may not be working"
         
-        logger.info(f"✓ Connection resilience test passed:")
+        logger.info(f"[U+2713] Connection resilience test passed:")
         logger.info(f"  Connections dropped: {result['connections_dropped']}")
         logger.info(f"  Reconnection attempts: {result['reconnection_attempts']}")
         logger.info(f"  Reconnection success rate: {reconnection_success_rate:.1f}%")
@@ -817,7 +817,7 @@ class TestWebSocketStressValidation:
             assert avg_cpu <= 80.0, \
                 f"Average CPU usage {avg_cpu:.1f}% too high during extended test"
             
-            logger.info(f"✓ Extended load endurance test passed:")
+            logger.info(f"[U+2713] Extended load endurance test passed:")
             logger.info(f"  Test duration: {performance['duration_seconds']:.1f} seconds")
             logger.info(f"  Connection success rate: {result['connection_success_rate']:.1f}%")
             logger.info(f"  Memory growth: {memory_growth:.1f}MB")
@@ -880,7 +880,7 @@ class TestWebSocketStressValidation:
         
         assert all_tests_passed, "One or more comprehensive stress tests failed"
         
-        logger.info("✅ COMPREHENSIVE STRESS VALIDATION PASSED")
+        logger.info(" PASS:  COMPREHENSIVE STRESS VALIDATION PASSED")
         logger.info("=" * 60)
         logger.info("STRESS TEST SUMMARY:")
         logger.info(f"  Connection Success Rate: {comprehensive_results['connection_stress']['connection_success_rate']:.1f}%")

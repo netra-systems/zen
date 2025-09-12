@@ -202,4 +202,4 @@ def test_five_whys_fix_validation():
 if __name__ == "__main__":
     # Run basic validation
     test_five_whys_fix_validation()
-    print("✅ All Five Whys fixes validated successfully!")
+    print(" PASS:  All Five Whys fixes validated successfully!")

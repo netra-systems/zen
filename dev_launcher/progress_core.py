@@ -40,7 +40,7 @@ class Phase:
 class SpinnerAnimation:
     """Simple spinner for long operations."""
     
-    FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+    FRAMES = ['[U+280B]', '[U+2819]', '[U+2839]', '[U+2838]', '[U+283C]', '[U+2834]', '[U+2826]', '[U+2827]', '[U+2807]', '[U+280F]']
     
     def __init__(self):
         """Initialize spinner."""
@@ -94,5 +94,5 @@ class ProgressCalculator:
     def build_progress_bar(percentage: float, width: int = 20) -> str:
         """Build visual progress bar."""
         filled = int((percentage / width) * width)
-        bar = "█" * filled + "░" * (width - filled)
+        bar = "[U+2588]" * filled + "[U+2591]" * (width - filled)
         return bar

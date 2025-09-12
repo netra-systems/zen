@@ -101,7 +101,7 @@ class ArchitectureDashboard:
         """Generate recommendations section"""
         return f"""
             <div class="recommendations">
-                <h3>🎯 Recommended Actions</h3>
+                <h3> TARGET:  Recommended Actions</h3>
                 <ul>{self._render_recommendations_list(metrics)}</ul>
             </div>"""
     

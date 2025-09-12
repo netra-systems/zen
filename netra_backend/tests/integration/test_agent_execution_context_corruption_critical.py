@@ -99,7 +99,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         
         CRITICAL: E2E AUTH ENFORCEMENT per CLAUDE.md - All tests must use authentication
         """
-        print("🚨 TESTING: Concurrent agent execution context mixing detection")
+        print(" ALERT:  TESTING: Concurrent agent execution context mixing detection")
         
         # MANDATORY: E2E Authentication per CLAUDE.md
         auth_helper = E2EAuthHelper(environment="test")
@@ -138,9 +138,9 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                 
                 self.user_contexts[user_data["user_id"]] = context
                 contexts_created.append(user_data["user_id"])
-                print(f"✓ Created context for user: {user_data['user_id']}")
+                print(f"[U+2713] Created context for user: {user_data['user_id']}")
             except Exception as e:
-                print(f"❌ Failed to create context for user {user_data['user_id']}: {e}")
+                print(f" FAIL:  Failed to create context for user {user_data['user_id']}: {e}")
         
         print(f"Created {len(contexts_created)} user contexts")
         
@@ -222,7 +222,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         try:
             execution_results = await asyncio.gather(*tasks, return_exceptions=True)
         except Exception as e:
-            print(f"⚠️ Error in concurrent execution: {e}")
+            print(f" WARNING: [U+FE0F] Error in concurrent execution: {e}")
         
         print(f"Completed {len(execution_results)} concurrent agent executions")
         
@@ -241,7 +241,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                     if execution.user_id != user_id:
                         corruption = f"Execution {execution_id} user mismatch: expected {user_id}, got {execution.user_id}"
                         corruption_detected.append(corruption)
-                        print(f"❌ Context corruption: {corruption}")
+                        print(f" FAIL:  Context corruption: {corruption}")
         
         # Check 2: Verify WebSocket events are routed to correct users
         for event_call in self.websocket_event_calls:
@@ -252,7 +252,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
             if event.get("user_id") != intended_user:
                 corruption = f"WebSocket event user mismatch: event for {event.get('user_id')}, intended for {intended_user}"
                 corruption_detected.append(corruption)
-                print(f"❌ WebSocket routing corruption: {corruption}")
+                print(f" FAIL:  WebSocket routing corruption: {corruption}")
         
         # Check 3: Look for shared context memory between users (critical violation)
         context_memory_ids = {}
@@ -265,7 +265,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                 if other_user != user_id:
                     corruption = f"Shared context memory between users {user_id} and {other_user}: {memory_id}"
                     corruption_detected.append(corruption)
-                    print(f"❌ Critical memory sharing: {corruption}")
+                    print(f" FAIL:  Critical memory sharing: {corruption}")
             else:
                 context_memory_ids[memory_id] = user_id
         
@@ -276,7 +276,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         if len(execution_ids) != len(unique_execution_ids):
             collision_corruption = f"Execution ID collisions detected: {len(execution_ids)} executions, {len(unique_execution_ids)} unique IDs"
             corruption_detected.append(collision_corruption)
-            print(f"❌ ID collision corruption: {collision_corruption}")
+            print(f" FAIL:  ID collision corruption: {collision_corruption}")
         
         # Record comprehensive metrics
         self.record_metric("concurrent_executions", len(execution_results))
@@ -294,7 +294,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                 f"data exposure: {corruption_detected}"
             )
         
-        print("✅ No agent execution corruption detected (unexpected - test designed to fail)")
+        print(" PASS:  No agent execution corruption detected (unexpected - test designed to fail)")
     
     async def test_agent_result_routing_cross_user_contamination(self):
         """
@@ -305,7 +305,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         
         CRITICAL: E2E AUTH ENFORCEMENT per CLAUDE.md - All tests must use authentication
         """
-        print("🚨 TESTING: Agent result routing cross-user contamination")
+        print(" ALERT:  TESTING: Agent result routing cross-user contamination")
         
         # MANDATORY: E2E Authentication per CLAUDE.md
         auth_helper = E2EAuthHelper(environment="test")
@@ -435,12 +435,12 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                         if other_user_id.lower() in result_str:
                             contamination = f"User {user_id} results contain other user ID {other_user_id}"
                             contamination_incidents.append(contamination)
-                            print(f"❌ Cross-user contamination: {contamination}")
+                            print(f" FAIL:  Cross-user contamination: {contamination}")
                         
                         if other_sensitive.lower() in result_str:
                             contamination = f"User {user_id} results contain other user's sensitive data"
                             contamination_incidents.append(contamination)
-                            print(f"❌ Sensitive data leak: {contamination}")
+                            print(f" FAIL:  Sensitive data leak: {contamination}")
                         
                         # Check events for contamination
                         for event in events:
@@ -448,7 +448,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                             if other_user_id.lower() in event_str:
                                 contamination = f"User {user_id} events contain other user data {other_user_id}"
                                 contamination_incidents.append(contamination)
-                                print(f"❌ Event contamination: {contamination}")
+                                print(f" FAIL:  Event contamination: {contamination}")
         
         # Test for execution context bleeding between users
         enterprise_execution = None
@@ -468,12 +468,12 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
             if "free" in enterprise_results.lower():
                 contamination = "Enterprise user execution contains free tier references"
                 contamination_incidents.append(contamination)
-                print(f"❌ Tier contamination: {contamination}")
+                print(f" FAIL:  Tier contamination: {contamination}")
             
             if "enterprise" in free_results.lower():
                 contamination = "Free user execution contains enterprise references"  
                 contamination_incidents.append(contamination)
-                print(f"❌ Privilege escalation: {contamination}")
+                print(f" FAIL:  Privilege escalation: {contamination}")
         
         # Record metrics
         self.record_metric("sensitive_executions", len(agent_results))
@@ -490,7 +490,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                 f"{contamination_incidents}"
             )
         
-        print("✅ No cross-user contamination detected")
+        print(" PASS:  No cross-user contamination detected")
     
     async def test_websocket_event_delivery_user_isolation_violation(self):
         """
@@ -501,7 +501,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         
         CRITICAL: E2E AUTH ENFORCEMENT per CLAUDE.md - All tests must use authentication
         """
-        print("🚨 TESTING: WebSocket event delivery user isolation")
+        print(" ALERT:  TESTING: WebSocket event delivery user isolation")
         
         # MANDATORY: E2E Authentication per CLAUDE.md
         auth_helper = E2EAuthHelper(environment="test")
@@ -550,7 +550,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                 }
                 
             except Exception as e:
-                print(f"❌ Failed to setup WebSocket user {user['user_id']}: {e}")
+                print(f" FAIL:  Failed to setup WebSocket user {user['user_id']}: {e}")
         
         print(f"Setup {len(mock_websocket_connections)} WebSocket connections")
         
@@ -597,7 +597,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                     # Event delivery failed - isolation violation
                     violation = f"No WebSocket connection found for user {target_user}"
                     isolation_violations.append(violation)
-                    print(f"❌ Event delivery failure: {violation}")
+                    print(f" FAIL:  Event delivery failure: {violation}")
             
             await asyncio.sleep(0.1)
             
@@ -626,7 +626,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                 if message_user != user_id:
                     violation = f"User {user_id} received message intended for {message_user}"
                     isolation_violations.append(violation)
-                    print(f"❌ WebSocket isolation violation: {violation}")
+                    print(f" FAIL:  WebSocket isolation violation: {violation}")
         
         # Check 2: Verify all expected events were delivered
         expected_events_per_user = 5  # agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
@@ -639,7 +639,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                 if received_count != expected_events_per_user:
                     violation = f"User {user_id} received {received_count} events, expected {expected_events_per_user}"
                     isolation_violations.append(violation)
-                    print(f"❌ Event count violation: {violation}")
+                    print(f" FAIL:  Event count violation: {violation}")
         
         # Check 3: Look for cross-user event contamination in message content
         for conn_id, conn_data in mock_websocket_connections.items():
@@ -655,7 +655,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                     if other_user_id != user_id and other_user_id.lower() in message_content:
                         violation = f"User {user_id} message contains other user data: {other_user_id}"
                         isolation_violations.append(violation)
-                        print(f"❌ Message contamination: {violation}")
+                        print(f" FAIL:  Message contamination: {violation}")
         
         # Record metrics  
         self.record_metric("websocket_users", len(websocket_users))
@@ -671,7 +671,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
                 f"causing cross-user information exposure: {isolation_violations}"
             )
         
-        print("✅ WebSocket event isolation appears intact")
+        print(" PASS:  WebSocket event isolation appears intact")
     
     def teardown_method(self, method):
         """Enhanced teardown with corruption incident reporting."""
@@ -700,7 +700,7 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
         
         # Report all corruption incidents found during test
         if self.corruption_incidents:
-            print(f"\n🚨 CRITICAL CORRUPTION INCIDENTS: {len(self.corruption_incidents)}")
+            print(f"\n ALERT:  CRITICAL CORRUPTION INCIDENTS: {len(self.corruption_incidents)}")
             for i, incident in enumerate(self.corruption_incidents, 1):
                 print(f"  {i}. {incident}")
             
@@ -717,12 +717,12 @@ class TestAgentExecutionContextCorruption(SSotAsyncTestCase):
             self.record_metric("data_contamination_incidents", len(data_contamination))
             self.record_metric("event_violation_incidents", len(event_violations))
         else:
-            print("\n✅ No agent execution corruption detected (unexpected - tests designed to fail)")
+            print("\n PASS:  No agent execution corruption detected (unexpected - tests designed to fail)")
             self.record_metric("total_corruption_incidents", 0)
         
         # Generate corruption summary report
         test_metrics = self.get_all_metrics()
-        print(f"\n📊 Agent Execution Corruption Test Metrics:")
+        print(f"\n CHART:  Agent Execution Corruption Test Metrics:")
         for metric, value in test_metrics.items():
             if any(keyword in metric for keyword in ["corruption", "violation", "contamination", "incident"]):
                 print(f"  {metric}: {value}")

@@ -161,7 +161,7 @@ class UserScopedWebSocketEventRouter:
                 )
             else:
                 logger.error(
-                    f"🚨 CRITICAL: Failed to register connection {connection_id} "
+                    f" ALERT:  CRITICAL: Failed to register connection {connection_id} "
                     f"for user {self.user_context.user_id[:8]}..."
                 )
             
@@ -329,7 +329,7 @@ class UserScopedWebSocketEventRouter:
             
             if not is_valid:
                 logger.critical(
-                    f"🚨 CRITICAL SECURITY: Connection {connection_id} does not belong to user "
+                    f" ALERT:  CRITICAL SECURITY: Connection {connection_id} does not belong to user "
                     f"{self.user_context.user_id[:8]}... - potential cross-user access attempt"
                 )
             

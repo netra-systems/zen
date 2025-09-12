@@ -299,7 +299,7 @@ class TestErrorHandling(BaseIntegrationTest):
         assert stats["total_recoveries"] == 1
         assert stats["recovery_rate"] == 1.0
         
-        logger.info("✅ Timeout error handling and recovery test passed")
+        logger.info(" PASS:  Timeout error handling and recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -326,7 +326,7 @@ class TestErrorHandling(BaseIntegrationTest):
         assert stats["total_recoveries"] == 0
         assert stats["error_rate"] == 1.0
         
-        logger.info("✅ Connection error propagation test passed")
+        logger.info(" PASS:  Connection error propagation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -369,7 +369,7 @@ class TestErrorHandling(BaseIntegrationTest):
         
         assert len(recovery_strategies) >= 3  # Should use different strategies for different errors
         
-        logger.info(f"✅ Multiple error types test passed - {len(successful_recoveries)}/{len(error_types)} recovered")
+        logger.info(f" PASS:  Multiple error types test passed - {len(successful_recoveries)}/{len(error_types)} recovered")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -430,7 +430,7 @@ class TestErrorHandling(BaseIntegrationTest):
             if not isinstance(result, Exception) and result.get("success"):
                 assert result["agent_name"] == f"concurrent_agent_{i}"
         
-        logger.info(f"✅ Concurrent error isolation test passed - {len(successful_results)}/4 successful")
+        logger.info(f" PASS:  Concurrent error isolation test passed - {len(successful_results)}/4 successful")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -489,7 +489,7 @@ class TestErrorHandling(BaseIntegrationTest):
         assert avg_normal_time < 0.2  # Normal execution should be fast
         assert avg_error_time < 0.5   # Error recovery should still be reasonable
         
-        logger.info(f"✅ Error handling performance test passed - normal: {avg_normal_time:.3f}s, recovery: {avg_error_time:.3f}s")
+        logger.info(f" PASS:  Error handling performance test passed - normal: {avg_normal_time:.3f}s, recovery: {avg_error_time:.3f}s")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -539,7 +539,7 @@ class TestErrorHandling(BaseIntegrationTest):
         assert "notify_agent_started" in event_types  # Should start normally
         assert "notify_agent_error" in event_types    # Should emit error event
         
-        logger.info("✅ WebSocket error event delivery test passed")
+        logger.info(" PASS:  WebSocket error event delivery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -586,7 +586,7 @@ class TestErrorHandling(BaseIntegrationTest):
         assert final_stats["total_errors"] == 1  # Only one error from first execution
         assert final_stats["total_recoveries"] == 1
         
-        logger.info("✅ Error recovery state consistency test passed")
+        logger.info(" PASS:  Error recovery state consistency test passed")
 
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ def validate_factory_pattern():
         print("  [PASS] LifecycleManagerFactory: SUCCESS")
         
     except Exception as e:
-        print(f"  ❌ LifecycleManagerFactory: FAIL - {e}")
+        print(f"   FAIL:  LifecycleManagerFactory: FAIL - {e}")
         return False
     
     # Check ConfigurationManagerFactory
@@ -65,10 +65,10 @@ def validate_factory_pattern():
         assert isinstance(user_config, UnifiedConfigurationManager)
         assert user_config.user_id == "test_user"
         
-        print("  ✅ ConfigurationManagerFactory: PASS")
+        print("   PASS:  ConfigurationManagerFactory: PASS")
         
     except Exception as e:
-        print(f"  ❌ ConfigurationManagerFactory: FAIL - {e}")
+        print(f"   FAIL:  ConfigurationManagerFactory: FAIL - {e}")
         return False
     
     # Check StateManagerFactory
@@ -84,17 +84,17 @@ def validate_factory_pattern():
         assert isinstance(user_state, UnifiedStateManager)
         assert user_state.user_id == "test_user"
         
-        print("  ✅ StateManagerFactory: PASS")
+        print("   PASS:  StateManagerFactory: PASS")
         
     except Exception as e:
-        print(f"  ❌ StateManagerFactory: FAIL - {e}")
+        print(f"   FAIL:  StateManagerFactory: FAIL - {e}")
         return False
     
     return True
 
 def validate_websocket_integration():
     """Validate WebSocket integration."""
-    print("🔌 Validating WebSocket Integration...")
+    print("[U+1F50C] Validating WebSocket Integration...")
     
     managers = [
         ("LifecycleManager", UnifiedLifecycleManager()),
@@ -115,17 +115,17 @@ def validate_websocket_integration():
             # Check for internal WebSocket manager storage
             assert hasattr(manager, '_websocket_manager'), f"{name} missing _websocket_manager attribute"
             
-            print(f"  ✅ {name}: PASS")
+            print(f"   PASS:  {name}: PASS")
             
         except Exception as e:
-            print(f"  ❌ {name}: FAIL - {e}")
+            print(f"   FAIL:  {name}: FAIL - {e}")
             return False
     
     return True
 
 def validate_isolated_environment():
     """Validate IsolatedEnvironment usage."""
-    print("🔒 Validating IsolatedEnvironment Usage...")
+    print("[U+1F512] Validating IsolatedEnvironment Usage...")
     
     managers = [
         ("LifecycleManager", UnifiedLifecycleManager()),
@@ -142,17 +142,17 @@ def validate_isolated_environment():
             from shared.isolated_environment import IsolatedEnvironment
             assert isinstance(manager._env, IsolatedEnvironment), f"{name} not using IsolatedEnvironment"
             
-            print(f"  ✅ {name}: PASS")
+            print(f"   PASS:  {name}: PASS")
             
         except Exception as e:
-            print(f"  ❌ {name}: FAIL - {e}")
+            print(f"   FAIL:  {name}: FAIL - {e}")
             return False
     
     return True
 
 def validate_thread_safety():
     """Validate thread safety mechanisms."""
-    print("🔒 Validating Thread Safety...")
+    print("[U+1F512] Validating Thread Safety...")
     
     managers = [
         ("LifecycleManager", UnifiedLifecycleManager()),
@@ -169,17 +169,17 @@ def validate_thread_safety():
             # Check for async-safe operations
             async_methods = [method for method in dir(manager) if inspect.iscoroutinefunction(getattr(manager, method))]
             
-            print(f"  ✅ {name}: PASS (locks: {len(lock_attributes)}, async methods: {len(async_methods)})")
+            print(f"   PASS:  {name}: PASS (locks: {len(lock_attributes)}, async methods: {len(async_methods)})")
             
         except Exception as e:
-            print(f"  ❌ {name}: FAIL - {e}")
+            print(f"   FAIL:  {name}: FAIL - {e}")
             return False
     
     return True
 
 def validate_ssot_compliance():
     """Validate SSOT compliance."""
-    print("📋 Validating SSOT Compliance...")
+    print("[U+1F4CB] Validating SSOT Compliance...")
     
     # Check that managers have proper SSOT methods
     lifecycle_manager = UnifiedLifecycleManager()
@@ -206,16 +206,16 @@ def validate_ssot_compliance():
         assert hasattr(state_manager, 'get_agent_state'), "StateManager missing get_agent_state method"
         assert hasattr(state_manager, 'query_states'), "StateManager missing query_states method"
         
-        print("  ✅ All SSOT compliance checks: PASS")
+        print("   PASS:  All SSOT compliance checks: PASS")
         return True
         
     except Exception as e:
-        print(f"  ❌ SSOT compliance: FAIL - {e}")
+        print(f"   FAIL:  SSOT compliance: FAIL - {e}")
         return False
 
 def main():
     """Run all validations."""
-    print("🚀 SSOT Unified Managers Validation")
+    print("[U+1F680] SSOT Unified Managers Validation")
     print("=" * 50)
     
     results = []
@@ -230,21 +230,21 @@ def main():
     print("\n" + "=" * 50)
     
     if all(results):
-        print("🎉 ALL VALIDATIONS PASSED!")
-        print("✅ SSOT Unified Managers are properly implemented")
-        print("📊 Summary:")
-        print(f"  • UnifiedLifecycleManager: {len(inspect.getsource(UnifiedLifecycleManager).splitlines())} lines")
-        print(f"  • UnifiedConfigurationManager: {len(inspect.getsource(UnifiedConfigurationManager).splitlines())} lines")  
-        print(f"  • UnifiedStateManager: {len(inspect.getsource(UnifiedStateManager).splitlines())} lines")
-        print("  • All managers implement factory pattern for user isolation")
-        print("  • All managers support WebSocket integration")
-        print("  • All managers use IsolatedEnvironment for env access")
-        print("  • All managers implement thread-safe operations")
+        print(" CELEBRATION:  ALL VALIDATIONS PASSED!")
+        print(" PASS:  SSOT Unified Managers are properly implemented")
+        print(" CHART:  Summary:")
+        print(f"  [U+2022] UnifiedLifecycleManager: {len(inspect.getsource(UnifiedLifecycleManager).splitlines())} lines")
+        print(f"  [U+2022] UnifiedConfigurationManager: {len(inspect.getsource(UnifiedConfigurationManager).splitlines())} lines")  
+        print(f"  [U+2022] UnifiedStateManager: {len(inspect.getsource(UnifiedStateManager).splitlines())} lines")
+        print("  [U+2022] All managers implement factory pattern for user isolation")
+        print("  [U+2022] All managers support WebSocket integration")
+        print("  [U+2022] All managers use IsolatedEnvironment for env access")
+        print("  [U+2022] All managers implement thread-safe operations")
         return 0
     else:
-        print("❌ SOME VALIDATIONS FAILED!")
+        print(" FAIL:  SOME VALIDATIONS FAILED!")
         failed_count = len([r for r in results if not r])
-        print(f"📊 {failed_count} out of {len(results)} validations failed")
+        print(f" CHART:  {failed_count} out of {len(results)} validations failed")
         return 1
 
 if __name__ == "__main__":

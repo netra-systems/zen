@@ -361,7 +361,7 @@ class LauncherConfig:
             if self._use_emoji:
                 print(f"{emoji} {text}: {message}")
             else:
-                print(f"• {text}: {message}")
+                print(f"[U+2022] {text}: {message}")
     
     def log_verbose_config(self):
         """Log verbose configuration information."""
@@ -403,7 +403,7 @@ class LauncherConfig:
     
     def show_configuration(self):
         """Show configuration summary."""
-        self._print("📝", "CONFIG", "Configuration:")
+        self._print("[U+1F4DD]", "CONFIG", "Configuration:")
         self._print_service_modes()
         self._print_config_options()
     
@@ -416,14 +416,14 @@ class LauncherConfig:
             from dev_launcher.service_config import ResourceMode
             
             # Print header
-            self._print("🔧", "SERVICES", "Service Modes:")
+            self._print("[U+1F527]", "SERVICES", "Service Modes:")
             
             # Map modes to descriptive text and emojis
             mode_info = {
-                ResourceMode.LOCAL: ("Local", "💻"),
-                ResourceMode.SHARED: ("On", "☁️"),  # Changed from "Cloud" to "On" for better UX
-                ResourceMode.DOCKER: ("Docker", "🧪"),
-                ResourceMode.DISABLED: ("Off", "❌")
+                ResourceMode.LOCAL: ("Local", "[U+1F4BB]"),
+                ResourceMode.SHARED: ("On", "[U+2601][U+FE0F]"),  # Changed from "Cloud" to "On" for better UX
+                ResourceMode.DOCKER: ("Docker", "[U+1F9EA]"),
+                ResourceMode.DISABLED: ("Off", " FAIL: ")
             }
             
             # Display each service mode
@@ -455,7 +455,7 @@ class LauncherConfig:
                 if self._use_emoji:
                     print(f"  {emoji} {name:12}: {desc:6}{detail}")
                 else:
-                    print(f"  • {name:12}: {desc:6}{detail}")
+                    print(f"  [U+2022] {name:12}: {desc:6}{detail}")
             
             print()  # Add spacing after service modes
         except ImportError:
@@ -476,20 +476,20 @@ class LauncherConfig:
     
     def _print_dynamic_ports_config(self):
         """Print dynamic ports configuration."""
-        print(f"  • Dynamic ports: {'YES' if self.dynamic_ports else 'NO'}")
+        print(f"  [U+2022] Dynamic ports: {'YES' if self.dynamic_ports else 'NO'}")
     
     def _print_backend_reload_config(self):
         """Print backend reload configuration."""
         reload_text = 'YES (uvicorn native)' if self.backend_reload else 'NO'
-        print(f"  • Backend hot reload: {reload_text}")
+        print(f"  [U+2022] Backend hot reload: {reload_text}")
     
     def _print_frontend_reload_config(self):
         """Print frontend reload configuration."""
-        print(f"  • Frontend hot reload: YES (Next.js native)")
+        print(f"  [U+2022] Frontend hot reload: YES (Next.js native)")
     
     def _print_logging_config(self):
         """Print logging configuration."""
-        print(f"  • Real-time logging: YES")
+        print(f"  [U+2022] Real-time logging: YES")
     
     def _print_feature_configs(self):
         """Print feature configuration options."""
@@ -499,20 +499,20 @@ class LauncherConfig:
     
     def _print_turbopack_config(self):
         """Print Turbopack configuration."""
-        print(f"  • Turbopack: {'YES' if self.use_turbopack else 'NO'}")
+        print(f"  [U+2022] Turbopack: {'YES' if self.use_turbopack else 'NO'}")
     
     def _print_secrets_config(self):
         """Print secrets configuration."""
-        print(f"  • Secret loading: {'YES' if self.load_secrets else 'NO'}")
+        print(f"  [U+2022] Secret loading: {'YES' if self.load_secrets else 'NO'}")
     
     def _print_verbose_config(self):
         """Print verbose configuration."""
-        print(f"  • Verbose output: {'YES' if self.verbose else 'NO'}")
+        print(f"  [U+2022] Verbose output: {'YES' if self.verbose else 'NO'}")
     
     def show_env_var_debug_info(self):
         """Show debug information about environment variables."""
         print("\n" + "=" * 60)
-        print("🔍 ENVIRONMENT VARIABLE DEBUG INFO")
+        print(" SEARCH:  ENVIRONMENT VARIABLE DEBUG INFO")
         print("=" * 60)
         self._show_env_files_status()
         self._show_key_env_vars()
@@ -521,7 +521,7 @@ class LauncherConfig:
     def _show_env_files_status(self):
         """Show environment files status."""
         env_files = self._get_env_files_list()
-        print("\n📁 Environment Files Status:")
+        print("\n[U+1F4C1] Environment Files Status:")
         for filename, description in env_files:
             self._show_env_file_status(filename, description)
     
@@ -538,13 +538,13 @@ class LauncherConfig:
         filepath = self.project_root / filename
         if filepath.exists():
             size = filepath.stat().st_size
-            print(f"  ✅ {filename:25} - {description} ({size} bytes)")
+            print(f"   PASS:  {filename:25} - {description} ({size} bytes)")
         else:
-            print(f"  ❌ {filename:25} - {description} (not found)")
+            print(f"   FAIL:  {filename:25} - {description} (not found)")
     
     def _show_key_env_vars(self):
         """Show key environment variables."""
-        print("\n🔑 Key Environment Variables (current state):")
+        print("\n[U+1F511] Key Environment Variables (current state):")
         important_vars = self._get_important_env_vars()
         for var in important_vars:
             self._show_env_var_status(var)

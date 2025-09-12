@@ -674,7 +674,7 @@ class TestWebSocketUserPermissionValidation(BaseIntegrationTest):
             concurrent_results = await validator.simulate_websocket_message_routing_with_permissions(concurrent_routes)
             
             # Validate isolation maintained during concurrent operations
-            assert concurrent_results["total_routes"] == 12  # 3 users × 4 routes each
+            assert concurrent_results["total_routes"] == 12  # 3 users  x  4 routes each
             
             # Verify permission isolation
             isolation_results = await validator.validate_permission_isolation_across_users(user_contexts)

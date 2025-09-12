@@ -83,22 +83,22 @@ def get_content_corpus_schema(table_name: str) -> str:
 WORKLOAD_EVENTS_TABLE_NAME = 'workload_events'
 WORKLOAD_EVENTS_TABLE_SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS {WORKLOAD_EVENTS_TABLE_NAME} (
-    event_id UUID DEFAULT generateUUIDv4(),
-    timestamp DateTime64(3) DEFAULT now(),
-    user_id UInt32,
-    workload_id String,
-    event_type String,
-    event_category String,
-    metrics Nested(
-        name String,        -- Corrected: Changed from Array(String)
-        value Float64,      -- Corrected: Changed from Array(Float64)
-        unit String         -- Corrected: Changed from Array(String)
-    ),
-    dimensions Map(String, String),
-    metadata String,
-    INDEX idx_user_id user_id TYPE minmax GRANULARITY 8192,
-    INDEX idx_workload_id workload_id TYPE bloom_filter GRANULARITY 1,
-    INDEX idx_event_type event_type TYPE set(100) GRANULARITY 1
+[U+00A0] [U+00A0] event_id UUID DEFAULT generateUUIDv4(),
+[U+00A0] [U+00A0] timestamp DateTime64(3) DEFAULT now(),
+[U+00A0] [U+00A0] user_id UInt32,
+[U+00A0] [U+00A0] workload_id String,
+[U+00A0] [U+00A0] event_type String,
+[U+00A0] [U+00A0] event_category String,
+[U+00A0] [U+00A0] metrics Nested(
+[U+00A0] [U+00A0] [U+00A0] [U+00A0] name String, [U+00A0]      -- Corrected: Changed from Array(String)
+[U+00A0] [U+00A0] [U+00A0] [U+00A0] value Float64,      -- Corrected: Changed from Array(Float64)
+[U+00A0] [U+00A0] [U+00A0] [U+00A0] unit String         -- Corrected: Changed from Array(String)
+[U+00A0] [U+00A0] ),
+[U+00A0] [U+00A0] dimensions Map(String, String),
+[U+00A0] [U+00A0] metadata String,
+[U+00A0] [U+00A0] INDEX idx_user_id user_id TYPE minmax GRANULARITY 8192,
+[U+00A0] [U+00A0] INDEX idx_workload_id workload_id TYPE bloom_filter GRANULARITY 1,
+[U+00A0] [U+00A0] INDEX idx_event_type event_type TYPE set(100) GRANULARITY 1
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (user_id, timestamp, event_id)

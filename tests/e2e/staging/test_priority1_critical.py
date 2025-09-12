@@ -97,21 +97,21 @@ class TestCriticalWebSocket:
                                 if (welcome_data.get("type") == "system_message" and 
                                     welcome_data.get("data", {}).get("event") == "connection_established" and
                                     welcome_data.get("data", {}).get("connection_ready")):
-                                    print("✅ WebSocket connection confirmed ready for messages (SSOT format)")
+                                    print(" PASS:  WebSocket connection confirmed ready for messages (SSOT format)")
                                     connection_ready = True
                                     break
                                 else:
-                                    print(f"✅ SSOT message received, format variation acceptable: {welcome_data.get('type')}")
+                                    print(f" PASS:  SSOT message received, format variation acceptable: {welcome_data.get('type')}")
                                     # Message received successfully, continue
                                     break
                             except json.JSONDecodeError:
-                                print(f"⚠️ Welcome message not JSON: {welcome_response}")
+                                print(f" WARNING: [U+FE0F] Welcome message not JSON: {welcome_response}")
                                 break
                         
                         except asyncio.TimeoutError:
-                            print(f"❌ Timeout waiting for welcome message (attempt {attempt + 1}/2)")
+                            print(f" FAIL:  Timeout waiting for welcome message (attempt {attempt + 1}/2)")
                             if attempt == 1:
-                                print("⚠️ Proceeding without welcome message - connection established")
+                                print(" WARNING: [U+FE0F] Proceeding without welcome message - connection established")
                                 break
                             await asyncio.sleep(2)  # Brief delay before retry
                     
@@ -129,10 +129,10 @@ class TestCriticalWebSocket:
                         print(f"WebSocket ping response: {response}")
                         ping_success = True
                     except asyncio.TimeoutError:
-                        print("⚠️ Ping timeout - but connection was established and working")
+                        print(" WARNING: [U+FE0F] Ping timeout - but connection was established and working")
                         # Don't fail the test - connection is working
                     except Exception as e:
-                        print(f"⚠️ Ping error (connection still successful): {e}")
+                        print(f" WARNING: [U+FE0F] Ping error (connection still successful): {e}")
             except websockets.exceptions.InvalidStatus as e:
                 # Auth token might not be valid for staging
                 if "403" in str(e) or "401" in str(e):
@@ -154,9 +154,9 @@ class TestCriticalWebSocket:
         # Check auth enforcement based on staging environment configuration
         # Staging may have auth relaxed for E2E testing - this is acceptable
         if got_auth_error:
-            print("✅ WebSocket enforces authentication (production-ready)")
+            print(" PASS:  WebSocket enforces authentication (production-ready)")
         else:
-            print("⚠️ WebSocket auth bypassed (acceptable for staging E2E tests)")
+            print(" WARNING: [U+FE0F] WebSocket auth bypassed (acceptable for staging E2E tests)")
             # In staging, auth may be disabled for testing - validate connection works instead
         
         # Connection with auth should succeed or we should handle staging limitations
@@ -223,30 +223,30 @@ class TestCriticalWebSocket:
                                     if (welcome_data.get("type") == "system_message" and 
                                         welcome_data.get("data", {}).get("event") == "connection_established" and
                                         welcome_data.get("data", {}).get("connection_ready")):
-                                        print("✅ WebSocket connection confirmed ready for messages (SSOT format)")
+                                        print(" PASS:  WebSocket connection confirmed ready for messages (SSOT format)")
                                         auth_accepted = True  # If we get welcome message, auth was accepted
                                         break
                                     else:
-                                        print(f"✅ SSOT message received, format variation acceptable: {welcome_data.get('type')}")
+                                        print(f" PASS:  SSOT message received, format variation acceptable: {welcome_data.get('type')}")
                                         # Message received successfully, auth was accepted
                                         auth_accepted = True
                                         break
                                 except json.JSONDecodeError:
-                                    print(f"⚠️ Welcome message not JSON: {welcome_response}")
+                                    print(f" WARNING: [U+FE0F] Welcome message not JSON: {welcome_response}")
                                     # Still counts as successful connection establishment
                                     auth_accepted = True
                                     break
                             
                             except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosedError) as welcome_error:
                                 if "1011" in str(welcome_error) or "internal error" in str(welcome_error).lower():
-                                    print(f"⚠️ WebSocket 1011 internal error during welcome message (staging infrastructure)")
-                                    print(f"✅ Connection was established, auth succeeded before infrastructure error")
+                                    print(f" WARNING: [U+FE0F] WebSocket 1011 internal error during welcome message (staging infrastructure)")
+                                    print(f" PASS:  Connection was established, auth succeeded before infrastructure error")
                                     auth_accepted = True  # Mark as successful - auth worked
                                     break
                                 else:
-                                    print(f"⚠️ Error waiting for welcome message (attempt {welcome_attempt + 1}/3): {welcome_error}")
+                                    print(f" WARNING: [U+FE0F] Error waiting for welcome message (attempt {welcome_attempt + 1}/3): {welcome_error}")
                                     if welcome_attempt == 2:
-                                        print("⚠️ Proceeding without welcome message - connection was established")
+                                        print(" WARNING: [U+FE0F] Proceeding without welcome message - connection was established")
                                         # Connection was established even without welcome message
                                         auth_accepted = True
                                         break
@@ -277,7 +277,7 @@ class TestCriticalWebSocket:
                                 print(f"Auth accepted, response: {data}")
                                 
                         except asyncio.TimeoutError:
-                            print("⚠️ Timeout waiting for message response - but connection was established")
+                            print(" WARNING: [U+FE0F] Timeout waiting for message response - but connection was established")
                             # Connection establishment was successful, which proves auth works
                             auth_accepted = True
                         
@@ -289,8 +289,8 @@ class TestCriticalWebSocket:
                     
                     # SSOT FIX: Handle 1011 internal error as staging infrastructure limitation
                     if "1011" in str(e) or "internal error" in str(e).lower():
-                        print(f"⚠️ WebSocket 1011 internal error detected (staging infrastructure limitation)")
-                        print(f"✅ Auth was processed (connection established before error)")
+                        print(f" WARNING: [U+FE0F] WebSocket 1011 internal error detected (staging infrastructure limitation)")
+                        print(f" PASS:  Auth was processed (connection established before error)")
                         auth_accepted = True  # Auth worked, infrastructure failed after
                         break
                         
@@ -299,7 +299,7 @@ class TestCriticalWebSocket:
                         if "403" in str(e) or "401" in str(e):
                             print("Auth token rejected by staging (this proves auth enforcement works)")
                         elif "1011" in str(e) or "internal error" in str(e).lower():
-                            print("✅ Auth successful but WebSocket infrastructure error (staging limitation)")
+                            print(" PASS:  Auth successful but WebSocket infrastructure error (staging limitation)")
                             auth_accepted = True  # Mark as successful since auth worked
                         else:
                             raise  # Re-raise non-auth errors
@@ -314,9 +314,9 @@ class TestCriticalWebSocket:
         
         # Auth enforcement check adapted for staging environment
         if auth_enforced:
-            print("✅ Authentication properly enforced")
+            print(" PASS:  Authentication properly enforced")
         else:
-            print("⚠️ Auth bypassed in staging - acceptable for E2E testing")
+            print(" WARNING: [U+FE0F] Auth bypassed in staging - acceptable for E2E testing")
             # In staging, validate that authenticated connections work properly instead
             assert auth_accepted, "Authenticated WebSocket connection should work in staging"
     
@@ -344,7 +344,7 @@ class TestCriticalWebSocket:
                     config.websocket_url,
                     additional_headers=ws_headers
                 ) as ws:
-                    print("✓ Authenticated WebSocket connection established")
+                    print("[U+2713] Authenticated WebSocket connection established")
                     
                     # Create test message
                     test_message = {
@@ -357,12 +357,12 @@ class TestCriticalWebSocket:
                     # Send message
                     await ws.send(json.dumps(test_message))
                     message_sent = True
-                    print("✓ Message sent via authenticated WebSocket")
+                    print("[U+2713] Message sent via authenticated WebSocket")
                     
                     # Try to receive response (with timeout)
                     try:
                         response = await asyncio.wait_for(ws.recv(), timeout=10)
-                        print(f"✓ WebSocket response received: {response[:100]}...")
+                        print(f"[U+2713] WebSocket response received: {response[:100]}...")
                         response_received = True
                         
                         # Validate the response to ensure it's a real response
@@ -370,7 +370,7 @@ class TestCriticalWebSocket:
                             response_data = json.loads(response)
                             if isinstance(response_data, dict) and response_data.get("type"):
                                 actual_message_validated = True
-                                print(f"✓ Valid message response: type={response_data.get('type')}")
+                                print(f"[U+2713] Valid message response: type={response_data.get('type')}")
                         except json.JSONDecodeError:
                             print("Response received but not JSON - likely real network data")
                             actual_message_validated = True
@@ -707,7 +707,7 @@ class TestCriticalAgent:
                     response = await client.get(f"{config.backend_url}{endpoint}")
                     
                     if response.status_code == 200:
-                        print(f"✓ Streaming endpoint {endpoint} available")
+                        print(f"[U+2713] Streaming endpoint {endpoint} available")
                         streaming_tested = True
                         
                         # Check if it's actually a streaming response
@@ -730,7 +730,7 @@ class TestCriticalAgent:
                         
                         if post_response.status_code in [200, 401, 403]:
                             streaming_tested = True
-                            print(f"✓ Streaming POST endpoint {endpoint} responded: {post_response.status_code}")
+                            print(f"[U+2713] Streaming POST endpoint {endpoint} responded: {post_response.status_code}")
                     
                 except Exception as e:
                     print(f"Streaming test error for {endpoint}: {e}")
@@ -984,9 +984,9 @@ class TestCriticalMessaging:
                         }
                         
                         if post_response.status_code == 201:
-                            print(f"✓ Message creation successful at {endpoint}")
+                            print(f"[U+2713] Message creation successful at {endpoint}")
                         elif post_response.status_code in [401, 403]:
-                            print(f"🔐 Message creation requires auth at {endpoint}")
+                            print(f"[U+1F510] Message creation requires auth at {endpoint}")
                     
                 except Exception as e:
                     message_endpoints_tested[f"GET {endpoint}"] = {"error": str(e)[:100]}
@@ -1128,11 +1128,11 @@ class TestCriticalMessaging:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Thread access successful: {endpoint}")
+                        print(f"[U+2713] Thread access successful: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Thread not found (expected): {endpoint}")
+                        print(f"[U+2022] Thread not found (expected): {endpoint}")
                     elif response.status_code in [401, 403]:
-                        print(f"🔐 Thread access requires auth: {endpoint}")
+                        print(f"[U+1F510] Thread access requires auth: {endpoint}")
                     
                 except Exception as e:
                     switching_results[f"GET {endpoint}"] = {"error": str(e)[:100]}
@@ -1199,7 +1199,7 @@ class TestCriticalMessaging:
                     }
                     
                     if paginated_response.status_code == 200:
-                        print(f"✓ Paginated history supported: {endpoint}")
+                        print(f"[U+2713] Paginated history supported: {endpoint}")
                     
                 except Exception as e:
                     history_results[f"GET {endpoint}"] = {"error": str(e)[:100]}
@@ -1248,13 +1248,13 @@ class TestCriticalMessaging:
                                 isolation_results[f"GET {endpoint} (no auth)"]["item_count"] = len(data)
                                 # Should be empty or minimal for unauthenticated requests
                                 if len(data) == 0:
-                                    print(f"✓ Proper isolation: {endpoint} returns empty without auth")
+                                    print(f"[U+2713] Proper isolation: {endpoint} returns empty without auth")
                             elif isinstance(data, dict):
                                 isolation_results[f"GET {endpoint} (no auth)"]["has_user_data"] = bool(data)
                         except json.JSONDecodeError:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"✓ Proper auth required: {endpoint}")
+                        print(f"[U+2713] Proper auth required: {endpoint}")
                         isolation_results[f"GET {endpoint} (no auth)"]["auth_enforced"] = True
                     
                     # Test with different user identifiers (simulated)
@@ -1431,7 +1431,7 @@ class TestCriticalScalability:
                     # Check for rate limit indicators
                     if status == 429:  # Too Many Requests
                         rate_limit_results["rate_limit_detected"] = True
-                        print(f"✓ Rate limit detected at request {i+1}")
+                        print(f"[U+2713] Rate limit detected at request {i+1}")
                         
                     # Check for rate limit headers
                     rate_limit_headers = {}
@@ -1468,9 +1468,9 @@ class TestCriticalScalability:
         
         # Note: Rate limiting might not be enabled in staging, so we don't assert it must be detected
         if rate_limit_results["rate_limit_detected"]:
-            print("✓ Rate limiting is active and working correctly")
+            print("[U+2713] Rate limiting is active and working correctly")
         else:
-            print("• No rate limiting detected (may not be configured in staging)")
+            print("[U+2022] No rate limiting detected (may not be configured in staging)")
     
     @pytest.mark.asyncio
     async def test_019_error_handling_real(self):
@@ -1529,7 +1529,7 @@ class TestCriticalScalability:
                     
                     # Log interesting error responses
                     if response.status_code in [400, 401, 403, 404, 405, 422, 429, 500]:
-                        print(f"• {method} {endpoint}: {response.status_code} - {description}")
+                        print(f"[U+2022] {method} {endpoint}: {response.status_code} - {description}")
                     
                 except Exception as e:
                     error_test_results[f"{method} {endpoint}"] = {
@@ -1818,11 +1818,11 @@ class TestCriticalUserExperience:
                         }
                         
                         if post_response.status_code in [200, 202]:
-                            print(f"✓ Agent control available: {endpoint}")
+                            print(f"[U+2713] Agent control available: {endpoint}")
                         elif post_response.status_code in [401, 403]:
-                            print(f"🔐 Agent control requires auth: {endpoint}")
+                            print(f"[U+1F510] Agent control requires auth: {endpoint}")
                         elif post_response.status_code == 404:
-                            print(f"• Agent control not implemented: {endpoint}")
+                            print(f"[U+2022] Agent control not implemented: {endpoint}")
                     
                 except Exception as e:
                     lifecycle_results[f"GET {endpoint}"] = {"error": str(e)[:100]}
@@ -1887,7 +1887,7 @@ class TestCriticalUserExperience:
                     
                     if is_streaming:
                         streaming_results["streaming_endpoints"][endpoint]["streaming_detected"] = True
-                        print(f"✓ Streaming capability detected: {endpoint}")
+                        print(f"[U+2713] Streaming capability detected: {endpoint}")
                     
                     # Test POST request for streaming (with streaming payload)
                     if endpoint in ["/api/chat/stream", "/api/agents/stream"]:
@@ -1979,11 +1979,11 @@ class TestCriticalUserExperience:
                     }
                     
                     if len(chunks_received) > 1:
-                        print(f"✓ WebSocket streaming detected: {len(chunks_received)} chunks")
+                        print(f"[U+2713] WebSocket streaming detected: {len(chunks_received)} chunks")
                     elif len(chunks_received) == 1:
-                        print(f"✓ WebSocket response received (single chunk): {chunks_received[0]} bytes")
+                        print(f"[U+2713] WebSocket response received (single chunk): {chunks_received[0]} bytes")
                     else:
-                        print("• No WebSocket chunks received (streaming may not be implemented)")
+                        print("[U+2022] No WebSocket chunks received (streaming may not be implemented)")
                     
             except Exception as e:
                 error_msg = str(e)[:100]
@@ -2301,7 +2301,7 @@ class TestCriticalUserExperience:
                                                 "data": event.get("data", {}),  # SSOT: Preserve event data
                                                 "sequence": i + 1
                                             })
-                                            print(f"✅ CRITICAL EVENT RECEIVED: {event_type}")
+                                            print(f" PASS:  CRITICAL EVENT RECEIVED: {event_type}")
                                 
                                 except json.JSONDecodeError:
                                     # Non-JSON event data - still track it
@@ -2356,7 +2356,7 @@ class TestCriticalUserExperience:
         if missing_events:
             print(f"Missing critical events: {missing_events}")
         else:
-            print("✓ All critical events detected!")
+            print("[U+2713] All critical events detected!")
         
         # SSOT FIX: Adjust duration assertion for Windows asyncio patterns
         assert duration > 0.3, f"Test too fast ({duration:.3f}s) for event delivery testing!"
@@ -2378,7 +2378,7 @@ class TestCriticalUserExperience:
 def verify_test_duration(test_name: str, duration: float, minimum: float = 0.1):
     """Verify test took real time to execute"""
     assert duration >= minimum, \
-        f"🚨 FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
+        f" ALERT:  FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
         f"This test is not making real network calls!"
 
 

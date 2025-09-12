@@ -588,7 +588,7 @@ class TestWebSocketUserStateIsolation(BaseIntegrationTest):
             # Verify isolation maintained during rapid modifications
             assert rapid_results["isolation_maintained"], \
                 f"Rapid modifications violated isolation: {rapid_results['violations']}"
-            assert rapid_results["total_operations"] == 20  # 2 users × 5 batches × 2 operations
+            assert rapid_results["total_operations"] == 20  # 2 users  x  5 batches  x  2 operations
             
         finally:
             await validator.cleanup()

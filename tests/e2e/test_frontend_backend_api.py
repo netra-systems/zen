@@ -1,5 +1,5 @@
 """
-CRITICAL Frontend → Backend API Communication Test
+CRITICAL Frontend  ->  Backend API Communication Test
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal + All customer segments (Free, Early, Mid, Enterprise)

@@ -902,7 +902,7 @@ class TestDataProcessingBusinessIntegration(DatabaseIntegrationTest):
                     'cost_usd': raw_data.get('total_cost', 0)
                 }
             elif platform == 'google':
-                # Convert character counts to approximate token counts (1 token ≈ 4 chars)
+                # Convert character counts to approximate token counts (1 token [U+2248] 4 chars)
                 input_chars = raw_data.get('input_character_count', 0)
                 output_chars = raw_data.get('output_character_count', 0)
                 normalized = {

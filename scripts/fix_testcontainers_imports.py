@@ -132,10 +132,10 @@ def main():
     if fixed_count > 0:
         print("\nTestcontainers import issues have been resolved!")
         print("The following changes were made:")
-        print("  - import testcontainers.redis as redis_container → from testcontainers.redis import RedisContainer")
-        print("  - import testcontainers.postgres as postgres_container → from testcontainers.postgres import PostgresContainer")
-        print("  - redis_container.RedisContainer → RedisContainer")
-        print("  - postgres_container.PostgresContainer → PostgresContainer")
+        print("  - import testcontainers.redis as redis_container  ->  from testcontainers.redis import RedisContainer")
+        print("  - import testcontainers.postgres as postgres_container  ->  from testcontainers.postgres import PostgresContainer")
+        print("  - redis_container.RedisContainer  ->  RedisContainer")
+        print("  - postgres_container.PostgresContainer  ->  PostgresContainer")
     else:
         print("No changes were needed.")
 

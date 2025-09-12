@@ -188,7 +188,7 @@ Return a JSON object with the following structure:
                 "current_period_value": number,
                 "prior_period_value": number,
                 "change_percentage": number,
-                "performance_indicator": "Symbol indicating performance (e.g., ↑, ↓, →)",
+                "performance_indicator": "Symbol indicating performance (e.g.,  up ,  down ,  -> )",
                 "performance_assessment": "Qualitative assessment (e.g., Strong, Needs Improvement)"
             }}
         ],

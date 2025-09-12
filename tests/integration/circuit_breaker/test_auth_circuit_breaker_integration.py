@@ -5,7 +5,7 @@ This test suite validates that auth service circuit breakers work correctly
 with the unified circuit breaker system, ensuring that authentication failures
 are properly handled and don't cascade due to compatibility layer issues.
 
-Test Philosophy: Integration tests that prove the auth → circuit breaker integration
+Test Philosophy: Integration tests that prove the auth  ->  circuit breaker integration
 works properly with the unified system, identifying any issues with the compatibility layer.
 """
 import pytest

@@ -1,7 +1,7 @@
 """Test WorkflowOrchestrator Golden Path - P0 Failing E2E Tests.
 
 This test module validates the complete golden path user flow: 
-login → agent execution → AI response delivery with SSOT compliance.
+login  ->  agent execution  ->  AI response delivery with SSOT compliance.
 
 EXPECTED BEHAVIOR (BEFORE REMEDIATION):
 - These tests should FAIL because interface fragmentation breaks golden path
@@ -215,7 +215,7 @@ class TestWorkflowOrchestratorGoldenPath(SSotAsyncTestCase):
         return mock_emitter
         
     async def test_golden_path_login_to_ai_response_complete_flow(self):
-        """Test complete golden path: login → agent execution → AI response delivery.
+        """Test complete golden path: login  ->  agent execution  ->  AI response delivery.
         
         EXPECTED: This test should FAIL before remediation (golden path broken).
         AFTER REMEDIATION: Should PASS when SSOT compliance enables golden path.

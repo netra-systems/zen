@@ -250,7 +250,7 @@ class ProductionMonitoringSystem:
         if metrics.isolation_score <= self.thresholds.isolation_score_emergency:
             alerts.append({
                 "level": "EMERGENCY",
-                "title": "🚨 CRITICAL: Isolation Score Emergency",
+                "title": " ALERT:  CRITICAL: Isolation Score Emergency",
                 "message": f"Isolation score dropped to {metrics.isolation_score:.1%} (threshold: {self.thresholds.isolation_score_emergency:.1%})",
                 "metric": "isolation_score",
                 "value": metrics.isolation_score,
@@ -261,7 +261,7 @@ class ProductionMonitoringSystem:
         elif metrics.isolation_score <= self.thresholds.isolation_score_critical:
             alerts.append({
                 "level": "CRITICAL",
-                "title": "🚨 Isolation Score Critical",
+                "title": " ALERT:  Isolation Score Critical",
                 "message": f"Isolation score at {metrics.isolation_score:.1%} (threshold: {self.thresholds.isolation_score_critical:.1%})",
                 "metric": "isolation_score",
                 "value": metrics.isolation_score,
@@ -272,7 +272,7 @@ class ProductionMonitoringSystem:
         elif metrics.isolation_score <= self.thresholds.isolation_score_warning:
             alerts.append({
                 "level": "WARNING",
-                "title": "⚠️ Isolation Score Warning",
+                "title": " WARNING: [U+FE0F] Isolation Score Warning",
                 "message": f"Isolation score at {metrics.isolation_score:.1%} (threshold: {self.thresholds.isolation_score_warning:.1%})",
                 "metric": "isolation_score",
                 "value": metrics.isolation_score,
@@ -284,7 +284,7 @@ class ProductionMonitoringSystem:
         if metrics.error_rate >= self.thresholds.error_rate_emergency:
             alerts.append({
                 "level": "EMERGENCY",
-                "title": "🚨 CRITICAL: Error Rate Emergency", 
+                "title": " ALERT:  CRITICAL: Error Rate Emergency", 
                 "message": f"Error rate spiked to {metrics.error_rate:.2%} (threshold: {self.thresholds.error_rate_emergency:.2%})",
                 "metric": "error_rate",
                 "value": metrics.error_rate,
@@ -295,7 +295,7 @@ class ProductionMonitoringSystem:
         elif metrics.error_rate >= self.thresholds.error_rate_critical:
             alerts.append({
                 "level": "CRITICAL",
-                "title": "🚨 High Error Rate",
+                "title": " ALERT:  High Error Rate",
                 "message": f"Error rate at {metrics.error_rate:.2%} (threshold: {self.thresholds.error_rate_critical:.2%})",
                 "metric": "error_rate", 
                 "value": metrics.error_rate,
@@ -306,7 +306,7 @@ class ProductionMonitoringSystem:
         elif metrics.error_rate >= self.thresholds.error_rate_warning:
             alerts.append({
                 "level": "WARNING",
-                "title": "⚠️ Elevated Error Rate",
+                "title": " WARNING: [U+FE0F] Elevated Error Rate",
                 "message": f"Error rate at {metrics.error_rate:.2%} (threshold: {self.thresholds.error_rate_warning:.2%})",
                 "metric": "error_rate",
                 "value": metrics.error_rate,
@@ -318,7 +318,7 @@ class ProductionMonitoringSystem:
         if metrics.cascade_failures >= self.thresholds.cascade_failures_emergency:
             alerts.append({
                 "level": "EMERGENCY", 
-                "title": "🚨 CRITICAL: Multiple Cascade Failures",
+                "title": " ALERT:  CRITICAL: Multiple Cascade Failures",
                 "message": f"{metrics.cascade_failures} cascade failures detected (threshold: {self.thresholds.cascade_failures_emergency})",
                 "metric": "cascade_failures",
                 "value": metrics.cascade_failures,
@@ -329,7 +329,7 @@ class ProductionMonitoringSystem:
         elif metrics.cascade_failures >= self.thresholds.cascade_failures_critical:
             alerts.append({
                 "level": "CRITICAL",
-                "title": "🚨 Multiple Cascade Failures",
+                "title": " ALERT:  Multiple Cascade Failures",
                 "message": f"{metrics.cascade_failures} cascade failures detected (threshold: {self.thresholds.cascade_failures_critical})",
                 "metric": "cascade_failures",
                 "value": metrics.cascade_failures,
@@ -340,7 +340,7 @@ class ProductionMonitoringSystem:
         elif metrics.cascade_failures >= self.thresholds.cascade_failures_warning:
             alerts.append({
                 "level": "WARNING",
-                "title": "⚠️ Cascade Failure Detected",
+                "title": " WARNING: [U+FE0F] Cascade Failure Detected",
                 "message": f"{metrics.cascade_failures} cascade failure(s) detected",
                 "metric": "cascade_failures",
                 "value": metrics.cascade_failures,
@@ -354,7 +354,7 @@ class ProductionMonitoringSystem:
             if response_time_increase >= self.thresholds.response_time_emergency_increase:
                 alerts.append({
                     "level": "EMERGENCY",
-                    "title": "🚨 CRITICAL: Response Time Degradation",
+                    "title": " ALERT:  CRITICAL: Response Time Degradation",
                     "message": f"Response time increased by {response_time_increase:.1%} (threshold: {self.thresholds.response_time_emergency_increase:.1%})",
                     "metric": "response_time_degradation",
                     "value": response_time_increase,
@@ -365,7 +365,7 @@ class ProductionMonitoringSystem:
             elif response_time_increase >= self.thresholds.response_time_critical_increase:
                 alerts.append({
                     "level": "CRITICAL",
-                    "title": "🚨 Response Time Degradation",
+                    "title": " ALERT:  Response Time Degradation",
                     "message": f"Response time increased by {response_time_increase:.1%} (threshold: {self.thresholds.response_time_critical_increase:.1%})",
                     "metric": "response_time_degradation",
                     "value": response_time_increase,
@@ -375,7 +375,7 @@ class ProductionMonitoringSystem:
             elif response_time_increase >= self.thresholds.response_time_warning_increase:
                 alerts.append({
                     "level": "WARNING",
-                    "title": "⚠️ Response Time Increase",
+                    "title": " WARNING: [U+FE0F] Response Time Increase",
                     "message": f"Response time increased by {response_time_increase:.1%} from baseline",
                     "metric": "response_time_degradation", 
                     "value": response_time_increase,
@@ -746,7 +746,7 @@ Environment: {self.environment.upper()}
 Date: {datetime.now().strftime('%Y-%m-%d')}
 
 === EXECUTIVE SUMMARY ===
-Overall Status: {'✅ HEALTHY' if min(isolation_scores) >= 0.99 else '⚠️ NEEDS ATTENTION'}
+Overall Status: {' PASS:  HEALTHY' if min(isolation_scores) >= 0.99 else ' WARNING: [U+FE0F] NEEDS ATTENTION'}
 Data Points: {len(daily_data)}
 Monitoring Period: 24 hours
 
@@ -774,24 +774,24 @@ Response Time P95:
 === STABILITY METRICS ===
 Total Requests Processed: {total_requests:,}
 Cascade Failures (24h): {cascade_failures_count}
-System Uptime: {'✅ 100%' if cascade_failures_count == 0 else f'⚠️ {cascade_failures_count} incidents'}
+System Uptime: {' PASS:  100%' if cascade_failures_count == 0 else f' WARNING: [U+FE0F] {cascade_failures_count} incidents'}
 
 === RECOMMENDATIONS ===
 """
             
             # Add recommendations based on metrics
             if min(isolation_scores) < 0.99:
-                report += "- 🚨 Isolation score below 99% - investigate request isolation\n"
+                report += "-  ALERT:  Isolation score below 99% - investigate request isolation\n"
             
             if max(error_rates) > 0.01:
-                report += "- ⚠️ Error rate exceeded 1% - review error logs\n"
+                report += "-  WARNING: [U+FE0F] Error rate exceeded 1% - review error logs\n"
             
             if cascade_failures_count > 0:
-                report += f"- 🚨 {cascade_failures_count} cascade failures detected - review isolation implementation\n"
+                report += f"-  ALERT:  {cascade_failures_count} cascade failures detected - review isolation implementation\n"
             
             if not any([min(isolation_scores) < 0.99, max(error_rates) > 0.01, cascade_failures_count > 0]):
-                report += "- ✅ All metrics within acceptable ranges\n"
-                report += "- ✅ System operating normally\n"
+                report += "-  PASS:  All metrics within acceptable ranges\n"
+                report += "-  PASS:  System operating normally\n"
             
             report += f"""
 === NEXT ACTIONS ===
@@ -917,7 +917,7 @@ Examples:
             print("="*60)
             
             if "error" in status:
-                print(f"❌ Error: {status['error']}")
+                print(f" FAIL:  Error: {status['error']}")
                 sys.exit(1)
             
             metrics = status["metrics"]
@@ -937,9 +937,9 @@ Examples:
                 
                 alert_status = status["alert_status"]
                 print(f"\nAlert Configuration:")
-                print(f"  Slack: {'✅' if alert_status['configured_channels']['slack'] else '❌'}")
-                print(f"  PagerDuty: {'✅' if alert_status['configured_channels']['pagerduty'] else '❌'}")
-                print(f"  Email: {'✅' if alert_status['configured_channels']['email'] else '❌'}")
+                print(f"  Slack: {' PASS: ' if alert_status['configured_channels']['slack'] else ' FAIL: '}")
+                print(f"  PagerDuty: {' PASS: ' if alert_status['configured_channels']['pagerduty'] else ' FAIL: '}")
+                print(f"  Email: {' PASS: ' if alert_status['configured_channels']['email'] else ' FAIL: '}")
             
             print("\n" + "="*60)
             
@@ -953,13 +953,13 @@ Examples:
             if args.pagerduty_key:
                 monitor.alert_config.pagerduty_integration_key = args.pagerduty_key
                 
-            print("✅ Alert configuration updated")
+            print(" PASS:  Alert configuration updated")
             
     except KeyboardInterrupt:
-        print("\n⚠️ Monitoring interrupted by user")
+        print("\n WARNING: [U+FE0F] Monitoring interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" FAIL:  Error: {e}")
         logger.exception("Unexpected error in monitoring")
         sys.exit(1)
 

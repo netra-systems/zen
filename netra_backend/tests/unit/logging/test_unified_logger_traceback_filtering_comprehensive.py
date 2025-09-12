@@ -915,7 +915,7 @@ class TestUnifiedLoggerErrorHandling(SSotBaseTestCase):
         # Arrange
         logger = UnifiedLogger()
         
-        unicode_message = "Test with Unicode: 你好世界 🌍 émojis and spëcial chars"
+        unicode_message = "Test with Unicode: [U+4F60][U+597D][U+4E16][U+754C] [U+1F30D] [U+00E9]mojis and sp[U+00EB]cial chars"
         special_chars = "Quotes: 'single' \"double\" Brackets: [array] {dict} Backslash: \\"
         
         # Act & Assert - Should not raise exceptions

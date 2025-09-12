@@ -223,7 +223,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         assert redis_fallback_result["core_functionality_preserved"], "Core features must remain available"
         self.assert_business_value_delivered(redis_fallback_result, "automation")
         
-        logger.info(f"✅ Redis→PostgreSQL fallback successful. Degradation: {degradation_factor:.2f}x")
+        logger.info(f" PASS:  Redis -> PostgreSQL fallback successful. Degradation: {degradation_factor:.2f}x")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -262,7 +262,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         business_impact = exhaustion_result["business_impact_score"]
         assert business_impact >= 0.7, f"Business impact too severe: {business_impact}"
         
-        logger.info(f"✅ PostgreSQL connection exhaustion handled. Business impact: {business_impact:.2f}")
+        logger.info(f" PASS:  PostgreSQL connection exhaustion handled. Business impact: {business_impact:.2f}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -298,7 +298,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         assert recovery_result["circuit_breaker_closed"], "Circuit breaker must close on recovery"
         assert recovery_result["normal_operation_resumed"], "Normal operation must resume"
         
-        logger.info(f"✅ LLM API timeout handling successful. Business continuity: {business_continuity:.2f}")
+        logger.info(f" PASS:  LLM API timeout handling successful. Business continuity: {business_continuity:.2f}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -329,7 +329,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         assert recovery_result["normal_throughput_restored"], "Normal throughput must be restored"
         assert recovery_result["queued_requests_processed"], "Queued requests must be processed"
         
-        logger.info(f"✅ External API rate limiting handled. UX impact: {ux_impact:.2f}")
+        logger.info(f" PASS:  External API rate limiting handled. UX impact: {ux_impact:.2f}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -359,7 +359,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         assert mesh_result["load_balancing_maintained"], "Load balancing must be maintained"
         assert mesh_result["health_checks_continued"], "Health checks must continue"
         
-        logger.info("✅ Service discovery failure handled successfully")
+        logger.info(" PASS:  Service discovery failure handled successfully")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -402,7 +402,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         resilience_score = self._calculate_system_resilience_score(baseline_health, health_failure_results, recovery_results)
         assert resilience_score >= 0.8, f"System resilience too low: {resilience_score}"
         
-        logger.info(f"✅ Health check failure/recovery cycle completed. Resilience: {resilience_score:.2f}")
+        logger.info(f" PASS:  Health check failure/recovery cycle completed. Resilience: {resilience_score:.2f}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -438,7 +438,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         assert propagation_result["consistent_auth_state"], "Auth state must be consistent across services"
         assert propagation_result["no_partial_authentication"], "Must prevent partial auth states"
         
-        logger.info("✅ Authentication failure propagation handled correctly")
+        logger.info(" PASS:  Authentication failure propagation handled correctly")
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -473,7 +473,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         assert websocket_result["websocket_connections_maintained"], "WebSocket connections must survive LB changes"
         assert websocket_result["reconnection_logic_worked"], "Reconnection logic must function"
         
-        logger.info(f"✅ Load balancer configuration issues handled. Session preservation: {lb_reconfig_result['session_preservation_rate']:.2f}")
+        logger.info(f" PASS:  Load balancer configuration issues handled. Session preservation: {lb_reconfig_result['session_preservation_rate']:.2f}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -523,7 +523,7 @@ class TestComprehensiveServiceDependencyFailures(BaseIntegrationTest):
         assert recovery_result["resolution_restored"], "DNS resolution must be restored"
         assert recovery_result["stale_cache_invalidated"], "Stale cache entries must be invalidated"
         
-        logger.info("✅ DNS resolution failure handling successful")
+        logger.info(" PASS:  DNS resolution failure handling successful")
 
     # Helper methods for comprehensive testing scenarios
 

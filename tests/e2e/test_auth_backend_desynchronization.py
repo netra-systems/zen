@@ -7,7 +7,7 @@
 # REMOVED_SYNTAX_ERROR: inconsistent state that requires proper rollback mechanisms.
 
 # REMOVED_SYNTAX_ERROR: BVJ (Business Value Justification):
-    # REMOVED_SYNTAX_ERROR: - Segment: All tiers (Free → Enterprise)
+    # REMOVED_SYNTAX_ERROR: - Segment: All tiers (Free  ->  Enterprise)
     # REMOVED_SYNTAX_ERROR: - Business Goal: Data Integrity and Platform Stability
     # REMOVED_SYNTAX_ERROR: - Value Impact: Prevents user account corruption that leads to login failures
     # REMOVED_SYNTAX_ERROR: - Strategic Impact: Critical security vulnerability - prevents data inconsistency attacks

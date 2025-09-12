@@ -80,7 +80,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         super().setup_method(method)
         # Create scoped registry to avoid conflicts
         self.registry = ToolRegistry(scope_id=f"test_{method.__name__}")
-        logger.info(f"🧪 Starting unit test: {method.__name__}")
+        logger.info(f"[U+1F9EA] Starting unit test: {method.__name__}")
     
     def test_pydantic_basemodel_detection_and_rejection(self):
         """
@@ -96,7 +96,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         - Clear error message: "BaseModel classes are data schemas, not executable tools"
         - No "modelmetaclass" registration attempts
         """
-        logger.info("🧪 Testing BaseModel class detection and rejection")
+        logger.info("[U+1F9EA] Testing BaseModel class detection and rejection")
         
         # Create BaseModel instance that should be rejected
         basemodel_instance = TestDataModel(name="test", value=42)
@@ -106,7 +106,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
             self.registry.register("test_basemodel", basemodel_instance)
             
             # If we reach here, the BaseModel was accepted (current broken state)
-            logger.error("❌ CURRENT STATE BUG: BaseModel instance was accepted as tool")
+            logger.error(" FAIL:  CURRENT STATE BUG: BaseModel instance was accepted as tool")
             
             # Check if this generated "modelmetaclass" name
             registered_tools = list(self.registry._items.keys())
@@ -118,18 +118,18 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
             
         except ValueError as e:
             error_msg = str(e)
-            logger.info(f"✅ BaseModel registration rejected: {error_msg}")
+            logger.info(f" PASS:  BaseModel registration rejected: {error_msg}")
             
             # Validate proper rejection message (after fix)
             if "BaseModel classes are data schemas, not executable tools" in error_msg:
-                logger.info("✅ Fix working: Proper BaseModel rejection message")
+                logger.info(" PASS:  Fix working: Proper BaseModel rejection message")
             else:
                 # Different error - might be partial fix
-                logger.warning(f"⚠️ BaseModel rejected but with unexpected error: {error_msg}")
+                logger.warning(f" WARNING: [U+FE0F] BaseModel rejected but with unexpected error: {error_msg}")
                 
         except Exception as e:
             # Other unexpected error
-            logger.error(f"❌ Unexpected error during BaseModel registration: {e}")
+            logger.error(f" FAIL:  Unexpected error during BaseModel registration: {e}")
             pytest.fail(f"Unexpected error type: {type(e).__name__}: {e}")
     
     def test_metaclass_name_fallback_dangerous_pattern(self):
@@ -138,9 +138,9 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         
         Tests the dangerous pattern:
         tool_name = getattr(tool, '__class__', type(tool)).__name__.lower()
-        When tool is BaseModel instance → "modelmetaclass"
+        When tool is BaseModel instance  ->  "modelmetaclass"
         """
-        logger.info("🧪 Testing metaclass name fallback dangerous pattern")
+        logger.info("[U+1F9EA] Testing metaclass name fallback dangerous pattern")
         
         # Create BaseModel instance
         basemodel_instance = TestDataModel(name="test", value=123)
@@ -148,20 +148,20 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         # Reproduce the dangerous name generation pattern from staging
         dangerous_name = getattr(basemodel_instance, '__class__', type(basemodel_instance)).__name__.lower()
         
-        logger.info(f"🔍 Generated tool name using dangerous pattern: '{dangerous_name}'")
+        logger.info(f" SEARCH:  Generated tool name using dangerous pattern: '{dangerous_name}'")
         
         # In current broken state, this should produce "modelmetaclass"
         if dangerous_name == "modelmetaclass":
-            logger.error("🚨 REPRODUCED: Dangerous metaclass name fallback creates 'modelmetaclass'")
+            logger.error(" ALERT:  REPRODUCED: Dangerous metaclass name fallback creates 'modelmetaclass'")
             pytest.fail(f"REPRODUCED STAGING BUG: Metaclass fallback generates 'modelmetaclass' for BaseModel instances")
         
         # Check for other suspicious BaseModel-related names
         basemodel_indicators = ["model", "base", "pydantic"]
         if any(indicator in dangerous_name for indicator in basemodel_indicators):
-            logger.warning(f"⚠️ BaseModel-related name detected: '{dangerous_name}'")
+            logger.warning(f" WARNING: [U+FE0F] BaseModel-related name detected: '{dangerous_name}'")
             
         # After fix, name generation should avoid metaclass fallbacks
-        logger.info(f"✅ Safe name generation or BaseModel properly filtered: '{dangerous_name}'")
+        logger.info(f" PASS:  Safe name generation or BaseModel properly filtered: '{dangerous_name}'")
     
     def test_tool_interface_contract_validation(self):
         """
@@ -170,13 +170,13 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         Current State: Objects without 'name' or 'execute' methods pass validation
         After Fix: Only objects with proper tool interface accepted
         """
-        logger.info("🧪 Testing tool interface contract validation")
+        logger.info("[U+1F9EA] Testing tool interface contract validation")
         
         # Test 1: Valid tool should always be accepted
         valid_tool = ValidTestTool()
         try:
             self.registry.register(valid_tool.name, valid_tool)
-            logger.info("✅ Valid tool registered successfully")
+            logger.info(" PASS:  Valid tool registered successfully")
         except Exception as e:
             pytest.fail(f"Valid tool was rejected: {e}")
         
@@ -188,7 +188,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
             self.registry.register("fallback_name", invalid_tool_no_name)
             
             # If accepted, check if it caused issues
-            logger.warning("⚠️ Tool without 'name' attribute was accepted")
+            logger.warning(" WARNING: [U+FE0F] Tool without 'name' attribute was accepted")
             
             # Check if dangerous name generation occurred
             if hasattr(invalid_tool_no_name, '__class__'):
@@ -197,9 +197,9 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
                     pytest.fail(f"REPRODUCED: Dangerous name generation for tool without 'name': {generated_name}")
             
         except ValueError as e:
-            logger.info(f"✅ Tool without 'name' properly rejected: {e}")
+            logger.info(f" PASS:  Tool without 'name' properly rejected: {e}")
         except Exception as e:
-            logger.error(f"❌ Unexpected error for tool without 'name': {e}")
+            logger.error(f" FAIL:  Unexpected error for tool without 'name': {e}")
         
         # Test 3: Tool missing 'execute' method  
         invalid_tool_no_execute = InvalidToolMissingExecute()
@@ -207,12 +207,12 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
             self.registry.register(invalid_tool_no_execute.name, invalid_tool_no_execute)
             
             # If accepted in current state, this is a validation gap
-            logger.warning("⚠️ Tool without 'execute' method was accepted")
+            logger.warning(" WARNING: [U+FE0F] Tool without 'execute' method was accepted")
             
         except ValueError as e:
-            logger.info(f"✅ Tool without 'execute' method properly rejected: {e}")
+            logger.info(f" PASS:  Tool without 'execute' method properly rejected: {e}")
         except Exception as e:
-            logger.error(f"❌ Unexpected error for tool without 'execute': {e}")
+            logger.error(f" FAIL:  Unexpected error for tool without 'execute': {e}")
     
     def test_basemodel_class_vs_instance_detection(self):
         """
@@ -221,28 +221,28 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         CRITICAL: BaseModel classes should never be registered, regardless of
         whether they are passed as class objects or instances.
         """
-        logger.info("🧪 Testing BaseModel class vs instance detection")
+        logger.info("[U+1F9EA] Testing BaseModel class vs instance detection")
         
         # Test BaseModel class (not instance)
         try:
             self.registry.register("basemodel_class", TestDataModel)
-            logger.error("❌ CURRENT STATE BUG: BaseModel CLASS was accepted as tool")
+            logger.error(" FAIL:  CURRENT STATE BUG: BaseModel CLASS was accepted as tool")
             pytest.fail("BaseModel class should not be accepted as tool")
         except ValueError as e:
-            logger.info(f"✅ BaseModel class properly rejected: {e}")
+            logger.info(f" PASS:  BaseModel class properly rejected: {e}")
         except Exception as e:
-            logger.error(f"❌ Unexpected error for BaseModel class: {e}")
+            logger.error(f" FAIL:  Unexpected error for BaseModel class: {e}")
         
         # Test BaseModel instance
         basemodel_instance = TestDataModel(name="test", value=42)
         try:
             self.registry.register("basemodel_instance", basemodel_instance)
-            logger.error("❌ CURRENT STATE BUG: BaseModel INSTANCE was accepted as tool")
+            logger.error(" FAIL:  CURRENT STATE BUG: BaseModel INSTANCE was accepted as tool")
             pytest.fail("BaseModel instance should not be accepted as tool")
         except ValueError as e:
-            logger.info(f"✅ BaseModel instance properly rejected: {e}")
+            logger.info(f" PASS:  BaseModel instance properly rejected: {e}")
         except Exception as e:
-            logger.error(f"❌ Unexpected error for BaseModel instance: {e}")
+            logger.error(f" FAIL:  Unexpected error for BaseModel instance: {e}")
     
     def test_multiple_basemodel_registration_attempts(self):
         """
@@ -251,7 +251,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         This test simulates the scenario that leads to "modelmetaclass already registered"
         when multiple BaseModel classes are processed.
         """
-        logger.info("🧪 Testing multiple BaseModel registration attempts")
+        logger.info("[U+1F9EA] Testing multiple BaseModel registration attempts")
         
         class TestDataModel2(BaseModel):
             field1: str
@@ -274,29 +274,29 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
                 tool_name = f"basemodel_{i}"
                 self.registry.register(tool_name, basemodel)
                 registration_attempts.append(tool_name)
-                logger.warning(f"⚠️ BaseModel {i} was accepted as tool")
+                logger.warning(f" WARNING: [U+FE0F] BaseModel {i} was accepted as tool")
                 
             except ValueError as e:
                 errors.append(str(e))
-                logger.info(f"✅ BaseModel {i} properly rejected: {e}")
+                logger.info(f" PASS:  BaseModel {i} properly rejected: {e}")
                 
             except Exception as e:
                 # Check for "already registered" errors
                 if "already registered" in str(e):
-                    logger.error(f"🚨 REPRODUCED: Duplicate registration error for BaseModel {i}: {e}")
+                    logger.error(f" ALERT:  REPRODUCED: Duplicate registration error for BaseModel {i}: {e}")
                     pytest.fail(f"REPRODUCED BUG: Duplicate BaseModel registration: {e}")
                 else:
                     errors.append(str(e))
-                    logger.error(f"❌ Unexpected error for BaseModel {i}: {e}")
+                    logger.error(f" FAIL:  Unexpected error for BaseModel {i}: {e}")
         
         # Analyze results
-        logger.info(f"📊 Multiple BaseModel test results:")
+        logger.info(f" CHART:  Multiple BaseModel test results:")
         logger.info(f"   Accepted: {len(registration_attempts)}")
         logger.info(f"   Rejected: {len(errors)}")
         
         if registration_attempts:
             # In current broken state, some BaseModels might be accepted
-            logger.error(f"❌ CURRENT STATE BUG: {len(registration_attempts)} BaseModel(s) accepted as tools")
+            logger.error(f" FAIL:  CURRENT STATE BUG: {len(registration_attempts)} BaseModel(s) accepted as tools")
             
             # Check if this caused "modelmetaclass" registrations
             registered_names = list(self.registry._items.keys())
@@ -305,7 +305,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         
         # After fix, all BaseModels should be rejected
         if len(errors) == len(basemodels):
-            logger.info("✅ All BaseModel registration attempts properly rejected")
+            logger.info(" PASS:  All BaseModel registration attempts properly rejected")
     
     def test_valid_tools_still_work_with_basemodel_filtering(self):
         """
@@ -313,7 +313,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         
         CRITICAL: The fix should not break existing valid tool registration.
         """
-        logger.info("🧪 Testing that valid tools still work with BaseModel filtering")
+        logger.info("[U+1F9EA] Testing that valid tools still work with BaseModel filtering")
         
         # Create multiple valid tools
         class ValidTool1:
@@ -334,7 +334,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         for tool in valid_tools:
             try:
                 self.registry.register(tool.name, tool)
-                logger.info(f"✅ Valid tool '{tool.name}' registered successfully")
+                logger.info(f" PASS:  Valid tool '{tool.name}' registered successfully")
             except Exception as e:
                 pytest.fail(f"Valid tool '{tool.name}' was rejected: {e}")
         
@@ -349,7 +349,7 @@ class TestToolRegistryBaseModelFiltering(SSotBaseTestCase):
         expected_count = len(valid_tools)
         assert registered_count == expected_count, f"Expected {expected_count} tools, got {registered_count}"
         
-        logger.info(f"✅ All {len(valid_tools)} valid tools work correctly with BaseModel filtering")
+        logger.info(f" PASS:  All {len(valid_tools)} valid tools work correctly with BaseModel filtering")
 
 
 @pytest.mark.unit
@@ -365,7 +365,7 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
     def setup_method(self, method):
         """Set up method-level fixtures."""
         super().setup_method(method)
-        logger.info(f"🧪 Starting duplicate handling test: {method.__name__}")
+        logger.info(f"[U+1F9EA] Starting duplicate handling test: {method.__name__}")
     
     def test_duplicate_registration_prevention(self):
         """
@@ -374,7 +374,7 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         Current State: Multiple tools with same name cause "already registered" errors
         After Fix: Graceful handling with proper error messages
         """
-        logger.info("🧪 Testing duplicate registration prevention")
+        logger.info("[U+1F9EA] Testing duplicate registration prevention")
         
         # Create registry with duplicate prevention enabled (use scoped registry)
         registry = ToolRegistry(scope_id="duplicate_test")
@@ -385,7 +385,7 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         # First registration should succeed
         try:
             registry.register(tool1.name, tool1)
-            logger.info("✅ First tool registration successful")
+            logger.info(" PASS:  First tool registration successful")
         except Exception as e:
             pytest.fail(f"First registration failed: {e}")
         
@@ -394,21 +394,21 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
             registry.register(tool2.name, tool2)
             
             # If this succeeds, duplicate prevention is not working
-            logger.error("❌ CURRENT STATE BUG: Duplicate registration was allowed")
+            logger.error(" FAIL:  CURRENT STATE BUG: Duplicate registration was allowed")
             pytest.fail("Duplicate registration should have been prevented")
             
         except ValueError as e:
             error_msg = str(e)
-            logger.info(f"✅ Duplicate registration properly prevented: {error_msg}")
+            logger.info(f" PASS:  Duplicate registration properly prevented: {error_msg}")
             
             # Validate error message quality
             if "already registered" in error_msg and tool1.name in error_msg:
-                logger.info("✅ Clear duplicate registration error message")
+                logger.info(" PASS:  Clear duplicate registration error message")
             else:
-                logger.warning(f"⚠️ Duplicate error message could be clearer: {error_msg}")
+                logger.warning(f" WARNING: [U+FE0F] Duplicate error message could be clearer: {error_msg}")
                 
         except Exception as e:
-            logger.error(f"❌ Unexpected error type for duplicate registration: {type(e).__name__}: {e}")
+            logger.error(f" FAIL:  Unexpected error type for duplicate registration: {type(e).__name__}: {e}")
     
     def test_registry_scoping_isolation(self):
         """
@@ -417,7 +417,7 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         Current State: Single global registry shared across all users
         After Fix: User-scoped registries with proper isolation
         """
-        logger.info("🧪 Testing registry scoping isolation")
+        logger.info("[U+1F9EA] Testing registry scoping isolation")
         
         # Create multiple registries to simulate user isolation
         registry1 = ToolRegistry(scope_id="isolation_test_1")
@@ -433,11 +433,11 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         try:
             registry1.register(tool1.name, tool1)
             registry2.register(tool2.name, tool2)
-            logger.info("✅ Same tool name registered in different registries without conflict")
+            logger.info(" PASS:  Same tool name registered in different registries without conflict")
             
         except Exception as e:
             if "already registered" in str(e):
-                logger.error("🚨 REPRODUCED: Cross-registry registration conflict")
+                logger.error(" ALERT:  REPRODUCED: Cross-registry registration conflict")
                 pytest.fail(f"REPRODUCED BUG: Registry isolation failure - {e}")
             else:
                 pytest.fail(f"Unexpected error during registry isolation test: {e}")
@@ -453,13 +453,13 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         assert registry1.get(tool2.name) is None or registry1.get(tool2.name) is tool1
         assert registry2.get(tool1.name) is None or registry2.get(tool1.name) is tool2
         
-        logger.info("✅ Registry scoping isolation working correctly")
+        logger.info(" PASS:  Registry scoping isolation working correctly")
     
     def test_override_behavior_control(self):
         """
         Test that allow_override parameter properly controls duplicate behavior.
         """
-        logger.info("🧪 Testing override behavior control")
+        logger.info("[U+1F9EA] Testing override behavior control")
         
         # Test with strict registry (default behavior)
         strict_registry = ToolRegistry(scope_id="strict_test")
@@ -484,4 +484,4 @@ class TestUniversalRegistryDuplicateHandling(SSotBaseTestCase):
         retrieved = permissive_registry.get(tool1.name)
         assert retrieved is tool2, "Override should have replaced the original tool"
         
-        logger.info("✅ Override behavior control working correctly")
+        logger.info(" PASS:  Override behavior control working correctly")

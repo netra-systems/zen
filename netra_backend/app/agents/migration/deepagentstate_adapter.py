@@ -5,7 +5,7 @@ pattern to the modern UserExecutionContext pattern, ensuring complete user isola
 and request security.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - SECURITY CRITICAL
+- Segment: ALL (Free  ->  Enterprise) - SECURITY CRITICAL
 - Business Goal: Eliminate user data leakage risks through proper migration
 - Value Impact: Enables safe multi-user operations, prevents security breaches
 - Revenue Impact: CRITICAL - Protects business from data breach liability
@@ -163,7 +163,7 @@ class DeepAgentStateAdapter:
         This method provides backward compatibility during the migration period
         by converting UserExecutionContext data back to DeepAgentState format.
         
-        ⚠️ WARNING: This method is for TEMPORARY backward compatibility only.
+         WARNING: [U+FE0F] WARNING: This method is for TEMPORARY backward compatibility only.
         It will be removed when DeepAgentState migration is complete.
         
         Args:
@@ -437,7 +437,7 @@ class MigrationDetector:
             Formatted migration report string
         """
         if not usage_patterns:
-            return "✅ No DeepAgentState usage found."
+            return " PASS:  No DeepAgentState usage found."
         
         # Group by file
         files_by_usage = {}
@@ -448,10 +448,10 @@ class MigrationDetector:
             files_by_usage[file_path].append(pattern)
         
         # Generate report
-        report = f"🚨 Found {len(usage_patterns)} DeepAgentState usage patterns in {len(files_by_usage)} files:\n\n"
+        report = f" ALERT:  Found {len(usage_patterns)} DeepAgentState usage patterns in {len(files_by_usage)} files:\n\n"
         
         for file_path, patterns in files_by_usage.items():
-            report += f"📁 {file_path}\n"
+            report += f"[U+1F4C1] {file_path}\n"
             for pattern in patterns:
                 report += f"  Line {pattern['line']} ({pattern['type']}): {pattern['content']}\n"
             report += "\n"

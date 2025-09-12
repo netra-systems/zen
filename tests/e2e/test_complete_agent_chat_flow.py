@@ -98,7 +98,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
         
         CRITICAL: This test MUST use real authentication and validate all 5 WebSocket events.
         """
-        logger.info("🚀 Starting complete agent chat flow E2E test with REAL authentication")
+        logger.info("[U+1F680] Starting complete agent chat flow E2E test with REAL authentication")
         
         # Step 1: Create authenticated user with real JWT token
         auth_user = await self.auth_helper.create_authenticated_user(
@@ -106,7 +106,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
             permissions=["read", "write", "agent_execute"]
         )
         
-        logger.info(f"✅ Created authenticated user: {auth_user.email}")
+        logger.info(f" PASS:  Created authenticated user: {auth_user.email}")
         
         # Step 2: Create strongly typed user execution context
         user_context = await create_authenticated_user_context(
@@ -117,7 +117,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
             websocket_enabled=True
         )
         
-        logger.info(f"✅ Created execution context: {user_context.user_id}")
+        logger.info(f" PASS:  Created execution context: {user_context.user_id}")
         
         # Step 3: Establish authenticated WebSocket connection
         websocket_url = "ws://localhost:8000/ws/chat"
@@ -136,7 +136,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
                 user_id=auth_user.user_id
             )
             
-            logger.info("✅ Established authenticated WebSocket connection")
+            logger.info(" PASS:  Established authenticated WebSocket connection")
             
             # Step 4: Send agent request message
             chat_message = {
@@ -149,14 +149,14 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            logger.info(f"📤 Sending agent request: {chat_message['message'][:50]}...")
+            logger.info(f"[U+1F4E4] Sending agent request: {chat_message['message'][:50]}...")
             await WebSocketTestHelpers.send_test_message(websocket_connection, chat_message)
             
             # Step 5: Collect all WebSocket events with timeout
             collection_timeout = 30.0  # Allow sufficient time for agent execution
             start_time = time.time()
             
-            logger.info("👂 Collecting WebSocket events...")
+            logger.info("[U+1F442] Collecting WebSocket events...")
             
             while time.time() - start_time < collection_timeout:
                 try:
@@ -167,11 +167,11 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
                     received_events.append(event)
                     
                     event_type = event.get("type", "unknown")
-                    logger.info(f"📨 Received event: {event_type}")
+                    logger.info(f"[U+1F4E8] Received event: {event_type}")
                     
                     # Stop collecting when agent completion is received
                     if event_type == "agent_completed":
-                        logger.info("✅ Agent completed event received - stopping collection")
+                        logger.info(" PASS:  Agent completed event received - stopping collection")
                         break
                         
                 except Exception as e:
@@ -179,16 +179,16 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
                         # Check if we have completion event, if not continue waiting
                         completion_events = [e for e in received_events if e.get("type") == "agent_completed"]
                         if completion_events:
-                            logger.info("✅ Found completion event in previous messages")
+                            logger.info(" PASS:  Found completion event in previous messages")
                             break
                         else:
-                            logger.debug("⏳ Timeout waiting for events, continuing...")
+                            logger.debug("[U+23F3] Timeout waiting for events, continuing...")
                             continue
                     else:
-                        logger.error(f"❌ Error receiving WebSocket message: {e}")
+                        logger.error(f" FAIL:  Error receiving WebSocket message: {e}")
                         break
             
-            logger.info(f"📊 Collected {len(received_events)} WebSocket events")
+            logger.info(f" CHART:  Collected {len(received_events)} WebSocket events")
             
             # Step 6: Validate all required WebSocket events (MISSION CRITICAL)
             required_events = [
@@ -201,7 +201,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
             
             # Use SSOT assertion function
             assert_websocket_events_sent(received_events, required_events)
-            logger.info("✅ All 5 required WebSocket events validated")
+            logger.info(" PASS:  All 5 required WebSocket events validated")
             
             # Step 7: Validate business value delivery
             event_types = [event.get("type") for event in received_events]
@@ -235,7 +235,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
             has_business_value = any(indicator in final_response.lower() for indicator in business_indicators)
             assert has_business_value, f"Response lacks business value indicators: {final_response[:200]}..."
             
-            logger.info("✅ Agent response contains actionable business value")
+            logger.info(" PASS:  Agent response contains actionable business value")
             
             # Step 9: Validate authentication context preservation
             auth_events = [e for e in received_events if "user_id" in e.get("data", {})]
@@ -246,7 +246,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
                 if event_user_id:
                     assert event_user_id == auth_user.user_id, f"User ID mismatch in event: {event_user_id} != {auth_user.user_id}"
             
-            logger.info("✅ Authentication context preserved throughout agent execution")
+            logger.info(" PASS:  Authentication context preserved throughout agent execution")
             
             # Step 10: Validate response timing (user experience)
             if len(received_events) >= 2:
@@ -262,21 +262,21 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
                         total_time = (last_time - first_time).total_seconds()
                         assert total_time < 30.0, f"Agent execution took too long: {total_time}s (max: 30s)"
                         
-                        logger.info(f"✅ Agent execution completed in {total_time:.2f}s (acceptable for UX)")
+                        logger.info(f" PASS:  Agent execution completed in {total_time:.2f}s (acceptable for UX)")
                     except Exception as e:
                         logger.warning(f"Could not parse event timestamps for timing validation: {e}")
             
-            logger.info("🎉 COMPLETE AGENT CHAT FLOW E2E TEST PASSED")
-            logger.info(f"   👤 User: {auth_user.email}")
-            logger.info(f"   📨 Events: {len(received_events)}")
-            logger.info(f"   🎯 Business Value: AI-powered cost optimization insights delivered")
-            logger.info(f"   ✅ All mission-critical requirements satisfied")
+            logger.info(" CELEBRATION:  COMPLETE AGENT CHAT FLOW E2E TEST PASSED")
+            logger.info(f"   [U+1F464] User: {auth_user.email}")
+            logger.info(f"   [U+1F4E8] Events: {len(received_events)}")
+            logger.info(f"    TARGET:  Business Value: AI-powered cost optimization insights delivered")
+            logger.info(f"    PASS:  All mission-critical requirements satisfied")
             
         finally:
             # Clean up WebSocket connection
             if websocket_connection:
                 await WebSocketTestHelpers.close_test_connection(websocket_connection)
-                logger.info("🧹 WebSocket connection closed")
+                logger.info("[U+1F9F9] WebSocket connection closed")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -287,7 +287,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
         This test focuses specifically on the tool execution aspect of agent workflows,
         ensuring tools are properly executed and their results are communicated to users.
         """
-        logger.info("🚀 Starting agent chat flow with tool execution validation")
+        logger.info("[U+1F680] Starting agent chat flow with tool execution validation")
         
         # Create authenticated user
         auth_user = await self.auth_helper.create_authenticated_user(
@@ -337,10 +337,10 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
                     
                     if event_type == "tool_executing":
                         tool_executing_events.append(event)
-                        logger.info(f"🔧 Tool executing: {event.get('data', {}).get('tool_name', 'unknown')}")
+                        logger.info(f"[U+1F527] Tool executing: {event.get('data', {}).get('tool_name', 'unknown')}")
                     elif event_type == "tool_completed":
                         tool_completed_events.append(event) 
-                        logger.info(f"✅ Tool completed: {event.get('data', {}).get('tool_name', 'unknown')}")
+                        logger.info(f" PASS:  Tool completed: {event.get('data', {}).get('tool_name', 'unknown')}")
                     elif event_type == "agent_completed":
                         break
                         
@@ -369,7 +369,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
                 assert "result" in event_data, "tool_completed event missing result"
                 assert event_data["tool_name"], "tool_completed event has empty tool_name"
             
-            logger.info(f"✅ Tool execution validation passed: {len(tool_executing_events)} tools executed")
+            logger.info(f" PASS:  Tool execution validation passed: {len(tool_executing_events)} tools executed")
             
         finally:
             if websocket_connection:
@@ -384,7 +384,7 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
         This test validates that agents provide high-quality, actionable responses
         that deliver real business value to users.
         """
-        logger.info("🚀 Starting agent chat flow response quality validation")
+        logger.info("[U+1F680] Starting agent chat flow response quality validation")
         
         # Create authenticated user
         auth_user = await self.auth_helper.create_authenticated_user(
@@ -455,10 +455,10 @@ class TestCompleteAgentChatFlowE2E(BaseE2ETest):
             has_actionable_content = any(term in final_response.lower() for term in action_terms)
             assert has_actionable_content, f"Response lacks actionable recommendations: {final_response[:150]}..."
             
-            logger.info("✅ Agent response quality validation passed")
-            logger.info(f"   📝 Response length: {len(final_response)} characters")
-            logger.info(f"   🎯 Contains cost optimization focus: ✅")
-            logger.info(f"   🎯 Contains actionable recommendations: ✅")
+            logger.info(" PASS:  Agent response quality validation passed")
+            logger.info(f"   [U+1F4DD] Response length: {len(final_response)} characters")
+            logger.info(f"    TARGET:  Contains cost optimization focus:  PASS: ")
+            logger.info(f"    TARGET:  Contains actionable recommendations:  PASS: ")
             
         finally:
             if websocket_connection:

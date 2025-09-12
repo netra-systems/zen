@@ -102,7 +102,7 @@ def main():
             json.dump(module_errors, f, indent=2)
         print(f"\nDetailed report saved to: {output_file}")
     else:
-        print("\n✓ No import errors found!")
+        print("\n[U+2713] No import errors found!")
     
     return 0
 

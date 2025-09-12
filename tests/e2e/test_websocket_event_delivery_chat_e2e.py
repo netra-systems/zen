@@ -11,18 +11,18 @@ Business Value Justification (BVJ):
 - Strategic Impact: Tests the real-time experience that increases customer satisfaction and retention
 
 CRITICAL SUCCESS METRICS:
-✅ All 5 critical WebSocket events delivered in real-time
-✅ Event timing and sequencing maintains user engagement
-✅ Event content provides meaningful progress updates
-✅ No missing or delayed events that break user experience
-✅ Events delivered consistently across different chat scenarios
+ PASS:  All 5 critical WebSocket events delivered in real-time
+ PASS:  Event timing and sequencing maintains user engagement
+ PASS:  Event content provides meaningful progress updates
+ PASS:  No missing or delayed events that break user experience
+ PASS:  Events delivered consistently across different chat scenarios
 
 CRITICAL EVENTS TESTED:
-• agent_started - User knows AI is working on their request
-• agent_thinking - Real-time progress visibility maintains engagement  
-• tool_executing - User sees AI taking action on their behalf
-• tool_completed - User receives intermediate results and confidence
-• agent_completed - User gets final response with full context
+[U+2022] agent_started - User knows AI is working on their request
+[U+2022] agent_thinking - Real-time progress visibility maintains engagement  
+[U+2022] tool_executing - User sees AI taking action on their behalf
+[U+2022] tool_completed - User receives intermediate results and confidence
+[U+2022] agent_completed - User gets final response with full context
 
 COMPLIANCE:
 @compliance CLAUDE.md - WebSocket events enable substantive chat (Section 6)
@@ -98,28 +98,28 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
         self.event_delivery_score = 0.0
         self.timing_scores = []
         
-        print(f"\n📡 WEBSOCKET EVENT DELIVERY E2E TEST - Environment: {self.environment}")
-        print(f"🎯 Target: Complete event delivery for engaging chat experience")
-        print(f"⚡ Business Impact: Real-time transparency drives user engagement")
+        print(f"\n[U+1F4E1] WEBSOCKET EVENT DELIVERY E2E TEST - Environment: {self.environment}")
+        print(f" TARGET:  Target: Complete event delivery for engaging chat experience")
+        print(f" LIGHTNING:  Business Impact: Real-time transparency drives user engagement")
     
     def teardown_method(self):
         """Clean up and report event delivery metrics."""
         test_duration = time.time() - self.test_start_time
         avg_timing_score = sum(self.timing_scores) / len(self.timing_scores) if self.timing_scores else 0.0
         
-        print(f"\n📊 Event Delivery Test Summary:")
-        print(f"⏱️ Duration: {test_duration:.2f}s")
-        print(f"📡 Events Delivered: {self.events_delivered}")
-        print(f"🎯 Critical Events: {self.critical_events_received}/5")
-        print(f"📈 Event Delivery Score: {self.event_delivery_score:.1f}%")
-        print(f"⚡ Average Timing Score: {avg_timing_score:.1f}%")
+        print(f"\n CHART:  Event Delivery Test Summary:")
+        print(f"[U+23F1][U+FE0F] Duration: {test_duration:.2f}s")
+        print(f"[U+1F4E1] Events Delivered: {self.events_delivered}")
+        print(f" TARGET:  Critical Events: {self.critical_events_received}/5")
+        print(f"[U+1F4C8] Event Delivery Score: {self.event_delivery_score:.1f}%")
+        print(f" LIGHTNING:  Average Timing Score: {avg_timing_score:.1f}%")
         
         if self.critical_events_received >= 5 and self.event_delivery_score >= 80.0:
-            print(f"✅ EXCELLENT EVENT DELIVERY - User experience optimal")
+            print(f" PASS:  EXCELLENT EVENT DELIVERY - User experience optimal")
         elif self.critical_events_received >= 4 and self.event_delivery_score >= 60.0:
-            print(f"✅ GOOD EVENT DELIVERY - User experience acceptable")
+            print(f" PASS:  GOOD EVENT DELIVERY - User experience acceptable")
         else:
-            print(f"❌ POOR EVENT DELIVERY - User experience degraded")
+            print(f" FAIL:  POOR EVENT DELIVERY - User experience degraded")
         
         super().teardown_method()
     
@@ -161,7 +161,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
         ]
         sequence_index = 0
         
-        print(f"🔍 Monitoring detailed event delivery for {timeout}s...")
+        print(f" SEARCH:  Monitoring detailed event delivery for {timeout}s...")
         
         while time.time() - monitoring_start < timeout:
             try:
@@ -189,7 +189,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
                     delivery_metrics["event_intervals"].append(interval)
                     last_event_time = current_time
                     
-                    print(f"📨 Event: {event_type} at {event_elapsed:.2f}s (interval: {interval:.2f}s)")
+                    print(f"[U+1F4E8] Event: {event_type} at {event_elapsed:.2f}s (interval: {interval:.2f}s)")
                     
                     # Track critical events
                     if event_type in [e.value for e in CriticalAgentEventType]:
@@ -198,15 +198,15 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
                         # Check sequence
                         if sequence_index < len(expected_sequence) and event_type == expected_sequence[sequence_index]:
                             sequence_index += 1
-                            print(f"✅ Sequence correct: {event_type} ({sequence_index}/{len(expected_sequence)})")
+                            print(f" PASS:  Sequence correct: {event_type} ({sequence_index}/{len(expected_sequence)})")
                         elif event_type in expected_sequence:
                             # Event out of order
                             delivery_metrics["sequence_correct"] = False
-                            print(f"⚠️ Sequence issue: {event_type} received out of order")
+                            print(f" WARNING: [U+FE0F] Sequence issue: {event_type} received out of order")
                         
                         # Check if all critical events received
                         if len(delivery_metrics["critical_events_timing"]) >= 5:
-                            print("🎉 All 5 critical events received!")
+                            print(" CELEBRATION:  All 5 critical events received!")
                             break
                 
             except asyncio.TimeoutError:
@@ -257,7 +257,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates the event delivery that drives user engagement.
         """
-        print("\n🧪 MISSION CRITICAL: Testing complete critical event delivery...")
+        print("\n[U+1F9EA] MISSION CRITICAL: Testing complete critical event delivery...")
         
         # STEP 1: Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -267,7 +267,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
             websocket_enabled=True
         )
         
-        print(f"👤 User authenticated for event delivery test: {user_context.user_id}")
+        print(f"[U+1F464] User authenticated for event delivery test: {user_context.user_id}")
         
         # STEP 2: Establish authenticated WebSocket connection
         jwt_token = user_context.agent_context["jwt_token"]
@@ -291,7 +291,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
                 timeout=self.config.connection_timeout
             )
             
-            print("🔌 WebSocket connected for event delivery monitoring")
+            print("[U+1F50C] WebSocket connected for event delivery monitoring")
             
         except Exception as e:
             pytest.fail(f"CRITICAL: Event delivery WebSocket connection failed: {e}")
@@ -318,7 +318,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
             
             await websocket.send(json.dumps(event_trigger_request))
             request_time = time.time() - self.test_start_time
-            print(f"📤 Event-triggering request sent at {request_time:.2f}s")
+            print(f"[U+1F4E4] Event-triggering request sent at {request_time:.2f}s")
             
             # STEP 4: Monitor detailed event delivery
             events_received, delivery_metrics = await self._monitor_detailed_event_delivery(
@@ -328,7 +328,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
             )
             
             # STEP 5: Validate critical event delivery
-            print("✅ STEP 5: Validating critical event delivery...")
+            print(" PASS:  STEP 5: Validating critical event delivery...")
             
             self.events_delivered = len(events_received)
             self.critical_events_received = len(delivery_metrics["critical_events_timing"])
@@ -345,9 +345,9 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
             
             missing_events = set(required_events) - received_event_types
             if missing_events:
-                print(f"⚠️ Missing critical events: {missing_events}")
+                print(f" WARNING: [U+FE0F] Missing critical events: {missing_events}")
             else:
-                print(f"✅ All critical events received!")
+                print(f" PASS:  All critical events received!")
             
             # STEP 7: Timing quality validation
             timing_analysis = []
@@ -362,7 +362,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
                     timing_score = 40.0
                 
                 timing_analysis.append(timing_score)
-                print(f"⏱️ {event_type}: {timing:.2f}s (score: {timing_score:.1f}%)")
+                print(f"[U+23F1][U+FE0F] {event_type}: {timing:.2f}s (score: {timing_score:.1f}%)")
             
             self.timing_scores = timing_analysis
             
@@ -370,16 +370,16 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
             assert self.event_delivery_score >= 50.0, f"Event delivery quality too low: {self.event_delivery_score:.1f}%"
             
             if delivery_metrics["sequence_correct"]:
-                print("✅ Event sequence correct - optimal user experience")
+                print(" PASS:  Event sequence correct - optimal user experience")
             else:
-                print("⚠️ Event sequence issues detected - may impact UX")
+                print(" WARNING: [U+FE0F] Event sequence issues detected - may impact UX")
             
-            print(f"📊 Event Delivery Summary:")
-            print(f"   • Total Events: {self.events_delivered}")
-            print(f"   • Critical Events: {self.critical_events_received}/5")
-            print(f"   • First Event: {delivery_metrics['first_event_time']:.2f}s")
-            print(f"   • Sequence Correct: {delivery_metrics['sequence_correct']}")
-            print(f"   • Delivery Score: {self.event_delivery_score:.1f}%")
+            print(f" CHART:  Event Delivery Summary:")
+            print(f"   [U+2022] Total Events: {self.events_delivered}")
+            print(f"   [U+2022] Critical Events: {self.critical_events_received}/5")
+            print(f"   [U+2022] First Event: {delivery_metrics['first_event_time']:.2f}s")
+            print(f"   [U+2022] Sequence Correct: {delivery_metrics['sequence_correct']}")
+            print(f"   [U+2022] Delivery Score: {self.event_delivery_score:.1f}%")
             
         finally:
             if websocket and not websocket.closed:
@@ -395,7 +395,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Ensures reliable event delivery for all user interactions.
         """
-        print("\n🧪 CRITICAL: Testing event delivery consistency...")
+        print("\n[U+1F9EA] CRITICAL: Testing event delivery consistency...")
         
         # STEP 1: Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -440,7 +440,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
         
         async with self.golden_path_helper.authenticated_websocket_connection(user_context):
             for i, scenario in enumerate(chat_scenarios):
-                print(f"🔄 Testing scenario {i+1}: {scenario['name']}")
+                print(f" CYCLE:  Testing scenario {i+1}: {scenario['name']}")
                 
                 scenario_start = time.time()
                 
@@ -471,15 +471,15 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
                     
                     scenario_results.append(scenario_result)
                     
-                    print(f"   📊 Events: {events_received}, Expected: {expected_found}/{len(scenario['expected_events'])}")
-                    print(f"   ⏱️ Time: {scenario_result['execution_time']:.2f}s")
-                    print(f"   📈 Consistency: {consistency_score:.1f}%")
+                    print(f"    CHART:  Events: {events_received}, Expected: {expected_found}/{len(scenario['expected_events'])}")
+                    print(f"   [U+23F1][U+FE0F] Time: {scenario_result['execution_time']:.2f}s")
+                    print(f"   [U+1F4C8] Consistency: {consistency_score:.1f}%")
                     
                     # Brief delay between scenarios
                     await asyncio.sleep(2.0)
                 
                 except Exception as e:
-                    print(f"   ❌ Scenario failed: {str(e)[:100]}")
+                    print(f"    FAIL:  Scenario failed: {str(e)[:100]}")
                     scenario_results.append({
                         "name": scenario["name"],
                         "events_received": 0,
@@ -507,10 +507,10 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
         assert avg_consistency >= 60.0, f"Event delivery consistency too low: {avg_consistency:.1f}%"
         assert avg_execution_time < 45.0, f"Average execution time too slow: {avg_execution_time:.2f}s"
         
-        print(f"🎉 Event delivery consistency validation complete")
-        print(f"📊 Successful scenarios: {len(successful_scenarios)}/3")
-        print(f"📈 Average consistency: {avg_consistency:.1f}%")
-        print(f"⏱️ Average execution time: {avg_execution_time:.2f}s")
+        print(f" CELEBRATION:  Event delivery consistency validation complete")
+        print(f" CHART:  Successful scenarios: {len(successful_scenarios)}/3")
+        print(f"[U+1F4C8] Average consistency: {avg_consistency:.1f}%")
+        print(f"[U+23F1][U+FE0F] Average execution time: {avg_execution_time:.2f}s")
     
     @pytest.mark.asyncio
     async def test_event_delivery_under_load_conditions(self):
@@ -522,7 +522,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Ensures event delivery stability during peak usage.
         """
-        print("\n🧪 CRITICAL: Testing event delivery under load...")
+        print("\n[U+1F9EA] CRITICAL: Testing event delivery under load...")
         
         # STEP 1: Create multiple authenticated user contexts
         user_contexts = []
@@ -535,7 +535,7 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
             )
             user_contexts.append(context)
         
-        print(f"👥 Created {len(user_contexts)} users for load testing")
+        print(f"[U+1F465] Created {len(user_contexts)} users for load testing")
         
         # STEP 2: Execute concurrent chat requests
         async def execute_user_chat_with_events(user_context, user_index):
@@ -589,9 +589,9 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
             if isinstance(result, dict) and result.get("success"):
                 successful_results.append(result)
             elif isinstance(result, dict):
-                print(f"⚠️ User {result.get('user_index', '?')} failed: {result.get('error', 'Unknown')}")
+                print(f" WARNING: [U+FE0F] User {result.get('user_index', '?')} failed: {result.get('error', 'Unknown')}")
             else:
-                print(f"⚠️ Load test exception: {str(result)[:100]}")
+                print(f" WARNING: [U+FE0F] Load test exception: {str(result)[:100]}")
         
         # STEP 5: Validate load performance
         success_rate = len(successful_results) / len(user_contexts) * 100
@@ -616,11 +616,11 @@ class TestWebSocketEventDeliveryChatE2E(SSotBaseTestCase):
             assert avg_events >= 2.0, f"Insufficient events under load: {avg_events:.1f}"
             assert avg_execution_time < 60.0, f"Execution too slow under load: {avg_execution_time:.2f}s"
         
-        print(f"🎉 Load test event delivery validation complete")
-        print(f"📊 Success rate: {success_rate:.1f}%")
-        print(f"📡 Average events per user: {avg_events:.1f}")
-        print(f"⏱️ Average execution time: {avg_execution_time:.2f}s")
-        print(f"🎯 Average business value: {avg_business_value:.1f}%")
+        print(f" CELEBRATION:  Load test event delivery validation complete")
+        print(f" CHART:  Success rate: {success_rate:.1f}%")
+        print(f"[U+1F4E1] Average events per user: {avg_events:.1f}")
+        print(f"[U+23F1][U+FE0F] Average execution time: {avg_execution_time:.2f}s")
+        print(f" TARGET:  Average business value: {avg_business_value:.1f}%")
 
 
 if __name__ == "__main__":

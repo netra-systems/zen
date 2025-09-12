@@ -302,7 +302,7 @@ class AntiPatternExamples:
     
     def test_direct_sqlalchemy_usage_WRONG(self):
         """
-        ❌ WRONG: Direct SQLAlchemy usage bypasses SSOT principles.
+         FAIL:  WRONG: Direct SQLAlchemy usage bypasses SSOT principles.
         
         This pattern is detected and flagged by compliance checking.
         """
@@ -319,7 +319,7 @@ class AntiPatternExamples:
     
     def test_unmanaged_session_WRONG(self):
         """
-        ❌ WRONG: Creating repositories without factory management.
+         FAIL:  WRONG: Creating repositories without factory management.
         
         This bypasses session tracking and transaction management.
         """
@@ -334,7 +334,7 @@ class AntiPatternExamples:
     
     def test_session_without_context_manager_WRONG(self):
         """
-        ❌ WRONG: Using sessions without proper context management.
+         FAIL:  WRONG: Using sessions without proper context management.
         
         This can lead to resource leaks and transaction issues.
         """
@@ -363,35 +363,35 @@ def main():
         
         print("Running basic user repository example...")
         await examples.test_basic_user_repository_usage()
-        print("✅ Basic usage example completed")
+        print(" PASS:  Basic usage example completed")
         
         print("Running multiple repository example...")
         await examples.test_multiple_repository_usage()
-        print("✅ Multiple repository example completed")
+        print(" PASS:  Multiple repository example completed")
         
         print("Running auth service example...")
         await examples.test_auth_service_repositories()
-        print("✅ Auth service example completed")
+        print(" PASS:  Auth service example completed")
         
         print("Running data factories example...")
         await examples.test_data_factories_usage()
-        print("✅ Data factories example completed")
+        print(" PASS:  Data factories example completed")
         
         print("Running transaction rollback example...")
         await examples.test_transaction_rollback_behavior()
-        print("✅ Transaction rollback example completed")
+        print(" PASS:  Transaction rollback example completed")
         
         print("Running compliance checking example...")
         await examples.test_compliance_checking()
-        print("✅ Compliance checking example completed")
+        print(" PASS:  Compliance checking example completed")
         
         print("Running error handling example...")
         await examples.test_error_handling_and_cleanup()
-        print("✅ Error handling example completed")
+        print(" PASS:  Error handling example completed")
         
         print("Running convenience functions example...")
         examples.test_convenience_functions()
-        print("✅ Convenience functions example completed")
+        print(" PASS:  Convenience functions example completed")
         
         # Generate compliance report
         print("\nGenerating compliance report...")
@@ -402,12 +402,12 @@ def main():
         # Cleanup resources
         print("\nCleaning up resources...")
         await factory.cleanup_resources()
-        print("✅ Cleanup completed")
+        print(" PASS:  Cleanup completed")
     
     # Run all examples
     asyncio.run(run_examples())
     
-    print("\n🎉 All examples completed successfully!")
+    print("\n CELEBRATION:  All examples completed successfully!")
     print("\nKey takeaways:")
     print("1. Always use factory.get_test_session() for session management")
     print("2. Create repositories through factory methods only")

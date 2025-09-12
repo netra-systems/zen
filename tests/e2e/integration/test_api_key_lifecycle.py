@@ -1,5 +1,5 @@
 """
-Test #5: API Key Generation → Usage → Revocation Flow
+Test #5: API Key Generation  ->  Usage  ->  Revocation Flow
 
 BVJ (Business Value Justification):
 1. Segment: Mid/Enterprise ($50K+ MRR customers)

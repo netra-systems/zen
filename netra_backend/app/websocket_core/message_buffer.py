@@ -180,7 +180,7 @@ class WebSocketMessageBuffer:
             # Check message size
             if buffered_msg.size_bytes > self.config.max_message_size_bytes:
                 error_msg = f"Message too large: {buffered_msg.size_bytes} bytes exceeds max {self.config.max_message_size_bytes}"
-                logger.error(f"🚨 BUFFER OVERFLOW: {error_msg}")
+                logger.error(f" ALERT:  BUFFER OVERFLOW: {error_msg}")
                 self.stats['messages_dropped'] += 1
                 
                 # LOUD FAILURE: Raise exception instead of silent return
@@ -216,7 +216,7 @@ class WebSocketMessageBuffer:
             # Re-raise our custom exception
             raise
         except Exception as e:
-            logger.error(f"🚨 MESSAGE BUFFER FAILURE: Failed to buffer message for user {user_id}: {e}")
+            logger.error(f" ALERT:  MESSAGE BUFFER FAILURE: Failed to buffer message for user {user_id}: {e}")
             self.stats['messages_dropped'] += 1
             # Log at ERROR level but still return False for backward compatibility
             # TODO: Convert to exception in next major version

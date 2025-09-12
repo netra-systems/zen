@@ -319,7 +319,7 @@ async def test_multi_session_isolation_with_real_services(real_services):
         assert concurrent_result["concurrent_operations_isolated"], \
             f"Concurrent operations not isolated: {concurrent_result.get('error')}"
         assert concurrent_result["successful_operations"] >= 2, \
-            f"Expected ≥2 successful concurrent operations, got {concurrent_result['successful_operations']}"
+            f"Expected  >= 2 successful concurrent operations, got {concurrent_result['successful_operations']}"
         
         # Phase 4: Verify complete session isolation
         logger.info("Verifying session isolation...")
@@ -354,7 +354,7 @@ async def test_multi_session_isolation_with_real_services(real_services):
         
         # Summary
         total_verification_time = isolation_result["verification_time"]
-        logger.info(f"✓ Multi-session isolation verified:")
+        logger.info(f"[U+2713] Multi-session isolation verified:")
         logger.info(f"  - {session_count} completely isolated sessions")
         logger.info(f"  - {concurrent_result['successful_operations']} concurrent operations isolated")
         logger.info(f"  - 0 data leaks detected")
@@ -404,7 +404,7 @@ async def test_websocket_session_boundaries(real_services):
                 assert secret not in msg_str, \
                     f"Session 2 secret '{secret}' found in session 1 messages: {msg_str}"
         
-        logger.info("✓ WebSocket session boundaries enforced correctly")
+        logger.info("[U+2713] WebSocket session boundaries enforced correctly")
         
     finally:
         await isolation_tester.cleanup_all_sessions()
@@ -444,7 +444,7 @@ async def test_session_state_independence(real_services):
             assert "session_a_preference" not in msg_str, \
                 f"Session A state leaked to session B: {msg_str}"
         
-        logger.info("✓ Session state independence verified")
+        logger.info("[U+2713] Session state independence verified")
         
     finally:
         await isolation_tester.cleanup_all_sessions()

@@ -1,7 +1,7 @@
 """
 Performance Measurement Classes for E2E Agent Testing
 Classes for measuring latency, throughput, and resource usage.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import time

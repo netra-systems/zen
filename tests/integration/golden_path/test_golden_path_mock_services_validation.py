@@ -61,7 +61,7 @@ class TestGoldenPathMockServicesValidation(SSotAsyncTestCase):
             assert service_name in golden_path_services, f"Missing required service: {service_name}"
             assert golden_path_services[service_name] is not None, f"Service {service_name} is None"
         
-        logger.success("✅ Mock services validation passed")
+        logger.success(" PASS:  Mock services validation passed")
     
     @pytest.mark.integration
     @pytest.mark.asyncio  
@@ -102,7 +102,7 @@ class TestGoldenPathMockServicesValidation(SSotAsyncTestCase):
         assert len(events) > 0, "At least one event should be recorded"
         assert events[0]["event_type"] == "agent_started", "Event type must be correct"
         
-        logger.success("✅ Mock WebSocket validation passed")
+        logger.success(" PASS:  Mock WebSocket validation passed")
     
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -142,7 +142,7 @@ class TestGoldenPathMockServicesValidation(SSotAsyncTestCase):
         for expected_event in expected_events:
             assert expected_event in event_types, f"Missing critical event: {expected_event}"
         
-        logger.success("✅ Mock agent execution validation passed")
+        logger.success(" PASS:  Mock agent execution validation passed")
     
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -175,7 +175,7 @@ class TestGoldenPathMockServicesValidation(SSotAsyncTestCase):
         key_exists = await redis_manager.exists(cache_key)
         assert key_exists is True, "Cache key must exist"
         
-        logger.success("✅ Mock data persistence validation passed")
+        logger.success(" PASS:  Mock data persistence validation passed")
     
     @pytest.mark.integration  
     @pytest.mark.asyncio
@@ -232,12 +232,12 @@ class TestGoldenPathMockServicesValidation(SSotAsyncTestCase):
         assert execution_time > 0, "Execution time must be measured"
         assert execution_time < 5.0, "Mock execution should complete quickly"
         
-        logger.success("✅ Complete mock Golden Path flow validation passed")
+        logger.success(" PASS:  Complete mock Golden Path flow validation passed")
         
         # Provide business value summary
-        logger.success(f"🎯 Business Value Delivered:")
-        logger.success(f"   Mock services functional: ✅")
+        logger.success(f" TARGET:  Business Value Delivered:")
+        logger.success(f"   Mock services functional:  PASS: ")
         logger.success(f"   WebSocket events validated: {critical_events}")
-        logger.success(f"   Execution completed: ✅")
+        logger.success(f"   Execution completed:  PASS: ")
         logger.success(f"   Performance acceptable: {execution_time:.2f}s < 5.0s")
-        logger.success(f"   No Docker dependency: ✅")
+        logger.success(f"   No Docker dependency:  PASS: ")

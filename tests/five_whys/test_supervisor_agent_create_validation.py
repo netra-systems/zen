@@ -68,7 +68,7 @@ class TestSupervisorAgentCreateValidation:
         assert supervisor._llm_manager == self.mock_llm_manager
         assert supervisor.websocket_bridge == self.mock_websocket_bridge
         
-        print("✅ WHY #1 - SupervisorAgent.create() accepts correct parameters")
+        print(" PASS:  WHY #1 - SupervisorAgent.create() accepts correct parameters")
     
     def test_why_1_supervisor_create_rejects_old_parameters(self):
         """
@@ -89,7 +89,7 @@ class TestSupervisorAgentCreateValidation:
             with pytest.raises(TypeError):
                 SupervisorAgent.create(**params)
         
-        print("✅ WHY #1 - SupervisorAgent.create() rejects deprecated parameters")
+        print(" PASS:  WHY #1 - SupervisorAgent.create() rejects deprecated parameters")
     
     def test_why_2_supervisor_interface_contract_consistency(self):
         """
@@ -123,7 +123,7 @@ class TestSupervisorAgentCreateValidation:
             assert create_ws_param.default == inspect.Parameter.empty, "websocket_bridge should be required in create()"
             assert init_ws_param.default is None, "websocket_bridge should be optional in __init__()"
         
-        print("✅ WHY #2 - SupervisorAgent interface contracts are consistent")
+        print(" PASS:  WHY #2 - SupervisorAgent interface contracts are consistent")
     
     def test_why_3_supervisor_parameter_validation_system(self):
         """
@@ -177,7 +177,7 @@ class TestSupervisorAgentCreateValidation:
         )
         assert supervisor_no_ws.websocket_bridge is None
         
-        print("✅ WHY #3 - SupervisorAgent interface prevents 'name' parameter errors")
+        print(" PASS:  WHY #3 - SupervisorAgent interface prevents 'name' parameter errors")
     
     def test_why_4_supervisor_create_usage_coverage(self):
         """
@@ -210,7 +210,7 @@ class TestSupervisorAgentCreateValidation:
         assert supervisor1._llm_manager != supervisor2._llm_manager
         assert supervisor1.websocket_bridge != supervisor2.websocket_bridge
         
-        print("✅ WHY #4 - All SupervisorAgent.create() usage patterns work")
+        print(" PASS:  WHY #4 - All SupervisorAgent.create() usage patterns work")
     
     def test_why_5_supervisor_interface_governance_standards(self):
         """
@@ -240,7 +240,7 @@ class TestSupervisorAgentCreateValidation:
                 assert param.annotation != inspect.Parameter.empty, \
                     f"SupervisorAgent.create() parameter '{param_name}' missing type annotation"
         
-        print("✅ WHY #5 - SupervisorAgent follows interface governance standards")
+        print(" PASS:  WHY #5 - SupervisorAgent follows interface governance standards")
     
     def test_end_to_end_supervisor_websocket_integration(self):
         """
@@ -271,7 +271,7 @@ class TestSupervisorAgentCreateValidation:
         # Validate WebSocket bridge integration
         assert supervisor.websocket_bridge == self.mock_websocket_bridge
         
-        print("✅ END-TO-END: SupervisorAgent.create() WebSocket integration works")
+        print(" PASS:  END-TO-END: SupervisorAgent.create() WebSocket integration works")
     
     def test_regression_prevention_comprehensive_supervisor_validation(self):
         """
@@ -356,12 +356,12 @@ class TestSupervisorAgentCreateValidation:
         total_checks = len(validation_results)
         passed_checks = sum(1 for r in validation_results if r['result'])
         
-        print(f"✅ SUPERVISOR COMPREHENSIVE VALIDATION PASSED: {passed_checks}/{total_checks} checks successful")
-        print(f"✅ SupervisorAgent.create() parameter regression CANNOT RECUR")
+        print(f" PASS:  SUPERVISOR COMPREHENSIVE VALIDATION PASSED: {passed_checks}/{total_checks} checks successful")
+        print(f" PASS:  SupervisorAgent.create() parameter regression CANNOT RECUR")
         
         # Detailed results
         for result in validation_results:
-            status = "✅" if result['result'] else "❌"
+            status = " PASS: " if result['result'] else " FAIL: "
             critical = " (CRITICAL)" if result['critical'] else ""
             print(f"  {status} {result['check']}{critical}: {result['result']}")
 

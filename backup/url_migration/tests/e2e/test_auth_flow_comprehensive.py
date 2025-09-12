@@ -1337,7 +1337,7 @@ async def test_gcp_staging_comprehensive_auth_flow():
             token = await auth_tester.staging_auth.get_test_token()
             assert token is not None, "Failed to get staging auth token"
             assert len(token) > 20, "Token appears invalid"
-            logger.info("✓ Successfully obtained staging auth token")
+            logger.info("[U+2713] Successfully obtained staging auth token")
         except Exception as e:
             if "GCP" in str(e) or "secret" in str(e).lower():
                 pytest.skip(f"GCP service issue: {e}")
@@ -1355,7 +1355,7 @@ async def test_gcp_staging_comprehensive_auth_flow():
                 if response.status_code == 200:
                     data = response.json()
                     assert data.get("valid") is True, "Token verification failed"
-                    logger.info("✓ Token verification successful")
+                    logger.info("[U+2713] Token verification successful")
                 else:
                     logger.warning(f"Token verification returned {response.status_code}")
         except httpx.TimeoutException:
@@ -1375,7 +1375,7 @@ async def test_gcp_staging_comprehensive_auth_flow():
             # Test health endpoint
             health_response = await auth_client.get("/health", timeout=30.0)
             if health_response.status_code == 200:
-                logger.info("✓ Authenticated health check successful")
+                logger.info("[U+2713] Authenticated health check successful")
             else:
                 logger.warning(f"Health check returned {health_response.status_code}")
             
@@ -1387,7 +1387,7 @@ async def test_gcp_staging_comprehensive_auth_flow():
             else:
                 raise
         
-        logger.info("🎉 GCP staging comprehensive auth flow test PASSED")
+        logger.info(" CELEBRATION:  GCP staging comprehensive auth flow test PASSED")
         
     except Exception as e:
         if any(term in str(e).lower() for term in ["gcp", "staging", "run.app", "secret"]):

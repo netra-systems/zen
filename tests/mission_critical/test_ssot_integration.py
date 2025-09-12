@@ -441,7 +441,7 @@ class TestSSotIntegrationWithIsolation(IntegrationTestCase):
         self.assertLess(memory_increase, 150,
                        f"SSOT integration excessive memory usage: {memory_increase:.1f}MB")
         
-        logger.info(f"✓ SSOT Integration isolation test: {num_users} users, "
+        logger.info(f"[U+2713] SSOT Integration isolation test: {num_users} users, "
                    f"{execution_time:.2f}s, {memory_increase:.1f}MB increase")
     
     def test_database_session_isolation_during_integration(self):
@@ -577,7 +577,7 @@ class TestSSotIntegrationWithIsolation(IntegrationTestCase):
                     self.assertIn(f"user_{user_id}", transfer_data,
                                 f"Cross-transfer data not isolated: {transfer_data}")
             
-            logger.info(f"✓ Database integration isolation: {len(integration_data)} unique sessions")
+            logger.info(f"[U+2713] Database integration isolation: {len(integration_data)} unique sessions")
     
     def test_websocket_channel_isolation_cross_component(self):
         """
@@ -738,7 +738,7 @@ class TestSSotIntegrationWithIsolation(IntegrationTestCase):
                     self.assertIn(f"user_{user_id}", message,
                                 f"Cross-component message not isolated: {message}")
             
-            logger.info(f"✓ WebSocket integration isolation: {len(channel_integration_data)} unique channels")
+            logger.info(f"[U+2713] WebSocket integration isolation: {len(channel_integration_data)} unique channels")
     
     def test_race_condition_prevention_cross_component(self):
         """
@@ -871,7 +871,7 @@ class TestSSotIntegrationWithIsolation(IntegrationTestCase):
             self.assertIn(f"{thread_id}_{operation_id}", transfer['db_to_ws'])
             self.assertIn(f"{thread_id}_{operation_id}", transfer['ws_to_mock'])
         
-        logger.info(f"✓ Integration race condition prevention: {num_threads} threads, {expected_operations} operations")
+        logger.info(f"[U+2713] Integration race condition prevention: {num_threads} threads, {expected_operations} operations")
     
     def test_security_boundary_enforcement_integration(self):
         """
@@ -1038,7 +1038,7 @@ class TestSSotIntegrationWithIsolation(IntegrationTestCase):
                     self.assertNotIn(mock_id, other_mock_ids,
                                    f"SECURITY: Mock objects shared between users: {user_id}")
         
-        logger.info(f"✓ Integration security boundary enforcement: {len(user_integration_resources)} isolated users")
+        logger.info(f"[U+2713] Integration security boundary enforcement: {len(user_integration_resources)} isolated users")
     
     def test_performance_monitoring_integration_concurrent_load(self):
         """
@@ -1170,7 +1170,7 @@ class TestSSotIntegrationWithIsolation(IntegrationTestCase):
             if throughputs:
                 self.assertGreater(avg_throughput, 0.8, f"Average integration throughput too low: {avg_throughput:.2f} ops/sec")
         
-        logger.info(f"✓ Integration performance monitoring: {num_users} users, "
+        logger.info(f"[U+2713] Integration performance monitoring: {num_users} users, "
                    f"avg: {avg_time:.2f}s, max: {max_time:.2f}s, "
                    f"cross-component: {avg_cross_time:.2f}s, memory: {total_memory_increase:.1f}MB")
 

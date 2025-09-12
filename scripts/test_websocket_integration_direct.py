@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 async def test_websocket_integration_auth():
     """Test WebSocket integration with real authentication."""
-    logger.info("🚀 Starting WebSocket Integration Authentication Test")
+    logger.info("[U+1F680] Starting WebSocket Integration Authentication Test")
     
     try:
         # Import integration auth helper
@@ -53,10 +53,10 @@ async def test_websocket_integration_auth():
         )
         
         if not token:
-            logger.error("❌ Failed to create authenticated token")
+            logger.error(" FAIL:  Failed to create authenticated token")
             return False
         
-        logger.info(f"✅ Created authenticated token: {token[:20]}...")
+        logger.info(f" PASS:  Created authenticated token: {token[:20]}...")
         
         # Get WebSocket headers with authentication
         ws_headers = auth_helper.get_integration_websocket_headers(token)
@@ -81,7 +81,7 @@ async def test_websocket_integration_auth():
                 open_timeout=10,
                 close_timeout=5
             ) as websocket:
-                logger.info("✅ WebSocket connection successful!")
+                logger.info(" PASS:  WebSocket connection successful!")
                 
                 # Send a test message
                 test_message = {
@@ -92,32 +92,32 @@ async def test_websocket_integration_auth():
                 
                 import json
                 await websocket.send(json.dumps(test_message))
-                logger.info("✅ Test message sent successfully")
+                logger.info(" PASS:  Test message sent successfully")
                 
                 # Try to receive a response (with timeout)
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    logger.info(f"✅ Received response: {response[:100]}...")
+                    logger.info(f" PASS:  Received response: {response[:100]}...")
                     return True
                 except asyncio.TimeoutError:
-                    logger.info("⏱️ No response received (timeout) but connection successful")
+                    logger.info("[U+23F1][U+FE0F] No response received (timeout) but connection successful")
                     return True
                     
         except websockets.exceptions.ConnectionClosedError as e:
-            logger.error(f"❌ WebSocket connection closed: {e}")
+            logger.error(f" FAIL:  WebSocket connection closed: {e}")
             logger.error("This may indicate authentication was rejected")
             return False
         except OSError as e:
-            logger.warning(f"⚠️ Connection error: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Connection error: {e}")
             logger.warning("Backend WebSocket server may not be running")
             logger.info("This is expected if backend is not running, but auth mechanism works")
             return True  # Auth mechanism works, just no server
         except Exception as e:
-            logger.error(f"❌ Unexpected WebSocket error: {e}")
+            logger.error(f" FAIL:  Unexpected WebSocket error: {e}")
             return False
             
     except Exception as e:
-        logger.error(f"❌ Integration test failed: {e}")
+        logger.error(f" FAIL:  Integration test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -125,7 +125,7 @@ async def test_websocket_integration_auth():
 
 async def test_websocket_auth_validation():
     """Test that WebSocket auth validation works correctly."""
-    logger.info("🔐 Testing WebSocket auth validation")
+    logger.info("[U+1F510] Testing WebSocket auth validation")
     
     try:
         from test_framework.ssot.integration_auth_manager import create_integration_test_helper
@@ -138,20 +138,20 @@ async def test_websocket_auth_validation():
         is_valid = await auth_helper.validate_integration_token(token)
         
         if is_valid:
-            logger.info("✅ Token validation successful")
+            logger.info(" PASS:  Token validation successful")
             return True
         else:
-            logger.error("❌ Token validation failed")
+            logger.error(" FAIL:  Token validation failed")
             return False
             
     except Exception as e:
-        logger.error(f"❌ Auth validation test failed: {e}")
+        logger.error(f" FAIL:  Auth validation test failed: {e}")
         return False
 
 
 async def test_multi_user_token_creation():
     """Test creation of multiple user tokens for isolation testing."""
-    logger.info("👥 Testing multi-user token creation")
+    logger.info("[U+1F465] Testing multi-user token creation")
     
     try:
         from test_framework.ssot.integration_auth_manager import create_integration_test_helper
@@ -173,36 +173,36 @@ async def test_multi_user_token_creation():
             )
             if token:
                 tokens[user["user_id"]] = token
-                logger.info(f"✅ Created token for {user['user_id']}")
+                logger.info(f" PASS:  Created token for {user['user_id']}")
             else:
-                logger.error(f"❌ Failed to create token for {user['user_id']}")
+                logger.error(f" FAIL:  Failed to create token for {user['user_id']}")
                 return False
         
         if len(tokens) == len(users):
-            logger.info(f"✅ Successfully created {len(tokens)} user tokens")
+            logger.info(f" PASS:  Successfully created {len(tokens)} user tokens")
             
             # Test that tokens are different
             token_values = list(tokens.values())
             unique_tokens = set(token_values)
             
             if len(unique_tokens) == len(token_values):
-                logger.info("✅ All tokens are unique (proper isolation)")
+                logger.info(" PASS:  All tokens are unique (proper isolation)")
                 return True
             else:
-                logger.error("❌ Some tokens are identical (isolation failed)")
+                logger.error(" FAIL:  Some tokens are identical (isolation failed)")
                 return False
         else:
-            logger.error("❌ Failed to create all user tokens")
+            logger.error(" FAIL:  Failed to create all user tokens")
             return False
             
     except Exception as e:
-        logger.error(f"❌ Multi-user token test failed: {e}")
+        logger.error(f" FAIL:  Multi-user token test failed: {e}")
         return False
 
 
 async def main():
     """Run all WebSocket integration authentication tests."""
-    logger.info("🧪 WebSocket Integration Authentication Test Suite")
+    logger.info("[U+1F9EA] WebSocket Integration Authentication Test Suite")
     logger.info("=" * 60)
     
     tests = [
@@ -220,23 +220,23 @@ async def main():
             result = await test_func()
             if result:
                 passed += 1
-                logger.info(f"✅ {test_name}: PASSED")
+                logger.info(f" PASS:  {test_name}: PASSED")
             else:
-                logger.error(f"❌ {test_name}: FAILED")
+                logger.error(f" FAIL:  {test_name}: FAILED")
         except Exception as e:
-            logger.error(f"❌ {test_name}: ERROR - {e}")
+            logger.error(f" FAIL:  {test_name}: ERROR - {e}")
     
     logger.info("=" * 60)
-    logger.info(f"🎯 Test Results: {passed}/{total} tests passed")
+    logger.info(f" TARGET:  Test Results: {passed}/{total} tests passed")
     
     if passed == total:
-        logger.info("🎉 ALL TESTS PASSED!")
-        logger.info("✅ WebSocket integration authentication is working correctly")
-        logger.info("✅ Integration tests should now pass with proper authentication")
+        logger.info(" CELEBRATION:  ALL TESTS PASSED!")
+        logger.info(" PASS:  WebSocket integration authentication is working correctly")
+        logger.info(" PASS:  Integration tests should now pass with proper authentication")
         return True
     else:
-        logger.error(f"❌ {total - passed} tests failed")
-        logger.error("❌ WebSocket integration authentication needs more work")
+        logger.error(f" FAIL:  {total - passed} tests failed")
+        logger.error(" FAIL:  WebSocket integration authentication needs more work")
         return False
 
 

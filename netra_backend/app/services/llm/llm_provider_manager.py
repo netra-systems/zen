@@ -247,7 +247,7 @@ This function uses recursion to calculate the factorial."""
             elif "aws" in prompt.lower() and "cost" in prompt.lower():
                 response_text = """For AWS cost optimization with 100TB of data, consider:
 
-- Use S3 storage classes: Standard → IA → Glacier Deep Archive
+- Use S3 storage classes: Standard  ->  IA  ->  Glacier Deep Archive
 - Implement data compression and deduplication
 - Use CloudFront CDN to reduce data transfer costs
 - Monitor with AWS Cost Explorer and set up billing alerts

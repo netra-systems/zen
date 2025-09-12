@@ -234,15 +234,15 @@ class CrossServiceConfigValidator:
         blocking_services = sum(1 for c in checks if not c.can_delete)
         
         if blocking_services > 0:
-            report_lines.append(f"⛔ DELETION BLOCKED by {blocking_services}/{total_services} services")
+            report_lines.append(f"[U+26D4] DELETION BLOCKED by {blocking_services}/{total_services} services")
         else:
-            report_lines.append(f"✅ Can be deleted - no critical dependencies found")
+            report_lines.append(f" PASS:  Can be deleted - no critical dependencies found")
         
         report_lines.extend(["", "-" * 40, ""])
         
         # Detailed results
         for check in checks:
-            status = "❌ REQUIRED" if check.is_required else "✅ Optional"
+            status = " FAIL:  REQUIRED" if check.is_required else " PASS:  Optional"
             
             report_lines.extend([
                 f"Service: {check.service_name}",
@@ -276,7 +276,7 @@ class CrossServiceConfigValidator:
                 ])
                 
                 if legacy_info.get("critical_security"):
-                    report_lines.append("⚠️ SECURITY CRITICAL: This is a security-sensitive configuration!")
+                    report_lines.append(" WARNING: [U+FE0F] SECURITY CRITICAL: This is a security-sensitive configuration!")
                 
                 report_lines.extend(["", "-" * 40, ""])
         except ImportError:

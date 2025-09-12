@@ -12,12 +12,12 @@ Business Value Justification (BVJ):
 
 GOLDEN PATH DEFINITION:
 The "golden path" is the optimal user experience flow:
-1. User sends message → WebSocket connection established with authentication
-2. Agent starts processing → agent_started event (user sees AI is working)
-3. Agent analyzes request → agent_thinking event (real-time progress visibility)
-4. Agent executes tools → tool_executing event (demonstrates problem-solving)
-5. Tools return results → tool_completed event (actionable insights delivered)
-6. Agent synthesizes response → agent_completed event (valuable response ready)
+1. User sends message  ->  WebSocket connection established with authentication
+2. Agent starts processing  ->  agent_started event (user sees AI is working)
+3. Agent analyzes request  ->  agent_thinking event (real-time progress visibility)
+4. Agent executes tools  ->  tool_executing event (demonstrates problem-solving)
+5. Tools return results  ->  tool_completed event (actionable insights delivered)
+6. Agent synthesizes response  ->  agent_completed event (valuable response ready)
 7. User receives complete AI response with insights and actions
 
 This flow represents the CORE VALUE PROPOSITION of the platform.

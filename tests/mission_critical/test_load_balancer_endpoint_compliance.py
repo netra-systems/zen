@@ -173,7 +173,7 @@ class LoadBalancerComplianceValidator:
         report.append(f"Scanned Files: {self.scanned_files}")
         report.append(f"Files with Violations: {self.violation_files}")
         report.append(f"Total Violations: {len(self.violations)}")
-        report.append(f"Compliance Status: {'✅ COMPLIANT' if len(self.violations) == 0 else '❌ NON-COMPLIANT'}")
+        report.append(f"Compliance Status: {' PASS:  COMPLIANT' if len(self.violations) == 0 else ' FAIL:  NON-COMPLIANT'}")
         report.append("")
         
         if self.violations:
@@ -344,9 +344,9 @@ class TestLoadBalancerEndpointCompliance:
         # Log individual service results
         for service, result in results['results'].items():
             if result['accessible']:
-                logger.info(f"✅ {service.upper()}: {result['url']} ({result.get('response_time', 'N/A')}ms)")
+                logger.info(f" PASS:  {service.upper()}: {result['url']} ({result.get('response_time', 'N/A')}ms)")
             else:
-                logger.error(f"❌ {service.upper()}: {result['url']} - {result.get('error', 'Unknown error')}")
+                logger.error(f" FAIL:  {service.upper()}: {result['url']} - {result.get('error', 'Unknown error')}")
         
         # CRITICAL: At least backend and auth must be accessible
         critical_services = ['backend', 'auth']
@@ -400,7 +400,7 @@ if __name__ == "__main__":
         print(report)
         
         if not results['is_compliant']:
-            print("\n❌ COMPLIANCE CHECK FAILED!")
+            print("\n FAIL:  COMPLIANCE CHECK FAILED!")
             print("Run migration script: python scripts/migrate_cloud_run_urls.py --execute")
             sys.exit(1)
         
@@ -414,9 +414,9 @@ if __name__ == "__main__":
         print(f"Accessibility Rate: {conn_results['accessibility_rate']:.1f}%")
         
         if conn_results['all_accessible']:
-            print("\n✅ ALL COMPLIANCE CHECKS PASSED!")
+            print("\n PASS:  ALL COMPLIANCE CHECKS PASSED!")
         else:
-            print("\n⚠️  Some connectivity issues detected (may be expected in CI)")
+            print("\n WARNING: [U+FE0F]  Some connectivity issues detected (may be expected in CI)")
         
         print("\nLoad Balancer Migration: SUCCESSFUL")
     

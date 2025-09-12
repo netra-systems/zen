@@ -75,7 +75,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         self.test_engines = []
         self.database_errors = []
         
-        self.logger.info("🔧 E2E SQLAlchemy Pool Configuration Test Setup")
+        self.logger.info("[U+1F527] E2E SQLAlchemy Pool Configuration Test Setup")
     
     def teardown_method(self):
         """Cleanup method with database engine cleanup."""
@@ -86,7 +86,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         if test_duration < 0.01:
             pytest.fail(f"E2E test completed in {test_duration:.4f}s - This indicates test was not executed with real database")
         
-        self.logger.info(f"✅ E2E Database Pool Test Duration: {test_duration:.2f}s (valid E2E timing)")
+        self.logger.info(f" PASS:  E2E Database Pool Test Duration: {test_duration:.2f}s (valid E2E timing)")
         
         # Cleanup test database engines
         asyncio.run(self._async_cleanup())
@@ -102,7 +102,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         
         self.test_engines.clear()
         self.database_errors.clear()
-        self.logger.info("🧹 Database Engine Cleanup Complete")
+        self.logger.info("[U+1F9F9] Database Engine Cleanup Complete")
     
     async def _ensure_database_ready(self) -> bool:
         """Ensure PostgreSQL database is ready for testing."""
@@ -121,11 +121,11 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
                 result = await conn.execute(text("SELECT 1"))
                 assert result.scalar() == 1
             
-            self.logger.info("✅ PostgreSQL database ready for E2E testing")
+            self.logger.info(" PASS:  PostgreSQL database ready for E2E testing")
             return True
             
         except Exception as e:
-            self.logger.error(f"❌ Database not ready: {e}")
+            self.logger.error(f" FAIL:  Database not ready: {e}")
             self.logger.error("Run: python tests/unified_test_runner.py --real-services")
             return False
     
@@ -150,12 +150,12 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         if not database_ready:
             pytest.skip("PostgreSQL database not available for E2E testing - run with --real-services")
         
-        self.logger.info("🚨 REPRODUCING EXACT STAGING FAILURE: QueuePool + AsyncEngine")
+        self.logger.info(" ALERT:  REPRODUCING EXACT STAGING FAILURE: QueuePool + AsyncEngine")
         
         # Step 1: Reproduce the BROKEN configuration (current netra_backend)
         database_url = get_database_url()
         
-        self.logger.info(f"🔍 Testing with database URL: {database_url[:50]}...")
+        self.logger.info(f" SEARCH:  Testing with database URL: {database_url[:50]}...")
         
         # Test the exact configuration that's failing in staging
         broken_engine = None
@@ -163,7 +163,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         
         try:
             # This is the EXACT configuration causing staging failures
-            self.logger.info("⚠️ Creating AsyncEngine with QueuePool (BROKEN CONFIG)")
+            self.logger.info(" WARNING: [U+FE0F] Creating AsyncEngine with QueuePool (BROKEN CONFIG)")
             broken_engine = create_async_engine(
                 database_url,
                 poolclass=QueuePool,  # THIS IS THE BUG - QueuePool cannot be used with async engines
@@ -177,7 +177,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
             self.test_engines.append(broken_engine)
             
             # Attempt to use the broken configuration (should fail)
-            self.logger.info("🧪 Attempting database operation with broken configuration...")
+            self.logger.info("[U+1F9EA] Attempting database operation with broken configuration...")
             
             # This will trigger the exact staging error
             async with broken_engine.begin() as conn:
@@ -185,22 +185,22 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
                 test_value = result.scalar()
                 
             # If we reach here, the test configuration is not reproducing the staging failure
-            self.logger.error("❌ STAGING FAILURE NOT REPRODUCED - Test environment may differ from staging")
-            self.logger.error("❌ Expected ArgumentError: 'Pool class QueuePool cannot be used with asyncio engine'")
+            self.logger.error(" FAIL:  STAGING FAILURE NOT REPRODUCED - Test environment may differ from staging")
+            self.logger.error(" FAIL:  Expected ArgumentError: 'Pool class QueuePool cannot be used with asyncio engine'")
             
         except ArgumentError as e:
             # This is the EXPECTED staging failure
             if "Pool class QueuePool cannot be used with asyncio engine" in str(e):
                 staging_error_reproduced = True
                 self.database_errors.append(str(e))
-                self.logger.info("✅ STAGING FAILURE SUCCESSFULLY REPRODUCED!")
-                self.logger.info(f"✅ Error message matches staging: {str(e)[:100]}...")
+                self.logger.info(" PASS:  STAGING FAILURE SUCCESSFULLY REPRODUCED!")
+                self.logger.info(f" PASS:  Error message matches staging: {str(e)[:100]}...")
             else:
-                self.logger.error(f"❌ Unexpected ArgumentError: {e}")
+                self.logger.error(f" FAIL:  Unexpected ArgumentError: {e}")
                 raise
         
         except Exception as e:
-            self.logger.error(f"❌ Unexpected error type: {type(e).__name__}: {e}")
+            self.logger.error(f" FAIL:  Unexpected error type: {type(e).__name__}: {e}")
             self.database_errors.append(f"Unexpected error: {e}")
             raise
         
@@ -211,10 +211,10 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
             "Expected: ArgumentError with 'Pool class QueuePool cannot be used with asyncio engine'"
         )
         
-        self.logger.info("🎯 Step 1 COMPLETE: Staging failure successfully reproduced")
+        self.logger.info(" TARGET:  Step 1 COMPLETE: Staging failure successfully reproduced")
         
         # Step 2: Test the FIXED configuration (NullPool + AsyncEngine)
-        self.logger.info("✅ Testing FIXED configuration: NullPool + AsyncEngine")
+        self.logger.info(" PASS:  Testing FIXED configuration: NullPool + AsyncEngine")
         
         fixed_engine = None
         fix_successful = False
@@ -235,20 +235,20 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
                 assert status == "fixed_config_works"
             
             fix_successful = True
-            self.logger.info("✅ FIXED CONFIGURATION WORKS: NullPool + AsyncEngine successful")
+            self.logger.info(" PASS:  FIXED CONFIGURATION WORKS: NullPool + AsyncEngine successful")
             
         except Exception as e:
-            self.logger.error(f"❌ Fixed configuration failed unexpectedly: {e}")
+            self.logger.error(f" FAIL:  Fixed configuration failed unexpectedly: {e}")
             self.database_errors.append(f"Fixed config error: {e}")
             raise
         
         # CRITICAL ASSERTION: Fixed configuration must work
         assert fix_successful, "CRITICAL: Fixed configuration (NullPool + AsyncEngine) failed"
         
-        self.logger.info("🎯 Step 2 COMPLETE: Fixed configuration validated")
+        self.logger.info(" TARGET:  Step 2 COMPLETE: Fixed configuration validated")
         
         # Step 3: Test get_request_scoped_db_session with current broken configuration
-        self.logger.info("🔍 Testing get_request_scoped_db_session (primary failure path in staging)")
+        self.logger.info(" SEARCH:  Testing get_request_scoped_db_session (primary failure path in staging)")
         
         request_session_error = None
         try:
@@ -262,23 +262,23 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         except ArgumentError as e:
             if "Pool class QueuePool cannot be used with asyncio engine" in str(e):
                 request_session_error = str(e)
-                self.logger.info("✅ get_request_scoped_db_session reproduced staging failure")
+                self.logger.info(" PASS:  get_request_scoped_db_session reproduced staging failure")
             else:
-                self.logger.error(f"❌ Unexpected error in get_request_scoped_db_session: {e}")
+                self.logger.error(f" FAIL:  Unexpected error in get_request_scoped_db_session: {e}")
                 raise
         except Exception as e:
-            self.logger.warning(f"⚠️ get_request_scoped_db_session error (may be expected): {type(e).__name__}: {e}")
+            self.logger.warning(f" WARNING: [U+FE0F] get_request_scoped_db_session error (may be expected): {type(e).__name__}: {e}")
             request_session_error = f"Other error: {e}"
         
         # CRITICAL: This is the primary failure path in staging
         if request_session_error:
-            self.logger.info("✅ get_request_scoped_db_session correctly fails with broken pool config")
+            self.logger.info(" PASS:  get_request_scoped_db_session correctly fails with broken pool config")
             self.database_errors.append(f"Request session error: {request_session_error}")
         
-        self.logger.info("🎯 Step 3 COMPLETE: Request scoped session failure reproduced")
+        self.logger.info(" TARGET:  Step 3 COMPLETE: Request scoped session failure reproduced")
         
         # Step 4: Validate WebSocket authentication database dependency failure
-        self.logger.info("🌐 Testing WebSocket authentication database dependency (staging failure trigger)")
+        self.logger.info("[U+1F310] Testing WebSocket authentication database dependency (staging failure trigger)")
         
         # Create test user for WebSocket auth test
         test_user_id = f"pool_test_user_{uuid.uuid4().hex[:8]}"
@@ -293,7 +293,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         try:
             # Simulate WebSocket authentication that requires database session
             # This is the exact path that's failing in staging
-            self.logger.info("🔐 Simulating WebSocket authentication database dependency...")
+            self.logger.info("[U+1F510] Simulating WebSocket authentication database dependency...")
             
             # In staging, this would fail during WebSocket auth because get_request_scoped_db_session
             # is used in the auth flow and hits the QueuePool + AsyncEngine incompatibility
@@ -313,18 +313,18 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
                 
         except AttributeError:
             # Method may not exist - that's fine, we're testing the database layer
-            self.logger.info("✅ Auth service method simulation skipped (focus on database layer)")
+            self.logger.info(" PASS:  Auth service method simulation skipped (focus on database layer)")
         except ArgumentError as e:
             if "Pool class QueuePool cannot be used with asyncio engine" in str(e):
                 websocket_auth_error = str(e)
-                self.logger.info("✅ WebSocket auth database dependency reproduced staging failure")
+                self.logger.info(" PASS:  WebSocket auth database dependency reproduced staging failure")
             else:
                 raise
         except Exception as e:
-            self.logger.warning(f"⚠️ WebSocket auth simulation error: {type(e).__name__}: {e}")
+            self.logger.warning(f" WARNING: [U+FE0F] WebSocket auth simulation error: {type(e).__name__}: {e}")
             websocket_auth_error = f"WebSocket auth error: {e}"
         
-        self.logger.info("🎯 Step 4 COMPLETE: WebSocket authentication failure path tested")
+        self.logger.info(" TARGET:  Step 4 COMPLETE: WebSocket authentication failure path tested")
         
         # FINAL VALIDATION: Ensure we've reproduced the core staging issues
         assert staging_error_reproduced, "CRITICAL: Core staging failure not reproduced"
@@ -339,20 +339,20 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         )
         
         # Success summary
-        self.logger.info("🚨 STAGING FAILURE REPRODUCTION SUCCESS!")
-        self.logger.info(f"✅ QueuePool + AsyncEngine error reproduced: {staging_error_reproduced}")
-        self.logger.info(f"✅ NullPool + AsyncEngine fix validated: {fix_successful}")
-        self.logger.info(f"✅ Database errors captured: {len(self.database_errors)}")
-        self.logger.info(f"✅ Execution time validated: {execution_time:.3f}s (real database operations)")
+        self.logger.info(" ALERT:  STAGING FAILURE REPRODUCTION SUCCESS!")
+        self.logger.info(f" PASS:  QueuePool + AsyncEngine error reproduced: {staging_error_reproduced}")
+        self.logger.info(f" PASS:  NullPool + AsyncEngine fix validated: {fix_successful}")
+        self.logger.info(f" PASS:  Database errors captured: {len(self.database_errors)}")
+        self.logger.info(f" PASS:  Execution time validated: {execution_time:.3f}s (real database operations)")
         
         # Log error details for debugging
-        self.logger.info("📋 STAGING ERROR ANALYSIS:")
+        self.logger.info("[U+1F4CB] STAGING ERROR ANALYSIS:")
         for i, error in enumerate(self.database_errors):
             self.logger.info(f"  Error {i+1}: {error[:200]}{'...' if len(error) > 200 else ''}")
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🚨 SQLALCHEMY POOL CONFIGURATION E2E SUCCESS: {duration:.2f}s")
-        self.logger.info("🎯 CRITICAL STAGING FAILURE REPRODUCED - Ready for fix implementation")
+        self.logger.info(f" ALERT:  SQLALCHEMY POOL CONFIGURATION E2E SUCCESS: {duration:.2f}s")
+        self.logger.info(" TARGET:  CRITICAL STAGING FAILURE REPRODUCED - Ready for fix implementation")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -369,14 +369,14 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         if not database_ready:
             pytest.skip("PostgreSQL database not available for configuration comparison")
         
-        self.logger.info("⚖️ COMPARING auth_service (WORKING) vs netra_backend (BROKEN) configurations")
+        self.logger.info("[U+2696][U+FE0F] COMPARING auth_service (WORKING) vs netra_backend (BROKEN) configurations")
         
         database_url = get_database_url()
         
         # Test 1: auth_service configuration (WORKING - NullPool)
         auth_service_success = False
         try:
-            self.logger.info("✅ Testing auth_service configuration: NullPool + AsyncEngine")
+            self.logger.info(" PASS:  Testing auth_service configuration: NullPool + AsyncEngine")
             auth_engine = create_async_engine(
                 database_url,
                 poolclass=NullPool,  # auth_service uses this (CORRECT)
@@ -391,17 +391,17 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
                 assert config_type == "auth_service_config"
             
             auth_service_success = True
-            self.logger.info("✅ auth_service configuration WORKS: NullPool + AsyncEngine")
+            self.logger.info(" PASS:  auth_service configuration WORKS: NullPool + AsyncEngine")
             
         except Exception as e:
-            self.logger.error(f"❌ auth_service configuration failed unexpectedly: {e}")
+            self.logger.error(f" FAIL:  auth_service configuration failed unexpectedly: {e}")
             self.database_errors.append(f"auth_service config error: {e}")
         
         # Test 2: netra_backend configuration (BROKEN - QueuePool)
         netra_backend_failure = False
         netra_backend_error = None
         try:
-            self.logger.info("⚠️ Testing netra_backend configuration: QueuePool + AsyncEngine")
+            self.logger.info(" WARNING: [U+FE0F] Testing netra_backend configuration: QueuePool + AsyncEngine")
             backend_engine = create_async_engine(
                 database_url,
                 poolclass=QueuePool,  # netra_backend uses this (BROKEN)
@@ -423,11 +423,11 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
             if "Pool class QueuePool cannot be used with asyncio engine" in str(e):
                 netra_backend_failure = True
                 netra_backend_error = str(e)
-                self.logger.info("✅ netra_backend configuration FAILS as expected: QueuePool incompatible")
+                self.logger.info(" PASS:  netra_backend configuration FAILS as expected: QueuePool incompatible")
             else:
                 raise
         except Exception as e:
-            self.logger.error(f"❌ Unexpected netra_backend configuration error: {e}")
+            self.logger.error(f" FAIL:  Unexpected netra_backend configuration error: {e}")
             self.database_errors.append(f"netra_backend unexpected error: {e}")
         
         # CRITICAL VALIDATION: Configurations must behave as expected
@@ -436,7 +436,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         assert netra_backend_error is not None, "CRITICAL: netra_backend error message not captured"
         
         # Test 3: Validate current netra_backend database module behavior
-        self.logger.info("🔍 Testing current netra_backend database module behavior")
+        self.logger.info(" SEARCH:  Testing current netra_backend database module behavior")
         
         current_backend_error = None
         try:
@@ -454,26 +454,26 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         except ArgumentError as e:
             if "Pool class QueuePool cannot be used with asyncio engine" in str(e):
                 current_backend_error = str(e)
-                self.logger.info("✅ Current netra_backend database module fails as expected")
+                self.logger.info(" PASS:  Current netra_backend database module fails as expected")
             else:
                 raise
         except Exception as e:
-            self.logger.warning(f"⚠️ Current backend database module error: {type(e).__name__}: {e}")
+            self.logger.warning(f" WARNING: [U+FE0F] Current backend database module error: {type(e).__name__}: {e}")
             current_backend_error = f"Other current backend error: {e}"
         
         # COMPARISON SUMMARY
-        self.logger.info("⚖️ CONFIGURATION COMPARISON RESULTS:")
-        self.logger.info(f"  ✅ auth_service (NullPool): {'SUCCESS' if auth_service_success else 'FAILED'}")
-        self.logger.info(f"  ❌ netra_backend (QueuePool): {'FAILED' if netra_backend_failure else 'UNEXPECTED SUCCESS'}")
-        self.logger.info(f"  🔧 Current backend module: {'FAILS' if current_backend_error else 'WORKS'}")
+        self.logger.info("[U+2696][U+FE0F] CONFIGURATION COMPARISON RESULTS:")
+        self.logger.info(f"   PASS:  auth_service (NullPool): {'SUCCESS' if auth_service_success else 'FAILED'}")
+        self.logger.info(f"   FAIL:  netra_backend (QueuePool): {'FAILED' if netra_backend_failure else 'UNEXPECTED SUCCESS'}")
+        self.logger.info(f"  [U+1F527] Current backend module: {'FAILS' if current_backend_error else 'WORKS'}")
         
         # Validate timing
         execution_time = time.time() - execution_start_time
         assert execution_time >= 0.1, f"Configuration comparison too fast: {execution_time:.3f}s"
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"⚖️ POOL CONFIGURATION COMPARISON SUCCESS: {duration:.2f}s")
-        self.logger.info("🎯 Configuration difference validated - auth_service works, netra_backend broken")
+        self.logger.info(f"[U+2696][U+FE0F] POOL CONFIGURATION COMPARISON SUCCESS: {duration:.2f}s")
+        self.logger.info(" TARGET:  Configuration difference validated - auth_service works, netra_backend broken")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -490,7 +490,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         if not database_ready:
             pytest.skip("PostgreSQL database not available for WebSocket dependency testing")
         
-        self.logger.info("🌐 TESTING WebSocket database dependency - PRIMARY STAGING FAILURE PATH")
+        self.logger.info("[U+1F310] TESTING WebSocket database dependency - PRIMARY STAGING FAILURE PATH")
         
         # Create test user for WebSocket authentication simulation
         websocket_user_id = f"ws_pool_test_{uuid.uuid4().hex[:8]}"
@@ -501,7 +501,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
             exp_minutes=30
         )
         
-        self.logger.info(f"🔐 Created WebSocket test user: {websocket_user_id[:8]}...")
+        self.logger.info(f"[U+1F510] Created WebSocket test user: {websocket_user_id[:8]}...")
         
         # Test 1: Simulate WebSocket authentication database access pattern
         websocket_db_error = None
@@ -514,12 +514,12 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
             # 3. get_request_scoped_db_session called
             # 4. QueuePool + AsyncEngine incompatibility triggered
             
-            self.logger.info("🧪 Simulating WebSocket auth database access pattern...")
+            self.logger.info("[U+1F9EA] Simulating WebSocket auth database access pattern...")
             
             for attempt in range(3):  # Simulate multiple WebSocket auth attempts
                 websocket_operations_attempted += 1
                 
-                self.logger.info(f"🔄 WebSocket auth attempt {attempt + 1}")
+                self.logger.info(f" CYCLE:  WebSocket auth attempt {attempt + 1}")
                 
                 # This is the exact code path failing in staging
                 async for db_session in get_request_scoped_db_session():
@@ -555,16 +555,16 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         except ArgumentError as e:
             if "Pool class QueuePool cannot be used with asyncio engine" in str(e):
                 websocket_db_error = str(e)
-                self.logger.info("✅ WebSocket database dependency reproduced staging failure")
+                self.logger.info(" PASS:  WebSocket database dependency reproduced staging failure")
             else:
-                self.logger.error(f"❌ Unexpected ArgumentError in WebSocket auth: {e}")
+                self.logger.error(f" FAIL:  Unexpected ArgumentError in WebSocket auth: {e}")
                 raise
         except Exception as e:
-            self.logger.warning(f"⚠️ WebSocket auth database error: {type(e).__name__}: {e}")
+            self.logger.warning(f" WARNING: [U+FE0F] WebSocket auth database error: {type(e).__name__}: {e}")
             websocket_db_error = f"WebSocket auth error: {e}"
         
         # Test 2: Simulate rapid WebSocket connection attempts (staging load pattern)
-        self.logger.info("⚡ Simulating rapid WebSocket connections (staging load pattern)")
+        self.logger.info(" LIGHTNING:  Simulating rapid WebSocket connections (staging load pattern)")
         
         rapid_connection_errors = []
         rapid_connections_attempted = 0
@@ -573,7 +573,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
             rapid_connections_attempted += 1
             
             try:
-                self.logger.info(f"⚡ Rapid connection {connection_num + 1}")
+                self.logger.info(f" LIGHTNING:  Rapid connection {connection_num + 1}")
                 
                 # Each WebSocket connection triggers authentication database access
                 async for db_session in get_request_scoped_db_session():
@@ -597,38 +597,38 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         # Test 3: Measure the frequency of the staging failure pattern
         failure_frequency = len(rapid_connection_errors) / max(rapid_connections_attempted, 1) * 100
         
-        self.logger.info("📊 WEBSOCKET DATABASE DEPENDENCY ANALYSIS:")
-        self.logger.info(f"  🔄 WebSocket operations attempted: {websocket_operations_attempted}")
-        self.logger.info(f"  ⚡ Rapid connections attempted: {rapid_connections_attempted}")
-        self.logger.info(f"  ❌ Rapid connection failures: {len(rapid_connection_errors)}")
-        self.logger.info(f"  📈 Failure frequency: {failure_frequency:.1f}%")
+        self.logger.info(" CHART:  WEBSOCKET DATABASE DEPENDENCY ANALYSIS:")
+        self.logger.info(f"   CYCLE:  WebSocket operations attempted: {websocket_operations_attempted}")
+        self.logger.info(f"   LIGHTNING:  Rapid connections attempted: {rapid_connections_attempted}")
+        self.logger.info(f"   FAIL:  Rapid connection failures: {len(rapid_connection_errors)}")
+        self.logger.info(f"  [U+1F4C8] Failure frequency: {failure_frequency:.1f}%")
         
         # CRITICAL VALIDATION: This should demonstrate the staging failure pattern
         if websocket_db_error or len(rapid_connection_errors) > 0:
-            self.logger.info("✅ WebSocket database dependency failure reproduced successfully")
+            self.logger.info(" PASS:  WebSocket database dependency failure reproduced successfully")
             self.database_errors.extend(rapid_connection_errors)
         else:
-            self.logger.warning("⚠️ WebSocket dependency test didn't reproduce staging failure")
-            self.logger.warning("⚠️ This may indicate test environment differs from staging")
+            self.logger.warning(" WARNING: [U+FE0F] WebSocket dependency test didn't reproduce staging failure")
+            self.logger.warning(" WARNING: [U+FE0F] This may indicate test environment differs from staging")
         
         # Test 4: Validate the specific error message matches staging logs
         if websocket_db_error and "Pool class QueuePool cannot be used with asyncio engine" in websocket_db_error:
-            self.logger.info("✅ Error message matches exact staging failure pattern")
-            self.logger.info(f"✅ Staging error reproduced: {websocket_db_error[:150]}...")
+            self.logger.info(" PASS:  Error message matches exact staging failure pattern")
+            self.logger.info(f" PASS:  Staging error reproduced: {websocket_db_error[:150]}...")
         
         # Validate timing for real database operations
         execution_time = time.time() - execution_start_time
         assert execution_time >= 0.1, f"WebSocket dependency test too fast: {execution_time:.3f}s"
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🌐 WEBSOCKET DATABASE DEPENDENCY TEST SUCCESS: {duration:.2f}s")
-        self.logger.info("🎯 Primary staging failure path validated")
+        self.logger.info(f"[U+1F310] WEBSOCKET DATABASE DEPENDENCY TEST SUCCESS: {duration:.2f}s")
+        self.logger.info(" TARGET:  Primary staging failure path validated")
         
         # Log rapid connection errors for detailed analysis
         if rapid_connection_errors:
-            self.logger.info("🔍 RAPID CONNECTION ERROR DETAILS:")
+            self.logger.info(" SEARCH:  RAPID CONNECTION ERROR DETAILS:")
             for error in rapid_connection_errors[:3]:  # Show first 3 errors
-                self.logger.info(f"  📋 {error}")
+                self.logger.info(f"  [U+1F4CB] {error}")
     
     @pytest.mark.e2e  
     @pytest.mark.real_services
@@ -645,7 +645,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         if not database_ready:
             pytest.skip("PostgreSQL database not available for compatibility matrix testing")
         
-        self.logger.info("📋 TESTING Database Pool Compatibility Matrix")
+        self.logger.info("[U+1F4CB] TESTING Database Pool Compatibility Matrix")
         
         database_url = get_database_url()
         
@@ -668,7 +668,7 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         compatibility_results = []
         
         for config in pool_configurations:
-            self.logger.info(f"🧪 Testing {config['name']}: {config['description']}")
+            self.logger.info(f"[U+1F9EA] Testing {config['name']}: {config['description']}")
             
             config_result = {
                 "name": config["name"],
@@ -695,33 +695,33 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
                     assert test_result == "compatibility_test"
                 
                 config_result["actual"] = "PASS"
-                self.logger.info(f"✅ {config['name']} - PASSED")
+                self.logger.info(f" PASS:  {config['name']} - PASSED")
                 
             except ArgumentError as e:
                 if "Pool class QueuePool cannot be used with asyncio engine" in str(e):
                     config_result["actual"] = "FAIL"  
                     config_result["error"] = str(e)
-                    self.logger.info(f"❌ {config['name']} - FAILED (expected)")
+                    self.logger.info(f" FAIL:  {config['name']} - FAILED (expected)")
                 else:
                     config_result["actual"] = "ERROR"
                     config_result["error"] = f"Unexpected ArgumentError: {e}"
-                    self.logger.error(f"❌ {config['name']} - UNEXPECTED ERROR: {e}")
+                    self.logger.error(f" FAIL:  {config['name']} - UNEXPECTED ERROR: {e}")
                     
             except Exception as e:
                 config_result["actual"] = "ERROR"
                 config_result["error"] = f"{type(e).__name__}: {e}"
-                self.logger.error(f"❌ {config['name']} - ERROR: {e}")
+                self.logger.error(f" FAIL:  {config['name']} - ERROR: {e}")
             
             compatibility_results.append(config_result)
         
         # Validate compatibility matrix results
-        self.logger.info("📊 POOL COMPATIBILITY MATRIX RESULTS:")
+        self.logger.info(" CHART:  POOL COMPATIBILITY MATRIX RESULTS:")
         
         matrix_valid = True
         for result in compatibility_results:
             expected = result["expected"]
             actual = result["actual"]
-            match_status = "✅ MATCH" if expected == actual else "❌ MISMATCH"
+            match_status = " PASS:  MATCH" if expected == actual else " FAIL:  MISMATCH"
             
             self.logger.info(f"  {result['name']}: Expected={expected}, Actual={actual} - {match_status}")
             if result["error"]:
@@ -749,11 +749,11 @@ class TestSQLAlchemyAsyncPoolConfigurationE2E(BaseE2ETest):
         assert execution_time >= 0.1, f"Compatibility matrix test too fast: {execution_time:.3f}s"
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"📋 POOL COMPATIBILITY MATRIX SUCCESS: {duration:.2f}s")
-        self.logger.info("✅ Matrix validation confirms: QueuePool fails, NullPool works with AsyncEngine")
+        self.logger.info(f"[U+1F4CB] POOL COMPATIBILITY MATRIX SUCCESS: {duration:.2f}s")
+        self.logger.info(" PASS:  Matrix validation confirms: QueuePool fails, NullPool works with AsyncEngine")
         
         # Log final compatibility summary
-        self.logger.info("🎯 COMPATIBILITY MATRIX SUMMARY:")
+        self.logger.info(" TARGET:  COMPATIBILITY MATRIX SUMMARY:")
         for result in compatibility_results:
-            status_icon = "✅" if result["expected"] == result["actual"] else "❌"
+            status_icon = " PASS: " if result["expected"] == result["actual"] else " FAIL: "
             self.logger.info(f"  {status_icon} {result['description']}: {result['actual']}")

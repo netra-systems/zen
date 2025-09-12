@@ -326,13 +326,13 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         successful_executions = sum(1 for session in user_sessions if session.execution_results is not None)
         success_rate = successful_executions / len(user_sessions)
         
-        assert success_rate >= 0.95, f"Execution success rate too low: {success_rate:.2%} (expected ≥95%)"
+        assert success_rate >= 0.95, f"Execution success rate too low: {success_rate:.2%} (expected  >= 95%)"
         
         # Performance validation
         execution_time = time.time() - start_time
         throughput = (num_concurrent_users * operations_per_user) / execution_time
         
-        assert throughput >= 2.0, f"Concurrency throughput too low: {throughput:.1f} ops/s (expected ≥2.0 ops/s)"
+        assert throughput >= 2.0, f"Concurrency throughput too low: {throughput:.1f} ops/s (expected  >= 2.0 ops/s)"
         assert execution_time < 120.0, f"High concurrency test should complete in <120s, took {execution_time:.2f}s"
         
         logger.info(f"High-concurrency isolation test completed in {execution_time:.2f}s with perfect isolation")
@@ -523,10 +523,10 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
             logger.info(f"  Execution time fairness: {fairness_metrics['execution_time_fairness']:.2%}")
         
         # Validate fairness requirements
-        assert fairness_metrics["completion_rate_fairness"] >= 0.7, f"Completion rate fairness too low: {fairness_metrics['completion_rate_fairness']:.2%} (expected ≥70%)"
+        assert fairness_metrics["completion_rate_fairness"] >= 0.7, f"Completion rate fairness too low: {fairness_metrics['completion_rate_fairness']:.2%} (expected  >= 70%)"
         
         if "execution_time_fairness" in fairness_metrics:
-            assert fairness_metrics["execution_time_fairness"] >= 0.6, f"Execution time fairness too low: {fairness_metrics['execution_time_fairness']:.2%} (expected ≥60%)"
+            assert fairness_metrics["execution_time_fairness"] >= 0.6, f"Execution time fairness too low: {fairness_metrics['execution_time_fairness']:.2%} (expected  >= 60%)"
         
         # Phase 4: Validate resource usage stability
         peak_memory = max(m["memory_rss_mb"] for m in resource_metrics)
@@ -554,7 +554,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         execution_time = time.time() - start_time
         total_throughput = total_operations / execution_time
         
-        assert total_throughput >= 1.0, f"Total throughput too low: {total_throughput:.1f} ops/s (expected ≥1.0 ops/s)"
+        assert total_throughput >= 1.0, f"Total throughput too low: {total_throughput:.1f} ops/s (expected  >= 1.0 ops/s)"
         assert execution_time < 180.0, f"Resource contention test should complete in <180s, took {execution_time:.2f}s"
         
         logger.info(f"Resource contention test completed in {execution_time:.2f}s with {fairness_metrics['completion_rate_fairness']:.2%} fairness")
@@ -718,7 +718,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         logger.info(f"Transaction Results: {len(successful_transactions)}/{total_expected} successful ({success_rate:.2%})")
         
         # Validate transaction success rate
-        assert success_rate >= 0.9, f"Transaction success rate too low: {success_rate:.2%} (expected ≥90%)"
+        assert success_rate >= 0.9, f"Transaction success rate too low: {success_rate:.2%} (expected  >= 90%)"
         
         # Phase 4: Cross-user isolation validation
         cross_contamination_checks = 0
@@ -801,7 +801,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         execution_time = time.time() - start_time
         transaction_throughput = len(successful_transactions) / execution_time
         
-        assert transaction_throughput >= 2.0, f"Transaction throughput too low: {transaction_throughput:.1f} txn/s (expected ≥2.0 txn/s)"
+        assert transaction_throughput >= 2.0, f"Transaction throughput too low: {transaction_throughput:.1f} txn/s (expected  >= 2.0 txn/s)"
         assert execution_time < 120.0, f"Transaction isolation test should complete in <120s, took {execution_time:.2f}s"
         
         logger.info(f"Database transaction isolation test completed in {execution_time:.2f}s with perfect isolation")
@@ -1012,7 +1012,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         logger.info(f"Performance degradation: {len(degraded_users)}/{num_users-1} normal users affected ({degradation_rate:.2%})")
         
         # Validate resource isolation (normal users should not be significantly affected)
-        assert degradation_rate <= 0.3, f"Too many users experienced performance degradation: {degradation_rate:.2%} (expected ≤30%)"
+        assert degradation_rate <= 0.3, f"Too many users experienced performance degradation: {degradation_rate:.2%} (expected  <= 30%)"
         
         # Check execution time fairness
         execution_times = []
@@ -1030,7 +1030,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
             
             logger.info(f"Execution time variance: {time_variance_ratio:.2%} (avg: {avg_execution_time:.1f}s, max: {max_execution_time:.1f}s)")
             
-            assert time_variance_ratio <= 1.0, f"Execution time variance too high: {time_variance_ratio:.2%} (expected ≤100%)"
+            assert time_variance_ratio <= 1.0, f"Execution time variance too high: {time_variance_ratio:.2%} (expected  <= 100%)"
         
         # Validate system resource usage
         peak_memory = max(snapshot["memory_rss_mb"] for snapshot in system_resource_snapshots)
@@ -1045,7 +1045,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         # Validate all users completed their operations
         completion_rate = sum(1 for metrics in user_resource_metrics.values() if metrics["operations_completed"] >= 4) / num_users
         
-        assert completion_rate >= 0.9, f"User completion rate too low: {completion_rate:.2%} (expected ≥90%)"
+        assert completion_rate >= 0.9, f"User completion rate too low: {completion_rate:.2%} (expected  >= 90%)"
         
         # Performance validation
         execution_time = time.time() - start_time
@@ -1154,7 +1154,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         
         # Require at least 80% connection success
         connection_success_rate = successful_connections / num_concurrent_connections
-        assert connection_success_rate >= 0.8, f"Connection establishment rate too low: {connection_success_rate:.2%} (expected ≥80%)"
+        assert connection_success_rate >= 0.8, f"Connection establishment rate too low: {connection_success_rate:.2%} (expected  >= 80%)"
         
         # Phase 2: Send targeted messages to specific connections
         async def send_targeted_messages():
@@ -1283,8 +1283,8 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         logger.info(f"Isolation Violations: {len(isolation_violations)} violations detected")
         
         # Validate delivery performance
-        assert avg_targeted_delivery >= 0.8, f"Targeted message delivery rate too low: {avg_targeted_delivery:.2%} (expected ≥80%)"
-        assert avg_broadcast_delivery >= 0.7, f"Broadcast message delivery rate too low: {avg_broadcast_delivery:.2%} (expected ≥70%)"
+        assert avg_targeted_delivery >= 0.8, f"Targeted message delivery rate too low: {avg_targeted_delivery:.2%} (expected  >= 80%)"
+        assert avg_broadcast_delivery >= 0.7, f"Broadcast message delivery rate too low: {avg_broadcast_delivery:.2%} (expected  >= 70%)"
         
         # Validate perfect isolation (zero cross-connection messages)
         assert len(isolation_violations) == 0, f"Message isolation violations detected: {len(isolation_violations)}"
@@ -1293,7 +1293,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         stable_connections = sum(1 for metrics in connection_metrics.values() if metrics["established"] and metrics["errors"] == 0)
         stability_rate = stable_connections / successful_connections
         
-        assert stability_rate >= 0.9, f"Connection stability rate too low: {stability_rate:.2%} (expected ≥90%)"
+        assert stability_rate >= 0.9, f"Connection stability rate too low: {stability_rate:.2%} (expected  >= 90%)"
         
         # Performance validation
         execution_time = time.time() - start_time
@@ -1302,7 +1302,7 @@ class TestAdvancedMultiUserConcurrencyIsolation(BaseIntegrationTest):
         
         logger.info(f"Performance: {message_throughput:.1f} messages/second across {successful_connections} connections")
         
-        assert message_throughput >= 20.0, f"Message throughput too low: {message_throughput:.1f} msg/s (expected ≥20 msg/s)"
+        assert message_throughput >= 20.0, f"Message throughput too low: {message_throughput:.1f} msg/s (expected  >= 20 msg/s)"
         assert execution_time < 120.0, f"Massive WebSocket test should complete in <120s, took {execution_time:.2f}s"
         
         logger.info(f"Massive concurrent WebSocket test completed in {execution_time:.2f}s with perfect isolation")

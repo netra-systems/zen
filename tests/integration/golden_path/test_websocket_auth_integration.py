@@ -306,18 +306,18 @@ class TestWebSocketAuthIntegration(SSotAsyncTestCase):
         for i, result in enumerate(results):
             if isinstance(result, Exception):
                 failed_connections += 1
-                print(f"❌ Concurrent auth {i} failed: {result}")
+                print(f" FAIL:  Concurrent auth {i} failed: {result}")
             elif isinstance(result, dict) and result.get("success", False):
                 successful_connections += 1
                 if "connection_time" in result:
                     connection_times.append(result["connection_time"])
-                    print(f"✅ Concurrent auth {i} succeeded in {result['connection_time']:.2f}s")
+                    print(f" PASS:  Concurrent auth {i} succeeded in {result['connection_time']:.2f}s")
                 else:
-                    print(f"✅ Concurrent auth {i} succeeded")
+                    print(f" PASS:  Concurrent auth {i} succeeded")
             else:
                 failed_connections += 1
                 error_msg = result.get("error", str(result)) if isinstance(result, dict) else str(result)
-                print(f"❌ Concurrent auth {i} failed: {error_msg}")
+                print(f" FAIL:  Concurrent auth {i} failed: {error_msg}")
         
         # Assertions
         success_rate = successful_connections / concurrent_users
@@ -476,10 +476,10 @@ class TestWebSocketAuthIntegration(SSotAsyncTestCase):
         self.record_metric("avg_total_auth_time", avg_total_time)
         self.record_metric("performance_test_cycles", test_cycles)
         
-        print(f"\n📊 AUTHENTICATION PERFORMANCE METRICS:")
-        print(f"   🔑 Avg Token Generation: {avg_token_time:.2f}s (max: {max_token_time:.2f}s)")
-        print(f"   🔌 Avg Connection Time: {avg_connection_time:.2f}s (max: {max_connection_time:.2f}s)")  
-        print(f"   ⏱️  Avg Total Auth Time: {avg_total_time:.2f}s (max: {max_total_time:.2f}s)")
+        print(f"\n CHART:  AUTHENTICATION PERFORMANCE METRICS:")
+        print(f"   [U+1F511] Avg Token Generation: {avg_token_time:.2f}s (max: {max_token_time:.2f}s)")
+        print(f"   [U+1F50C] Avg Connection Time: {avg_connection_time:.2f}s (max: {max_connection_time:.2f}s)")  
+        print(f"   [U+23F1][U+FE0F]  Avg Total Auth Time: {avg_total_time:.2f}s (max: {max_total_time:.2f}s)")
         
     @pytest.mark.integration
     @pytest.mark.real_services

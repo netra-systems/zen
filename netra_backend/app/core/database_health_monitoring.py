@@ -1,7 +1,7 @@
-"""Database health monitoring with ≤8 line functions.
+"""Database health monitoring with  <= 8 line functions.
 
 Provides health checking for database connection pools with aggressive
-function decomposition. All functions ≤8 lines.
+function decomposition. All functions  <= 8 lines.
 """
 
 from datetime import datetime
@@ -20,7 +20,7 @@ from netra_backend.app.db.health_checks import (
 
 
 class PoolHealthChecker:
-    """Health checker for database connections - ≤8 lines per function."""
+    """Health checker for database connections -  <= 8 lines per function."""
     
     def __init__(self, db_type: DatabaseType):
         """Initialize health checker."""

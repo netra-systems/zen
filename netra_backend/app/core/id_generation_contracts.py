@@ -246,9 +246,9 @@ def enforce_id_generation_ssot():
 if __name__ == "__main__":
     results = validate_id_generation_contracts()
     if results["valid"]:
-        print("✅ All ID generation contracts validated successfully")
+        print(" PASS:  All ID generation contracts validated successfully")
     else:
-        print("❌ Contract violations found:")
+        print(" FAIL:  Contract violations found:")
         for violation in results.get("violations", []):
             print(f"  - {violation}")
         for missing in results.get("missing_methods", []):

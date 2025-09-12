@@ -7,7 +7,7 @@ BUSINESS VALUE JUSTIFICATION (BVJ):
 4. Revenue Impact: 25% of enterprise deals require high-volume export features
 
 CRITICAL E2E test for complete export pipeline flow:
-Frontend → Request Export → Backend Generation → Large Dataset Handling → Download → Validation
+Frontend  ->  Request Export  ->  Backend Generation  ->  Large Dataset Handling  ->  Download  ->  Validation
 
 ARCHITECTURAL COMPLIANCE:
 - File size: <300 lines (modular design with helper imports)

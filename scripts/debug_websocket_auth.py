@@ -48,6 +48,6 @@ if context:
     print(f"security_mode: {context.get('security_mode')}")
     print(f"detection_method: {context.get('detection_method')}")
     print()
-    print("❌ SECURITY FAILURE: Production allowed E2E bypass!")
+    print(" FAIL:  SECURITY FAILURE: Production allowed E2E bypass!")
 else:
-    print("✅ SECURITY SUCCESS: Production correctly blocked E2E bypass!")
+    print(" PASS:  SECURITY SUCCESS: Production correctly blocked E2E bypass!")

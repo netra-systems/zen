@@ -238,15 +238,15 @@ LockNotHeldError
 
                                 # REMOVED_SYNTAX_ERROR: print("Running basic lock acquisition test...")
                                 # REMOVED_SYNTAX_ERROR: test_instance.test_basic_lock_acquisition(tmp_path)
-                                # REMOVED_SYNTAX_ERROR: print("✓ Passed")
+                                # REMOVED_SYNTAX_ERROR: print("[U+2713] Passed")
 
                                 # REMOVED_SYNTAX_ERROR: print("Running context manager test...")
                                 # REMOVED_SYNTAX_ERROR: test_instance.test_context_manager(tmp_path)
-                                # REMOVED_SYNTAX_ERROR: print("✓ Passed")
+                                # REMOVED_SYNTAX_ERROR: print("[U+2713] Passed")
 
                                 # REMOVED_SYNTAX_ERROR: print("Running concurrent access test...")
                                 # REMOVED_SYNTAX_ERROR: test_concurrent_access_simulation(tmp_path)
-                                # REMOVED_SYNTAX_ERROR: print("✓ Passed")
+                                # REMOVED_SYNTAX_ERROR: print("[U+2713] Passed")
 
                                 # REMOVED_SYNTAX_ERROR: print(" )
                                 # REMOVED_SYNTAX_ERROR: All manual tests passed!")

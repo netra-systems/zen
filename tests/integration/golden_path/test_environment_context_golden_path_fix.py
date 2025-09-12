@@ -105,11 +105,11 @@ class TestEnvironmentContextGoldenPathFix:
                 assert "localhost" not in auth_url, "localhost found in staging auth URL!"
                 assert "localhost" not in backend_url, "localhost found in staging backend URL!"
                 
-                print(f"✅ GOLDEN PATH FIX VALIDATED:")
+                print(f" PASS:  GOLDEN PATH FIX VALIDATED:")
                 print(f"   Environment: {context.environment_type.value}")
                 print(f"   Auth Service: {auth_url}")
                 print(f"   Backend Service: {backend_url}")
-                print(f"   ❌ NO MORE localhost:8081 in staging!")
+                print(f"    FAIL:  NO MORE localhost:8081 in staging!")
     
     @pytest.mark.asyncio
     async def test_golden_path_validator_uses_correct_environment(self, clear_environment_cache):
@@ -169,9 +169,9 @@ class TestEnvironmentContextGoldenPathFix:
                     assert called_env_type == ModelsEnvironmentType.STAGING, f"ServiceHealthClient called with wrong environment: {called_env_type}"
                     assert called_env_type != ModelsEnvironmentType.DEVELOPMENT, "Must not default to DEVELOPMENT"
                     
-                    print(f"✅ GOLDEN PATH VALIDATOR FIX VALIDATED:")
+                    print(f" PASS:  GOLDEN PATH VALIDATOR FIX VALIDATED:")
                     print(f"   ServiceHealthClient environment: {called_env_type.value}")
-                    print(f"   ❌ NO MORE DEVELOPMENT default!")
+                    print(f"    FAIL:  NO MORE DEVELOPMENT default!")
     
     @pytest.mark.asyncio  
     async def test_service_health_client_uses_correct_urls(self, clear_environment_cache):
@@ -201,10 +201,10 @@ class TestEnvironmentContextGoldenPathFix:
         assert "localhost" not in backend_url, "localhost found in staging backend URL!"
         assert ":8081" not in auth_url, "Port 8081 found in staging auth URL!"
         
-        print(f"✅ SERVICE HEALTH CLIENT FIX VALIDATED:")
+        print(f" PASS:  SERVICE HEALTH CLIENT FIX VALIDATED:")
         print(f"   Auth URL: {auth_url}")
         print(f"   Backend URL: {backend_url}")
-        print(f"   ❌ NO MORE localhost:8081!")
+        print(f"    FAIL:  NO MORE localhost:8081!")
     
     @pytest.mark.asyncio
     async def test_environment_detection_failure_prevents_golden_path(self, clear_environment_cache):
@@ -233,9 +233,9 @@ class TestEnvironmentContextGoldenPathFix:
                     )
                 
                 assert "Cannot determine environment with sufficient confidence" in str(exc_info.value)
-                print(f"✅ FAIL-FAST BEHAVIOR VALIDATED:")
+                print(f" PASS:  FAIL-FAST BEHAVIOR VALIDATED:")
                 print(f"   Error: {str(exc_info.value)}")
-                print(f"   ✅ NO DANGEROUS DEFAULTS!")
+                print(f"    PASS:  NO DANGEROUS DEFAULTS!")
     
     @pytest.mark.asyncio
     async def test_production_environment_detection(self, clear_environment_cache):
@@ -382,14 +382,14 @@ class TestEnvironmentContextGoldenPathFix:
                     from netra_backend.app.core.service_dependencies.models import EnvironmentType as ModelsEnvironmentType
                     assert first_call_env == ModelsEnvironmentType.STAGING
                     
-                    print(f"✅ COMPREHENSIVE GOLDEN PATH FIX VALIDATED:")
+                    print(f" PASS:  COMPREHENSIVE GOLDEN PATH FIX VALIDATED:")
                     print(f"   Environment Detection: {context.environment_type.value}")
                     print(f"   Platform: {context.cloud_platform.value}")
                     print(f"   Confidence: {context.confidence_score}")
                     print(f"   Service: {context.service_name}")
                     print(f"   Validation Success: {result.overall_success}")
                     print(f"   Requirements Passed: {result.requirements_passed}")
-                    print(f"   ✅ GOLDEN PATH PROTECTED: $500K+ ARR SECURED!")
+                    print(f"    PASS:  GOLDEN PATH PROTECTED: $500K+ ARR SECURED!")
 
 
 if __name__ == "__main__":

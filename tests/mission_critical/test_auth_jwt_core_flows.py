@@ -1,5 +1,5 @@
 """
-🔴 MISSION CRITICAL: Authentication JWT Core Flows Test Suite
+[U+1F534] MISSION CRITICAL: Authentication JWT Core Flows Test Suite
 
 Tests the most fundamental authentication paths that ALL users must traverse.
 These are the HIGHEST BUSINESS VALUE authentication flows.
@@ -171,7 +171,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         
         BUSINESS IMPACT: Without this, ZERO users can authenticate = $0 revenue
         """
-        logger.info("🔴 MISSION CRITICAL: Testing JWT token generation")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing JWT token generation")
         
         # Generate JWT token using SSOT helper
         user_id = f"mission-critical-{uuid.uuid4().hex[:8]}"
@@ -196,7 +196,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         assert validation["user_id"] == user_id, "BUSINESS CRITICAL: User ID mismatch in token"
         assert validation["email"] == email, "BUSINESS CRITICAL: Email mismatch in token"
         
-        logger.info("✅ MISSION CRITICAL: JWT token generation validated")
+        logger.info(" PASS:  MISSION CRITICAL: JWT token generation validated")
         
     async def test_jwt_token_validation_core_business_flow(self):
         """
@@ -204,7 +204,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         
         BUSINESS IMPACT: Without this, users can't access ANY features = $0 value delivery
         """
-        logger.info("🔴 MISSION CRITICAL: Testing JWT token validation")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing JWT token validation")
         
         # Create valid token
         user_id = f"validation-test-{uuid.uuid4().hex[:8]}"
@@ -233,7 +233,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"MISSION CRITICAL FAILURE: Validation system error - {str(e)}")
         
-        logger.info("✅ MISSION CRITICAL: JWT token validation confirmed")
+        logger.info(" PASS:  MISSION CRITICAL: JWT token validation confirmed")
         
     async def test_cross_service_jwt_consistency_revenue_critical(self):
         """
@@ -241,7 +241,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         
         BUSINESS IMPACT: Inconsistency breaks ALL API calls = Complete service failure
         """
-        logger.info("🔴 MISSION CRITICAL: Testing cross-service JWT consistency")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing cross-service JWT consistency")
         
         # Create token using auth helper (simulates auth service)
         user_id = f"cross-service-{uuid.uuid4().hex[:8]}"
@@ -267,7 +267,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         assert user_data.get("user_id") == user_id, "BUSINESS CRITICAL: User ID inconsistent across services"
         assert user_data.get("email") == email, "BUSINESS CRITICAL: Email inconsistent across services"
         
-        logger.info("✅ MISSION CRITICAL: Cross-service JWT consistency validated")
+        logger.info(" PASS:  MISSION CRITICAL: Cross-service JWT consistency validated")
     
     async def test_token_expiration_security_compliance(self):
         """
@@ -275,7 +275,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         
         BUSINESS IMPACT: Without expiration, compromised tokens = Security breach risk
         """
-        logger.info("🔴 MISSION CRITICAL: Testing token expiration security")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing token expiration security")
         
         # Create short-lived token (1 second)
         user_id = f"expiration-test-{uuid.uuid4().hex[:8]}"
@@ -300,7 +300,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         except Exception as e:
             pytest.fail(f"MISSION CRITICAL FAILURE: Unexpected error during expiration test - {str(e)}")
         
-        logger.info("✅ MISSION CRITICAL: Token expiration security validated")
+        logger.info(" PASS:  MISSION CRITICAL: Token expiration security validated")
         
     async def test_multi_user_isolation_revenue_protection(self):
         """
@@ -308,7 +308,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         
         BUSINESS IMPACT: Data leaks between users = Legal liability + User trust loss
         """
-        logger.info("🔴 MISSION CRITICAL: Testing multi-user isolation")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing multi-user isolation")
         
         # Create tokens for multiple users
         user_count = 5
@@ -338,7 +338,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         assert len(validation["unique_user_ids"]) == user_count, "CRITICAL: User ID collision detected"
         assert len(validation["unique_emails"]) == user_count, "CRITICAL: Email collision detected"
         
-        logger.info(f"✅ MISSION CRITICAL: Multi-user isolation validated for {user_count} users")
+        logger.info(f" PASS:  MISSION CRITICAL: Multi-user isolation validated for {user_count} users")
         
     async def test_auth_performance_under_load_revenue_impact(self):
         """
@@ -346,7 +346,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         
         BUSINESS IMPACT: Slow auth = User abandonment = Revenue loss
         """
-        logger.info("🔴 MISSION CRITICAL: Testing auth performance under load")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing auth performance under load")
         
         # Simulate realistic user load
         concurrent_users = 50
@@ -394,7 +394,7 @@ class TestAuthJWTCoreFlows(BaseIntegrationTest):
         assert avg_duration < 0.1, f"BUSINESS CRITICAL: Average auth time {avg_duration:.3f}s > 100ms - users will abandon"
         assert max_duration < 0.5, f"BUSINESS CRITICAL: Max auth time {max_duration:.3f}s > 500ms - unacceptable UX"
         
-        logger.info(f"✅ MISSION CRITICAL: Auth performance validated - {successful_auths} users, avg {avg_duration:.3f}s")
+        logger.info(f" PASS:  MISSION CRITICAL: Auth performance validated - {successful_auths} users, avg {avg_duration:.3f}s")
 
 
 @pytest.mark.mission_critical
@@ -408,7 +408,7 @@ class TestAuthJWTBusinessContinuity(BaseIntegrationTest):
         
         BUSINESS IMPACT: Service restart breaks ALL user access = Complete outage
         """
-        logger.info("🔴 MISSION CRITICAL: Testing auth service restart continuity")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing auth service restart continuity")
         
         # Create token before "restart"
         user_id = f"restart-test-{uuid.uuid4().hex[:8]}"
@@ -445,7 +445,7 @@ class TestAuthJWTBusinessContinuity(BaseIntegrationTest):
         assert cross_validation_pre["secrets_match"], "MISSION CRITICAL: Pre-restart token fails cross-service validation"
         assert cross_validation_post["secrets_match"], "MISSION CRITICAL: Post-restart token fails cross-service validation"
         
-        logger.info("✅ MISSION CRITICAL: Auth service restart continuity validated")
+        logger.info(" PASS:  MISSION CRITICAL: Auth service restart continuity validated")
     
     async def test_database_connectivity_auth_resilience(self):
         """
@@ -453,7 +453,7 @@ class TestAuthJWTBusinessContinuity(BaseIntegrationTest):
         
         BUSINESS IMPACT: DB issues should not prevent JWT validation = Service availability
         """
-        logger.info("🔴 MISSION CRITICAL: Testing auth resilience to database issues")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing auth resilience to database issues")
         
         # Create valid JWT token (should work without database)
         user_id = f"db-resilience-{uuid.uuid4().hex[:8]}"
@@ -470,7 +470,7 @@ class TestAuthJWTBusinessContinuity(BaseIntegrationTest):
         assert validation["auth_service_valid"], "MISSION CRITICAL: Auth validation fails without database"
         assert validation["backend_service_valid"], "MISSION CRITICAL: Backend validation fails without database"
         
-        logger.info("✅ MISSION CRITICAL: Auth resilience to database issues validated")
+        logger.info(" PASS:  MISSION CRITICAL: Auth resilience to database issues validated")
 
 
 if __name__ == "__main__":

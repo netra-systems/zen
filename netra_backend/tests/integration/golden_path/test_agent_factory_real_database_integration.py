@@ -13,7 +13,7 @@ CRITICAL: This test validates REAL service interactions:
 - Real user execution context isolation
 - NO MOCKS - Integration testing with actual database services
 
-Tests core Golden Path: User connects → Agent factory creates → Database validates → Context isolates
+Tests core Golden Path: User connects  ->  Agent factory creates  ->  Database validates  ->  Context isolates
 """
 
 import asyncio

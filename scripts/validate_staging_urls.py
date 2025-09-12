@@ -309,14 +309,14 @@ ENVIRONMENT VARIABLE ISSUES:
 """
         
         for issue in env_issues:
-            report += f"  • {issue}\n"
+            report += f"  [U+2022] {issue}\n"
             
         report += f"""
 CONFIGURATION FILE ISSUES:
 """
         
         for issue in config_issues:
-            report += f"  • {issue}\n"
+            report += f"  [U+2022] {issue}\n"
             
         report += f"""
 {'='*60}

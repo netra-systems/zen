@@ -1,7 +1,7 @@
 """
 Async Resource Leak Detector
 Detects async resource leaks in test suites
-Maximum 300 lines, functions ≤8 lines
+Maximum 300 lines, functions  <= 8 lines
 """
 
 import asyncio

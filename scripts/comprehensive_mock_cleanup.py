@@ -184,11 +184,11 @@ def main():
     """Main cleanup function."""
     base_dir = Path('/Users/anthony/Documents/GitHub/netra-apex')
     
-    print("🧹 COMPREHENSIVE MOCK CLEANUP - MOCKS = ABOMINATION")
+    print("[U+1F9F9] COMPREHENSIVE MOCK CLEANUP - MOCKS = ABOMINATION")
     print("=" * 60)
     
     # Find all files with mock imports
-    print("🔍 Scanning for files with mock imports...")
+    print(" SEARCH:  Scanning for files with mock imports...")
     mock_files = find_files_with_mock_imports(base_dir)
     
     print(f"Found {len(mock_files)} files with mock imports to clean up")
@@ -205,16 +205,16 @@ def main():
         
         if success:
             total_cleaned += 1
-            print(f"  ✅ Cleaned up:")
+            print(f"   PASS:  Cleaned up:")
             for change in changes:
                 print(f"    - {change}")
             total_changes.extend(changes)
         else:
-            print(f"  ⏭️  No changes needed")
+            print(f"  [U+23ED][U+FE0F]  No changes needed")
     
     # Summary
     print("\n" + "=" * 60)
-    print("🎯 CLEANUP SUMMARY")
+    print(" TARGET:  CLEANUP SUMMARY")
     print("=" * 60)
     print(f"Files processed: {len(mock_files)}")
     print(f"Files modified: {total_cleaned}")
@@ -229,8 +229,8 @@ def main():
     for change_type, count in sorted(change_counts.items()):
         print(f"  {change_type}: {count}")
     
-    print(f"\n✅ Mock cleanup completed! Eliminated mock dependencies from {total_cleaned} files")
-    print("📋 Next steps:")
+    print(f"\n PASS:  Mock cleanup completed! Eliminated mock dependencies from {total_cleaned} files")
+    print("[U+1F4CB] Next steps:")
     print("  1. Run tests to identify any broken imports")
     print("  2. Update commented test methods to use real services")  
     print("  3. Verify all functionality works with real service connections")

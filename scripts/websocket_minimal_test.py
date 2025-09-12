@@ -114,11 +114,11 @@ class WebSocketTester:
             assert data["connection_ready"] is True
             
             await websocket.close()
-            logger.info("✅ Connection success test passed")
+            logger.info(" PASS:  Connection success test passed")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Connection success test failed: {e}")
+            logger.error(f" FAIL:  Connection success test failed: {e}")
             return False
             
     async def test_connection_timeout(self):
@@ -131,18 +131,18 @@ class WebSocketTester:
                 websockets.connect("ws://localhost:9999"),
                 timeout=2.0
             )
-            logger.error("❌ Expected timeout but connection succeeded")
+            logger.error(" FAIL:  Expected timeout but connection succeeded")
             return False
             
         except asyncio.TimeoutError:
-            logger.info("✅ Connection timeout test passed")
+            logger.info(" PASS:  Connection timeout test passed")
             return True
         except Exception as e:
             # Connection refused or connect call failed is also expected
             if "Connection refused" in str(e) or "Connect call failed" in str(e):
-                logger.info("✅ Connection timeout test passed (connection refused)")
+                logger.info(" PASS:  Connection timeout test passed (connection refused)")
                 return True
-            logger.error(f"❌ Unexpected error in timeout test: {e}")
+            logger.error(f" FAIL:  Unexpected error in timeout test: {e}")
             return False
             
     async def test_ping_pong(self):
@@ -173,11 +173,11 @@ class WebSocketTester:
             assert "timestamp" in data
             
             await websocket.close()
-            logger.info("✅ Ping/pong test passed")
+            logger.info(" PASS:  Ping/pong test passed")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Ping/pong test failed: {e}")
+            logger.error(f" FAIL:  Ping/pong test failed: {e}")
             return False
             
     async def test_echo_functionality(self):
@@ -209,11 +209,11 @@ class WebSocketTester:
             assert data["original"] == echo_message
             
             await websocket.close()
-            logger.info("✅ Echo test passed")
+            logger.info(" PASS:  Echo test passed")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Echo test failed: {e}")
+            logger.error(f" FAIL:  Echo test failed: {e}")
             return False
             
     async def run_all_tests(self):
@@ -261,9 +261,9 @@ async def main():
         all_passed = await tester.run_all_tests()
         
         if all_passed:
-            logger.info("🎉 All tests passed! WebSocket functionality is working.")
+            logger.info(" CELEBRATION:  All tests passed! WebSocket functionality is working.")
         else:
-            logger.error("💥 Some tests failed. WebSocket has issues.")
+            logger.error("[U+1F4A5] Some tests failed. WebSocket has issues.")
             
         return all_passed
         

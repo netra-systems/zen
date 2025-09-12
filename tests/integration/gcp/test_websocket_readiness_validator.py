@@ -185,7 +185,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
         - Timing should reflect GCP timeout settings
         - Error should be clear and actionable
         """
-        logger.info("🔍 Testing validator detection of Redis failure in GCP staging")
+        logger.info(" SEARCH:  Testing validator detection of Redis failure in GCP staging")
         
         # Record timing for GCP timeout validation
         start_time = time.time()
@@ -226,7 +226,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
             "Validator should detect GCP environment"
         )
         
-        logger.info("✅ PASS: Validator correctly detected Redis failure")
+        logger.info(" PASS:  PASS: Validator correctly detected Redis failure")
 
     @pytest.mark.integration
     @pytest.mark.gcp
@@ -247,7 +247,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
         - No services should be in failed_services list
         - Timing should be reasonable
         """
-        logger.info("✅ Testing validator success when Redis working")
+        logger.info(" PASS:  Testing validator success when Redis working")
         
         start_time = time.time()
         
@@ -282,7 +282,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
             f"Validation completed too quickly ({elapsed_time:.3f}s) - may not be testing properly"
         )
         
-        logger.info("✅ PASS: Validator correctly succeeded with working Redis")
+        logger.info(" PASS:  PASS: Validator correctly succeeded with working Redis")
 
     @pytest.mark.integration
     @pytest.mark.gcp
@@ -302,7 +302,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
         - Timeout should be longer than test environments (10s)
         - Retry configuration should be GCP-appropriate
         """
-        logger.info("⏱️  Testing GCP timeout configuration for Redis")
+        logger.info("[U+23F1][U+FE0F]  Testing GCP timeout configuration for Redis")
         
         # Validate GCP environment detection
         assert gcp_validator_staging.is_gcp_environment, (
@@ -334,7 +334,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
             "Redis readiness check should be marked as critical"
         )
         
-        logger.info("✅ PASS: GCP timeout configuration correctly applied")
+        logger.info(" PASS:  PASS: GCP timeout configuration correctly applied")
         logger.info(f"  Redis timeout: {redis_check.timeout_seconds}s")
         logger.info(f"  Retry count: {redis_check.retry_count}")
         logger.info(f"  Retry delay: {redis_check.retry_delay}s")
@@ -359,7 +359,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
         - Phase 3 (WebSocket Integration) should not be reached
         - Failure should be clean and deterministic
         """
-        logger.info("🔄 Testing startup phase progression with Redis failure")
+        logger.info(" CYCLE:  Testing startup phase progression with Redis failure")
         
         # Mock detailed phase logging to track progression
         phase_log = []
@@ -409,7 +409,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
                     f"If later phases reached, final state should be FAILED, got: {result.state.value}"
                 )
             
-            logger.info("✅ PASS: Startup phase progression correctly stopped at Redis failure")
+            logger.info(" PASS:  PASS: Startup phase progression correctly stopped at Redis failure")
             
         finally:
             # Restore original logger
@@ -434,7 +434,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
         - Grace period should only apply in GCP environments
         - Timing should be measurable and consistent
         """
-        logger.info("⏱️  Testing Redis grace period behavior in GCP")
+        logger.info("[U+23F1][U+FE0F]  Testing Redis grace period behavior in GCP")
         
         # Create validator with working Redis
         validator = create_gcp_websocket_validator(mock_app_state_redis_available)
@@ -462,7 +462,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
                 f"Grace period too long, expected ~500ms, got {elapsed_time:.3f}s"
             )
             
-            logger.info(f"✅ PASS: Grace period correctly applied ({elapsed_time:.3f}s)")
+            logger.info(f" PASS:  PASS: Grace period correctly applied ({elapsed_time:.3f}s)")
             
         else:
             logger.info("Redis validation failed - grace period not applicable")
@@ -488,7 +488,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
         - Timing variance should be reasonable (not excessive)
         - Results should be deterministic
         """
-        logger.info("🔄 Testing validator timing consistency across multiple runs")
+        logger.info(" CYCLE:  Testing validator timing consistency across multiple runs")
         
         timing_results = []
         validation_results = []
@@ -539,7 +539,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
             f"Some validations completed too quickly: {timing_results}"
         )
         
-        logger.info("✅ PASS: Validator timing is consistent across multiple runs")
+        logger.info(" PASS:  PASS: Validator timing is consistent across multiple runs")
 
     @pytest.mark.integration
     @pytest.mark.gcp
@@ -560,7 +560,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
         - Error states should be properly represented
         - No silent failures should occur
         """
-        logger.info("📋 Testing validator error handling and logging quality")
+        logger.info("[U+1F4CB] Testing validator error handling and logging quality")
         
         # Capture log messages
         log_messages = []
@@ -618,7 +618,7 @@ class TestWebSocketReadinessValidatorGCPRedis:
                 "Result details should include environment information"
             )
             
-            logger.info("✅ PASS: Validator error handling and logging is comprehensive")
+            logger.info(" PASS:  PASS: Validator error handling and logging is comprehensive")
             
         finally:
             # Restore original logger

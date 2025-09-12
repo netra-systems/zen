@@ -92,10 +92,10 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
         websocket_headers = self.e2e_helper.get_websocket_headers(auth_user.jwt_token)
         
         # Log test attempt for debugging
-        print(f"🔍 CRITICAL TEST: GCP Load Balancer auth header preservation")
-        print(f"🌐 Staging WebSocket URL: {self.staging_websocket_url}")
-        print(f"🔑 Headers being sent: {list(websocket_headers.keys())}")
-        print(f"✅ Authorization header present: {'authorization' in [k.lower() for k in websocket_headers.keys()]}")
+        print(f" SEARCH:  CRITICAL TEST: GCP Load Balancer auth header preservation")
+        print(f"[U+1F310] Staging WebSocket URL: {self.staging_websocket_url}")
+        print(f"[U+1F511] Headers being sent: {list(websocket_headers.keys())}")
+        print(f" PASS:  Authorization header present: {'authorization' in [k.lower() for k in websocket_headers.keys()]}")
         
         # Act & Assert - Test WebSocket connection through GCP Load Balancer
         connection_successful = False
@@ -113,7 +113,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                 max_size=2**16      # Smaller max message size for faster handshake
             ) as websocket:
                 connection_successful = True
-                print(f"✅ WebSocket connection established through GCP Load Balancer")
+                print(f" PASS:  WebSocket connection established through GCP Load Balancer")
                 
                 # Send header validation test message
                 header_test_message = {
@@ -126,37 +126,37 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                 }
                 
                 await websocket.send(json.dumps(header_test_message))
-                print(f"📤 Sent header validation test message")
+                print(f"[U+1F4E4] Sent header validation test message")
                 
                 # Wait for response that confirms auth header was received by backend
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=self.auth_timeout)
                     response_data = json.loads(response)
-                    print(f"📥 Received response: {response_data.get('type', 'unknown')}")
+                    print(f"[U+1F4E5] Received response: {response_data.get('type', 'unknown')}")
                     
                     # Any valid response indicates auth headers were preserved and processed
                     auth_headers_preserved = True
                     
                 except asyncio.TimeoutError:
-                    print(f"⏰ Response timeout - connection established but no immediate response")
+                    print(f"[U+23F0] Response timeout - connection established but no immediate response")
                     # Connection establishment without immediate closure indicates auth success
                     auth_headers_preserved = True
                     
         except websockets.exceptions.InvalidHandshake as e:
             error_details = f"WebSocket handshake failed: {e}"
-            print(f"❌ Handshake error (may indicate auth header stripping): {error_details}")
+            print(f" FAIL:  Handshake error (may indicate auth header stripping): {error_details}")
             
         except websockets.exceptions.ConnectionClosedError as e:
             error_details = f"Connection closed during handshake: {e}"
-            print(f"❌ Connection closed (may indicate auth failure): {error_details}")
+            print(f" FAIL:  Connection closed (may indicate auth failure): {error_details}")
             
         except asyncio.TimeoutError:
             error_details = "Connection timeout (GCP Load Balancer may be stripping headers)"
-            print(f"⏰ Connection timeout: {error_details}")
+            print(f"[U+23F0] Connection timeout: {error_details}")
             
         except Exception as e:
             error_details = f"Unexpected connection error: {e}"
-            print(f"🔥 Unexpected error: {error_details}")
+            print(f" FIRE:  Unexpected error: {error_details}")
         
         # CRITICAL ASSERTIONS - These failures indicate infrastructure regression
         self.assertTrue(
@@ -176,7 +176,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
             f"Required fix: Add header_action for Authorization header preservation."
         )
         
-        print(f"✅ CRITICAL TEST PASSED: GCP Load Balancer preserves Authorization headers")
+        print(f" PASS:  CRITICAL TEST PASSED: GCP Load Balancer preserves Authorization headers")
     
     async def test_gcp_load_balancer_preserves_e2e_bypass_header(self):
         """
@@ -201,8 +201,8 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
             "X-Test-Infrastructure": "gcp_load_balancer"
         })
         
-        print(f"🔍 CRITICAL TEST: E2E bypass header preservation through GCP")
-        print(f"🔑 E2E headers: {[k for k in websocket_headers.keys() if 'e2e' in k.lower() or 'test' in k.lower()]}")
+        print(f" SEARCH:  CRITICAL TEST: E2E bypass header preservation through GCP")
+        print(f"[U+1F511] E2E headers: {[k for k in websocket_headers.keys() if 'e2e' in k.lower() or 'test' in k.lower()]}")
         
         # Act & Assert - Test E2E header preservation
         e2e_headers_preserved = False
@@ -215,7 +215,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                 ping_interval=None,
                 ping_timeout=None
             ) as websocket:
-                print(f"✅ WebSocket connection with E2E headers established")
+                print(f" PASS:  WebSocket connection with E2E headers established")
                 
                 # Send E2E header validation message
                 e2e_test_message = {
@@ -235,17 +235,17 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                     # Response indicates E2E headers were preserved
                     e2e_headers_preserved = True
                     connection_details = f"Response type: {response_data.get('type', 'unknown')}"
-                    print(f"✅ E2E headers preserved - received: {connection_details}")
+                    print(f" PASS:  E2E headers preserved - received: {connection_details}")
                     
                 except asyncio.TimeoutError:
                     # Connection success without errors indicates E2E headers worked
                     e2e_headers_preserved = True
                     connection_details = "Connection established successfully"
-                    print(f"✅ E2E headers preserved - connection stable")
+                    print(f" PASS:  E2E headers preserved - connection stable")
                     
         except Exception as e:
             connection_details = f"E2E connection failed: {e}"
-            print(f"❌ E2E header preservation test failed: {connection_details}")
+            print(f" FAIL:  E2E header preservation test failed: {connection_details}")
         
         # Assert E2E headers preserved
         self.assertTrue(
@@ -271,8 +271,8 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
         
         websocket_headers = self.e2e_helper.get_websocket_headers(golden_path_user.jwt_token)
         
-        print(f"🌟 CRITICAL TEST: Complete Golden Path WebSocket flow")
-        print(f"👤 User: {golden_path_user.email} ({golden_path_user.user_id[:8]}...)")
+        print(f"[U+1F31F] CRITICAL TEST: Complete Golden Path WebSocket flow")
+        print(f"[U+1F464] User: {golden_path_user.email} ({golden_path_user.user_id[:8]}...)")
         
         # Act - Test complete Golden Path flow
         golden_path_steps_completed = []
@@ -283,7 +283,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                 additional_headers=websocket_headers
             ) as websocket:
                 golden_path_steps_completed.append("connection_established")
-                print(f"✅ Step 1: WebSocket connection established")
+                print(f" PASS:  Step 1: WebSocket connection established")
                 
                 # Step 2: User authentication confirmation
                 auth_confirm_message = {
@@ -293,7 +293,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                 }
                 await websocket.send(json.dumps(auth_confirm_message))
                 golden_path_steps_completed.append("auth_message_sent")
-                print(f"✅ Step 2: Authentication confirmation sent")
+                print(f" PASS:  Step 2: Authentication confirmation sent")
                 
                 # Step 3: Simulated chat message initiation
                 chat_initiation_message = {
@@ -305,28 +305,28 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                 }
                 await websocket.send(json.dumps(chat_initiation_message))
                 golden_path_steps_completed.append("chat_initiated")
-                print(f"✅ Step 3: Chat session initiated")
+                print(f" PASS:  Step 3: Chat session initiated")
                 
                 # Step 4: Wait for any response indicating server processing
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=self.auth_timeout)
                     response_data = json.loads(response)
                     golden_path_steps_completed.append("server_response_received")
-                    print(f"✅ Step 4: Server response received - {response_data.get('type', 'unknown')}")
+                    print(f" PASS:  Step 4: Server response received - {response_data.get('type', 'unknown')}")
                     
                 except asyncio.TimeoutError:
                     # No immediate response is acceptable for Golden Path validation
                     golden_path_steps_completed.append("connection_stable")
-                    print(f"✅ Step 4: Connection stable (no immediate errors)")
+                    print(f" PASS:  Step 4: Connection stable (no immediate errors)")
                 
                 # Golden Path flow completed successfully
                 golden_path_steps_completed.append("golden_path_complete")
-                print(f"🌟 Golden Path WebSocket flow completed successfully")
+                print(f"[U+1F31F] Golden Path WebSocket flow completed successfully")
                 
         except Exception as e:
-            print(f"❌ Golden Path flow failed at step: {len(golden_path_steps_completed) + 1}")
-            print(f"❌ Error: {e}")
-            print(f"✅ Completed steps: {golden_path_steps_completed}")
+            print(f" FAIL:  Golden Path flow failed at step: {len(golden_path_steps_completed) + 1}")
+            print(f" FAIL:  Error: {e}")
+            print(f" PASS:  Completed steps: {golden_path_steps_completed}")
         
         # Assert Golden Path core steps completed
         required_steps = ["connection_established", "auth_message_sent", "chat_initiated"]
@@ -357,14 +357,14 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
         
         websocket_headers = self.e2e_helper.get_websocket_headers(reconnect_user.jwt_token)
         
-        print(f"🔄 Testing WebSocket reconnection with auth preservation")
+        print(f" CYCLE:  Testing WebSocket reconnection with auth preservation")
         
         # Act - Test multiple connection attempts (simulating reconnection)
         connection_attempts = []
         
         for attempt in range(2):  # Keep reasonable for E2E test
             try:
-                print(f"🔄 Connection attempt {attempt + 1}")
+                print(f" CYCLE:  Connection attempt {attempt + 1}")
                 
                 async with websockets.connect(
                     self.staging_websocket_url,
@@ -384,7 +384,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                     await asyncio.sleep(0.5)
                     
                     connection_attempts.append(f"attempt_{attempt + 1}_success")
-                    print(f"✅ Connection attempt {attempt + 1} successful")
+                    print(f" PASS:  Connection attempt {attempt + 1} successful")
                     
                 # Brief pause between connections
                 if attempt < 1:  # Don't wait after last attempt
@@ -392,7 +392,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                     
             except Exception as e:
                 connection_attempts.append(f"attempt_{attempt + 1}_failed: {e}")
-                print(f"❌ Connection attempt {attempt + 1} failed: {e}")
+                print(f" FAIL:  Connection attempt {attempt + 1} failed: {e}")
         
         # Assert at least one successful reconnection
         successful_attempts = [attempt for attempt in connection_attempts if "success" in attempt]
@@ -419,8 +419,8 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
             )
             users.append(user)
         
-        print(f"👥 Testing multi-user isolation through GCP staging")
-        print(f"👤 Users: {[user.email for user in users]}")
+        print(f"[U+1F465] Testing multi-user isolation through GCP staging")
+        print(f"[U+1F464] Users: {[user.email for user in users]}")
         
         # Act - Test concurrent user connections
         async def test_isolated_user(user_index: int, user: AuthenticatedUser):
@@ -456,11 +456,11 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                     await asyncio.sleep(0.5)
                     
                     isolation_result["isolation_validated"] = True
-                    print(f"✅ User {user_index} isolation validated")
+                    print(f" PASS:  User {user_index} isolation validated")
                     
             except Exception as e:
                 isolation_result["error"] = str(e)
-                print(f"❌ User {user_index} isolation test failed: {e}")
+                print(f" FAIL:  User {user_index} isolation test failed: {e}")
             
             return isolation_result
         
@@ -476,7 +476,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
             if isinstance(result, dict) and result.get("isolation_validated"):
                 successful_isolations.append(result)
             elif isinstance(result, Exception):
-                print(f"❌ Isolation test exception: {result}")
+                print(f" FAIL:  Isolation test exception: {result}")
         
         self.assertGreater(
             len(successful_isolations),
@@ -505,7 +505,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
         COMPLEMENTARY TO: test_gcp_load_balancer_header_validation.py
         This focuses specifically on WebSocket upgrade header preservation.
         """
-        logger.info("🔍 REGRESSION TEST: GitHub issue #113 header stripping prevention")
+        logger.info(" SEARCH:  REGRESSION TEST: GitHub issue #113 header stripping prevention")
         
         # Arrange - Create user with comprehensive auth headers
         regression_user = await self.e2e_helper.create_authenticated_user(
@@ -528,8 +528,8 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
             "Connection": "upgrade"  # Critical connection upgrade header
         })
         
-        print(f"🔍 Testing {len(problematic_headers)} headers that previously failed")
-        print(f"🔑 Critical headers: Authorization, X-E2E-Bypass, Upgrade, Connection")
+        print(f" SEARCH:  Testing {len(problematic_headers)} headers that previously failed")
+        print(f"[U+1F511] Critical headers: Authorization, X-E2E-Bypass, Upgrade, Connection")
         
         # Act - Test WebSocket connection with previously problematic headers
         regression_test_result = {
@@ -577,7 +577,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
                     regression_test_result["regression_prevented"] = True
                     regression_test_result["server_response"] = "timeout_but_connected"
                 
-                print("✅ GitHub issue #113 regression test: WebSocket connection successful")
+                print(" PASS:  GitHub issue #113 regression test: WebSocket connection successful")
                 
         except websockets.exceptions.InvalidHandshake as e:
             regression_test_result["error_details"] = f"Handshake failed: {e}"
@@ -624,7 +624,7 @@ class TestWebSocketGCPStagingInfrastructure(SSotBaseTestCase, unittest.TestCase)
             f"Full test result: {regression_test_result}"
         )
         
-        print("✅ REGRESSION TEST PASSED: GitHub issue #113 header stripping prevented")
+        print(" PASS:  REGRESSION TEST PASSED: GitHub issue #113 header stripping prevented")
 
 
 class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCase):
@@ -657,7 +657,7 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCa
         
         headers = self.e2e_helper.get_websocket_headers(timeout_user.jwt_token)
         
-        print(f"⏱️ Testing GCP timeout resilience")
+        print(f"[U+23F1][U+FE0F] Testing GCP timeout resilience")
         
         # Act - Test connection with various timeout configurations
         timeout_scenarios = [
@@ -698,7 +698,7 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCa
                         "configured_timeout": timeout_value
                     })
                     
-                    print(f"✅ {scenario_name}: Connected in {connection_time:.2f}s")
+                    print(f" PASS:  {scenario_name}: Connected in {connection_time:.2f}s")
                     
             except asyncio.TimeoutError:
                 timeout_results.append({
@@ -707,7 +707,7 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCa
                     "error": "timeout",
                     "configured_timeout": timeout_value
                 })
-                print(f"⏰ {scenario_name}: Timeout at {timeout_value}s")
+                print(f"[U+23F0] {scenario_name}: Timeout at {timeout_value}s")
                 
             except Exception as e:
                 timeout_results.append({
@@ -716,7 +716,7 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCa
                     "error": str(e),
                     "configured_timeout": timeout_value
                 })
-                print(f"❌ {scenario_name}: Error - {e}")
+                print(f" FAIL:  {scenario_name}: Error - {e}")
         
         # Assert reasonable timeout resilience
         successful_scenarios = [r for r in timeout_results if r.get("success")]
@@ -752,7 +752,7 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCa
         error_handling_results = []
         
         for scenario in problematic_scenarios:
-            print(f"🔍 Testing error handling: {scenario['name']}")
+            print(f" SEARCH:  Testing error handling: {scenario['name']}")
             
             try:
                 # Attempt connection with problematic configuration
@@ -784,7 +784,7 @@ class TestGCPWebSocketInfrastructureResilience(SSotBaseTestCase, unittest.TestCa
                     "error_handling": "good" if error_detected else "unclear"
                 })
                 
-                print(f"✅ {scenario['name']}: Proper error handling - {e}")
+                print(f" PASS:  {scenario['name']}: Proper error handling - {e}")
         
         # Assert error handling is working
         good_error_handling = [

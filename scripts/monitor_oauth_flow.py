@@ -20,7 +20,7 @@ class OAuthMonitor:
         
     async def check_services(self):
         """Check all services are healthy"""
-        print("\n🔍 Checking service health...")
+        print("\n SEARCH:  Checking service health...")
         async with httpx.AsyncClient() as client:
             services = [
                 ("Auth Service", f"{self.auth_url}/auth/health"),
@@ -32,15 +32,15 @@ class OAuthMonitor:
                 try:
                     response = await client.get(url, timeout=5.0)
                     if response.status_code == 200:
-                        print(f"✅ {name}: OK")
+                        print(f" PASS:  {name}: OK")
                     else:
-                        print(f"⚠️  {name}: Status {response.status_code}")
+                        print(f" WARNING: [U+FE0F]  {name}: Status {response.status_code}")
                 except Exception as e:
-                    print(f"❌ {name}: {str(e)[:50]}")
+                    print(f" FAIL:  {name}: {str(e)[:50]}")
     
     async def check_oauth_config(self):
         """Verify OAuth configuration"""
-        print("\n🔧 OAuth Configuration:")
+        print("\n[U+1F527] OAuth Configuration:")
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(f"{self.auth_url}/auth/config")
@@ -52,16 +52,16 @@ class OAuthMonitor:
                 
                 # Check for configuration issues
                 if "auth.staging" not in str(config['authorized_redirect_uris']):
-                    print("  ⚠️  WARNING: Redirect URI should point to auth service!")
+                    print("   WARNING: [U+FE0F]  WARNING: Redirect URI should point to auth service!")
                 
                 return config
             except Exception as e:
-                print(f"  ❌ Failed to get config: {e}")
+                print(f"   FAIL:  Failed to get config: {e}")
                 return None
     
     async def test_oauth_initiation(self):
         """Test OAuth login initiation"""
-        print("\n🚀 Testing OAuth Initiation:")
+        print("\n[U+1F680] Testing OAuth Initiation:")
         async with httpx.AsyncClient(follow_redirects=False) as client:
             try:
                 response = await client.get(
@@ -72,7 +72,7 @@ class OAuthMonitor:
                 if response.status_code == 302:
                     location = response.headers.get('location', '')
                     if 'accounts.google.com' in location:
-                        print("  ✅ Redirects to Google OAuth")
+                        print("   PASS:  Redirects to Google OAuth")
                         
                         # Extract redirect_uri from location
                         if 'redirect_uri=' in location:
@@ -80,21 +80,21 @@ class OAuthMonitor:
                             parsed = urllib.parse.urlparse(location)
                             params = urllib.parse.parse_qs(parsed.query)
                             redirect_uri = params.get('redirect_uri', [''])[0]
-                            print(f"  📍 Redirect URI: {redirect_uri}")
+                            print(f"   PIN:  Redirect URI: {redirect_uri}")
                             
                             if "auth.staging" not in redirect_uri:
-                                print("  ⚠️  WARNING: Redirect URI not pointing to auth service!")
+                                print("   WARNING: [U+FE0F]  WARNING: Redirect URI not pointing to auth service!")
                     else:
-                        print(f"  ❌ Invalid redirect: {location[:50]}")
+                        print(f"   FAIL:  Invalid redirect: {location[:50]}")
                 else:
-                    print(f"  ❌ No redirect: Status {response.status_code}")
+                    print(f"   FAIL:  No redirect: Status {response.status_code}")
                     
             except Exception as e:
-                print(f"  ❌ Error: {e}")
+                print(f"   FAIL:  Error: {e}")
     
     def monitor_logs(self, duration_seconds=30):
         """Monitor auth service logs for OAuth activity"""
-        print(f"\n📋 Monitoring logs for {duration_seconds} seconds...")
+        print(f"\n[U+1F4CB] Monitoring logs for {duration_seconds} seconds...")
         print("  (Looking for OAuth callback and token handling)")
         
         end_time = datetime.now() + timedelta(seconds=duration_seconds)
@@ -117,16 +117,16 @@ class OAuthMonitor:
                     lines = result.stdout.strip().split('\n')
                     for line in lines:
                         if any(keyword in line for keyword in ['OAuth', 'token', 'callback', 'JWT']):
-                            print(f"  📝 {line[:100]}")
+                            print(f"  [U+1F4DD] {line[:100]}")
                 
                 time.sleep(5)  # Check every 5 seconds
                 
         except Exception as e:
-            print(f"  ❌ Log monitoring error: {e}")
+            print(f"   FAIL:  Log monitoring error: {e}")
     
     async def simulate_oauth_callback(self):
         """Simulate an OAuth callback to test token handling"""
-        print("\n🧪 Simulating OAuth Callback (test only):")
+        print("\n[U+1F9EA] Simulating OAuth Callback (test only):")
         print("  Note: This will fail authentication but tests the flow")
         
         async with httpx.AsyncClient(follow_redirects=False) as client:
@@ -168,7 +168,7 @@ class OAuthMonitor:
         # Simulate callback (optional)
         # await self.simulate_oauth_callback()
         
-        print("\n📊 Summary:")
+        print("\n CHART:  Summary:")
         print("-"*40)
         
         issues = []
@@ -181,13 +181,13 @@ class OAuthMonitor:
                 issues.append("Google Client ID not configured")
         
         if issues:
-            print("⚠️  Issues found:")
+            print(" WARNING: [U+FE0F]  Issues found:")
             for issue in issues:
-                print(f"  • {issue}")
+                print(f"  [U+2022] {issue}")
         else:
-            print("✅ OAuth configuration appears correct")
+            print(" PASS:  OAuth configuration appears correct")
         
-        print("\n💡 Next Steps:")
+        print("\n IDEA:  Next Steps:")
         print("1. Try logging in at: https://app.staging.netrasystems.ai")
         print("2. Check browser console for token storage:")
         print("   localStorage.getItem('jwt_token')")

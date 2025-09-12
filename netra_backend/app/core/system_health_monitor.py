@@ -2,7 +2,7 @@
 
 This module provides comprehensive health monitoring for all system components
 including databases, Redis, WebSocket connections, and system resources.
-All functions are ≤8 lines, total file ≤300 lines as per conventions.
+All functions are  <= 8 lines, total file  <= 300 lines as per conventions.
 """
 
 import asyncio

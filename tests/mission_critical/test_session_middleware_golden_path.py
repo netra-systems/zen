@@ -1,6 +1,6 @@
 """
 Mission Critical tests for SessionMiddleware Golden Path.
-Protects 90% business value - user login → AI response flow.
+Protects 90% business value - user login  ->  AI response flow.
 """
 
 import unittest

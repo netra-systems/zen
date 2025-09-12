@@ -276,7 +276,7 @@ def create_comprehensive_test_context(test_name: str) -> ExecutionEngineTestCont
 def create_business_workflow_agents() -> Dict[str, MockAgentForTesting]:
     """Create agents for business-critical workflow testing.
     
-    Returns real agents that implement the triage → data → optimization workflow
+    Returns real agents that implement the triage  ->  data  ->  optimization workflow
     that delivers core business value. No mocking - authentic business logic patterns.
     """
     return {

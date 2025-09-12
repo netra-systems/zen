@@ -79,7 +79,7 @@ class ThreadServiceMissingSimulator:
                 ThreadService._instance = None
                 self.service_missing = True
                 
-                logger.warning("🚨 MISSING SERVICE: Thread service set to None - simulating service unavailability")
+                logger.warning(" ALERT:  MISSING SERVICE: Thread service set to None - simulating service unavailability")
     
     def restore_thread_service(self, delay_seconds: float = 3.0) -> None:
         """
@@ -102,7 +102,7 @@ class ThreadServiceMissingSimulator:
                         ThreadService._instance = ThreadService()
                     
                     self.service_missing = False
-                    logger.info(f"✅ SERVICE RESTORED: Thread service restored after {delay_seconds}s delay")
+                    logger.info(f" PASS:  SERVICE RESTORED: Thread service restored after {delay_seconds}s delay")
         
         # Run restoration in background
         asyncio.create_task(delayed_restoration())
@@ -117,7 +117,7 @@ class ThreadServiceMissingSimulator:
                     ThreadService._instance = ThreadService()
                 
                 self.service_missing = False
-                logger.info("🧹 CLEANUP: Thread service missing simulation cleaned up")
+                logger.info("[U+1F9F9] CLEANUP: Thread service missing simulation cleaned up")
 
 
 @pytest.mark.integration
@@ -168,7 +168,7 @@ class TestThreadServiceMissingDetection:
         - Mock thread management responses delivered to users
         - System doesn't wait for proper thread service initialization
         """
-        logger.info("🧪 INTEGRATION TEST: Thread service missing - wait not fallback")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Thread service missing - wait not fallback")
         
         # Step 1: Establish WebSocket connection first
         websocket = await self.auth_helper.connect_authenticated_websocket(timeout=10.0)
@@ -188,7 +188,7 @@ class TestThreadServiceMissingDetection:
             "requires_thread_management": True
         }
         
-        logger.info("📤 Sending thread management request during service unavailability")
+        logger.info("[U+1F4E4] Sending thread management request during service unavailability")
         await websocket.send(json.dumps(thread_request))
         
         # Step 5: Receive and validate events - should wait for real thread service
@@ -208,7 +208,7 @@ class TestThreadServiceMissingDetection:
                 
                 if has_fallback:
                     raise AssertionError(
-                        f"🚨 THREAD SERVICE FAILURE: FALLBACK PATTERNS DETECTED\n"
+                        f" ALERT:  THREAD SERVICE FAILURE: FALLBACK PATTERNS DETECTED\n"
                         f"Event type: {event.get('type', 'unknown')}\n"
                         f"Fallback patterns: {fallback_patterns}\n"
                         f"Event content: {event_content[:200]}...\n"
@@ -224,12 +224,12 @@ class TestThreadServiceMissingDetection:
                 for pattern in thread_fallback_indicators:
                     if re.search(pattern, event_content, re.IGNORECASE):
                         raise AssertionError(
-                            f"🚨 THREAD FALLBACK DETECTED: {pattern}\n"
+                            f" ALERT:  THREAD FALLBACK DETECTED: {pattern}\n"
                             f"Event: {event_content[:200]}...\n"
                             f"BUSINESS IMPACT: Mock thread management delivered to user"
                         )
                 
-                logger.info(f"✅ Event {len(events)}/5 - {event.get('type')} (real thread service)")
+                logger.info(f" PASS:  Event {len(events)}/5 - {event.get('type')} (real thread service)")
                 
             except asyncio.TimeoutError:
                 continue
@@ -263,11 +263,11 @@ class TestThreadServiceMissingDetection:
                 has_business_value, _ = self.validator.validate_response_for_business_value(final_response)
                 
                 assert has_business_value, (
-                    f"🚨 NO BUSINESS VALUE: Thread service issue may have caused degraded response\n"
+                    f" ALERT:  NO BUSINESS VALUE: Thread service issue may have caused degraded response\n"
                     f"Response: '{final_response[:100]}...'"
                 )
             
-            logger.success("✅ THREAD SERVICE TEST PASSED: Real thread management used, no fallbacks")
+            logger.success(" PASS:  THREAD SERVICE TEST PASSED: Real thread management used, no fallbacks")
         
         else:
             # If insufficient events received, check if it's appropriate waiting behavior
@@ -281,7 +281,7 @@ class TestThreadServiceMissingDetection:
                 if has_fallback:
                     raise AssertionError(f"Fallback detected during thread service wait: {patterns}")
             
-            logger.info("✅ APPROPRIATE BEHAVIOR: System waited for thread service availability")
+            logger.info(" PASS:  APPROPRIATE BEHAVIOR: System waited for thread service availability")
         
         await websocket.close()
     
@@ -297,7 +297,7 @@ class TestThreadServiceMissingDetection:
         - Normal thread management workflow functions correctly
         - No residual fallback patterns from previous service unavailability
         """
-        logger.info("🧪 INTEGRATION TEST: Normal thread operations after service restoration")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Normal thread operations after service restoration")
         
         # Step 1: Simulate and immediately restore thread service
         self.thread_simulator.simulate_thread_service_missing()
@@ -342,7 +342,7 @@ class TestThreadServiceMissingDetection:
             assert not has_fallback, f"Fallback patterns in post-restoration operation: {patterns}"
         
         await websocket.close()
-        logger.success("✅ POST-RESTORATION TEST PASSED: Normal thread operations resumed")
+        logger.success(" PASS:  POST-RESTORATION TEST PASSED: Normal thread operations resumed")
     
     async def test_multiple_thread_operations_during_service_unavailability(self):
         """
@@ -357,7 +357,7 @@ class TestThreadServiceMissingDetection:
         - No fallback handlers created for any operation
         - Once restored, all operations function normally
         """
-        logger.info("🧪 INTEGRATION TEST: Multiple thread operations during service unavailability")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Multiple thread operations during service unavailability")
         
         # Establish connection first
         websocket = await self.auth_helper.connect_authenticated_websocket(timeout=10.0)
@@ -384,7 +384,7 @@ class TestThreadServiceMissingDetection:
             }
             
             await websocket.send(json.dumps(request))
-            logger.info(f"📤 Sent thread request {i+1}/{len(thread_requests)}")
+            logger.info(f"[U+1F4E4] Sent thread request {i+1}/{len(thread_requests)}")
             
             # Brief pause between requests
             await asyncio.sleep(0.5)
@@ -415,10 +415,10 @@ class TestThreadServiceMissingDetection:
             f"Insufficient events for multi-thread operations: {len(all_events)}/{len(thread_requests)}"
         )
         
-        logger.info(f"✅ Received {len(all_events)} events for {len(thread_requests)} thread operations")
+        logger.info(f" PASS:  Received {len(all_events)} events for {len(thread_requests)} thread operations")
         
         await websocket.close()
-        logger.success("✅ MULTI-THREAD TEST PASSED: All operations handled appropriately")
+        logger.success(" PASS:  MULTI-THREAD TEST PASSED: All operations handled appropriately")
 
 
 if __name__ == "__main__":
@@ -434,9 +434,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--pytest":
         pytest.main([__file__, "-v", "--tb=short"])
     else:
-        print("🧪 INTEGRATION: Thread Service Missing Detection Tests")
-        print("📋 These tests prevent thread service unavailability from creating fallback handlers")
-        print("🚀 Starting test execution...")
+        print("[U+1F9EA] INTEGRATION: Thread Service Missing Detection Tests")
+        print("[U+1F4CB] These tests prevent thread service unavailability from creating fallback handlers")
+        print("[U+1F680] Starting test execution...")
         
         exit_code = pytest.main([
             __file__,
@@ -448,8 +448,8 @@ if __name__ == "__main__":
         ])
         
         if exit_code == 0:
-            print("✅ ALL TESTS PASSED: Thread service unavailability handled correctly")
+            print(" PASS:  ALL TESTS PASSED: Thread service unavailability handled correctly")
         else:
-            print("🚨 TEST FAILURES: Thread service issues detected")
+            print(" ALERT:  TEST FAILURES: Thread service issues detected")
             
         sys.exit(exit_code)

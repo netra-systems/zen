@@ -161,9 +161,9 @@ def main():
     
     # Stop PostgreSQL gracefully
     if stop_postgres_gracefully():
-        print("✅ PostgreSQL shutdown completed successfully.")
+        print(" PASS:  PostgreSQL shutdown completed successfully.")
     else:
-        print("❌ PostgreSQL shutdown completed with warnings.")
+        print(" FAIL:  PostgreSQL shutdown completed with warnings.")
         sys.exit(1)
 
 

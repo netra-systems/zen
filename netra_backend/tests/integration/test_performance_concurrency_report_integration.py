@@ -11,7 +11,7 @@ CRITICAL: Tests validate that report generation performs efficiently under load,
 concurrent users without degradation, and maintains consistent delivery times. Performance
 issues directly impact user satisfaction and business growth potential.
 
-Golden Path Focus: High performance → Concurrent user support → Scalable report delivery → Consistent UX
+Golden Path Focus: High performance  ->  Concurrent user support  ->  Scalable report delivery  ->  Consistent UX
 NO MOCKS: Uses real services to test actual performance characteristics and bottlenecks
 """
 

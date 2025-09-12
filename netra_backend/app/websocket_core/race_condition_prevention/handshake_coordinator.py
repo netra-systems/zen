@@ -55,11 +55,11 @@ class HandshakeCoordinator:
     5. Environment-specific timing control
     
     State Flow:
-    INITIALIZING → HANDSHAKE_PENDING → CONNECTED → READY_FOR_MESSAGES
+    INITIALIZING  ->  HANDSHAKE_PENDING  ->  CONNECTED  ->  READY_FOR_MESSAGES
     
     Error States:
-    Any state → ERROR (on failure)
-    Any state → CLOSED (on normal closure)
+    Any state  ->  ERROR (on failure)
+    Any state  ->  CLOSED (on normal closure)
     """
     
     def __init__(self, environment: Optional[str] = None):
@@ -162,7 +162,7 @@ class HandshakeCoordinator:
         self.state_transitions.append((old_state, new_state, transition_time))
         self.state = new_state
         
-        logger.debug(f"State transition: {old_state.value} → {new_state.value}")
+        logger.debug(f"State transition: {old_state.value}  ->  {new_state.value}")
         
         # Log important transitions with more detail
         if new_state == ApplicationConnectionState.READY_FOR_MESSAGES:
@@ -283,7 +283,7 @@ class HandshakeCoordinator:
         for old_state, new_state, _ in self.state_transitions:
             allowed_transitions = valid_transitions.get(old_state, [])
             if new_state not in allowed_transitions:
-                logger.error(f"Invalid state transition: {old_state.value} → {new_state.value}")
+                logger.error(f"Invalid state transition: {old_state.value}  ->  {new_state.value}")
                 return False
         
         return True

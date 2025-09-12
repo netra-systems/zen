@@ -53,7 +53,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
         """
         config = get_staging_config()
         
-        print("🔍 TESTING WEBSOCKET AUTH CONSISTENCY FIX")
+        print(" SEARCH:  TESTING WEBSOCKET AUTH CONSISTENCY FIX")
         print("=" * 60)
         
         # Create headers with test token
@@ -66,84 +66,84 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
         print(f"[INFO] Token prefix: {self.test_token[:30]}...")
         
         # Test 1: REST API Authentication
-        print("\n🔍 Step 1: Testing REST API Authentication")
+        print("\n SEARCH:  Step 1: Testing REST API Authentication")
         rest_results = await self._test_rest_api_auth(config, headers)
         rest_success = any(result.get("success", False) for result in rest_results.values())
         
         if rest_success:
-            print("✅ REST API authentication: SUCCESS")
+            print(" PASS:  REST API authentication: SUCCESS")
         else:
-            print("❌ REST API authentication: FAILED")
+            print(" FAIL:  REST API authentication: FAILED")
             print("   This indicates broader authentication issues in staging")
         
         # Test 2: WebSocket Authentication (should now match REST behavior)
-        print("\n🔍 Step 2: Testing WebSocket Authentication (with fix)")
+        print("\n SEARCH:  Step 2: Testing WebSocket Authentication (with fix)")
         websocket_result = await self._test_websocket_auth(config, headers)
         websocket_success = websocket_result.get("connection_succeeded", False)
         
         if websocket_success:
-            print("✅ WebSocket authentication: SUCCESS")
+            print(" PASS:  WebSocket authentication: SUCCESS")
         elif websocket_result.get("auth_error_received", False):
-            print("⚠️  WebSocket authentication: AUTH ERROR (may be expected)")
+            print(" WARNING: [U+FE0F]  WebSocket authentication: AUTH ERROR (may be expected)")
             print("   If REST also fails, this is consistent behavior")
         else:
-            print("❌ WebSocket authentication: FAILED (unexpected)")
+            print(" FAIL:  WebSocket authentication: FAILED (unexpected)")
         
         # Test 3: Consistency Analysis
-        print("\n🔍 Step 3: Consistency Analysis")
+        print("\n SEARCH:  Step 3: Consistency Analysis")
         
         # Both succeed - ideal case
         if rest_success and websocket_success:
-            print("🎉 CONSISTENCY SUCCESS: Both REST and WebSocket authentication work!")
+            print(" CELEBRATION:  CONSISTENCY SUCCESS: Both REST and WebSocket authentication work!")
             print("   The JWT secret consistency fix is working correctly")
             consistency_result = "BOTH_SUCCESS"
             
         # Both fail - consistent failure (may indicate staging auth setup issue)
         elif not rest_success and not websocket_success:
-            print("⚠️  CONSISTENT FAILURE: Both REST and WebSocket authentication fail")
+            print(" WARNING: [U+FE0F]  CONSISTENT FAILURE: Both REST and WebSocket authentication fail")
             print("   This is consistent behavior - may indicate staging environment issue")
             print("   The fix is working (both use same validation logic)")
             consistency_result = "BOTH_FAIL_CONSISTENT"
             
         # REST succeeds but WebSocket fails - this is the bug we fixed
         elif rest_success and not websocket_success:
-            print("❌ INCONSISTENCY DETECTED: REST works but WebSocket fails")
+            print(" FAIL:  INCONSISTENCY DETECTED: REST works but WebSocket fails")
             print("   This indicates the JWT secret consistency fix did not work!")
             print("   WebSocket is still using different JWT validation logic")
             consistency_result = "INCONSISTENT_BUG"
             
         # WebSocket succeeds but REST fails - unexpected scenario
         else:
-            print("⚠️  UNEXPECTED: WebSocket works but REST fails")
+            print(" WARNING: [U+FE0F]  UNEXPECTED: WebSocket works but REST fails")
             print("   This is an unusual scenario - may need investigation")
             consistency_result = "UNEXPECTED"
         
         # Test Results Summary
         print("\n" + "=" * 60)
-        print("🔍 WEBSOCKET AUTH CONSISTENCY FIX TEST RESULTS")
+        print(" SEARCH:  WEBSOCKET AUTH CONSISTENCY FIX TEST RESULTS")
         print("=" * 60)
-        print(f"REST API Success: {'✅' if rest_success else '❌'}")
-        print(f"WebSocket Success: {'✅' if websocket_success else '❌'}")
+        print(f"REST API Success: {' PASS: ' if rest_success else ' FAIL: '}")
+        print(f"WebSocket Success: {' PASS: ' if websocket_success else ' FAIL: '}")
         print(f"Consistency Result: {consistency_result}")
         
         # Test assertions based on consistency
         if consistency_result == "BOTH_SUCCESS":
-            print("✅ TEST PASSED: Authentication consistency achieved!")
+            print(" PASS:  TEST PASSED: Authentication consistency achieved!")
             assert True  # Ideal case - both work
             
         elif consistency_result == "BOTH_FAIL_CONSISTENT":
-            print("✅ TEST PASSED: Consistent behavior (both fail)")
+            print(" PASS:  TEST PASSED: Consistent behavior (both fail)")
             print("   NOTE: Both REST and WebSocket use same validation logic")
             print("   May need to check staging environment JWT secret configuration")
             assert True  # Consistent behavior is good
             
         elif consistency_result == "INCONSISTENT_BUG":
-            print("❌ TEST FAILED: JWT secret consistency fix did not work!")
+            print(" FAIL:  TEST FAILED: JWT secret consistency fix did not work!")
             print("   WebSocket still uses different JWT validation than REST")
             assert False, "JWT secret consistency fix failed - REST works but WebSocket fails"
             
         else:  # UNEXPECTED
-            print("⚠️  TEST WARNING: Unexpected authentication behavior")
+            print(" WARNING: [U+FE0F]  TEST WARNING: Unexpected authentication behavior")
             # Don't fail the test, but log the unexpected scenario
             assert True
         
@@ -173,7 +173,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
                         "response_size": len(response.content)
                     }
                     
-                    status_icon = "✅" if success else "❌"
+                    status_icon = " PASS: " if success else " FAIL: "
                     print(f"      {status_icon} {endpoint}: {response.status_code}")
                     
                 except Exception as e:
@@ -181,7 +181,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
                         "success": False,
                         "error": str(e)
                     }
-                    print(f"      ❌ {endpoint}: {str(e)}")
+                    print(f"       FAIL:  {endpoint}: {str(e)}")
         
         return results
     
@@ -205,7 +205,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
                 close_timeout=5
             ) as ws:
                 result["connection_succeeded"] = True
-                print("      ✅ WebSocket connection SUCCESS")
+                print("       PASS:  WebSocket connection SUCCESS")
                 
                 # Test bidirectional communication
                 test_message = {
@@ -215,29 +215,29 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
                 }
                 
                 await ws.send(json.dumps(test_message))
-                print("      📤 Sent test message")
+                print("      [U+1F4E4] Sent test message")
                 
                 try:
                     response = await asyncio.wait_for(ws.recv(), timeout=3)
-                    print(f"      📥 Received response: {response[:50]}...")
+                    print(f"      [U+1F4E5] Received response: {response[:50]}...")
                 except asyncio.TimeoutError:
-                    print("      ⏰ No response (may be normal)")
+                    print("      [U+23F0] No response (may be normal)")
                 
         except websockets.exceptions.InvalidStatus as e:
             if e.status_code in [401, 403]:
                 result["auth_error_received"] = True
-                print(f"      ⚠️  WebSocket auth rejected (HTTP {e.status_code})")
+                print(f"       WARNING: [U+FE0F]  WebSocket auth rejected (HTTP {e.status_code})")
             else:
                 result["error"] = f"HTTP {e.status_code}: {str(e)}"
-                print(f"      ❌ WebSocket error: {result['error']}")
+                print(f"       FAIL:  WebSocket error: {result['error']}")
         except Exception as e:
             error_msg = str(e).lower()
             if "403" in error_msg or "forbidden" in error_msg or "401" in error_msg:
                 result["auth_error_received"] = True
-                print(f"      ⚠️  WebSocket auth error: {e}")
+                print(f"       WARNING: [U+FE0F]  WebSocket auth error: {e}")
             else:
                 result["error"] = str(e)
-                print(f"      ❌ WebSocket connection error: {result['error']}")
+                print(f"       FAIL:  WebSocket connection error: {result['error']}")
         
         return result
     
@@ -249,7 +249,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
         This test helps validate that WebSocket now uses the same
         JWT validation logic as REST endpoints.
         """
-        print("🔍 JWT VALIDATION METHODS COMPARISON TEST")
+        print(" SEARCH:  JWT VALIDATION METHODS COMPARISON TEST")
         print("=" * 60)
         
         try:
@@ -260,7 +260,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
             secret = get_unified_jwt_secret()
             config_validation = validate_unified_jwt_config()
             
-            print(f"   JWT secret resolved: {'✅' if secret else '❌'}")
+            print(f"   JWT secret resolved: {' PASS: ' if secret else ' FAIL: '}")
             print(f"   JWT secret length: {len(secret) if secret else 0}")
             print(f"   Configuration valid: {config_validation.get('valid', False)}")
             
@@ -270,7 +270,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
                 print(f"   Warnings: {config_validation['warnings']}")
         
         except Exception as e:
-            print(f"❌ JWT secret manager test failed: {e}")
+            print(f" FAIL:  JWT secret manager test failed: {e}")
         
         try:
             # Test resilient token validation (used by both REST and WebSocket now)
@@ -291,7 +291,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
                 print(f"   Error: {validation_result.get('error', 'unknown')}")
         
         except Exception as e:
-            print(f"❌ Resilient validation test failed: {e}")
+            print(f" FAIL:  Resilient validation test failed: {e}")
         
         try:
             # Test WebSocket user context extractor (should now use resilient validation)
@@ -301,25 +301,25 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
             print("   (Should now use same validation as REST)")
             
             extractor = UserContextExtractor()
-            print(f"   Extractor created: ✅")
+            print(f"   Extractor created:  PASS: ")
             print(f"   JWT algorithm: {extractor.jwt_algorithm}")
             
             # Test JWT validation directly (this should now use resilient validation)
             jwt_payload = await extractor.validate_and_decode_jwt(self.test_token)
             
             if jwt_payload:
-                print(f"   Direct JWT validation: ✅")
+                print(f"   Direct JWT validation:  PASS: ")
                 print(f"   User ID: {jwt_payload.get('sub', 'unknown')}")
                 print(f"   Source: {jwt_payload.get('source', 'unknown')}")
             else:
-                print(f"   Direct JWT validation: ❌")
+                print(f"   Direct JWT validation:  FAIL: ")
                 print("   This may indicate JWT secret or validation issues")
         
         except Exception as e:
-            print(f"❌ WebSocket context extractor test failed: {e}")
+            print(f" FAIL:  WebSocket context extractor test failed: {e}")
         
         print("\n" + "=" * 60)
-        print("🔍 JWT VALIDATION COMPARISON COMPLETE")
+        print(" SEARCH:  JWT VALIDATION COMPARISON COMPLETE")
         print("=" * 60)
         
         # This test is diagnostic - always pass but provide information
@@ -327,7 +327,7 @@ class TestWebSocketAuthConsistencyFix(StagingTestBase):
 
 
 if __name__ == "__main__":
-    print("🚀 Starting WebSocket Authentication Consistency Fix Test...")
+    print("[U+1F680] Starting WebSocket Authentication Consistency Fix Test...")
     
     async def run_tests():
         test_class = TestWebSocketAuthConsistencyFix()

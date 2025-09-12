@@ -177,7 +177,7 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         # Log successful Golden Path completion
         total_duration = time.time() - auth_start_time
         # Success: Complete Golden Path flow preserved during SSOT migration
-        print(f"✅ GOLDEN PATH PRESERVED: Complete flow succeeded in {total_duration:.2f}s: "
+        print(f" PASS:  GOLDEN PATH PRESERVED: Complete flow succeeded in {total_duration:.2f}s: "
               f"auth({auth_duration:.2f}s) + websocket({websocket_duration:.2f}s) + agent({agent_duration:.2f}s)")
 
     @pytest.mark.e2e
@@ -238,7 +238,7 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         assert success_count >= 2, f"Should succeed consistently after recovery, got {success_count}/3"
         
         # Success: Auth circuit breaker failure recovery preserved during SSOT migration
-        print(f"✅ FAILURE RECOVERY VERIFIED: Circuit breaker handled {failures_caught} failures and recovered, "
+        print(f" PASS:  FAILURE RECOVERY VERIFIED: Circuit breaker handled {failures_caught} failures and recovered, "
               f"allowing {success_count}/3 subsequent successful authentications")
 
     @pytest.mark.e2e
@@ -289,7 +289,7 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         assert time_variance < 0.1, f"Time variance {time_variance:.3f}s should be < 0.1s (consistent performance)"
         
         # Success: Auth circuit breaker performance impact minimal after SSOT migration
-        print(f"✅ PERFORMANCE VERIFIED: Circuit breaker adds minimal overhead: avg={avg_time:.3f}s, "
+        print(f" PASS:  PERFORMANCE VERIFIED: Circuit breaker adds minimal overhead: avg={avg_time:.3f}s, "
               f"max={max_time:.3f}s, variance={time_variance:.3f}s over 10 calls")
 
     @pytest.mark.e2e
@@ -356,5 +356,5 @@ class TestGoldenPathAuthCircuitBreakerPreservation(SSotAsyncTestCase):
         assert final_result["valid"] is True, "Final call should succeed"
         
         # Success: Auth circuit breaker state transitions preserved during SSOT migration
-        print(f"✅ STATE TRANSITIONS VERIFIED: Circuit breaker handled intermittent pattern: {success_count} successes, "
+        print(f" PASS:  STATE TRANSITIONS VERIFIED: Circuit breaker handled intermittent pattern: {success_count} successes, "
               f"{failure_count} handled failures, final state operational")

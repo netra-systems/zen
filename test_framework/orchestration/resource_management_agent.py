@@ -980,9 +980,9 @@ if __name__ == "__main__":
             # Check specific layer
             success = ensure_layer_resources_available(rm, args.layer)
             if success:
-                print(f"✅ Resources available for layer: {args.layer}")
+                print(f" PASS:  Resources available for layer: {args.layer}")
             else:
-                print(f"❌ Resources not available for layer: {args.layer}")
+                print(f" FAIL:  Resources not available for layer: {args.layer}")
                 sys.exit(1)
         
         elif args.monitor:

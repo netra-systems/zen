@@ -43,7 +43,7 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
         
         try:
             # Test 1: Create authenticated user (requires user_sessions table for session storage)
-            print("🔐 Testing user authentication with session creation...")
+            print("[U+1F510] Testing user authentication with session creation...")
             
             # This should fail if user_sessions table is missing
             auth_user = await auth_helper.create_authenticated_user(
@@ -56,10 +56,10 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
             assert auth_user.jwt_token is not None, "User missing JWT token"
             assert auth_user.user_id is not None, "User missing ID"
             
-            print(f"✅ User authenticated successfully: {auth_user.user_id}")
+            print(f" PASS:  User authenticated successfully: {auth_user.user_id}")
             
             # Test 2: Validate session persistence (depends on user_sessions table)
-            print("💾 Testing session persistence and validation...")
+            print("[U+1F4BE] Testing session persistence and validation...")
             
             # Get authentication headers
             auth_headers = auth_helper.get_auth_headers(auth_user.jwt_token)
@@ -78,7 +78,7 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
                     if response.status == 200:
                         user_data = await response.json()
                         assert user_data["user_id"] == auth_user.user_id
-                        print("✅ Session validation successful")
+                        print(" PASS:  Session validation successful")
                     else:
                         # Expected failure case - session validation fails due to missing user_sessions
                         error_text = await response.text()
@@ -88,38 +88,38 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
                             pytest.fail(f"Unexpected session validation failure: {response.status} - {error_text}")
             
             # Test 4: Test session refresh (requires user_sessions table for token management)
-            print("🔄 Testing session refresh functionality...")
+            print(" CYCLE:  Testing session refresh functionality...")
             
             # Refresh the JWT token
             refreshed_auth = await auth_helper.refresh_user_session(auth_user)
             assert refreshed_auth is not None, "Failed to refresh session"
             assert refreshed_auth.jwt_token != auth_user.jwt_token, "Token was not refreshed"
             
-            print("✅ Session refresh successful")
+            print(" PASS:  Session refresh successful")
             
             # Test 5: Test session cleanup (validates user_sessions table operations)
-            print("🧹 Testing session cleanup...")
+            print("[U+1F9F9] Testing session cleanup...")
             
             cleanup_success = await auth_helper.cleanup_user_session(auth_user.user_id)
             assert cleanup_success, "Failed to cleanup user session"
             
-            print("✅ Session cleanup successful")
+            print(" PASS:  Session cleanup successful")
             
-            print("🎉 COMPLETE AUTHENTICATION FLOW SUCCESSFUL - user_sessions table is working!")
+            print(" CELEBRATION:  COMPLETE AUTHENTICATION FLOW SUCCESSFUL - user_sessions table is working!")
             
         except Exception as e:
             # Expected failure scenarios
             error_message = str(e).lower()
             
             if any(keyword in error_message for keyword in ["user_sessions", "table", "does not exist", "relation"]):
-                pytest.fail(f"❌ CRITICAL: Authentication failed due to missing user_sessions table: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Authentication failed due to missing user_sessions table: {e}")
             elif "connection" in error_message or "database" in error_message:
-                pytest.fail(f"❌ CRITICAL: Database connection issue (may indicate missing schema): {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Database connection issue (may indicate missing schema): {e}")
             elif "service" in error_message or "unavailable" in error_message:
-                pytest.fail(f"❌ CRITICAL: Service registration issue (app.state not configured): {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Service registration issue (app.state not configured): {e}")
             else:
                 # Unexpected error
-                pytest.fail(f"❌ UNEXPECTED: Authentication failed with unexpected error: {e}")
+                pytest.fail(f" FAIL:  UNEXPECTED: Authentication failed with unexpected error: {e}")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -160,7 +160,7 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
                     timeout=10
                 ) as websocket:
                     
-                    print("🔗 WebSocket connection established with authentication")
+                    print("[U+1F517] WebSocket connection established with authentication")
                     
                     # Send test message that requires authenticated session
                     test_message = {
@@ -178,32 +178,32 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
                         
                         # Validate authenticated response
                         assert response_data.get("type") == "pong", "Invalid WebSocket response type"
-                        print("✅ WebSocket authentication successful")
+                        print(" PASS:  WebSocket authentication successful")
                         
                     except asyncio.TimeoutError:
                         pytest.fail("WebSocket response timeout - session validation may have failed")
                     
             except websockets.exceptions.ConnectionClosed as e:
                 if e.code == 1008:  # Policy violation
-                    pytest.fail("❌ CRITICAL: WebSocket authentication failed - likely due to session validation failure")
+                    pytest.fail(" FAIL:  CRITICAL: WebSocket authentication failed - likely due to session validation failure")
                 else:
-                    pytest.fail(f"❌ WebSocket connection closed unexpectedly: {e}")
+                    pytest.fail(f" FAIL:  WebSocket connection closed unexpectedly: {e}")
                     
             except Exception as e:
                 error_message = str(e).lower()
                 if "authentication" in error_message or "unauthorized" in error_message:
-                    pytest.fail(f"❌ CRITICAL: WebSocket authentication failed: {e}")
+                    pytest.fail(f" FAIL:  CRITICAL: WebSocket authentication failed: {e}")
                 else:
-                    pytest.fail(f"❌ WebSocket connection failed: {e}")
+                    pytest.fail(f" FAIL:  WebSocket connection failed: {e}")
                     
         except Exception as e:
             # Handle authentication setup failures
             error_message = str(e).lower()
             
             if "user_sessions" in error_message:
-                pytest.fail(f"❌ CRITICAL: WebSocket auth failed due to missing user_sessions table: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: WebSocket auth failed due to missing user_sessions table: {e}")
             else:
-                pytest.fail(f"❌ WebSocket authentication setup failed: {e}")
+                pytest.fail(f" FAIL:  WebSocket authentication setup failed: {e}")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -213,7 +213,7 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
         Test that chat functionality requires proper authentication with user_sessions.
         
         This test validates the END-TO-END business value delivery:
-        Authentication → Session Management → Chat Access → Business Value
+        Authentication  ->  Session Management  ->  Chat Access  ->  Business Value
         
         Should FAIL initially if authentication stack is broken, then PASS after fix.
         """
@@ -227,7 +227,7 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
                 username="chat_user"
             )
             
-            print(f"🔐 User authenticated for chat access: {auth_user.user_id}")
+            print(f"[U+1F510] User authenticated for chat access: {auth_user.user_id}")
             
             # Test chat access with authenticated session
             backend_url = real_services_fixture["backend_url"]
@@ -252,10 +252,10 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
                     if response.status == 201:
                         thread_result = await response.json()
                         thread_id = thread_result["id"]
-                        print(f"✅ Chat thread created: {thread_id}")
+                        print(f" PASS:  Chat thread created: {thread_id}")
                     else:
                         error_text = await response.text()
-                        pytest.fail(f"❌ CRITICAL: Thread creation failed (authentication issue): {response.status} - {error_text}")
+                        pytest.fail(f" FAIL:  CRITICAL: Thread creation failed (authentication issue): {response.status} - {error_text}")
                 
                 # Test 2: Send message to thread (core business functionality)
                 send_message_url = f"{backend_url}/api/v1/threads/{thread_id}/messages"
@@ -272,10 +272,10 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
                     
                     if response.status == 201:
                         message_result = await response.json()
-                        print(f"✅ Message sent successfully: {message_result['id']}")
+                        print(f" PASS:  Message sent successfully: {message_result['id']}")
                     else:
                         error_text = await response.text()
-                        pytest.fail(f"❌ CRITICAL: Message sending failed (authentication issue): {response.status} - {error_text}")
+                        pytest.fail(f" FAIL:  CRITICAL: Message sending failed (authentication issue): {response.status} - {error_text}")
                 
                 # Test 3: Retrieve thread messages (validate session persistence)
                 get_messages_url = f"{backend_url}/api/v1/threads/{thread_id}/messages"
@@ -288,21 +288,21 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
                     if response.status == 200:
                         messages = await response.json()
                         assert len(messages) > 0, "No messages retrieved"
-                        print(f"✅ Messages retrieved: {len(messages)} messages")
+                        print(f" PASS:  Messages retrieved: {len(messages)} messages")
                     else:
                         error_text = await response.text()
-                        pytest.fail(f"❌ CRITICAL: Message retrieval failed (session issue): {response.status} - {error_text}")
+                        pytest.fail(f" FAIL:  CRITICAL: Message retrieval failed (session issue): {response.status} - {error_text}")
             
-            print("🎉 COMPLETE CHAT FUNCTIONALITY SUCCESSFUL - Authentication and user_sessions working!")
+            print(" CELEBRATION:  COMPLETE CHAT FUNCTIONALITY SUCCESSFUL - Authentication and user_sessions working!")
             
         except Exception as e:
             error_message = str(e).lower()
             
             if "user_sessions" in error_message or "session" in error_message:
-                pytest.fail(f"❌ CRITICAL: Chat functionality blocked by session management issue: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Chat functionality blocked by session management issue: {e}")
             elif "authentication" in error_message or "unauthorized" in error_message:
-                pytest.fail(f"❌ CRITICAL: Chat functionality blocked by authentication failure: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Chat functionality blocked by authentication failure: {e}")
             elif "database" in error_message or "table" in error_message:
-                pytest.fail(f"❌ CRITICAL: Chat functionality blocked by database issue: {e}")
+                pytest.fail(f" FAIL:  CRITICAL: Chat functionality blocked by database issue: {e}")
             else:
-                pytest.fail(f"❌ Chat functionality failed: {e}")
+                pytest.fail(f" FAIL:  Chat functionality failed: {e}")

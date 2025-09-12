@@ -60,9 +60,9 @@ def test_cors_headers():
         
         # Check for missing Access-Control-Allow-Origin
         if "access-control-allow-origin" not in [h.lower() for h in response.headers]:
-            print("   ⚠️  WARNING: Access-Control-Allow-Origin header is missing!")
+            print("    WARNING: [U+FE0F]  WARNING: Access-Control-Allow-Origin header is missing!")
         else:
-            print("   ✓ Access-Control-Allow-Origin header is present")
+            print("   [U+2713] Access-Control-Allow-Origin header is present")
             
     except Exception as e:
         print(f"   ERROR: {e}")

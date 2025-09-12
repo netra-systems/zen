@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core value proposition - complete AI-powered business process automation
 
 This E2E test validates:
-- Complete agent pipeline from triage → data → optimization → completion
+- Complete agent pipeline from triage  ->  data  ->  optimization  ->  completion
 - All 5 critical WebSocket events delivered in correct sequence and order
 - Real user value delivered through complete chat interface workflow
 - Full business workflow validation with real authentication and services
@@ -407,7 +407,7 @@ class TestTriageToCompletionEventFlow(BaseE2ETest):
             f"Complete workflow too slow: {total_workflow_time:.2f}s (max: 120s)"
         
         # Log comprehensive business workflow success
-        self.logger.info("✅ CRITICAL SUCCESS: Complete business workflow validated")
+        self.logger.info(" PASS:  CRITICAL SUCCESS: Complete business workflow validated")
         self.logger.info(f"  - Workflow: {workflow_summary['workflow_name']}")
         self.logger.info(f"  - Total time: {total_workflow_time:.2f}s")
         self.logger.info(f"  - Stages completed: {workflow_summary['stages_completed']}/{workflow_summary['total_stages']}")
@@ -535,7 +535,7 @@ class TestTriageToCompletionEventFlow(BaseE2ETest):
         events_for_run = [te for te in timed_events if te['event'].get('run_id') == str(run_id)]
         assert len(events_for_run) > 0, f"No events received for run_id {run_id}"
         
-        self.logger.info("✅ SUCCESS: Workflow event ordering and timing validated")
+        self.logger.info(" PASS:  SUCCESS: Workflow event ordering and timing validated")
         self.logger.info(f"  - Events received: {len(timed_events)}")
         self.logger.info(f"  - Event sequence: {event_types_ordered}")
         self.logger.info(f"  - Max gap between events: {max_gap_between_events:.2f}s")
@@ -662,7 +662,7 @@ class TestTriageToCompletionEventFlow(BaseE2ETest):
         assert len(all_run_ids) == num_workflows, \
             f"Run IDs not unique in high frequency test: {len(all_run_ids)} / {num_workflows}"
         
-        self.logger.info(f"✅ PERFORMANCE SUCCESS: High frequency business workflows validated")
+        self.logger.info(f" PASS:  PERFORMANCE SUCCESS: High frequency business workflows validated")
         self.logger.info(f"  - Workflows executed: {num_workflows}")
         self.logger.info(f"  - Average execution time: {average_execution_time:.2f}s")
         self.logger.info(f"  - Total events delivered: {total_events}")

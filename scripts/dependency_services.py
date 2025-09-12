@@ -2,7 +2,7 @@
 """
 Service Installation for Netra AI Platform installer.
 PostgreSQL, Redis, and ClickHouse installation guidance.
-CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
+CRITICAL: All functions MUST be  <= 8 lines, file  <= 300 lines.
 """
 
 import sys

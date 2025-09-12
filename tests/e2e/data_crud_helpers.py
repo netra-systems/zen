@@ -49,7 +49,7 @@ class DataCRUDManager:
     Key responsibilities:
     - Create user data in Auth Service
     - Read user data from Backend API  
-    - Update user preferences via Frontend → Backend
+    - Update user preferences via Frontend  ->  Backend
     - Delete user data with GDPR compliance
     - Verify data consistency across services
     """
@@ -187,14 +187,14 @@ class DataCRUDManager:
     async def update_user_preferences(self, 
                                     user_id: str, 
                                     preferences: Dict[str, Any]) -> DataCRUDResult:
-        """Update user preferences via Frontend → Backend."""
+        """Update user preferences via Frontend  ->  Backend."""
         start_time = time.time()
         
         try:
             if not self._http_client:
                 await self.setup_test_environment()
                 
-            # Update via Backend API (simulating Frontend → Backend flow)
+            # Update via Backend API (simulating Frontend  ->  Backend flow)
             response = await self._http_client.put(
                 f"{self.backend_service_url}/api/users/{user_id}/preferences",
                 json=preferences,

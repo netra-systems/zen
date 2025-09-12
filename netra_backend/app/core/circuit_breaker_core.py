@@ -1,6 +1,6 @@
 """DEPRECATED: Core circuit breaker implementation - MIGRATED TO UnifiedCircuitBreaker.
 
-⚠️  MIGRATION TO UNIFIED CIRCUIT BREAKER ⚠️
+ WARNING: [U+FE0F]  MIGRATION TO UNIFIED CIRCUIT BREAKER  WARNING: [U+FE0F]
 
 This module now serves as a compatibility wrapper around UnifiedCircuitBreaker.
 All functionality has been migrated to the unified SSOT implementation.
@@ -14,7 +14,7 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures existing code works while consolidating implementations
 - Strategic Impact: Unified resilience foundation with legacy support
 
-All functions adhere to ≤8 line complexity limit per MANDATORY requirements.
+All functions adhere to  <= 8 line complexity limit per MANDATORY requirements.
 """
 
 import asyncio

@@ -11,7 +11,7 @@ Tests end-to-end rate limit analysis workflows to ensure customers
 can predict and manage rate limit impacts before they affect operations.
 
 CRITICAL: These tests validate rate limit prediction accuracy for business continuity.
-Maximum 300 lines, functions ≤8 lines per SSOT standards.
+Maximum 300 lines, functions  <= 8 lines per SSOT standards.
 """
 
 import pytest
@@ -67,7 +67,7 @@ class TestRateLimitImpactAnalysis(BaseE2ETest):
         await _validate_prediction_accuracy(results, setup)
 
 
-# Helper functions (≤8 lines each per SSOT standards)
+# Helper functions ( <= 8 lines each per SSOT standards)
 
 def _create_basic_rate_limit_state() -> DeepAgentState:
     """Create state for basic rate limit analysis test."""

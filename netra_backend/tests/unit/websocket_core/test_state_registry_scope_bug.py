@@ -70,7 +70,7 @@ class TestWebSocketStateRegistryScopeBug(SSotBaseTestCase):
         # Import the actual WebSocket route function
         from netra_backend.app.routes.websocket import websocket_endpoint, _initialize_connection_state
         
-        logger.info("🔴 UNIT TEST: Reproducing state_registry scope bug")
+        logger.info("[U+1F534] UNIT TEST: Reproducing state_registry scope bug")
         
         # Mock the state registry initialization to succeed
         with patch('netra_backend.app.websocket_core.connection_state_machine.get_connection_state_registry') as mock_get_registry:
@@ -114,14 +114,14 @@ class TestWebSocketStateRegistryScopeBug(SSotBaseTestCase):
                 
                 # Verify the exact error we expect
                 error_message = str(exc_info.value)
-                logger.error(f"🔴 CAPTURED ERROR: {error_message}")
+                logger.error(f"[U+1F534] CAPTURED ERROR: {error_message}")
                 
                 # The test should fail with state_registry not defined
                 assert "state_registry" in error_message, f"Expected state_registry error, got: {error_message}"
                 assert ("not defined" in error_message or "referenced before assignment" in error_message), \
                     f"Expected scope error, got: {error_message}"
                 
-                logger.info("✅ UNIT TEST SUCCESS: state_registry scope bug reproduced successfully")
+                logger.info(" PASS:  UNIT TEST SUCCESS: state_registry scope bug reproduced successfully")
     
     @pytest.mark.asyncio
     async def test_state_registry_variable_isolation_unit(self):
@@ -133,7 +133,7 @@ class TestWebSocketStateRegistryScopeBug(SSotBaseTestCase):
         """
         from netra_backend.app.routes.websocket import _initialize_connection_state
         
-        logger.info("🔴 UNIT TEST: Testing state_registry variable isolation")
+        logger.info("[U+1F534] UNIT TEST: Testing state_registry variable isolation")
         
         # Mock dependencies for initialization
         with patch('netra_backend.app.websocket_core.connection_state_machine.get_connection_state_registry') as mock_get_registry:
@@ -158,7 +158,7 @@ class TestWebSocketStateRegistryScopeBug(SSotBaseTestCase):
                 pytest.fail("Expected NameError for state_registry variable not being in scope")
             except NameError as e:
                 # This is the expected behavior - state_registry is not accessible
-                logger.info(f"✅ UNIT TEST SUCCESS: Confirmed state_registry scope isolation: {e}")
+                logger.info(f" PASS:  UNIT TEST SUCCESS: Confirmed state_registry scope isolation: {e}")
                 assert "state_registry" in str(e)
                 assert "not defined" in str(e)
     
@@ -170,7 +170,7 @@ class TestWebSocketStateRegistryScopeBug(SSotBaseTestCase):
         This test simulates the specific code path in websocket_endpoint()
         where state_registry is accessed after _initialize_connection_state() returns.
         """
-        logger.info("🔴 UNIT TEST: Testing authentication flow scope bug")
+        logger.info("[U+1F534] UNIT TEST: Testing authentication flow scope bug")
         
         # Import the problematic code sections
         from netra_backend.app.routes.websocket import websocket_endpoint
@@ -207,12 +207,12 @@ class TestWebSocketStateRegistryScopeBug(SSotBaseTestCase):
                 await websocket_endpoint(self.mock_websocket)
             
             error_message = str(exc_info.value)
-            logger.error(f"🔴 AUTH FLOW ERROR: {error_message}")
+            logger.error(f"[U+1F534] AUTH FLOW ERROR: {error_message}")
             
             # Verify this is the state_registry scope error
             assert "state_registry" in error_message, f"Expected state_registry error, got: {error_message}"
             
-            logger.info("✅ UNIT TEST SUCCESS: Authentication flow scope bug reproduced")
+            logger.info(" PASS:  UNIT TEST SUCCESS: Authentication flow scope bug reproduced")
 
 
 if __name__ == "__main__":

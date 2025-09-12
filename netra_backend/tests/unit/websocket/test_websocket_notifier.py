@@ -25,7 +25,7 @@ CRITICAL COVERAGE AREAS:
 - Backlog processing and user notifications
 - Error handling and recovery patterns
 
-⚠️ DEPRECATION CONTEXT: While WebSocketNotifier is deprecated in favor of AgentWebSocketBridge,
+ WARNING: [U+FE0F] DEPRECATION CONTEXT: While WebSocketNotifier is deprecated in favor of AgentWebSocketBridge,
 it's still used in production and requires complete test coverage for stability.
 """
 

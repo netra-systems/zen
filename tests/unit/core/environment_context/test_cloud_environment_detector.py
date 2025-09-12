@@ -348,12 +348,12 @@ class TestEnvironmentDetectionIntegration:
                 assert "netra-staging" in context.project_id
                 
                 # Log the success for debugging
-                print(f"✅ GOLDEN PATH FIX VALIDATED:")
+                print(f" PASS:  GOLDEN PATH FIX VALIDATED:")
                 print(f"   Environment: {context.environment_type.value}")
                 print(f"   Confidence: {context.confidence_score}")
                 print(f"   Platform: {context.cloud_platform.value}")
                 print(f"   Service: {context.service_name}")
-                print(f"   ❌ NO MORE localhost:8081 in staging!")
+                print(f"    FAIL:  NO MORE localhost:8081 in staging!")
 
 
 class TestEnvironmentDetectionFailureCases:

@@ -711,7 +711,7 @@ class TestConfigurationServiceConcurrency:
         assert len(errors) == 0, f"Concurrent access should not cause errors: {errors}"
         
         # Check results
-        assert len(results) == 500, "All operations should complete (5 workers × 100 operations)"
+        assert len(results) == 500, "All operations should complete (5 workers  x  100 operations)"
         
         success_count = len([r for r in results if r[2] == "success"])
         assert success_count == 500, "All operations should succeed"
@@ -755,7 +755,7 @@ class TestConfigurationServiceConcurrency:
         assert len(errors) == 0, f"Concurrent validation should not cause errors: {errors}"
         
         # Check results
-        assert len(validation_results) == 30, "All validation operations should complete (3 workers × 10 validations)"
+        assert len(validation_results) == 30, "All validation operations should complete (3 workers  x  10 validations)"
 
 
 if __name__ == "__main__":

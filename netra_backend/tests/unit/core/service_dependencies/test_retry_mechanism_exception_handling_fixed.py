@@ -375,7 +375,7 @@ class TestExceptionConstructorSafety:
             "Simple message",
             "Message with (parentheses) and special chars: @#$%",
             "Multi-line\nmessage\nwith\nbreaks",
-            "Unicode message with émojis: 🚀🔥⚠️",
+            "Unicode message with [U+00E9]mojis: [U+1F680] FIRE:  WARNING: [U+FE0F]",
             "",  # Empty message
             "Very " + "long " * 100 + "message",  # Long message
         ]

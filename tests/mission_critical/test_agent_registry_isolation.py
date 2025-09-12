@@ -821,7 +821,7 @@
             # REMOVED_SYNTAX_ERROR: Expected Result: MASSIVE FAILURE showing all isolation bugs simultaneously
             # REMOVED_SYNTAX_ERROR: '''
 
-            # REMOVED_SYNTAX_ERROR: logger.critical("🚨 STARTING COMPREHENSIVE ISOLATION AUDIT - EXPECT MASSIVE FAILURES 🚨")
+            # REMOVED_SYNTAX_ERROR: logger.critical(" ALERT:  STARTING COMPREHENSIVE ISOLATION AUDIT - EXPECT MASSIVE FAILURES  ALERT: ")
 
             # Create realistic concurrent user simulation
             # REMOVED_SYNTAX_ERROR: user_count = 8
@@ -902,7 +902,7 @@
                     
 
                     # Execute all users concurrently
-                    # REMOVED_SYNTAX_ERROR: logger.warning("⚡ Executing 8 concurrent users - isolation violations expected...")
+                    # REMOVED_SYNTAX_ERROR: logger.warning(" LIGHTNING:  Executing 8 concurrent users - isolation violations expected...")
                     # REMOVED_SYNTAX_ERROR: results = await asyncio.gather( )
                     # REMOVED_SYNTAX_ERROR: *[comprehensive_user_simulation(user) for user in users],
                     # REMOVED_SYNTAX_ERROR: return_exceptions=True
@@ -940,8 +940,8 @@
                     # REMOVED_SYNTAX_ERROR: assert len(exceptions) == 0, \
                     # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                    # REMOVED_SYNTAX_ERROR: logger.critical("🎯 IF YOU SEE THIS MESSAGE, THE ISOLATION BUGS HAVE BEEN FIXED!")
-                    # REMOVED_SYNTAX_ERROR: logger.critical("🎯 THESE TESTS SHOULD FAIL WITH CURRENT SINGLETON ARCHITECTURE!")
+                    # REMOVED_SYNTAX_ERROR: logger.critical(" TARGET:  IF YOU SEE THIS MESSAGE, THE ISOLATION BUGS HAVE BEEN FIXED!")
+                    # REMOVED_SYNTAX_ERROR: logger.critical(" TARGET:  THESE TESTS SHOULD FAIL WITH CURRENT SINGLETON ARCHITECTURE!")
 
 
                     # ============================================================================
@@ -1161,9 +1161,9 @@
                         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                             # REMOVED_SYNTAX_ERROR: import asyncio
 
-                            # REMOVED_SYNTAX_ERROR: print("🚨 CRITICAL ISOLATION TEST SUITE")
-                            # REMOVED_SYNTAX_ERROR: print("🚨 These tests are DESIGNED TO FAIL with current architecture")
-                            # REMOVED_SYNTAX_ERROR: print("🚨 Demonstrates user isolation violations in AgentRegistry singleton")
+                            # REMOVED_SYNTAX_ERROR: print(" ALERT:  CRITICAL ISOLATION TEST SUITE")
+                            # REMOVED_SYNTAX_ERROR: print(" ALERT:  These tests are DESIGNED TO FAIL with current architecture")
+                            # REMOVED_SYNTAX_ERROR: print(" ALERT:  Demonstrates user isolation violations in AgentRegistry singleton")
 
                             # Run a quick demonstration
                             # REMOVED_SYNTAX_ERROR: asyncio.run(test_comprehensive_isolation_audit_FAILING())

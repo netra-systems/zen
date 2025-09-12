@@ -87,7 +87,7 @@ class TestAuthE2EFlow:
     async def test_complete_login_to_chat_ready(self):
         """
         BVJ: $25K MRR protection - Complete login flow validation
-        Test: Login → Token → WebSocket → Chat Ready (<10s for real services)
+        Test: Login  ->  Token  ->  WebSocket  ->  Chat Ready (<10s for real services)
         """
         start_time = time.time()
         
@@ -148,7 +148,7 @@ class TestAuthE2EFlow:
     async def test_token_refresh_across_services(self):
         """
         BVJ: $15K MRR protection - Token refresh prevents session loss
-        Test: Token expiry → Automatic refresh → Service continuity
+        Test: Token expiry  ->  Automatic refresh  ->  Service continuity
         """
         # REAL authentication to get initial tokens
         initial_token, initial_user_data = await self.harness.auth_helper.authenticate_user()
@@ -176,7 +176,7 @@ class TestAuthE2EFlow:
     async def test_logout_cleanup_all_services(self):
         """
         BVJ: $10K MRR protection - Clean logout prevents security issues
-        Test: Logout → Token invalidation → WebSocket cleanup
+        Test: Logout  ->  Token invalidation  ->  WebSocket cleanup
         """
         # REAL authentication to setup active session
         token, user_data = await self.harness.auth_helper.authenticate_user()
@@ -224,7 +224,7 @@ class TestAuthE2EFlow:
     async def test_multi_tab_auth_sync(self):
         """
         BVJ: $20K MRR protection - Multi-tab consistency prevents user confusion
-        Test: Tab 1 login → Tab 2 auto-sync → Consistent state
+        Test: Tab 1 login  ->  Tab 2 auto-sync  ->  Consistent state
         """
         # REAL multi-tab scenario using different auth helper instances
         
@@ -260,7 +260,7 @@ class TestAuthE2EFlow:
     async def test_auth_error_recovery(self):
         """
         BVJ: $30K MRR protection - Graceful error handling
-        Test: Auth failure → Clear error message → Recovery path
+        Test: Auth failure  ->  Clear error message  ->  Recovery path
         """
         invalid_token = "invalid-test-token-should-fail"
         
@@ -367,7 +367,7 @@ class TestAuthE2EFlow:
     async def test_session_persistence_validation(self):
         """
         BVJ: $35K MRR protection - Session persistence prevents re-login
-        Test: Login → Session created → Reconnect uses session
+        Test: Login  ->  Session created  ->  Reconnect uses session
         """
         # REAL session persistence test
         auth_helper = E2EAuthHelper()

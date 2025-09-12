@@ -83,7 +83,7 @@ class TestJWTValidationIntegration:
             assert isinstance(access_token, str)
             assert len(access_token) > 0
             
-            print(f"✓ Access token created successfully: {access_token[:50]}...")
+            print(f"[U+2713] Access token created successfully: {access_token[:50]}...")
             
         except Exception as e:
             # This test may fail if auth service is not available
@@ -116,7 +116,7 @@ class TestJWTValidationIntegration:
             assert validation_result.email == test_email
             assert validation_result.error is None
             
-            print(f"✓ Token validation successful for user: {validation_result.user_id}")
+            print(f"[U+2713] Token validation successful for user: {validation_result.user_id}")
             
         except Exception as e:
             pytest.skip(f"Auth service not available for integration test: {e}")
@@ -142,7 +142,7 @@ class TestJWTValidationIntegration:
             assert isinstance(refresh_token, str) 
             assert len(refresh_token) > 0
             
-            print(f"✓ Refresh token created successfully: {refresh_token[:50]}...")
+            print(f"[U+2713] Refresh token created successfully: {refresh_token[:50]}...")
             
         except Exception as e:
             pytest.skip(f"Auth service not available for integration test: {e}")
@@ -159,7 +159,7 @@ class TestJWTValidationIntegration:
             assert isinstance(service_token, str)
             assert len(service_token) > 0
             
-            print(f"✓ Service token created via auth_client: {service_token[:50]}...")
+            print(f"[U+2713] Service token created via auth_client: {service_token[:50]}...")
             
         except Exception as e:
             pytest.skip(f"Auth service not available for direct client test: {e}")
@@ -199,7 +199,7 @@ class TestJWTValidationIntegration:
         assert result["details"]["key_manager"] is False
         
         if jwt_works:
-            print("🚨 ARCHITECTURAL MISMATCH CONFIRMED:")
+            print(" ALERT:  ARCHITECTURAL MISMATCH CONFIRMED:")
             print("   - JWT functionality works via UnifiedJWTValidator")
             print("   - Golden Path validation fails because it expects app.state.key_manager")
             print("   - This is the root cause of the authentication failure")
@@ -243,7 +243,7 @@ class TestJWTValidationIntegration:
             assert new_access_validation.valid is True
             assert new_access_validation.user_id == user_id
             
-            print("✅ COMPLETE JWT FLOW SUCCESSFUL:")
+            print(" PASS:  COMPLETE JWT FLOW SUCCESSFUL:")
             print(f"   - Access token: {access_token[:30]}...")
             print(f"   - Refresh token: {refresh_token[:30]}...")
             print(f"   - New access token: {new_access_token[:30]}...")
@@ -281,7 +281,7 @@ class TestJWTValidationIntegration:
                 assert result.error is not None
                 assert result.user_id is None
                 
-                print(f"✓ Invalid token handled correctly: {invalid_token[:30]}...")
+                print(f"[U+2713] Invalid token handled correctly: {invalid_token[:30]}...")
                 
             except Exception as e:
                 pytest.fail(f"JWT validator should handle invalid tokens gracefully, got: {e}")
@@ -305,7 +305,7 @@ class TestJWTValidationIntegration:
             assert isinstance(service_token, str)
             assert len(service_token) > 0
             
-            print(f"✓ Service token created: {service_token[:50]}...")
+            print(f"[U+2713] Service token created: {service_token[:50]}...")
             
         except Exception as e:
             pytest.skip(f"Auth service not available for service token test: {e}")

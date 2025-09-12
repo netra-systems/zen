@@ -55,7 +55,7 @@ class QualityAlertHandler(BaseMessageHandler):
         await self.monitoring_service.subscribe_to_updates(user_id)
         message = self._build_subscription_message("subscribed")
         
-        # ✅ CORRECT - Maintains session continuity
+        #  PASS:  CORRECT - Maintains session continuity
         user_context = get_user_execution_context(
             user_id=user_id,
             thread_id=None,  # Let session manager handle missing IDs
@@ -69,7 +69,7 @@ class QualityAlertHandler(BaseMessageHandler):
         await self.monitoring_service.unsubscribe_from_updates(user_id)
         message = self._build_subscription_message("unsubscribed")
         
-        # ✅ CORRECT - Maintains session continuity
+        #  PASS:  CORRECT - Maintains session continuity
         user_context = get_user_execution_context(
             user_id=user_id,
             thread_id=None,  # Let session manager handle missing IDs
@@ -82,7 +82,7 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle invalid subscription action."""
         error_message = f"Invalid action: {action}. Use 'subscribe' or 'unsubscribe'"
         try:
-            # ✅ CORRECT - Maintains session continuity
+            #  PASS:  CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs
@@ -106,7 +106,7 @@ class QualityAlertHandler(BaseMessageHandler):
         logger.error(f"Error handling quality alert subscription: {str(error)}")
         error_message = f"Failed to handle subscription: {str(error)}"
         try:
-            # ✅ CORRECT - Maintains session continuity
+            #  PASS:  CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs

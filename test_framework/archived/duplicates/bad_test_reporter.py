@@ -108,7 +108,7 @@ class BadTestReporter:
         print(f"Consecutive failures: {history['consecutive_failures']}")
         
         if history.get("marked_as_bad"):
-            print(f"⚠️  MARKED AS BAD: {history.get('bad_reason', 'Unknown reason')}")
+            print(f" WARNING: [U+FE0F]  MARKED AS BAD: {history.get('bad_reason', 'Unknown reason')}")
     
     def _print_recent_failures(self, history: dict):
         """Print recent failures.

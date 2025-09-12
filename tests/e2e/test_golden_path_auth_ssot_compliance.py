@@ -1,12 +1,12 @@
 """
-🚨 MISSION CRITICAL: Golden Path Auth SSOT Compliance E2E Test
+ ALERT:  MISSION CRITICAL: Golden Path Auth SSOT Compliance E2E Test
 
 SSOT VIOLATION REPRODUCTION - Test #5 of 5
 This test EXPOSES SSOT violations in the complete Golden Path user journey by verifying
 that auth operations bypass UnifiedAuthInterface at critical points.
 
 VIOLATION DETAILS:
-- Golden Path: User login → WebSocket connection → Agent execution → Response delivery
+- Golden Path: User login  ->  WebSocket connection  ->  Agent execution  ->  Response delivery
 - Issue: Auth operations at multiple points bypass SSOT UnifiedAuthInterface
 - Impact: Inconsistent auth behavior across the complete user journey
 
@@ -70,14 +70,14 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
         4. Real-time progress events
         5. Response delivery
         """
-        logger.info("🚨 TESTING COMPLETE GOLDEN PATH AUTH SSOT VIOLATIONS")
+        logger.info(" ALERT:  TESTING COMPLETE GOLDEN PATH AUTH SSOT VIOLATIONS")
         
         if NoDockerModeDetector.is_no_docker_mode():
             # Use staging environment for E2E test
             env = get_env()
             backend_url = env.get("BACKEND_URL", "https://netra-backend-staging.ue.r.appspot.com")
             websocket_url = backend_url.replace("https://", "wss://").replace("http://", "ws://") + "/ws"
-            logger.info(f"🔍 Using staging environment: {backend_url}")
+            logger.info(f" SEARCH:  Using staging environment: {backend_url}")
         else:
             # Use local services
             backend_url = "http://localhost:8000"
@@ -92,7 +92,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
         def track_unified_auth_usage(operation_name):
             def wrapper(*args, **kwargs):
                 unified_interface_usage.append(f"UnifiedAuthInterface.{operation_name}")
-                logger.info(f"✅ SSOT COMPLIANT: UnifiedAuthInterface.{operation_name} called")
+                logger.info(f" PASS:  SSOT COMPLIANT: UnifiedAuthInterface.{operation_name} called")
                 return {"valid": True, "user_id": "golden_path_user", "email": "goldenpath@test.com"}
             return wrapper
         
@@ -101,7 +101,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
             mock_unified_auth.return_value.verify_token = AsyncMock(side_effect=track_unified_auth_usage("verify_token"))
             
             # PHASE 1: User Authentication (should use UnifiedAuthInterface)
-            logger.info("🔍 PHASE 1: Testing user authentication SSOT compliance")
+            logger.info(" SEARCH:  PHASE 1: Testing user authentication SSOT compliance")
             
             auth_helper = E2EAuthHelper()
             try:
@@ -110,7 +110,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
                 
                 if auth_result and auth_result.get("access_token"):
                     auth_operations_log.append("Phase1: User authentication successful")
-                    logger.info("✅ Phase 1: User authentication completed")
+                    logger.info(" PASS:  Phase 1: User authentication completed")
                     test_token = auth_result["access_token"]
                 else:
                     # Create a test token for violation testing
@@ -128,10 +128,10 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
                     jwt_secret = env.get("JWT_SECRET_KEY", "golden-path-test-secret")
                     test_token = jwt.encode(test_payload, jwt_secret, algorithm="HS256")
                     
-                    logger.warning("⚠️ Using test token for violation testing")
+                    logger.warning(" WARNING: [U+FE0F] Using test token for violation testing")
                 
             except Exception as e:
-                logger.error(f"❌ Phase 1 auth failed: {e}")
+                logger.error(f" FAIL:  Phase 1 auth failed: {e}")
                 auth_violations.append("Phase1: User authentication bypassed UnifiedAuthInterface")
                 
                 # Create fallback token for continued testing
@@ -146,7 +146,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
                 test_token = jwt.encode(test_payload, "fallback-secret", algorithm="HS256")
             
             # PHASE 2: WebSocket Connection Auth (CRITICAL VIOLATION POINT)
-            logger.info("🔍 PHASE 2: Testing WebSocket connection auth SSOT compliance")
+            logger.info(" SEARCH:  PHASE 2: Testing WebSocket connection auth SSOT compliance")
             
             websocket_auth_violations = []
             
@@ -159,7 +159,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
                     # Check if this goes through UnifiedAuthInterface (it shouldn't due to violation)
                     if len(unified_interface_usage) == 0:
                         websocket_auth_violations.append("WebSocket auth bypassed UnifiedAuthInterface")
-                        logger.error("🚨 VIOLATION: WebSocket auth bypassed UnifiedAuthInterface")
+                        logger.error(" ALERT:  VIOLATION: WebSocket auth bypassed UnifiedAuthInterface")
                     
                     return {
                         "sub": "websocket_user",
@@ -188,10 +188,10 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
                             ) as websocket:
                                 connection_successful = True
                                 auth_operations_log.append("Phase2: WebSocket connection established")
-                                logger.info("✅ Phase 2: WebSocket connection successful")
+                                logger.info(" PASS:  Phase 2: WebSocket connection successful")
                                 
                                 # PHASE 3: Agent Execution Request (Auth verification point)
-                                logger.info("🔍 PHASE 3: Testing agent execution auth SSOT compliance")
+                                logger.info(" SEARCH:  PHASE 3: Testing agent execution auth SSOT compliance")
                                 
                                 agent_request = {
                                     "type": "execute_agent",
@@ -214,35 +214,35 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
                                         
                                         if event.get("type") == "agent_started":
                                             auth_operations_log.append("Phase3: Agent started event received")
-                                            logger.info("✅ Phase 3: Agent execution initiated")
+                                            logger.info(" PASS:  Phase 3: Agent execution initiated")
                                             break
                                             
                                 except asyncio.TimeoutError:
-                                    logger.warning("⚠️ Phase 3: Timeout waiting for agent events")
+                                    logger.warning(" WARNING: [U+FE0F] Phase 3: Timeout waiting for agent events")
                         else:
                             # Simulate connection for staging/no-docker mode
                             connection_successful = True
                             auth_operations_log.append("Phase2: WebSocket connection simulated (staging)")
-                            logger.info("✅ Phase 2: WebSocket connection simulated for staging")
+                            logger.info(" PASS:  Phase 2: WebSocket connection simulated for staging")
                             
                     except Exception as e:
-                        logger.error(f"❌ Phase 2 WebSocket connection failed: {e}")
+                        logger.error(f" FAIL:  Phase 2 WebSocket connection failed: {e}")
                         websocket_auth_violations.append(f"WebSocket connection failed: {e}")
                 
                 except Exception as e:
-                    logger.error(f"❌ Phase 2 WebSocket auth setup failed: {e}")
+                    logger.error(f" FAIL:  Phase 2 WebSocket auth setup failed: {e}")
                     websocket_auth_violations.append(f"WebSocket auth setup failed: {e}")
             
             # Add WebSocket violations to main violations list
             auth_violations.extend(websocket_auth_violations)
             
             # PHASE 4: Analyze Golden Path Auth SSOT Compliance
-            logger.info("🔍 PHASE 4: Analyzing complete Golden Path auth SSOT compliance")
+            logger.info(" SEARCH:  PHASE 4: Analyzing complete Golden Path auth SSOT compliance")
             
             # Check if UnifiedAuthInterface was used throughout the Golden Path
             if len(unified_interface_usage) == 0:
                 auth_violations.append("CRITICAL: No UnifiedAuthInterface usage detected in Golden Path")
-                logger.error("🚨 CRITICAL VIOLATION: Golden Path completely bypassed UnifiedAuthInterface")
+                logger.error(" ALERT:  CRITICAL VIOLATION: Golden Path completely bypassed UnifiedAuthInterface")
             
             # Check for direct auth bypasses
             bypass_indicators = [
@@ -255,26 +255,26 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
             for indicator in bypass_indicators:
                 if any(indicator in log_entry for log_entry in auth_operations_log):
                     auth_violations.append(f"Golden Path used bypassed auth: {indicator}")
-                    logger.error(f"🚨 VIOLATION: Golden Path used {indicator}")
+                    logger.error(f" ALERT:  VIOLATION: Golden Path used {indicator}")
             
             # FINAL ASSESSMENT: Document all violations
-            logger.info("🔍 FINAL: Golden Path SSOT violation assessment")
+            logger.info(" SEARCH:  FINAL: Golden Path SSOT violation assessment")
             
-            logger.info(f"📊 Auth operations performed: {len(auth_operations_log)}")
-            logger.info(f"📊 UnifiedAuthInterface usage: {len(unified_interface_usage)}")
-            logger.info(f"📊 Auth violations detected: {len(auth_violations)}")
+            logger.info(f" CHART:  Auth operations performed: {len(auth_operations_log)}")
+            logger.info(f" CHART:  UnifiedAuthInterface usage: {len(unified_interface_usage)}")
+            logger.info(f" CHART:  Auth violations detected: {len(auth_violations)}")
             
             for i, operation in enumerate(auth_operations_log, 1):
-                logger.info(f"📊 {i}. {operation}")
+                logger.info(f" CHART:  {i}. {operation}")
             
             # Report violations
             if auth_violations:
-                logger.critical("🚨 GOLDEN PATH AUTH SSOT VIOLATIONS CONFIRMED:")
+                logger.critical(" ALERT:  GOLDEN PATH AUTH SSOT VIOLATIONS CONFIRMED:")
                 for i, violation in enumerate(auth_violations, 1):
-                    logger.critical(f"🚨 {i}. {violation}")
+                    logger.critical(f" ALERT:  {i}. {violation}")
                     
-                logger.critical("🚨 THIS TEST PASSES = GOLDEN PATH HAS SSOT VIOLATIONS")
-                logger.critical("🚨 AFTER SSOT FIX: All Golden Path auth should use UnifiedAuthInterface")
+                logger.critical(" ALERT:  THIS TEST PASSES = GOLDEN PATH HAS SSOT VIOLATIONS")
+                logger.critical(" ALERT:  AFTER SSOT FIX: All Golden Path auth should use UnifiedAuthInterface")
                 
                 # Business impact assertion
                 assert len(auth_violations) > 0, f"GOLDEN PATH SSOT VIOLATIONS: {auth_violations}"
@@ -296,7 +296,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
         This test verifies that auth tokens work consistently across all services
         in the Golden Path (backend, WebSocket, agent execution).
         """
-        logger.info("🚨 TESTING GOLDEN PATH: Cross-service auth consistency")
+        logger.info(" ALERT:  TESTING GOLDEN PATH: Cross-service auth consistency")
         
         # Create test token
         test_payload = {
@@ -322,10 +322,10 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
             from netra_backend.app.auth_integration.auth import verify_token
             backend_result = await verify_token(test_token)
             service_auth_results["backend_api"] = bool(backend_result)
-            logger.info(f"🔍 Backend API auth result: {service_auth_results['backend_api']}")
+            logger.info(f" SEARCH:  Backend API auth result: {service_auth_results['backend_api']}")
         except Exception as e:
             service_auth_results["backend_api"] = False
-            logger.warning(f"⚠️ Backend API auth failed: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Backend API auth failed: {e}")
         
         # Test 2: WebSocket auth  
         try:
@@ -333,16 +333,16 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
             ws_extractor = WebSocketUserContextExtractor()
             ws_result = await ws_extractor.extract_user_context_from_token(test_token)
             service_auth_results["websocket"] = bool(ws_result)
-            logger.info(f"🔍 WebSocket auth result: {service_auth_results['websocket']}")
+            logger.info(f" SEARCH:  WebSocket auth result: {service_auth_results['websocket']}")
         except Exception as e:
             service_auth_results["websocket"] = False
-            logger.warning(f"⚠️ WebSocket auth failed: {e}")
+            logger.warning(f" WARNING: [U+FE0F] WebSocket auth failed: {e}")
         
         # Test 3: Agent execution auth (simulated)
         try:
             # Simulate agent execution auth check
             service_auth_results["agent_execution"] = service_auth_results.get("websocket", False)
-            logger.info(f"🔍 Agent execution auth result: {service_auth_results['agent_execution']}")
+            logger.info(f" SEARCH:  Agent execution auth result: {service_auth_results['agent_execution']}")
         except Exception as e:
             service_auth_results["agent_execution"] = False
         
@@ -350,25 +350,25 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
         auth_values = list(service_auth_results.values())
         if not all(result == auth_values[0] for result in auth_values):
             consistency_violations.append("Cross-service auth inconsistency detected")
-            logger.error("🚨 VIOLATION: Auth token accepted by some services but not others")
+            logger.error(" ALERT:  VIOLATION: Auth token accepted by some services but not others")
             
             for service, result in service_auth_results.items():
                 if result != auth_values[0]:
                     consistency_violations.append(f"{service} auth differs from other services")
-                    logger.error(f"🚨 INCONSISTENCY: {service} auth = {result}, others = {auth_values[0]}")
+                    logger.error(f" ALERT:  INCONSISTENCY: {service} auth = {result}, others = {auth_values[0]}")
         
         if consistency_violations:
-            logger.critical("🚨 GOLDEN PATH CROSS-SERVICE AUTH VIOLATIONS:")
+            logger.critical(" ALERT:  GOLDEN PATH CROSS-SERVICE AUTH VIOLATIONS:")
             for violation in consistency_violations:
-                logger.critical(f"🚨 - {violation}")
+                logger.critical(f" ALERT:  - {violation}")
                 
-            logger.critical("🚨 CUSTOMER IMPACT: Inconsistent auth across Golden Path")
-            logger.critical("🚨 Users may connect to WebSocket but API calls fail")
+            logger.critical(" ALERT:  CUSTOMER IMPACT: Inconsistent auth across Golden Path")
+            logger.critical(" ALERT:  Users may connect to WebSocket but API calls fail")
             
             assert len(consistency_violations) > 0, f"CROSS-SERVICE AUTH VIOLATIONS: {consistency_violations}"
             return True
         else:
-            logger.info("✅ Cross-service auth consistency appears good")
+            logger.info(" PASS:  Cross-service auth consistency appears good")
             pytest.fail("VIOLATION NOT REPRODUCED: Cross-service auth is consistent")
 
     @pytest.mark.asyncio
@@ -380,7 +380,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
         This test analyzes the auth flow architecture and identifies violations
         where components bypass the SSOT UnifiedAuthInterface pattern.
         """
-        logger.info("🚨 TESTING GOLDEN PATH: Auth flow architecture violations")
+        logger.info(" ALERT:  TESTING GOLDEN PATH: Auth flow architecture violations")
         
         # Track architectural violations in Golden Path components
         architecture_violations = []
@@ -400,10 +400,10 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
             for method in violation_methods:
                 if hasattr(extractor, method):
                     architecture_violations.append(f"WebSocket has architectural violation method: {method}")
-                    logger.error(f"🚨 ARCHITECTURE VIOLATION: WebSocket.{method}")
+                    logger.error(f" ALERT:  ARCHITECTURE VIOLATION: WebSocket.{method}")
             
         except Exception as e:
-            logger.warning(f"⚠️ WebSocket architecture analysis failed: {e}")
+            logger.warning(f" WARNING: [U+FE0F] WebSocket architecture analysis failed: {e}")
         
         # Test 2: Auth integration architecture
         try:
@@ -415,10 +415,10 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
             
             if jwt_functions:
                 architecture_violations.append(f"Auth integration has direct JWT functions: {jwt_functions}")
-                logger.error(f"🚨 ARCHITECTURE VIOLATION: Direct JWT functions in auth integration: {jwt_functions}")
+                logger.error(f" ALERT:  ARCHITECTURE VIOLATION: Direct JWT functions in auth integration: {jwt_functions}")
                 
         except Exception as e:
-            logger.warning(f"⚠️ Auth integration architecture analysis failed: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Auth integration architecture analysis failed: {e}")
         
         # Test 3: Import dependency violations
         try:
@@ -437,18 +437,18 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
                        any('auth_client_core' in str(getattr(module, attr, '')) 
                            for attr in dir(module) if not attr.startswith('_')):
                         architecture_violations.append(f"WebSocket module {ws_module} bypasses UnifiedAuthInterface")
-                        logger.error(f"🚨 DEPENDENCY VIOLATION: {ws_module} bypasses UnifiedAuthInterface")
+                        logger.error(f" ALERT:  DEPENDENCY VIOLATION: {ws_module} bypasses UnifiedAuthInterface")
             
         except Exception as e:
-            logger.warning(f"⚠️ Import dependency analysis failed: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Import dependency analysis failed: {e}")
         
         if architecture_violations:
-            logger.critical("🚨 GOLDEN PATH ARCHITECTURAL VIOLATIONS:")
+            logger.critical(" ALERT:  GOLDEN PATH ARCHITECTURAL VIOLATIONS:")
             for violation in architecture_violations:
-                logger.critical(f"🚨 - {violation}")
+                logger.critical(f" ALERT:  - {violation}")
                 
-            logger.critical("🚨 Golden Path architecture violates SSOT principles")
-            logger.critical("🚨 All auth operations should flow through UnifiedAuthInterface")
+            logger.critical(" ALERT:  Golden Path architecture violates SSOT principles")
+            logger.critical(" ALERT:  All auth operations should flow through UnifiedAuthInterface")
             
             assert len(architecture_violations) > 0, f"ARCHITECTURE VIOLATIONS: {architecture_violations}"
             return True
@@ -457,7 +457,7 @@ class TestGoldenPathAuthSsotCompliance(SSotAsyncTestCase):
 
     def tearDown(self):
         """Clean up test artifacts."""
-        logger.info("🧹 Golden Path auth SSOT compliance test cleanup complete")
+        logger.info("[U+1F9F9] Golden Path auth SSOT compliance test cleanup complete")
 
 
 if __name__ == "__main__":

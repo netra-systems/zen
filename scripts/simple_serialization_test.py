@@ -74,7 +74,7 @@ async def test_blocking_behavior():
             
             if actual > 0.005:  # >5ms indicates blocking
                 blocks.append(actual)
-                print(f"⚠️  Event loop delayed: {actual*1000:.2f}ms")
+                print(f" WARNING: [U+FE0F]  Event loop delayed: {actual*1000:.2f}ms")
     
     monitor_task = asyncio.create_task(monitor_responsiveness())
     
@@ -108,7 +108,7 @@ async def test_blocking_behavior():
     
     # Analysis
     if blocks:
-        print(f"\n📊 Event Loop Blocking Detected:")
+        print(f"\n CHART:  Event Loop Blocking Detected:")
         print(f"   Total blocks: {len(blocks)}")
         print(f"   Max block: {max(blocks)*1000:.2f}ms")
         print(f"   Total blocked time: {sum(blocks)*1000:.2f}ms")
@@ -124,7 +124,7 @@ async def test_blocking_behavior():
         
         return True
     else:
-        print(f"\n✅ No significant blocking detected")
+        print(f"\n PASS:  No significant blocking detected")
         return False
 
 
@@ -158,7 +158,7 @@ async def test_concurrent_vs_sequential():
     
     # Compare
     improvement = ((seq_time - conc_time) / seq_time) * 100
-    print(f"\n📊 Performance Comparison:")
+    print(f"\n CHART:  Performance Comparison:")
     print(f"   Sequential: {seq_time*1000:.2f}ms")
     print(f"   Concurrent: {conc_time*1000:.2f}ms")
     print(f"   Improvement: {improvement:.1f}%")
@@ -239,31 +239,31 @@ async def main():
         print("="*50)
         
         if blocking_detected or load_blocking:
-            print("🔴 EVENT LOOP BLOCKING CONFIRMED")
+            print("[U+1F534] EVENT LOOP BLOCKING CONFIRMED")
             
             if blocking_detected:
-                print("   ❌ Synchronous serialization blocks event loop")
+                print("    FAIL:  Synchronous serialization blocks event loop")
             
             if load_blocking:
-                print("   ❌ Mixed sync/async paths cause blocking under load")
+                print("    FAIL:  Mixed sync/async paths cause blocking under load")
             
-            print("\n💡 ROOT CAUSE:")
+            print("\n IDEA:  ROOT CAUSE:")
             print("   The issue is NOT with _serialize_message_safely_async")
             print("   The issue is that send_to_user, broadcast_to_room, etc.")
             print("   still use _serialize_message_safely (synchronous)")
             
-            print("\n🔧 SOLUTION:")
+            print("\n[U+1F527] SOLUTION:")
             print("   Update _send_to_connection to use async serialization")
             print("   This will fix send_to_user, broadcast_to_room, broadcast_to_all")
             
         else:
-            print("🟢 No blocking detected in test conditions")
+            print("[U+1F7E2] No blocking detected in test conditions")
             print("   Implementation may be adequate for current load patterns")
         
         if async_better:
-            print("✅ Async serialization shows performance benefits")
+            print(" PASS:  Async serialization shows performance benefits")
         else:
-            print("ℹ️  Async serialization overhead may not be worth it for simple cases")
+            print("[U+2139][U+FE0F]  Async serialization overhead may not be worth it for simple cases")
             
     except Exception as e:
         print(f"Test failed: {e}")

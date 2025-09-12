@@ -385,7 +385,7 @@ class TestWebSocketSecurityFocused(SSotAsyncTestCase):
                         f"SECURITY BREACH: Manager for {user_id} can access {other_user}'s connection"
                     )
         
-        print("✅ COMPREHENSIVE SECURITY VALIDATION PASSED - No cross-user contamination detected")
+        print(" PASS:  COMPREHENSIVE SECURITY VALIDATION PASSED - No cross-user contamination detected")
 
 
 # Helper function for easy test execution

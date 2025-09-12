@@ -7,7 +7,7 @@ to prevent resource exhaustion and ensure fair resource allocation across users
 in high-load scenarios.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - affects system scalability for all users
+- Segment: ALL (Free  ->  Enterprise) - affects system scalability for all users
 - Business Goal: Scalability/Stability - ensures system remains stable under load
 - Value Impact: Prevents resource exhaustion that could cause system-wide outages
 - Revenue Impact: Prevents downtime that costs $300K+ per hour for SaaS platforms
@@ -862,7 +862,7 @@ class TestExecutionEngineFactoryResourceLimitsUnit(SSotBaseTestCase):
 """
 BUSINESS VALUE JUSTIFICATION for ExecutionEngine Factory Resource Limits Tests
 
-Segment: ALL (Free → Enterprise) - affects system scalability and stability for all users
+Segment: ALL (Free  ->  Enterprise) - affects system scalability and stability for all users
 Business Goal: Scalability/Stability - ensures system remains stable under high load
 Value Impact: Prevents resource exhaustion that could cause catastrophic system-wide outages
 Revenue Impact: Prevents downtime costing $300K+ per hour for SaaS platforms

@@ -43,25 +43,25 @@ async def test_threads_endpoint_with_jwt():
             print(f"Response Headers: {dict(response.headers)}")
             
             if response.status_code == 200:
-                print("\n✅ SUCCESS: Threads endpoint returned 200 OK")
+                print("\n PASS:  SUCCESS: Threads endpoint returned 200 OK")
                 data = response.json()
                 print(f"Response Data: {json.dumps(data, indent=2)[:500]}")
                 return True
             elif response.status_code == 404:
-                print("\n❌ FAILURE: Still getting 404 error")
+                print("\n FAIL:  FAILURE: Still getting 404 error")
                 print(f"Response Body: {response.text}")
                 return False
             elif response.status_code == 401:
-                print("\n⚠️ JWT Token might be expired")
+                print("\n WARNING: [U+FE0F] JWT Token might be expired")
                 print(f"Response Body: {response.text}")
                 return False
             else:
-                print(f"\n⚠️ Unexpected status code: {response.status_code}")
+                print(f"\n WARNING: [U+FE0F] Unexpected status code: {response.status_code}")
                 print(f"Response Body: {response.text}")
                 return False
                 
     except Exception as e:
-        print(f"\n❌ Error during test: {e}")
+        print(f"\n FAIL:  Error during test: {e}")
         return False
 
 
@@ -83,9 +83,9 @@ async def test_local_environment():
     print(f"Environment: {config.environment}")
     
     if config.environment in ["development", "staging"]:
-        print("✅ Environment correctly set for auto-user creation")
+        print(" PASS:  Environment correctly set for auto-user creation")
     else:
-        print("❌ Environment not set correctly")
+        print(" FAIL:  Environment not set correctly")
     
     return config.environment in ["development", "staging"]
 
@@ -106,14 +106,14 @@ async def main():
     print("\n" + "=" * 60)
     print("TEST SUMMARY")
     print("=" * 60)
-    print(f"Local Environment Test: {'✅ PASSED' if local_test else '❌ FAILED'}")
-    print(f"Staging Endpoint Test: {'✅ PASSED' if staging_test else '❌ FAILED (Token may be expired)'}")
+    print(f"Local Environment Test: {' PASS:  PASSED' if local_test else ' FAIL:  FAILED'}")
+    print(f"Staging Endpoint Test: {' PASS:  PASSED' if staging_test else ' FAIL:  FAILED (Token may be expired)'}")
     
     if local_test:
-        print("\n✅ Fix has been successfully implemented!")
+        print("\n PASS:  Fix has been successfully implemented!")
         print("Users with valid JWT tokens will be auto-created in staging.")
     else:
-        print("\n❌ Fix implementation needs review.")
+        print("\n FAIL:  Fix implementation needs review.")
 
 
 if __name__ == "__main__":

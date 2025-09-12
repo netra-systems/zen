@@ -1,5 +1,5 @@
 """
-Database Consistency Test: auth_users ↔ userbase Sync
+Database Consistency Test: auth_users [U+2194] userbase Sync
 
 CRITICAL CONTEXT: Cross-Database User Data Validation
 Tests user data consistency between Auth service and Main service databases.
@@ -327,7 +327,7 @@ async def sync_tester():
 
 
 class TestDatabaseUserSync:
-    """E2E Tests for auth_users ↔ userbase synchronization."""
+    """E2E Tests for auth_users [U+2194] userbase synchronization."""
     
     @pytest.mark.asyncio
     @pytest.mark.e2e

@@ -11,12 +11,12 @@ CRITICAL MISSION: Validates that BaseAgent properly integrates with execution in
 maintaining user isolation and emitting proper WebSocket events for chat business value.
 
 This comprehensive test suite covers:
-- BaseAgent ↔ ExecutionEngine (agent execution lifecycle) 
-- BaseAgent ↔ UnifiedToolDispatcher (tool execution with WebSocket events)
-- BaseAgent ↔ LLMManager (LLM operations with user context)
-- BaseAgent ↔ UnifiedWebSocketEmitter (event emission during execution)
-- BaseAgent ↔ UserExecutionContext (context passing and isolation)
-- BaseAgent ↔ ReliabilityManager (error handling and retries)
+- BaseAgent [U+2194] ExecutionEngine (agent execution lifecycle) 
+- BaseAgent [U+2194] UnifiedToolDispatcher (tool execution with WebSocket events)
+- BaseAgent [U+2194] LLMManager (LLM operations with user context)
+- BaseAgent [U+2194] UnifiedWebSocketEmitter (event emission during execution)
+- BaseAgent [U+2194] UserExecutionContext (context passing and isolation)
+- BaseAgent [U+2194] ReliabilityManager (error handling and retries)
 - Real business value scenarios (cost analysis, data processing, etc.)
 - Execution pattern validation and error handling
 - WebSocket event emission and validation
@@ -273,7 +273,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         # Assert user context isolation
         assert hasattr(agent, '_user_execution_context')
         
-        self.logger.info("✅ BaseAgent factory method creates context-aware agent successfully")
+        self.logger.info(" PASS:  BaseAgent factory method creates context-aware agent successfully")
     
     @pytest.mark.asyncio
     async def test_base_agent_state_management_lifecycle(self):
@@ -298,7 +298,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         with pytest.raises(ValueError, match="Invalid state transition"):
             agent.set_state(SubAgentLifecycle.RUNNING)  # Can't go back from SHUTDOWN
         
-        self.logger.info("✅ BaseAgent state management lifecycle works correctly")
+        self.logger.info(" PASS:  BaseAgent state management lifecycle works correctly")
     
     # ========================================================================
     # EXECUTION ENGINE INTEGRATION TESTS
@@ -357,7 +357,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         thinking_events = [e for e in mock_websocket_bridge.events_emitted if e["event_type"] == "agent_thinking"]
         assert len(thinking_events) >= 1
         
-        self.logger.info("✅ BaseAgent integrates properly with ExecutionEngine")
+        self.logger.info(" PASS:  BaseAgent integrates properly with ExecutionEngine")
     
     @pytest.mark.asyncio
     async def test_base_agent_execution_with_reliability_manager(
@@ -399,7 +399,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         assert "state" in cb_status
         assert cb_status["state"] in ["closed", "half_open", "open"]
         
-        self.logger.info("✅ BaseAgent integrates properly with ReliabilityManager")
+        self.logger.info(" PASS:  BaseAgent integrates properly with ReliabilityManager")
     
     # ========================================================================
     # LLM MANAGER INTEGRATION TESTS
@@ -464,7 +464,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         assert "current_session" in usage_summary
         assert usage_summary["current_session"]["operations_count"] >= 1
         
-        self.logger.info("✅ BaseAgent integrates properly with LLMManager and token tracking")
+        self.logger.info(" PASS:  BaseAgent integrates properly with LLMManager and token tracking")
     
     # ========================================================================
     # WEBSOCKET EVENT INTEGRATION TESTS
@@ -527,7 +527,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         completed_event = completed_events[0]
         # The completion result would be enhanced with cost analysis if context was provided
         
-        self.logger.info("✅ BaseAgent emits all critical WebSocket events correctly")
+        self.logger.info(" PASS:  BaseAgent emits all critical WebSocket events correctly")
     
     @pytest.mark.asyncio
     async def test_base_agent_websocket_bridge_adapter_integration(
@@ -555,7 +555,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         assert "agent_thinking" in event_types
         # Note: emit_progress and emit_error may map to different event types in the adapter
         
-        self.logger.info("✅ BaseAgent WebSocketBridgeAdapter integration works correctly")
+        self.logger.info(" PASS:  BaseAgent WebSocketBridgeAdapter integration works correctly")
     
     # ========================================================================
     # BUSINESS VALUE SCENARIO TESTS 
@@ -665,7 +665,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         thinking_events = [e for e in mock_websocket_bridge.events_emitted if e["event_type"] == "agent_thinking"]
         assert len(thinking_events) >= 2  # Should have multiple thinking steps
         
-        self.logger.info("✅ Complete cost analysis business scenario delivers real value")
+        self.logger.info(" PASS:  Complete cost analysis business scenario delivers real value")
     
     @pytest.mark.asyncio
     async def test_data_processing_agent_business_scenario(
@@ -772,7 +772,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         assert "tool_completed" in emitted_events
         assert "agent_completed" in emitted_events
         
-        self.logger.info("✅ Data processing business scenario delivers actionable insights")
+        self.logger.info(" PASS:  Data processing business scenario delivers actionable insights")
     
     # ========================================================================
     # USER ISOLATION AND CONTEXT MANAGEMENT TESTS
@@ -833,7 +833,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         assert user2_ops[0]["input_tokens"] == 200
         assert user1_ops != user2_ops
         
-        self.logger.info("✅ BaseAgent properly isolates user contexts")
+        self.logger.info(" PASS:  BaseAgent properly isolates user contexts")
     
     @pytest.mark.asyncio
     async def test_base_agent_metadata_storage_and_retrieval(self, user_execution_context):
@@ -876,7 +876,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         nonexistent_value = agent.get_metadata_value(user_execution_context, "nonexistent_key", "default_val")
         assert nonexistent_value == "default_val"
         
-        self.logger.info("✅ BaseAgent metadata storage and retrieval works correctly")
+        self.logger.info(" PASS:  BaseAgent metadata storage and retrieval works correctly")
     
     # ========================================================================
     # ERROR HANDLING AND RESILIENCE TESTS
@@ -926,7 +926,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         post_reset_health = agent.get_health_status()
         assert post_reset_health["state"] == SubAgentLifecycle.PENDING.value
         
-        self.logger.info("✅ BaseAgent error handling and recovery patterns work correctly")
+        self.logger.info(" PASS:  BaseAgent error handling and recovery patterns work correctly")
     
     @pytest.mark.asyncio
     async def test_base_agent_graceful_shutdown_and_cleanup(
@@ -960,7 +960,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         await agent.shutdown()  # Should not raise exception
         assert agent.get_state() == SubAgentLifecycle.SHUTDOWN
         
-        self.logger.info("✅ BaseAgent graceful shutdown and cleanup works correctly")
+        self.logger.info(" PASS:  BaseAgent graceful shutdown and cleanup works correctly")
     
     # ========================================================================
     # PERFORMANCE AND MONITORING TESTS
@@ -1017,7 +1017,7 @@ class TestBaseAgentExecutionPatterns(BaseIntegrationTest):
         assert "current_session" in usage_summary
         assert usage_summary["current_session"]["operations_count"] >= 1
         
-        self.logger.info("✅ BaseAgent performance monitoring and metrics work correctly")
+        self.logger.info(" PASS:  BaseAgent performance monitoring and metrics work correctly")
 
 
 # ============================================================================
@@ -1123,7 +1123,7 @@ class TestMockAgentIntegrationScenarios(BaseIntegrationTest):
         # Validate context metadata storage
         assert "cost_analysis_result" in user_execution_context.metadata
         
-        self.logger.info("✅ Mock cost analysis agent executes complete pattern correctly")
+        self.logger.info(" PASS:  Mock cost analysis agent executes complete pattern correctly")
 
 
 # Test execution summary  

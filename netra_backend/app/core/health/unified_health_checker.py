@@ -20,7 +20,7 @@ Key functionality:
 - Support for both HTTP and direct function call checks
 
 Replaces 6+ duplicate health check implementations with a single unified utility.
-Each function ≤25 lines, class ≤250 lines total.
+Each function  <= 25 lines, class  <= 250 lines total.
 """
 
 import asyncio

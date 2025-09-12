@@ -133,7 +133,7 @@ class TestAgentResponseDeliveryMechanisms(BaseIntegrationTest):
                     assert call_args[1]["message_type"] == "agent_response", "Correct message type"
                     assert "response" in call_args[1]["data"], "Response data included"
                     
-                    logger.info("✅ WebSocket response delivery validated")
+                    logger.info(" PASS:  WebSocket response delivery validated")
                     
     async def test_websocket_delivery_failure_graceful_handling(self):
         """
@@ -180,7 +180,7 @@ class TestAgentResponseDeliveryMechanisms(BaseIntegrationTest):
                     assert result.success, "Agent execution should succeed independently of delivery"
                     assert result.result is not None, "Response should be available for alternative delivery"
                     
-                    logger.info("✅ WebSocket delivery failure handled gracefully")
+                    logger.info(" PASS:  WebSocket delivery failure handled gracefully")
                     
     async def test_multi_user_response_delivery_isolation(self):
         """
@@ -250,7 +250,7 @@ class TestAgentResponseDeliveryMechanisms(BaseIntegrationTest):
         assert user_1_delivery["data"]["user_context"] == user_1_id, "User 1 context isolated"
         assert user_2_delivery["data"]["user_context"] == user_2_id, "User 2 context isolated"
         
-        logger.info("✅ Multi-user response delivery isolation validated")
+        logger.info(" PASS:  Multi-user response delivery isolation validated")
         
     async def test_response_delivery_with_websocket_events_integration(self):
         """
@@ -323,7 +323,7 @@ class TestAgentResponseDeliveryMechanisms(BaseIntegrationTest):
                     assert call["user_id"] == self.test_user_id, "All events sent to correct user"
                     assert "thread_id" in call["data"], "All events include thread_id"
                     
-                logger.info(f"✅ WebSocket events integration validated ({len(event_calls)} events)")
+                logger.info(f" PASS:  WebSocket events integration validated ({len(event_calls)} events)")
                 
     async def test_response_delivery_performance_meets_requirements(self):
         """
@@ -382,9 +382,9 @@ class TestAgentResponseDeliveryMechanisms(BaseIntegrationTest):
                     assert avg_delivery_time < 0.1, f"Average delivery time {avg_delivery_time:.3f}s too slow"
                     assert max_delivery_time < 0.5, f"Max delivery time {max_delivery_time:.3f}s too slow"
                     
-                    logger.info(f"✅ Response delivery performance validated (avg: {avg_delivery_time:.3f}s, max: {max_delivery_time:.3f}s)")
+                    logger.info(f" PASS:  Response delivery performance validated (avg: {avg_delivery_time:.3f}s, max: {max_delivery_time:.3f}s)")
                 else:
-                    logger.info("✅ Response delivery performance validated (no delivery timing captured)")
+                    logger.info(" PASS:  Response delivery performance validated (no delivery timing captured)")
                     
     def teardown_method(self):
         """Clean up test resources."""

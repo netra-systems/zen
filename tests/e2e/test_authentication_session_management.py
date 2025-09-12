@@ -70,7 +70,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         - API authentication with Bearer token
         - Token expiration and refresh handling
         """
-        print(f"🚀 Testing complete JWT authentication flow")
+        print(f"[U+1F680] Testing complete JWT authentication flow")
         
         # Test user creation and authentication
         test_email = f"jwt_test_{int(time.time())}@example.com"
@@ -80,14 +80,14 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             permissions=["read", "write", "agent_execution"]
         )
         
-        print(f"✅ Created authenticated user: {user_data['email']}")
-        print(f"🔑 JWT token generated (length: {len(user_token)})")
+        print(f" PASS:  Created authenticated user: {user_data['email']}")
+        print(f"[U+1F511] JWT token generated (length: {len(user_token)})")
         
         # Validate JWT token structure
         try:
             # Decode token without verification to inspect claims
             token_payload = jwt.decode(user_token, options={"verify_signature": False})
-            print(f"📋 Token payload keys: {list(token_payload.keys())}")
+            print(f"[U+1F4CB] Token payload keys: {list(token_payload.keys())}")
             
             # Validate required JWT claims
             required_claims = ['sub', 'email', 'exp', 'iat']
@@ -103,7 +103,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
             assert exp_datetime > datetime.now(timezone.utc), "Token is expired"
             
-            print(f"✅ JWT token structure validated")
+            print(f" PASS:  JWT token structure validated")
             print(f"   Subject: {token_payload['sub']}")
             print(f"   Email: {token_payload['email']}")
             print(f"   Expires: {exp_datetime}")
@@ -123,15 +123,15 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                 async with session.get(api_url, headers=headers) as response:
                     if response.status == 200:
                         profile_data = await response.json()
-                        print(f"✅ API authentication successful")
+                        print(f" PASS:  API authentication successful")
                         print(f"   Profile data: {list(profile_data.keys()) if isinstance(profile_data, dict) else 'Non-dict response'}")
                     elif response.status == 401:
-                        print(f"⚠️ API returned 401 - endpoint may require different auth")
+                        print(f" WARNING: [U+FE0F] API returned 401 - endpoint may require different auth")
                     else:
-                        print(f"⚠️ API returned {response.status} - endpoint may not exist")
+                        print(f" WARNING: [U+FE0F] API returned {response.status} - endpoint may not exist")
                         
             except aiohttp.ClientError as e:
-                print(f"⚠️ API request failed: {e} (endpoint may not be implemented)")
+                print(f" WARNING: [U+FE0F] API request failed: {e} (endpoint may not be implemented)")
         
         # Test WebSocket authentication with JWT
         websocket_url = "ws://localhost:8000/ws"
@@ -139,7 +139,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         
         try:
             async with websockets.connect(websocket_url, additional_headers=websocket_headers) as websocket:
-                print(f"✅ WebSocket authentication successful")
+                print(f" PASS:  WebSocket authentication successful")
                 
                 # Send authenticated request
                 auth_request = {
@@ -151,7 +151,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(auth_request))
-                print(f"📤 Sent authenticated WebSocket request")
+                print(f"[U+1F4E4] Sent authenticated WebSocket request")
                 
                 # Wait for response to confirm authentication worked
                 start_time = time.time()
@@ -162,11 +162,11 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                         message = await asyncio.wait_for(websocket.recv(), timeout=5)
                         event = json.loads(message)
                         
-                        print(f"📨 WebSocket event: {event['type']}")
+                        print(f"[U+1F4E8] WebSocket event: {event['type']}")
                         
                         if event['type'] in ['agent_started', 'agent_completed']:
                             auth_confirmed = True
-                            print(f"✅ WebSocket authentication confirmed via agent response")
+                            print(f" PASS:  WebSocket authentication confirmed via agent response")
                             break
                             
                     except asyncio.TimeoutError:
@@ -175,15 +175,15 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                         continue
                 
                 if not auth_confirmed:
-                    print(f"⚠️ WebSocket authentication could not be confirmed (no agent response)")
+                    print(f" WARNING: [U+FE0F] WebSocket authentication could not be confirmed (no agent response)")
                 
         except websockets.exceptions.InvalidStatus as e:
             if e.status_code == 401:
                 pytest.fail(f"WebSocket authentication failed: {e}")
             else:
-                print(f"⚠️ WebSocket connection failed: {e} (may be infrastructure issue)")
+                print(f" WARNING: [U+FE0F] WebSocket connection failed: {e} (may be infrastructure issue)")
         except Exception as e:
-            print(f"⚠️ WebSocket test failed: {e}")
+            print(f" WARNING: [U+FE0F] WebSocket test failed: {e}")
         
         # Test token validation endpoint (if available)
         auth_service_url = "http://localhost:8081"  # Auth service
@@ -195,21 +195,21 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             try:
                 async with session.get(validation_url, headers=validation_headers) as response:
                     if response.status == 200:
-                        print(f"✅ Token validation endpoint confirmed token is valid")
+                        print(f" PASS:  Token validation endpoint confirmed token is valid")
                     elif response.status == 401:
                         pytest.fail(f"Token validation failed: token rejected by auth service")
                     else:
-                        print(f"⚠️ Token validation endpoint returned {response.status}")
+                        print(f" WARNING: [U+FE0F] Token validation endpoint returned {response.status}")
                         
             except aiohttp.ClientError as e:
-                print(f"⚠️ Token validation request failed: {e} (auth service may not be running)")
+                print(f" WARNING: [U+FE0F] Token validation request failed: {e} (auth service may not be running)")
         
-        print(f"🎉 JWT AUTHENTICATION FLOW SUCCESS!")
-        print(f"   ✓ JWT token created with proper structure")
-        print(f"   ✓ Token contains required claims")
-        print(f"   ✓ API authentication with Bearer token")
-        print(f"   ✓ WebSocket authentication with JWT headers")
-        print(f"   ✓ Token validation across services")
+        print(f" CELEBRATION:  JWT AUTHENTICATION FLOW SUCCESS!")
+        print(f"   [U+2713] JWT token created with proper structure")
+        print(f"   [U+2713] Token contains required claims")
+        print(f"   [U+2713] API authentication with Bearer token")
+        print(f"   [U+2713] WebSocket authentication with JWT headers")
+        print(f"   [U+2713] Token validation across services")
 
 
     @pytest.mark.e2e
@@ -227,7 +227,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         - Graceful token expiration handling
         - Session continuity during renewal
         """
-        print(f"🚀 Testing session persistence and renewal")
+        print(f"[U+1F680] Testing session persistence and renewal")
         
         # Create user with short-lived token for renewal testing
         test_email = f"session_test_{int(time.time())}@example.com"
@@ -240,14 +240,14 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             exp_minutes=2  # Very short expiration for testing
         )
         
-        print(f"✅ Created short-lived token (2 min expiration)")
+        print(f" PASS:  Created short-lived token (2 min expiration)")
         
         # Decode token to get expiration
         token_payload = jwt.decode(short_lived_token, options={"verify_signature": False})
         original_exp = token_payload['exp']
         original_exp_time = datetime.fromtimestamp(original_exp, tz=timezone.utc)
         
-        print(f"🕒 Token expires at: {original_exp_time}")
+        print(f"[U+1F552] Token expires at: {original_exp_time}")
         
         # Test initial token validity
         headers = auth_helper.get_auth_headers(short_lived_token)
@@ -259,13 +259,13 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                 test_url = f"{backend_url}/api/health"  # Generic health endpoint
                 async with session.get(test_url, headers=headers) as response:
                     initial_auth_status = response.status
-                    print(f"📊 Initial auth status: {initial_auth_status}")
+                    print(f" CHART:  Initial auth status: {initial_auth_status}")
             except aiohttp.ClientError:
                 initial_auth_status = "connection_failed"
-                print(f"⚠️ Initial request failed - service may not be available")
+                print(f" WARNING: [U+FE0F] Initial request failed - service may not be available")
         
         # Test token renewal process
-        print(f"🔄 Testing token renewal...")
+        print(f" CYCLE:  Testing token renewal...")
         
         # Create new token with same user but fresh expiration
         renewed_token = auth_helper.create_test_jwt_token(
@@ -279,7 +279,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         renewed_exp = renewed_payload['exp']
         renewed_exp_time = datetime.fromtimestamp(renewed_exp, tz=timezone.utc)
         
-        print(f"✅ Token renewed")
+        print(f" PASS:  Token renewed")
         print(f"   Original expiry: {original_exp_time}")
         print(f"   Renewed expiry: {renewed_exp_time}")
         
@@ -295,14 +295,14 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             try:
                 async with session.get(test_url, headers=renewed_headers) as response:
                     renewed_auth_status = response.status
-                    print(f"📊 Renewed token auth status: {renewed_auth_status}")
+                    print(f" CHART:  Renewed token auth status: {renewed_auth_status}")
                     
                     # Renewed token should work at least as well as original
                     if initial_auth_status == 200:
                         assert renewed_auth_status == 200, "Renewed token should maintain authentication"
                         
             except aiohttp.ClientError:
-                print(f"⚠️ Renewed token test failed - service may not be available")
+                print(f" WARNING: [U+FE0F] Renewed token test failed - service may not be available")
         
         # Test WebSocket session continuity with renewed token
         websocket_url = "ws://localhost:8000/ws"
@@ -310,7 +310,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         
         try:
             async with websockets.connect(websocket_url, additional_headers=renewed_websocket_headers) as websocket:
-                print(f"✅ WebSocket connection with renewed token successful")
+                print(f" PASS:  WebSocket connection with renewed token successful")
                 
                 # Send test message to confirm session continuity
                 continuity_request = {
@@ -322,24 +322,24 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                 }
                 
                 await websocket.send(json.dumps(continuity_request))
-                print(f"📤 Sent session continuity test message")
+                print(f"[U+1F4E4] Sent session continuity test message")
                 
                 # Brief wait for response
                 try:
                     message = await asyncio.wait_for(websocket.recv(), timeout=10)
                     event = json.loads(message)
-                    print(f"📨 Session continuity confirmed: {event['type']}")
+                    print(f"[U+1F4E8] Session continuity confirmed: {event['type']}")
                 except asyncio.TimeoutError:
-                    print(f"⚠️ No immediate response to continuity test")
+                    print(f" WARNING: [U+FE0F] No immediate response to continuity test")
                     
         except Exception as e:
-            print(f"⚠️ WebSocket session continuity test failed: {e}")
+            print(f" WARNING: [U+FE0F] WebSocket session continuity test failed: {e}")
         
-        print(f"✅ SESSION PERSISTENCE AND RENEWAL SUCCESS!")
-        print(f"   ✓ Token renewal process validated")
-        print(f"   ✓ Expiration extension confirmed")
-        print(f"   ✓ Renewed token authentication works")
-        print(f"   ✓ Session continuity maintained")
+        print(f" PASS:  SESSION PERSISTENCE AND RENEWAL SUCCESS!")
+        print(f"   [U+2713] Token renewal process validated")
+        print(f"   [U+2713] Expiration extension confirmed")
+        print(f"   [U+2713] Renewed token authentication works")
+        print(f"   [U+2713] Session continuity maintained")
 
 
     @pytest.mark.e2e
@@ -357,7 +357,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         - Consistent user state across sessions
         - No session interference or conflicts
         """
-        print(f"🚀 Testing multi-device concurrent sessions")
+        print(f"[U+1F680] Testing multi-device concurrent sessions")
         
         # Create shared user account
         shared_email = f"multi_device_{int(time.time())}@example.com"
@@ -394,7 +394,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             }
         ]
         
-        print(f"✅ Created {len(device_configs)} device sessions for user: {shared_email}")
+        print(f" PASS:  Created {len(device_configs)} device sessions for user: {shared_email}")
         
         # Function to simulate device session
         async def device_session(device_config: Dict) -> Dict:
@@ -421,7 +421,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                 
                 async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
                     session_result["websocket_connected"] = True
-                    print(f"🔌 {device.title()} WebSocket connected")
+                    print(f"[U+1F50C] {device.title()} WebSocket connected")
                     
                     # Send device-specific request
                     device_request = {
@@ -438,7 +438,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                     
                     await websocket.send(json.dumps(device_request))
                     session_result["agent_request_sent"] = True
-                    print(f"📤 {device.title()} sent agent request")
+                    print(f"[U+1F4E4] {device.title()} sent agent request")
                     
                     # Collect events from this device session
                     start_time = time.time()
@@ -449,11 +449,11 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                             event = json.loads(message)
                             
                             session_result["events_received"] += 1
-                            print(f"📨 {device.title()}: {event['type']}")
+                            print(f"[U+1F4E8] {device.title()}: {event['type']}")
                             
                             if event['type'] == 'agent_completed':
                                 session_result["session_successful"] = True
-                                print(f"✅ {device.title()} session completed")
+                                print(f" PASS:  {device.title()} session completed")
                                 break
                                 
                         except asyncio.TimeoutError:
@@ -463,12 +463,12 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                             
             except Exception as e:
                 session_result["error"] = str(e)
-                print(f"❌ {device.title()} session error: {e}")
+                print(f" FAIL:  {device.title()} session error: {e}")
             
             return session_result
         
         # Execute all device sessions concurrently
-        print(f"🏃 Starting concurrent sessions from {len(device_configs)} devices...")
+        print(f"[U+1F3C3] Starting concurrent sessions from {len(device_configs)} devices...")
         
         device_tasks = [device_session(config) for config in device_configs]
         device_results = await asyncio.gather(*device_tasks, return_exceptions=True)
@@ -487,7 +487,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             else:
                 failed_devices.append(f"{result['device']}: Incomplete session")
         
-        print(f"📊 MULTI-DEVICE SESSION RESULTS:")
+        print(f" CHART:  MULTI-DEVICE SESSION RESULTS:")
         print(f"   Successful devices: {len(successful_devices)}")
         print(f"   Failed devices: {len(failed_devices)}")
         
@@ -496,7 +496,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         
         if failed_devices:
             for failure in failed_devices:
-                print(f"   ❌ {failure}")
+                print(f"    FAIL:  {failure}")
         
         # Validation criteria
         success_rate = len(successful_devices) / len(device_configs)
@@ -510,11 +510,11 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             assert device_result["events_received"] >= 1, \
                 f"{device_result['device']} received no events"
         
-        print(f"✅ MULTI-DEVICE CONCURRENT SESSIONS SUCCESS!")
-        print(f"   ✓ {success_rate:.1%} device success rate")
-        print(f"   ✓ Concurrent sessions handled properly")
-        print(f"   ✓ Session isolation maintained")
-        print(f"   ✓ Same user authenticated from multiple devices")
+        print(f" PASS:  MULTI-DEVICE CONCURRENT SESSIONS SUCCESS!")
+        print(f"   [U+2713] {success_rate:.1%} device success rate")
+        print(f"   [U+2713] Concurrent sessions handled properly")
+        print(f"   [U+2713] Session isolation maintained")
+        print(f"   [U+2713] Same user authenticated from multiple devices")
 
 
     @pytest.mark.e2e
@@ -533,10 +533,10 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         - Insufficient permissions are handled
         - Security headers and CORS policies
         """
-        print(f"🚀 Testing authentication security boundaries")
+        print(f"[U+1F680] Testing authentication security boundaries")
         
         # Test 1: Unauthenticated WebSocket connection
-        print(f"🔒 Testing unauthenticated WebSocket connection rejection...")
+        print(f"[U+1F512] Testing unauthenticated WebSocket connection rejection...")
         
         websocket_url = "ws://localhost:8000/ws"
         
@@ -559,23 +559,23 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                     event = json.loads(response)
                     
                     if event.get('type') == 'error':
-                        print(f"✅ Unauthenticated request properly rejected: {event.get('message', 'Auth error')}")
+                        print(f" PASS:  Unauthenticated request properly rejected: {event.get('message', 'Auth error')}")
                     else:
-                        print(f"⚠️ Unauthenticated request unexpectedly succeeded: {event['type']}")
+                        print(f" WARNING: [U+FE0F] Unauthenticated request unexpectedly succeeded: {event['type']}")
                         
                 except asyncio.TimeoutError:
-                    print(f"✅ Unauthenticated request timed out (likely rejected)")
+                    print(f" PASS:  Unauthenticated request timed out (likely rejected)")
                     
         except websockets.exceptions.InvalidStatus as e:
             if e.status_code == 401:
-                print(f"✅ Unauthenticated WebSocket connection properly rejected (401)")
+                print(f" PASS:  Unauthenticated WebSocket connection properly rejected (401)")
             else:
-                print(f"⚠️ WebSocket connection failed with status {e.status_code}")
+                print(f" WARNING: [U+FE0F] WebSocket connection failed with status {e.status_code}")
         except Exception as e:
-            print(f"⚠️ Unauthenticated WebSocket test failed: {e}")
+            print(f" WARNING: [U+FE0F] Unauthenticated WebSocket test failed: {e}")
         
         # Test 2: Invalid JWT token
-        print(f"🔒 Testing invalid JWT token rejection...")
+        print(f"[U+1F512] Testing invalid JWT token rejection...")
         
         invalid_tokens = [
             "invalid.jwt.token",
@@ -603,23 +603,23 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                         event = json.loads(response)
                         
                         if event.get('type') == 'error':
-                            print(f"✅ Invalid token #{i+1} properly rejected")
+                            print(f" PASS:  Invalid token #{i+1} properly rejected")
                         else:
-                            print(f"⚠️ Invalid token #{i+1} unexpectedly accepted")
+                            print(f" WARNING: [U+FE0F] Invalid token #{i+1} unexpectedly accepted")
                             
                     except asyncio.TimeoutError:
-                        print(f"✅ Invalid token #{i+1} timed out (likely rejected)")
+                        print(f" PASS:  Invalid token #{i+1} timed out (likely rejected)")
                         
             except websockets.exceptions.InvalidStatus as e:
                 if e.status_code == 401:
-                    print(f"✅ Invalid token #{i+1} properly rejected at connection (401)")
+                    print(f" PASS:  Invalid token #{i+1} properly rejected at connection (401)")
                 else:
-                    print(f"⚠️ Invalid token #{i+1} failed with status {e.status_code}")
+                    print(f" WARNING: [U+FE0F] Invalid token #{i+1} failed with status {e.status_code}")
             except Exception as e:
-                print(f"✅ Invalid token #{i+1} properly rejected: {e}")
+                print(f" PASS:  Invalid token #{i+1} properly rejected: {e}")
         
         # Test 3: Expired token
-        print(f"🔒 Testing expired JWT token rejection...")
+        print(f"[U+1F512] Testing expired JWT token rejection...")
         
         # Create token that's already expired
         expired_token = auth_helper.create_test_jwt_token(
@@ -646,25 +646,25 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                     event = json.loads(response)
                     
                     if event.get('type') == 'error' and 'expired' in event.get('message', '').lower():
-                        print(f"✅ Expired token properly rejected: {event.get('message')}")
+                        print(f" PASS:  Expired token properly rejected: {event.get('message')}")
                     elif event.get('type') == 'error':
-                        print(f"✅ Expired token rejected (general auth error): {event.get('message')}")
+                        print(f" PASS:  Expired token rejected (general auth error): {event.get('message')}")
                     else:
-                        print(f"⚠️ Expired token unexpectedly accepted: {event['type']}")
+                        print(f" WARNING: [U+FE0F] Expired token unexpectedly accepted: {event['type']}")
                         
                 except asyncio.TimeoutError:
-                    print(f"✅ Expired token timed out (likely rejected)")
+                    print(f" PASS:  Expired token timed out (likely rejected)")
                     
         except websockets.exceptions.InvalidStatus as e:
             if e.status_code == 401:
-                print(f"✅ Expired token properly rejected at connection (401)")
+                print(f" PASS:  Expired token properly rejected at connection (401)")
             else:
-                print(f"⚠️ Expired token failed with status {e.status_code}")
+                print(f" WARNING: [U+FE0F] Expired token failed with status {e.status_code}")
         except Exception as e:
-            print(f"✅ Expired token properly rejected: {e}")
+            print(f" PASS:  Expired token properly rejected: {e}")
         
         # Test 4: Limited permissions token
-        print(f"🔒 Testing limited permissions enforcement...")
+        print(f"[U+1F512] Testing limited permissions enforcement...")
         
         # Create token with limited permissions
         limited_token = auth_helper.create_test_jwt_token(
@@ -693,33 +693,33 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                     event = json.loads(response)
                     
                     if event.get('type') == 'error' and 'permission' in event.get('message', '').lower():
-                        print(f"✅ Permission enforcement working: {event.get('message')}")
+                        print(f" PASS:  Permission enforcement working: {event.get('message')}")
                     elif event.get('type') == 'error':
-                        print(f"⚠️ Limited token rejected (general error): {event.get('message')}")
+                        print(f" WARNING: [U+FE0F] Limited token rejected (general error): {event.get('message')}")
                     else:
                         # Some systems might allow the request but limit functionality
-                        print(f"⚠️ Limited permissions request processed: {event['type']}")
+                        print(f" WARNING: [U+FE0F] Limited permissions request processed: {event['type']}")
                         print(f"   (System may handle permissions at execution level)")
                         
                 except asyncio.TimeoutError:
-                    print(f"✅ Limited permissions request timed out (likely rejected)")
+                    print(f" PASS:  Limited permissions request timed out (likely rejected)")
                     
         except websockets.exceptions.InvalidStatus as e:
             if e.status_code == 403:
-                print(f"✅ Limited permissions properly rejected (403)")
+                print(f" PASS:  Limited permissions properly rejected (403)")
             elif e.status_code == 401:
-                print(f"⚠️ Limited permissions rejected as auth error (401)")
+                print(f" WARNING: [U+FE0F] Limited permissions rejected as auth error (401)")
             else:
-                print(f"⚠️ Limited permissions failed with status {e.status_code}")
+                print(f" WARNING: [U+FE0F] Limited permissions failed with status {e.status_code}")
         except Exception as e:
-            print(f"⚠️ Limited permissions test failed: {e}")
+            print(f" WARNING: [U+FE0F] Limited permissions test failed: {e}")
         
-        print(f"✅ AUTHENTICATION SECURITY BOUNDARIES TESTED!")
-        print(f"   ✓ Unauthenticated requests handling")
-        print(f"   ✓ Invalid token rejection")
-        print(f"   ✓ Expired token rejection")
-        print(f"   ✓ Permission enforcement validation")
-        print(f"   ✓ Security boundary protection confirmed")
+        print(f" PASS:  AUTHENTICATION SECURITY BOUNDARIES TESTED!")
+        print(f"   [U+2713] Unauthenticated requests handling")
+        print(f"   [U+2713] Invalid token rejection")
+        print(f"   [U+2713] Expired token rejection")
+        print(f"   [U+2713] Permission enforcement validation")
+        print(f"   [U+2713] Security boundary protection confirmed")
 
 
     @pytest.mark.e2e
@@ -737,7 +737,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         - Service-to-service authentication validation
         - Cross-service user identity consistency
         """
-        print(f"🚀 Testing cross-service authentication")
+        print(f"[U+1F680] Testing cross-service authentication")
         
         # Create authenticated user
         cross_service_email = f"cross_service_{int(time.time())}@example.com"
@@ -747,7 +747,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             permissions=["read", "write", "agent_execution"]
         )
         
-        print(f"✅ Created user for cross-service testing: {cross_service_email}")
+        print(f" PASS:  Created user for cross-service testing: {cross_service_email}")
         
         # Service endpoints to test
         services_to_test = [
@@ -774,7 +774,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                 base_url = service_config["base_url"]
                 endpoints = service_config["test_endpoints"]
                 
-                print(f"🔍 Testing {service_name} at {base_url}")
+                print(f" SEARCH:  Testing {service_name} at {base_url}")
                 
                 service_results = {
                     "service_reachable": False,
@@ -826,7 +826,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                 cross_service_results[service_name] = service_results
         
         # Test WebSocket authentication consistency
-        print(f"🔍 Testing WebSocket authentication consistency")
+        print(f" SEARCH:  Testing WebSocket authentication consistency")
         
         websocket_results = {
             "connection_successful": False,
@@ -874,7 +874,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             print(f"   WebSocket: Connection failed - {e}")
         
         # Analyze cross-service results
-        print(f"\n📊 CROSS-SERVICE AUTHENTICATION RESULTS:")
+        print(f"\n CHART:  CROSS-SERVICE AUTHENTICATION RESULTS:")
         
         total_services = len(cross_service_results) + 1  # +1 for WebSocket
         working_services = 0
@@ -892,7 +892,7 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
                 working_services += 1
             
             for error in results["errors"]:
-                print(f"     ⚠️ {error}")
+                print(f"      WARNING: [U+FE0F] {error}")
         
         # WebSocket results
         print(f"   WebSocket Service:")
@@ -905,10 +905,10 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
             working_services += 1
         
         if websocket_results["error"]:
-            print(f"     ⚠️ {websocket_results['error']}")
+            print(f"      WARNING: [U+FE0F] {websocket_results['error']}")
         
         # Validation criteria
-        print(f"\n📈 SUMMARY:")
+        print(f"\n[U+1F4C8] SUMMARY:")
         print(f"   Services reachable: {reachable_services}/{total_services}")
         print(f"   Services with working auth: {working_services}/{total_services}")
         
@@ -919,10 +919,10 @@ class TestAuthenticationSessionManagement(SSotBaseTestCase):
         if reachable_services > 0:
             auth_success_rate = working_services / reachable_services
             assert auth_success_rate >= 0.5, f"Cross-service auth success rate too low: {auth_success_rate:.1%}"
-            print(f"✅ Cross-service auth success rate: {auth_success_rate:.1%}")
+            print(f" PASS:  Cross-service auth success rate: {auth_success_rate:.1%}")
         
-        print(f"✅ CROSS-SERVICE AUTHENTICATION TESTED!")
-        print(f"   ✓ JWT token tested across multiple services")
-        print(f"   ✓ Authentication consistency validated")
-        print(f"   ✓ WebSocket and API auth coordination")
-        print(f"   ✓ Service-to-service identity verification")
+        print(f" PASS:  CROSS-SERVICE AUTHENTICATION TESTED!")
+        print(f"   [U+2713] JWT token tested across multiple services")
+        print(f"   [U+2713] Authentication consistency validated")
+        print(f"   [U+2713] WebSocket and API auth coordination")
+        print(f"   [U+2713] Service-to-service identity verification")

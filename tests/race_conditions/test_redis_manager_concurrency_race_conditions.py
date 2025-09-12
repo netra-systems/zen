@@ -169,7 +169,7 @@ class TestRedisManagerConcurrencyRaceConditions:
                 # Standard deviation should be reasonable (not excessive variance)
                 assert std_time <= 1.0, f"Too much timing variance: {std_time}s"
             
-            print(f"✅ Stress test: {total_successes}/{total_expected} validations succeeded "
+            print(f" PASS:  Stress test: {total_successes}/{total_expected} validations succeeded "
                   f"in {total_stress_time:.2f}s (success rate: {success_rate:.2%})")
     
     @pytest.mark.stress
@@ -271,7 +271,7 @@ class TestRedisManagerConcurrencyRaceConditions:
                     assert check['elapsed_time'] >= 0.4, \
                         f"Grace period missing during connection instability: {check['elapsed_time']}s"
             
-            print(f"✅ Connection stability test: {len(successful_checks)} successful, "
+            print(f" PASS:  Connection stability test: {len(successful_checks)} successful, "
                   f"{len(failed_checks)} failed (instability handled correctly)")
     
     @pytest.mark.stress
@@ -360,7 +360,7 @@ class TestRedisManagerConcurrencyRaceConditions:
                 assert avg_validation_time >= 0.5, \
                     f"Average validation time suggests grace period missing: {avg_validation_time}s"
             
-            print(f"✅ Load test: {successful_validations}/{concurrent_load} succeeded "
+            print(f" PASS:  Load test: {successful_validations}/{concurrent_load} succeeded "
                   f"in {total_load_time:.2f}s (success rate: {success_rate:.2%})")
     
     @pytest.mark.stress
@@ -461,7 +461,7 @@ class TestRedisManagerConcurrencyRaceConditions:
         
         # Check for thread safety errors
         if shared_state['errors']:
-            print(f"⚠️  Thread safety warnings: {len(shared_state['errors'])} errors occurred")
+            print(f" WARNING: [U+FE0F]  Thread safety warnings: {len(shared_state['errors'])} errors occurred")
             for error in shared_state['errors'][:5]:  # Show first 5 errors
                 print(f"   - {error}")
         
@@ -471,7 +471,7 @@ class TestRedisManagerConcurrencyRaceConditions:
                 assert result['elapsed_time'] >= 0.4, \
                     f"Grace period missing in thread {result['thread_id']}: {result['elapsed_time']}s"
         
-        print(f"✅ Thread safety test: {len(successful_results)}/{total_expected} successful "
+        print(f" PASS:  Thread safety test: {len(successful_results)}/{total_expected} successful "
               f"(max concurrent: {shared_state['max_concurrent']})")
     
     @pytest.mark.stress
@@ -546,7 +546,7 @@ class TestRedisManagerConcurrencyRaceConditions:
             expected_total = stress_tasks * iterations_per_task
             success_rate = total_successes / expected_total
             
-            print(f"✅ Memory stress test: {total_successes}/{expected_total} successful "
+            print(f" PASS:  Memory stress test: {total_successes}/{expected_total} successful "
                   f"(success rate: {success_rate:.2%}, object growth: {growth_rate:.2%})")
     
     @pytest.mark.stress
@@ -629,7 +629,7 @@ class TestRedisManagerConcurrencyRaceConditions:
                 # Maximum time should be reasonable (not hanging)
                 assert max_time <= 10.0, f"Maximum time too high (possible hang): {max_time}s"
                 
-                print(f"✅ Grace period consistency: avg={avg_time:.3f}s, median={median_time:.3f}s, "
+                print(f" PASS:  Grace period consistency: avg={avg_time:.3f}s, median={median_time:.3f}s, "
                       f"std={std_dev:.3f}s, range=[{min_time:.3f}s, {max_time:.3f}s]")
             else:
                 pytest.fail(f"Insufficient timing data: {len(all_elapsed_times)} measurements")
@@ -743,5 +743,5 @@ class TestRedisManagerConcurrencyRaceConditions:
             assert unexpected_errors <= total_iterations * 0.1, \
                 f"Too many unexpected errors: {unexpected_errors}/{total_iterations}"
             
-            print(f"✅ Error handling test: {successful_failures}/{total_iterations} graceful failures "
+            print(f" PASS:  Error handling test: {successful_failures}/{total_iterations} graceful failures "
                   f"({graceful_failure_rate:.2%}), {unexpected_errors} unexpected errors")

@@ -390,7 +390,7 @@ class WebSocketBusinessValueValidator:
         }
         
         try:
-            # Test Golden Path: Login → AI Response
+            # Test Golden Path: Login  ->  AI Response
             async with websocket_client_factory(
                 headers={"sec-websocket-protocol": f"jwt.{jwt_token}"}
             ) as client:

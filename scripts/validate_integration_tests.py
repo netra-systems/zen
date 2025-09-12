@@ -72,10 +72,10 @@ def main():
     print(f"\nSuccess rate: {success_rate:.1f}%")
     
     if success_rate >= 70:
-        print("✓ Major import issues resolved!")
+        print("[U+2713] Major import issues resolved!")
         return 0
     else:
-        print("✗ More work needed on import issues")
+        print("[U+2717] More work needed on import issues")
         return 1
 
 

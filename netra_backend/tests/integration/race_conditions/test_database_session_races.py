@@ -5,7 +5,7 @@ This module tests for race conditions in database session allocation and managem
 Validates that database sessions remain isolated and properly managed under concurrent load.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure data integrity and prevent database connection exhaustion
 - Value Impact: Prevents data corruption, connection leaks, and system instability
 - Strategic Impact: CRITICAL - Database reliability is fundamental to platform operation
@@ -294,7 +294,7 @@ class TestDatabaseSessionRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ 100 concurrent database session allocations completed successfully in {allocation_time:.2f}s. "
+            f" PASS:  100 concurrent database session allocations completed successfully in {allocation_time:.2f}s. "
             f"Success rate: {successful_allocations}/100, Valid isolation: {valid_isolations}/100, "
             f"Successful DB ops: {successful_db_ops}/100, Race conditions: {len(self.race_condition_detections)}, "
             f"Leaked sessions: {final_pool_metrics.leaked_sessions}"
@@ -422,7 +422,7 @@ class TestDatabaseSessionRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Session isolation test passed: 8 users × 5 sessions = {len(all_session_results)} total sessions. "
+            f" PASS:  Session isolation test passed: 8 users  x  5 sessions = {len(all_session_results)} total sessions. "
             f"All sessions properly isolated with unique IDs and correct user association."
         )
     
@@ -543,7 +543,7 @@ class TestDatabaseSessionRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Connection pool stress test passed: "
+            f" PASS:  Connection pool stress test passed: "
             f"{successful_batches}/12 successful batches, {total_sessions_allocated} sessions allocated "
             f"in {stress_test_time:.2f}s. Peak concurrent sessions: {max_concurrent_sessions}, "
             f"Pool exhaustion events: {final_pool_metrics.pool_exhaustion_events}, "
@@ -654,7 +654,7 @@ class TestDatabaseSessionRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Transaction isolation race test passed: "
+            f" PASS:  Transaction isolation race test passed: "
             f"{successful_transactions}/25 successful transactions, "
             f"{valid_isolations}/25 with valid isolation, "
             f"{len(unique_test_values)} unique test values, "

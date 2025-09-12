@@ -80,10 +80,10 @@ class CriticalPathValidator:
         
         if critical_failures:
             self.logger.error("=" * 60)
-            self.logger.error("🚨 CRITICAL FAILURES DETECTED - CHAT IS BROKEN!")
+            self.logger.error(" ALERT:  CRITICAL FAILURES DETECTED - CHAT IS BROKEN!")
             self.logger.error("=" * 60)
             for failure in critical_failures:
-                self.logger.error(f"❌ {failure.component}: {failure.failure_reason}")
+                self.logger.error(f" FAIL:  {failure.component}: {failure.failure_reason}")
                 if failure.remediation:
                     self.logger.error(f"   FIX: {failure.remediation}")
             self.logger.error("=" * 60)
@@ -93,7 +93,7 @@ class CriticalPathValidator:
                    if not v.passed and v.criticality != CriticalityLevel.CHAT_BREAKING]
         
         if warnings:
-            self.logger.warning("⚠️ Non-critical issues detected:")
+            self.logger.warning(" WARNING: [U+FE0F] Non-critical issues detected:")
             for warning in warnings:
                 self.logger.warning(f"  - {warning.component}: {warning.failure_reason}")
         
@@ -124,7 +124,7 @@ class CriticalPathValidator:
                         criticality=CriticalityLevel.CHAT_BREAKING,
                         metadata={"factory_pattern": True, "supervisor_supported": True}
                     )
-                    self.logger.info("✓ WebSocket bridge supported via factory pattern - supervisor ready")
+                    self.logger.info("[U+2713] WebSocket bridge supported via factory pattern - supervisor ready")
                     self.validations.append(validation)
                     return  # Factory pattern validation complete
                 
@@ -144,12 +144,12 @@ class CriticalPathValidator:
                         # TEMPORARY FIX: Skip validation for agents that don't have any WebSocket methods
                         # This handles legacy agents that might not properly inherit from BaseAgent
                         if not has_bridge_setter and not has_emit and not has_propagate:
-                            self.logger.warning(f"⚠️ Agent '{agent_name}' has no WebSocket methods - skipping validation (may be legacy agent)")
+                            self.logger.warning(f" WARNING: [U+FE0F] Agent '{agent_name}' has no WebSocket methods - skipping validation (may be legacy agent)")
                             continue
                             
                         # ADDITIONAL FIX: For agents with partial WebSocket support, try to initialize properly
                         if not has_bridge_setter and (has_emit or has_propagate):
-                            self.logger.warning(f"⚠️ Agent '{agent_name}' has partial WebSocket support - attempting initialization fix")
+                            self.logger.warning(f" WARNING: [U+FE0F] Agent '{agent_name}' has partial WebSocket support - attempting initialization fix")
                             # Check if this is a BaseAgent and try to ensure proper initialization
                             if hasattr(agent, '__class__') and hasattr(agent.__class__, '__bases__'):
                                 from netra_backend.app.agents.base_agent import BaseAgent
@@ -182,7 +182,7 @@ class CriticalPathValidator:
                                 "missing_setter": agents_missing_context_setter
                             }
                         )
-                        self.logger.error(f"❌ CRITICAL: WebSocket bridge not properly supported by agents: {agents_missing_mixin or agents_missing_context_setter}")
+                        self.logger.error(f" FAIL:  CRITICAL: WebSocket bridge not properly supported by agents: {agents_missing_mixin or agents_missing_context_setter}")
                     else:
                         validation = CriticalPathValidation(
                             component="WebSocket Bridge Chain",
@@ -191,7 +191,7 @@ class CriticalPathValidator:
                             passed=True,
                             criticality=CriticalityLevel.CHAT_BREAKING
                         )
-                        self.logger.info("✓ WebSocket bridge properly supported by all agents")
+                        self.logger.info("[U+2713] WebSocket bridge properly supported by all agents")
                     
                     self.validations.append(validation)
                 else:
@@ -206,7 +206,7 @@ class CriticalPathValidator:
                             criticality=CriticalityLevel.CHAT_BREAKING,
                             metadata={"factory_pattern": True, "registry": False}
                         )
-                        self.logger.info("✓ WebSocket bridge available for factory-based agent creation")
+                        self.logger.info("[U+2713] WebSocket bridge available for factory-based agent creation")
                         self.validations.append(validation)
                     else:
                         self._add_critical_failure(
@@ -248,7 +248,7 @@ class CriticalPathValidator:
                             failure_reason="Registry missing set_websocket_bridge method",
                             remediation="Add set_websocket_bridge method to AgentRegistry class"
                         )
-                        self.logger.error("❌ CRITICAL: AgentRegistry missing set_websocket_bridge method")
+                        self.logger.error(" FAIL:  CRITICAL: AgentRegistry missing set_websocket_bridge method")
                     else:
                         # Check if bridge was actually set
                         if hasattr(registry, 'websocket_bridge') and registry.websocket_bridge is not None:
@@ -267,7 +267,7 @@ class CriticalPathValidator:
                                         criticality=CriticalityLevel.CHAT_BREAKING,
                                         metadata={"bridge_set": True, "tool_dispatcher_support": True}
                                     )
-                                    self.logger.info("✓ Agent registry WebSocket bridge integration verified")
+                                    self.logger.info("[U+2713] Agent registry WebSocket bridge integration verified")
                                 else:
                                     validation = CriticalPathValidation(
                                         component="Agent Registry WebSocket Integration",
@@ -279,7 +279,7 @@ class CriticalPathValidator:
                                         remediation="Ensure tool dispatcher is initialized with AgentWebSocketBridge",
                                         metadata={"has_support": has_support}
                                     )
-                                    self.logger.warning("⚠️ Tool dispatcher lacks WebSocket support")
+                                    self.logger.warning(" WARNING: [U+FE0F] Tool dispatcher lacks WebSocket support")
                             else:
                                 validation = CriticalPathValidation(
                                     component="Agent Registry WebSocket Integration",
@@ -289,7 +289,7 @@ class CriticalPathValidator:
                                     criticality=CriticalityLevel.CHAT_BREAKING,
                                     metadata={"bridge_set": True}
                                 )
-                                self.logger.info("✓ Agent registry has WebSocket bridge set")
+                                self.logger.info("[U+2713] Agent registry has WebSocket bridge set")
                         else:
                             validation = CriticalPathValidation(
                                 component="Agent Registry WebSocket Integration",
@@ -335,7 +335,7 @@ class CriticalPathValidator:
                         "architecture": "UserContext"
                     }
                 )
-                self.logger.info("✓ Tool dispatcher configuration verified for UserContext architecture")
+                self.logger.info("[U+2713] Tool dispatcher configuration verified for UserContext architecture")
             else:
                 failure_details = []
                 if not has_bridge_factory:
@@ -357,7 +357,7 @@ class CriticalPathValidator:
                         "architecture": "UserContext"
                     }
                 )
-                self.logger.error(f"❌ CRITICAL: UserContext tool dispatcher configuration incomplete - tool events won't be sent to UI")
+                self.logger.error(f" FAIL:  CRITICAL: UserContext tool dispatcher configuration incomplete - tool events won't be sent to UI")
             
             self.validations.append(validation)
                 
@@ -428,7 +428,7 @@ class CriticalPathValidator:
                         remediation="Ensure MessageRouter is properly initialized with all required methods",
                         metadata={"missing_components": missing_components}
                     )
-                    self.logger.error(f"❌ CRITICAL: MessageRouter infrastructure incomplete - missing: {missing_components}")
+                    self.logger.error(f" FAIL:  CRITICAL: MessageRouter infrastructure incomplete - missing: {missing_components}")
                 elif handler_status and handler_status["status"] == "initializing":
                     # CRITICAL FIX: During grace period, don't warn about zero handlers
                     validation = CriticalPathValidation(
@@ -443,7 +443,7 @@ class CriticalPathValidator:
                             "message": handler_status["message"]
                         }
                     )
-                    self.logger.info(f"ℹ️ Handler registration: {handler_status['message']}")
+                    self.logger.info(f"[U+2139][U+FE0F] Handler registration: {handler_status['message']}")
                 elif handler_status and handler_status["status"] == "error":
                     # CRITICAL FIX: Only warn AFTER grace period expires
                     validation = CriticalPathValidation(
@@ -456,7 +456,7 @@ class CriticalPathValidator:
                         remediation="Ensure MessageRouter initializes with default handlers (HeartbeatHandler, etc.)",
                         metadata={"handler_status": handler_status}
                     )
-                    self.logger.error(f"❌ CRITICAL: {handler_status['message']} - basic functionality broken")
+                    self.logger.error(f" FAIL:  CRITICAL: {handler_status['message']} - basic functionality broken")
                 elif default_handler_count == 0:
                     # Fallback case when grace period checking is not available
                     validation = CriticalPathValidation(
@@ -469,7 +469,7 @@ class CriticalPathValidator:
                         remediation="Ensure MessageRouter initializes with default handlers (HeartbeatHandler, etc.)",
                         metadata={"default_handler_count": 0}
                     )
-                    self.logger.error("❌ CRITICAL: MessageRouter has no default handlers - basic functionality broken")
+                    self.logger.error(" FAIL:  CRITICAL: MessageRouter has no default handlers - basic functionality broken")
                 else:
                     # Infrastructure is ready - handlers are properly registered
                     validation = CriticalPathValidation(
@@ -486,9 +486,9 @@ class CriticalPathValidator:
                         }
                     )
                     if handler_status:
-                        self.logger.info(f"✓ {handler_status['message']} - per-connection registration supported")
+                        self.logger.info(f"[U+2713] {handler_status['message']} - per-connection registration supported")
                     else:
-                        self.logger.info(f"✓ Message handler infrastructure ready ({default_handler_count} default handlers, per-connection registration supported)")
+                        self.logger.info(f"[U+2713] Message handler infrastructure ready ({default_handler_count} default handlers, per-connection registration supported)")
                 
                 self.validations.append(validation)
             else:
@@ -557,7 +557,7 @@ class CriticalPathValidator:
                     failure_reason="Execution engine not found in supervisor",
                     remediation="Ensure supervisor has execution_engine or engine attribute"
                 )
-                self.logger.error("❌ CRITICAL: Execution engine missing - context can't be propagated to agents")
+                self.logger.error(" FAIL:  CRITICAL: Execution engine missing - context can't be propagated to agents")
             elif not context_propagation_possible:
                 validation = CriticalPathValidation(
                     component="Execution Context Propagation",
@@ -568,7 +568,7 @@ class CriticalPathValidator:
                     failure_reason="AgentWebSocketBridge not available for execution context",
                     remediation="Ensure AgentWebSocketBridge is initialized and available"
                 )
-                self.logger.error("❌ CRITICAL: AgentWebSocketBridge not available - agent events won't be sent")
+                self.logger.error(" FAIL:  CRITICAL: AgentWebSocketBridge not available - agent events won't be sent")
             else:
                 validation = CriticalPathValidation(
                     component="Execution Context Propagation",
@@ -578,7 +578,7 @@ class CriticalPathValidator:
                     criticality=CriticalityLevel.CHAT_BREAKING,
                     metadata={"bridge_location": engine_with_bridge}
                 )
-                self.logger.info(f"✓ Execution context propagation chain verified (using {engine_with_bridge})")
+                self.logger.info(f"[U+2713] Execution context propagation chain verified (using {engine_with_bridge})")
             
             self.validations.append(validation)
             
@@ -617,7 +617,7 @@ class CriticalPathValidator:
                         remediation="Ensure AgentWebSocketBridge has all notification methods",
                         metadata={"missing_methods": missing_methods}
                     )
-                    self.logger.error(f"❌ CRITICAL: AgentWebSocketBridge incomplete - missing methods: {missing_methods}")
+                    self.logger.error(f" FAIL:  CRITICAL: AgentWebSocketBridge incomplete - missing methods: {missing_methods}")
                 else:
                     # Check if bridge is integrated with supervisor
                     integrated = False
@@ -641,7 +641,7 @@ class CriticalPathValidator:
                             "has_all_methods": True
                         }
                     )
-                    self.logger.info(f"✓ AgentWebSocketBridge properly initialized in: {', '.join(bridge_locations)}")
+                    self.logger.info(f"[U+2713] AgentWebSocketBridge properly initialized in: {', '.join(bridge_locations)}")
             else:
                 validation = CriticalPathValidation(
                     component="AgentWebSocketBridge Initialization",
@@ -653,7 +653,7 @@ class CriticalPathValidator:
                     remediation="Ensure AgentWebSocketBridge is created during startup",
                     metadata={"checked_locations": ["app.state.agent_websocket_bridge"]}
                 )
-                self.logger.error("❌ CRITICAL: AgentWebSocketBridge not initialized - NO agent events will be sent to UI")
+                self.logger.error(" FAIL:  CRITICAL: AgentWebSocketBridge not initialized - NO agent events will be sent to UI")
             
             self.validations.append(validation)
             
@@ -676,7 +676,7 @@ class CriticalPathValidator:
             remediation=remediation
         )
         self.validations.append(validation)
-        self.logger.error(f"❌ CRITICAL: {component}: {reason}")
+        self.logger.error(f" FAIL:  CRITICAL: {component}: {reason}")
 
 
 # Global validator instance

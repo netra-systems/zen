@@ -744,10 +744,10 @@ class TestSensitiveDataFilterComprehensive(SSotBaseTestCase):
     def test_unicode_and_special_characters(self):
         """Test handling of Unicode and special characters."""
         unicode_tests = [
-            "password=пароль123",  # Cyrillic
-            "api_key=clé_🔑_123",   # French with emoji
-            "secret=秘密データ",      # Japanese
-            "token=tökën_spéçiål",  # Accented characters
+            "password=[U+043F]apo[U+043B][U+044C]123",  # Cyrillic
+            "api_key=cl[U+00E9]_[U+1F511]_123",   # French with emoji
+            "secret=[U+79D8][U+5BC6][U+30C7][U+30FC][U+30BF]",      # Japanese
+            "token=t[U+00F6]k[U+00EB]n_sp[U+00E9][U+00E7]i[U+00E5]l",  # Accented characters
         ]
         
         for test_input in unicode_tests:

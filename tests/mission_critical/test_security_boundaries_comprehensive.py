@@ -38,7 +38,7 @@
         # REMOVED_SYNTAX_ERROR: 5. JWT Token Security - Token validation and claim verification
 
         # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
-            # REMOVED_SYNTAX_ERROR: - Segment: ALL (Free → Enterprise) - Security is universal
+            # REMOVED_SYNTAX_ERROR: - Segment: ALL (Free  ->  Enterprise) - Security is universal
             # REMOVED_SYNTAX_ERROR: - Business Goal: Prevent data leakage, security breaches, compliance violations
             # REMOVED_SYNTAX_ERROR: - Value Impact: Prevents $100K+ security incidents, enables enterprise adoption
             # REMOVED_SYNTAX_ERROR: - Strategic Impact: Foundation for trustworthy multi-tenant platform

@@ -172,11 +172,11 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         BUSINESS VALUE: Validates user onboarding pipeline that drives platform growth.
         Tests tier assignment and trial period logic that directly affects revenue.
         """
-        logger.info("🧪 Testing complete registration flow integration with real database")
+        logger.info("[U+1F9EA] Testing complete registration flow integration with real database")
         
         for scenario_name, scenario_data in self.business_scenarios.items():
             with pytest.raises(Exception, match="") if scenario_name == "should_not_exist" else nullcontext():
-                logger.info(f"📧 Testing scenario: {scenario_name}")
+                logger.info(f"[U+1F4E7] Testing scenario: {scenario_name}")
                 
                 # REAL DATABASE INTEGRATION: Validate registration
                 result = self.user_business_logic.validate_registration(scenario_data)
@@ -235,9 +235,9 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                     assert stored_user.subscription_tier == scenario_data["expected_tier"].value
                     assert stored_user.trial_days_remaining == expected_trial_days
                     
-                    logger.info(f"✅ Registration flow integration successful for {scenario_name}")
+                    logger.info(f" PASS:  Registration flow integration successful for {scenario_name}")
         
-        logger.info("🎯 Complete registration flow integration test passed")
+        logger.info(" TARGET:  Complete registration flow integration test passed")
     
     @pytest.mark.asyncio
     async def test_business_email_detection_integration(self):
@@ -247,7 +247,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         BUSINESS VALUE: Proper email classification drives tier suggestion logic that affects conversion rates.
         Integration with potential external domain validation services.
         """
-        logger.info("🧪 Testing business email detection integration")
+        logger.info("[U+1F9EA] Testing business email detection integration")
         
         # Test scenarios with real domain classification
         test_cases = [
@@ -278,7 +278,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         ]
         
         for test_case in test_cases:
-            logger.info(f"📧 Testing: {test_case['description']}")
+            logger.info(f"[U+1F4E7] Testing: {test_case['description']}")
             
             registration_data = {
                 "email": test_case["email"],
@@ -298,9 +298,9 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
             if test_case["expected_business"] and "enterprise.com" in test_case["email"]:
                 assert result.trial_days == 30, f"Business emails from known domains should get 30-day trial"
             
-            logger.info(f"✅ Business email detection successful for {test_case['description']}")
+            logger.info(f" PASS:  Business email detection successful for {test_case['description']}")
         
-        logger.info("🎯 Business email detection integration test passed")
+        logger.info(" TARGET:  Business email detection integration test passed")
     
     @pytest.mark.asyncio 
     async def test_trial_period_calculation_integration(self):
@@ -310,7 +310,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         BUSINESS VALUE: Trial period accuracy impacts conversion rates and revenue funnel.
         Integration with configuration service for dynamic trial rules.
         """
-        logger.info("🧪 Testing trial period calculation integration")
+        logger.info("[U+1F9EA] Testing trial period calculation integration")
         
         # Save original environment
         original_env = self.env.get("ENVIRONMENT")
@@ -352,7 +352,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
             }
             
             for test_case in environment_test_cases:
-                logger.info(f"🌍 Testing environment: {test_case['description']}")
+                logger.info(f"[U+1F30D] Testing environment: {test_case['description']}")
                 
                 # REAL ENVIRONMENT INTEGRATION: Set environment variables
                 self.env.set("ENVIRONMENT", test_case["environment"], "test_trial_integration")
@@ -368,7 +368,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                 assert result.trial_days == test_case["expected_trial_days"], \
                     f"Trial days mismatch in {test_case['environment']}: expected {test_case['expected_trial_days']}, got {result.trial_days}"
                 
-                logger.info(f"✅ Trial period calculation correct for {test_case['description']}")
+                logger.info(f" PASS:  Trial period calculation correct for {test_case['description']}")
                 
                 # BUSINESS VALUE VALIDATION: Known business domains get 30 days in production
                 if test_case["environment"] == "production":
@@ -388,7 +388,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
             if original_testing:
                 self.env.set("TESTING", original_testing, "test_cleanup")
         
-        logger.info("🎯 Trial period calculation integration test passed")
+        logger.info(" TARGET:  Trial period calculation integration test passed")
     
     @pytest.mark.asyncio
     async def test_login_attempt_lockout_integration(self):
@@ -398,7 +398,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         BUSINESS VALUE: Prevents abuse while maintaining UX, protects against brute force attacks.
         Real Redis integration for distributed lockout state management.
         """
-        logger.info("🧪 Testing login attempt lockout integration with Redis")
+        logger.info("[U+1F9EA] Testing login attempt lockout integration with Redis")
         
         test_user_id = f"lockout-test-{uuid.uuid4().hex[:8]}"
         test_email = f"{test_user_id}@lockouttest.com"
@@ -419,7 +419,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         ]
         
         for scenario in test_scenarios:
-            logger.info(f"🔒 Testing login attempt #{scenario['attempt']}")
+            logger.info(f"[U+1F512] Testing login attempt #{scenario['attempt']}")
             
             # REAL REDIS PERSISTENCE: Store attempt count
             await self.redis_client.set(attempts_key, scenario["attempt"] - 1)
@@ -453,10 +453,10 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                     "locked"
                 )
             
-            logger.info(f"✅ Login attempt #{scenario['attempt']} handled correctly")
+            logger.info(f" PASS:  Login attempt #{scenario['attempt']} handled correctly")
         
         # CONCURRENT OPERATION TESTING: Test race conditions
-        logger.info("🏃 Testing concurrent login attempts with Redis locks")
+        logger.info("[U+1F3C3] Testing concurrent login attempts with Redis locks")
         
         async def concurrent_login_attempt(attempt_id: int):
             """Simulate concurrent login attempt."""
@@ -476,14 +476,14 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         
         # Verify consistent behavior under concurrency
         allowed_count = sum(1 for r in concurrent_results if r["allowed"])
-        logger.info(f"📊 Concurrent attempts: {len(concurrent_results)}, Allowed: {allowed_count}")
+        logger.info(f" CHART:  Concurrent attempts: {len(concurrent_results)}, Allowed: {allowed_count}")
         
         # All should have consistent remaining attempts (business logic is stateless)
         remaining_attempts = [r["remaining"] for r in concurrent_results]
         assert all(r == remaining_attempts[0] for r in remaining_attempts), \
             "Concurrent login attempts should have consistent remaining counts"
         
-        logger.info("🎯 Login attempt lockout integration test passed")
+        logger.info(" TARGET:  Login attempt lockout integration test passed")
     
     @pytest.mark.asyncio
     async def test_account_lifecycle_management_integration(self):
@@ -493,7 +493,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         BUSINESS VALUE: Ensures proper onboarding and billing transitions that affect revenue.
         Integration with email verification and notification services.
         """
-        logger.info("🧪 Testing account lifecycle management integration")
+        logger.info("[U+1F9EA] Testing account lifecycle management integration")
         
         # Test lifecycle scenarios with real database persistence
         lifecycle_scenarios = [
@@ -547,7 +547,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         ]
         
         for scenario in lifecycle_scenarios:
-            logger.info(f"🔄 Testing lifecycle scenario: {scenario['name']}")
+            logger.info(f" CYCLE:  Testing lifecycle scenario: {scenario['name']}")
             
             # REAL BUSINESS LOGIC INTEGRATION
             result = self.user_business_logic.process_account_lifecycle(scenario["account_data"])
@@ -597,9 +597,9 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                 assert stored_user.email_verified == scenario["account_data"]["email_verified"]
                 assert stored_user.is_active == (scenario["account_data"]["status"] == "active")
                 
-            logger.info(f"✅ Lifecycle scenario '{scenario['name']}' processed correctly")
+            logger.info(f" PASS:  Lifecycle scenario '{scenario['name']}' processed correctly")
         
-        logger.info("🎯 Account lifecycle management integration test passed")
+        logger.info(" TARGET:  Account lifecycle management integration test passed")
     
     @pytest.mark.asyncio
     async def test_cross_environment_business_rules_integration(self):
@@ -609,7 +609,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         BUSINESS VALUE: Ensures consistent business rules across environments while allowing
         environment-specific optimizations (faster tests, staging behavior).
         """
-        logger.info("🧪 Testing cross-environment business rules integration")
+        logger.info("[U+1F9EA] Testing cross-environment business rules integration")
         
         # Test environment-specific business rule variations
         original_env = self.env.get("ENVIRONMENT")
@@ -644,7 +644,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         
         try:
             for env_config in environment_rules:
-                logger.info(f"🌍 Testing environment: {env_config['environment']}")
+                logger.info(f"[U+1F30D] Testing environment: {env_config['environment']}")
                 
                 # REAL CONFIGURATION INTEGRATION: Set environment
                 self.env.set("ENVIRONMENT", env_config["environment"], "test_cross_env")
@@ -691,7 +691,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                 
                 assert business_result.trial_days == expected_business_trial
                 
-                logger.info(f"✅ Environment {env_config['environment']} rules validated")
+                logger.info(f" PASS:  Environment {env_config['environment']} rules validated")
                 
         finally:
             # Restore original environment
@@ -700,7 +700,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
             if original_testing:  
                 self.env.set("TESTING", original_testing, "test_cleanup")
         
-        logger.info("🎯 Cross-environment business rules integration test passed")
+        logger.info(" TARGET:  Cross-environment business rules integration test passed")
     
     # ============================================================================
     # DIFFICULT FAILING INTEGRATION TESTS (3+) - Revenue Protection
@@ -715,7 +715,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         Real database constraints prevent unauthorized tier assignments.
         Integration with billing service to prevent revenue leakage.
         """
-        logger.info("🧪 DIFFICULT TEST: Revenue protection tier bypass prevention")
+        logger.info("[U+1F9EA] DIFFICULT TEST: Revenue protection tier bypass prevention")
         
         # Test scenarios that should FAIL due to business rule violations
         tier_bypass_attempts = [
@@ -744,7 +744,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         ]
         
         for attempt in tier_bypass_attempts:
-            logger.info(f"🚫 Testing bypass attempt: {attempt['name']}")
+            logger.info(f"[U+1F6AB] Testing bypass attempt: {attempt['name']}")
             
             if attempt["should_fail"]:
                 # REVENUE PROTECTION: Business logic should prevent these scenarios
@@ -791,17 +791,17 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                         stored_user = db_result.fetchone()
                         
                         # Log potential revenue protection issue
-                        logger.warning(f"⚠️ POTENTIAL REVENUE LEAK: User {attempt['registration_data']['email']} "
+                        logger.warning(f" WARNING: [U+FE0F] POTENTIAL REVENUE LEAK: User {attempt['registration_data']['email']} "
                                      f"stored with tier {stored_user.subscription_tier} - should be reviewed")
                         
                     except Exception as e:
                         # Database constraint violation is EXPECTED for proper revenue protection
-                        logger.info(f"✅ Database constraint prevented tier bypass: {e}")
+                        logger.info(f" PASS:  Database constraint prevented tier bypass: {e}")
                         await session.rollback()
             
-            logger.info(f"✅ Tier bypass prevention validated for {attempt['name']}")
+            logger.info(f" PASS:  Tier bypass prevention validated for {attempt['name']}")
         
-        logger.info("🎯 DIFFICULT TEST PASSED: Revenue protection tier bypass prevention")
+        logger.info(" TARGET:  DIFFICULT TEST PASSED: Revenue protection tier bypass prevention")
     
     @pytest.mark.asyncio 
     async def test_concurrent_registration_race_conditions_integration(self):
@@ -812,7 +812,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         Database uniqueness constraints with proper error handling.
         Real transaction isolation prevents double registrations.
         """
-        logger.info("🧪 DIFFICULT TEST: Concurrent registration race conditions")
+        logger.info("[U+1F9EA] DIFFICULT TEST: Concurrent registration race conditions")
         
         test_email = f"race-condition-{uuid.uuid4().hex[:8]}@concurrency.test"
         test_password = "SecurePass123!"
@@ -856,7 +856,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                 return {"attempt_id": attempt_id, "success": False, "error": str(e)}
         
         # CONCURRENT OPERATION TESTING: Launch multiple registration attempts
-        logger.info(f"🏃 Launching 10 concurrent registration attempts for {test_email}")
+        logger.info(f"[U+1F3C3] Launching 10 concurrent registration attempts for {test_email}")
         
         concurrent_tasks = [attempt_registration(i) for i in range(10)]
         results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
@@ -866,7 +866,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         failed_registrations = [r for r in results if isinstance(r, dict) and not r.get("success")]
         exceptions = [r for r in results if isinstance(r, Exception)]
         
-        logger.info(f"📊 Concurrent registration results:")
+        logger.info(f" CHART:  Concurrent registration results:")
         logger.info(f"   Successful: {len(successful_registrations)}")
         logger.info(f"   Failed: {len(failed_registrations)}")
         logger.info(f"   Exceptions: {len(exceptions)}")
@@ -888,8 +888,8 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
             # Track for cleanup
             self.test_users_created.append(test_email)
         
-        logger.info(f"✅ Race condition properly handled - only 1 user created")
-        logger.info("🎯 DIFFICULT TEST PASSED: Concurrent registration race conditions")
+        logger.info(f" PASS:  Race condition properly handled - only 1 user created")
+        logger.info(" TARGET:  DIFFICULT TEST PASSED: Concurrent registration race conditions")
     
     @pytest.mark.asyncio
     async def test_trial_period_manipulation_prevention_integration(self):
@@ -900,7 +900,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         Database triggers prevent trial manipulation.
         Integration with audit service tracks trial abuse attempts.
         """
-        logger.info("🧪 DIFFICULT TEST: Trial period manipulation prevention")
+        logger.info("[U+1F9EA] DIFFICULT TEST: Trial period manipulation prevention")
         
         # Create a user with standard trial period
         test_email = f"trial-manipulation-{uuid.uuid4().hex[:8]}@manipulation.test"
@@ -945,7 +945,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
         ]
         
         for attempt in manipulation_attempts:
-            logger.info(f"🚫 Testing manipulation: {attempt['name']}")
+            logger.info(f"[U+1F6AB] Testing manipulation: {attempt['name']}")
             
             # Setup expired trial if needed
             if attempt.get("setup_expired"):
@@ -995,7 +995,7 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                         
                         # REVENUE PROTECTION: Check for illegal trial extensions
                         if attempt["new_trial_days"] > 30:  # Max reasonable trial
-                            logger.warning(f"⚠️ POTENTIAL REVENUE LEAK: Trial days set to {updated_user.trial_days_remaining}")
+                            logger.warning(f" WARNING: [U+FE0F] POTENTIAL REVENUE LEAK: Trial days set to {updated_user.trial_days_remaining}")
                             assert updated_user.trial_days_remaining <= 30, \
                                 "Trial days should not exceed business rule maximum"
                         
@@ -1018,16 +1018,16 @@ class TestUserBusinessLogicIntegration(BaseIntegrationTest):
                         
                     except Exception as e:
                         # Database constraints preventing manipulation are EXPECTED
-                        logger.info(f"✅ Database constraint prevented trial manipulation: {e}")
+                        logger.info(f" PASS:  Database constraint prevented trial manipulation: {e}")
                         await session.rollback()
                 
                 # EXPIRED TRIAL VALIDATION
                 if lifecycle_result.requires_upgrade and lifecycle_result.limited_access:
-                    logger.info("✅ Expired trial properly detected - upgrade required")
+                    logger.info(" PASS:  Expired trial properly detected - upgrade required")
             
-            logger.info(f"✅ Trial manipulation prevention validated for {attempt['name']}")
+            logger.info(f" PASS:  Trial manipulation prevention validated for {attempt['name']}")
         
-        logger.info("🎯 DIFFICULT TEST PASSED: Trial period manipulation prevention")
+        logger.info(" TARGET:  DIFFICULT TEST PASSED: Trial period manipulation prevention")
 
 
 @pytest.mark.asyncio
@@ -1036,7 +1036,7 @@ async def test_user_business_logic_integration_smoke():
     Smoke test to verify UserBusinessLogic integration test suite is working.
     This test validates that the test infrastructure is properly set up.
     """
-    logger.info("🔥 Running UserBusinessLogic integration smoke test")
+    logger.info(" FIRE:  Running UserBusinessLogic integration smoke test")
     
     # Basic instantiation test
     business_logic = UserBusinessLogic()
@@ -1054,7 +1054,7 @@ async def test_user_business_logic_integration_smoke():
     assert result.is_valid
     assert result.assigned_tier == SubscriptionTier.FREE
     
-    logger.info("✅ UserBusinessLogic integration smoke test passed")
+    logger.info(" PASS:  UserBusinessLogic integration smoke test passed")
 
 
 # Test helper function

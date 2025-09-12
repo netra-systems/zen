@@ -1,7 +1,7 @@
 """
 Regression Test - WebSocket Context Import Failure (Unit)
 
-🚨 CRITICAL REGRESSION TEST 🚨
+ ALERT:  CRITICAL REGRESSION TEST  ALERT: 
 This test MUST FAIL initially to prove the regression exists.
 
 Purpose: Prove that WebSocketRequestContext cannot be imported from websocket_core
@@ -82,7 +82,7 @@ class TestWebSocketContextImportRegression:
     
     def test_websocket_request_context_alias_available_EXPECTED_TO_FAIL(self):
         """
-        🚨 REGRESSION TEST: This test MUST FAIL to prove the issue exists.
+         ALERT:  REGRESSION TEST: This test MUST FAIL to prove the issue exists.
         
         Test that WebSocketRequestContext alias can be imported from websocket_core.
         
@@ -91,7 +91,7 @@ class TestWebSocketContextImportRegression:
         """
         # This assertion should FAIL, proving the regression
         assert WEBSOCKET_REQUEST_CONTEXT_AVAILABLE, (
-            f"🚨 REGRESSION DETECTED: WebSocketRequestContext alias cannot be imported "
+            f" ALERT:  REGRESSION DETECTED: WebSocketRequestContext alias cannot be imported "
             f"from websocket_core package. Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
             f"This breaks backward compatibility and agent-WebSocket integration."
         )
@@ -121,7 +121,7 @@ class TestWebSocketContextImportRegression:
     
     def test_backward_compatibility_broken_EXPECTED_TO_FAIL(self):
         """
-        🚨 REGRESSION TEST: This test MUST FAIL to prove backward compatibility is broken.
+         ALERT:  REGRESSION TEST: This test MUST FAIL to prove backward compatibility is broken.
         
         Test that code expecting WebSocketRequestContext import will fail.
         
@@ -138,7 +138,7 @@ class TestWebSocketContextImportRegression:
         
         # This assertion should FAIL, proving backward compatibility is broken
         assert import_successful, (
-            f"🚨 BACKWARD COMPATIBILITY BROKEN: The import statement '{import_statement}' "
+            f" ALERT:  BACKWARD COMPATIBILITY BROKEN: The import statement '{import_statement}' "
             f"fails, breaking existing code that depends on WebSocketRequestContext alias. "
             f"This violates SSOT principles and breaks agent-WebSocket integration."
         )
@@ -175,7 +175,7 @@ class TestWebSocketContextImportRegression:
         
         if missing_exports:
             pytest.fail(
-                f"🚨 EXPORT REGRESSION: websocket_core __all__ is missing: {missing_exports}. "
+                f" ALERT:  EXPORT REGRESSION: websocket_core __all__ is missing: {missing_exports}. "
                 f"This breaks backward compatibility and SSOT principles."
             )
     
@@ -217,17 +217,17 @@ class TestWebSocketContextImportRegression:
         failed_imports = [path for path, success in import_results.items() if not success]
         successful_imports = [path for path, success in import_results.items() if success]
         
-        print("\n🔍 Import Path Analysis:")
-        print(f"✅ Successful imports ({len(successful_imports)}):")
+        print("\n SEARCH:  Import Path Analysis:")
+        print(f" PASS:  Successful imports ({len(successful_imports)}):")
         for path in successful_imports:
             print(f"   - {path}")
         
-        print(f"\n❌ Failed imports ({len(failed_imports)}):")
+        print(f"\n FAIL:  Failed imports ({len(failed_imports)}):")
         for path in failed_imports:
             print(f"   - {path}")
         
         if failed_imports:
-            print(f"\n🚨 REGRESSION IMPACT: {len(failed_imports)} import path(s) are broken")
+            print(f"\n ALERT:  REGRESSION IMPACT: {len(failed_imports)} import path(s) are broken")
         
         # This test always passes but documents the current state
         assert True, "Documentation test - see output for import path status"

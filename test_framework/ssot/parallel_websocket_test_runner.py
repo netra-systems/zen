@@ -123,7 +123,7 @@ class ParallelWebSocketTestRunner:
         Raises:
             RuntimeError: If parallel execution setup fails
         """
-        logger.info(f"🚀 Starting parallel execution of {test_suite.suite_name}")
+        logger.info(f"[U+1F680] Starting parallel execution of {test_suite.suite_name}")
         start_time = time.time()
         
         if test_suite.execution_mode == ParallelExecutionMode.ASYNC_CONCURRENT:
@@ -140,7 +140,7 @@ class ParallelWebSocketTestRunner:
         successful_tests = sum(1 for r in results if r.success)
         
         logger.info(
-            f"✅ Parallel test suite completed: {test_suite.suite_name}\n"
+            f" PASS:  Parallel test suite completed: {test_suite.suite_name}\n"
             f"   Execution mode: {test_suite.execution_mode.value}\n"
             f"   Tests run: {len(results)}\n"
             f"   Successful: {successful_tests}/{len(results)}\n"
@@ -227,7 +227,7 @@ class ParallelWebSocketTestRunner:
                 )
                 
                 logger.debug(
-                    f"✅ Parallel test completed: {test_name} "
+                    f" PASS:  Parallel test completed: {test_name} "
                     f"({execution_time:.2f}s, {result.connections_used} connections)"
                 )
                 
@@ -235,7 +235,7 @@ class ParallelWebSocketTestRunner:
                 
             except Exception as e:
                 execution_time = time.time() - test_start
-                logger.error(f"❌ Parallel test failed: {test_name}: {e}")
+                logger.error(f" FAIL:  Parallel test failed: {test_name}: {e}")
                 
                 return ParallelTestResult(
                     test_name=test_name,

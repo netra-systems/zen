@@ -12,8 +12,8 @@ Business Value:
 
 Target Fix:
 Line 376 in gcp_initialization_validator.py:
-  FROM: is_connected = redis_manager.is_connected()  # ❌ Method call on property
-  TO:   is_connected = redis_manager.is_connected    # ✅ Property access
+  FROM: is_connected = redis_manager.is_connected()  #  FAIL:  Method call on property
+  TO:   is_connected = redis_manager.is_connected    #  PASS:  Property access
 
 This test suite provides precise validation of this specific fix.
 """
@@ -67,7 +67,7 @@ class TestGCPInitializationValidatorRedisFix334(SSotBaseTestCase):
         # REPRODUCE: Execute the EXACT problematic line 376 code
         with self.expect_exception(TypeError, "'bool' object is not callable"):
             # This is the EXACT line 376 that causes the bug:
-            is_connected = mock_redis_manager.is_connected()  # ❌ WRONG: Method call
+            is_connected = mock_redis_manager.is_connected()  #  FAIL:  WRONG: Method call
         
     def test_line_376_fixed_redis_is_connected_property_access_works(self):
         """
@@ -87,7 +87,7 @@ class TestGCPInitializationValidatorRedisFix334(SSotBaseTestCase):
         type(mock_redis_manager).is_connected = property(lambda self: True)
         
         # EXECUTE: The CORRECTED version of line 376
-        is_connected = mock_redis_manager.is_connected  # ✅ CORRECT: Property access
+        is_connected = mock_redis_manager.is_connected  #  PASS:  CORRECT: Property access
         
         # VERIFY: No TypeError, gets correct boolean result
         self.assertTrue(isinstance(is_connected, bool))
@@ -119,7 +119,7 @@ class TestGCPInitializationValidatorRedisFix334(SSotBaseTestCase):
             elif hasattr(redis_manager, 'is_connected'):
                 # THIS IS THE BUGGY LINE 376:
                 with self.expect_exception(TypeError, "'bool' object is not callable"):
-                    is_connected = redis_manager.is_connected()  # ❌ Method call bug
+                    is_connected = redis_manager.is_connected()  #  FAIL:  Method call bug
                     
     def test_validate_redis_readiness_method_integration_after_fix(self):
         """
@@ -146,7 +146,7 @@ class TestGCPInitializationValidatorRedisFix334(SSotBaseTestCase):
                 result = False
             elif hasattr(redis_manager, 'is_connected'):
                 # THIS IS THE FIXED LINE 376:
-                is_connected = redis_manager.is_connected  # ✅ Property access fix
+                is_connected = redis_manager.is_connected  #  PASS:  Property access fix
                 result = bool(is_connected)
             else:
                 result = False
@@ -175,7 +175,7 @@ class TestGCPInitializationValidatorRedisFix334(SSotBaseTestCase):
         type(mock_redis_manager).is_connected = property(lambda self: False)
         
         # EXECUTE: Fixed line 376 with disconnected Redis
-        is_connected = mock_redis_manager.is_connected  # ✅ Property access
+        is_connected = mock_redis_manager.is_connected  #  PASS:  Property access
         
         # VERIFY: Returns False without error
         self.assertTrue(isinstance(is_connected, bool)) 
@@ -299,7 +299,7 @@ class TestGCPInitializationValidatorRedisFix334(SSotBaseTestCase):
                 result = False
             elif hasattr(redis_manager, 'is_connected'):
                 # CRITICAL: This is the fixed version of line 376
-                is_connected = redis_manager.is_connected  # ✅ No parentheses
+                is_connected = redis_manager.is_connected  #  PASS:  No parentheses
                 
                 if is_connected:
                     # IDEAL CASE: Redis fully operational (staging success scenario)
@@ -342,7 +342,7 @@ class TestGCPInitializationValidatorRedisFix334(SSotBaseTestCase):
                     result = False
                 elif hasattr(redis_manager, 'is_connected'):
                     # Fixed line 376 - no longer causes TypeError
-                    is_connected = redis_manager.is_connected  # ✅ Property access
+                    is_connected = redis_manager.is_connected  #  PASS:  Property access
                     result = bool(is_connected)
                 else:
                     result = False

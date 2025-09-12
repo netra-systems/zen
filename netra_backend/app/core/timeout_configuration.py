@@ -3,8 +3,8 @@
 **BUSINESS CONTEXT**: Priority 3 timeout hierarchy fixes to restore $200K+ MRR business value
 by aligning timeouts for cloud-native GCP Cloud Run environment.
 
-**ROOT CAUSE**: WebSocket (3s) → Agent (15s) timeout causing premature failures
-**REQUIRED**: Cloud-native timeout hierarchy with 35s WebSocket → 30s Agent coordination
+**ROOT CAUSE**: WebSocket (3s)  ->  Agent (15s) timeout causing premature failures
+**REQUIRED**: Cloud-native timeout hierarchy with 35s WebSocket  ->  30s Agent coordination
 **IMPACT**: $200K+ MRR affected by inconsistent AI processing reliability
 
 **IMPLEMENTATION STRATEGY**:
@@ -179,12 +179,12 @@ class CloudNativeTimeoutManager:
         return TimeoutConfig(
             # CRITICAL FIX: WebSocket timeouts for Cloud Run staging (35s > 30s agent)
             websocket_connection_timeout=60,  # Connection establishment
-            websocket_recv_timeout=35,        # PRIORITY 3 FIX: 3s → 35s
+            websocket_recv_timeout=35,        # PRIORITY 3 FIX: 3s  ->  35s
             websocket_send_timeout=30,
             websocket_heartbeat_timeout=90,
             
             # Agent execution timeouts (must be < WebSocket recv timeout)
-            agent_execution_timeout=30,       # PRIORITY 3 FIX: 15s → 30s 
+            agent_execution_timeout=30,       # PRIORITY 3 FIX: 15s  ->  30s 
             agent_thinking_timeout=25,
             agent_tool_timeout=20,
             agent_completion_timeout=15,

@@ -401,7 +401,7 @@ class TestRedisConnectionPoolConflicts(SSotAsyncTestCase):
         for mtype, items in by_type.items():
             report += f"\n{mtype.upper()} ({len(items)} managers):\n"
             for item in items:
-                status = "✓ Active" if item["instance"] else "✗ Failed"
+                status = "[U+2713] Active" if item["instance"] else "[U+2717] Failed"
                 error = f" - {item.get('error', '')}" if item.get('error') else ""
                 report += f"  - {item['module']}.{item['class']} {status}{error}\n"
         

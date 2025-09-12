@@ -18,7 +18,7 @@ CRITICAL AREAS TESTED:
 4. Real-Time Communication - WebSocket message routing and filtering
 5. System Integration - WebSocket Core integration with AgentRegistry and other SSOT components
 
-🚨 MISSION CRITICAL EVENTS (Must deliver for chat business value):
+ ALERT:  MISSION CRITICAL EVENTS (Must deliver for chat business value):
 1. agent_started - User must see agent began processing their problem
 2. agent_thinking - Real-time reasoning visibility (shows AI is working on valuable solutions)
 3. tool_executing - Tool usage transparency (demonstrates problem-solving approach)  

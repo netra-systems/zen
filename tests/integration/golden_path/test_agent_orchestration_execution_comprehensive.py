@@ -146,7 +146,7 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         from netra_backend.app.agents.supervisor.agent_class_registry import get_agent_class_registry
         from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         
-        logger.info("🔧 Configuring AgentInstanceFactory for golden path tests...")
+        logger.info("[U+1F527] Configuring AgentInstanceFactory for golden path tests...")
         
         try:
             # Create test agent class registry with basic agents
@@ -175,10 +175,10 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
                 tool_dispatcher=None  # Will be created per-request
             )
             
-            logger.info("✅ AgentInstanceFactory configured successfully for tests")
+            logger.info(" PASS:  AgentInstanceFactory configured successfully for tests")
             
         except Exception as e:
-            logger.error(f"❌ Failed to configure AgentInstanceFactory for tests: {e}")
+            logger.error(f" FAIL:  Failed to configure AgentInstanceFactory for tests: {e}")
             # Don't raise the error - let tests run and fail gracefully with better error messages
             logger.warning("   - Tests may fail due to unconfigured factory, but will provide better error context")
 
@@ -339,14 +339,14 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         required_events = ['agent_started', 'agent_completed']
         for required_event in required_events:
             if required_event in event_types:
-                logger.info(f"✅ {required_event} event verified")
+                logger.info(f" PASS:  {required_event} event verified")
             else:
-                logger.warning(f"⚠️ {required_event} event not found in: {event_types}")
+                logger.warning(f" WARNING: [U+FE0F] {required_event} event not found in: {event_types}")
         
         # At least one WebSocket event should have been sent
         self.assertGreater(len(event_history), 0, 
                           f"Expected WebSocket events to be sent, but no events found. Bridge: {websocket_bridge}")
-        logger.info(f"✅ WebSocket events sent: {len(event_history)} events, types: {event_types}")
+        logger.info(f" PASS:  WebSocket events sent: {len(event_history)} events, types: {event_types}")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -514,9 +514,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         
         # Should have tool execution events
         if "tool_executing" in event_types:
-            logger.info("✅ tool_executing event verified")
+            logger.info(" PASS:  tool_executing event verified")
         if "tool_completed" in event_types:
-            logger.info("✅ tool_completed event verified")
+            logger.info(" PASS:  tool_completed event verified")
         
         # At least one tool-related event should be present
         tool_events = [et for et in event_types if 'tool' in et]
@@ -724,9 +724,9 @@ class TestAgentOrchestrationExecution(SSotAsyncTestCase):
         # Should have error handling events
         error_events = [et for et in event_types if 'error' in et or 'recover' in et]
         if len(error_events) > 0:
-            logger.info(f"✅ Error handling events found: {error_events}")
+            logger.info(f" PASS:  Error handling events found: {error_events}")
         else:
-            logger.warning(f"⚠️ No error events found in: {event_types}")
+            logger.warning(f" WARNING: [U+FE0F] No error events found in: {event_types}")
 
     @pytest.mark.integration
     @pytest.mark.real_services

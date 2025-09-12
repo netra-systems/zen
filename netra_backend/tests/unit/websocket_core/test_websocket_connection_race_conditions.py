@@ -82,7 +82,7 @@ class TestWebSocketConnectionStateMachine:
             
             state_machine = ConnectionStateMachine()
             
-            # Expected progression: CONNECTING → ACCEPTED → AUTHENTICATED → SERVICES_READY → PROCESSING_READY
+            # Expected progression: CONNECTING  ->  ACCEPTED  ->  AUTHENTICATED  ->  SERVICES_READY  ->  PROCESSING_READY
             assert state_machine.current_state == ApplicationConnectionState.CONNECTING
             
             state_machine.transition_to(ApplicationConnectionState.ACCEPTED)

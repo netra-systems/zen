@@ -355,14 +355,14 @@ class RealAccountDeletionTester(SSotBaseTestCase):
             deleted_user = await self._auth_service.get_user_by_id(self._test_context.test_user_id)
             
             if deleted_user is None:
-                logger.info("✓ Auth service user deletion verified - user not found")
+                logger.info("[U+2713] Auth service user deletion verified - user not found")
                 return {
                     "user_deleted": True,
                     "verification_method": "auth_service_query",
                     "user_exists": False
                 }
             else:
-                logger.error("✗ Auth service user deletion FAILED - user still exists")
+                logger.error("[U+2717] Auth service user deletion FAILED - user still exists")
                 return {
                     "user_deleted": False,
                     "verification_method": "auth_service_query", 
@@ -391,14 +391,14 @@ class RealAccountDeletionTester(SSotBaseTestCase):
             )
             
             if profile_response.status_code == 404:
-                logger.info("✓ Backend profile deletion verified - profile not found")
+                logger.info("[U+2713] Backend profile deletion verified - profile not found")
                 return {
                     "profile_deleted": True,
                     "verification_method": "backend_api_check",
                     "status_code": 404
                 }
             elif profile_response.status_code == 401:
-                logger.info("✓ Backend profile access denied - token invalidated")
+                logger.info("[U+2713] Backend profile access denied - token invalidated")
                 return {
                     "profile_deleted": True,
                     "verification_method": "backend_api_check",
@@ -414,7 +414,7 @@ class RealAccountDeletionTester(SSotBaseTestCase):
                     "status_code": 501
                 }
             else:
-                logger.error(f"✗ Backend profile deletion FAILED - profile still accessible: {profile_response.status_code}")
+                logger.error(f"[U+2717] Backend profile deletion FAILED - profile still accessible: {profile_response.status_code}")
                 return {
                     "profile_deleted": False,
                     "verification_method": "backend_api_check",
@@ -443,7 +443,7 @@ class RealAccountDeletionTester(SSotBaseTestCase):
                 user_records_found = False  # Placeholder - would query actual tables
                 
                 if not user_records_found:
-                    logger.info("✓ Database cleanup verified - no remaining user data found")
+                    logger.info("[U+2713] Database cleanup verified - no remaining user data found")
                     return {
                         "data_removed": True,
                         "verification_method": "database_queries",
@@ -451,7 +451,7 @@ class RealAccountDeletionTester(SSotBaseTestCase):
                         "remaining_records": remaining_records
                     }
                 else:
-                    logger.error("✗ Database cleanup FAILED - user data still present")
+                    logger.error("[U+2717] Database cleanup FAILED - user data still present")
                     return {
                         "data_removed": False,
                         "verification_method": "database_queries",
@@ -473,14 +473,14 @@ class RealAccountDeletionTester(SSotBaseTestCase):
             connections_terminated = len(self._test_context.websocket_connections) == 0 or True
             
             if connections_terminated:
-                logger.info("✓ WebSocket cleanup verified - connections terminated")
+                logger.info("[U+2713] WebSocket cleanup verified - connections terminated")
                 return {
                     "connections_terminated": True,
                     "verification_method": "websocket_manager_check",
                     "connection_count": 0
                 }
             else:
-                logger.error("✗ WebSocket cleanup FAILED - connections still active")
+                logger.error("[U+2717] WebSocket cleanup FAILED - connections still active")
                 return {
                     "connections_terminated": False,
                     "verification_method": "websocket_manager_check",

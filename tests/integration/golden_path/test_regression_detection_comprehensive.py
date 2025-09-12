@@ -17,7 +17,7 @@ CRITICAL REGRESSION SCENARIOS TO DETECT:
 3. WebSocket connection and event delivery regressions
 4. Database persistence and data integrity regressions  
 5. Performance degradation regressions (response time increases)
-6. Cross-service integration regressions (auth↔backend↔cache)
+6. Cross-service integration regressions (auth[U+2194]backend[U+2194]cache)
 7. Configuration and environment variable regressions
 8. API contract and interface regressions
 9. Error handling and recovery mechanism regressions
@@ -204,7 +204,7 @@ class TestRegressionDetectionComprehensive(BaseIntegrationTest):
             self.logger.warning(f"Authentication performance regressions: {slow_auth_scenarios}")
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Authentication regression detection completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Authentication regression detection completed in {test_duration:.3f}s")
         
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -382,10 +382,10 @@ class TestRegressionDetectionComprehensive(BaseIntegrationTest):
         value_delivery_rate = business_value_rate / total_scenarios if total_scenarios > 0 else 0.0
         
         assert value_delivery_rate >= 0.8, \
-            f"Business value delivery rate too low: {value_delivery_rate:.1%} (expected ≥80%)"
+            f"Business value delivery rate too low: {value_delivery_rate:.1%} (expected  >= 80%)"
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Agent execution regression detection completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Agent execution regression detection completed in {test_duration:.3f}s")
         self.logger.info(f"   Business value delivery rate: {value_delivery_rate:.1%}")
     
     @pytest.mark.integration
@@ -562,7 +562,7 @@ class TestRegressionDetectionComprehensive(BaseIntegrationTest):
             self.logger.warning(f"WebSocket regressions detected: {failed_websocket_scenarios}")
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ WebSocket regression detection completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  WebSocket regression detection completed in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -738,7 +738,7 @@ class TestRegressionDetectionComprehensive(BaseIntegrationTest):
         assert success_rate >= 0.8, f"Database operation success rate too low: {success_rate:.1%}"
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Database regression detection completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Database regression detection completed in {test_duration:.3f}s")
         self.logger.info(f"   Database operation success rate: {success_rate:.1%}")
     
     @pytest.mark.integration
@@ -868,7 +868,7 @@ class TestRegressionDetectionComprehensive(BaseIntegrationTest):
             f"Service integration success rate too low: {integration_success_rate:.1%}"
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Cross-service integration regression detection completed in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Cross-service integration regression detection completed in {test_duration:.3f}s")
         self.logger.info(f"   Integration success rate: {integration_success_rate:.1%}")
     
     @pytest.mark.integration
@@ -1027,14 +1027,14 @@ class TestRegressionDetectionComprehensive(BaseIntegrationTest):
         }
         
         # Log key findings
-        self.logger.info("📊 REGRESSION REPORT GENERATED")
+        self.logger.info(" CHART:  REGRESSION REPORT GENERATED")
         self.logger.info(f"   Business Impact: {regression_report['executive_summary']['business_impact']}")
         self.logger.info(f"   System Health: {regression_report['executive_summary']['system_health_score']:.1%}")
         
         if regression_report['recommendations']:
-            self.logger.info("📋 KEY RECOMMENDATIONS:")
+            self.logger.info("[U+1F4CB] KEY RECOMMENDATIONS:")
             for rec in regression_report['recommendations'][:3]:  # Show top 3
-                self.logger.info(f"   • {rec}")
+                self.logger.info(f"   [U+2022] {rec}")
     
     def _generate_regression_recommendations(self, analysis: Dict) -> List[str]:
         """Generate actionable recommendations based on regression analysis."""
@@ -1066,14 +1066,14 @@ class TestRegressionDetectionComprehensive(BaseIntegrationTest):
         total_test_time = time.time() - self.test_start_time
         total_regressions = sum(len(regressions) for regressions in self.regression_results.values())
         
-        self.logger.info("🔍 REGRESSION DETECTION SUMMARY")
+        self.logger.info(" SEARCH:  REGRESSION DETECTION SUMMARY")
         self.logger.info(f"   Total test time: {total_test_time:.2f}s")
         self.logger.info(f"   Total regressions detected: {total_regressions}")
         
         if total_regressions == 0:
-            self.logger.info("   ✅ NO REGRESSIONS DETECTED - System stable")
+            self.logger.info("    PASS:  NO REGRESSIONS DETECTED - System stable")
         else:
-            self.logger.info(f"   ⚠️  {total_regressions} regressions require attention")
+            self.logger.info(f"    WARNING: [U+FE0F]  {total_regressions} regressions require attention")
             
         for category, regressions in self.regression_results.items():
             if regressions:

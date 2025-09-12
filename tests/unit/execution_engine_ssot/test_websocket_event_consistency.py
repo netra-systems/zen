@@ -106,7 +106,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         
     def test_required_websocket_events_available(self):
         """Test that UserExecutionEngine can emit all required WebSocket events"""
-        print("\n🔍 Testing required WebSocket events availability...")
+        print("\n SEARCH:  Testing required WebSocket events availability...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -134,7 +134,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         elif not callable(getattr(engine, 'send_websocket_event')):
             event_violations.append("send_websocket_event is not callable")
         else:
-            print(f"  ✅ send_websocket_event method available")
+            print(f"   PASS:  send_websocket_event method available")
         
         # Test each required event type
         required_events = [
@@ -149,7 +149,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
             for event_type, event_data in required_events:
                 try:
                     await engine.send_websocket_event(event_type, event_data)
-                    print(f"    ✅ {event_type} event sent successfully")
+                    print(f"     PASS:  {event_type} event sent successfully")
                 except Exception as e:
                     event_violations.append(f"Failed to send {event_type} event: {e}")
         
@@ -161,7 +161,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
             missing_events = event_capture.get_missing_events()
             event_violations.append(f"Missing required events: {missing_events}")
         else:
-            print(f"  ✅ All required events captured: {list(event_capture.event_counts.keys())}")
+            print(f"   PASS:  All required events captured: {list(event_capture.event_counts.keys())}")
         
         # Validate event data integrity
         for event in event_capture.events_captured:
@@ -170,17 +170,17 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
             elif not event['data']:
                 event_violations.append(f"Event {event['event_type']} has empty data")
         
-        print(f"  ✅ Event data integrity validated for {len(event_capture.events_captured)} events")
+        print(f"   PASS:  Event data integrity validated for {len(event_capture.events_captured)} events")
         
         # CRITICAL: All required events must be available for chat functionality
         if event_violations:
             self.fail(f"WebSocket event violations: {event_violations}")
         
-        print(f"  ✅ All required WebSocket events available and functional")
+        print(f"   PASS:  All required WebSocket events available and functional")
     
     async def test_websocket_event_ordering_consistency(self):
         """Test that WebSocket events are emitted in consistent logical order"""
-        print("\n🔍 Testing WebSocket event ordering consistency...")
+        print("\n SEARCH:  Testing WebSocket event ordering consistency...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -261,17 +261,17 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
                     f"Expected: {expected_sequence}, Got: {actual_sequence}"
                 )
             else:
-                print(f"    ✅ Event sequence correct: {len(actual_sequence)} events")
+                print(f"     PASS:  Event sequence correct: {len(actual_sequence)} events")
         
         # CRITICAL: Event ordering is essential for user experience
         if ordering_violations:
             self.fail(f"WebSocket event ordering violations: {ordering_violations}")
         
-        print(f"  ✅ WebSocket event ordering consistent across {len(test_scenarios)} scenarios")
+        print(f"   PASS:  WebSocket event ordering consistent across {len(test_scenarios)} scenarios")
     
     async def test_concurrent_websocket_event_isolation(self):
         """Test that WebSocket events are properly isolated between concurrent users"""
-        print("\n🔍 Testing concurrent WebSocket event isolation...")
+        print("\n SEARCH:  Testing concurrent WebSocket event isolation...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -375,18 +375,18 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
                             f"User {user_id}: Event contains data from {other_user_id}: {event_data}"
                         )
         
-        print(f"  ✅ Tested {num_users} concurrent users")
-        print(f"  ✅ Total events processed: {sum(len(ui['event_capture'].events_captured) for ui in user_data)}")
+        print(f"   PASS:  Tested {num_users} concurrent users")
+        print(f"   PASS:  Total events processed: {sum(len(ui['event_capture'].events_captured) for ui in user_data)}")
         
         # CRITICAL: Event isolation prevents user data leaks
         if isolation_violations:
             self.fail(f"WebSocket event isolation violations: {isolation_violations}")
         
-        print(f"  ✅ WebSocket events properly isolated between concurrent users")
+        print(f"   PASS:  WebSocket events properly isolated between concurrent users")
     
     async def test_websocket_event_error_handling(self):
         """Test WebSocket event error handling and recovery"""
-        print("\n🔍 Testing WebSocket event error handling...")
+        print("\n SEARCH:  Testing WebSocket event error handling...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -428,7 +428,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         
         normal_success = asyncio.run(test_normal_events())
         if normal_success:
-            print(f"  ✅ Normal event sending works")
+            print(f"   PASS:  Normal event sending works")
         
         # Test error scenarios
         error_scenarios = ['agent_started', 'tool_executing', 'agent_completed']
@@ -455,9 +455,9 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
             error_handled = await test_error_scenario()
             
             if not error_handled:
-                print(f"  ⚠️  Error not handled for {error_event} (this may be expected)")
+                print(f"   WARNING: [U+FE0F]  Error not handled for {error_event} (this may be expected)")
             else:
-                print(f"  ✅ Error gracefully handled for {error_event}")
+                print(f"   PASS:  Error gracefully handled for {error_event}")
         
         # Test malformed event data
         async def test_malformed_data():
@@ -475,7 +475,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
                     # Reset error simulation
                     error_websocket.error_on_event = None
                     await engine.send_websocket_event(event_type, bad_data)
-                    print(f"    ✅ Handled malformed data for {event_type}: {type(bad_data)}")
+                    print(f"     PASS:  Handled malformed data for {event_type}: {type(bad_data)}")
                 except Exception as e:
                     malformed_errors.append(f"Malformed data error for {event_type}: {e}")
             
@@ -483,9 +483,9 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         
         malformed_errors = await test_malformed_data()
         if malformed_errors:
-            print(f"  ⚠️  Malformed data errors (may be expected): {len(malformed_errors)}")
+            print(f"   WARNING: [U+FE0F]  Malformed data errors (may be expected): {len(malformed_errors)}")
         else:
-            print(f"  ✅ All malformed data handled gracefully")
+            print(f"   PASS:  All malformed data handled gracefully")
         
         # CRITICAL: Error handling prevents system crashes
         # Note: Some error propagation may be expected behavior
@@ -494,7 +494,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         if serious_violations:
             self.fail(f"Serious WebSocket error handling violations: {serious_violations}")
         
-        print(f"  ✅ WebSocket event error handling validated")
+        print(f"   PASS:  WebSocket event error handling validated")
 
 
 if __name__ == '__main__':

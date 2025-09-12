@@ -34,7 +34,7 @@ def generate_markdown_security_report(results: Dict[str, Any]) -> str:
 def _build_security_report_header() -> str:
     """Build the security report header"""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    return f"""# 🔒 Security Test Report
+    return f"""# [U+1F512] Security Test Report
 Generated: {timestamp}
 """
 
@@ -56,17 +56,17 @@ def _get_security_status_badge(summary: Dict[str, Any]) -> str:
     vuln_count = summary.get("vulnerability_count", 0)
     
     if failed == 0 and vuln_count == 0:
-        return "### 🛡️ Security Status: **PASSED**"
+        return "### [U+1F6E1][U+FE0F] Security Status: **PASSED**"
     else:
-        return "### ⚠️ Security Status: **NEEDS ATTENTION**"
+        return "###  WARNING: [U+FE0F] Security Status: **NEEDS ATTENTION**"
 
 def _build_security_metrics_table(summary: Dict[str, Any]) -> str:
     """Build the security metrics table"""
     return f"""| Metric | Value |
 |--------|---------|
 | Total Security Tests | {summary.get('total', 0)} |
-| Passed | ✅ {summary.get('passed', 0)} |
-| Failed | ❌ {summary.get('failed', 0)} |
+| Passed |  PASS:  {summary.get('passed', 0)} |
+| Failed |  FAIL:  {summary.get('failed', 0)} |
 | Success Rate | {summary.get('success_rate', 0):.1f}% |
 | Static Analysis Issues | {summary.get('vulnerability_count', 0)} |
 | Security Test Issues | {summary.get('security_issue_count', 0)} |"""
@@ -80,7 +80,7 @@ def _build_vulnerabilities_section(results: Dict[str, Any]) -> str:
     severity_groups = _group_vulnerabilities_by_severity(vulnerabilities)
     vulnerabilities_content = _format_vulnerability_groups(severity_groups)
     
-    return f"""## 🔍 Static Analysis Findings
+    return f"""##  SEARCH:  Static Analysis Findings
 
 {vulnerabilities_content}"""
 
@@ -108,8 +108,8 @@ def _format_vulnerability_groups(severity_groups: Dict[str, List[Dict]]) -> str:
 
 def _format_severity_group(severity: str, vulns: List[Dict]) -> str:
     """Format a single severity group"""
-    emoji_map = {"HIGH": "🔴", "MEDIUM": "🟠", "LOW": "🟡", "unknown": "⚪"}
-    severity_emoji = emoji_map.get(severity, "⚪")
+    emoji_map = {"HIGH": "[U+1F534]", "MEDIUM": "[U+1F7E0]", "LOW": "[U+1F7E1]", "unknown": "[U+26AA]"}
+    severity_emoji = emoji_map.get(severity, "[U+26AA]")
     
     header = f"### {severity_emoji} {severity} Severity ({len(vulns)} issues)\n"
     vulnerabilities_list = _format_vulnerability_list(vulns)
@@ -144,7 +144,7 @@ def _build_test_issues_section(results: Dict[str, Any]) -> str:
         return ""
     
     issues_table = _build_security_issues_table(security_issues)
-    return f"""## 🚨 Security Test Issues
+    return f"""##  ALERT:  Security Test Issues
 
 {issues_table}"""
 
@@ -173,11 +173,11 @@ def _build_test_results_table(tests: List[Dict]) -> str:
 
 def _format_test_result_row(test: Dict) -> str:
     """Format a single test result row"""
-    status_icons = {"passed": "✅", "failed": "❌", "timeout": "⏱️", "error": "🔥"}
-    status_icon = status_icons.get(test["status"], "❓")
+    status_icons = {"passed": " PASS: ", "failed": " FAIL: ", "timeout": "[U+23F1][U+FE0F]", "error": " FIRE: "}
+    status_icon = status_icons.get(test["status"], "[U+2753]")
     
     security_checks = len(test.get("security_checks", []))
-    checks_indicator = "🔒" if security_checks == 0 else f"⚠️ {security_checks}"
+    checks_indicator = "[U+1F512]" if security_checks == 0 else f" WARNING: [U+FE0F] {security_checks}"
     
     return (f"| {test['name']} | {status_icon} {test['status']} | "
             f"{test['duration']:.2f}s | {checks_indicator} |")
@@ -188,7 +188,7 @@ def _build_recommendations_section(results: Dict[str, Any]) -> str:
     vulnerabilities = results.get("vulnerabilities", [])
     
     recommendations = _generate_security_recommendations(summary, vulnerabilities)
-    return f"""## 📋 Recommendations
+    return f"""## [U+1F4CB] Recommendations
 
 {recommendations}"""
 
@@ -200,26 +200,26 @@ def _generate_security_recommendations(summary: Dict, vulnerabilities: List[Dict
     if vuln_count > 0:
         high_vulns = sum(1 for v in vulnerabilities if v.get("severity") == "HIGH")
         if high_vulns > 0:
-            recommendations.append(f"- 🔴 **CRITICAL:** Address {high_vulns} high-severity vulnerabilities immediately")
+            recommendations.append(f"- [U+1F534] **CRITICAL:** Address {high_vulns} high-severity vulnerabilities immediately")
         recommendations.extend([
-            "- 🔍 Review and fix static analysis findings",
-            "- 📝 Update security tests to cover identified vulnerabilities"
+            "-  SEARCH:  Review and fix static analysis findings",
+            "- [U+1F4DD] Update security tests to cover identified vulnerabilities"
         ])
     
     if summary.get("security_issues"):
         recommendations.extend([
-            "- ⚠️ Investigate security test failures",
-            "- 🛡️ Strengthen security controls in affected areas"
+            "-  WARNING: [U+FE0F] Investigate security test failures",
+            "- [U+1F6E1][U+FE0F] Strengthen security controls in affected areas"
         ])
     
     if summary.get("failed", 0) > 0:
-        recommendations.append("- ❌ Fix failing security tests before deployment")
+        recommendations.append("-  FAIL:  Fix failing security tests before deployment")
     
     if vuln_count == 0 and summary.get("failed", 0) == 0:
         recommendations.extend([
-            "- ✅ No critical security issues found",
-            "- 🔄 Continue regular security testing",
-            "- 📚 Keep security dependencies up to date"
+            "-  PASS:  No critical security issues found",
+            "-  CYCLE:  Continue regular security testing",
+            "- [U+1F4DA] Keep security dependencies up to date"
         ])
     
     return "\n".join(recommendations)
@@ -230,7 +230,7 @@ def _build_compliance_section(results: Dict[str, Any]) -> str:
     vulnerabilities = results.get("vulnerabilities", [])
     
     compliance_checks = _generate_compliance_checks(summary, vulnerabilities)
-    return f"""## ✔️ Security Compliance Checklist
+    return f"""## [U+2714][U+FE0F] Security Compliance Checklist
 
 {compliance_checks}"""
 
@@ -247,7 +247,7 @@ def _generate_compliance_checks(summary: Dict, vulnerabilities: List[Dict]) -> s
     
     check_lines = []
     for check_name, passed in checks:
-        icon = "✅" if passed else "❌"
+        icon = " PASS: " if passed else " FAIL: "
         check_lines.append(f"- {icon} {check_name}")
     
     return "\n".join(check_lines)
@@ -290,7 +290,7 @@ def main():
     print(f"  Vulnerabilities: {summary.get('vulnerability_count', 0)}")
     
     if high_vulns > 0:
-        print(f"  ⚠️ HIGH SEVERITY ISSUES: {high_vulns}")
+        print(f"   WARNING: [U+FE0F] HIGH SEVERITY ISSUES: {high_vulns}")
     
     # Return failure if security issues found
     return 0 if (summary.get("failed", 0) == 0 and high_vulns == 0) else 1

@@ -2,7 +2,7 @@
 INVESTOR CRITICAL TEST: Instant ROI Calculation Accuracy
 BVJ: Most critical test for investor evaluation - validates core value proposition.
 Each successful investor demo converts to $10K-100K ARR.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import sys

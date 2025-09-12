@@ -86,8 +86,8 @@ class ImportManagementSystem:
                 f.write(output)
             
             logger.info(f"Import Check Results:")
-            logger.info(f"  ✓ Successful imports: {success}")
-            logger.info(f"  ✗ Failed imports: {errors}")
+            logger.info(f"  [U+2713] Successful imports: {success}")
+            logger.info(f"  [U+2717] Failed imports: {errors}")
             logger.info(f"  Report saved to: {report_path}")
             
             return {
@@ -173,16 +173,16 @@ class ImportManagementSystem:
         for module in critical_modules:
             try:
                 __import__(module)
-                logger.info(f"  ✓ {module}")
+                logger.info(f"  [U+2713] {module}")
             except ImportError as e:
-                logger.error(f"  ✗ {module}: {e}")
+                logger.error(f"  [U+2717] {module}: {e}")
                 failures.append((module, str(e)))
         
         if failures:
             logger.warning(f"\n{len(failures)} critical imports still failing")
             return False
         else:
-            logger.info("\n✓ All critical imports verified!")
+            logger.info("\n[U+2713] All critical imports verified!")
             return True
     
     def generate_report(self) -> None:
@@ -285,9 +285,9 @@ class ImportManagementSystem:
         logger.info(f"Tools Run: {len(self.stats['tools_run'])}")
         
         if exit_code == 0:
-            logger.info("\n✓ Import management completed successfully!")
+            logger.info("\n[U+2713] Import management completed successfully!")
         else:
-            logger.warning("\n⚠ Some import issues remain")
+            logger.warning("\n WARNING:  Some import issues remain")
         
         return exit_code
 

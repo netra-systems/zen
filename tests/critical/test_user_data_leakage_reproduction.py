@@ -112,7 +112,7 @@ class TestUserDataLeakageReproduction(SSotAsyncTestCase):
         Reproduces real production scenario where multiple enterprise customers
         execute agents concurrently and their sensitive data gets mixed.
         
-        COMPLIANCE IMPACT: GDPR Article 25, HIPAA §164.308, SOC 2 CC6.1
+        COMPLIANCE IMPACT: GDPR Article 25, HIPAA [U+00A7]164.308, SOC 2 CC6.1
         
         EXPECTED: This test should FAIL - proving production vulnerability exists.
         """
@@ -222,7 +222,7 @@ class TestUserDataLeakageReproduction(SSotAsyncTestCase):
         self.assertEqual(
             len(cross_tenant_contamination),
             0,
-            f"🚨 CRITICAL PRODUCTION VULNERABILITY: Cross-tenant data leakage detected! "
+            f" ALERT:  CRITICAL PRODUCTION VULNERABILITY: Cross-tenant data leakage detected! "
             f"Enterprise customer data is mixing between tenants. "
             f"COMPLIANCE VIOLATION: GDPR, HIPAA, PCI-DSS, ITAR. "
             f"Contamination incidents: {cross_tenant_contamination}"
@@ -430,7 +430,7 @@ class TestUserDataLeakageReproduction(SSotAsyncTestCase):
         self.assertEqual(
             len(websocket_event_contamination),
             0,
-            f"🚨 CRITICAL PRODUCTION VULNERABILITY: WebSocket event cross-contamination detected! "
+            f" ALERT:  CRITICAL PRODUCTION VULNERABILITY: WebSocket event cross-contamination detected! "
             f"Users are receiving WebSocket events containing other users' sensitive data. "
             f"Contamination incidents: {websocket_event_contamination}"
         )
@@ -539,7 +539,7 @@ class TestUserDataLeakageReproduction(SSotAsyncTestCase):
         self.assertEqual(
             len(data_corruption_incidents),
             0,
-            f"🚨 CRITICAL PRODUCTION VULNERABILITY: Memory pressure data corruption detected! "
+            f" ALERT:  CRITICAL PRODUCTION VULNERABILITY: Memory pressure data corruption detected! "
             f"High memory usage causes DeepAgentState instances to share memory and corrupt data. "
             f"Corruption incidents: {data_corruption_incidents}"
         )
@@ -552,7 +552,7 @@ class TestUserDataLeakageReproduction(SSotAsyncTestCase):
             total_incidents = len(self.data_leakage_incidents) + len(self.compliance_violations)
             
             self.test_logger.error(
-                f"🚨 PRODUCTION VULNERABILITY SUMMARY: {total_incidents} critical incidents detected. "
+                f" ALERT:  PRODUCTION VULNERABILITY SUMMARY: {total_incidents} critical incidents detected. "
                 f"Data leakage: {len(self.data_leakage_incidents)}, "
                 f"Compliance violations: {len(self.compliance_violations)}. "
                 f"IMMEDIATE REMEDIATION REQUIRED for production deployment."

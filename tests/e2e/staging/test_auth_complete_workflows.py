@@ -106,9 +106,9 @@ class TestCompleteAuthenticationWorkflows:
                 try:
                     async with session.get(endpoint, timeout=10) as resp:
                         assert resp.status == 200, f"Staging {service} service unhealthy: {resp.status}"
-                        logger.info(f"✅ Staging {service} service healthy")
+                        logger.info(f" PASS:  Staging {service} service healthy")
                 except Exception as e:
-                    pytest.fail(f"❌ Staging {service} service unavailable: {e}")
+                    pytest.fail(f" FAIL:  Staging {service} service unavailable: {e}")
     
     async def _cleanup_test_artifacts(self):
         """Clean up any test artifacts created during testing."""
@@ -163,7 +163,7 @@ class TestCompleteAuthenticationWorkflows:
                     assert jwt_token, "Empty JWT token received"
                     assert user_id, "No user ID in registration response"
                     
-                    logger.info(f"✅ User registration successful: {test_email}")
+                    logger.info(f" PASS:  User registration successful: {test_email}")
             
             # Step 2: Validate token works for authenticated API calls
             auth_headers = self.auth_helper.get_auth_headers(jwt_token)
@@ -183,7 +183,7 @@ class TestCompleteAuthenticationWorkflows:
                         assert resp.status == 200, f"Profile access failed: {resp.status}"
                         profile_data = await resp.json()
                     
-                    logger.info(f"✅ Authenticated API call successful")
+                    logger.info(f" PASS:  Authenticated API call successful")
             
             # Step 3: Test WebSocket connection with new token
             ws_headers = self.ws_helper.get_websocket_headers(jwt_token)
@@ -211,10 +211,10 @@ class TestCompleteAuthenticationWorkflows:
                 response_data = json.loads(response)
                 
                 await websocket.close()
-                logger.info(f"✅ WebSocket authentication successful")
+                logger.info(f" PASS:  WebSocket authentication successful")
                 
             except asyncio.TimeoutError:
-                logger.warning("⚠️ WebSocket connection timed out - may indicate staging load")
+                logger.warning(" WARNING: [U+FE0F] WebSocket connection timed out - may indicate staging load")
                 # Don't fail test for WebSocket timeout in staging
             
             execution_time = time.time() - start_time
@@ -233,11 +233,11 @@ class TestCompleteAuthenticationWorkflows:
             assert result.business_value_delivered, "Business value not delivered"
             assert execution_time < 60.0, f"Registration flow too slow: {execution_time}s"
             
-            logger.info(f"✅ BUSINESS VALUE: New user can register and immediately use authenticated features")
+            logger.info(f" PASS:  BUSINESS VALUE: New user can register and immediately use authenticated features")
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Registration workflow failed: {e}")
+            logger.error(f" FAIL:  Registration workflow failed: {e}")
             pytest.fail(f"Complete user registration workflow failed: {e}")
     
     @pytest.mark.asyncio
@@ -284,7 +284,7 @@ class TestCompleteAuthenticationWorkflows:
                             user_data = oauth_response.get("user", {})
                             
                             assert jwt_token, "No OAuth JWT token received"
-                            logger.info(f"✅ OAuth simulation successful: {test_email}")
+                            logger.info(f" PASS:  OAuth simulation successful: {test_email}")
                             
                         else:
                             # Fallback to manual token creation if OAuth simulation fails
@@ -307,7 +307,7 @@ class TestCompleteAuthenticationWorkflows:
                     assert resp.status == 200, f"OAuth token validation failed: {resp.status}"
                     validation_data = await resp.json()
                     
-                    logger.info(f"✅ OAuth token validation successful")
+                    logger.info(f" PASS:  OAuth token validation successful")
             
             # Step 3: Test authenticated business actions
             business_actions_completed = []
@@ -321,9 +321,9 @@ class TestCompleteAuthenticationWorkflows:
                     websocket_enabled=True
                 )
                 business_actions_completed.append("user_context_creation")
-                logger.info(f"✅ User context created for OAuth user")
+                logger.info(f" PASS:  User context created for OAuth user")
             except Exception as e:
-                logger.warning(f"⚠️ User context creation failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] User context creation failed: {e}")
             
             # Action 2: Test API endpoint access
             try:
@@ -333,9 +333,9 @@ class TestCompleteAuthenticationWorkflows:
                     async with session.get(api_url, headers=auth_headers, timeout=10) as resp:
                         if resp.status == 200:
                             business_actions_completed.append("api_access")
-                            logger.info(f"✅ API access successful for OAuth user")
+                            logger.info(f" PASS:  API access successful for OAuth user")
             except Exception as e:
-                logger.warning(f"⚠️ API access test failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] API access test failed: {e}")
             
             execution_time = time.time() - start_time
             
@@ -355,12 +355,12 @@ class TestCompleteAuthenticationWorkflows:
             assert result.business_value_delivered, "No business actions completed for OAuth user"
             assert execution_time < 45.0, f"OAuth flow too slow: {execution_time}s"
             
-            logger.info(f"✅ BUSINESS VALUE: OAuth users can authenticate and use system features")
+            logger.info(f" PASS:  BUSINESS VALUE: OAuth users can authenticate and use system features")
             logger.info(f"   Completed actions: {', '.join(business_actions_completed)}")
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ OAuth flow failed: {e}")
+            logger.error(f" FAIL:  OAuth flow failed: {e}")
             pytest.fail(f"OAuth login workflow failed: {e}")
     
     @pytest.mark.asyncio
@@ -395,7 +395,7 @@ class TestCompleteAuthenticationWorkflows:
                 exp_minutes=5  # Short expiry for testing
             )
             
-            logger.info(f"✅ Initial token created with 5min expiry")
+            logger.info(f" PASS:  Initial token created with 5min expiry")
             
             # Step 2: Test initial token works
             auth_headers = self.auth_helper.get_auth_headers(initial_token)
@@ -406,7 +406,7 @@ class TestCompleteAuthenticationWorkflows:
                     assert resp.status == 200, f"Initial token validation failed: {resp.status}"
                     initial_validation = await resp.json()
                     
-                    logger.info(f"✅ Initial token validation successful")
+                    logger.info(f" PASS:  Initial token validation successful")
             
             # Step 3: Create refreshed token (simulating refresh flow)
             # Note: In a real system, this would call a refresh endpoint
@@ -420,7 +420,7 @@ class TestCompleteAuthenticationWorkflows:
                 exp_minutes=30  # Extended expiry after refresh
             )
             
-            logger.info(f"✅ Token refresh simulated successfully")
+            logger.info(f" PASS:  Token refresh simulated successfully")
             
             # Step 4: Validate refreshed token works
             refresh_headers = self.auth_helper.get_auth_headers(refreshed_token)
@@ -430,7 +430,7 @@ class TestCompleteAuthenticationWorkflows:
                     assert resp.status == 200, f"Refreshed token validation failed: {resp.status}"
                     refresh_validation = await resp.json()
                     
-                    logger.info(f"✅ Refreshed token validation successful")
+                    logger.info(f" PASS:  Refreshed token validation successful")
             
             # Step 5: Test session persistence - both tokens should work for same user
             initial_user_id = initial_validation.get("sub")
@@ -451,7 +451,7 @@ class TestCompleteAuthenticationWorkflows:
                 )
                 business_continuity_actions.append("initial_context")
             except Exception as e:
-                logger.warning(f"⚠️ Initial context creation failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Initial context creation failed: {e}")
             
             # Action with refreshed token  
             try:
@@ -462,7 +462,7 @@ class TestCompleteAuthenticationWorkflows:
                 )
                 business_continuity_actions.append("refreshed_context")
             except Exception as e:
-                logger.warning(f"⚠️ Refreshed context creation failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Refreshed context creation failed: {e}")
             
             # Step 7: Test WebSocket with refreshed token
             try:
@@ -488,10 +488,10 @@ class TestCompleteAuthenticationWorkflows:
                 await websocket.close()
                 
                 business_continuity_actions.append("websocket_after_refresh")
-                logger.info(f"✅ WebSocket works after token refresh")
+                logger.info(f" PASS:  WebSocket works after token refresh")
                 
             except asyncio.TimeoutError:
-                logger.warning("⚠️ WebSocket timeout after refresh - may indicate staging load")
+                logger.warning(" WARNING: [U+FE0F] WebSocket timeout after refresh - may indicate staging load")
             
             execution_time = time.time() - start_time
             
@@ -511,12 +511,12 @@ class TestCompleteAuthenticationWorkflows:
             assert result.business_value_delivered, "Session continuity not maintained across refresh"
             assert execution_time < 30.0, f"Token refresh flow too slow: {execution_time}s"
             
-            logger.info(f"✅ BUSINESS VALUE: Users maintain session continuity across token refresh")
+            logger.info(f" PASS:  BUSINESS VALUE: Users maintain session continuity across token refresh")
             logger.info(f"   Continuity actions: {', '.join(business_continuity_actions)}")
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Token refresh workflow failed: {e}")
+            logger.error(f" FAIL:  Token refresh workflow failed: {e}")
             pytest.fail(f"JWT token refresh workflow failed: {e}")
     
     @pytest.mark.asyncio
@@ -550,7 +550,7 @@ class TestCompleteAuthenticationWorkflows:
             )
             
             user_id = user_data.get("id") or user_data.get("user_id") or f"multi-{uuid.uuid4().hex[:8]}"
-            logger.info(f"✅ Initial authentication successful: {test_email}")
+            logger.info(f" PASS:  Initial authentication successful: {test_email}")
             
             # Step 2: Create session state with initial action
             session_data = {}
@@ -567,7 +567,7 @@ class TestCompleteAuthenticationWorkflows:
             session_data["thread_id"] = str(user_context.thread_id)
             session_data["creation_time"] = datetime.now(timezone.utc).isoformat()
             
-            logger.info(f"✅ Session state created: {user_context.request_id}")
+            logger.info(f" PASS:  Session state created: {user_context.request_id}")
             
             # Step 3: Secondary authentication step (token validation)
             auth_headers = self.auth_helper.get_auth_headers(initial_token)
@@ -582,7 +582,7 @@ class TestCompleteAuthenticationWorkflows:
                     validated_user_id = validation_data.get("sub")
                     assert validated_user_id == user_id, "User identity lost in secondary validation"
                     
-                    logger.info(f"✅ Secondary authentication successful")
+                    logger.info(f" PASS:  Secondary authentication successful")
             
             # Step 4: Verify session state persists
             # Test that we can create another context with same user and it's consistent
@@ -599,7 +599,7 @@ class TestCompleteAuthenticationWorkflows:
             session_data["secondary_context_id"] = str(secondary_context.request_id)
             session_data["verification_time"] = datetime.now(timezone.utc).isoformat()
             
-            logger.info(f"✅ Session persistence verified across authentication steps")
+            logger.info(f" PASS:  Session persistence verified across authentication steps")
             
             # Step 5: Test concurrent authentication sessions
             concurrent_sessions = []
@@ -641,7 +641,7 @@ class TestCompleteAuthenticationWorkflows:
             session_data["concurrent_sessions"] = len(successful_sessions)
             session_data["concurrent_results"] = successful_sessions
             
-            logger.info(f"✅ Concurrent sessions: {len(successful_sessions)}/3 successful")
+            logger.info(f" PASS:  Concurrent sessions: {len(successful_sessions)}/3 successful")
             
             # Step 6: Test WebSocket persistence across steps
             websocket_persistence_test = False
@@ -669,10 +669,10 @@ class TestCompleteAuthenticationWorkflows:
                 await websocket.close()
                 
                 websocket_persistence_test = True
-                logger.info(f"✅ WebSocket session persistence verified")
+                logger.info(f" PASS:  WebSocket session persistence verified")
                 
             except asyncio.TimeoutError:
-                logger.warning("⚠️ WebSocket persistence test timed out")
+                logger.warning(" WARNING: [U+FE0F] WebSocket persistence test timed out")
             
             execution_time = time.time() - start_time
             
@@ -704,12 +704,12 @@ class TestCompleteAuthenticationWorkflows:
             assert execution_time < 45.0, f"Multi-step auth too slow: {execution_time}s"
             assert len(successful_sessions) >= 2, "Concurrent sessions not working properly"
             
-            logger.info(f"✅ BUSINESS VALUE: Multi-step authentication maintains session integrity")
+            logger.info(f" PASS:  BUSINESS VALUE: Multi-step authentication maintains session integrity")
             logger.info(f"   Completed steps: {', '.join(business_actions_completed)}")
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Multi-step authentication failed: {e}")
+            logger.error(f" FAIL:  Multi-step authentication failed: {e}")
             pytest.fail(f"Multi-step authentication workflow failed: {e}")
     
     @pytest.mark.asyncio
@@ -743,11 +743,11 @@ class TestCompleteAuthenticationWorkflows:
                     password="wrongpassword"
                 )
                 # If this succeeds, it's unexpected
-                logger.warning("⚠️ Authentication with invalid credentials unexpectedly succeeded")
+                logger.warning(" WARNING: [U+FE0F] Authentication with invalid credentials unexpectedly succeeded")
             except Exception as e:
                 # This is expected
                 recovery_results.append("invalid_credentials_rejected")
-                logger.info(f"✅ Invalid credentials properly rejected: {type(e).__name__}")
+                logger.info(f" PASS:  Invalid credentials properly rejected: {type(e).__name__}")
             
             # Step 2: Test expired token handling
             try:
@@ -773,13 +773,13 @@ class TestCompleteAuthenticationWorkflows:
                     async with session.get(validate_url, headers=auth_headers, timeout=10) as resp:
                         if resp.status in [401, 403]:
                             recovery_results.append("expired_token_rejected")
-                            logger.info(f"✅ Expired token properly rejected: {resp.status}")
+                            logger.info(f" PASS:  Expired token properly rejected: {resp.status}")
                         else:
-                            logger.warning(f"⚠️ Expired token not rejected: {resp.status}")
+                            logger.warning(f" WARNING: [U+FE0F] Expired token not rejected: {resp.status}")
                             
             except Exception as e:
                 recovery_results.append("expired_token_handling")
-                logger.info(f"✅ Expired token handling working: {type(e).__name__}")
+                logger.info(f" PASS:  Expired token handling working: {type(e).__name__}")
             
             # Step 3: Test malformed token handling
             try:
@@ -806,11 +806,11 @@ class TestCompleteAuthenticationWorkflows:
                 
                 if malformed_rejections >= len(malformed_tokens) // 2:
                     recovery_results.append("malformed_tokens_rejected")
-                    logger.info(f"✅ Malformed tokens properly rejected: {malformed_rejections}/{len(malformed_tokens)}")
+                    logger.info(f" PASS:  Malformed tokens properly rejected: {malformed_rejections}/{len(malformed_tokens)}")
                 
             except Exception as e:
                 recovery_results.append("malformed_token_handling")
-                logger.info(f"✅ Malformed token handling working: {type(e).__name__}")
+                logger.info(f" PASS:  Malformed token handling working: {type(e).__name__}")
             
             # Step 4: Test recovery to successful authentication
             try:
@@ -824,12 +824,12 @@ class TestCompleteAuthenticationWorkflows:
                     async with session.get(validate_url, headers=auth_headers, timeout=10) as resp:
                         if resp.status == 200:
                             recovery_results.append("successful_recovery")
-                            logger.info(f"✅ Successful authentication after failures")
+                            logger.info(f" PASS:  Successful authentication after failures")
                         else:
-                            logger.warning(f"⚠️ Recovery authentication failed: {resp.status}")
+                            logger.warning(f" WARNING: [U+FE0F] Recovery authentication failed: {resp.status}")
                             
             except Exception as e:
-                logger.warning(f"⚠️ Recovery authentication failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Recovery authentication failed: {e}")
             
             # Step 5: Test system state consistency after failures
             try:
@@ -841,10 +841,10 @@ class TestCompleteAuthenticationWorkflows:
                 )
                 
                 recovery_results.append("system_state_consistent")
-                logger.info(f"✅ System state consistent after auth failures")
+                logger.info(f" PASS:  System state consistent after auth failures")
                 
             except Exception as e:
-                logger.warning(f"⚠️ System state inconsistent after failures: {e}")
+                logger.warning(f" WARNING: [U+FE0F] System state inconsistent after failures: {e}")
             
             # Step 6: Test WebSocket recovery after auth failures
             try:
@@ -872,12 +872,12 @@ class TestCompleteAuthenticationWorkflows:
                 await websocket.close()
                 
                 recovery_results.append("websocket_recovery")
-                logger.info(f"✅ WebSocket recovery successful")
+                logger.info(f" PASS:  WebSocket recovery successful")
                 
             except asyncio.TimeoutError:
-                logger.warning("⚠️ WebSocket recovery timed out")
+                logger.warning(" WARNING: [U+FE0F] WebSocket recovery timed out")
             except Exception as e:
-                logger.warning(f"⚠️ WebSocket recovery failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] WebSocket recovery failed: {e}")
             
             execution_time = time.time() - start_time
             
@@ -898,12 +898,12 @@ class TestCompleteAuthenticationWorkflows:
             assert execution_time < 60.0, f"Auth failure recovery too slow: {execution_time}s"
             assert "successful_recovery" in recovery_results, "System failed to recover from auth failures"
             
-            logger.info(f"✅ BUSINESS VALUE: System gracefully handles and recovers from auth failures")
+            logger.info(f" PASS:  BUSINESS VALUE: System gracefully handles and recovers from auth failures")
             logger.info(f"   Recovery capabilities: {', '.join(recovery_results)}")
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Auth failure recovery test failed: {e}")
+            logger.error(f" FAIL:  Auth failure recovery test failed: {e}")
             pytest.fail(f"Authentication failure recovery workflow failed: {e}")
 
 

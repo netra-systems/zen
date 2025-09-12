@@ -55,7 +55,7 @@ class AuthStarter:
         # Check if auth service is enabled
         auth_config = self.services_config.auth_service
         if not auth_config.get_config().get("enabled", True):
-            self._print("⚠️", "AUTH", "Auth service is disabled in configuration")
+            self._print(" WARNING: [U+FE0F]", "AUTH", "Auth service is disabled in configuration")
             return None, None
         
         # Show Redis mode for auth service
@@ -77,7 +77,7 @@ class AuthStarter:
         else:
             mode_desc = "with Redis disabled"
         
-        self._print("🔐", "AUTH", f"Starting auth service ({mode_desc})...")
+        self._print("[U+1F510]", "AUTH", f"Starting auth service ({mode_desc})...")
         
         # Get auth service configuration with dynamic port allocation
         # Use '0.0.0.0' host to match uvicorn binding to prevent race condition
@@ -85,7 +85,7 @@ class AuthStarter:
         port = find_available_port(preferred_port, (8081, 8090), host='0.0.0.0')
         
         if port != preferred_port:
-            self._print("⚠️", "AUTH", f"Port {preferred_port} unavailable, using port {port} instead")
+            self._print(" WARNING: [U+FE0F]", "AUTH", f"Port {preferred_port} unavailable, using port {port} instead")
         
         # Build command to start auth service
         cmd = self._build_auth_command(port)
@@ -198,7 +198,7 @@ class AuthStarter:
             )
             
             if not process:
-                self._print("❌", "ERROR", "Failed to create auth service process")
+                self._print(" FAIL: ", "ERROR", "Failed to create auth service process")
                 return None, None
             
             # Create log streamer for auth service
@@ -228,12 +228,12 @@ class AuthStarter:
             self.env_manager.set("AUTH_SERVICE_URL", f"http://localhost:{port}", 
                                            source="auth_starter", force=True)
             
-            self._print("✅", "AUTH", f"Auth service started on port {port}")
+            self._print(" PASS: ", "AUTH", f"Auth service started on port {port}")
             return process, streamer
             
         except Exception as e:
             logger.error(f"Failed to start auth service: {e}")
-            self._print("❌", "ERROR", f"Auth service startup failed: {str(e)}")
+            self._print(" FAIL: ", "ERROR", f"Auth service startup failed: {str(e)}")
             return None, None
     
     def _create_auth_streamer(self, process: subprocess.Popen) -> LogStreamer:
@@ -248,7 +248,7 @@ class AuthStarter:
     def _handle_auth_startup_failure(self, process: subprocess.Popen):
         """Handle auth service startup failure."""
         exit_code = process.returncode
-        self._print("❌", "ERROR", f"Auth service exited with code {exit_code}")
+        self._print(" FAIL: ", "ERROR", f"Auth service exited with code {exit_code}")
         
         if exit_code == 1:
             logger.error("Auth service failed - check Redis and PostgreSQL connections")

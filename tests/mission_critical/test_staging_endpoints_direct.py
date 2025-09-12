@@ -335,7 +335,7 @@ logger = logging.getLogger(__name__)
 
     # Removed problematic line: async def test_complete_signup_flow(self) -> Dict[str, Any]:
         # REMOVED_SYNTAX_ERROR: """Test complete user signup flow in staging environment."""
-        # REMOVED_SYNTAX_ERROR: logger.info("🧪 Testing complete signup flow...")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Testing complete signup flow...")
         # REMOVED_SYNTAX_ERROR: start_time = time.time()
 
         # REMOVED_SYNTAX_ERROR: user_data = self.generate_test_user_data()
@@ -431,7 +431,7 @@ logger = logging.getLogger(__name__)
 
 # REMOVED_SYNTAX_ERROR: async def calculate_business_metrics(self) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Calculate comprehensive business metrics from test results."""
-    # REMOVED_SYNTAX_ERROR: logger.info("🧪 Calculating business metrics...")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F9EA] Calculating business metrics...")
 
     # Calculate conversion rate
     # REMOVED_SYNTAX_ERROR: total_attempts = self.business_metrics["successful_signups"] + self.business_metrics["successful_logins"]
@@ -455,7 +455,7 @@ logger = logging.getLogger(__name__)
 
                 # REMOVED_SYNTAX_ERROR: self.business_metrics["revenue_attributed"] = successful_users * avg_revenue_per_user * conversion_to_paid
 
-                # REMOVED_SYNTAX_ERROR: logger.info(f"📊 Business Metrics Summary:")
+                # REMOVED_SYNTAX_ERROR: logger.info(f" CHART:  Business Metrics Summary:")
                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")

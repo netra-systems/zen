@@ -213,7 +213,7 @@ class TestMessagePipeline:
         # (The actual LLM calls may happen at different levels)
         assert supervisor is not None, "Supervisor should be created"
         
-        logger.info(f"✅ First message pipeline completed in {response_time:.2f}s")
+        logger.info(f" PASS:  First message pipeline completed in {response_time:.2f}s")
     
     @pytest.mark.asyncio
     async def test_message_routing_to_supervisor(self, agent_service_with_mocks, message_helper):
@@ -290,7 +290,7 @@ class TestMessagePipeline:
                                  if msg["message"].get("type") == "thread_created")
         assert thread_created_count >= len(test_messages), f"Expected thread creation for {len(test_messages)} users"
         
-        logger.info(f"✅ Message routing test completed - {len(test_messages)} messages routed successfully")
+        logger.info(f" PASS:  Message routing test completed - {len(test_messages)} messages routed successfully")
     
     @pytest.mark.asyncio
     async def test_streaming_response_flow(self, agent_service_with_mocks, message_helper):
@@ -373,7 +373,7 @@ class TestMessagePipeline:
         message_types = [msg["message"].get("type") for msg in message_helper.sent_messages]
         assert any("agent" in msg_type for msg_type in message_types), "No agent response received"
         
-        logger.info(f"✅ Streaming response test completed in {response_time:.2f}s")
+        logger.info(f" PASS:  Streaming response test completed in {response_time:.2f}s")
     
     @pytest.mark.asyncio
     async def test_concurrent_message_processing(self, agent_service_with_mocks, message_helper):
@@ -438,7 +438,7 @@ class TestMessagePipeline:
         # Verify reasonable performance under load
         assert total_time < 10.0, f"Concurrent processing took {total_time}s, should be under 10s"
         
-        logger.info(f"✅ Concurrent processing test: {concurrent_users} users, {messages_per_user} msgs/user in {total_time:.2f}s")
+        logger.info(f" PASS:  Concurrent processing test: {concurrent_users} users, {messages_per_user} msgs/user in {total_time:.2f}s")
     
     @pytest.mark.asyncio
     async def test_error_handling_and_recovery(self, agent_service_with_mocks, message_helper):
@@ -501,7 +501,7 @@ class TestMessagePipeline:
         # The exact behavior depends on implementation - could be error message or fallback response
         assert len(message_helper.sent_messages) > 0, "System should remain responsive during errors"
         
-        logger.info(f"✅ Error handling test completed - {len(message_helper.sent_messages)} messages handled")
+        logger.info(f" PASS:  Error handling test completed - {len(message_helper.sent_messages)} messages handled")
     
     @pytest.mark.asyncio
     async def test_message_validation_and_rejection(self, agent_service_with_mocks, message_helper):
@@ -552,7 +552,7 @@ class TestMessagePipeline:
         # Verify system handled invalid messages appropriately
         logger.info(f"Handled {len(invalid_messages)} invalid messages with {error_count} error responses")
         
-        logger.info(f"✅ Message validation test: {error_count} errors properly handled")
+        logger.info(f" PASS:  Message validation test: {error_count} errors properly handled")
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

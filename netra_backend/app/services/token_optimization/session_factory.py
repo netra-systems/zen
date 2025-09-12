@@ -182,7 +182,7 @@ class UserTokenOptimizationSession:
         }
         
         logger.info(
-            f"✅ Finalized token optimization session {self.session_id}: "
+            f" PASS:  Finalized token optimization session {self.session_id}: "
             f"{self.operations_count} operations, ${self.total_cost:.4f} total cost"
         )
         
@@ -257,7 +257,7 @@ class TokenOptimizationSessionFactory:
         }
         
         logger.info(
-            f"✅ Created token optimization session: {session_key} "
+            f" PASS:  Created token optimization session: {session_key} "
             f"for user {context.user_id}"
         )
         
@@ -306,7 +306,7 @@ class TokenOptimizationSessionFactory:
         if session_key in self._active_sessions:
             del self._active_sessions[session_key]
         
-        logger.info(f"✅ Finalized and cleaned up session: {session_key}")
+        logger.info(f" PASS:  Finalized and cleaned up session: {session_key}")
         
         return summary
     
@@ -367,7 +367,7 @@ class TokenOptimizationSessionFactory:
             cleanup_count += 1
         
         if cleanup_count > 0:
-            logger.info(f"✅ Cleaned up {cleanup_count} expired token optimization sessions")
+            logger.info(f" PASS:  Cleaned up {cleanup_count} expired token optimization sessions")
         
         return cleanup_count
     

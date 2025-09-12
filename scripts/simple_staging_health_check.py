@@ -64,7 +64,7 @@ class SimpleStagingHealthCheck:
                         "content_preview": response.text[:200] if response.text else ""
                     }
                     service_issues.append(issue)
-                    print(f"    🚨 CRITICAL: HTTP {response.status_code}")
+                    print(f"     ALERT:  CRITICAL: HTTP {response.status_code}")
                     
                 elif response.status_code == 404:
                     issue = {
@@ -77,7 +77,7 @@ class SimpleStagingHealthCheck:
                         "content_preview": response.text[:200] if response.text else ""
                     }
                     service_issues.append(issue)
-                    print(f"    ⚠️  HIGH: Endpoint not found")
+                    print(f"     WARNING: [U+FE0F]  HIGH: Endpoint not found")
                     
                 elif response_time > 5:
                     issue = {
@@ -90,10 +90,10 @@ class SimpleStagingHealthCheck:
                         "content_preview": response.text[:200] if response.text else ""
                     }
                     service_issues.append(issue)
-                    print(f"    ⚠️  MEDIUM: Slow response")
+                    print(f"     WARNING: [U+FE0F]  MEDIUM: Slow response")
                     
                 elif response.status_code == 200:
-                    print(f"    ✅ OK")
+                    print(f"     PASS:  OK")
                     
             except requests.exceptions.Timeout:
                 issue = {
@@ -106,7 +106,7 @@ class SimpleStagingHealthCheck:
                     "content_preview": ""
                 }
                 service_issues.append(issue)
-                print(f"    🚨 CRITICAL: Timeout")
+                print(f"     ALERT:  CRITICAL: Timeout")
                 
             except requests.exceptions.ConnectionError:
                 issue = {
@@ -119,7 +119,7 @@ class SimpleStagingHealthCheck:
                     "content_preview": ""
                 }
                 service_issues.append(issue)
-                print(f"    🚨 CRITICAL: Connection failed")
+                print(f"     ALERT:  CRITICAL: Connection failed")
                 
             except Exception as e:
                 issue = {
@@ -132,7 +132,7 @@ class SimpleStagingHealthCheck:
                     "content_preview": ""
                 }
                 service_issues.append(issue)
-                print(f"    ⚠️  HIGH: {str(e)}")
+                print(f"     WARNING: [U+FE0F]  HIGH: {str(e)}")
                 
         return service_issues
     
@@ -155,7 +155,7 @@ class SimpleStagingHealthCheck:
         print(f"\n=== ISSUE ANALYSIS ===")
         
         if not all_issues:
-            print("✅ No critical issues detected!")
+            print(" PASS:  No critical issues detected!")
             return {"status": "healthy", "issues": []}
             
         # Sort by severity
@@ -175,7 +175,7 @@ class SimpleStagingHealthCheck:
             
         # Identify most critical issue
         most_critical = sorted_issues[0]
-        print(f"\n🔥 MOST CRITICAL ISSUE:")
+        print(f"\n FIRE:  MOST CRITICAL ISSUE:")
         print(f"  Service: {most_critical['service']}")
         print(f"  Endpoint: {most_critical['endpoint']}")
         print(f"  Error: {most_critical['error']}")
@@ -206,7 +206,7 @@ def main():
     with open(output_file, 'w') as f:
         json.dump(results, f, indent=2, default=str)
         
-    print(f"\n📄 Results saved to: {output_file}")
+    print(f"\n[U+1F4C4] Results saved to: {output_file}")
     
     return results
 

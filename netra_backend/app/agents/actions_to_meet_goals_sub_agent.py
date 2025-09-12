@@ -175,7 +175,7 @@ class ActionsToMeetGoalsSubAgent(BaseAgent):
             # CRITICAL: Validate LLM manager is available (Five Whys Fix)
             if not self.llm_manager:
                 error_msg = (
-                    "❌ LLM manager is None - agent was instantiated without required dependency. "
+                    " FAIL:  LLM manager is None - agent was instantiated without required dependency. "
                     "This indicates incomplete architectural migration between legacy AgentRegistry "
                     "and new factory patterns. See FIVE_WHYS_ANALYSIS_20250904.md"
                 )

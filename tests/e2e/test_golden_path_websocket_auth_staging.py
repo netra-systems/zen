@@ -118,7 +118,7 @@ class TestWebSocketAuthGoldenPathStaging(StagingTestBase):
     @pytest.mark.mission_critical
     async def test_complete_golden_path_user_flow_staging(self):
         """
-        Test complete Golden Path: login → WebSocket connection → AI response
+        Test complete Golden Path: login  ->  WebSocket connection  ->  AI response
         
         Full user journey:
         1. User login via OAuth

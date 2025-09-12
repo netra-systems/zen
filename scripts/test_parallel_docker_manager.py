@@ -191,11 +191,11 @@ class ParallelTestSimulator:
         # Final verdict
         print(f"\n{'='*60}")
         if successful == len(self.results):
-            print("✅ ALL TESTS PASSED - No conflicts detected!")
+            print(" PASS:  ALL TESTS PASSED - No conflicts detected!")
         elif successful > len(self.results) * 0.8:
-            print("⚠️ MOSTLY PASSED - Minor issues detected")
+            print(" WARNING: [U+FE0F] MOSTLY PASSED - Minor issues detected")
         else:
-            print("❌ FAILURES DETECTED - Review error logs")
+            print(" FAIL:  FAILURES DETECTED - Review error logs")
         print(f"{'='*60}\n")
 
 
@@ -219,9 +219,9 @@ def test_unified_runner_integration():
     result = subprocess.run(cmd, capture_output=True, text=True)
     
     if result.returncode == 0:
-        print("✅ Unified test runner integration successful")
+        print(" PASS:  Unified test runner integration successful")
     else:
-        print("❌ Unified test runner integration failed")
+        print(" FAIL:  Unified test runner integration failed")
         print(f"Error: {result.stderr}")
     
     return result.returncode == 0

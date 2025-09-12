@@ -250,7 +250,7 @@ class AgentTestValidator:
     def generate_console_summary(self, result: ValidationResult) -> str:
         """Generate console summary report"""
         metrics = result.metrics
-        status = "✅ PASS" if result.is_valid else "❌ FAIL"
+        status = " PASS:  PASS" if result.is_valid else " FAIL:  FAIL"
         
         summary = f"""
 Agent Test Validation Summary {status}

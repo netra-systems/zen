@@ -152,7 +152,7 @@ class TestWebSocketAuthenticationIntegration(BaseIntegrationTest):
                 "X-User-Metadata": json.dumps({
                     "complex": {"nested": {"data": True}},
                     "special_chars": "quotes\"and'apostrophes",
-                    "unicode": "🔐🚀💯",
+                    "unicode": "[U+1F510][U+1F680][U+1F4AF]",
                     "timestamps": datetime.now(timezone.utc).isoformat()
                 }),
                 "X-Complex-Auth-Context": json.dumps({
@@ -665,13 +665,13 @@ if __name__ == "__main__":
             # Generate analysis report
             report = await test_instance.test_infrastructure_gap_analysis_report()
             
-            print(f"✅ Infrastructure gap testing completed")
-            print(f"   → {report['total_failures']} failures captured")
-            print(f"   → {report['expected_failures']} expected infrastructure gaps exposed")
-            print(f"   → {report['staging_specific_failures']} staging-specific issues identified")
+            print(f" PASS:  Infrastructure gap testing completed")
+            print(f"    ->  {report['total_failures']} failures captured")
+            print(f"    ->  {report['expected_failures']} expected infrastructure gaps exposed")
+            print(f"    ->  {report['staging_specific_failures']} staging-specific issues identified")
             
         except Exception as e:
-            print(f"✗ Infrastructure gap testing encountered issues: {e}")
+            print(f"[U+2717] Infrastructure gap testing encountered issues: {e}")
             raise
     
     # Run tests if executed directly

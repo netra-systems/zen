@@ -48,16 +48,16 @@ def test_gcp_imports() -> List[Tuple[str, bool, str]]:
             results.append((module_name, True, 'Import successful'))
             
             if has_graceful_handling:
-                print(f"✅ {module_name}: Import successful with graceful GCP handling")
+                print(f" PASS:  {module_name}: Import successful with graceful GCP handling")
             else:
-                print(f"⚠️  {module_name}: Import successful but no graceful handling detected")
+                print(f" WARNING: [U+FE0F]  {module_name}: Import successful but no graceful handling detected")
                 
         except ImportError as e:
             results.append((module_name, False, str(e)))
-            print(f"❌ {module_name}: Import failed - {e}")
+            print(f" FAIL:  {module_name}: Import failed - {e}")
         except Exception as e:
             results.append((module_name, False, f"Unexpected error: {e}"))
-            print(f"❌ {module_name}: Unexpected error - {e}")
+            print(f" FAIL:  {module_name}: Unexpected error - {e}")
     
     return results
 
@@ -71,19 +71,19 @@ def test_gcp_library_status():
         'google.cloud.error_reporting'
     ]
     
-    print("\n📊 GCP Library Status:")
+    print("\n CHART:  GCP Library Status:")
     for lib in libraries:
         try:
             importlib.import_module(lib)
-            print(f"✅ {lib}: Available")
+            print(f" PASS:  {lib}: Available")
         except ImportError:
-            print(f"❌ {lib}: Not available")
+            print(f" FAIL:  {lib}: Not available")
 
 
 def main():
     """Main verification function."""
     
-    print("🔍 Verifying GCP Integration Import Handling")
+    print(" SEARCH:  Verifying GCP Integration Import Handling")
     print("=" * 50)
     
     results = test_gcp_imports()
@@ -93,15 +93,15 @@ def main():
     successful_imports = sum(1 for _, success, _ in results if success)
     total_imports = len(results)
     
-    print(f"\n📈 Summary:")
+    print(f"\n[U+1F4C8] Summary:")
     print(f"Successful imports: {successful_imports}/{total_imports}")
     
     if successful_imports == total_imports:
-        print("✅ All GCP integration modules can be imported successfully!")
-        print("✅ Backend unit tests should now run without GCP dependency issues.")
+        print(" PASS:  All GCP integration modules can be imported successfully!")
+        print(" PASS:  Backend unit tests should now run without GCP dependency issues.")
         return 0
     else:
-        print("❌ Some imports still failing. Check above for details.")
+        print(" FAIL:  Some imports still failing. Check above for details.")
         return 1
 
 

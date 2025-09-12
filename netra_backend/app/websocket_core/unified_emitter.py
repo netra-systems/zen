@@ -960,41 +960,41 @@ class UnifiedWebSocketEmitter:
             
             # CRITICAL CHECK: run_id cannot be None
             if run_id is None:
-                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id is None for {event_type} "
+                logger.error(f" ALERT:  CONTEXT VALIDATION FAILED: run_id is None for {event_type} "
                            f"(agent={agent_name or 'unknown'}). This would cause event misrouting!")
-                logger.error(f"🚨 SECURITY RISK: Events with None run_id can be delivered to wrong users!")
+                logger.error(f" ALERT:  SECURITY RISK: Events with None run_id can be delivered to wrong users!")
                 self._validation_cache[cache_key] = False
                 return False
             
             # CRITICAL CHECK: run_id cannot be 'registry' (system context)
             if run_id == 'registry':
-                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id='registry' for {event_type} "
+                logger.error(f" ALERT:  CONTEXT VALIDATION FAILED: run_id='registry' for {event_type} "
                            f"(agent={agent_name or 'unknown'}). System context cannot emit user events!")
-                logger.error(f"🚨 SECURITY RISK: Registry context events would be broadcast to all users!")
+                logger.error(f" ALERT:  SECURITY RISK: Registry context events would be broadcast to all users!")
                 self._validation_cache[cache_key] = False
                 return False
             
             # VALIDATION CHECK: run_id should be a non-empty string
             if not isinstance(run_id, str) or not run_id.strip():
-                logger.error(f"🚨 CONTEXT VALIDATION FAILED: Invalid run_id '{run_id}' for {event_type} "
+                logger.error(f" ALERT:  CONTEXT VALIDATION FAILED: Invalid run_id '{run_id}' for {event_type} "
                            f"(agent={agent_name or 'unknown'}). run_id must be non-empty string!")
                 self._validation_cache[cache_key] = False
                 return False
             
             # VALIDATION CHECK: run_id should not contain suspicious patterns
             if self._is_suspicious_run_id(run_id):
-                logger.warning(f"⚠️ CONTEXT VALIDATION WARNING: Suspicious run_id pattern '{run_id}' for {event_type} "
+                logger.warning(f" WARNING: [U+FE0F] CONTEXT VALIDATION WARNING: Suspicious run_id pattern '{run_id}' for {event_type} "
                               f"(agent={agent_name or 'unknown'}). Event will be sent but flagged for monitoring.")
                 # Allow but log for monitoring - some legitimate run_ids might trigger this
             
             # Context validation passed
-            logger.debug(f"✅ CONTEXT VALIDATION PASSED: run_id={run_id} for {event_type} is valid")
+            logger.debug(f" PASS:  CONTEXT VALIDATION PASSED: run_id={run_id} for {event_type} is valid")
             self._validation_cache[cache_key] = True
             self._last_validated_run_id = run_id
             return True
             
         except Exception as e:
-            logger.error(f"🚨 CONTEXT VALIDATION EXCEPTION: Validation failed for {event_type} "
+            logger.error(f" ALERT:  CONTEXT VALIDATION EXCEPTION: Validation failed for {event_type} "
                         f"(run_id={run_id}, agent={agent_name or 'unknown'}): {e}")
             self._validation_cache[cache_key] = False
             return False

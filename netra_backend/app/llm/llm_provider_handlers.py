@@ -1,7 +1,7 @@
 """LLM Provider Handlers Module
 
 Handles provider-specific LLM initialization and configuration.
-Each function must be ≤8 lines as per module architecture requirements.
+Each function must be  <= 8 lines as per module architecture requirements.
 """
 from typing import Any, Dict, Optional
 

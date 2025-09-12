@@ -1,7 +1,7 @@
 """
 Golden Path Failure Tests - Issue #186 WebSocket Manager Fragmentation
 
-Tests that prove the Golden Path (user login → AI response) fails due to WebSocket manager
+Tests that prove the Golden Path (user login  ->  AI response) fails due to WebSocket manager
 fragmentation and SSOT violations. These tests are designed to FAIL initially, proving
 that the core business value delivery mechanism is broken.
 
@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Enable systematic fix to restore core platform value delivery
 
 SSOT Violations This Module Proves:
-1. Login → AI response flow failure without authentication bypass
+1. Login  ->  AI response flow failure without authentication bypass
 2. WebSocket event delivery inconsistency between manager implementations  
 3. Multi-user isolation failure causing cross-user contamination
 4. Agent execution pipeline breaks due to manager interface mismatches

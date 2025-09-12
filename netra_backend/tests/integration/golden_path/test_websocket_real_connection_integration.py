@@ -135,7 +135,7 @@ class TestWebSocketRealConnectionIntegration(BaseIntegrationTest):
                 assert session_row.user_id == auth_user.user_id
                 assert session_row.is_active is True
                 
-                self.logger.info(f"✅ WebSocket connection established and persisted for user {auth_user.user_id}")
+                self.logger.info(f" PASS:  WebSocket connection established and persisted for user {auth_user.user_id}")
                 
         except asyncio.TimeoutError:
             pytest.fail(f"WebSocket connection timed out after {self.connection_timeout}s - may indicate race condition issue")
@@ -225,7 +225,7 @@ class TestWebSocketRealConnectionIntegration(BaseIntegrationTest):
                 assert "active_threads" in recovered_state
                 assert "websocket_context" in recovered_state
                 
-                self.logger.info(f"✅ WebSocket state recovery successful for user {auth_user.user_id}")
+                self.logger.info(f" PASS:  WebSocket state recovery successful for user {auth_user.user_id}")
                 
         except Exception as e:
             pytest.fail(f"WebSocket connection recovery test failed: {e}")
@@ -321,7 +321,7 @@ class TestWebSocketRealConnectionIntegration(BaseIntegrationTest):
             except Exception as e:
                 pytest.fail(f"Context persistence failed on connection {connection_attempt + 1}: {e}")
         
-        self.logger.info(f"✅ User context persistence validated across 3 reconnections")
+        self.logger.info(f" PASS:  User context persistence validated across 3 reconnections")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -414,7 +414,7 @@ class TestWebSocketRealConnectionIntegration(BaseIntegrationTest):
         assert successful_connections == num_concurrent_users, \
             f"Only {successful_connections}/{num_concurrent_users} connections succeeded"
         
-        self.logger.info(f"✅ All {num_concurrent_users} concurrent WebSocket connections succeeded with proper isolation")
+        self.logger.info(f" PASS:  All {num_concurrent_users} concurrent WebSocket connections succeeded with proper isolation")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -485,7 +485,7 @@ class TestWebSocketRealConnectionIntegration(BaseIntegrationTest):
         assert success_rate >= 0.8, \
             f"Race condition prevention failed: only {successful_connections}/{race_condition_attempts} connections succeeded"
         
-        self.logger.info(f"✅ Race condition prevention validated: {successful_connections}/{race_condition_attempts} connections succeeded")
+        self.logger.info(f" PASS:  Race condition prevention validated: {successful_connections}/{race_condition_attempts} connections succeeded")
         
         # Verify business value delivered
         self.assert_business_value_delivered(

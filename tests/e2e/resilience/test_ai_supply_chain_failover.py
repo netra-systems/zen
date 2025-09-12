@@ -5,7 +5,7 @@ BVJ: Protects $75K+ MRR from LLM provider failures by validating automatic failo
 cost optimization, and SLA compliance during provider outages.
 
 Test Coverage:
-1. Primary provider timeout → fallback to secondary
+1. Primary provider timeout  ->  fallback to secondary
 2. Rate limiting triggers provider switch  
 3. Cost threshold triggers cheaper provider
 4. Quality degradation triggers premium provider
@@ -147,7 +147,7 @@ class TestAISupplyChainFailover:
         await provider_simulator.execute_with_failover("Cost tracking test", "gpt4")
         self._validate_cost_tracking(provider_simulator.metrics, initial_cost)
 
-    # Helper validation methods (≤8 lines each)
+    # Helper validation methods ( <= 8 lines each)
 
     def _validate_successful_failover(self, result: Dict[str, Any], primary_provider: str):
         """Validate failover executed successfully."""

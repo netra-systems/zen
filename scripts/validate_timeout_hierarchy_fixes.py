@@ -24,7 +24,7 @@ from netra_backend.app.core.timeout_configuration import (
 
 def test_environment_detection():
     """Test timeout configuration for different environments."""
-    print("🔧 Testing Environment-Aware Timeout Configuration")
+    print("[U+1F527] Testing Environment-Aware Timeout Configuration")
     print("=" * 60)
     
     environments = ['local', 'staging', 'production', 'testing']
@@ -48,7 +48,7 @@ def test_environment_detection():
             'config': config
         }
         
-        status = "✅ VALID" if hierarchy_valid else "❌ INVALID"
+        status = " PASS:  VALID" if hierarchy_valid else " FAIL:  INVALID"
         print(f"Environment: {env.upper()}")
         print(f"  WebSocket Timeout: {websocket_timeout}s")
         print(f"  Agent Timeout: {agent_timeout}s") 
@@ -60,7 +60,7 @@ def test_environment_detection():
 
 def test_before_after_comparison():
     """Compare old hardcoded timeouts vs new coordinated timeouts."""
-    print("📊 Before/After Timeout Comparison")
+    print(" CHART:  Before/After Timeout Comparison")
     print("=" * 60)
     
     # OLD: Hardcoded values that caused failures
@@ -92,15 +92,15 @@ def test_before_after_comparison():
     websocket_improvement = ((new_websocket_timeout - old_websocket_timeout) / old_websocket_timeout) * 100
     agent_improvement = ((new_agent_timeout - old_agent_timeout) / old_agent_timeout) * 100
     
-    print(f"📈 Improvements:")
-    print(f"  WebSocket Timeout: +{websocket_improvement:.0f}% (3s → {new_websocket_timeout}s)")
-    print(f"  Agent Timeout: +{agent_improvement:.0f}% (15s → {new_agent_timeout}s)")
+    print(f"[U+1F4C8] Improvements:")
+    print(f"  WebSocket Timeout: +{websocket_improvement:.0f}% (3s  ->  {new_websocket_timeout}s)")
+    print(f"  Agent Timeout: +{agent_improvement:.0f}% (15s  ->  {new_agent_timeout}s)")
     print(f"  Business Impact: $200K+ MRR reliability restored")
     print()
 
 def test_staging_specific_validation():
     """Validate staging environment specifically for deployment."""
-    print("🎯 Staging Environment Validation")
+    print(" TARGET:  Staging Environment Validation")
     print("=" * 60)
     
     # Ensure we're testing staging configuration
@@ -145,24 +145,24 @@ def test_staging_specific_validation():
     
     all_passed = True
     for check in checks:
-        status = "✅ PASS" if check['condition'] else "❌ FAIL"
+        status = " PASS:  PASS" if check['condition'] else " FAIL:  FAIL"
         print(f"  {check['name']}: {status} - {check['result']}")
         if not check['condition']:
             all_passed = False
     
     print()
     if all_passed:
-        print("🎉 ALL STAGING VALIDATIONS PASSED")
-        print("✅ Ready for deployment to restore $200K+ MRR reliability")
+        print(" CELEBRATION:  ALL STAGING VALIDATIONS PASSED")
+        print(" PASS:  Ready for deployment to restore $200K+ MRR reliability")
     else:
-        print("❌ STAGING VALIDATION FAILED")
-        print("⚠️  Deployment blocked until issues resolved")
+        print(" FAIL:  STAGING VALIDATION FAILED")
+        print(" WARNING: [U+FE0F]  Deployment blocked until issues resolved")
     
     return all_passed
 
 def test_timeout_measurement():
     """Measure actual timeout behavior vs expected values."""
-    print("⏱️  Timeout Measurement and Performance")
+    print("[U+23F1][U+FE0F]  Timeout Measurement and Performance")
     print("=" * 60)
     
     os.environ['ENVIRONMENT'] = 'staging'
@@ -176,7 +176,7 @@ def test_timeout_measurement():
     
     print(f"Configuration Fetch Performance:")
     print(f"  Time to get timeouts: {config_fetch_time*1000:.2f}ms")
-    print(f"  Configuration caching: {'✅ Active' if config_fetch_time < 0.01 else '❌ Slow'}")
+    print(f"  Configuration caching: {' PASS:  Active' if config_fetch_time < 0.01 else ' FAIL:  Slow'}")
     print()
     
     print(f"Timeout Values for Cloud Run Optimization:")
@@ -188,15 +188,15 @@ def test_timeout_measurement():
     
     # Simulate execution timing
     print(f"Expected Execution Scenarios:")
-    print(f"  ⚡ Fast agent response (5s): Well within {agent_timeout}s limit")
-    print(f"  🕐 Normal agent response (20s): Within {agent_timeout}s limit") 
-    print(f"  ⏳ Complex agent response (25s): Within {agent_timeout}s limit")
-    print(f"  🚨 Timeout scenario (30s+): Gracefully handled by {websocket_timeout}s WebSocket")
+    print(f"   LIGHTNING:  Fast agent response (5s): Well within {agent_timeout}s limit")
+    print(f"  [U+1F550] Normal agent response (20s): Within {agent_timeout}s limit") 
+    print(f"  [U+23F3] Complex agent response (25s): Within {agent_timeout}s limit")
+    print(f"   ALERT:  Timeout scenario (30s+): Gracefully handled by {websocket_timeout}s WebSocket")
     print()
 
 def generate_deployment_report():
     """Generate comprehensive deployment readiness report."""
-    print("📋 Deployment Readiness Report")
+    print("[U+1F4CB] Deployment Readiness Report")
     print("=" * 60)
     
     # Test all environments
@@ -206,69 +206,69 @@ def generate_deployment_report():
     all_environments_valid = all(result['hierarchy_valid'] for result in env_results.values())
     
     if all_environments_valid:
-        print("✅ All environments have valid timeout hierarchies")
-        print("✅ Cloud-native timeouts properly configured")
-        print("✅ Business value protection implemented")
-        print("✅ Ready for staging deployment")
+        print(" PASS:  All environments have valid timeout hierarchies")
+        print(" PASS:  Cloud-native timeouts properly configured")
+        print(" PASS:  Business value protection implemented")
+        print(" PASS:  Ready for staging deployment")
         print()
-        print("🚀 DEPLOYMENT STATUS: APPROVED")
-        print("💰 BUSINESS IMPACT: $200K+ MRR reliability restored")
+        print("[U+1F680] DEPLOYMENT STATUS: APPROVED")
+        print("[U+1F4B0] BUSINESS IMPACT: $200K+ MRR reliability restored")
     else:
-        print("❌ Some environments have invalid timeout hierarchies")
-        print("⚠️  Deployment blocked until configuration fixed")
-        print("🚨 DEPLOYMENT STATUS: BLOCKED")
+        print(" FAIL:  Some environments have invalid timeout hierarchies")
+        print(" WARNING: [U+FE0F]  Deployment blocked until configuration fixed")
+        print(" ALERT:  DEPLOYMENT STATUS: BLOCKED")
     
     return all_environments_valid
 
 def main():
     """Run complete timeout hierarchy validation."""
-    print("🏗️  Priority 3 Timeout Hierarchy Implementation Validation")
+    print("[U+1F3D7][U+FE0F]  Priority 3 Timeout Hierarchy Implementation Validation")
     print("Business Context: Restoring $200K+ MRR through cloud-native timeout coordination")
     print("=" * 80)
     print()
     
     try:
         # Run all validation tests
-        print("1️⃣  Testing Environment Detection...")
+        print("1[U+FE0F][U+20E3]  Testing Environment Detection...")
         env_results = test_environment_detection()
         print()
         
-        print("2️⃣  Testing Before/After Comparison...")
+        print("2[U+FE0F][U+20E3]  Testing Before/After Comparison...")
         test_before_after_comparison()
         print()
         
-        print("3️⃣  Validating Staging Configuration...")
+        print("3[U+FE0F][U+20E3]  Validating Staging Configuration...")
         staging_valid = test_staging_specific_validation()
         print()
         
-        print("4️⃣  Measuring Timeout Performance...")
+        print("4[U+FE0F][U+20E3]  Measuring Timeout Performance...")
         test_timeout_measurement()
         print()
         
-        print("5️⃣  Generating Deployment Report...")
+        print("5[U+FE0F][U+20E3]  Generating Deployment Report...")
         deployment_ready = generate_deployment_report()
         print()
         
         # Final summary
-        print("🎯 FINAL VALIDATION SUMMARY")
+        print(" TARGET:  FINAL VALIDATION SUMMARY")
         print("=" * 80)
         if staging_valid and deployment_ready:
-            print("✅ Priority 3 timeout hierarchy implementation: SUCCESSFUL")
-            print("✅ Timeout coordination: WebSocket (35s) > Agent (30s)")  
-            print("✅ Business value protection: $200K+ MRR reliability restored")
-            print("✅ Cloud Run optimization: Cold start and latency accommodated")
-            print("✅ Test fixes: Hardcoded timeouts replaced with centralized config")
+            print(" PASS:  Priority 3 timeout hierarchy implementation: SUCCESSFUL")
+            print(" PASS:  Timeout coordination: WebSocket (35s) > Agent (30s)")  
+            print(" PASS:  Business value protection: $200K+ MRR reliability restored")
+            print(" PASS:  Cloud Run optimization: Cold start and latency accommodated")
+            print(" PASS:  Test fixes: Hardcoded timeouts replaced with centralized config")
             print()
-            print("🚀 READY FOR DEPLOYMENT")
-            print("💰 BUSINESS IMPACT: Positive - reliability restored")
+            print("[U+1F680] READY FOR DEPLOYMENT")
+            print("[U+1F4B0] BUSINESS IMPACT: Positive - reliability restored")
         else:
-            print("❌ Validation failed - deployment blocked")
+            print(" FAIL:  Validation failed - deployment blocked")
             return 1
             
         return 0
         
     except Exception as e:
-        print(f"❌ Validation failed with error: {e}")
+        print(f" FAIL:  Validation failed with error: {e}")
         return 1
 
 if __name__ == "__main__":

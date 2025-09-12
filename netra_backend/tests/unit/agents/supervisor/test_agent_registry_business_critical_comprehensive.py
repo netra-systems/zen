@@ -1,8 +1,8 @@
 """
-🚨 CRITICAL BUSINESS VALUE TEST SUITE: Agent Registry Comprehensive Unit Tests
+ ALERT:  CRITICAL BUSINESS VALUE TEST SUITE: Agent Registry Comprehensive Unit Tests
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Protects $500K+ ARR
+- Segment: ALL (Free  ->  Enterprise) - Protects $500K+ ARR
 - Business Goal: Core agent orchestration reliability ensuring chat functionality
 - Value Impact: Validates user isolation preventing enterprise security breaches ($15K+ MRR per customer)
 - Revenue Impact: Protects 90% of platform value delivery through agent execution orchestration

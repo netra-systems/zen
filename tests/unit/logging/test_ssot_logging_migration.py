@@ -174,7 +174,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
         if critical_failures:
             # EXPECTED FAILURE: Legacy logging patterns may not exist yet
             self.fail(f"""
-            🚨 MIGRATION COMPATIBILITY FAILURE: Critical legacy logging patterns not available
+             ALERT:  MIGRATION COMPATIBILITY FAILURE: Critical legacy logging patterns not available
             
             Critical Failures: {len(critical_failures)}
             Failed Imports: {failed_imports}
@@ -192,7 +192,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
         # Validate deprecation warnings are present (indicating migration guidance)
         if len(self.deprecation_warnings) == 0:
             self.fail(f"""
-            🚨 MIGRATION GUIDANCE MISSING: No deprecation warnings for legacy patterns
+             ALERT:  MIGRATION GUIDANCE MISSING: No deprecation warnings for legacy patterns
             
             Legacy Patterns Tested: {len(self.legacy_patterns)}
             Deprecation Warnings: {len(self.deprecation_warnings)}
@@ -324,7 +324,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
             if critical_gaps:
                 # EXPECTED FAILURE: SSOT components may not be fully implemented
                 self.fail(f"""
-                🚨 SSOT FUNCTIONALITY GAPS: Critical SSOT logging components missing
+                 ALERT:  SSOT FUNCTIONALITY GAPS: Critical SSOT logging components missing
                 
                 Critical Gaps: {len(critical_gaps)}
                 Functionality Gaps: {functionality_gaps}
@@ -351,7 +351,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
             
             if incomplete_categories:
                 self.fail(f"""
-                🚨 SSOT FUNCTIONALITY INCOMPLETE: SSOT patterns missing essential methods
+                 ALERT:  SSOT FUNCTIONALITY INCOMPLETE: SSOT patterns missing essential methods
                 
                 Incomplete Categories: {incomplete_categories}
                 Overall Functionality Gaps: {len(functionality_gaps)}
@@ -364,7 +364,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
             
         except Exception as e:
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): SSOT logging infrastructure not available for equivalence testing
+             ALERT:  EXPECTED FAILURE (Issue #368): SSOT logging infrastructure not available for equivalence testing
             
             Error: {str(e)}
             Equivalence Tests Attempted: {len(equivalence_tests)}
@@ -455,7 +455,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
             # Analyze migration guidance completeness
             if not migration_guides and not migration_examples:
                 self.fail(f"""
-                🚨 MIGRATION GUIDANCE MISSING: No migration instructions available
+                 ALERT:  MIGRATION GUIDANCE MISSING: No migration instructions available
                 
                 Legacy Patterns: {len(self.legacy_patterns)}
                 Migration Guides: {len(migration_guides)}
@@ -486,7 +486,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
             
             if incomplete_guidance:
                 self.fail(f"""
-                🚨 MIGRATION GUIDANCE INCOMPLETE: Migration instructions lack sufficient detail
+                 ALERT:  MIGRATION GUIDANCE INCOMPLETE: Migration instructions lack sufficient detail
                 
                 Incomplete Guidance: {incomplete_guidance}
                 Total Migration Guides: {len(migration_guides)}
@@ -514,7 +514,7 @@ class TestSSotLoggingMigration(SSotBaseTestCase):
             
         except Exception as e:
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Migration guidance infrastructure not available
+             ALERT:  EXPECTED FAILURE (Issue #368): Migration guidance infrastructure not available
             
             Error: {str(e)}
             Migration Guides Found: {len(migration_guides)}
@@ -598,7 +598,7 @@ class TestSSotMigrationValidation(SSotBaseTestCase):
             # Analyze format compatibility
             if format_breaking_changes:
                 self.fail(f"""
-                🚨 LOG FORMAT BREAKING CHANGES: SSOT migration breaks existing log formats
+                 ALERT:  LOG FORMAT BREAKING CHANGES: SSOT migration breaks existing log formats
                 
                 Breaking Changes: {len(format_breaking_changes)}
                 Format Compatibility Results: {format_compatibility_results}
@@ -615,7 +615,7 @@ class TestSSotMigrationValidation(SSotBaseTestCase):
             untested_categories = set(legacy_formats.keys()) - set(format_compatibility_results.keys())
             if untested_categories:
                 self.fail(f"""
-                🚨 FORMAT COMPATIBILITY INCOMPLETE: Some log categories not tested
+                 ALERT:  FORMAT COMPATIBILITY INCOMPLETE: Some log categories not tested
                 
                 Untested Categories: {untested_categories}
                 Tested Categories: {list(format_compatibility_results.keys())}
@@ -641,7 +641,7 @@ class TestSSotMigrationValidation(SSotBaseTestCase):
             
         except Exception as e:
             self.fail(f"""
-            🚨 FORMAT COMPATIBILITY VALIDATION FAILED: Unable to validate log format compatibility
+             ALERT:  FORMAT COMPATIBILITY VALIDATION FAILED: Unable to validate log format compatibility
             
             Error: {str(e)}
             Compatibility Results: {format_compatibility_results}
@@ -711,7 +711,7 @@ class TestSSotMigrationValidation(SSotBaseTestCase):
             # Analyze performance impact
             if performance_regressions:
                 self.fail(f"""
-                🚨 SSOT PERFORMANCE REGRESSION: SSOT logging performs worse than legacy
+                 ALERT:  SSOT PERFORMANCE REGRESSION: SSOT logging performs worse than legacy
                 
                 Performance Regressions: {len(performance_regressions)}
                 Benchmarks: {performance_benchmarks}
@@ -740,7 +740,7 @@ class TestSSotMigrationValidation(SSotBaseTestCase):
             
             if underperforming_categories:
                 self.fail(f"""
-                🚨 SSOT LATENCY CONCERNS: SSOT logging adds significant latency
+                 ALERT:  SSOT LATENCY CONCERNS: SSOT logging adds significant latency
                 
                 Underperforming Categories: {underperforming_categories}
                 High Performance Requirements: {high_performance_categories}
@@ -766,7 +766,7 @@ class TestSSotMigrationValidation(SSotBaseTestCase):
             
         except Exception as e:
             self.fail(f"""
-            🚨 PERFORMANCE BENCHMARKING FAILED: Unable to assess SSOT migration performance impact
+             ALERT:  PERFORMANCE BENCHMARKING FAILED: Unable to assess SSOT migration performance impact
             
             Error: {str(e)}
             Performance Benchmarks: {performance_benchmarks}

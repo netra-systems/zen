@@ -48,7 +48,7 @@ class WebSocketDeploymentTestRunner:
         
     async def run_pre_deployment_validation(self) -> Dict[str, Any]:
         """Run WebSocket validation before deployment."""
-        logger.info("🔍 Running pre-deployment WebSocket validation...")
+        logger.info(" SEARCH:  Running pre-deployment WebSocket validation...")
         
         validation_result = {
             "phase": "pre_deployment",
@@ -76,10 +76,10 @@ class WebSocketDeploymentTestRunner:
             
             if results["summary"]["deployment_ready"]:
                 validation_result["status"] = "passed"
-                logger.success(f"✅ Pre-deployment WebSocket validation PASSED ({results['summary']['success_rate']}%)")
+                logger.success(f" PASS:  Pre-deployment WebSocket validation PASSED ({results['summary']['success_rate']}%)")
             else:
                 validation_result["status"] = "failed"
-                logger.error(f"❌ Pre-deployment WebSocket validation FAILED ({results['summary']['success_rate']}%)")
+                logger.error(f" FAIL:  Pre-deployment WebSocket validation FAILED ({results['summary']['success_rate']}%)")
                 
             self.progress_tracker.emit_event(ProgressEvent(
                 type="websocket_validation_complete",
@@ -90,7 +90,7 @@ class WebSocketDeploymentTestRunner:
         except Exception as e:
             validation_result["status"] = "error"
             validation_result["error"] = str(e)
-            logger.error(f"❌ Pre-deployment WebSocket validation error: {e}")
+            logger.error(f" FAIL:  Pre-deployment WebSocket validation error: {e}")
             
             self.progress_tracker.emit_event(ProgressEvent(
                 type="websocket_validation_error",
@@ -102,7 +102,7 @@ class WebSocketDeploymentTestRunner:
         
     async def run_post_deployment_validation(self) -> Dict[str, Any]:
         """Run WebSocket validation after deployment."""
-        logger.info("🔍 Running post-deployment WebSocket validation...")
+        logger.info(" SEARCH:  Running post-deployment WebSocket validation...")
         
         validation_result = {
             "phase": "post_deployment", 
@@ -133,10 +133,10 @@ class WebSocketDeploymentTestRunner:
             
             if results["summary"]["deployment_ready"]:
                 validation_result["status"] = "passed"
-                logger.success(f"✅ Post-deployment WebSocket validation PASSED ({results['summary']['success_rate']}%)")
+                logger.success(f" PASS:  Post-deployment WebSocket validation PASSED ({results['summary']['success_rate']}%)")
             else:
                 validation_result["status"] = "failed"
-                logger.error(f"❌ Post-deployment WebSocket validation FAILED ({results['summary']['success_rate']}%)")
+                logger.error(f" FAIL:  Post-deployment WebSocket validation FAILED ({results['summary']['success_rate']}%)")
                 
             self.progress_tracker.emit_event(ProgressEvent(
                 type="websocket_validation_complete",
@@ -147,7 +147,7 @@ class WebSocketDeploymentTestRunner:
         except Exception as e:
             validation_result["status"] = "error"
             validation_result["error"] = str(e)
-            logger.error(f"❌ Post-deployment WebSocket validation error: {e}")
+            logger.error(f" FAIL:  Post-deployment WebSocket validation error: {e}")
             
             self.progress_tracker.emit_event(ProgressEvent(
                 type="websocket_validation_error",
@@ -159,7 +159,7 @@ class WebSocketDeploymentTestRunner:
         
     async def run_websocket_health_monitoring(self, duration_minutes: int = 30) -> Dict[str, Any]:
         """Run continuous WebSocket health monitoring."""
-        logger.info(f"🔍 Running WebSocket health monitoring for {duration_minutes} minutes...")
+        logger.info(f" SEARCH:  Running WebSocket health monitoring for {duration_minutes} minutes...")
         
         monitoring_result = {
             "phase": "health_monitoring",
@@ -202,7 +202,7 @@ class WebSocketDeploymentTestRunner:
                 # Log periodic status
                 if total_checks % 10 == 0:
                     health_rate = (healthy_checks / total_checks * 100)
-                    logger.info(f"📊 WebSocket health monitoring: {health_rate:.1f}% healthy ({healthy_checks}/{total_checks})")
+                    logger.info(f" CHART:  WebSocket health monitoring: {health_rate:.1f}% healthy ({healthy_checks}/{total_checks})")
                     
                 # Wait before next check (2 minutes between checks)
                 await asyncio.sleep(120)
@@ -220,13 +220,13 @@ class WebSocketDeploymentTestRunner:
         monitoring_result["health_rate"] = (healthy_checks / total_checks * 100) if total_checks > 0 else 0
         monitoring_result["status"] = "completed"
         
-        logger.info(f"📈 WebSocket health monitoring completed: {monitoring_result['health_rate']:.1f}% healthy")
+        logger.info(f"[U+1F4C8] WebSocket health monitoring completed: {monitoring_result['health_rate']:.1f}% healthy")
         
         return monitoring_result
         
     async def run_websocket_regression_tests(self) -> Dict[str, Any]:
         """Run WebSocket regression tests to prevent known issues."""
-        logger.info("🔍 Running WebSocket regression prevention tests...")
+        logger.info(" SEARCH:  Running WebSocket regression prevention tests...")
         
         regression_result = {
             "phase": "regression_testing",
@@ -257,9 +257,9 @@ class WebSocketDeploymentTestRunner:
                     
                     if result["status"] == "passed":
                         passed_tests += 1
-                        logger.success(f"✅ Regression test {test_name} passed")
+                        logger.success(f" PASS:  Regression test {test_name} passed")
                     else:
-                        logger.error(f"❌ Regression test {test_name} failed: {result.get('error')}")
+                        logger.error(f" FAIL:  Regression test {test_name} failed: {result.get('error')}")
                         
                 except Exception as e:
                     regression_result["tests"][test_name] = {
@@ -267,7 +267,7 @@ class WebSocketDeploymentTestRunner:
                         "status": "error",
                         "error": str(e)
                     }
-                    logger.error(f"❌ Regression test {test_name} error: {e}")
+                    logger.error(f" FAIL:  Regression test {test_name} error: {e}")
                     
             # Summary
             success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
@@ -280,14 +280,14 @@ class WebSocketDeploymentTestRunner:
             }
             
             if regression_result["summary"]["regression_free"]:
-                logger.success(f"✅ WebSocket regression tests PASSED: {success_rate}% success rate")
+                logger.success(f" PASS:  WebSocket regression tests PASSED: {success_rate}% success rate")
             else:
-                logger.error(f"❌ WebSocket regression tests FAILED: {success_rate}% success rate")
+                logger.error(f" FAIL:  WebSocket regression tests FAILED: {success_rate}% success rate")
                 
         except Exception as e:
             regression_result["error"] = str(e)
             regression_result["summary"] = {"regression_free": False}
-            logger.error(f"❌ WebSocket regression testing error: {e}")
+            logger.error(f" FAIL:  WebSocket regression testing error: {e}")
             
         return regression_result
         
@@ -339,7 +339,7 @@ class WebSocketDeploymentTestRunner:
             f"### Pre-Deployment Validation",
             f"- **Status:** {pre_status.upper()}",
             f"- **Success Rate:** {pre_success}%",
-            f"- **Deployment Ready:** {'✅ Yes' if pre_deployment.get('deployment_ready', False) else '❌ No'}",
+            f"- **Deployment Ready:** {' PASS:  Yes' if pre_deployment.get('deployment_ready', False) else ' FAIL:  No'}",
             ""
         ])
         
@@ -351,7 +351,7 @@ class WebSocketDeploymentTestRunner:
             f"### Post-Deployment Validation",
             f"- **Status:** {post_status.upper()}",
             f"- **Success Rate:** {post_success}%",
-            f"- **Deployment Healthy:** {'✅ Yes' if post_deployment.get('deployment_healthy', False) else '❌ No'}",
+            f"- **Deployment Healthy:** {' PASS:  Yes' if post_deployment.get('deployment_healthy', False) else ' FAIL:  No'}",
             ""
         ])
         
@@ -360,18 +360,18 @@ class WebSocketDeploymentTestRunner:
         
         report_lines.extend([
             f"### Rollback Recommendation",
-            f"- **Recommend Rollback:** {'🚨 YES' if should_rollback else '✅ NO'}",
+            f"- **Recommend Rollback:** {' ALERT:  YES' if should_rollback else ' PASS:  NO'}",
             f"- **Reason:** {rollback_reason}",
             ""
         ])
         
         # Business impact
         if post_success >= 90:
-            business_impact = "✅ Minimal impact - Chat functionality stable"
+            business_impact = " PASS:  Minimal impact - Chat functionality stable"
         elif post_success >= 70:
-            business_impact = "⚠️  Moderate impact - Some chat issues possible"
+            business_impact = " WARNING: [U+FE0F]  Moderate impact - Some chat issues possible"
         else:
-            business_impact = "🚨 High impact - Significant chat functionality issues"
+            business_impact = " ALERT:  High impact - Significant chat functionality issues"
             
         report_lines.extend([
             f"### Business Impact Assessment",
@@ -391,7 +391,7 @@ class WebSocketDeploymentTestRunner:
         if pre_tests:
             report_lines.append("### Pre-Deployment Tests")
             for test_name, result in pre_tests.items():
-                status_emoji = "✅" if result.get("status") == "passed" else "❌"
+                status_emoji = " PASS: " if result.get("status") == "passed" else " FAIL: "
                 report_lines.append(f"- **{test_name}:** {status_emoji} {result.get('status', 'unknown').upper()}")
                 if result.get("error"):
                     report_lines.append(f"  - Error: {result['error']}")
@@ -402,7 +402,7 @@ class WebSocketDeploymentTestRunner:
         if post_tests:
             report_lines.append("### Post-Deployment Tests")
             for test_name, result in post_tests.items():
-                status_emoji = "✅" if result.get("status") == "passed" else "❌"
+                status_emoji = " PASS: " if result.get("status") == "passed" else " FAIL: "
                 report_lines.append(f"- **{test_name}:** {status_emoji} {result.get('status', 'unknown').upper()}")
                 if result.get("error"):
                     report_lines.append(f"  - Error: {result['error']}")

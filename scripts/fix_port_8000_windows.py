@@ -65,12 +65,12 @@ def check_port_usage(port: int = 8000) -> List[Tuple[str, str, str]]:
     Returns:
         List of tuples (process_name, pid, connection_info)
     """
-    logger.info(f"🔍 Checking what processes are using port {port}...")
+    logger.info(f" SEARCH:  Checking what processes are using port {port}...")
     
     success, stdout, stderr = run_command(f"netstat -ano | findstr :{port}")
     
     if not success or not stdout.strip():
-        logger.info(f"✅ Port {port} appears to be free")
+        logger.info(f" PASS:  Port {port} appears to be free")
         return []
     
     processes = []
@@ -100,7 +100,7 @@ def check_port_usage(port: int = 8000) -> List[Tuple[str, str, str]]:
                 processes.append((process_name, pid, f"{protocol} {local_addr} {state}"))
     
     if processes:
-        logger.warning(f"⚠️  Port {port} is being used by {len(processes)} process(es):")
+        logger.warning(f" WARNING: [U+FE0F]  Port {port} is being used by {len(processes)} process(es):")
         for i, (name, pid, conn_info) in enumerate(processes, 1):
             logger.warning(f"   {i}. {name} (PID: {pid}) - {conn_info}")
     
@@ -120,16 +120,16 @@ def kill_processes_using_port(port: int = 8000, force: bool = False) -> bool:
     processes = check_port_usage(port)
     
     if not processes:
-        logger.info(f"✅ No processes found using port {port}")
+        logger.info(f" PASS:  No processes found using port {port}")
         return True
     
-    logger.info(f"🔪 Attempting to terminate {len(processes)} process(es) using port {port}...")
+    logger.info(f"[U+1F52A] Attempting to terminate {len(processes)} process(es) using port {port}...")
     
     killed_count = 0
     for process_name, pid, _ in processes:
         # Skip system processes
         if process_name.lower() in ['system', 'csrss.exe', 'winlogon.exe', 'services.exe']:
-            logger.warning(f"⚠️  Skipping system process: {process_name} (PID: {pid})")
+            logger.warning(f" WARNING: [U+FE0F]  Skipping system process: {process_name} (PID: {pid})")
             continue
             
         logger.info(f"   Terminating {process_name} (PID: {pid})...")
@@ -142,23 +142,23 @@ def kill_processes_using_port(port: int = 8000, force: bool = False) -> bool:
             success, stdout, stderr = run_command(f"taskkill /F /T /PID {pid}")
         
         if success:
-            logger.info(f"   ✅ Successfully terminated {process_name} (PID: {pid})")
+            logger.info(f"    PASS:  Successfully terminated {process_name} (PID: {pid})")
             killed_count += 1
         else:
-            logger.error(f"   ❌ Failed to terminate {process_name} (PID: {pid}): {stderr}")
+            logger.error(f"    FAIL:  Failed to terminate {process_name} (PID: {pid}): {stderr}")
     
     # Wait a moment for processes to clean up
     if killed_count > 0:
-        logger.info("⏳ Waiting 3 seconds for processes to clean up...")
+        logger.info("[U+23F3] Waiting 3 seconds for processes to clean up...")
         time.sleep(3)
         
         # Verify the port is now free
         remaining = check_port_usage(port)
         if not remaining:
-            logger.info(f"✅ Port {port} is now free!")
+            logger.info(f" PASS:  Port {port} is now free!")
             return True
         else:
-            logger.warning(f"⚠️  Port {port} still has {len(remaining)} process(es) using it")
+            logger.warning(f" WARNING: [U+FE0F]  Port {port} still has {len(remaining)} process(es) using it")
             return False
     
     return killed_count > 0
@@ -173,7 +173,7 @@ def check_windows_firewall(port: int = 8000) -> bool:
     Returns:
         True if port is allowed, False otherwise
     """
-    logger.info(f"🔥 Checking Windows firewall rules for port {port}...")
+    logger.info(f" FIRE:  Checking Windows firewall rules for port {port}...")
     
     # Check existing firewall rules
     success, stdout, stderr = run_command(
@@ -181,13 +181,13 @@ def check_windows_firewall(port: int = 8000) -> bool:
     )
     
     if success and stdout.strip():
-        logger.info(f"✅ Found firewall rules mentioning port {port}:")
+        logger.info(f" PASS:  Found firewall rules mentioning port {port}:")
         lines = stdout.strip().split('\n')
         for line in lines[:5]:  # Show first 5 matches
             logger.info(f"   {line.strip()}")
         return True
     else:
-        logger.warning(f"⚠️  No specific firewall rules found for port {port}")
+        logger.warning(f" WARNING: [U+FE0F]  No specific firewall rules found for port {port}")
         return False
 
 def create_firewall_rule(port: int = 8000) -> bool:
@@ -200,7 +200,7 @@ def create_firewall_rule(port: int = 8000) -> bool:
     Returns:
         True if successful, False otherwise
     """
-    logger.info(f"🔥 Creating Windows firewall rule for port {port}...")
+    logger.info(f" FIRE:  Creating Windows firewall rule for port {port}...")
     
     rule_name = f"Netra Backend Port {port}"
     
@@ -218,10 +218,10 @@ def create_firewall_rule(port: int = 8000) -> bool:
     )
     
     if success:
-        logger.info(f"✅ Successfully created firewall rule for port {port}")
+        logger.info(f" PASS:  Successfully created firewall rule for port {port}")
         return True
     else:
-        logger.error(f"❌ Failed to create firewall rule: {stderr}")
+        logger.error(f" FAIL:  Failed to create firewall rule: {stderr}")
         return False
 
 def check_reserved_ports(port: int = 8000) -> bool:
@@ -234,7 +234,7 @@ def check_reserved_ports(port: int = 8000) -> bool:
     Returns:
         True if port is available, False if reserved
     """
-    logger.info(f"🔍 Checking if port {port} is in Windows reserved range...")
+    logger.info(f" SEARCH:  Checking if port {port} is in Windows reserved range...")
     
     # Get dynamic port range
     success, stdout, stderr = run_command("netsh int ipv4 show dynamicport tcp")
@@ -257,16 +257,16 @@ def check_reserved_ports(port: int = 8000) -> bool:
                     end_port = start_port + num_ports - 1
                     
                     if start_port <= port <= end_port:
-                        logger.warning(f"⚠️  Port {port} is in Windows dynamic range ({start_port}-{end_port})")
+                        logger.warning(f" WARNING: [U+FE0F]  Port {port} is in Windows dynamic range ({start_port}-{end_port})")
                         logger.warning(f"   Consider using a different port outside this range")
                         return False
                     else:
-                        logger.info(f"✅ Port {port} is not in Windows dynamic range ({start_port}-{end_port})")
+                        logger.info(f" PASS:  Port {port} is not in Windows dynamic range ({start_port}-{end_port})")
                         return True
                 except:
                     continue
     
-    logger.info(f"✅ Port {port} should be available for use")
+    logger.info(f" PASS:  Port {port} should be available for use")
     return True
 
 def test_port_binding(port: int = 8000) -> bool:
@@ -279,7 +279,7 @@ def test_port_binding(port: int = 8000) -> bool:
     Returns:
         True if binding successful, False otherwise
     """
-    logger.info(f"🧪 Testing if we can bind to port {port}...")
+    logger.info(f"[U+1F9EA] Testing if we can bind to port {port}...")
     
     try:
         import socket
@@ -290,20 +290,20 @@ def test_port_binding(port: int = 8000) -> bool:
             sock.listen(1)
             
             actual_port = sock.getsockname()[1]
-            logger.info(f"✅ Successfully bound to port {actual_port}")
+            logger.info(f" PASS:  Successfully bound to port {actual_port}")
             return True
             
     except OSError as e:
         if e.errno == 10013:  # Permission denied
-            logger.error(f"❌ Permission denied when trying to bind to port {port}")
+            logger.error(f" FAIL:  Permission denied when trying to bind to port {port}")
             logger.error(f"   This usually means another process is using the port or firewall is blocking it")
         elif e.errno == 10048:  # Address already in use
-            logger.error(f"❌ Port {port} is already in use by another process")
+            logger.error(f" FAIL:  Port {port} is already in use by another process")
         else:
-            logger.error(f"❌ Failed to bind to port {port}: {e}")
+            logger.error(f" FAIL:  Failed to bind to port {port}: {e}")
         return False
     except Exception as e:
-        logger.error(f"❌ Unexpected error when testing port {port}: {e}")
+        logger.error(f" FAIL:  Unexpected error when testing port {port}: {e}")
         return False
 
 def main():
@@ -350,10 +350,10 @@ Examples:
     args = parser.parse_args()
     
     if sys.platform != "win32":
-        logger.error("❌ This script is only for Windows systems")
+        logger.error(" FAIL:  This script is only for Windows systems")
         return 1
     
-    logger.info("🚀 Starting Windows Port 8000 Permission Error Fix")
+    logger.info("[U+1F680] Starting Windows Port 8000 Permission Error Fix")
     logger.info("=" * 60)
     
     # Step 1: Check current port usage
@@ -364,7 +364,7 @@ Examples:
         if processes_found:
             success = kill_processes_using_port(args.port, force=args.force)
             if not success:
-                logger.error(f"❌ Failed to free port {args.port}")
+                logger.error(f" FAIL:  Failed to free port {args.port}")
                 return 1
     
     # Step 3: Check Windows firewall
@@ -381,13 +381,13 @@ Examples:
     # Step 6: Test port binding
     if test_port_binding(args.port):
         logger.info("=" * 60)
-        logger.info(f"✅ SUCCESS: Port {args.port} is now available for the backend service!")
+        logger.info(f" PASS:  SUCCESS: Port {args.port} is now available for the backend service!")
         logger.info(f"   You can now run the dev launcher:")
         logger.info(f"   python scripts/dev_launcher.py")
         return 0
     else:
         logger.error("=" * 60)
-        logger.error(f"❌ FAILED: Port {args.port} is still not available")
+        logger.error(f" FAIL:  FAILED: Port {args.port} is still not available")
         logger.error("   Additional troubleshooting may be needed:")
         logger.error("   1. Try running as Administrator")
         logger.error("   2. Check if Windows Defender is blocking the port")

@@ -452,7 +452,7 @@ class ServiceAvailabilityChecker:
             ResourceMode.DISABLED: get_emoji('x')
         }
         
-        safe_print(f"{service_emoji} {service_name.upper()}: {old_mode.value} → {new_mode.value} ({reason})")
+        safe_print(f"{service_emoji} {service_name.upper()}: {old_mode.value}  ->  {new_mode.value} ({reason})")
     
     def print_availability_summary(self, results: Dict[str, ServiceAvailabilityResult]):
         """Print a summary of service availability checks."""
@@ -483,14 +483,14 @@ class ServiceAvailabilityChecker:
         print("="*60)
         print("\nTo enable AI features, set up at least one API key:")
         print("\n1. Anthropic Claude (Recommended):")
-        print("   • Visit: https://console.anthropic.com/")
-        print("   • Create API key and set: ANTHROPIC_API_KEY=your-key")
+        print("   [U+2022] Visit: https://console.anthropic.com/")
+        print("   [U+2022] Create API key and set: ANTHROPIC_API_KEY=your-key")
         print("\n2. OpenAI GPT:")
-        print("   • Visit: https://platform.openai.com/api-keys")
-        print("   • Create API key and set: OPENAI_API_KEY=your-key")
+        print("   [U+2022] Visit: https://platform.openai.com/api-keys")
+        print("   [U+2022] Create API key and set: OPENAI_API_KEY=your-key")
         print("\n3. Google Gemini:")
-        print("   • Visit: https://aistudio.google.com/")
-        print("   • Create API key and set: GEMINI_API_KEY=your-key")
+        print("   [U+2022] Visit: https://aistudio.google.com/")
+        print("   [U+2022] Create API key and set: GEMINI_API_KEY=your-key")
         print("\nExample .env file entry:")
         print("ANTHROPIC_API_KEY=sk-ant-api03-...")
         print("\nWithout API keys, the platform will run in mock mode with limited AI functionality.")
@@ -572,15 +572,15 @@ def _start_docker_services_if_needed(config: ServicesConfiguration,
                 
                 if success:
                     for service_name in docker_services_needed:
-                        warnings.append(f"✅ Started {service_name} Docker container via UnifiedDockerManager")
+                        warnings.append(f" PASS:  Started {service_name} Docker container via UnifiedDockerManager")
                 else:
-                    warnings.append(f"❌ Failed to start some Docker services: {docker_services_needed}")
+                    warnings.append(f" FAIL:  Failed to start some Docker services: {docker_services_needed}")
                     
             finally:
                 loop.close()
                 
         except ImportError as e:
-            warnings.append(f"❌ Could not import UnifiedDockerManager: {e}")
+            warnings.append(f" FAIL:  Could not import UnifiedDockerManager: {e}")
             # Fallback to legacy Docker management
             try:
                 from dev_launcher.docker_services import DockerServiceManager
@@ -590,27 +590,27 @@ def _start_docker_services_if_needed(config: ServicesConfiguration,
                     if service_name == 'redis':
                         success, message = docker_manager.start_redis_container()
                         if success:
-                            warnings.append(f"✅ Started Redis Docker container (legacy)")
+                            warnings.append(f" PASS:  Started Redis Docker container (legacy)")
                         else:
-                            warnings.append(f"❌ Failed to start Redis Docker container: {message}")
+                            warnings.append(f" FAIL:  Failed to start Redis Docker container: {message}")
                     
                     elif service_name == 'clickhouse':
                         success, message = docker_manager.start_clickhouse_container()
                         if success:
-                            warnings.append(f"✅ Started ClickHouse Docker container (legacy)")
+                            warnings.append(f" PASS:  Started ClickHouse Docker container (legacy)")
                         else:
-                            warnings.append(f"❌ Failed to start ClickHouse Docker container: {message}")
+                            warnings.append(f" FAIL:  Failed to start ClickHouse Docker container: {message}")
                     
                     elif service_name == 'postgres':
                         success, message = docker_manager.start_postgres_container()
                         if success:
-                            warnings.append(f"✅ Started PostgreSQL Docker container (legacy)")
+                            warnings.append(f" PASS:  Started PostgreSQL Docker container (legacy)")
                         else:
-                            warnings.append(f"❌ Failed to start PostgreSQL Docker container: {message}")
+                            warnings.append(f" FAIL:  Failed to start PostgreSQL Docker container: {message}")
             
             except ImportError:
-                warnings.append("⚠️  Docker services module not available")
+                warnings.append(" WARNING: [U+FE0F]  Docker services module not available")
         except Exception as e:
-            warnings.append(f"⚠️  Error starting Docker services: {str(e)}")
+            warnings.append(f" WARNING: [U+FE0F]  Error starting Docker services: {str(e)}")
     
     return warnings

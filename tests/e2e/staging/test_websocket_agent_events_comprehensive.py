@@ -15,9 +15,9 @@ This test suite validates ALL 5 required WebSocket events for agent execution:
 4. tool_completed - Tool results display (delivers actionable insights)
 5. agent_completed - User knows when valuable response is ready
 
-🚨 MISSION CRITICAL: These events enable substantive chat interactions - core business value!
+ ALERT:  MISSION CRITICAL: These events enable substantive chat interactions - core business value!
 
-🚨 CRITICAL E2E REQUIREMENTS:
+ ALERT:  CRITICAL E2E REQUIREMENTS:
 - ALL tests use real authentication (JWT/OAuth) - NO EXCEPTIONS
 - Real WebSocket connections to staging services
 - Validate ALL 5 WebSocket events in correct sequence
@@ -123,7 +123,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
         # WebSocket event tracking
         self.event_sequences: Dict[str, WebSocketEventSequence] = {}
         
-        self.logger.info(f"✅ WebSocket testing environment setup complete - {len(self.test_users)} authenticated users")
+        self.logger.info(f" PASS:  WebSocket testing environment setup complete - {len(self.test_users)} authenticated users")
         
     async def test_all_five_required_websocket_events_authenticated(self):
         """
@@ -153,7 +153,7 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
                     event_sequence.add_event(event)
                     
                     # Log event for debugging
-                    self.logger.info(f"📨 WebSocket Event: {event.get('type')} - {event.get('data', {}).get('message', 'No message')}")
+                    self.logger.info(f"[U+1F4E8] WebSocket Event: {event.get('type')} - {event.get('data', {}).get('message', 'No message')}")
                     
                     # Stop collecting after agent completion
                     if event.get("type") == "agent_completed":
@@ -199,8 +199,8 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
         
         if not is_valid:
             received_types = event_sequence.get_event_types()
-            self.logger.error(f"❌ Missing required WebSocket events: {missing_events}")
-            self.logger.error(f"📋 Events received: {received_types}")
+            self.logger.error(f" FAIL:  Missing required WebSocket events: {missing_events}")
+            self.logger.error(f"[U+1F4CB] Events received: {received_types}")
             pytest.fail(f"MISSION CRITICAL FAILURE: Missing required WebSocket events: {missing_events}")
         
         # Validate event content quality and timing
@@ -255,10 +255,10 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
         assert event_types[0] == "agent_started", f"First event should be agent_started, got {event_types[0]}"
         assert event_types[-1] == "agent_completed", f"Last event should be agent_completed, got {event_types[-1]}"
         
-        self.logger.info(f"✅ All 5 required WebSocket events validated successfully")
-        self.logger.info(f"📊 Total events: {len(event_sequence.events)}")
-        self.logger.info(f"⏱️ Execution duration: {execution_duration:.1f}s")
-        self.logger.info(f"📋 Event sequence: {' → '.join(event_types)}")
+        self.logger.info(f" PASS:  All 5 required WebSocket events validated successfully")
+        self.logger.info(f" CHART:  Total events: {len(event_sequence.events)}")
+        self.logger.info(f"[U+23F1][U+FE0F] Execution duration: {execution_duration:.1f}s")
+        self.logger.info(f"[U+1F4CB] Event sequence: {'  ->  '.join(event_types)}")
         
     async def test_websocket_event_timing_and_distribution(self):
         """
@@ -333,10 +333,10 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
         first_event_time = min(event_times)
         assert first_event_time <= 3.0, f"First event too slow: {first_event_time:.1f}s"
         
-        self.logger.info(f"✅ WebSocket event timing validation completed")
-        self.logger.info(f"⏱️ Total duration: {total_duration:.1f}s")
-        self.logger.info(f"📊 Event distribution span: {time_span:.1f}s")
-        self.logger.info(f"🧠 Thinking events: {len(thinking_events)}")
+        self.logger.info(f" PASS:  WebSocket event timing validation completed")
+        self.logger.info(f"[U+23F1][U+FE0F] Total duration: {total_duration:.1f}s")
+        self.logger.info(f" CHART:  Event distribution span: {time_span:.1f}s")
+        self.logger.info(f"[U+1F9E0] Thinking events: {len(thinking_events)}")
         
     async def test_multi_user_websocket_event_isolation(self):
         """
@@ -453,9 +453,9 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
             user_events = set(event_sequence.get_event_types())
             assert required_events.issubset(user_events), f"User {user_result['user_index']} missing events: {required_events - user_events}"
         
-        self.logger.info(f"✅ Multi-user WebSocket isolation validation completed")
-        self.logger.info(f"👥 Successful concurrent users: {len(successful_users)}")
-        self.logger.info(f"📨 Unique event types across all users: {len(all_event_types)}")
+        self.logger.info(f" PASS:  Multi-user WebSocket isolation validation completed")
+        self.logger.info(f"[U+1F465] Successful concurrent users: {len(successful_users)}")
+        self.logger.info(f"[U+1F4E8] Unique event types across all users: {len(all_event_types)}")
         
     async def test_websocket_reconnection_and_event_continuity(self):
         """
@@ -556,10 +556,10 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
         # Validate reconnection was transparent to user
         assert "reconnection_successful" in str(completion_data) or completion_data.get("resumed_from_checkpoint"), "No indication of successful reconnection recovery"
         
-        self.logger.info(f"✅ WebSocket reconnection and continuity validation completed")
-        self.logger.info(f"📊 Events before disconnection: {len(initial_events)}")
-        self.logger.info(f"🔄 Events after reconnection: {len(reconnected_events)}")
-        self.logger.info(f"✨ Total event continuity maintained: {len(all_events)} events")
+        self.logger.info(f" PASS:  WebSocket reconnection and continuity validation completed")
+        self.logger.info(f" CHART:  Events before disconnection: {len(initial_events)}")
+        self.logger.info(f" CYCLE:  Events after reconnection: {len(reconnected_events)}")
+        self.logger.info(f"[U+2728] Total event continuity maintained: {len(all_events)} events")
         
     async def test_websocket_event_content_quality_validation(self):
         """
@@ -683,11 +683,11 @@ class TestWebSocketAgentEventsComprehensive(BaseE2ETest):
         found_indicators = [ind for ind in progression_indicators if ind in content_text]
         assert len(found_indicators) >= 2, f"Content lacks progression indicators: {found_indicators}"
         
-        self.logger.info(f"✅ WebSocket event content quality validation completed")
-        self.logger.info(f"📝 Total content length: {total_content_length} characters")
-        self.logger.info(f"🧠 Thinking events: {len(thinking_events)}")
-        self.logger.info(f"🔧 Tool events: {len(tool_executing_events)} executing, {len(tool_completed_events)} completed")
-        self.logger.info(f"📈 Progression indicators found: {len(found_indicators)}")
+        self.logger.info(f" PASS:  WebSocket event content quality validation completed")
+        self.logger.info(f"[U+1F4DD] Total content length: {total_content_length} characters")
+        self.logger.info(f"[U+1F9E0] Thinking events: {len(thinking_events)}")
+        self.logger.info(f"[U+1F527] Tool events: {len(tool_executing_events)} executing, {len(tool_completed_events)} completed")
+        self.logger.info(f"[U+1F4C8] Progression indicators found: {len(found_indicators)}")
 
 
 # Integration with pytest for automated test discovery

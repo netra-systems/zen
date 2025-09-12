@@ -116,7 +116,7 @@ class TestGoldenPathEventValidatorIntegration(SSotAsyncTestCase):
         print(f"Failed validations: {len(failed_events)}")
         
         for event_type, result in validation_results.items():
-            print(f"  {event_type}: {'✅ PASS' if result['success'] else '❌ FAIL'}")
+            print(f"  {event_type}: {' PASS:  PASS' if result['success'] else ' FAIL:  FAIL'}")
             if not result['success'] and 'error_details' in result:
                 for error in result['error_details']:
                     print(f"    Error: {error}")
@@ -234,7 +234,7 @@ class TestGoldenPathEventValidatorIntegration(SSotAsyncTestCase):
         print(f"Failed calculations: {len(failed_calculations)}")
         
         for scenario, result in business_calculation_results.items():
-            status = '✅ PASS' if result.get('meets_threshold', False) else '❌ FAIL'
+            status = ' PASS:  PASS' if result.get('meets_threshold', False) else ' FAIL:  FAIL'
             print(f"  {scenario}: {status}")
             if 'calculated_impact' in result:
                 print(f"    Revenue impact: ${result['calculated_impact']:,.0f}")

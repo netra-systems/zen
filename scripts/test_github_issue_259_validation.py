@@ -16,7 +16,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 def test_staging_test_defaults_availability():
     """Test that staging test defaults are available in test context."""
-    print("🧪 Testing staging test defaults availability...")
+    print("[U+1F9EA] Testing staging test defaults availability...")
     
     env = IsolatedEnvironment()
     env.complete_reset_for_testing()  # Ensure clean state 
@@ -37,19 +37,19 @@ def test_staging_test_defaults_availability():
     for var, expected_prefix in staging_vars.items():
         value = env.get(var)
         if value and (value.startswith(expected_prefix) or value == expected_prefix):
-            results[var] = "✅ PRESENT"
+            results[var] = " PASS:  PRESENT"
         else:
-            results[var] = f"❌ MISSING (got: {value})"
+            results[var] = f" FAIL:  MISSING (got: {value})"
     
     for var, result in results.items():
         print(f"  {var}: {result}")
     
-    return all("✅" in result for result in results.values())
+    return all(" PASS: " in result for result in results.values())
 
 
 def test_production_test_defaults_availability():
     """Test that production test defaults are available in test context."""
-    print("🧪 Testing production test defaults availability...")
+    print("[U+1F9EA] Testing production test defaults availability...")
     
     env = IsolatedEnvironment()
     env.complete_reset_for_testing()  # Ensure clean state
@@ -69,19 +69,19 @@ def test_production_test_defaults_availability():
     for var, expected_prefix in production_vars.items():
         value = env.get(var)
         if value and (value.startswith(expected_prefix) or value == expected_prefix):
-            results[var] = "✅ PRESENT"
+            results[var] = " PASS:  PRESENT"
         else:
-            results[var] = f"❌ MISSING (got: {value})"
+            results[var] = f" FAIL:  MISSING (got: {value})"
     
     for var, result in results.items():
         print(f"  {var}: {result}")
     
-    return all("✅" in result for result in results.values())
+    return all(" PASS: " in result for result in results.values())
 
 
 def test_security_isolation():
     """Test that test defaults are NOT available outside test context."""
-    print("🔒 Testing security isolation (non-test context)...")
+    print("[U+1F512] Testing security isolation (non-test context)...")
     
     env = IsolatedEnvironment()
     env.complete_reset_for_testing()  # Ensure clean state
@@ -107,19 +107,19 @@ def test_security_isolation():
     for var in secure_vars:
         value = env.get(var)
         if value is None:
-            results[var] = "✅ PROPERLY ISOLATED"
+            results[var] = " PASS:  PROPERLY ISOLATED"
         else:
-            results[var] = f"❌ SECURITY LEAK (got: {value[:20]}...)"
+            results[var] = f" FAIL:  SECURITY LEAK (got: {value[:20]}...)"
     
     for var, result in results.items():
         print(f"  {var}: {result}")
     
-    return all("✅" in result for result in results.values())
+    return all(" PASS: " in result for result in results.values())
 
 
 def test_backwards_compatibility():
     """Test that existing functionality still works."""
-    print("🔄 Testing backwards compatibility...")
+    print(" CYCLE:  Testing backwards compatibility...")
     
     env = IsolatedEnvironment()
     
@@ -129,37 +129,37 @@ def test_backwards_compatibility():
     # Test enable_isolation method (original)
     try:
         env.enable_isolation()
-        test_results['enable_isolation'] = "✅ WORKS"
+        test_results['enable_isolation'] = " PASS:  WORKS"
     except Exception as e:
-        test_results['enable_isolation'] = f"❌ BROKEN: {e}"
+        test_results['enable_isolation'] = f" FAIL:  BROKEN: {e}"
     
     # Test enable_isolation_mode method (compatibility)
     try:
         env.enable_isolation_mode()
-        test_results['enable_isolation_mode'] = "✅ WORKS"
+        test_results['enable_isolation_mode'] = " PASS:  WORKS"
     except Exception as e:
-        test_results['enable_isolation_mode'] = f"❌ BROKEN: {e}"
+        test_results['enable_isolation_mode'] = f" FAIL:  BROKEN: {e}"
     
     # Test basic set/get
     try:
         env.set('TEST_VAR', 'test_value', 'test')
         value = env.get('TEST_VAR')
         if value == 'test_value':
-            test_results['basic_set_get'] = "✅ WORKS"
+            test_results['basic_set_get'] = " PASS:  WORKS"
         else:
-            test_results['basic_set_get'] = f"❌ BROKEN: got {value}"
+            test_results['basic_set_get'] = f" FAIL:  BROKEN: got {value}"
     except Exception as e:
-        test_results['basic_set_get'] = f"❌ BROKEN: {e}"
+        test_results['basic_set_get'] = f" FAIL:  BROKEN: {e}"
     
     for test, result in test_results.items():
         print(f"  {test}: {result}")
     
-    return all("✅" in result for result in test_results.values())
+    return all(" PASS: " in result for result in test_results.values())
 
 
 def test_original_failing_scenario():
     """Test the original failing scenario from GitHub issue #259."""
-    print("🎯 Testing original failing scenario from GitHub issue #259...")
+    print(" TARGET:  Testing original failing scenario from GitHub issue #259...")
     
     # Create a minimal test script that simulates the original failure
     test_script = '''
@@ -205,13 +205,13 @@ else:
                               capture_output=True, text=True, timeout=30)
         
         if result.returncode == 0:
-            print("  ✅ Original failing scenario now PASSES")
+            print("   PASS:  Original failing scenario now PASSES")
             return True
         else:
-            print(f"  ❌ Original failing scenario still FAILS: {result.stdout} {result.stderr}")
+            print(f"   FAIL:  Original failing scenario still FAILS: {result.stdout} {result.stderr}")
             return False
     except Exception as e:
-        print(f"  ❌ Test execution error: {e}")
+        print(f"   FAIL:  Test execution error: {e}")
         return False
     finally:
         os.unlink(temp_script)
@@ -219,7 +219,7 @@ else:
 
 def test_no_environmental_pollution():
     """Test that changes don't pollute the environment."""
-    print("🌍 Testing environmental pollution prevention...")
+    print("[U+1F30D] Testing environmental pollution prevention...")
     
     # Get initial environment state
     initial_env = dict(os.environ)
@@ -246,10 +246,10 @@ def test_no_environmental_pollution():
                       if not var.startswith(('PYTEST_', 'TEST_', '_PYTEST_'))]
     
     if not unexpected_vars:
-        print("  ✅ No environmental pollution detected")
+        print("   PASS:  No environmental pollution detected")
         return True
     else:
-        print(f"  ❌ Environmental pollution detected: {unexpected_vars}")
+        print(f"   FAIL:  Environmental pollution detected: {unexpected_vars}")
         return False
 
 
@@ -281,11 +281,11 @@ def main():
         try:
             if test_func():
                 passed += 1
-                status = "✅ PASS"
+                status = " PASS:  PASS"
             else:
-                status = "❌ FAIL"
+                status = " FAIL:  FAIL"
         except Exception as e:
-            status = f"❌ ERROR: {e}"
+            status = f" FAIL:  ERROR: {e}"
         
         print(f"  Status: {status}")
     
@@ -293,14 +293,14 @@ def main():
     print(f"VALIDATION SUMMARY: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 ALL TESTS PASSED - GitHub issue #259 fix maintains system stability!")
-        print("✅ System stability VERIFIED")
-        print("✅ No breaking changes introduced")
-        print("✅ Security isolation maintained")
-        print("✅ Original issue resolved")
+        print(" CELEBRATION:  ALL TESTS PASSED - GitHub issue #259 fix maintains system stability!")
+        print(" PASS:  System stability VERIFIED")
+        print(" PASS:  No breaking changes introduced")
+        print(" PASS:  Security isolation maintained")
+        print(" PASS:  Original issue resolved")
         return True
     else:
-        print("⚠️  SOME TESTS FAILED - Review failures above")
+        print(" WARNING: [U+FE0F]  SOME TESTS FAILED - Review failures above")
         return False
 
 

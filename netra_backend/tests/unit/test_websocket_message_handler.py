@@ -739,7 +739,7 @@ class TestWebSocketMessageHandler(BaseIntegrationTest):
                 "boolean": True,
                 "null_field": None
             },
-            "unicode": "测试数据 🚀",
+            "unicode": "[U+6D4B][U+8BD5][U+6570][U+636E] [U+1F680]",
             "timestamp": datetime.now().isoformat()
         }
         

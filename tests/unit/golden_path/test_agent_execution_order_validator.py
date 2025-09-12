@@ -1,7 +1,7 @@
 """
 Test Agent Execution Order Validation Logic for Golden Path
 
-CRITICAL UNIT TEST: This validates the Data → Optimization → Report agent execution 
+CRITICAL UNIT TEST: This validates the Data  ->  Optimization  ->  Report agent execution 
 order that is fundamental to delivering business value in the Golden Path.
 
 Business Value Justification (BVJ):
@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core business logic for $500K+ ARR delivery
 
 GOLDEN PATH REQUIREMENT: Agent Execution Pipeline Order
-Data Agent (collect metrics) → Optimization Agent (analyze) → Report Agent (deliver)
+Data Agent (collect metrics)  ->  Optimization Agent (analyze)  ->  Report Agent (deliver)
 This test validates the ordering logic without actual agent execution.
 """
 

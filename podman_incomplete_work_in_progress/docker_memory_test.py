@@ -62,8 +62,8 @@ print(f"Peak memory usage: {max(baseline['rss_mb'], after_pytest['rss_mb'], afte
 # Verify we're under limits
 MEMORY_LIMIT_MB = 256
 if after_cleanup['rss_mb'] < MEMORY_LIMIT_MB:
-    print(f"\n✅ PASS: Memory usage ({after_cleanup['rss_mb']:.1f} MB) is under limit ({MEMORY_LIMIT_MB} MB)")
+    print(f"\n PASS:  PASS: Memory usage ({after_cleanup['rss_mb']:.1f} MB) is under limit ({MEMORY_LIMIT_MB} MB)")
     sys.exit(0)
 else:
-    print(f"\n❌ FAIL: Memory usage ({after_cleanup['rss_mb']:.1f} MB) exceeds limit ({MEMORY_LIMIT_MB} MB)")
+    print(f"\n FAIL:  FAIL: Memory usage ({after_cleanup['rss_mb']:.1f} MB) exceeds limit ({MEMORY_LIMIT_MB} MB)")
     sys.exit(1)

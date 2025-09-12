@@ -97,7 +97,7 @@ class EnvFileLoader:
             
             # Log critical warnings
             logger.critical("\n" + "="*80)
-            logger.critical("🚨 CRITICAL: STAGING ENV FILE DETECTED 🚨")
+            logger.critical(" ALERT:  CRITICAL: STAGING ENV FILE DETECTED  ALERT: ")
             logger.critical("="*80)
             logger.critical("The staging environment file violates unified environment management!")
             logger.critical("It can override Google Secret Manager values with invalid placeholders.")
@@ -107,10 +107,10 @@ class EnvFileLoader:
             logger.critical(f"  OR on Windows: del {staging_env_file}")
             logger.critical("")
             logger.critical("WHY THIS IS CRITICAL:")
-            logger.critical("• Overrides production secret management")
-            logger.critical("• Contains placeholder values instead of real secrets")
-            logger.critical("• Breaks environment isolation")
-            logger.critical("• Violates SPEC/unified_environment_management.xml")
+            logger.critical("[U+2022] Overrides production secret management")
+            logger.critical("[U+2022] Contains placeholder values instead of real secrets")
+            logger.critical("[U+2022] Breaks environment isolation")
+            logger.critical("[U+2022] Violates SPEC/unified_environment_management.xml")
             logger.critical("="*80)
             
             # In staging environment, consider raising an exception

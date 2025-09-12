@@ -148,14 +148,14 @@ class RequestScopedAgentExecutor:
             websocket_bridge=event_emitter  # EventEmitter implements the same interface
         )
         
-        logger.debug(f"🎯 EXECUTOR CREATED: {self._get_log_prefix()} - per-request isolation")
+        logger.debug(f" TARGET:  EXECUTOR CREATED: {self._get_log_prefix()} - per-request isolation")
         
         # Verify user context integrity
         try:
             user_context.verify_isolation()
-            logger.debug(f"✅ ISOLATION VERIFIED: {self._get_log_prefix()}")
+            logger.debug(f" PASS:  ISOLATION VERIFIED: {self._get_log_prefix()}")
         except Exception as e:
-            logger.error(f"🚨 ISOLATION VIOLATION: {self._get_log_prefix()} - {e}")
+            logger.error(f" ALERT:  ISOLATION VIOLATION: {self._get_log_prefix()} - {e}")
             raise AgentExecutorError(f"User context failed isolation verification: {e}")
     
     def _get_log_prefix(self) -> str:
@@ -338,7 +338,7 @@ class RequestScopedAgentExecutor:
                     
         except Exception as e:
             self._metrics['failed_executions'] += 1
-            logger.error(f"🚨 EXECUTION ERROR: {self._get_log_prefix()} {agent_name} failed: {e}")
+            logger.error(f" ALERT:  EXECUTION ERROR: {self._get_log_prefix()} {agent_name} failed: {e}")
             
             # Create error result
             error_result = self._create_error_result(execution_context, e)
@@ -475,7 +475,7 @@ class RequestScopedAgentExecutor:
                 result.duration * 1000 if result.duration else 0
             )
             
-            logger.info(f"✅ AGENT SUCCESS: {self._get_log_prefix()} {context.agent_name} completed")
+            logger.info(f" PASS:  AGENT SUCCESS: {self._get_log_prefix()} {context.agent_name} completed")
             
         except Exception as e:
             logger.warning(f"Failed to send success completion notification: {e}")
@@ -505,7 +505,7 @@ class RequestScopedAgentExecutor:
                 result.duration * 1000 if result.duration else 0
             )
             
-            logger.warning(f"❌ AGENT FAILURE: {self._get_log_prefix()} {context.agent_name} failed")
+            logger.warning(f" FAIL:  AGENT FAILURE: {self._get_log_prefix()} {context.agent_name} failed")
             
         except Exception as e:
             logger.warning(f"Failed to send failure completion notification: {e}")
@@ -584,7 +584,7 @@ class RequestScopedAgentExecutor:
         if self._disposed:
             return
         
-        logger.debug(f"🗑️ EXECUTOR DISPOSING: {self._get_log_prefix()}")
+        logger.debug(f"[U+1F5D1][U+FE0F] EXECUTOR DISPOSING: {self._get_log_prefix()}")
         
         # Cancel any active executions
         for context_key, execution_id in self._request_executions.items():
@@ -606,7 +606,7 @@ class RequestScopedAgentExecutor:
         self._agent_registry = None
         self._agent_core = None
         
-        logger.debug(f"✅ EXECUTOR DISPOSED: {self._get_log_prefix()}")
+        logger.debug(f" PASS:  EXECUTOR DISPOSED: {self._get_log_prefix()}")
     
     async def __aenter__(self) -> 'RequestScopedAgentExecutor':
         """Async context manager entry."""
@@ -659,7 +659,7 @@ class RequestScopedExecutorFactory:
                 from netra_backend.app.agents.supervisor.agent_registry import get_agent_registry
                 agent_registry = get_agent_registry()
             except Exception as e:
-                logger.error(f"🚨 FACTORY ERROR: Failed to get agent registry: {e}")
+                logger.error(f" ALERT:  FACTORY ERROR: Failed to get agent registry: {e}")
                 raise ValueError(f"Failed to get agent registry: {e}")
         
         # Create executor
@@ -667,10 +667,10 @@ class RequestScopedExecutorFactory:
             executor = RequestScopedAgentExecutor(
                 user_context, event_emitter, agent_registry
             )
-            logger.info(f"🏭 EXECUTOR CREATED: {executor._get_log_prefix()} via factory")
+            logger.info(f"[U+1F3ED] EXECUTOR CREATED: {executor._get_log_prefix()} via factory")
             return executor
         except Exception as e:
-            logger.error(f"🚨 FACTORY ERROR: Failed to create executor: {e}")
+            logger.error(f" ALERT:  FACTORY ERROR: Failed to create executor: {e}")
             raise ValueError(f"Failed to create RequestScopedAgentExecutor: {e}")
     
     @staticmethod
@@ -703,7 +703,7 @@ class RequestScopedExecutorFactory:
         executor = await RequestScopedExecutorFactory.create_executor(
             user_context, event_emitter, agent_registry
         )
-        logger.debug(f"📦 SCOPED EXECUTOR: {executor._get_log_prefix()} created with auto-cleanup")
+        logger.debug(f"[U+1F4E6] SCOPED EXECUTOR: {executor._get_log_prefix()} created with auto-cleanup")
         return executor
 
 

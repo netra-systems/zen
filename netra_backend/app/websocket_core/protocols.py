@@ -371,12 +371,12 @@ class WebSocketProtocolValidator:
             # Log validation results
             if validation_result['compliant']:
                 logger.info(
-                    f"✅ WebSocket Manager Protocol validation PASSED for {validation_result['manager_type']} "
+                    f" PASS:  WebSocket Manager Protocol validation PASSED for {validation_result['manager_type']} "
                     f"({validation_result['summary']['compliance_percentage']}% compliant)"
                 )
             else:
                 logger.error(
-                    f"❌ WebSocket Manager Protocol validation FAILED for {validation_result['manager_type']} "
+                    f" FAIL:  WebSocket Manager Protocol validation FAILED for {validation_result['manager_type']} "
                     f"({validation_result['summary']['compliance_percentage']}% compliant). "
                     f"Missing methods: {validation_result['missing_methods']}, "
                     f"Invalid signatures: {validation_result['invalid_signatures']}"
@@ -423,7 +423,7 @@ class WebSocketProtocolValidator:
                     five_whys_issues.append(f"FIVE WHYS CRITICAL: Missing {method} method")
             
             error_message = (
-                f"🚨 PROTOCOL COMPLIANCE FAILURE: {error_context} does not implement WebSocketManagerProtocol. "
+                f" ALERT:  PROTOCOL COMPLIANCE FAILURE: {error_context} does not implement WebSocketManagerProtocol. "
                 f"Manager type: {validation['manager_type']} from {validation['manager_module']}. "
                 f"Compliance: {validation['summary']['compliance_percentage']}%. "
                 f"Issues: {'; '.join(error_details)}. "
@@ -441,7 +441,7 @@ class WebSocketProtocolValidator:
             logger.critical(error_message)
             raise RuntimeError(error_message)
         
-        logger.info(f"✅ Protocol compliance verified for {error_context}: {validation['manager_type']}")
+        logger.info(f" PASS:  Protocol compliance verified for {error_context}: {validation['manager_type']}")
 
 
 def get_protocol_documentation() -> str:

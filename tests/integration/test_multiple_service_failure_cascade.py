@@ -74,7 +74,7 @@ class MultipleServiceFailureSimulator:
                 self.original_services['supervisor'] = getattr(AgentRegistry, '_instance', None)
                 AgentRegistry._instance = None
                 self.failed_services.add('supervisor')
-                logger.error("🚨 SERVICE FAILURE: Agent supervisor failed")
+                logger.error(" ALERT:  SERVICE FAILURE: Agent supervisor failed")
     
     def simulate_thread_service_failure(self) -> None:
         """Simulate thread service failure."""
@@ -83,7 +83,7 @@ class MultipleServiceFailureSimulator:
                 self.original_services['thread_service'] = getattr(ThreadService, '_instance', None)
                 ThreadService._instance = None
                 self.failed_services.add('thread_service')
-                logger.error("🚨 SERVICE FAILURE: Thread service failed")
+                logger.error(" ALERT:  SERVICE FAILURE: Thread service failed")
     
     def simulate_startup_failure(self) -> None:
         """Simulate startup completion failure."""
@@ -92,15 +92,15 @@ class MultipleServiceFailureSimulator:
                 self.original_services['startup'] = getattr(StartupOrchestrator, '_startup_complete', True)
                 StartupOrchestrator._startup_complete = False
                 self.failed_services.add('startup')
-                logger.error("🚨 SERVICE FAILURE: Startup incomplete")
+                logger.error(" ALERT:  SERVICE FAILURE: Startup incomplete")
     
     def simulate_all_service_failures(self) -> None:
         """Simulate all critical service failures simultaneously."""
-        logger.error("🚨 CATASTROPHIC FAILURE: Simulating all critical service failures")
+        logger.error(" ALERT:  CATASTROPHIC FAILURE: Simulating all critical service failures")
         self.simulate_supervisor_failure()
         self.simulate_thread_service_failure()
         self.simulate_startup_failure()
-        logger.error(f"🚨 SERVICES FAILED: {', '.join(self.failed_services)}")
+        logger.error(f" ALERT:  SERVICES FAILED: {', '.join(self.failed_services)}")
     
     def restore_service(self, service_name: str) -> None:
         """Restore a specific failed service."""
@@ -114,14 +114,14 @@ class MultipleServiceFailureSimulator:
                     StartupOrchestrator._startup_complete = self.original_services.get('startup', True)
                 
                 self.failed_services.discard(service_name)
-                logger.info(f"✅ SERVICE RESTORED: {service_name}")
+                logger.info(f" PASS:  SERVICE RESTORED: {service_name}")
     
     def restore_all_services(self) -> None:
         """Restore all failed services."""
         with self._lock:
             for service in list(self.failed_services):
                 self.restore_service(service)
-            logger.info("✅ ALL SERVICES RESTORED")
+            logger.info(" PASS:  ALL SERVICES RESTORED")
     
     def get_failed_services(self) -> Set[str]:
         """Get list of currently failed services."""
@@ -230,16 +230,16 @@ class TestMultipleServiceFailureCascade:
         - Cascading mock responses delivered
         - System appears to work but provides no real value
         """
-        logger.info("🧪 INTEGRATION TEST: All services failed - clean failure not cascade")
+        logger.info("[U+1F9EA] INTEGRATION TEST: All services failed - clean failure not cascade")
         
         # Step 1: Simulate all critical service failures
         self.service_simulator.simulate_all_service_failures()
         failed_services = self.service_simulator.get_failed_services()
-        logger.error(f"🚨 SIMULATED FAILURES: {', '.join(failed_services)}")
+        logger.error(f" ALERT:  SIMULATED FAILURES: {', '.join(failed_services)}")
         
         # Step 2: Attempt WebSocket connection with all services failed
         try:
-            logger.info("🔌 Attempting WebSocket connection with all services failed")
+            logger.info("[U+1F50C] Attempting WebSocket connection with all services failed")
             websocket = await self.auth_helper.connect_authenticated_websocket(timeout=10.0)
             
             # If connection succeeds, test what happens when we send a request
@@ -252,7 +252,7 @@ class TestMultipleServiceFailureCascade:
                 }
                 
                 await websocket.send(json.dumps(catastrophic_request))
-                logger.info("📤 Sent request with all services failed")
+                logger.info("[U+1F4E4] Sent request with all services failed")
                 
                 # Collect any responses
                 events = []
@@ -275,15 +275,15 @@ class TestMultipleServiceFailureCascade:
                         cascade_patterns = self.cascade_detector.detect_cascade_patterns(event_content)
                         
                         if has_fallback:
-                            logger.error(f"🚨 FALLBACK DETECTED in event {len(events)}: {fallback_patterns}")
+                            logger.error(f" ALERT:  FALLBACK DETECTED in event {len(events)}: {fallback_patterns}")
                         
                         if cascade_patterns:
-                            logger.error(f"🚨 CASCADE DETECTED in event {len(events)}: {cascade_patterns}")
+                            logger.error(f" ALERT:  CASCADE DETECTED in event {len(events)}: {cascade_patterns}")
                         
                         # Immediate failure on cascade detection
                         if cascade_patterns or (has_fallback and len(events) > 1):
                             raise AssertionError(
-                                f"🚨 CATASTROPHIC FAILURE: CASCADING FALLBACKS DETECTED\n"
+                                f" ALERT:  CATASTROPHIC FAILURE: CASCADING FALLBACKS DETECTED\n"
                                 f"Event {len(events)}: {event.get('type', 'unknown')}\n"
                                 f"Fallback patterns: {fallback_patterns}\n"
                                 f"Cascade patterns: {cascade_patterns}\n"
@@ -315,7 +315,7 @@ class TestMultipleServiceFailureCascade:
                     # CRITICAL: Multiple fallback events indicate cascade
                     if fallback_event_count > 1:
                         raise AssertionError(
-                            f"🚨 CASCADE FAILURE: MULTIPLE FALLBACK EVENTS\n"
+                            f" ALERT:  CASCADE FAILURE: MULTIPLE FALLBACK EVENTS\n"
                             f"Fallback events: {fallback_event_count}/{len(events)}\n"
                             f"All patterns: {all_fallback_patterns}\n"
                             f"BUSINESS IMPACT: Cascading mock responses masking system failure\n"
@@ -340,7 +340,7 @@ class TestMultipleServiceFailureCascade:
                             
                             if has_mock_value:
                                 raise AssertionError(
-                                    f"🚨 MOCK BUSINESS VALUE: Fallback providing fake insights\n"
+                                    f" ALERT:  MOCK BUSINESS VALUE: Fallback providing fake insights\n"
                                     f"Fallback content: {fallback_content[:200]}...\n"
                                     f"BUSINESS IMPACT: Users receiving mock value instead of error\n"
                                     f"Should show clear error with services: {', '.join(failed_services)} failed"
@@ -353,24 +353,24 @@ class TestMultipleServiceFailureCascade:
                 await websocket.close()
                 
                 # If we get here without cascade, that's acceptable
-                logger.success("✅ NO CASCADE DETECTED: System handled multiple service failures appropriately")
+                logger.success(" PASS:  NO CASCADE DETECTED: System handled multiple service failures appropriately")
             
             except AssertionError as e:
                 if "CASCADE" in str(e) or "FALLBACK" in str(e):
                     raise e
                 else:
                     # Unexpected error during request processing
-                    logger.success(f"✅ EXPECTED BEHAVIOR: Request failed appropriately: {e}")
+                    logger.success(f" PASS:  EXPECTED BEHAVIOR: Request failed appropriately: {e}")
         
         except Exception as e:
             error_msg = str(e)
             
             # Check if error indicates cascade or fallback creation
             if any(word in error_msg.lower() for word in ['cascade', 'fallback', 'mock', 'degraded']):
-                raise AssertionError(f"🚨 CASCADE/FALLBACK in connection error: {error_msg}")
+                raise AssertionError(f" ALERT:  CASCADE/FALLBACK in connection error: {error_msg}")
             
             # Connection failure with all services down is expected
-            logger.success(f"✅ EXPECTED BEHAVIOR: Connection failed cleanly with all services down: {error_msg}")
+            logger.success(f" PASS:  EXPECTED BEHAVIOR: Connection failed cleanly with all services down: {error_msg}")
     
     async def test_gradual_service_failure_cascade_prevention(self):
         """
@@ -384,7 +384,7 @@ class TestMultipleServiceFailureCascade:
         - Additional service failures don't trigger more fallbacks
         - System maintains clean failure state
         """
-        logger.info("🧪 INTEGRATION TEST: Gradual service failure cascade prevention")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Gradual service failure cascade prevention")
         
         # Start with working connection
         websocket = await self.auth_helper.connect_authenticated_websocket(timeout=10.0)
@@ -392,7 +392,7 @@ class TestMultipleServiceFailureCascade:
         services_to_fail = ['supervisor', 'thread_service', 'startup']
         
         for i, service in enumerate(services_to_fail):
-            logger.info(f"🚨 Failing service {i+1}/{len(services_to_fail)}: {service}")
+            logger.info(f" ALERT:  Failing service {i+1}/{len(services_to_fail)}: {service}")
             
             # Fail the service
             if service == 'supervisor':
@@ -423,27 +423,27 @@ class TestMultipleServiceFailureCascade:
                     
                     if cascade_patterns:
                         raise AssertionError(
-                            f"🚨 GRADUAL CASCADE: Service {service} failure triggered cascade\n"
+                            f" ALERT:  GRADUAL CASCADE: Service {service} failure triggered cascade\n"
                             f"Patterns: {cascade_patterns}\n"
                             f"Failed services so far: {', '.join(self.service_simulator.get_failed_services())}"
                         )
                     
-                    logger.info(f"✅ No cascade after {service} failure")
+                    logger.info(f" PASS:  No cascade after {service} failure")
                     
                 except asyncio.TimeoutError:
-                    logger.info(f"✅ Appropriate timeout after {service} failure")
+                    logger.info(f" PASS:  Appropriate timeout after {service} failure")
             
             except Exception as e:
                 error_msg = str(e)
                 if 'cascade' in error_msg.lower():
                     raise AssertionError(f"Cascade in send after {service} failure: {error_msg}")
-                logger.info(f"✅ Appropriate failure after {service} failure: {error_msg}")
+                logger.info(f" PASS:  Appropriate failure after {service} failure: {error_msg}")
             
             # Brief pause between failures
             await asyncio.sleep(0.5)
         
         await websocket.close()
-        logger.success("✅ GRADUAL FAILURE TEST PASSED: No cascading fallbacks detected")
+        logger.success(" PASS:  GRADUAL FAILURE TEST PASSED: No cascading fallbacks detected")
     
     async def test_service_recovery_after_multiple_failures(self):
         """
@@ -452,7 +452,7 @@ class TestMultipleServiceFailureCascade:
         This test validates that after multiple service failures are resolved,
         the system returns to normal operation without any residual fallback behavior.
         """
-        logger.info("🧪 INTEGRATION TEST: Service recovery after multiple failures")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Service recovery after multiple failures")
         
         # Simulate all failures
         self.service_simulator.simulate_all_service_failures()
@@ -499,7 +499,7 @@ class TestMultipleServiceFailureCascade:
             assert not cascade_patterns, f"Residual cascade patterns after recovery: {cascade_patterns}"
         
         await websocket.close()
-        logger.success("✅ RECOVERY TEST PASSED: Normal operation restored after multiple failures")
+        logger.success(" PASS:  RECOVERY TEST PASSED: Normal operation restored after multiple failures")
 
 
 if __name__ == "__main__":
@@ -515,9 +515,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--pytest":
         pytest.main([__file__, "-v", "--tb=short"])
     else:
-        print("🧪 INTEGRATION: Multiple Service Failure Cascade Prevention Tests")
-        print("📋 These tests prevent multiple service failures from creating cascading fallbacks")
-        print("🚀 Starting test execution...")
+        print("[U+1F9EA] INTEGRATION: Multiple Service Failure Cascade Prevention Tests")
+        print("[U+1F4CB] These tests prevent multiple service failures from creating cascading fallbacks")
+        print("[U+1F680] Starting test execution...")
         
         exit_code = pytest.main([
             __file__,
@@ -529,8 +529,8 @@ if __name__ == "__main__":
         ])
         
         if exit_code == 0:
-            print("✅ ALL TESTS PASSED: Multiple service failures handled correctly")
+            print(" PASS:  ALL TESTS PASSED: Multiple service failures handled correctly")
         else:
-            print("🚨 TEST FAILURES: Cascade failure issues detected")
+            print(" ALERT:  TEST FAILURES: Cascade failure issues detected")
             
         sys.exit(exit_code)

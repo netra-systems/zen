@@ -62,7 +62,7 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
         
     async def test_user_state_isolation_complete(self):
         """Test that user states are completely isolated between UserExecutionEngine instances"""
-        print("\n🔍 Testing user state isolation in UserExecutionEngine...")
+        print("\n SEARCH:  Testing user state isolation in UserExecutionEngine...")
         
         try:
             # Import here to catch import errors
@@ -104,7 +104,7 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
             if engine_user_id != user_id:
                 isolation_violations.append(f"Engine user_id mismatch: expected {user_id}, got {engine_user_id}")
         
-        print(f"  ✅ Created {len(engines)} engines with unique user IDs")
+        print(f"   PASS:  Created {len(engines)} engines with unique user IDs")
         
         # Test 2: Session ID isolation
         session_ids = set()
@@ -114,7 +114,7 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
                 isolation_violations.append(f"Duplicate session_id detected: {engine_session_id}")
             session_ids.add(engine_session_id)
         
-        print(f"  ✅ All engines have unique session IDs")
+        print(f"   PASS:  All engines have unique session IDs")
         
         # Test 3: WebSocket manager isolation
         websocket_managers = set()
@@ -125,7 +125,7 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
                 isolation_violations.append(f"Shared WebSocket manager detected for {user_id}")
             websocket_managers.add(ws_id)
         
-        print(f"  ✅ All engines have isolated WebSocket managers")
+        print(f"   PASS:  All engines have isolated WebSocket managers")
         
         # Test 4: User context isolation
         for user_id, data in engines.items():
@@ -138,7 +138,7 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
                 except Exception as e:
                     isolation_violations.append(f"Failed to get user context for {user_id}: {e}")
         
-        print(f"  ✅ User contexts properly isolated")
+        print(f"   PASS:  User contexts properly isolated")
         
         # Test 5: Check for shared mutable objects
         shared_objects = []
@@ -165,7 +165,7 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
         if shared_objects:
             isolation_violations.extend(shared_objects)
         else:
-            print(f"  ✅ No shared mutable objects detected")
+            print(f"   PASS:  No shared mutable objects detected")
         
         # Test 6: Concurrent modification isolation
         async def modify_user_data(user_id: str, engine: Any):
@@ -201,7 +201,7 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
             if not isinstance(result, str) or not result.startswith('success'):
                 isolation_violations.append(f"Concurrent modification failed for {user_id}: {result}")
         
-        print(f"  ✅ Concurrent modifications completed without interference")
+        print(f"   PASS:  Concurrent modifications completed without interference")
         
         # Validate WebSocket event isolation
         for user_id, data in engines.items():
@@ -214,18 +214,18 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
             elif events[0]['data']['user_id'] != user_id:
                 isolation_violations.append(f"User {user_id} received event for different user")
         
-        print(f"  ✅ WebSocket events properly isolated")
+        print(f"   PASS:  WebSocket events properly isolated")
         
         # CRITICAL: This test should PASS after SSOT consolidation
         # If violations are found, UserExecutionEngine isolation is broken
         if isolation_violations:
             self.fail(f"User isolation violations detected: {isolation_violations}")
         
-        print(f"  ✅ All {len(engines)} UserExecutionEngine instances properly isolated")
+        print(f"   PASS:  All {len(engines)} UserExecutionEngine instances properly isolated")
     
     async def test_user_memory_isolation_no_leaks(self):
         """Test that user engine instances don't leak memory between users"""
-        print("\n🔍 Testing memory isolation and leak prevention...")
+        print("\n SEARCH:  Testing memory isolation and leak prevention...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -272,7 +272,7 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
         if alive_engines > 2:  # Allow for some GC delay
             memory_violations.append(f"Memory leak: {alive_engines} engines not garbage collected")
         else:
-            print(f"  ✅ {len(weak_refs) - alive_engines}/{len(weak_refs)} engines properly garbage collected")
+            print(f"   PASS:  {len(weak_refs) - alive_engines}/{len(weak_refs)} engines properly garbage collected")
         
         # Test rapid creation/destruction for stress testing
         for batch in range(3):
@@ -295,17 +295,17 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
             batch_engines.clear()
             gc.collect()
         
-        print(f"  ✅ Stress test completed - rapid creation/destruction")
+        print(f"   PASS:  Stress test completed - rapid creation/destruction")
         
         # CRITICAL: Memory violations indicate SSOT implementation problems
         if memory_violations:
             self.fail(f"Memory isolation violations: {memory_violations}")
         
-        print(f"  ✅ Memory isolation validated - no leaks detected")
+        print(f"   PASS:  Memory isolation validated - no leaks detected")
     
     async def test_user_thread_safety_validation(self):
         """Test that UserExecutionEngine is thread-safe for concurrent users"""
-        print("\n🔍 Testing thread safety for concurrent user access...")
+        print("\n SEARCH:  Testing thread safety for concurrent user access...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -402,15 +402,15 @@ class TestUserExecutionEngineIsolationValidation(SSotAsyncTestCase):
         if success_count != num_threads:
             thread_safety_violations.append(f"Only {success_count}/{num_threads} threads succeeded")
         
-        print(f"  ✅ {success_count}/{num_threads} threads completed successfully")
-        print(f"  ✅ {shared_data['engines_created']} engines created")
-        print(f"  ✅ {shared_data['events_sent']} events sent")
+        print(f"   PASS:  {success_count}/{num_threads} threads completed successfully")
+        print(f"   PASS:  {shared_data['engines_created']} engines created")
+        print(f"   PASS:  {shared_data['events_sent']} events sent")
         
         # CRITICAL: Thread safety violations indicate SSOT implementation problems
         if thread_safety_violations:
             self.fail(f"Thread safety violations: {thread_safety_violations}")
         
-        print(f"  ✅ Thread safety validated for concurrent user access")
+        print(f"   PASS:  Thread safety validated for concurrent user access")
 
 
 if __name__ == '__main__':

@@ -314,8 +314,8 @@ class TestWebSocketRaceConditionDetectionLogic(BaseUnitTest):
         avg_calculation_time = calculation_time / iterations
         avg_validation_time = validation_time / iterations
         
-        assert avg_calculation_time < 0.00001, f"Progressive delay calculation too slow: {avg_calculation_time*1000000:.1f}μs per operation"
-        assert avg_validation_time < 0.00001, f"Connection validation too slow: {avg_validation_time*1000000:.1f}μs per operation"
+        assert avg_calculation_time < 0.00001, f"Progressive delay calculation too slow: {avg_calculation_time*1000000:.1f}[U+03BC]s per operation"
+        assert avg_validation_time < 0.00001, f"Connection validation too slow: {avg_validation_time*1000000:.1f}[U+03BC]s per operation"
 
 
 if __name__ == "__main__":

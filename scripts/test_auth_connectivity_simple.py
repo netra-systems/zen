@@ -47,12 +47,12 @@ async def test_auth_client_timeout_behavior():
                 result = await auth_client.is_service_available()
                 print(f"  Result: Service available = {result}")
                 print(f"  Expected: False (due to timeout)")
-                print(f"  ✅ REPRODUCED: Service unavailable due to timeout")
+                print(f"   PASS:  REPRODUCED: Service unavailable due to timeout")
         
         return True
         
     except Exception as e:
-        print(f"  ❌ ERROR: {e}")
+        print(f"   FAIL:  ERROR: {e}")
         return False
 
 
@@ -72,16 +72,16 @@ async def test_validate_token_jwt_connectivity_failure():
             result = await validate_token_jwt("test.jwt.token")
             print(f"  Result: {result}")
             print(f"  Expected: None (graceful failure)")
-            print(f"  ❌ ISSUE NOT REPRODUCED: Should have failed but didn't")
+            print(f"   FAIL:  ISSUE NOT REPRODUCED: Should have failed but didn't")
             return False
         
     except aiohttp.ClientError as e:
         print(f"  Result: Exception raised - {e}")
         print(f"  Expected: None (graceful failure)")
-        print(f"  ✅ REPRODUCED: Exception not handled gracefully")
+        print(f"   PASS:  REPRODUCED: Exception not handled gracefully")
         return True
     except Exception as e:
-        print(f"  ❌ UNEXPECTED ERROR: {e}")
+        print(f"   FAIL:  UNEXPECTED ERROR: {e}")
         return False
 
 
@@ -107,12 +107,12 @@ async def test_auth_service_connection_error():
             result = await auth_client.is_service_available()
             print(f"  Result: Service available = {result}")
             print(f"  Expected: False (connection refused)")
-            print(f"  ✅ REPRODUCED: Service correctly reports unavailable")
+            print(f"   PASS:  REPRODUCED: Service correctly reports unavailable")
         
         return True
         
     except Exception as e:
-        print(f"  ❌ ERROR: {e}")
+        print(f"   FAIL:  ERROR: {e}")
         return False
 
 
@@ -149,7 +149,7 @@ async def test_staging_timeout_configuration():
                         result = await auth_client.is_service_available()
                         print(f"  {config['ENVIRONMENT']}: Available = {result} (expected: False due to 0.5s timeout)")
                         if not result:
-                            print(f"  ✅ REPRODUCED: Staging timeout causes failure")
+                            print(f"   PASS:  REPRODUCED: Staging timeout causes failure")
                     else:
                         # Other environments should have longer timeout
                         mock_client.get.return_value = AsyncMock(status=200)
@@ -159,7 +159,7 @@ async def test_staging_timeout_configuration():
         return True
         
     except Exception as e:
-        print(f"  ❌ ERROR: {e}")
+        print(f"   FAIL:  ERROR: {e}")
         return False
 
 
@@ -191,7 +191,7 @@ async def main():
     print(f"Tests failed: {len(results) - sum(results)}")
     
     if sum(results) > 0:
-        print("\n✅ SUCCESS: Auth service connectivity issues have been reproduced!")
+        print("\n PASS:  SUCCESS: Auth service connectivity issues have been reproduced!")
         print("The tests demonstrate the exact problems described in issue #395:")
         print("- Staging 0.5s timeout causes service unavailability")
         print("- JWT validation fails to handle connection errors gracefully")
@@ -199,7 +199,7 @@ async def main():
         print("\nRECOMMENDATION: Proceed to remediation phase")
         return True
     else:
-        print("\n❌ TESTS NEED FIXING: Unable to reproduce connectivity issues")
+        print("\n FAIL:  TESTS NEED FIXING: Unable to reproduce connectivity issues")
         print("RECOMMENDATION: Fix test setup before proceeding to remediation")
         return False
 

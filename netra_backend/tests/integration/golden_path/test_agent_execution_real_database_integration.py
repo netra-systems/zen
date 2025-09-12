@@ -140,7 +140,7 @@ class TestAgentExecutionRealDatabaseIntegration(SSotBaseTestCase):
         assert float(metadata["execution_cost"]) == 0.75
         assert "database_analyzer" in metadata["tools_executed"]
         
-        print("✅ Agent execution result database persistence test passed")
+        print(" PASS:  Agent execution result database persistence test passed")
 
     @pytest.mark.asyncio
     async def test_multi_user_agent_execution_database_isolation(self):
@@ -233,7 +233,7 @@ class TestAgentExecutionRealDatabaseIntegration(SSotBaseTestCase):
                 other_cost_key = f"{other_company}_costs"
                 assert other_cost_key not in user_result_str
         
-        print("✅ Multi-user agent execution database isolation test passed")
+        print(" PASS:  Multi-user agent execution database isolation test passed")
 
     @pytest.mark.asyncio
     async def test_agent_execution_cost_tracking_database_integration(self):
@@ -341,7 +341,7 @@ class TestAgentExecutionRealDatabaseIntegration(SSotBaseTestCase):
         assert "advanced_analyzer" in tool_usage_stats
         assert tool_usage_stats["query_optimizer"] == 2  # Used by early and enterprise
         
-        print("✅ Agent execution cost tracking database integration test passed")
+        print(" PASS:  Agent execution cost tracking database integration test passed")
 
     @pytest.mark.asyncio
     async def test_agent_execution_history_database_queries(self):
@@ -447,7 +447,7 @@ class TestAgentExecutionRealDatabaseIntegration(SSotBaseTestCase):
         last_perf = int(performance_trend[-1]["performance_improvement"].replace("% faster", ""))
         assert last_perf > first_perf, "Performance should show improving trend"
         
-        print("✅ Agent execution history database queries test passed")
+        print(" PASS:  Agent execution history database queries test passed")
 
     @pytest.mark.asyncio
     async def test_agent_execution_database_cleanup_and_archival(self):
@@ -539,7 +539,7 @@ class TestAgentExecutionRealDatabaseIntegration(SSotBaseTestCase):
         # Archived queries may be slower but should still be reasonable
         assert archived_query_stats["avg_query_time_ms"] < 500, "Archived queries should be reasonable"
         
-        print("✅ Agent execution database cleanup and archival test passed")
+        print(" PASS:  Agent execution database cleanup and archival test passed")
 
     # Helper methods for real database operations
 

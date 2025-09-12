@@ -109,7 +109,7 @@ class DockerValidator:
         )
         
         if returncode != 0:
-            print(f"  ✗ Failed to start services: {stderr}")
+            print(f"  [U+2717] Failed to start services: {stderr}")
             return {}
         
         # Wait for all services to be healthy
@@ -137,15 +137,15 @@ class DockerValidator:
             startup_times[service] = service_time
             
             if healthy:
-                status = "✓" if service_time < MAX_STARTUP_TIME else "⚠"
+                status = "[U+2713]" if service_time < MAX_STARTUP_TIME else " WARNING: "
                 print(f"  {status} {service}: {service_time:.1f}s")
             else:
-                print(f"  ✗ {service}: Failed to become healthy")
+                print(f"  [U+2717] {service}: Failed to become healthy")
         
         total_time = time.time() - start_time
         self.results['startup_times'].append(total_time)
         
-        status = "✓" if total_time < MAX_STARTUP_TIME else "✗"
+        status = "[U+2713]" if total_time < MAX_STARTUP_TIME else "[U+2717]"
         print(f"  {status} Total startup time: {total_time:.1f}s (limit: {MAX_STARTUP_TIME}s)")
         
         return startup_times
@@ -184,7 +184,7 @@ class DockerValidator:
         
         self.results['memory_usage'].append(total_memory)
         
-        status = "✓" if total_memory < MAX_MEMORY_PER_SUITE else "✗"
+        status = "[U+2713]" if total_memory < MAX_MEMORY_PER_SUITE else "[U+2717]"
         print(f"  {status} Total memory: {total_memory:.1f}MB (limit: {MAX_MEMORY_PER_SUITE}MB)")
         
         return memory_usage
@@ -204,10 +204,10 @@ class DockerValidator:
         self.results['cleanup_times'].append(cleanup_time)
         
         if returncode == 0:
-            status = "✓" if cleanup_time < MAX_CLEANUP_TIME else "⚠"
+            status = "[U+2713]" if cleanup_time < MAX_CLEANUP_TIME else " WARNING: "
             print(f"  {status} Cleanup time: {cleanup_time:.1f}s (limit: {MAX_CLEANUP_TIME}s)")
         else:
-            print(f"  ✗ Cleanup failed: {stderr}")
+            print(f"  [U+2717] Cleanup failed: {stderr}")
         
         return cleanup_time
     
@@ -230,7 +230,7 @@ class DockerValidator:
             
             if returncode != 0:
                 results.append(False)
-                print(f"  ✗ Instance {instance_id}: Port allocation failed")
+                print(f"  [U+2717] Instance {instance_id}: Port allocation failed")
                 return
             
             # Start with dynamic ports
@@ -244,7 +244,7 @@ class DockerValidator:
             
             if returncode == 0:
                 results.append(True)
-                print(f"  ✓ Instance {instance_id}: Started successfully")
+                print(f"  [U+2713] Instance {instance_id}: Started successfully")
                 
                 # Cleanup
                 self.run_command(
@@ -256,7 +256,7 @@ class DockerValidator:
                 )
             else:
                 results.append(False)
-                print(f"  ✗ Instance {instance_id}: Failed - {stderr[:100]}")
+                print(f"  [U+2717] Instance {instance_id}: Failed - {stderr[:100]}")
             
             # Cleanup env file
             try:
@@ -428,9 +428,9 @@ class DockerValidator:
         ])
         
         if all_passed:
-            report.append("✓ All validations PASSED")
+            report.append("[U+2713] All validations PASSED")
         else:
-            report.append("✗ Some validations FAILED")
+            report.append("[U+2717] Some validations FAILED")
         
         report.append("=" * 60)
         

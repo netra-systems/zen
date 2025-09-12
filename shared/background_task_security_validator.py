@@ -4,7 +4,7 @@ SECURITY CRITICAL: This module provides comprehensive validation to ensure all b
 tasks maintain proper UserExecutionContext isolation and prevent data leakage.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Validate security compliance in background processing
 - Value Impact: Prevents security violations and ensures audit compliance
 - Revenue Impact: Maintains user trust and prevents data breaches

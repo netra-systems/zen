@@ -283,17 +283,17 @@ class RealServiceTestRunner:
                 
                 # Log immediate result
                 if result['status'] == 'passed':
-                    logger.info(f"✅ {test_config['name']}: PASSED ({result['duration']:.2f}s)")
+                    logger.info(f" PASS:  {test_config['name']}: PASSED ({result['duration']:.2f}s)")
                 elif result['status'] == 'failed':
-                    logger.error(f"❌ {test_config['name']}: FAILED ({result['duration']:.2f}s)")
+                    logger.error(f" FAIL:  {test_config['name']}: FAILED ({result['duration']:.2f}s)")
                     if result.get('error'):
                         logger.error(f"   Error: {result['error']}")
                 elif result['status'] == 'timeout':
-                    logger.error(f"⏰ {test_config['name']}: TIMEOUT ({result['duration']:.2f}s)")
+                    logger.error(f"[U+23F0] {test_config['name']}: TIMEOUT ({result['duration']:.2f}s)")
                 elif result['status'] == 'skipped':
-                    logger.warning(f"⚠️  {test_config['name']}: SKIPPED ({result['duration']:.2f}s)")
+                    logger.warning(f" WARNING: [U+FE0F]  {test_config['name']}: SKIPPED ({result['duration']:.2f}s)")
                 else:
-                    logger.error(f"❓ {test_config['name']}: {result['status'].upper()} ({result['duration']:.2f}s)")
+                    logger.error(f"[U+2753] {test_config['name']}: {result['status'].upper()} ({result['duration']:.2f}s)")
                 
                 # Stop on first failure if requested
                 if args.fast_fail and result['status'] in ['failed', 'error']:
@@ -301,7 +301,7 @@ class RealServiceTestRunner:
                     break
                     
             except Exception as e:
-                logger.error(f"❌ {test_config['name']}: EXCEPTION - {e}")
+                logger.error(f" FAIL:  {test_config['name']}: EXCEPTION - {e}")
                 results[test_config['name']] = {
                     'name': test_config['name'],
                     'status': 'exception',
@@ -378,31 +378,31 @@ class RealServiceTestRunner:
         
         # Status emoji
         if overall_status == 'success':
-            status_emoji = "✅"
+            status_emoji = " PASS: "
             status_color = "SUCCESS"
         elif overall_status == 'critical_failure':
-            status_emoji = "🚨"
+            status_emoji = " ALERT: "
             status_color = "CRITICAL FAILURE"
         else:
-            status_emoji = "❌"
+            status_emoji = " FAIL: "
             status_color = "FAILURE"
         
         print(f"{status_emoji} Overall Status: {status_color}")
-        print(f"⏱️  Total Duration: {duration:.2f} seconds")
-        print(f"🧪 Tests Run: {final_results['tests_run']}")
+        print(f"[U+23F1][U+FE0F]  Total Duration: {duration:.2f} seconds")
+        print(f"[U+1F9EA] Tests Run: {final_results['tests_run']}")
         
         # Summary counts
         summary = final_results['summary']
         print(f"\nResults:")
-        print(f"  ✅ Passed: {summary['passed']}")
-        print(f"  ❌ Failed: {summary['failed']}")
-        print(f"  🚫 Errors: {summary['errors']}")
-        print(f"  ⏰ Timeouts: {summary['timeouts']}")
-        print(f"  ⚠️  Skipped: {summary['skipped']}")
+        print(f"   PASS:  Passed: {summary['passed']}")
+        print(f"   FAIL:  Failed: {summary['failed']}")
+        print(f"  [U+1F6AB] Errors: {summary['errors']}")
+        print(f"  [U+23F0] Timeouts: {summary['timeouts']}")
+        print(f"   WARNING: [U+FE0F]  Skipped: {summary['skipped']}")
         
         # Critical failures
         if final_results['critical_failures']:
-            print(f"\n🚨 CRITICAL FAILURES:")
+            print(f"\n ALERT:  CRITICAL FAILURES:")
             for failure in final_results['critical_failures']:
                 print(f"  - {failure}")
         
@@ -415,17 +415,17 @@ class RealServiceTestRunner:
             duration = result['duration']
             
             if status == 'passed':
-                emoji = "✅"
+                emoji = " PASS: "
             elif status == 'failed':
-                emoji = "❌"
+                emoji = " FAIL: "
             elif status == 'error':
-                emoji = "🚫"
+                emoji = "[U+1F6AB]"
             elif status == 'timeout':
-                emoji = "⏰"
+                emoji = "[U+23F0]"
             elif status == 'skipped':
-                emoji = "⚠️"
+                emoji = " WARNING: [U+FE0F]"
             else:
-                emoji = "❓"
+                emoji = "[U+2753]"
             
             critical_marker = " [CRITICAL]" if result.get('critical', False) else ""
             print(f"{emoji} {test_name:<35} {status.upper():<10} ({duration:.2f}s){critical_marker}")
@@ -438,14 +438,14 @@ class RealServiceTestRunner:
         
         # Final verdict
         if overall_status == 'success':
-            print("🎉 ALL REAL SERVICE TESTS PASSED!")
-            print("✨ Mock remediation is COMPLETE - all functionality works with real services!")
+            print(" CELEBRATION:  ALL REAL SERVICE TESTS PASSED!")
+            print("[U+2728] Mock remediation is COMPLETE - all functionality works with real services!")
         elif overall_status == 'critical_failure':
-            print("🚨 CRITICAL TESTS FAILED!")
-            print("⚠️  Mock remediation is INCOMPLETE - critical functionality broken!")
+            print(" ALERT:  CRITICAL TESTS FAILED!")
+            print(" WARNING: [U+FE0F]  Mock remediation is INCOMPLETE - critical functionality broken!")
         else:
-            print("⚠️  SOME TESTS FAILED!")
-            print("🔧 Mock remediation needs additional work!")
+            print(" WARNING: [U+FE0F]  SOME TESTS FAILED!")
+            print("[U+1F527] Mock remediation needs additional work!")
         
         print("="*80)
     
@@ -462,7 +462,7 @@ class RealServiceTestRunner:
                 json.dump(final_results, f, indent=2, default=str)
             
             logger.info(f"Test results saved to: {output_path}")
-            print(f"📄 Detailed results saved to: {output_path}")
+            print(f"[U+1F4C4] Detailed results saved to: {output_path}")
             
         except Exception as e:
             logger.error(f"Failed to save results: {e}")

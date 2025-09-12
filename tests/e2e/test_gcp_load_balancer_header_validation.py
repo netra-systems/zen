@@ -105,7 +105,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         
         FAILURE = CRITICAL INFRASTRUCTURE REGRESSION
         """
-        logger.info("🔍 CRITICAL TEST: GCP Load Balancer Authorization header preservation")
+        logger.info(" SEARCH:  CRITICAL TEST: GCP Load Balancer Authorization header preservation")
         
         # Arrange - Create authenticated user with strong JWT token
         auth_user = await self.e2e_helper.create_authenticated_user(
@@ -132,7 +132,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         header_validation_results = []
         
         for scenario in test_scenarios:
-            logger.info(f"🔍 Testing {scenario['name']}: {scenario['url']}")
+            logger.info(f" SEARCH:  Testing {scenario['name']}: {scenario['url']}")
             
             if scenario["type"] == "http":
                 result = await self._test_http_auth_header_preservation(
@@ -144,7 +144,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
                 )
             
             header_validation_results.append(result)
-            logger.info(f"✅ {scenario['name']}: {result['status']}")
+            logger.info(f" PASS:  {scenario['name']}: {result['status']}")
         
         # CRITICAL ASSERTIONS - Any failure indicates header stripping regression
         successful_tests = [r for r in header_validation_results if r["headers_preserved"]]
@@ -169,7 +169,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
             f"Results: {header_validation_results}"
         )
         
-        logger.info("✅ CRITICAL TEST PASSED: GCP Load Balancer preserves Authorization headers")
+        logger.info(" PASS:  CRITICAL TEST PASSED: GCP Load Balancer preserves Authorization headers")
     
     async def _test_http_auth_header_preservation(
         self, scenario: Dict[str, Any], auth_user: AuthenticatedUser
@@ -327,7 +327,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         
         GitHub issue #113 specifically affects E2E testing infrastructure.
         """
-        logger.info("🔍 CRITICAL TEST: GCP Load Balancer E2E bypass header preservation")
+        logger.info(" SEARCH:  CRITICAL TEST: GCP Load Balancer E2E bypass header preservation")
         
         # Arrange - Create E2E test user with bypass headers
         e2e_user = await self.e2e_helper.create_authenticated_user(
@@ -364,7 +364,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         timeout = aiohttp.ClientTimeout(total=self.lb_timeout)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             for endpoint in e2e_test_endpoints:
-                logger.info(f"🔍 Testing E2E bypass: {endpoint['name']}")
+                logger.info(f" SEARCH:  Testing E2E bypass: {endpoint['name']}")
                 
                 result = {
                     "endpoint": endpoint["name"],
@@ -403,7 +403,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
                     result["status"] = "error"
                 
                 e2e_header_results.append(result)
-                logger.info(f"✅ {endpoint['name']}: {result.get('status', 'unknown')}")
+                logger.info(f" PASS:  {endpoint['name']}: {result.get('status', 'unknown')}")
         
         # Assert E2E bypass headers preserved
         successful_bypasses = [r for r in e2e_header_results if r["e2e_headers_preserved"]]
@@ -427,7 +427,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
             f"Results: {e2e_header_results}"
         )
         
-        logger.info("✅ CRITICAL TEST PASSED: GCP Load Balancer preserves E2E bypass headers")
+        logger.info(" PASS:  CRITICAL TEST PASSED: GCP Load Balancer preserves E2E bypass headers")
     
     async def test_complete_golden_path_through_gcp_load_balancer(self):
         """
@@ -438,7 +438,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         
         BUSINESS VALUE: This test represents $120K+ MRR Golden Path protection.
         """
-        logger.info("🌟 CRITICAL TEST: Complete Golden Path through GCP Load Balancer")
+        logger.info("[U+1F31F] CRITICAL TEST: Complete Golden Path through GCP Load Balancer")
         
         # Arrange - Create Golden Path test user
         golden_path_user = await self.e2e_helper.create_authenticated_user(
@@ -473,7 +473,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         golden_path_results = []
         
         for step_config in golden_path_steps:
-            logger.info(f"🌟 Golden Path Step: {step_config['description']}")
+            logger.info(f"[U+1F31F] Golden Path Step: {step_config['description']}")
             
             try:
                 step_result = await step_config["test_func"](golden_path_user)
@@ -482,9 +482,9 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
                 golden_path_results.append(step_result)
                 
                 if step_result.get("success"):
-                    logger.info(f"✅ Golden Path Step Passed: {step_config['step']}")
+                    logger.info(f" PASS:  Golden Path Step Passed: {step_config['step']}")
                 else:
-                    logger.error(f"❌ Golden Path Step Failed: {step_config['step']} - {step_result.get('error', 'Unknown error')}")
+                    logger.error(f" FAIL:  Golden Path Step Failed: {step_config['step']} - {step_result.get('error', 'Unknown error')}")
                     
             except Exception as e:
                 error_result = {
@@ -495,7 +495,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
                     "exception_type": type(e).__name__
                 }
                 golden_path_results.append(error_result)
-                logger.error(f"🔥 Golden Path Step Exception: {step_config['step']} - {e}")
+                logger.error(f" FIRE:  Golden Path Step Exception: {step_config['step']} - {e}")
         
         # Analyze Golden Path success
         successful_steps = [r for r in golden_path_results if r.get("success")]
@@ -521,7 +521,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
             f"All results: {golden_path_results}"
         )
         
-        logger.info("✅ CRITICAL TEST PASSED: Complete Golden Path works through GCP Load Balancer")
+        logger.info(" PASS:  CRITICAL TEST PASSED: Complete Golden Path works through GCP Load Balancer")
     
     async def _golden_path_step_authentication(self, user: AuthenticatedUser) -> Dict[str, Any]:
         """Test user authentication step through load balancer."""
@@ -679,7 +679,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         WebSockets have unique upgrade requirements that can be broken by 
         load balancer header stripping. This test validates WebSocket auth specifically.
         """
-        logger.info("🔍 CRITICAL TEST: WebSocket authentication flow through GCP Load Balancer")
+        logger.info(" SEARCH:  CRITICAL TEST: WebSocket authentication flow through GCP Load Balancer")
         
         # Arrange - Create multiple users for WebSocket auth testing
         websocket_users = []
@@ -693,7 +693,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         websocket_auth_results = []
         
         for i, user in enumerate(websocket_users):
-            logger.info(f"🔍 Testing WebSocket auth for user {i}: {user.email}")
+            logger.info(f" SEARCH:  Testing WebSocket auth for user {i}: {user.email}")
             
             websocket_headers = self.websocket_helper.get_websocket_headers(user.jwt_token)
             websocket_headers.update({
@@ -749,12 +749,12 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
                         result["auth_evidence"]["response_received"] = False
                         result["auth_evidence"]["timeout_acceptable"] = True
                     
-                    logger.info(f"✅ User {i} WebSocket auth successful in {connection_time:.2f}s")
+                    logger.info(f" PASS:  User {i} WebSocket auth successful in {connection_time:.2f}s")
                     
             except Exception as e:
                 result["error"] = str(e)
                 result["websocket_auth_success"] = False
-                logger.error(f"❌ User {i} WebSocket auth failed: {e}")
+                logger.error(f" FAIL:  User {i} WebSocket auth failed: {e}")
             
             websocket_auth_results.append(result)
         
@@ -780,7 +780,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
             f"This indicates partial load balancer header stripping issues."
         )
         
-        logger.info("✅ CRITICAL TEST PASSED: WebSocket authentication works through GCP Load Balancer")
+        logger.info(" PASS:  CRITICAL TEST PASSED: WebSocket authentication works through GCP Load Balancer")
     
     async def test_multi_user_isolation_through_gcp_load_balancer(self):
         """
@@ -789,7 +789,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
         This validates that the load balancer preserves user authentication context
         and doesn't cause user isolation violations in production.
         """
-        logger.info("👥 CRITICAL TEST: Multi-user isolation through GCP Load Balancer")
+        logger.info("[U+1F465] CRITICAL TEST: Multi-user isolation through GCP Load Balancer")
         
         # Arrange - Create multiple isolated users
         isolated_users = []
@@ -919,7 +919,7 @@ class TestGCPLoadBalancerHeaderValidation(SSotBaseTestCase):
             f"This indicates session affinity or header isolation issues."
         )
         
-        logger.info("✅ CRITICAL TEST PASSED: Multi-user isolation preserved through GCP Load Balancer")
+        logger.info(" PASS:  CRITICAL TEST PASSED: Multi-user isolation preserved through GCP Load Balancer")
 
 
 class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
@@ -947,7 +947,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
         This validates that the deployed load balancer configuration includes
         the fixes for GitHub issue #113.
         """
-        logger.info("🔍 CRITICAL TEST: Terraform header forwarding configuration validation")
+        logger.info(" SEARCH:  CRITICAL TEST: Terraform header forwarding configuration validation")
         
         # Test configuration evidence through HTTP headers
         config_validation_results = []
@@ -955,7 +955,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
         timeout = aiohttp.ClientTimeout(total=self.infrastructure_timeout)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             for domain_name, domain_url in self.load_balancer_domains.items():
-                logger.info(f"🔍 Validating {domain_name} load balancer config: {domain_url}")
+                logger.info(f" SEARCH:  Validating {domain_name} load balancer config: {domain_url}")
                 
                 result = {
                     "domain": domain_name,
@@ -1015,7 +1015,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
                     result["status"] = "error"
                 
                 config_validation_results.append(result)
-                logger.info(f"✅ {domain_name} config validation: {result.get('status', 'unknown')}")
+                logger.info(f" PASS:  {domain_name} config validation: {result.get('status', 'unknown')}")
         
         # Assert terraform configuration is properly deployed
         valid_configs = [r for r in config_validation_results if r["config_valid"]]
@@ -1039,7 +1039,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
             f"This indicates incomplete terraform deployment."
         )
         
-        logger.info("✅ CRITICAL TEST PASSED: Terraform header forwarding configuration validated")
+        logger.info(" PASS:  CRITICAL TEST PASSED: Terraform header forwarding configuration validated")
     
     async def test_load_balancer_timeout_configuration(self):
         """
@@ -1047,7 +1047,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
         
         This validates that timeout settings don't interfere with header preservation.
         """
-        logger.info("⏱️ Testing load balancer timeout configuration")
+        logger.info("[U+23F1][U+FE0F] Testing load balancer timeout configuration")
         
         timeout_test_scenarios = [
             {
@@ -1067,7 +1067,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
         timeout_results = []
         
         for scenario in timeout_test_scenarios:
-            logger.info(f"⏱️ Testing {scenario['name']}")
+            logger.info(f"[U+23F1][U+FE0F] Testing {scenario['name']}")
             
             result = {
                 "scenario": scenario["name"],
@@ -1119,7 +1119,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
                 result["timeout_config_valid"] = False
             
             timeout_results.append(result)
-            logger.info(f"✅ {scenario['name']}: {result.get('response_time', 'unknown')}s")
+            logger.info(f" PASS:  {scenario['name']}: {result.get('response_time', 'unknown')}s")
         
         # Assert reasonable timeout behavior
         valid_timeouts = [r for r in timeout_results if r["timeout_config_valid"]]
@@ -1132,7 +1132,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
             f"Results: {timeout_results}"
         )
         
-        logger.info("✅ Load balancer timeout configuration validated")
+        logger.info(" PASS:  Load balancer timeout configuration validated")
     
     async def test_cors_header_configuration(self):
         """
@@ -1141,7 +1141,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
         This validates that CORS headers are properly configured and don't
         interfere with authentication header preservation.
         """
-        logger.info("🌐 Testing CORS header configuration through load balancer")
+        logger.info("[U+1F310] Testing CORS header configuration through load balancer")
         
         # CORS test scenarios with different origins
         cors_test_scenarios = [
@@ -1167,7 +1167,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
         timeout = aiohttp.ClientTimeout(total=20.0)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             for scenario in cors_test_scenarios:
-                logger.info(f"🌐 Testing CORS: {scenario['name']}")
+                logger.info(f"[U+1F310] Testing CORS: {scenario['name']}")
                 
                 result = {
                     "scenario": scenario["name"],
@@ -1213,7 +1213,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
                     result["cors_configured"] = False
                 
                 cors_results.append(result)
-                logger.info(f"✅ {scenario['name']}: {result.get('cors_configured', 'unknown')}")
+                logger.info(f" PASS:  {scenario['name']}: {result.get('cors_configured', 'unknown')}")
         
         # Assert CORS configuration
         properly_configured = [r for r in cors_results if r["cors_configured"]]
@@ -1226,7 +1226,7 @@ class TestGCPLoadBalancerConfiguration(SSotBaseTestCase):
             f"Results: {cors_results}"
         )
         
-        logger.info("✅ CORS header configuration validated through load balancer")
+        logger.info(" PASS:  CORS header configuration validated through load balancer")
 
 
 if __name__ == "__main__":

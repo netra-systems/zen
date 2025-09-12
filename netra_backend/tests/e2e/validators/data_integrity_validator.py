@@ -1,7 +1,7 @@
 """
 Data Integrity Validation Framework for E2E Agent Testing
 Validates type safety, data flow, referential integrity, and state consistency.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from datetime import UTC, datetime

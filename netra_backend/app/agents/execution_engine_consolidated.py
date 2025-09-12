@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """
-🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+ ALERT:  CRITICAL SSOT MIGRATION - FILE DEPRECATED  ALERT: 
 
 This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
 
@@ -14,7 +14,7 @@ isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH
 """
 
 """
-🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+ ALERT:  CRITICAL SSOT MIGRATION - FILE DEPRECATED  ALERT: 
 
 This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
 
@@ -28,7 +28,7 @@ isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH
 
 """Unified Execution Engine - SSOT Implementation with Extension Pattern.
 
-🚨 CRITICAL SSOT MIGRATION NOTICE 🚨
+ ALERT:  CRITICAL SSOT MIGRATION NOTICE  ALERT: 
 This execution_engine_consolidated.py is DEPRECATED and will be REMOVED in the next release.
 
 MIGRATION REQUIRED:

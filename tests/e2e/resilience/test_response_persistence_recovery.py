@@ -131,12 +131,12 @@ env = get_env()
                 # REMOVED_SYNTAX_ERROR: pass
                 # REMOVED_SYNTAX_ERROR: test_responses = [ )
                 # REMOVED_SYNTAX_ERROR: { )
-                # REMOVED_SYNTAX_ERROR: "content": "GPU optimization: 24GB→16GB (33% reduction). Latency: 200ms→125ms (37.5% improvement).",
+                # REMOVED_SYNTAX_ERROR: "content": "GPU optimization: 24GB -> 16GB (33% reduction). Latency: 200ms -> 125ms (37.5% improvement).",
                 # REMOVED_SYNTAX_ERROR: "role": "assistant",
                 # REMOVED_SYNTAX_ERROR: "metadata": {"test_type": "transaction_integrity", "quality_validated": True}
                 # REMOVED_SYNTAX_ERROR: },
                 # REMOVED_SYNTAX_ERROR: { )
-                # REMOVED_SYNTAX_ERROR: "content": "Database query performance: 850ms→180ms (78.8% improvement) using B-tree indexing.",
+                # REMOVED_SYNTAX_ERROR: "content": "Database query performance: 850ms -> 180ms (78.8% improvement) using B-tree indexing.",
                 # REMOVED_SYNTAX_ERROR: "role": "assistant",
                 # REMOVED_SYNTAX_ERROR: "metadata": {"test_type": "transaction_integrity", "quality_validated": True}
                 
@@ -187,7 +187,7 @@ env = get_env()
                                     # Removed problematic line: async def test_response_persistence_rollback_scenario(self, postgres_session, test_thread, test_assistant):
                                         # REMOVED_SYNTAX_ERROR: """Test response persistence handles rollback scenarios correctly"""
                                         # REMOVED_SYNTAX_ERROR: valid_response = { )
-                                        # REMOVED_SYNTAX_ERROR: "content": "Memory allocation optimized: 32GB→20GB (37.5% reduction).",
+                                        # REMOVED_SYNTAX_ERROR: "content": "Memory allocation optimized: 32GB -> 20GB (37.5% reduction).",
                                         # REMOVED_SYNTAX_ERROR: "role": "assistant",
                                         # REMOVED_SYNTAX_ERROR: "metadata": {"test_type": "rollback_scenario"}
                                         
@@ -260,7 +260,7 @@ env = get_env()
                                                                 # Simulate partial state before crash
                                                                 # REMOVED_SYNTAX_ERROR: pre_crash_messages = [ )
                                                                 # REMOVED_SYNTAX_ERROR: { )
-                                                                # REMOVED_SYNTAX_ERROR: "content": "GPU cluster optimization: 52%→89% utilization (+37pp).",
+                                                                # REMOVED_SYNTAX_ERROR: "content": "GPU cluster optimization: 52% -> 89% utilization (+37pp).",
                                                                 # REMOVED_SYNTAX_ERROR: "role": "assistant",
                                                                 # REMOVED_SYNTAX_ERROR: "metadata": {"test_type": "crash_recovery", "status": "pre_crash"}
                                                                 
@@ -302,7 +302,7 @@ env = get_env()
                                                                             # REMOVED_SYNTAX_ERROR: thread_id=test_thread.id,
                                                                             # REMOVED_SYNTAX_ERROR: assistant_id=test_assistant.id,
                                                                             # REMOVED_SYNTAX_ERROR: role="assistant",
-                                                                            # REMOVED_SYNTAX_ERROR: content=[{"type": "text", "text": "Memory optimization: 24GB→16GB post-crash recovery."}],
+                                                                            # REMOVED_SYNTAX_ERROR: content=[{"type": "text", "text": "Memory optimization: 24GB -> 16GB post-crash recovery."}],
                                                                             # REMOVED_SYNTAX_ERROR: metadata_={"test_type": "crash_recovery", "status": "post_crash"}
                                                                             
                                                                             # REMOVED_SYNTAX_ERROR: new_session.add(post_crash_message)
@@ -392,7 +392,7 @@ env = get_env()
             # REMOVED_SYNTAX_ERROR: """Test integration of response quality validation with persistence"""
             # REMOVED_SYNTAX_ERROR: quality_test_responses = [ )
             # REMOVED_SYNTAX_ERROR: { )
-            # REMOVED_SYNTAX_ERROR: "content": "GPU memory: 24GB→16GB (33% reduction). Inference latency: 200ms→125ms (37.5% improvement). Cost: $2,400/month savings.",
+            # REMOVED_SYNTAX_ERROR: "content": "GPU memory: 24GB -> 16GB (33% reduction). Inference latency: 200ms -> 125ms (37.5% improvement). Cost: $2,400/month savings.",
             # REMOVED_SYNTAX_ERROR: "expected_quality": "high",
             # REMOVED_SYNTAX_ERROR: "should_persist": True
             # REMOVED_SYNTAX_ERROR: },
@@ -472,7 +472,7 @@ env = get_env()
                             # REMOVED_SYNTAX_ERROR: multi_db_test_data = { )
                             # REMOVED_SYNTAX_ERROR: "message_id": "formatted_string",
                             # REMOVED_SYNTAX_ERROR: "thread_id": "formatted_string",
-                            # REMOVED_SYNTAX_ERROR: "content": "Database optimization: Query time 850ms→180ms (78.8% improvement)",
+                            # REMOVED_SYNTAX_ERROR: "content": "Database optimization: Query time 850ms -> 180ms (78.8% improvement)",
                             # REMOVED_SYNTAX_ERROR: "timestamp": datetime.now(UTC),
                             # REMOVED_SYNTAX_ERROR: "metadata": {"test_type": "multi_db_consistency"}
                             

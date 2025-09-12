@@ -1,6 +1,6 @@
 """
 Tool Permission Test Helper Functions
-Extract common setup, assertion, and teardown logic for ≤8 line functions
+Extract common setup, assertion, and teardown logic for  <= 8 line functions
 """
 
 import asyncio

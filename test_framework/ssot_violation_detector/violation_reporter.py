@@ -113,7 +113,7 @@ class ViolationReporter:
         return f"""# SSOT Violation Report - Executive Summary
 Generated: {datetime.now(timezone.utc).isoformat()}
 
-## 🚨 Critical Findings
+##  ALERT:  Critical Findings
 
 ### Violation Overview
 - **Critical Violations:** {total_critical_violations}
@@ -122,11 +122,11 @@ Generated: {datetime.now(timezone.utc).isoformat()}
 - **SSOT Compliance Score:** {compliance_score}%
 
 ### Business Impact
-- **Risk Level:** {'🔴 HIGH' if total_critical_violations > 0 else '🟡 MEDIUM' if total_high_violations > 0 else '🟢 LOW'}
+- **Risk Level:** {'[U+1F534] HIGH' if total_critical_violations > 0 else '[U+1F7E1] MEDIUM' if total_high_violations > 0 else '[U+1F7E2] LOW'}
 - **Data Integrity Risk:** {'Critical' if total_critical_violations > 5 else 'Moderate' if total_critical_violations > 0 else 'Low'}
 - **Platform Stability Impact:** {'High' if len(critical_reports) > 3 else 'Medium' if len(critical_reports) > 0 else 'Low'}
 
-## 📊 Key Statistics
+##  CHART:  Key Statistics
 
 ### Violation Distribution
 | Severity | Count | Percentage |
@@ -139,29 +139,29 @@ Generated: {datetime.now(timezone.utc).isoformat()}
 ### Most Common Violations
 {self._format_top_violations(analysis_result)}
 
-## 🎯 Primary Target for Remediation
+##  TARGET:  Primary Target for Remediation
 
 **File:** `test_framework/ssot/database.py`  
 **Line:** 596  
 **Issue:** Direct `session.add()` bypassing MessageRepository SSOT pattern  
 **Impact:** Critical - affects all test framework message creation  
-**Priority:** 🔴 IMMEDIATE  
+**Priority:** [U+1F534] IMMEDIATE  
 
-## 📋 Immediate Action Items
+## [U+1F4CB] Immediate Action Items
 
 1. **Fix Critical Violation** - Update `test_framework/ssot/database.py:596`
 2. **Validate Tests** - Ensure all existing tests pass after remediation
 3. **Update Documentation** - Reflect SSOT compliance requirements
 4. **Implement Monitoring** - Add automated SSOT violation detection
 
-## 📈 Success Metrics
+## [U+1F4C8] Success Metrics
 
 - **Target Compliance Score:** 95%+
 - **Critical Violations:** 0
 - **High Violations:** < 3
 - **Test Coverage:** All message creation paths tested
 
-## 🔗 Related Documents
+## [U+1F517] Related Documents
 
 - [Detailed Analysis Report](detailed_analysis.md)
 - [Remediation Guide](remediation_guide.md)
@@ -190,7 +190,7 @@ Generated: {datetime.now(timezone.utc).isoformat()}
                 f"- **SSOT Message ID:** `{report.ssot_message_id}`",
                 f"- **Violation Message ID:** `{report.violation_message_id}`",
                 f"- **Violations Found:** {len(report.violations)}",
-                f"- **Critical Violations:** {'🔴 YES' if report.has_critical_violations else '🟢 NO'}",
+                f"- **Critical Violations:** {'[U+1F534] YES' if report.has_critical_violations else '[U+1F7E2] NO'}",
                 ""
             ])
             
@@ -202,11 +202,11 @@ Generated: {datetime.now(timezone.utc).isoformat()}
                 
                 for violation in report.violations:
                     severity_icon = {
-                        "critical": "🔴",
-                        "high": "🟠", 
-                        "medium": "🟡",
-                        "low": "🟢"
-                    }.get(violation.severity, "⚪")
+                        "critical": "[U+1F534]",
+                        "high": "[U+1F7E0]", 
+                        "medium": "[U+1F7E1]",
+                        "low": "[U+1F7E2]"
+                    }.get(violation.severity, "[U+26AA]")
                     
                     report_lines.extend([
                         f"**{severity_icon} {violation.violation_type.value.upper()}**",
@@ -261,11 +261,11 @@ Generated: {datetime.now(timezone.utc).isoformat()}
                 
                 for match in matches:
                     severity_icon = {
-                        "critical": "🔴",
-                        "high": "🟠",
-                        "medium": "🟡", 
-                        "low": "🟢"
-                    }.get(match.severity, "⚪")
+                        "critical": "[U+1F534]",
+                        "high": "[U+1F7E0]",
+                        "medium": "[U+1F7E1]", 
+                        "low": "[U+1F7E2]"
+                    }.get(match.severity, "[U+26AA]")
                     
                     report_lines.extend([
                         f"**Line {match.line_number}** {severity_icon} {match.severity.upper()}",
@@ -290,7 +290,7 @@ Generated: {datetime.now(timezone.utc).isoformat()}
         return f"""# SSOT Violation Remediation Guide
 Generated: {datetime.now(timezone.utc).isoformat()}
 
-## 🚀 Quick Start Remediation
+## [U+1F680] Quick Start Remediation
 
 ### Priority 1: Critical Violation Fix
 
@@ -339,7 +339,7 @@ from netra_backend.app.services.database.message_repository import MessageReposi
    - Run affected tests to ensure functionality preserved
    - Verify message structure consistency
 
-## 📋 Complete Remediation Checklist
+## [U+1F4CB] Complete Remediation Checklist
 
 ### Phase 1: Critical Fixes
 - [ ] Fix `test_framework/ssot/database.py:596`
@@ -362,7 +362,7 @@ from netra_backend.app.services.database.message_repository import MessageReposi
 - [ ] Create monitoring dashboard
 - [ ] Train team on SSOT patterns
 
-## 🔧 Technical Implementation Details
+## [U+1F527] Technical Implementation Details
 
 ### SSOT MessageRepository Pattern
 
@@ -401,27 +401,27 @@ SSOT-compliant messages have this structure:
 
 ### Anti-Patterns to Avoid
 
-❌ **Direct model instantiation:**
+ FAIL:  **Direct model instantiation:**
 ```python
 message = Message(thread_id=thread_id, content=content)  # DON'T
 ```
 
-❌ **Direct session operations:**
+ FAIL:  **Direct session operations:**
 ```python
 session.add(message_data)  # DON'T
 ```
 
-❌ **Raw SQL:**
+ FAIL:  **Raw SQL:**
 ```python
 session.execute("INSERT INTO message...")  # DON'T
 ```
 
-✅ **Correct SSOT pattern:**
+ PASS:  **Correct SSOT pattern:**
 ```python
 message = await message_repository.create_message(...)  # DO
 ```
 
-## 🧪 Testing Your Remediation
+## [U+1F9EA] Testing Your Remediation
 
 ### Before Remediation
 Run the violation detection tests:
@@ -449,15 +449,15 @@ python tests/integration/test_ssot_database_pattern_violations.py
 python tests/e2e/test_ssot_message_flow_end_to_end.py
 ```
 
-## 🎯 Success Criteria
+##  TARGET:  Success Criteria
 
-- ✅ All violation detection tests pass
-- ✅ No critical or high severity violations remain
-- ✅ SSOT compliance score > 95%
-- ✅ All existing functionality preserved
-- ✅ Performance impact < 5%
+-  PASS:  All violation detection tests pass
+-  PASS:  No critical or high severity violations remain
+-  PASS:  SSOT compliance score > 95%
+-  PASS:  All existing functionality preserved
+-  PASS:  Performance impact < 5%
 
-## 🔍 Monitoring & Prevention
+##  SEARCH:  Monitoring & Prevention
 
 ### Automated Detection
 Add to CI/CD pipeline:
@@ -471,7 +471,7 @@ python -m test_framework.ssot_violation_detector.cli --check-compliance
 - [ ] Proper async/await patterns
 - [ ] SSOT import statements present
 
-## 🆘 Troubleshooting
+## [U+1F198] Troubleshooting
 
 ### Common Issues
 
@@ -487,7 +487,7 @@ python -m test_framework.ssot_violation_detector.cli --check-compliance
 **Issue:** Message structure differences
 **Solution:** Validate content format matches SSOT pattern
 
-## 📞 Support
+## [U+1F4DE] Support
 
 For remediation support:
 - Review SSOT documentation in `netra_backend/app/services/database/`

@@ -13,7 +13,7 @@
 Corpus Admin Sub Agent - SSOT Redirection Module
 
 This module redirects all corpus admin imports to the new SSOT UnifiedCorpusAdmin.
-Part of the corpus admin consolidation effort (30 files → 1 file).
+Part of the corpus admin consolidation effort (30 files  ->  1 file).
 
 CRITICAL: This is a compatibility layer during migration to UnifiedCorpusAdmin.
 All functionality has been consolidated into netra_backend.app.admin.corpus.unified_corpus_admin

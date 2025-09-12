@@ -473,6 +473,6 @@ class TestThreeTierMessageFlowIntegration(BaseIntegrationTest):
         # Background PostgreSQL persistence would happen asynchronously
         # (In real implementation, would use background tasks)
         
-        print(f"✅ Successfully stored {len(concurrent_messages)} messages concurrently in Redis")
+        print(f" PASS:  Successfully stored {len(concurrent_messages)} messages concurrently in Redis")
         print(f"   Average time per message: {redis_result['avg_time_per_message_ms']:.2f}ms")
         print(f"   Total operation time: {redis_result['total_time_ms']:.2f}ms")

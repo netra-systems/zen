@@ -480,7 +480,7 @@ class TestAgentExecutionStateCorruption(BaseIntegrationTest):
             f"State integrity issues detected: {integrity_issues}"
         
         # Verify no data was lost due to race conditions
-        expected_total_modifications = 15  # 3 modifiers × 5 modifications each
+        expected_total_modifications = 15  # 3 modifiers  x  5 modifications each
         actual_modifications = final_state.get('modification_count', 0)
         
         # Allow some tolerance for race conditions in test environment

@@ -223,7 +223,7 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
             if not has_oauth_config:
                 logger.warning(f"Environment {env_name} missing OAuth credentials")
         
-        logger.info(f"OAuth credentials isolation validation: {'✅ PASSED' if validation_passed else '❌ FAILED'}")
+        logger.info(f"OAuth credentials isolation validation: {' PASS:  PASSED' if validation_passed else ' FAIL:  FAILED'}")
         return validation_passed
     
     def _validate_database_connection_strings(self, env_configs: Dict[str, Dict[str, Any]]) -> bool:
@@ -277,7 +277,7 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
                 logger.error(f"Environment {env_name} missing DATABASE_URL")
                 validation_passed = False
         
-        logger.info(f"Database connection validation: {'✅ PASSED' if validation_passed else '❌ FAILED'}")
+        logger.info(f"Database connection validation: {' PASS:  PASSED' if validation_passed else ' FAIL:  FAILED'}")
         return validation_passed
     
     def _validate_jwt_secrets_uniqueness(self, env_configs: Dict[str, Dict[str, Any]]) -> bool:
@@ -322,7 +322,7 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
                 logger.error(f"Environment {env_name} missing JWT_SECRET")
                 validation_passed = False
         
-        logger.info(f"JWT secrets validation: {'✅ PASSED' if validation_passed else '❌ FAILED'}")
+        logger.info(f"JWT secrets validation: {' PASS:  PASSED' if validation_passed else ' FAIL:  FAILED'}")
         return validation_passed
     
     def _validate_cors_configuration(self, env_configs: Dict[str, Dict[str, Any]]) -> bool:
@@ -363,7 +363,7 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
                 {'origins_configured': bool(cors_origins), 'origins_count': len(cors_origins.split(',')) if cors_origins else 0}
             )
         
-        logger.info(f"CORS configuration validation: {'✅ PASSED' if validation_passed else '❌ FAILED'}")
+        logger.info(f"CORS configuration validation: {' PASS:  PASSED' if validation_passed else ' FAIL:  FAILED'}")
         return validation_passed
     
     async def _validate_service_endpoints(self, env_configs: Dict[str, Dict[str, Any]]) -> bool:
@@ -418,7 +418,7 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
                 if not urls_configured:
                     logger.warning(f"Service URLs not fully configured for {env_name}")
         
-        logger.info(f"Service endpoints validation: {'✅ PASSED' if validation_passed else '❌ FAILED'}")
+        logger.info(f"Service endpoints validation: {' PASS:  PASSED' if validation_passed else ' FAIL:  FAILED'}")
         return validation_passed
     
     @pytest.mark.asyncio
@@ -489,9 +489,9 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
         assert critical_validations_passed, "Critical configuration validations failed - deployment blocked"
         
         if all_validations_passed:
-            logger.info("✅ INTEGRATION TEST 8 PASSED: All configuration cascade validations successful")
+            logger.info(" PASS:  INTEGRATION TEST 8 PASSED: All configuration cascade validations successful")
         else:
-            logger.warning("⚠️  INTEGRATION TEST 8 PASSED WITH WARNINGS: Some non-critical validations failed")
+            logger.warning(" WARNING: [U+FE0F]  INTEGRATION TEST 8 PASSED WITH WARNINGS: Some non-critical validations failed")
     
     def _generate_configuration_analysis_report(self):
         """Generate comprehensive configuration analysis report"""
@@ -552,7 +552,7 @@ class TestConfigurationCascadeEnvironments(DockerTestBase):
             assert jwt_secret, "JWT_SECRET must be present"
             assert len(jwt_secret) >= 32, "JWT_SECRET must be at least 32 characters"
             
-        logger.info("✅ INTEGRATION TEST 8b PASSED: Configuration regression prevention working")
+        logger.info(" PASS:  INTEGRATION TEST 8b PASSED: Configuration regression prevention working")
 
 
 if __name__ == "__main__":

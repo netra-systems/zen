@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Value Impact: Core value proposition - agents generate reports users can access
 - Strategic Impact: Foundation of $3M+ ARR - report quality drives user retention
 
-This test suite validates the critical golden path: agent execution → report generation → user access.
+This test suite validates the critical golden path: agent execution  ->  report generation  ->  user access.
 Without this pipeline working, the entire business value proposition fails.
 """
 

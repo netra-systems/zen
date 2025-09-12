@@ -216,7 +216,7 @@ class TestWebSocketJWTEncodingRegression:
             "simple",
             "with spaces here",
             "special!@#$%^&*()chars",
-            "unicode✓✗☺☹",
+            "unicode[U+2713][U+2717][U+263A][U+2639]",
             "mixed123.ABC-xyz_456",
             '{"json":"payload","with":"structure"}',
         ]
@@ -373,7 +373,7 @@ class TestRegressionPrevention:
             "token+with+plus",
             "token=with=equals",
             "token with spaces",
-            "tōken_with_ünicode",
+            "t[U+014D]ken_with_[U+00FC]nicode",
         ]
         
         for token in problematic_tokens:

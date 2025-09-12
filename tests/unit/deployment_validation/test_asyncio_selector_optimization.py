@@ -29,7 +29,7 @@ class TestAsyncioSelectorOptimization:
             limited_timeout = timeout_select(0.5)
             assert limited_timeout == 0.5, f"Small timeout modified: {limited_timeout}"
             
-            print("✅ Selector timeout optimization working correctly")
+            print(" PASS:  Selector timeout optimization working correctly")
             
         except ImportError as e:
             pytest.fail(f"Asyncio selector optimization not available: {e}")
@@ -67,7 +67,7 @@ class TestAsyncioSelectorOptimization:
                     loop.close()
                     
             assert success, "windows_safe_wait_for failed to complete operation"
-            print("✅ Windows-safe asyncio patterns working correctly")
+            print(" PASS:  Windows-safe asyncio patterns working correctly")
             
         except ImportError as e:
             pytest.fail(f"Windows-safe asyncio patterns not available: {e}")
@@ -85,11 +85,11 @@ class TestAsyncioSelectorOptimization:
             # The detection should work without errors
             assert isinstance(cloud_detected, bool), "Cloud detection should return boolean"
             
-            print("✅ Cloud environment detection functioning")
+            print(" PASS:  Cloud environment detection functioning")
             
         except ImportError as e:
             # Cloud environment detection might not be implemented yet
-            print(f"⚠️  Cloud environment detection not available: {e}")
+            print(f" WARNING: [U+FE0F]  Cloud environment detection not available: {e}")
             # Don't fail the test if this specific function doesn't exist
             pass
             
@@ -123,7 +123,7 @@ class TestAsyncioSelectorOptimization:
                     loop.close()
                     
             assert success, "Timeout handling test failed"
-            print("✅ Asyncio timeout handling prevents deadlocks")
+            print(" PASS:  Asyncio timeout handling prevents deadlocks")
             
         except ImportError as e:
             pytest.fail(f"Windows-safe asyncio functions not available: {e}")
@@ -164,7 +164,7 @@ class TestAsyncioSelectorOptimization:
                     loop.close()
                     
             assert success, "Progressive timeout patterns failed"
-            print("✅ Progressive timeout patterns working correctly")
+            print(" PASS:  Progressive timeout patterns working correctly")
             
         except ImportError as e:
             pytest.fail(f"Progressive timeout pattern functions not available: {e}")

@@ -58,7 +58,7 @@ class CachePerformanceStats:
     max_time_ns: Optional[int] = None
     
     # Performance buckets
-    sub_microsecond_ops: int = 0  # < 1μs
+    sub_microsecond_ops: int = 0  # < 1[U+03BC]s
     sub_millisecond_ops: int = 0  # < 1ms
     slow_ops: int = 0  # >= 1ms
     

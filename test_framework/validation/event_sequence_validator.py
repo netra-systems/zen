@@ -204,9 +204,9 @@ class EventSequenceValidator:
         # Log violations immediately for mission-critical visibility
         for violation in violations:
             if violation.business_impact in [BusinessValueImpact.CRITICAL, BusinessValueImpact.HIGH]:
-                logger.error(f"🚨 BUSINESS VALUE VIOLATION: {violation.description}")
+                logger.error(f" ALERT:  BUSINESS VALUE VIOLATION: {violation.description}")
             else:
-                logger.warning(f"⚠️ Sequence violation: {violation.description}")
+                logger.warning(f" WARNING: [U+FE0F] Sequence violation: {violation.description}")
         
         return violations
     
@@ -387,7 +387,7 @@ class EventSequenceValidator:
                 failure_details.extend(high_risk_sequences)
             
             error_message = (
-                "🚨 BUSINESS VALUE COMPROMISED - WebSocket event sequences failed!\n"
+                " ALERT:  BUSINESS VALUE COMPROMISED - WebSocket event sequences failed!\n"
                 + "\n".join(failure_details) + "\n\n"
                 "This indicates chat functionality will not deliver substantive AI value to users."
             )
@@ -408,7 +408,7 @@ class EventSequenceValidator:
         
         if missing_events:
             error_message = (
-                f"🚨 CRITICAL EVENTS MISSING: {missing_events}\n"
+                f" ALERT:  CRITICAL EVENTS MISSING: {missing_events}\n"
                 f"Received: {received_event_types}\n"
                 "Users cannot see AI value delivery without these events!"
             )

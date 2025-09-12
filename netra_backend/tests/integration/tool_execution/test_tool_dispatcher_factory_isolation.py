@@ -141,7 +141,7 @@ class TestToolDispatcherFactoryIsolation(BaseIntegrationTest):
             # Clean up all dispatchers
             await factory.cleanup_all_dispatchers()
         
-        self.logger.info("✅ Factory dispatcher isolation test passed")
+        self.logger.info(" PASS:  Factory dispatcher isolation test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -208,7 +208,7 @@ class TestToolDispatcherFactoryIsolation(BaseIntegrationTest):
         
         self.assert_business_value_delivered(scoped_dispatcher_result, "automation")
         
-        self.logger.info("✅ Request-scoped dispatcher context manager test passed")
+        self.logger.info(" PASS:  Request-scoped dispatcher context manager test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -313,7 +313,7 @@ class TestToolDispatcherFactoryIsolation(BaseIntegrationTest):
         
         self.assert_business_value_delivered(concurrent_execution_result, "automation")
         
-        self.logger.info("✅ Concurrent dispatcher creation test passed")
+        self.logger.info(" PASS:  Concurrent dispatcher creation test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -413,7 +413,7 @@ class TestToolDispatcherFactoryIsolation(BaseIntegrationTest):
             # Final cleanup
             await factory.cleanup_all_dispatchers()
         
-        self.logger.info("✅ Dispatcher factory memory management test passed")
+        self.logger.info(" PASS:  Dispatcher factory memory management test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -452,9 +452,9 @@ class TestToolDispatcherFactoryIsolation(BaseIntegrationTest):
                 
                 # Should succeed initially but may handle cleanup automatically
                 if result.success:
-                    self.logger.info(f"✅ Dispatcher {i+1} created and functional")
+                    self.logger.info(f" PASS:  Dispatcher {i+1} created and functional")
                 else:
-                    self.logger.warning(f"⚠️  Dispatcher {i+1} not functional: {result.error}")
+                    self.logger.warning(f" WARNING: [U+FE0F]  Dispatcher {i+1} not functional: {result.error}")
             
             # Check active dispatchers for this user
             user_id = str(user_context.user_id)
@@ -473,7 +473,7 @@ class TestToolDispatcherFactoryIsolation(BaseIntegrationTest):
                 inactive_dispatchers = [d for d in created_dispatchers if not d._is_active]
                 
                 if len(inactive_dispatchers) > 0:
-                    self.logger.info(f"✅ {len(inactive_dispatchers)} dispatchers cleaned up due to limit")
+                    self.logger.info(f" PASS:  {len(inactive_dispatchers)} dispatchers cleaned up due to limit")
             
             # Verify all executions were tracked
             total_executions = len(limit_tracking_tool._executions)
@@ -500,4 +500,4 @@ class TestToolDispatcherFactoryIsolation(BaseIntegrationTest):
                 if dispatcher._is_active:
                     await dispatcher.cleanup()
         
-        self.logger.info("✅ User dispatcher limit enforcement test passed")
+        self.logger.info(" PASS:  User dispatcher limit enforcement test passed")

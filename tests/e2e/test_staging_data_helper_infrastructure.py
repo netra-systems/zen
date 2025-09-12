@@ -972,7 +972,7 @@ class TestStagingDataHelperInfrastructure(BaseE2ETest):
         
         print(f"\nCRITICAL INFRASTRUCTURE FAILURES: {len(critical_failures)}")
         for failure in critical_failures:
-            print(f"  🚨 {failure.component}: {failure.business_impact}")
+            print(f"   ALERT:  {failure.component}: {failure.business_impact}")
             print(f"     Category: {failure.failure_category}")
             print(f"     Error: {failure.error_message}")
         
@@ -1098,14 +1098,14 @@ if __name__ == "__main__":
             # Generate comprehensive analysis report
             report = await test_instance.test_staging_infrastructure_comprehensive_failure_analysis()
             
-            print(f"✅ Staging infrastructure failure reproduction completed")
-            print(f"   → {report['total_failures']} staging failures reproduced")
-            print(f"   → {report['critical_failures']} critical infrastructure issues identified")
-            print(f"   → {report['business_value_success_rate']:.1f}% business value success rate (confirming 0% issue)")
-            print(f"   → Infrastructure gaps successfully exposed for remediation")
+            print(f" PASS:  Staging infrastructure failure reproduction completed")
+            print(f"    ->  {report['total_failures']} staging failures reproduced")
+            print(f"    ->  {report['critical_failures']} critical infrastructure issues identified")
+            print(f"    ->  {report['business_value_success_rate']:.1f}% business value success rate (confirming 0% issue)")
+            print(f"    ->  Infrastructure gaps successfully exposed for remediation")
             
         except Exception as e:
-            print(f"✗ Staging infrastructure testing encountered issues: {e}")
+            print(f"[U+2717] Staging infrastructure testing encountered issues: {e}")
             raise
     
     # Run tests if executed directly

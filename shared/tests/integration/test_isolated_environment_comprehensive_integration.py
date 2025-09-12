@@ -370,7 +370,7 @@ class TestIsolatedEnvironmentIntegration:
             "VALID_KEY": "valid_value",
             "": "",  # Invalid empty key
             "MALFORMED_LINE": "",  # Will be written as malformed
-            "UNICODE_KEY": "unicode_value_with_special_chars_éñ",
+            "UNICODE_KEY": "unicode_value_with_special_chars_[U+00E9][U+00F1]",
             "MULTILINE_VALUE": "line1\nline2\nline3"
         })
         
@@ -414,7 +414,7 @@ class TestIsolatedEnvironmentIntegration:
         
         # Verify valid parts of invalid config still loaded
         assert env.get("VALID_KEY") == "valid_value"
-        assert env.get("UNICODE_KEY") == "unicode_value_with_special_chars_éñ"
+        assert env.get("UNICODE_KEY") == "unicode_value_with_special_chars_[U+00E9][U+00F1]"
         
         # Test non-existent file handling
         non_existent = self.test_data_dir / "does_not_exist.env"
@@ -853,12 +853,12 @@ class TestIsolatedEnvironmentEdgeCases:
     def test_unicode_and_encoding_handling(self):
         """Test Unicode and encoding handling across different scenarios."""
         unicode_test_cases = [
-            ("UNICODE_BASIC", "héllo_wørld"),
-            ("UNICODE_EMOJI", "test_value_🚀_💡_✅"),
-            ("UNICODE_MIXED", "ASCII_mixed_with_ñoñascii_characters"),
-            ("UNICODE_CHINESE", "测试值_test_value"),
-            ("UNICODE_ARABIC", "قيمة_اختبار_test"),
-            ("UNICODE_RUSSIAN", "тестовое_значение_test"),
+            ("UNICODE_BASIC", "h[U+00E9]llo_w[U+00F8]rld"),
+            ("UNICODE_EMOJI", "test_value_[U+1F680]_ IDEA: _ PASS: "),
+            ("UNICODE_MIXED", "ASCII_mixed_with_[U+00F1]o[U+00F1]ascii_characters"),
+            ("UNICODE_CHINESE", "[U+6D4B][U+8BD5][U+503C]_test_value"),
+            ("UNICODE_ARABIC", "[U+0642][U+064A][U+0645][U+0629]_[U+0627][U+062E][U+062A][U+0628][U+0627][U+0631]_test"),
+            ("UNICODE_RUSSIAN", "tectovoe_[U+0437]na[U+0447]en[U+0438]e_test"),
         ]
         
         for key, value in unicode_test_cases:

@@ -951,13 +951,13 @@ class TestRedisCacheIntegration(SSotAsyncTestCase):
         self.record_metric("batch_ops_throughput", batch_ops_throughput)
         self.record_metric("performance_iterations", performance_iterations)
         
-        print(f"\n📊 REDIS CACHE PERFORMANCE METRICS:")
-        print(f"   📝 Single SET: {avg_single_set*1000:.1f}ms avg, {max_single_set*1000:.1f}ms max")
-        print(f"   📖 Single GET: {avg_single_get*1000:.1f}ms avg, {max_single_get*1000:.1f}ms max")
-        print(f"   📝📝 Batch SET: {avg_batch_set*1000:.1f}ms avg, {max_batch_set*1000:.1f}ms max")
-        print(f"   📖📖 Batch GET: {avg_batch_get*1000:.1f}ms avg, {max_batch_get*1000:.1f}ms max")
-        print(f"   🗑️  DELETE: {avg_delete*1000:.1f}ms avg, {max_delete*1000:.1f}ms max")
-        print(f"   ⚡ Throughput: {single_ops_throughput:.0f} single ops/s, {batch_ops_throughput:.0f} batch ops/s")
+        print(f"\n CHART:  REDIS CACHE PERFORMANCE METRICS:")
+        print(f"   [U+1F4DD] Single SET: {avg_single_set*1000:.1f}ms avg, {max_single_set*1000:.1f}ms max")
+        print(f"   [U+1F4D6] Single GET: {avg_single_get*1000:.1f}ms avg, {max_single_get*1000:.1f}ms max")
+        print(f"   [U+1F4DD][U+1F4DD] Batch SET: {avg_batch_set*1000:.1f}ms avg, {max_batch_set*1000:.1f}ms max")
+        print(f"   [U+1F4D6][U+1F4D6] Batch GET: {avg_batch_get*1000:.1f}ms avg, {max_batch_get*1000:.1f}ms max")
+        print(f"   [U+1F5D1][U+FE0F]  DELETE: {avg_delete*1000:.1f}ms avg, {max_delete*1000:.1f}ms max")
+        print(f"    LIGHTNING:  Throughput: {single_ops_throughput:.0f} single ops/s, {batch_ops_throughput:.0f} batch ops/s")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 """
 General Audit Service
 Provides system-wide audit logging and retrieval functionality.
-Follows modular design - ≤300 lines, ≤8 lines per function.
+Follows modular design -  <= 300 lines,  <= 8 lines per function.
 Implements "Default to Resilience" with flexible parameter validation.
 
 Business Value Justification (BVJ):

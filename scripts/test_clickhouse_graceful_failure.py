@@ -27,9 +27,9 @@ async def test_clickhouse_graceful_failure():
         print("Testing ClickHouse health check...")
         try:
             await asyncio.wait_for(_check_clickhouse_connection(), timeout=5.0)
-            print("✓ ClickHouse health check passed (unexpected but ok)")
+            print("[U+2713] ClickHouse health check passed (unexpected but ok)")
         except Exception as e:
-            print(f"✓ ClickHouse health check failed gracefully: {e}")
+            print(f"[U+2713] ClickHouse health check failed gracefully: {e}")
         
         # Test the service initialization
         print("Testing ClickHouse service initialization...")
@@ -38,11 +38,11 @@ async def test_clickhouse_graceful_failure():
             service = ClickHouseService()
             result = await asyncio.wait_for(service.execute_health_check(), timeout=5.0)
             if result:
-                print("✓ ClickHouse service initialized successfully")
+                print("[U+2713] ClickHouse service initialized successfully")
             else:
-                print("✓ ClickHouse service failed gracefully")
+                print("[U+2713] ClickHouse service failed gracefully")
         except Exception as e:
-            print(f"✓ ClickHouse service failed gracefully: {e}")
+            print(f"[U+2713] ClickHouse service failed gracefully: {e}")
         
         # Test the client context manager
         print("Testing ClickHouse client context manager...")
@@ -50,15 +50,15 @@ async def test_clickhouse_graceful_failure():
             from netra_backend.app.db.clickhouse import get_clickhouse_client
             async with get_clickhouse_client() as client:
                 result = await asyncio.wait_for(client.execute("SELECT 1"), timeout=5.0)
-                print(f"✓ ClickHouse client worked: {result}")
+                print(f"[U+2713] ClickHouse client worked: {result}")
         except Exception as e:
-            print(f"✓ ClickHouse client failed gracefully: {e}")
+            print(f"[U+2713] ClickHouse client failed gracefully: {e}")
         
-        print("\n✅ All ClickHouse graceful failure tests completed successfully!")
+        print("\n PASS:  All ClickHouse graceful failure tests completed successfully!")
         print("The backend should now start without being blocked by ClickHouse timeouts.")
         
     except Exception as e:
-        print(f"❌ Test failed with error: {e}")
+        print(f" FAIL:  Test failed with error: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -77,13 +77,13 @@ async def test_startup_module():
         
         # This should not block and should gracefully degrade
         await asyncio.wait_for(initialize_clickhouse(logger), timeout=15.0)
-        print("✓ ClickHouse startup initialization completed gracefully")
+        print("[U+2713] ClickHouse startup initialization completed gracefully")
         
     except asyncio.TimeoutError:
-        print("❌ ClickHouse startup initialization timed out - fix needed")
+        print(" FAIL:  ClickHouse startup initialization timed out - fix needed")
         return False
     except Exception as e:
-        print(f"✓ ClickHouse startup initialization failed gracefully: {e}")
+        print(f"[U+2713] ClickHouse startup initialization failed gracefully: {e}")
     
     return True
 
@@ -98,15 +98,15 @@ async def main():
         success &= await test_clickhouse_graceful_failure()
         success &= await test_startup_module()
     except Exception as e:
-        print(f"❌ Overall test failed: {e}")
+        print(f" FAIL:  Overall test failed: {e}")
         success = False
     
     print("\n" + "=" * 60)
     if success:
-        print("✅ ALL TESTS PASSED - ClickHouse graceful failure is working!")
+        print(" PASS:  ALL TESTS PASSED - ClickHouse graceful failure is working!")
         print("Backend should now start successfully without ClickHouse blocking it.")
     else:
-        print("❌ SOME TESTS FAILED - Additional fixes may be needed.")
+        print(" FAIL:  SOME TESTS FAILED - Additional fixes may be needed.")
     print("=" * 60)
     
     return success

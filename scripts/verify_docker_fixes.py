@@ -40,9 +40,9 @@ def verify_credentials():
         if (creds['user'] == expected_user and 
             creds['password'] == expected_pass and 
             creds['database'] == expected_db):
-            print(f"✅ {env_name}: {creds['user']}:{creds['password']}@{creds['database']}")
+            print(f" PASS:  {env_name}: {creds['user']}:{creds['password']}@{creds['database']}")
         else:
-            print(f"❌ {env_name}: Expected {expected_user}:{expected_pass}@{expected_db}")
+            print(f" FAIL:  {env_name}: Expected {expected_user}:{expected_pass}@{expected_db}")
             print(f"   Got: {creds['user']}:{creds['password']}@{creds['database']}")
             all_passed = False
     
@@ -62,9 +62,9 @@ def verify_service_urls():
     dev_url = dev_manager._build_service_url_from_port("postgres", 5433)
     
     if "netra:netra123" in dev_url and "netra_dev" in dev_url:
-        print(f"✅ Development PostgreSQL URL: {dev_url}")
+        print(f" PASS:  Development PostgreSQL URL: {dev_url}")
     else:
-        print(f"❌ Development PostgreSQL URL incorrect: {dev_url}")
+        print(f" FAIL:  Development PostgreSQL URL incorrect: {dev_url}")
         all_passed = False
     
     # Test test environment
@@ -72,9 +72,9 @@ def verify_service_urls():
     test_url = test_manager._build_service_url_from_port("postgres", 5434)
     
     if "test_user:test_pass" in test_url and "netra_test" in test_url:
-        print(f"✅ Test PostgreSQL URL: {test_url}")
+        print(f" PASS:  Test PostgreSQL URL: {test_url}")
     else:
-        print(f"❌ Test PostgreSQL URL incorrect: {test_url}")
+        print(f" FAIL:  Test PostgreSQL URL incorrect: {test_url}")
         all_passed = False
     
     # Test Alpine environment
@@ -82,9 +82,9 @@ def verify_service_urls():
     alpine_url = alpine_manager._build_service_url_from_port("postgres", 5435)
     
     if "test:test" in alpine_url and "netra_test" in alpine_url:
-        print(f"✅ Alpine PostgreSQL URL: {alpine_url}")
+        print(f" PASS:  Alpine PostgreSQL URL: {alpine_url}")
     else:
-        print(f"❌ Alpine PostgreSQL URL incorrect: {alpine_url}")
+        print(f" FAIL:  Alpine PostgreSQL URL incorrect: {alpine_url}")
         all_passed = False
     
     return all_passed
@@ -109,15 +109,15 @@ def verify_port_discovery():
     for container_name, expected_service in test_cases:
         service = manager._parse_container_name_to_service(container_name)
         if service == expected_service:
-            print(f"✅ Parsed '{container_name}' → '{service}'")
+            print(f" PASS:  Parsed '{container_name}'  ->  '{service}'")
         else:
-            print(f"❌ Failed to parse '{container_name}' (expected '{expected_service}', got '{service}')")
+            print(f" FAIL:  Failed to parse '{container_name}' (expected '{expected_service}', got '{service}')")
             all_passed = False
     
     # Test docker ps output parsing
     # Note: _discover_ports_from_docker_ps is an internal method that runs docker ps itself
     # We'll test the parsing logic indirectly through container name parsing
-    print(f"✅ Docker ps parsing: Verified through container name parsing")
+    print(f" PASS:  Docker ps parsing: Verified through container name parsing")
     
     return all_passed
 
@@ -136,29 +136,29 @@ def verify_config_loader():
         # Test development config
         dev_config = loader.get_environment_config(DockerEnvironment.DEVELOPMENT)
         if dev_config and dev_config.credentials['postgres_user'] == 'netra':
-            print(f"✅ Development config loaded: user={dev_config.credentials['postgres_user']}")
+            print(f" PASS:  Development config loaded: user={dev_config.credentials['postgres_user']}")
         else:
-            print(f"❌ Development config incorrect")
+            print(f" FAIL:  Development config incorrect")
             all_passed = False
         
         # Test test config
         test_config = loader.get_environment_config(DockerEnvironment.TEST)
         if test_config and test_config.credentials['postgres_user'] == 'test_user':
-            print(f"✅ Test config loaded: user={test_config.credentials['postgres_user']}")
+            print(f" PASS:  Test config loaded: user={test_config.credentials['postgres_user']}")
         else:
-            print(f"❌ Test config incorrect")
+            print(f" FAIL:  Test config incorrect")
             all_passed = False
         
         # Test port retrieval
         dev_backend_port = loader.get_service_port(DockerEnvironment.DEVELOPMENT, 'backend')
         if dev_backend_port == 8000:
-            print(f"✅ Port retrieval: development backend={dev_backend_port}")
+            print(f" PASS:  Port retrieval: development backend={dev_backend_port}")
         else:
-            print(f"❌ Port retrieval failed: development backend={dev_backend_port}")
+            print(f" FAIL:  Port retrieval failed: development backend={dev_backend_port}")
             all_passed = False
         
     except Exception as e:
-        print(f"❌ Configuration loader error: {e}")
+        print(f" FAIL:  Configuration loader error: {e}")
         all_passed = False
     
     return all_passed
@@ -174,11 +174,11 @@ def verify_environment_detection():
     
     if hasattr(manager, 'detect_environment'):
         env_type = manager.detect_environment()
-        print(f"✅ Environment detection method exists")
+        print(f" PASS:  Environment detection method exists")
         print(f"   Detected environment: {env_type.value}")
         return True
     else:
-        print(f"❌ Environment detection method missing")
+        print(f" FAIL:  Environment detection method missing")
         return False
 
 
@@ -201,16 +201,16 @@ def main():
     print("="*60)
     
     for component, passed in results.items():
-        status = "✅ PASSED" if passed else "❌ FAILED"
+        status = " PASS:  PASSED" if passed else " FAIL:  FAILED"
         print(f"{component}: {status}")
     
     all_passed = all(results.values())
     
     print("="*60)
     if all_passed:
-        print("✅ ALL VERIFICATIONS PASSED - FIXES WORKING CORRECTLY")
+        print(" PASS:  ALL VERIFICATIONS PASSED - FIXES WORKING CORRECTLY")
     else:
-        print("❌ SOME VERIFICATIONS FAILED - REVIEW OUTPUT ABOVE")
+        print(" FAIL:  SOME VERIFICATIONS FAILED - REVIEW OUTPUT ABOVE")
     print("="*60)
     
     return 0 if all_passed else 1

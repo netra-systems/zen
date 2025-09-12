@@ -118,7 +118,7 @@ class TestMessageRouterLegacyMappingIntegration:
         # Check WebSocket manager stats for integration impact
         ws_stats = await ws_manager.get_stats()
         
-        print(f"🔗 INTEGRATION PIPELINE RESULTS:")
+        print(f"[U+1F517] INTEGRATION PIPELINE RESULTS:")
         print(f"   - Chat message recognized type: {not is_chat_message_unknown}")
         print(f"   - Pipeline result: {result}")
         print(f"   - Active connections: {ws_stats.get('active_connections', 0)}")
@@ -199,7 +199,7 @@ class TestMessageRouterLegacyMappingIntegration:
             "Message should be routed successfully, enabling database persistence logic"
         )
         
-        print(f"🗃️ DATABASE INTEGRATION ANALYSIS:")
+        print(f"[U+1F5C3][U+FE0F] DATABASE INTEGRATION ANALYSIS:")
         print(f"   - Recognized message type: {not is_unknown}")
         print(f"   - Routing result: {routing_result}")
         print(f"   - Messages routed: {stats['messages_routed']}")
@@ -286,7 +286,7 @@ class TestMessageRouterLegacyMappingIntegration:
         print(f"Handlers that processed the message: {handlers_that_processed}")
         # The key validation is that the message was recognized, not which specific handler processed it
         
-        print(f"🔄 MULTI-HANDLER INTEGRATION RESULTS:")
+        print(f" CYCLE:  MULTI-HANDLER INTEGRATION RESULTS:")
         print(f"   - Registered handlers: {len(handler_names)}")
         print(f"   - Handler names: {handler_names}")
         print(f"   - Recognized type: {not is_unknown}")
@@ -343,7 +343,7 @@ class TestMessageRouterLegacyMappingIntegration:
         unknown_count = len(unknown_variations)
         coverage_percentage = ((total_variations - unknown_count) / total_variations) * 100
         
-        print(f"📊 LEGACY MAPPING COMPLETENESS ANALYSIS:")
+        print(f" CHART:  LEGACY MAPPING COMPLETENESS ANALYSIS:")
         print(f"   - Total legacy types: {len(legacy_types)}")
         print(f"   - Chat patterns: {chat_patterns}")
         print(f"   - Message patterns: {message_patterns}")
@@ -445,7 +445,7 @@ class TestMessageRouterServiceIntegration:
         # Should be handler response, not unknown type acknowledgment
         # Note: We don't assert specific response format as handlers may vary
         
-        print(f"🔐 AUTH INTEGRATION ANALYSIS:")
+        print(f"[U+1F510] AUTH INTEGRATION ANALYSIS:")
         print(f"   - JWT token created: {bool(jwt_token)}")
         print(f"   - Auth headers available: {bool(auth_headers)}")
         print(f"   - Recognized message type: {not is_unknown}")
@@ -514,12 +514,12 @@ class TestMessageRouterServiceIntegration:
         # Analyze routing stats for cross-service impact
         stats = router.get_stats()
         
-        print(f"🌐 CROSS-SERVICE INTEGRATION ANALYSIS:")
+        print(f"[U+1F310] CROSS-SERVICE INTEGRATION ANALYSIS:")
         print(f"   - Recognized message type: {not is_unknown}")
         print(f"   - Cross-service routing result: {result}")
         print(f"   - Messages routed: {stats['messages_routed']}")
         print(f"   - Messages handled properly: {stats['messages_routed']}")
-        print(f"   - Service impact: Frontend→Backend→Agent workflow working")
+        print(f"   - Service impact: Frontend -> Backend -> Agent workflow working")
         print(f"   - Business impact: Complete AI chat service chain functional")
         
         # Verify the message was processed properly for agents
@@ -533,8 +533,8 @@ class TestMessageRouterServiceIntegration:
 if __name__ == "__main__":
     # Run the integration tests to validate complete message routing pipeline
     import sys
-    print("🔗 Running Integration Tests for MessageRouter Legacy Mapping")
-    print("🔗 Focus: Complete pipeline integration with 'chat_message' recognized type")
-    print("🔗 These tests validate cross-service and database integration success")
+    print("[U+1F517] Running Integration Tests for MessageRouter Legacy Mapping")
+    print("[U+1F517] Focus: Complete pipeline integration with 'chat_message' recognized type")
+    print("[U+1F517] These tests validate cross-service and database integration success")
     
     pytest.main([__file__, "-v", "--tb=short"])

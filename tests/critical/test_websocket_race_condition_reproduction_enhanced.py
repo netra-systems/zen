@@ -88,7 +88,7 @@ class WebSocketRaceConditionReproductionEnhanced:
     
     Focuses on the specific issues identified:
     1. Multiple competing state machines with different connection IDs
-    2. Invalid state transition CONNECTING → SERVICES_READY (skipping intermediate states)  
+    2. Invalid state transition CONNECTING  ->  SERVICES_READY (skipping intermediate states)  
     3. Phase overlap between WebSocket handshake and application readiness
     4. Message processing starting before accept() completes
     5. Concurrent UserExecutionContext creation causing isolation failures
@@ -99,7 +99,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         self.race_scenarios: List[RaceConditionScenario] = []
         self.active_connections: Set[str] = set()
         self.state_machine_registry = get_connection_state_registry()
-        logger.info("🧪 ENHANCED RACE CONDITION TEST SETUP")
+        logger.info("[U+1F9EA] ENHANCED RACE CONDITION TEST SETUP")
 
     def teardown_method(self):
         """Cleanup after each test method."""
@@ -109,10 +109,10 @@ class WebSocketRaceConditionReproductionEnhanced:
         
         # Log race condition analysis
         if self.race_scenarios:
-            logger.info(f"📊 RACE CONDITION ANALYSIS: {len(self.race_scenarios)} scenarios executed")
+            logger.info(f" CHART:  RACE CONDITION ANALYSIS: {len(self.race_scenarios)} scenarios executed")
             for scenario in self.race_scenarios:
                 if scenario.timing_violations:
-                    logger.warning(f"⚠️ Timing violations in {scenario.scenario_name}: {scenario.timing_violations}")
+                    logger.warning(f" WARNING: [U+FE0F] Timing violations in {scenario.scenario_name}: {scenario.timing_violations}")
 
     @pytest.mark.race_condition
     @pytest.mark.xfail(reason="MUST FAIL: No Single Coordination State Machine - multiple competing state machines")
@@ -133,7 +133,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         user_id = "race-user-competing-machines"
         num_competing_machines = 8  # More aggressive than original test
         
-        logger.info(f"🎯 REPRODUCING: Multiple competing state machines for {user_id}")
+        logger.info(f" TARGET:  REPRODUCING: Multiple competing state machines for {user_id}")
         
         # Track all scenarios
         scenarios = []
@@ -182,7 +182,7 @@ class WebSocketRaceConditionReproductionEnhanced:
                 scenario.success = False
                 scenario.error_type = type(e).__name__
                 scenario.error_message = str(e)
-                logger.info(f"✅ Expected race condition detected in machine {machine_index}: {e}")
+                logger.info(f" PASS:  Expected race condition detected in machine {machine_index}: {e}")
             
             finally:
                 scenario.end_time = time.time()
@@ -203,7 +203,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         failed_machines = [s for s in scenarios if not s.success]
         
         # Analyze results
-        logger.info(f"📊 RACE RESULTS: {len(successful_machines)} succeeded, {len(failed_machines)} failed")
+        logger.info(f" CHART:  RACE RESULTS: {len(successful_machines)} succeeded, {len(failed_machines)} failed")
         
         # This test MUST fail with current implementation
         assert len(failed_machines) > 0, (
@@ -225,10 +225,10 @@ class WebSocketRaceConditionReproductionEnhanced:
         )
 
     @pytest.mark.race_condition
-    @pytest.mark.xfail(reason="MUST FAIL: Invalid state transition CONNECTING → SERVICES_READY")
+    @pytest.mark.xfail(reason="MUST FAIL: Invalid state transition CONNECTING  ->  SERVICES_READY")
     async def test_invalid_state_transition_skipping_intermediate_states(self):
         """
-        GOLDEN PATH ISSUE: "Invalid state transition CONNECTING → SERVICES_READY 
+        GOLDEN PATH ISSUE: "Invalid state transition CONNECTING  ->  SERVICES_READY 
         that skips required intermediate states (ACCEPTED, AUTHENTICATED)."
         
         ROOT CAUSE: No coordination enforcing proper state sequence in WebSocket lifecycle.
@@ -241,7 +241,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         connection_id = "invalid-transition-test"
         user_id = "test-user-invalid-transition"
         
-        logger.info(f"🎯 REPRODUCING: Invalid state transition CONNECTING → SERVICES_READY")
+        logger.info(f" TARGET:  REPRODUCING: Invalid state transition CONNECTING  ->  SERVICES_READY")
         
         scenario = RaceConditionScenario(
             scenario_name="invalid_state_skip",
@@ -260,7 +260,7 @@ class WebSocketRaceConditionReproductionEnhanced:
             
             # CRITICAL TEST: Try to skip directly to SERVICES_READY
             # This MUST FAIL because it skips ACCEPTED and AUTHENTICATED states
-            logger.info("🧪 Attempting invalid transition: CONNECTING → SERVICES_READY")
+            logger.info("[U+1F9EA] Attempting invalid transition: CONNECTING  ->  SERVICES_READY")
             
             # This should raise StateTransitionError
             invalid_transition_succeeded = state_machine.transition_to(
@@ -276,7 +276,7 @@ class WebSocketRaceConditionReproductionEnhanced:
                 
                 # This is a critical failure - the state machine allowed invalid transition
                 pytest.fail(
-                    f"RACE CONDITION VALIDATION FAILED: Invalid transition CONNECTING → SERVICES_READY "
+                    f"RACE CONDITION VALIDATION FAILED: Invalid transition CONNECTING  ->  SERVICES_READY "
                     f"succeeded when it should have been blocked. Current state: {state_machine.current_state}. "
                     f"This indicates the state machine validation is not working properly."
                 )
@@ -291,13 +291,13 @@ class WebSocketRaceConditionReproductionEnhanced:
             scenario.success = False
             scenario.error_type = "StateTransitionError"
             scenario.error_message = str(e)
-            logger.info(f"✅ Expected StateTransitionError caught: {e}")
+            logger.info(f" PASS:  Expected StateTransitionError caught: {e}")
             
         except Exception as e:
             scenario.success = False
             scenario.error_type = type(e).__name__
             scenario.error_message = str(e)
-            logger.info(f"✅ Unexpected error (also validates race condition): {e}")
+            logger.info(f" PASS:  Unexpected error (also validates race condition): {e}")
             
         finally:
             scenario.end_time = time.time()
@@ -323,7 +323,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         
         EXPECTED FAILURE: RuntimeError, state inconsistency, or deadlock when phases overlap.
         """
-        logger.info(f"🎯 REPRODUCING: WebSocket handshake and application phase overlap")
+        logger.info(f" TARGET:  REPRODUCING: WebSocket handshake and application phase overlap")
         
         # Mock WebSocket that simulates Cloud Run timing behavior
         websocket_mock = MagicMock()
@@ -340,7 +340,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         
         try:
             # Start both phases simultaneously (this SHOULD cause race condition)
-            logger.info("🧪 Starting Phase 1 (handshake) and Phase 4 (application) simultaneously")
+            logger.info("[U+1F9EA] Starting Phase 1 (handshake) and Phase 4 (application) simultaneously")
             
             phase1_task = asyncio.create_task(
                 self._simulate_phase1_websocket_handshake(websocket_mock, scenario)
@@ -366,7 +366,7 @@ class WebSocketRaceConditionReproductionEnhanced:
                 scenario.success = False
                 scenario.error_type = "TimeoutError" 
                 scenario.error_message = f"Phase overlap caused timeout after {timeout_seconds}s"
-                logger.info(f"✅ Expected race condition: Timeout due to phase overlap")
+                logger.info(f" PASS:  Expected race condition: Timeout due to phase overlap")
                 
                 # Cancel tasks to clean up
                 phase1_task.cancel()
@@ -387,13 +387,13 @@ class WebSocketRaceConditionReproductionEnhanced:
                 scenario.success = False
                 scenario.error_type = "PhaseOverlapFailure"
                 scenario.error_message = f"Phase overlap failures: {[str(f) for f in failures]}"
-                logger.info(f"✅ Expected race condition: Phase overlap caused {len(failures)} failures")
+                logger.info(f" PASS:  Expected race condition: Phase overlap caused {len(failures)} failures")
                 
             else:
                 # Unexpected - both phases succeeded without race condition
                 scenario.success = True
                 scenario.error_message = f"NO RACE CONDITION: Both phases completed successfully"
-                logger.warning(f"⚠️ Race condition not detected: {successes}")
+                logger.warning(f" WARNING: [U+FE0F] Race condition not detected: {successes}")
                 
             scenario.state_transitions.append(f"Phase1: {phase1_result}")
             scenario.state_transitions.append(f"Phase4: {phase4_result}")
@@ -402,7 +402,7 @@ class WebSocketRaceConditionReproductionEnhanced:
             scenario.success = False
             scenario.error_type = type(e).__name__
             scenario.error_message = str(e)
-            logger.info(f"✅ Expected race condition exception: {e}")
+            logger.info(f" PASS:  Expected race condition exception: {e}")
             
         finally:
             scenario.end_time = time.time()
@@ -428,7 +428,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         
         EXPECTED FAILURE: RuntimeError with "accept first" message.
         """
-        logger.info(f"🎯 REPRODUCING: Message processing before accept() complete")
+        logger.info(f" TARGET:  REPRODUCING: Message processing before accept() complete")
         
         scenario = RaceConditionScenario(
             scenario_name="accept_race_condition",
@@ -453,7 +453,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         
         try:
             # Attempt to process message before accept() completes
-            logger.info("🧪 Attempting message processing before WebSocket accept() completes")
+            logger.info("[U+1F9EA] Attempting message processing before WebSocket accept() completes")
             
             # This MUST FAIL with "Need to call accept first" error
             await self._attempt_message_processing_before_accept(
@@ -470,7 +470,7 @@ class WebSocketRaceConditionReproductionEnhanced:
                 scenario.success = False
                 scenario.error_type = "RuntimeError"
                 scenario.error_message = str(e)
-                logger.info(f"✅ Expected 'accept first' error caught: {e}")
+                logger.info(f" PASS:  Expected 'accept first' error caught: {e}")
             else:
                 # Different RuntimeError 
                 scenario.success = False
@@ -484,7 +484,7 @@ class WebSocketRaceConditionReproductionEnhanced:
             scenario.error_type = type(e).__name__
             scenario.error_message = str(e)
             scenario.add_timing_violation("Unexpected exception during accept race")
-            logger.info(f"✅ Race condition triggered different exception: {e}")
+            logger.info(f" PASS:  Race condition triggered different exception: {e}")
             
         finally:
             scenario.end_time = time.time()
@@ -513,7 +513,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         user_id = "context-race-user"
         num_contexts = 6  # More aggressive than original
         
-        logger.info(f"🎯 REPRODUCING: Concurrent UserExecutionContext creation for {user_id}")
+        logger.info(f" TARGET:  REPRODUCING: Concurrent UserExecutionContext creation for {user_id}")
         
         # Track context creation scenarios
         context_scenarios = []
@@ -546,7 +546,7 @@ class WebSocketRaceConditionReproductionEnhanced:
                 scenario.success = False
                 scenario.error_type = type(e).__name__
                 scenario.error_message = str(e)
-                logger.info(f"✅ Expected context race condition in {context_index}: {e}")
+                logger.info(f" PASS:  Expected context race condition in {context_index}: {e}")
                 
             finally:
                 scenario.end_time = time.time()
@@ -566,7 +566,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         successful_contexts = [s for s in context_scenarios if s.success]
         failed_contexts = [s for s in context_scenarios if not s.success]
         
-        logger.info(f"📊 CONTEXT RACE RESULTS: {len(successful_contexts)} succeeded, {len(failed_contexts)} failed")
+        logger.info(f" CHART:  CONTEXT RACE RESULTS: {len(successful_contexts)} succeeded, {len(failed_contexts)} failed")
         
         # Check for isolation violations in successful contexts
         if len(successful_contexts) > 1:
@@ -581,7 +581,7 @@ class WebSocketRaceConditionReproductionEnhanced:
             
             # If multiple contexts have the same ID, that's an isolation violation
             if len(unique_context_ids) < len(context_ids):
-                logger.info(f"✅ Expected race condition: Context ID collision detected")
+                logger.info(f" PASS:  Expected race condition: Context ID collision detected")
                 # This proves the race condition exists
                 assert True, "Context isolation race condition successfully reproduced"
                 return
@@ -603,7 +603,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         Simulate Phase 1: WebSocket transport handshake with Cloud Run timing.
         """
         try:
-            logger.info("🔄 Phase 1: Starting WebSocket handshake")
+            logger.info(" CYCLE:  Phase 1: Starting WebSocket handshake")
             
             # Simulate accept() call with Cloud Run delays
             await asyncio.sleep(0.005)  # 5ms handshake time
@@ -634,7 +634,7 @@ class WebSocketRaceConditionReproductionEnhanced:
         Simulate Phase 4: Application readiness setup that should wait for handshake.
         """
         try:
-            logger.info("🔄 Phase 4: Starting application setup")
+            logger.info(" CYCLE:  Phase 4: Starting application setup")
             
             # This should wait for Phase 1, but in race condition it doesn't
             if websocket_mock.client_state != "CONNECTED":
@@ -668,7 +668,7 @@ class WebSocketRaceConditionReproductionEnhanced:
             raise AssertionError("WebSocket already accepted - cannot reproduce 'accept first' race condition")
         
         # This should fail because accept hasn't been called
-        logger.info("🧪 Processing message while WebSocket still in handshake")
+        logger.info("[U+1F9EA] Processing message while WebSocket still in handshake")
         scenario.add_timing_violation("Message processing attempted before accept()")
         
         raise RuntimeError("Need to call accept() first before processing messages")

@@ -225,12 +225,12 @@ class TestModuleImportCleaner:
             try:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(new_content)
-                logger.info(f"✓ Modified: {file_path}")
+                logger.info(f"[U+2713] Modified: {file_path}")
             except Exception as e:
                 logger.error(f"Failed to write {file_path}: {e}")
                 return False
         else:
-            logger.info(f"✓ Would modify: {file_path}")
+            logger.info(f"[U+2713] Would modify: {file_path}")
         
         self.processed_files.append(file_path)
         return True

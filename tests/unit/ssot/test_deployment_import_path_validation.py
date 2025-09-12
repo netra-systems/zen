@@ -466,10 +466,10 @@ class TestDeploymentImportPathValidation(SSotBaseTestCase):
         in_verified_section = False
         
         for line in lines:
-            if "✅ VERIFIED IMPORTS" in line:
+            if " PASS:  VERIFIED IMPORTS" in line:
                 in_verified_section = True
                 continue
-            elif "❌ BROKEN IMPORTS" in line:
+            elif " FAIL:  BROKEN IMPORTS" in line:
                 in_verified_section = False
                 continue
             
@@ -491,7 +491,7 @@ class TestDeploymentImportPathValidation(SSotBaseTestCase):
         in_broken_section = False
         
         for line in lines:
-            if "❌ BROKEN IMPORTS" in line:
+            if " FAIL:  BROKEN IMPORTS" in line:
                 in_broken_section = True
                 continue
             elif in_broken_section and line.startswith("#"):

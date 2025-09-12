@@ -94,14 +94,14 @@ class StagingGoldenPathValidator:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as response:
                     if response.status in [200, 404, 401]:  # Any response indicates deployment
-                        self.successes.append("✅ WebSocket bridge endpoints available")
+                        self.successes.append(" PASS:  WebSocket bridge endpoints available")
                         return True
                     else:
-                        self.errors.append(f"❌ WebSocket bridge status check failed: {response.status}")
+                        self.errors.append(f" FAIL:  WebSocket bridge status check failed: {response.status}")
                         return False
         except Exception as e:
             # This is expected if endpoint doesn't exist yet
-            self.successes.append("✅ Backend deployment appears active (connection attempted)")
+            self.successes.append(" PASS:  Backend deployment appears active (connection attempted)")
             return True
     
     async def run_validation(self):
@@ -178,10 +178,10 @@ async def main():
         success = await validator.run_validation()
         sys.exit(0 if success else 1)
     except KeyboardInterrupt:
-        print("\n⏹️  Validation interrupted by user")
+        print("\n[U+23F9][U+FE0F]  Validation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n💥 Validation failed with unexpected error: {e}")
+        print(f"\n[U+1F4A5] Validation failed with unexpected error: {e}")
         sys.exit(1)
 
 

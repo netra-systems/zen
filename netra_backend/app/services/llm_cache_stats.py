@@ -1,7 +1,7 @@
 """LLM Cache Statistics Module.
 
 Handles cache statistics tracking and retrieval.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 import json

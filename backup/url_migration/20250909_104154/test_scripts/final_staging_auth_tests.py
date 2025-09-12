@@ -31,7 +31,7 @@ class StagingAuthTests:
             "timestamp": datetime.now().isoformat()
         }
         self.results.append(result)
-        status_symbol = "✓" if status == "PASS" else "✗" if status == "FAIL" else "!"
+        status_symbol = "[U+2713]" if status == "PASS" else "[U+2717]" if status == "FAIL" else "!"
         print(f"{status_symbol} {test_name}: {status} - {details}")
     
     async def test_auth_service_availability(self):
@@ -295,18 +295,18 @@ class StagingAuthTests:
         skipped = sum(1 for r in self.results if r['status'] == 'SKIP')
         
         print(f"Total Tests: {len(self.results)}")
-        print(f"✓ Passed: {passed}")
-        print(f"✗ Failed: {failed}")
+        print(f"[U+2713] Passed: {passed}")
+        print(f"[U+2717] Failed: {failed}")
         print(f"! Errors: {errors}")
-        print(f"🔥 Critical: {critical}")
-        print(f"⚠ Warnings: {warnings}")
+        print(f" FIRE:  Critical: {critical}")
+        print(f" WARNING:  Warnings: {warnings}")
         print(f"- Skipped: {skipped}")
         
         print(f"\nAuth Service URL: {AUTH_SERVICE_URL}")
         print(f"Backend URL: {BACKEND_URL}")
         
         if failed > 0 or critical > 0:
-            print(f"\n🚨 CRITICAL ISSUES FOUND:")
+            print(f"\n ALERT:  CRITICAL ISSUES FOUND:")
             for result in self.results:
                 if result['status'] in ['FAIL', 'CRITICAL']:
                     print(f"  - {result['test']}: {result['details']}")

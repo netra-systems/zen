@@ -218,9 +218,9 @@ class TestEnvironmentValidator:
             cur.execute(f"SELECT 1 FROM pg_database WHERE datname = '{test_db}'")
             if not cur.fetchone():
                 cur.execute(f"CREATE DATABASE {test_db}")
-                print(f"✓ Created test database: {test_db}")
+                print(f"[U+2713] Created test database: {test_db}")
             else:
-                print(f"✓ Test database already exists: {test_db}")
+                print(f"[U+2713] Test database already exists: {test_db}")
             
             cur.close()
             conn.close()
@@ -251,7 +251,7 @@ class TestEnvironmentValidator:
                 test_value = self.env.get(key)
                 if not test_value or test_value.startswith("test-"):
                     self.env.set(key, dev_value, source="copied_from_dev")
-                    print(f"✓ Copied {key} from .env to test environment")
+                    print(f"[U+2713] Copied {key} from .env to test environment")
         
         # Also set GOOGLE_API_KEY to match GEMINI_API_KEY
         gemini_key = self.env.get("GEMINI_API_KEY")
@@ -270,10 +270,10 @@ class TestEnvironmentValidator:
         report.append("-"*30)
         services = self.check_service_health()
         for service in services:
-            status_icon = "✓" if service.status == "healthy" else "✗"
+            status_icon = "[U+2713]" if service.status == "healthy" else "[U+2717]"
             report.append(f"  {status_icon} {service.name}: {service.status}")
             if service.error:
-                report.append(f"     └─ {service.error}")
+                report.append(f"     [U+2514][U+2500] {service.error}")
         
         # Configuration Issues
         if self.issues:
@@ -288,31 +288,31 @@ class TestEnvironmentValidator:
             if errors:
                 report.append(f"\nERRORS ({len(errors)}):")
                 for issue in errors:
-                    report.append(f"  ✗ [{issue.category}] {issue.message}")
+                    report.append(f"  [U+2717] [{issue.category}] {issue.message}")
                     if issue.fix_suggestion:
-                        report.append(f"     → Fix: {issue.fix_suggestion}")
+                        report.append(f"      ->  Fix: {issue.fix_suggestion}")
             
             if warnings:
                 report.append(f"\nWARNINGS ({len(warnings)}):")
                 for issue in warnings:
-                    report.append(f"  ⚠ [{issue.category}] {issue.message}")
+                    report.append(f"   WARNING:  [{issue.category}] {issue.message}")
                     if issue.fix_suggestion:
-                        report.append(f"     → Fix: {issue.fix_suggestion}")
+                        report.append(f"      ->  Fix: {issue.fix_suggestion}")
             
             if info:
                 report.append(f"\nINFO ({len(info)}):")
                 for issue in info:
-                    report.append(f"  ℹ [{issue.category}] {issue.message}")
+                    report.append(f"  [U+2139] [{issue.category}] {issue.message}")
         else:
-            report.append("\n✓ No configuration issues found!")
+            report.append("\n[U+2713] No configuration issues found!")
         
         # Summary
         report.append("\n" + "="*60)
         error_count = len([i for i in self.issues if i.severity == "error"])
         if error_count > 0:
-            report.append(f"RESULT: ✗ FAILED - {error_count} error(s) must be fixed")
+            report.append(f"RESULT: [U+2717] FAILED - {error_count} error(s) must be fixed")
         else:
-            report.append("RESULT: ✓ READY - Test environment is properly configured")
+            report.append("RESULT: [U+2713] READY - Test environment is properly configured")
         report.append("="*60)
         
         return "\n".join(report)
@@ -329,14 +329,14 @@ class TestEnvironmentValidator:
         
         # Ensure test env file exists with proper values
         if not self.test_env_file.exists():
-            print("✓ Created .env.mock file with default values")
+            print("[U+2713] Created .env.mock file with default values")
         
         # Export test environment for child processes
         env_dict = self.env.get_subprocess_env()
         for key, value in env_dict.items():
             os.environ[key] = value
         
-        print("✓ Test environment variables exported")
+        print("[U+2713] Test environment variables exported")
 
 def main():
     """Main entry point"""
@@ -378,7 +378,7 @@ def main():
         env_dict = validator.env.get_subprocess_env()
         for key, value in env_dict.items():
             os.environ[key] = value
-        print("✓ Environment variables exported")
+        print("[U+2713] Environment variables exported")
     
     # Return exit code based on errors
     error_count = len([i for i in validator.issues if i.severity == "error"])

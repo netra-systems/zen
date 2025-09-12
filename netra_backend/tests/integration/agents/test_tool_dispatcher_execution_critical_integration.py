@@ -542,7 +542,7 @@ class TestToolDispatcherExecutionCriticalIntegration(BaseIntegrationTest):
             user1_events = mock_websocket_manager.get_events_for_user("enterprise_user_1")
             user2_events = mock_websocket_manager.get_events_for_user("enterprise_user_2")
             
-            assert len(user1_events) >= 4  # At least 2 tools × 2 events each
+            assert len(user1_events) >= 4  # At least 2 tools  x  2 events each
             assert len(user2_events) >= 4
             
             # Critical: Verify no cross-user data leakage in events

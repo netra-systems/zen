@@ -90,7 +90,7 @@ class TestWebSocketEventHandlerRaceConditions(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail due to handler wiring race conditions.
         """
-        logger.info("🚨 TESTING: Dual interface event handler wiring race conditions")
+        logger.info(" ALERT:  TESTING: Dual interface event handler wiring race conditions")
         
         await self.async_setup_method()
         
@@ -230,7 +230,7 @@ class TestWebSocketEventHandlerRaceConditions(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail due to undefined handler references.
         """
-        logger.info("🚨 TESTING: Undefined event handler references")
+        logger.info(" ALERT:  TESTING: Undefined event handler references")
         
         await self.async_setup_method()
         
@@ -327,7 +327,7 @@ class TestWebSocketEventHandlerRaceConditions(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail due to timing race conditions.
         """
-        logger.info("🚨 TESTING: Timing-dependent event delivery races")
+        logger.info(" ALERT:  TESTING: Timing-dependent event delivery races")
         
         await self.async_setup_method()
         
@@ -468,7 +468,7 @@ class TestWebSocketEventHandlerRaceConditions(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail due to dropped events.
         """
-        logger.info("🚨 TESTING: Partial event handler initialization causing event drops")
+        logger.info(" ALERT:  TESTING: Partial event handler initialization causing event drops")
         
         await self.async_setup_method()
         
@@ -637,7 +637,7 @@ class TestWebSocketEventHandlerPerformanceRaces(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail due to concurrency conflicts.
         """
-        logger.info("🚨 TESTING: High concurrency event handler conflicts")
+        logger.info(" ALERT:  TESTING: High concurrency event handler conflicts")
         
         # CRITICAL: Setup high concurrency scenario
         concurrent_users = 10

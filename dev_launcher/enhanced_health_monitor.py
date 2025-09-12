@@ -100,7 +100,7 @@ class EnhancedHealthMonitor:
         start_time = time.time()
         component_statuses = []
         
-        self.logger.info("🏥 Starting comprehensive backend health check..." if self.use_emoji else 
+        self.logger.info("[U+1F3E5] Starting comprehensive backend health check..." if self.use_emoji else 
                         "Starting comprehensive backend health check...")
         
         # Check all components concurrently
@@ -147,7 +147,7 @@ class EnhancedHealthMonitor:
         self.last_full_check = report
         
         total_time = (time.time() - start_time) * 1000
-        self.logger.info(f"✅ Health check completed in {total_time:.1f}ms - Status: {overall_status}" 
+        self.logger.info(f" PASS:  Health check completed in {total_time:.1f}ms - Status: {overall_status}" 
                         if self.use_emoji else 
                         f"Health check completed in {total_time:.1f}ms - Status: {overall_status}")
         

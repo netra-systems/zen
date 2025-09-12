@@ -169,7 +169,7 @@ class GCPDeployer:
                 cpu="1" if self.use_alpine else "1",
                 min_instances=1,
                 max_instances=10,
-                # ⚠️ CRITICAL: Frontend environment variables are MANDATORY for deployment
+                #  WARNING: [U+FE0F] CRITICAL: Frontend environment variables are MANDATORY for deployment
                 # These are duplicated in deploy_service() method for redundancy
                 # See also: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
                 # NEVER REMOVE ANY OF THESE VARIABLES - Frontend will fail without them
@@ -241,7 +241,7 @@ class GCPDeployer:
                 shell=self.use_shell
             )
             if result.returncode != 0:
-                print("❌ gcloud CLI is not installed")
+                print(" FAIL:  gcloud CLI is not installed")
                 return False
             
             # Authenticate with service account if provided
@@ -260,18 +260,18 @@ class GCPDeployer:
             current_project = result.stdout.strip()
             
             if current_project != self.project_id:
-                print(f"⚠️ Current project is '{current_project}', switching to '{self.project_id}'")
+                print(f" WARNING: [U+FE0F] Current project is '{current_project}', switching to '{self.project_id}'")
                 subprocess.run(
                     [self.gcloud_cmd, "config", "set", "project", self.project_id],
                     check=True,
                     shell=self.use_shell
                 )
                 
-            print(f"✅ gcloud CLI configured for project: {self.project_id}")
+            print(f" PASS:  gcloud CLI configured for project: {self.project_id}")
             return True
             
         except FileNotFoundError:
-            print("❌ gcloud CLI is not installed")
+            print(" FAIL:  gcloud CLI is not installed")
             print("Please install: https://cloud.google.com/sdk/docs/install")
             return False
     
@@ -281,17 +281,17 @@ class GCPDeployer:
         if self.service_account_path:
             service_account_file = Path(self.service_account_path)
             if not service_account_file.exists():
-                print(f"❌ Service account file not found: {service_account_file}")
+                print(f" FAIL:  Service account file not found: {service_account_file}")
                 return False
             return GCPAuthConfig.setup_authentication(service_account_file)
         
         # Otherwise use centralized auth config to find and set up authentication
-        print("🔍 Using centralized authentication configuration...")
+        print(" SEARCH:  Using centralized authentication configuration...")
         return GCPAuthConfig.ensure_authentication()
     
     def validate_frontend_environment_variables(self) -> bool:
         """
-        🚨 CRITICAL: Validate all required frontend environment variables are present.
+         ALERT:  CRITICAL: Validate all required frontend environment variables are present.
         Missing any of these will cause complete frontend failure.
         Cross-reference: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
         """
@@ -319,7 +319,7 @@ class GCPDeployer:
                 break
         
         if not frontend_service:
-            print("  ❌ Frontend service configuration not found!")
+            print("   FAIL:  Frontend service configuration not found!")
             return False
         
         missing_vars = []
@@ -328,30 +328,30 @@ class GCPDeployer:
                 missing_vars.append(var)
         
         if missing_vars:
-            print("  ❌ CRITICAL: Missing required frontend environment variables:")
+            print("   FAIL:  CRITICAL: Missing required frontend environment variables:")
             for var in missing_vars:
                 print(f"     - {var}")
-            print("\n  🔴 DEPLOYMENT BLOCKED: Frontend will fail without these variables!")
+            print("\n  [U+1F534] DEPLOYMENT BLOCKED: Frontend will fail without these variables!")
             print("  See: frontend/.env.staging for required values")
             print("  See: SPEC/frontend_deployment_critical.xml for documentation")
             return False
         
-        print("  ✅ All required frontend environment variables present")
+        print("   PASS:  All required frontend environment variables present")
         return True
     
     def validate_deployment_configuration(self) -> bool:
         """Validate deployment configuration and environment variables."""
-        print("\n🔍 Validating deployment configuration...")
+        print("\n SEARCH:  Validating deployment configuration...")
         
         # CRITICAL: Validate frontend environment variables first
         if not self.validate_frontend_environment_variables():
             return False
         
         # CRITICAL: OAuth validation BEFORE deployment
-        print("🔐 Validating OAuth configuration before deployment...")
+        print("[U+1F510] Validating OAuth configuration before deployment...")
         oauth_validation_success = self._validate_oauth_configuration()
         if not oauth_validation_success:
-            print("🚨🚨🚨 DEPLOYMENT ABORTED - OAuth validation failed! 🚨🚨🚨")
+            print(" ALERT:  ALERT:  ALERT:  DEPLOYMENT ABORTED - OAuth validation failed!  ALERT:  ALERT:  ALERT: ")
             return False
         
         # Required environment variables for staging deployment
@@ -367,7 +367,7 @@ class GCPDeployer:
                 missing_vars.append(var)
         
         if missing_vars:
-            print(f"  ❌ Missing required environment variables: {missing_vars}")
+            print(f"   FAIL:  Missing required environment variables: {missing_vars}")
             print("     Set these variables before deploying to staging")
             return False
         
@@ -388,19 +388,19 @@ class GCPDeployer:
                 invalid_url_vars.append(f"{var_name}={var_value}")
         
         if invalid_url_vars:
-            print(f"  ❌ Found local development URLs in {self.project_id} environment:")
+            print(f"   FAIL:  Found local development URLs in {self.project_id} environment:")
             for var in invalid_url_vars:
                 print(f"     {var}")
             print("  This will cause CORS and authentication failures in staging!")
             print("  Run: python scripts/validate_staging_urls.py --environment staging --fix")
             return False
         
-        print("  ✅ Deployment configuration valid")
+        print("   PASS:  Deployment configuration valid")
         return True
     
     def run_pre_deployment_checks(self) -> bool:
         """Run pre-deployment checks to ensure code quality."""
-        print("\n🔍 Running pre-deployment checks...")
+        print("\n SEARCH:  Running pre-deployment checks...")
         
         # First validate configuration
         if not self.validate_deployment_configuration():
@@ -451,17 +451,17 @@ class GCPDeployer:
                 )
                 
                 if result.returncode == 0:
-                    print(f"  ✅ {check['name']} passed")
+                    print(f"   PASS:  {check['name']} passed")
                 else:
-                    print(f"  ❌ {check['name']} failed")
+                    print(f"   FAIL:  {check['name']} failed")
                     
                     # Check if this is a critical failure
                     if check.get("critical", False):
-                        print("\n" + "🚨" * 10)
+                        print("\n" + " ALERT: " * 10)
                         print("  CRITICAL FAILURE: WebSocket agent events not working!")
                         print("  Basic chat functionality will be BROKEN in production!")
                         print("  This MUST be fixed before ANY deployment!")
-                        print("🚨" * 10 + "\n")
+                        print(" ALERT: " * 10 + "\n")
                         critical_failed = True
                         
                     if check["required"]:
@@ -471,23 +471,23 @@ class GCPDeployer:
                         print(f"     Warning: Non-critical check failed")
                         
             except FileNotFoundError:
-                print(f"  ⚠️ {check['name']} script not found")
+                print(f"   WARNING: [U+FE0F] {check['name']} script not found")
                 if check["required"]:
                     all_passed = False
                     
         if critical_failed:
-            print("\n❌ MISSION CRITICAL tests failed!")
+            print("\n FAIL:  MISSION CRITICAL tests failed!")
             print("   WebSocket agent events are NOT working!")
             print("   See DEPLOYMENT_CHECKLIST.md for troubleshooting.")
             print("   See SPEC/learnings/websocket_agent_integration_critical.xml for fix details.")
             return False
             
         if not all_passed:
-            print("\n❌ Required checks failed. Please fix issues before deploying.")
+            print("\n FAIL:  Required checks failed. Please fix issues before deploying.")
             print("   See SPEC/gcp_deployment.xml for deployment guidelines.")
             return False
             
-        print("\n✅ All pre-deployment checks passed")
+        print("\n PASS:  All pre-deployment checks passed")
         return True
     
     def enable_apis(self, check_apis: bool = False) -> bool:
@@ -497,10 +497,10 @@ class GCPDeployer:
             check_apis: If True, will attempt to enable APIs. If False, will skip.
         """
         if not check_apis:
-            print("\n🔧 Skipping GCP API checks (use --check-apis to enable)")
+            print("\n[U+1F527] Skipping GCP API checks (use --check-apis to enable)")
             return True
             
-        print("\n🔧 Enabling required GCP APIs...")
+        print("\n[U+1F527] Enabling required GCP APIs...")
         
         required_apis = [
             "run.googleapis.com",
@@ -521,9 +521,9 @@ class GCPDeployer:
             )
             if result.returncode != 0:
                 if "already enabled" in result.stderr.lower():
-                    print(f"  ✓ {api} already enabled")
+                    print(f"  [U+2713] {api} already enabled")
                 elif "permission_denied" in result.stderr.lower() or "auth_permission_denied" in result.stderr.lower():
-                    print(f"  ⚠️ {api} - checking if already enabled...")
+                    print(f"   WARNING: [U+FE0F] {api} - checking if already enabled...")
                     # Check if the API is already enabled
                     check_result = subprocess.run(
                         [self.gcloud_cmd, "services", "list", "--enabled", "--filter", f"name:{api}"],
@@ -533,17 +533,17 @@ class GCPDeployer:
                         shell=self.use_shell
                     )
                     if api in check_result.stdout:
-                        print(f"  ✓ {api} is already enabled")
+                        print(f"  [U+2713] {api} is already enabled")
                     else:
-                        print(f"  ❌ Failed to enable {api}: Permission denied")
+                        print(f"   FAIL:  Failed to enable {api}: Permission denied")
                         print(f"     The service account may lack permissions to enable APIs.")
                         print(f"     Please ensure {api} is enabled in the GCP Console.")
                         return False
                 else:
-                    print(f"  ❌ Failed to enable {api}: {result.stderr}")
+                    print(f"   FAIL:  Failed to enable {api}: {result.stderr}")
                     return False
                 
-        print("✅ All required APIs enabled")
+        print(" PASS:  All required APIs enabled")
         return True
     
     def configure_docker_auth(self) -> bool:
@@ -565,7 +565,7 @@ class GCPDeployer:
                 )
                 
                 if token_result.returncode != 0:
-                    print(f"  ❌ Failed to get access token: {token_result.stderr}")
+                    print(f"   FAIL:  Failed to get access token: {token_result.stderr}")
                     return False
                 
                 access_token = token_result.stdout.strip()
@@ -585,10 +585,10 @@ class GCPDeployer:
                 )
                 
                 if login_result.returncode == 0:
-                    print(f"  ✅ {runtime_name} authentication configured successfully")
+                    print(f"   PASS:  {runtime_name} authentication configured successfully")
                     return True
                 else:
-                    print(f"  ❌ Failed to configure {runtime_name} authentication: {login_result.stderr}")
+                    print(f"   FAIL:  Failed to configure {runtime_name} authentication: {login_result.stderr}")
                     return False
             else:
                 # Use standard Docker configuration
@@ -602,14 +602,14 @@ class GCPDeployer:
                 )
                 
                 if result.returncode == 0:
-                    print(f"  ✅ {runtime_name} authentication configured successfully")
+                    print(f"   PASS:  {runtime_name} authentication configured successfully")
                     return True
                 else:
-                    print(f"  ❌ Failed to configure {runtime_name} authentication: {result.stderr}")
+                    print(f"   FAIL:  Failed to configure {runtime_name} authentication: {result.stderr}")
                     return False
                 
         except Exception as e:
-            print(f"  ❌ Container runtime authentication error: {e}")
+            print(f"   FAIL:  Container runtime authentication error: {e}")
             return False
     
     def create_dockerfile(self, service: ServiceConfig) -> bool:
@@ -715,12 +715,12 @@ CMD ["npm", "start"]
         with open(dockerfile_path, 'w') as f:
             f.write(content)
             
-        print(f"  ✅ Created {service.dockerfile}")
+        print(f"   PASS:  Created {service.dockerfile}")
         return True
     
     def build_image_local(self, service: ServiceConfig) -> bool:
         """Build Docker image locally (faster than Cloud Build)."""
-        print(f"\n🔨 Building {service.name} Docker image locally...")
+        print(f"\n[U+1F528] Building {service.name} Docker image locally...")
         
         # Create Dockerfile if needed
         if not self.create_dockerfile(service):
@@ -750,7 +750,7 @@ CMD ["npm", "start"]
                 check=True
             )
             
-            print(f"  ✅ Built successfully, now pushing to registry...")
+            print(f"   PASS:  Built successfully, now pushing to registry...")
             
             # Configure docker for GCR
             if not self.configure_docker_auth():
@@ -766,17 +766,17 @@ CMD ["npm", "start"]
                 check=True
             )
             
-            print(f"✅ {service.name} image built and pushed successfully")
+            print(f" PASS:  {service.name} image built and pushed successfully")
             return True
             
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to build {service.name} locally: {e}")
+            print(f" FAIL:  Failed to build {service.name} locally: {e}")
             print("   Tip: Ensure Docker Desktop is running")
             return False
     
     def build_image_cloud(self, service: ServiceConfig) -> bool:
         """Build Docker image using Cloud Build (slower but no local resources needed)."""
-        print(f"\n🔨 Building {service.name} Docker image with Cloud Build...")
+        print(f"\n[U+1F528] Building {service.name} Docker image with Cloud Build...")
         
         # Create Dockerfile if needed
         if not self.create_dockerfile(service):
@@ -831,11 +831,11 @@ CMD ["npm", "start"]
                 check=True,
                 shell=self.use_shell
             )
-            print(f"✅ {service.name} image built successfully")
+            print(f" PASS:  {service.name} image built successfully")
             return True
             
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to build {service.name}: {e}")
+            print(f" FAIL:  Failed to build {service.name}: {e}")
             return False
     
     def build_image(self, service: ServiceConfig, use_local: bool = False) -> bool:
@@ -868,7 +868,7 @@ CMD ["npm", "start"]
                 return result.stdout.strip()
             return None
         except Exception as e:
-            print(f"   ⚠️ Failed to retrieve secret {secret_name}: {e}")
+            print(f"    WARNING: [U+FE0F] Failed to retrieve secret {secret_name}: {e}")
             return None
     
     def get_critical_env_vars_from_gsm(self, service_name: str) -> Dict[str, str]:
@@ -882,7 +882,7 @@ CMD ["npm", "start"]
         Returns:
             Dictionary of environment variable mappings
         """
-        print(f"   🔐 Retrieving critical secrets from GSM for {service_name}...")
+        print(f"   [U+1F510] Retrieving critical secrets from GSM for {service_name}...")
         
         env_vars = {}
         
@@ -901,7 +901,7 @@ CMD ["npm", "start"]
                 value = self.retrieve_secret_value(gsm_name)
                 if value:
                     env_vars[env_name] = value
-                    print(f"      ✅ Retrieved {env_name}")
+                    print(f"       PASS:  Retrieved {env_name}")
                 else:
                     # Use reasonable defaults for non-critical values
                     if env_name == "POSTGRES_PORT":
@@ -912,7 +912,7 @@ CMD ["npm", "start"]
                     elif env_name == "POSTGRES_DB":
                         env_vars[env_name] = "netra_staging"
                     else:
-                        print(f"      ⚠️ Missing {env_name} - deployment may fail")
+                        print(f"       WARNING: [U+FE0F] Missing {env_name} - deployment may fail")
             
             # Critical authentication secrets
             # CRITICAL FIX: JWT_SECRET_KEY and JWT_SECRET_STAGING must both map to jwt-secret-staging
@@ -929,7 +929,7 @@ CMD ["npm", "start"]
                 value = self.retrieve_secret_value(gsm_name)
                 if value:
                     env_vars[env_name] = value
-                    print(f"      ✅ Retrieved {env_name}")
+                    print(f"       PASS:  Retrieved {env_name}")
             
             # OAuth configuration - CRITICAL for auth to work
             oauth_mappings = {
@@ -942,9 +942,9 @@ CMD ["npm", "start"]
                 value = self.retrieve_secret_value(gsm_name)
                 if value:
                     env_vars[env_name] = value
-                    print(f"      ✅ Retrieved {env_name}")
+                    print(f"       PASS:  Retrieved {env_name}")
                 else:
-                    print(f"      ⚠️ Missing {env_name} - OAuth may not work")
+                    print(f"       WARNING: [U+FE0F] Missing {env_name} - OAuth may not work")
             
             # Redis configuration
             redis_mappings = {
@@ -967,17 +967,17 @@ CMD ["npm", "start"]
         
         # Log that we have the necessary components for DatabaseURLBuilder
         if all(k in env_vars for k in ["POSTGRES_HOST", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"]):
-            print(f"      ✅ Database configuration provided (POSTGRES_* variables)")
+            print(f"       PASS:  Database configuration provided (POSTGRES_* variables)")
             if "/cloudsql/" in env_vars.get("POSTGRES_HOST", ""):
-                print(f"      ℹ️ Cloud SQL proxy will be used: {env_vars['POSTGRES_HOST']}")
+                print(f"      [U+2139][U+FE0F] Cloud SQL proxy will be used: {env_vars['POSTGRES_HOST']}")
         
         return env_vars
     
     def deploy_service(self, service: ServiceConfig, no_traffic: bool = False) -> Tuple[bool, Optional[str]]:
         """Deploy service to Cloud Run."""
-        print(f"\n🚀 Deploying {service.name} to Cloud Run...")
+        print(f"\n[U+1F680] Deploying {service.name} to Cloud Run...")
         if no_traffic:
-            print(f"   ⚠️ Deploying with --no-traffic flag (revision won't receive traffic)")
+            print(f"    WARNING: [U+FE0F] Deploying with --no-traffic flag (revision won't receive traffic)")
         
         image_tag = f"{self.registry}/{service.cloud_run_name}:latest"
         
@@ -1014,23 +1014,23 @@ CMD ["npm", "start"]
         # Individual POSTGRES_* variables are already mounted as secrets via --set-secrets
         # See: shared/database_url_builder.py for the SSOT URL construction logic
         if service.name in ["backend", "auth"]:
-            print(f"      ℹ️ Database URL will be built from POSTGRES_* variables by DatabaseURLBuilder")
+            print(f"      [U+2139][U+FE0F] Database URL will be built from POSTGRES_* variables by DatabaseURLBuilder")
         
         # NOTE: Other secrets (JWT_*, SECRET_KEY, etc.) are mounted via --set-secrets below
         
-        # ⚠️ CRITICAL: Frontend environment variables - MANDATORY FOR DEPLOYMENT
+        #  WARNING: [U+FE0F] CRITICAL: Frontend environment variables - MANDATORY FOR DEPLOYMENT
         # These variables MUST be present for frontend to function
         # DO NOT REMOVE ANY OF THESE - See also: ServiceConfig initialization above
         # Cross-reference: frontend/.env.staging, SPEC/frontend_deployment_critical.xml
         if service.name == "frontend":
-            # 🚨 CRITICAL: All these URLs are REQUIRED for frontend connectivity
+            #  ALERT:  CRITICAL: All these URLs are REQUIRED for frontend connectivity
             # Missing any of these will cause complete frontend failure
             staging_api_url = "https://api.staging.netrasystems.ai"
             staging_auth_url = "https://auth.staging.netrasystems.ai"
             staging_ws_url = "wss://api.staging.netrasystems.ai"
             staging_frontend_url = "https://app.staging.netrasystems.ai"
             
-            # 🔴 NEVER REMOVE: Each variable below is used by different frontend components
+            # [U+1F534] NEVER REMOVE: Each variable below is used by different frontend components
             # Some may appear redundant but are required for backward compatibility
             critical_frontend_vars = [
                 f"NEXT_PUBLIC_API_URL={staging_api_url}",  # Main API endpoint
@@ -1119,34 +1119,34 @@ CMD ["npm", "start"]
             # P0 CRITICAL FIX: If URL parsing failed, retrieve URL using get_service_url
             # This fixes "No URL available" errors preventing health checks
             if not url:
-                print(f"   ⚠️ Service URL not found in deployment output, retrieving via gcloud...")
+                print(f"    WARNING: [U+FE0F] Service URL not found in deployment output, retrieving via gcloud...")
                 url = self.get_service_url(service.cloud_run_name)
                 if url:
-                    print(f"   ✅ Retrieved service URL successfully")
+                    print(f"    PASS:  Retrieved service URL successfully")
                 else:
-                    print(f"   ⚠️ Could not retrieve service URL - health checks may fail")
+                    print(f"    WARNING: [U+FE0F] Could not retrieve service URL - health checks may fail")
                     
-            print(f"✅ {service.name} deployed successfully")
+            print(f" PASS:  {service.name} deployed successfully")
             if url:
                 print(f"   URL: {url}")
             else:
-                print(f"   ⚠️ No URL available - service may not be accessible")
+                print(f"    WARNING: [U+FE0F] No URL available - service may not be accessible")
                 
             # Ensure traffic is routed to the latest revision (unless no-traffic flag is set)
             if not no_traffic:
                 self.update_traffic_to_latest(service.cloud_run_name)
             else:
-                print(f"   ⚠️ Traffic not routed to new revision (--no-traffic flag set)")
+                print(f"    WARNING: [U+FE0F] Traffic not routed to new revision (--no-traffic flag set)")
             
             return True, url
             
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to deploy {service.name}: {e.stderr}")
+            print(f" FAIL:  Failed to deploy {service.name}: {e.stderr}")
             return False, None
     
     def wait_for_revision_ready(self, service_name: str, max_wait: int = 60) -> bool:
         """Wait for the latest revision to be ready before routing traffic."""
-        print(f"  ⏳ Waiting for {service_name} revision to be ready...")
+        print(f"  [U+23F3] Waiting for {service_name} revision to be ready...")
         
         start_time = time.time()
         while time.time() - start_time < max_wait:
@@ -1170,7 +1170,7 @@ CMD ["npm", "start"]
                 )
                 
                 if result.returncode == 0 and "True" in result.stdout:
-                    print(f"  ✅ Revision is ready")
+                    print(f"   PASS:  Revision is ready")
                     return True
                     
             except Exception:
@@ -1178,16 +1178,16 @@ CMD ["npm", "start"]
             
             time.sleep(5)
         
-        print(f"  ⚠️ Revision not ready after {max_wait} seconds")
+        print(f"   WARNING: [U+FE0F] Revision not ready after {max_wait} seconds")
         return False
     
     def update_traffic_to_latest(self, service_name: str) -> bool:
         """Update traffic to route 100% to the latest revision."""
-        print(f"  📡 Updating traffic to latest revision for {service_name}...")
+        print(f"  [U+1F4E1] Updating traffic to latest revision for {service_name}...")
         
         # First wait for the revision to be ready
         if not self.wait_for_revision_ready(service_name):
-            print(f"  ⚠️ Skipping traffic update - revision not ready")
+            print(f"   WARNING: [U+FE0F] Skipping traffic update - revision not ready")
             return False
         
         try:
@@ -1209,20 +1209,20 @@ CMD ["npm", "start"]
             )
             
             if result.returncode == 0:
-                print(f"  ✅ Traffic updated to latest revision")
+                print(f"   PASS:  Traffic updated to latest revision")
                 return True
             else:
                 # This may fail if the service doesn't exist yet or if traffic is already at latest
                 # which is okay
                 if "already receives 100%" in result.stderr or "not found" in result.stderr:
-                    print(f"  ✓ Traffic already routing to latest revision")
+                    print(f"  [U+2713] Traffic already routing to latest revision")
                     return True
                 else:
-                    print(f"  ⚠️ Could not update traffic: {result.stderr[:200]}")
+                    print(f"   WARNING: [U+FE0F] Could not update traffic: {result.stderr[:200]}")
                     return False
                     
         except Exception as e:
-            print(f"  ⚠️ Error updating traffic: {e}")
+            print(f"   WARNING: [U+FE0F] Error updating traffic: {e}")
             return False
     
     def get_service_url(self, service_name: str) -> Optional[str]:
@@ -1260,7 +1260,7 @@ CMD ["npm", "start"]
             check_secrets: If True, will validate secrets. If False, will skip.
         """
         if not check_secrets:
-            print("\n🔐 Skipping secrets validation (use --check-secrets to enable)")
+            print("\n[U+1F510] Skipping secrets validation (use --check-secrets to enable)")
             return True
             
         print("Checking all required secrets in Secret Manager...")
@@ -1320,7 +1320,7 @@ CMD ["npm", "start"]
             )
             
             if result.returncode != 0:
-                print(f"  ❌ Secret missing: {secret_name}")
+                print(f"   FAIL:  Secret missing: {secret_name}")
                 missing_secrets.append(secret_name)
             else:
                 # Check if secret has a real value (not placeholder)
@@ -1338,22 +1338,22 @@ CMD ["npm", "start"]
                     # Check for common placeholder patterns
                     if any(placeholder in value.upper() for placeholder in 
                            ["REPLACE", "PLACEHOLDER", "YOUR-", "TODO", "FIXME"]):
-                        print(f"  ⚠️  Secret has placeholder value: {secret_name}")
+                        print(f"   WARNING: [U+FE0F]  Secret has placeholder value: {secret_name}")
                         placeholder_secrets.append(secret_name)
                     else:
-                        print(f"  ✅ Secret configured: {secret_name}")
+                        print(f"   PASS:  Secret configured: {secret_name}")
                 else:
-                    print(f"  ❌ Cannot access secret: {secret_name}")
+                    print(f"   FAIL:  Cannot access secret: {secret_name}")
                     missing_secrets.append(secret_name)
         
         # Report results
         if missing_secrets:
-            print(f"\n❌ Missing {len(missing_secrets)} required secrets:")
+            print(f"\n FAIL:  Missing {len(missing_secrets)} required secrets:")
             for secret in missing_secrets:
                 print(f"   - {secret}")
             
         if placeholder_secrets:
-            print(f"\n⚠️  {len(placeholder_secrets)} secrets have placeholder values:")
+            print(f"\n WARNING: [U+FE0F]  {len(placeholder_secrets)} secrets have placeholder values:")
             for secret in placeholder_secrets:
                 print(f"   - {secret}")
             print("\n   These need to be updated with real values for production.")
@@ -1364,10 +1364,10 @@ CMD ["npm", "start"]
         
         # For staging/production, also fail on placeholders
         if self.project_id != "netra-dev" and placeholder_secrets:
-            print("\n❌ Cannot deploy to staging/production with placeholder secrets!")
+            print("\n FAIL:  Cannot deploy to staging/production with placeholder secrets!")
             return False
         
-        print("\n✅ All required secrets are configured")
+        print("\n PASS:  All required secrets are configured")
         return True
     
     def validate_secrets_before_deployment(self) -> bool:
@@ -1376,7 +1376,7 @@ CMD ["npm", "start"]
         This prevents deployment failures due to missing or placeholder secrets.
         Implements canonical secrets management from SPEC/canonical_secrets_management.xml
         """
-        print("\n🔐 Validating secrets configuration...")
+        print("\n[U+1F510] Validating secrets configuration...")
         
         try:
             # Determine environment based on project
@@ -1396,27 +1396,27 @@ CMD ["npm", "start"]
             
             # Check if validation passed
             if result.returncode == 0:
-                print("✅ Secret validation passed")
+                print(" PASS:  Secret validation passed")
                 return True
             else:
-                print("❌ Secret validation failed:")
+                print(" FAIL:  Secret validation failed:")
                 print(result.stdout)
                 if result.stderr:
                     print("Errors:", result.stderr)
                 return False
                 
         except FileNotFoundError:
-            print("⚠️ Secret validation script not found (scripts/validate_secrets.py)")
+            print(" WARNING: [U+FE0F] Secret validation script not found (scripts/validate_secrets.py)")
             print("   Skipping validation (risky for production)")
             return True
         except Exception as e:
-            print(f"⚠️ Secret validation error: {e}")
+            print(f" WARNING: [U+FE0F] Secret validation error: {e}")
             print("   Continuing anyway (risky for production)")
             return True
     
     def setup_secrets(self) -> bool:
         """Create necessary secrets in Secret Manager."""
-        print("\n🔐 Setting up secrets in Secret Manager...")
+        print("\n[U+1F510] Setting up secrets in Secret Manager...")
         
         # CRITICAL: All these secrets are REQUIRED for staging deployment
         # Based on staging_secrets_requirements.xml
@@ -1490,12 +1490,12 @@ CMD ["npm", "start"]
             else:
                 print(f"  Secret already exists: {name}")
                 
-        print("✅ Secrets configured")
+        print(" PASS:  Secrets configured")
         return True
     
     def health_check(self, service_urls: Dict[str, str]) -> bool:
         """Perform health checks on deployed services."""
-        print("\n🏥 Running health checks...")
+        print("\n[U+1F3E5] Running health checks...")
         
         import requests
         
@@ -1503,7 +1503,7 @@ CMD ["npm", "start"]
         
         for service_name, url in service_urls.items():
             if not url:
-                print(f"  ⚠️ {service_name}: No URL available")
+                print(f"   WARNING: [U+FE0F] {service_name}: No URL available")
                 continue
                 
             # Determine health endpoint
@@ -1517,13 +1517,13 @@ CMD ["npm", "start"]
             try:
                 response = requests.get(health_url, timeout=10)
                 if response.status_code in [200, 301, 302]:
-                    print(f"  ✅ {service_name} is healthy")
+                    print(f"   PASS:  {service_name} is healthy")
                 else:
-                    print(f"  ❌ {service_name} returned status {response.status_code}")
+                    print(f"   FAIL:  {service_name} returned status {response.status_code}")
                     all_healthy = False
                     
             except Exception as e:
-                print(f"  ❌ {service_name} health check failed: {e}")
+                print(f"   FAIL:  {service_name} health check failed: {e}")
                 all_healthy = False
                 
         return all_healthy
@@ -1535,10 +1535,10 @@ CMD ["npm", "start"]
         deployed as netra-backend-staging-00035-fnj.
         """
         if skip_validation:
-            print("\n⚠️ SKIPPING deployment configuration validation (--skip-validation flag)")
+            print("\n WARNING: [U+FE0F] SKIPPING deployment configuration validation (--skip-validation flag)")
             return True
             
-        print("\n✅ Phase 0: Validating Deployment Configuration...")
+        print("\n PASS:  Phase 0: Validating Deployment Configuration...")
         print("   Checking against proven working configuration from netra-backend-staging-00035-fnj")
         
         try:
@@ -1548,7 +1548,7 @@ CMD ["npm", "start"]
             # Check if validation script exists
             validation_script = self.project_root / "scripts" / "validate_deployment_config.py"
             if not validation_script.exists():
-                print("   ⚠️ Validation script not found, skipping config validation")
+                print("    WARNING: [U+FE0F] Validation script not found, skipping config validation")
                 return True
             
             # Run validation
@@ -1565,7 +1565,7 @@ CMD ["npm", "start"]
                     print(f"   {line}")
             
             if result.returncode != 0:
-                print("\n❌ Deployment configuration validation FAILED!")
+                print("\n FAIL:  Deployment configuration validation FAILED!")
                 print("   Configuration does not match the proven working setup.")
                 print("   Review the errors above and fix configuration issues.")
                 print("   To bypass (NOT RECOMMENDED): use --skip-validation flag")
@@ -1573,11 +1573,11 @@ CMD ["npm", "start"]
                     print(f"\n   Error details: {result.stderr}")
                 return False
                 
-            print("   ✅ Configuration matches proven working setup")
+            print("    PASS:  Configuration matches proven working setup")
             return True
             
         except Exception as e:
-            print(f"   ⚠️ Could not run validation: {e}")
+            print(f"    WARNING: [U+FE0F] Could not run validation: {e}")
             # Don't fail deployment if validation itself fails
             return True
     
@@ -1599,7 +1599,7 @@ CMD ["npm", "start"]
             check_apis: Enable GCP API checks (default: False)
             check_secrets: Enable secrets validation from Google Secret Manager (default: False)
         """
-        print(f"🚀 Deploying Netra Apex Platform to GCP")
+        print(f"[U+1F680] Deploying Netra Apex Platform to GCP")
         print(f"   Project: {self.project_id}")
         print(f"   Region: {self.region}")
         print(f"   Build Mode: {'Local (Fast)' if use_local_build else 'Cloud Build'}")
@@ -1608,14 +1608,14 @@ CMD ["npm", "start"]
         print(f"   API Checks: {'Enabled' if check_apis else 'Disabled (default)'}")
         print(f"   Secrets Validation: {'Enabled' if check_secrets else 'Disabled (default)'}")
         if no_traffic:
-            print(f"   ⚠️ Traffic Mode: NO TRAFFIC (revisions won't receive traffic)")
+            print(f"    WARNING: [U+FE0F] Traffic Mode: NO TRAFFIC (revisions won't receive traffic)")
         
         # CRITICAL: Validate deployment configuration FIRST
         if not self.validate_deployment_config(skip_validation):
             return False
         
         # CRITICAL: Validate ALL prerequisites BEFORE any build operations
-        print("\n🔐 Phase 1: Validating Prerequisites...")
+        print("\n[U+1F510] Phase 1: Validating Prerequisites...")
         
         # Check prerequisites
         if not self.check_gcloud():
@@ -1626,27 +1626,27 @@ CMD ["npm", "start"]
         
         # CRITICAL: Validate secrets FIRST before any build operations
         if check_secrets:
-            print("\n🔐 Phase 2: Validating Secrets Configuration...")
+            print("\n[U+1F510] Phase 2: Validating Secrets Configuration...")
             if not self.validate_all_secrets_exist(check_secrets=check_secrets):
-                print("\n❌ CRITICAL: Secret validation failed!")
+                print("\n FAIL:  CRITICAL: Secret validation failed!")
                 print("   Deployment aborted to prevent runtime failures.")
                 print("   Please ensure all required secrets are configured in Secret Manager.")
                 print("   Run: python scripts/validate_secrets.py --environment staging --project " + self.project_id)
                 return False
         else:
-            print("\n🔐 Phase 2: Skipping Secrets Validation (use --check-secrets to enable)")
+            print("\n[U+1F510] Phase 2: Skipping Secrets Validation (use --check-secrets to enable)")
             
         # Setup any missing secrets with placeholders (development only)
         if self.project_id == "netra-dev":
             if not self.setup_secrets():
-                print("⚠️ Failed to setup development secrets")
+                print(" WARNING: [U+FE0F] Failed to setup development secrets")
                 return False
         
         # Run additional pre-deployment checks if requested
         if run_checks:
-            print("\n🔍 Phase 3: Running Pre-deployment Checks...")
+            print("\n SEARCH:  Phase 3: Running Pre-deployment Checks...")
             if not self.run_pre_deployment_checks():
-                print("\n❌ Pre-deployment checks failed")
+                print("\n FAIL:  Pre-deployment checks failed")
                 print("   Fix issues and try again, or use --no-checks to skip (not recommended)")
                 return False
             
@@ -1655,7 +1655,7 @@ CMD ["npm", "start"]
         if service_filter:
             services_to_deploy = [s for s in self.services if s.name == service_filter]
             if not services_to_deploy:
-                print(f"❌ Service '{service_filter}' not found. Available: {[s.name for s in self.services]}")
+                print(f" FAIL:  Service '{service_filter}' not found. Available: {[s.name for s in self.services]}")
                 return False
             print(f"   Service Filter: {service_filter}")
         
@@ -1663,7 +1663,7 @@ CMD ["npm", "start"]
         service_urls = {}
         
         # Phase 4: Build and Deploy
-        print("\n🏗️ Phase 4: Building and Deploying Services...")
+        print("\n[U+1F3D7][U+FE0F] Phase 4: Building and Deploying Services...")
         print("   All prerequisites validated - proceeding with deployment")
         
         for service in services_to_deploy:
@@ -1671,14 +1671,14 @@ CMD ["npm", "start"]
             if not skip_build:
                 print(f"\n   Building {service.name}...")
                 if not self.build_image(service, use_local=use_local_build):
-                    print(f"❌ Failed to build {service.name}")
+                    print(f" FAIL:  Failed to build {service.name}")
                     return False
                     
             # Deploy service
             print(f"   Deploying {service.name}...")
             success, url = self.deploy_service(service, no_traffic=no_traffic)
             if not success:
-                print(f"❌ Failed to deploy {service.name}")
+                print(f" FAIL:  Failed to deploy {service.name}")
                 return False
                 
             service_urls[service.name] = url
@@ -1691,12 +1691,12 @@ CMD ["npm", "start"]
         # Run health checks
         print("\n" + "="*50)
         if self.health_check(service_urls):
-            print("\n✅ All services deployed successfully!")
+            print("\n PASS:  All services deployed successfully!")
         else:
-            print("\n⚠️ Some services may not be fully healthy")
+            print("\n WARNING: [U+FE0F] Some services may not be fully healthy")
             
         # Print summary
-        print("\n📋 Deployment Summary:")
+        print("\n[U+1F4CB] Deployment Summary:")
         print("="*50)
         for service_name, url in service_urls.items():
             if url:
@@ -1705,17 +1705,17 @@ CMD ["npm", "start"]
         # Run post-deployment authentication tests
         if not skip_post_tests:
             print("\n" + "="*50)
-            print("🔐 Running Post-Deployment Authentication Tests")
+            print("[U+1F510] Running Post-Deployment Authentication Tests")
             print("="*50)
             if self.run_post_deployment_tests(service_urls):
-                print("✅ Post-deployment tests passed!")
+                print(" PASS:  Post-deployment tests passed!")
             else:
-                print("⚠️ Post-deployment tests failed - authentication may not be working correctly")
+                print(" WARNING: [U+FE0F] Post-deployment tests failed - authentication may not be working correctly")
                 print("   Check that JWT_SECRET_KEY is set to the same value in both services")
         else:
-            print("\n⚠️ Skipping post-deployment tests (--skip-post-tests flag used)")
+            print("\n WARNING: [U+FE0F] Skipping post-deployment tests (--skip-post-tests flag used)")
                 
-        print("\n🔑 Next Steps:")
+        print("\n[U+1F511] Next Steps:")
         print("1. Update secrets in Secret Manager with real values")
         print("2. Configure Cloud SQL and Redis instances")
         print("3. Set up custom domain and SSL certificates")
@@ -1769,18 +1769,18 @@ CMD ["npm", "start"]
             return all(results.values())
             
         except ImportError as e:
-            print(f"⚠️ Could not import post-deployment tests: {e}")
+            print(f" WARNING: [U+FE0F] Could not import post-deployment tests: {e}")
             print("   Tests will be skipped. Run manually with:")
             print(f"   python tests/post_deployment/test_auth_integration.py --environment {environment}")
             return True  # Don't fail deployment if tests can't be imported
             
         except Exception as e:
-            print(f"⚠️ Post-deployment tests failed with error: {e}")
+            print(f" WARNING: [U+FE0F] Post-deployment tests failed with error: {e}")
             return False
     
     def cleanup(self) -> bool:
         """Clean up deployed services."""
-        print("\n🧹 Cleaning up deployments...")
+        print("\n[U+1F9F9] Cleaning up deployments...")
         
         for service in self.services:
             print(f"  Deleting {service.cloud_run_name}...")
@@ -1798,9 +1798,9 @@ CMD ["npm", "start"]
             )
             
             if result.returncode == 0:
-                print(f"  ✅ Deleted {service.cloud_run_name}")
+                print(f"   PASS:  Deleted {service.cloud_run_name}")
             else:
-                print(f"  ⚠️ Could not delete {service.cloud_run_name}")
+                print(f"   WARNING: [U+FE0F] Could not delete {service.cloud_run_name}")
                 
         return True
     
@@ -1831,28 +1831,28 @@ CMD ["npm", "start"]
             print("="*60)
             
             if not success:
-                print("\n🚨🚨🚨 CRITICAL OAUTH VALIDATION FAILURE 🚨🚨🚨")
+                print("\n ALERT:  ALERT:  ALERT:  CRITICAL OAUTH VALIDATION FAILURE  ALERT:  ALERT:  ALERT: ")
                 print("Deployment cannot proceed - OAuth authentication will be broken!")
                 print("Please fix OAuth configuration issues before deploying.")
                 return False
             
-            print("\n✅ OAuth validation passed - deployment may proceed")
+            print("\n PASS:  OAuth validation passed - deployment may proceed")
             return True
             
         except ImportError as e:
-            print(f"⚠️  Could not import OAuth validator: {e}")
+            print(f" WARNING: [U+FE0F]  Could not import OAuth validator: {e}")
             print("Proceeding with deployment (validation skipped)")
             return True
         except Exception as e:
-            print(f"🚨 OAuth validation error: {e}")
+            print(f" ALERT:  OAuth validation error: {e}")
             print("This may indicate a critical OAuth configuration problem.")
             
             # In staging/production, fail on validation errors
             if self.project_id in ["netra-staging", "netra-production"]:
-                print("🚨 Failing deployment due to OAuth validation error in staging/production")
+                print(" ALERT:  Failing deployment due to OAuth validation error in staging/production")
                 return False
             else:
-                print("⚠️  Proceeding with deployment (development environment)")
+                print(" WARNING: [U+FE0F]  Proceeding with deployment (development environment)")
                 return True
 
 
@@ -1937,20 +1937,20 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
     
     # Print warning if not using recommended flags
     if not args.cleanup and not args.build_local and not args.skip_build:
-        print("\n⚠️ NOTE: Using Cloud Build (slow). Consider using --build-local for 5-10x faster builds.")
+        print("\n WARNING: [U+FE0F] NOTE: Using Cloud Build (slow). Consider using --build-local for 5-10x faster builds.")
         print("   Example: python scripts/deploy_to_gcp.py --project {} --build-local\n".format(args.project))
         time.sleep(2)
     
     # Alpine is now the default - print info unless disabled
     use_alpine = not args.no_alpine  # Alpine is default unless explicitly disabled
     if use_alpine:
-        print("\n🚀 Using Alpine-optimized images (default):")
-        print("   • 78% smaller images (150MB vs 350MB)")
-        print("   • 3x faster startup times")
-        print("   • 68% cost reduction ($205/month vs $650/month)")
-        print("   • Optimized resource limits (512MB RAM vs 2GB)\n")
+        print("\n[U+1F680] Using Alpine-optimized images (default):")
+        print("   [U+2022] 78% smaller images (150MB vs 350MB)")
+        print("   [U+2022] 3x faster startup times")
+        print("   [U+2022] 68% cost reduction ($205/month vs $650/month)")
+        print("   [U+2022] Optimized resource limits (512MB RAM vs 2GB)\n")
     else:
-        print("\n⚠️ Using regular images (not recommended - consider using Alpine for better performance)\n")
+        print("\n WARNING: [U+FE0F] Using regular images (not recommended - consider using Alpine for better performance)\n")
     
     deployer = GCPDeployer(args.project, args.region, service_account_path=args.service_account, use_alpine=use_alpine)
     
@@ -1973,10 +1973,10 @@ See SPEC/gcp_deployment.xml for detailed guidelines.
         sys.exit(0 if success else 1)
         
     except KeyboardInterrupt:
-        print("\n\n⚠️ Deployment interrupted by user")
+        print("\n\n WARNING: [U+FE0F] Deployment interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Deployment failed with error: {e}")
+        print(f"\n FAIL:  Deployment failed with error: {e}")
         sys.exit(1)
 
 

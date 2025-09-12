@@ -239,7 +239,7 @@ class TestWebSocketAgentCoordinationComprehensive(SSotAsyncTestCase):
         # Verify performance
         assert total_time < 0.1, f"Bridge communication too slow: {total_time}s"
         
-        logger.info(f"✅ WebSocket-Agent bridge integration validated: 5 events in {total_time:.3f}s")
+        logger.info(f" PASS:  WebSocket-Agent bridge integration validated: 5 events in {total_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -325,7 +325,7 @@ class TestWebSocketAgentCoordinationComprehensive(SSotAsyncTestCase):
             if critical_event not in event_types:
                 logger.warning(f"Critical event missing: {critical_event}")
         
-        logger.info(f"✅ Real-time agent execution validated: {len(self.captured_events)} events in {execution_time:.3f}s")
+        logger.info(f" PASS:  Real-time agent execution validated: {len(self.captured_events)} events in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -464,7 +464,7 @@ class TestWebSocketAgentCoordinationComprehensive(SSotAsyncTestCase):
             event_str = str(event)
             assert "user_0_" not in event_str, "User 1 events should not contain user 0 data"
         
-        logger.info(f"✅ Multi-user WebSocket-Agent isolation validated: {num_users} users, {total_events} events in {concurrent_execution_time:.3f}s")
+        logger.info(f" PASS:  Multi-user WebSocket-Agent isolation validated: {num_users} users, {total_events} events in {concurrent_execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -604,7 +604,7 @@ class TestWebSocketAgentCoordinationComprehensive(SSotAsyncTestCase):
         
         self.performance_metrics.append(performance_summary)
         
-        logger.info(f"✅ WebSocket-Agent performance under load validated: {events_per_second:.1f} events/sec, {avg_latency*1000:.2f}ms avg latency")
+        logger.info(f" PASS:  WebSocket-Agent performance under load validated: {events_per_second:.1f} events/sec, {avg_latency*1000:.2f}ms avg latency")
 
     @pytest.mark.integration
     @pytest.mark.golden_path
@@ -735,7 +735,7 @@ class TestWebSocketAgentCoordinationComprehensive(SSotAsyncTestCase):
             recovery_rate = successful_recoveries / failed_operations
             logger.info(f"Error recovery rate: {recovery_rate:.2%}")
         
-        logger.info(f"✅ WebSocket error handling validated: {failed_operations} failures, {successful_recoveries} recoveries, {successful_events} successful events")
+        logger.info(f" PASS:  WebSocket error handling validated: {failed_operations} failures, {successful_recoveries} recoveries, {successful_events} successful events")
 
     def _estimate_memory_per_event(self) -> int:
         """Estimate memory usage per WebSocket event."""

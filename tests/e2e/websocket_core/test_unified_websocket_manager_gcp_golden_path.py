@@ -20,7 +20,7 @@ GOLDEN PATH CRITICAL AREAS (10/10 Business Criticality):
 7. Real GCP Redis Connection Pool Management (production state management)
 8. Real GCP Database Connection Handling (production data persistence)
 9. Real GCP Service Mesh Traffic Management (production networking)
-10. Complete User Journey: Login → Chat → AI Response (Golden Path business flow)
+10. Complete User Journey: Login  ->  Chat  ->  AI Response (Golden Path business flow)
 
 Test Structure:  
 - 12 E2E Tests (4 high difficulty) running against real GCP staging environment

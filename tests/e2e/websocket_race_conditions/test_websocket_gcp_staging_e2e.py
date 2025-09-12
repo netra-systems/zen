@@ -102,9 +102,9 @@ class TestRealGCPWebSocketConnectionLifecycle:
         """
         # Test 1: GCP-style authentication (mandatory per CLAUDE.md)
         if self.is_real_staging:
-            print("🚀 REAL STAGING: Testing against actual GCP Cloud Run environment")
+            print("[U+1F680] REAL STAGING: Testing against actual GCP Cloud Run environment")
         else:
-            print("🔧 STAGING SIMULATION: Testing against local staging-configured services")
+            print("[U+1F527] STAGING SIMULATION: Testing against local staging-configured services")
         
         # Get authenticated token using staging-compatible method
         jwt_token = await self._get_staging_authentication()
@@ -113,8 +113,8 @@ class TestRealGCPWebSocketConnectionLifecycle:
         # Test 2: WebSocket connection with GCP-appropriate timeouts
         connection_timeout = 20.0 if self.is_real_staging else 10.0  # Longer timeout for real GCP
         
-        print(f"🔌 Connecting to WebSocket: {self.websocket_url}")
-        print(f"⏱️ Using timeout: {connection_timeout}s")
+        print(f"[U+1F50C] Connecting to WebSocket: {self.websocket_url}")
+        print(f"[U+23F1][U+FE0F] Using timeout: {connection_timeout}s")
         
         connection_start_time = time.time()
         
@@ -125,7 +125,7 @@ class TestRealGCPWebSocketConnectionLifecycle:
             )
             
             connection_time = time.time() - connection_start_time
-            print(f"✅ WebSocket connected in {connection_time:.2f}s")
+            print(f" PASS:  WebSocket connected in {connection_time:.2f}s")
             
             # Test 3: Validate connection stability (GCP race condition test)
             # Real GCP has 2-3 minute disconnection issues
@@ -162,21 +162,21 @@ class TestRealGCPWebSocketConnectionLifecycle:
                         pass  # Some responses may not be JSON
                     
                 except asyncio.TimeoutError:
-                    print(f"⚠️ Ping {ping_count} timed out - possible GCP race condition")
+                    print(f" WARNING: [U+FE0F] Ping {ping_count} timed out - possible GCP race condition")
                 
                 # Wait before next ping (don't spam)
                 await asyncio.sleep(2.0)
             
             # Test 4: Connection stability validation
             stability_rate = pong_count / ping_count if ping_count > 0 else 0
-            print(f"📊 Stability test: {pong_count}/{ping_count} pings succeeded ({stability_rate:.1%})")
+            print(f" CHART:  Stability test: {pong_count}/{ping_count} pings succeeded ({stability_rate:.1%})")
             
             # CRITICAL: At least 70% ping success rate (allow for GCP timing issues)
             assert stability_rate >= 0.7, f"Connection too unstable: {stability_rate:.1%} success rate"
             
             # Test 5: GCP load balancer timeout behavior
             # Test longer idle period (simulates real user behavior)
-            print("⏳ Testing GCP load balancer idle timeout behavior...")
+            print("[U+23F3] Testing GCP load balancer idle timeout behavior...")
             
             idle_start = time.time()
             idle_duration = 60.0  # 60 second idle test
@@ -199,11 +199,11 @@ class TestRealGCPWebSocketConnectionLifecycle:
                     timeout=10.0
                 )
                 
-                print(f"✅ Connection survived {idle_duration}s idle period")
+                print(f" PASS:  Connection survived {idle_duration}s idle period")
                 connection_survived_idle = True
                 
             except (asyncio.TimeoutError, websockets.exceptions.ConnectionClosed) as e:
-                print(f"❌ Connection lost during idle period: {e}")
+                print(f" FAIL:  Connection lost during idle period: {e}")
                 connection_survived_idle = False
             
             # Note: Connection loss during idle is expected with GCP load balancer
@@ -213,7 +213,7 @@ class TestRealGCPWebSocketConnectionLifecycle:
             await websocket_conn.close()
             
             total_test_time = time.time() - connection_start_time
-            print(f"🏁 Total test time: {total_test_time:.2f}s")
+            print(f"[U+1F3C1] Total test time: {total_test_time:.2f}s")
             
             # Test 6: Validate GCP behavior metrics
             assert connection_time < 30.0, f"Initial connection too slow: {connection_time}s"
@@ -319,7 +319,7 @@ class TestUserChatValueDeliveryE2E:
             websocket_enabled=True
         )
         
-        print(f"👤 Created authenticated user: {user_context.user_id}")
+        print(f"[U+1F464] Created authenticated user: {user_context.user_id}")
         
         # Test 2: Establish WebSocket connection for chat
         test_context = await self.websocket_test_base.create_test_context(
@@ -332,7 +332,7 @@ class TestUserChatValueDeliveryE2E:
             auth_required=True
         )
         
-        print("🔌 WebSocket connection established for chat")
+        print("[U+1F50C] WebSocket connection established for chat")
         
         # Test 3: Send realistic chat request (business value scenario)
         chat_request = {
@@ -348,7 +348,7 @@ class TestUserChatValueDeliveryE2E:
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
-        print(f"💬 Sending chat request: {chat_request['message'][:50]}...")
+        print(f"[U+1F4AC] Sending chat request: {chat_request['message'][:50]}...")
         
         chat_start_time = time.time()
         await test_context.send_message(chat_request)
@@ -362,7 +362,7 @@ class TestUserChatValueDeliveryE2E:
             "agent_completed"    # User knows response is complete
         }
         
-        print("📊 Waiting for agent events (business value delivery)...")
+        print(" CHART:  Waiting for agent events (business value delivery)...")
         
         # Allow longer timeout for complex agent processing
         agent_timeout = 120.0 if self.is_real_staging else 60.0
@@ -374,7 +374,7 @@ class TestUserChatValueDeliveryE2E:
         )
         
         chat_total_time = time.time() - chat_start_time
-        print(f"⏱️ Total chat processing time: {chat_total_time:.2f}s")
+        print(f"[U+23F1][U+FE0F] Total chat processing time: {chat_total_time:.2f}s")
         
         # CRITICAL: All agent events must be delivered for business value
         assert event_validation.success, f"Agent events not delivered: {event_validation.missing_events}"
@@ -438,7 +438,7 @@ class TestUserChatValueDeliveryE2E:
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
-        print("💬 Sending follow-up chat message...")
+        print("[U+1F4AC] Sending follow-up chat message...")
         
         await test_context.send_message(followup_request)
         
@@ -446,10 +446,10 @@ class TestUserChatValueDeliveryE2E:
         try:
             followup_response = await test_context.receive_message(timeout=30.0)
             followup_processed = True
-            print("✅ Follow-up message processed successfully")
+            print(" PASS:  Follow-up message processed successfully")
         except asyncio.TimeoutError:
             followup_processed = False
-            print("⚠️ Follow-up message timed out (may indicate session issues)")
+            print(" WARNING: [U+FE0F] Follow-up message timed out (may indicate session issues)")
         
         # Cleanup
         await test_context.cleanup()

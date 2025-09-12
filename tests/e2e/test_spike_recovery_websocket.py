@@ -4,13 +4,13 @@ Tests WebSocket system resilience under connection spike scenarios using REAL se
 Validates connection handling, recovery times, and system stability during high load.
 
 CLAUDE.md COMPLIANCE:
-✅ NO MOCKS - Uses real WebSocket connections with /ws/test endpoint
-✅ ABSOLUTE IMPORTS - All imports use absolute paths from package root  
-✅ REAL SERVICES - Tests against actual backend WebSocket services
-✅ ISOLATED ENVIRONMENT - Uses IsolatedEnvironment pattern for env vars
-✅ E2E LOCATION - Properly located in /tests/e2e/ directory
-✅ SERVICE INDEPENDENCE - Each service maintains independence
-✅ OBSERVABLE METRICS - Comprehensive metrics collection and validation
+ PASS:  NO MOCKS - Uses real WebSocket connections with /ws/test endpoint
+ PASS:  ABSOLUTE IMPORTS - All imports use absolute paths from package root  
+ PASS:  REAL SERVICES - Tests against actual backend WebSocket services
+ PASS:  ISOLATED ENVIRONMENT - Uses IsolatedEnvironment pattern for env vars
+ PASS:  E2E LOCATION - Properly located in /tests/e2e/ directory
+ PASS:  SERVICE INDEPENDENCE - Each service maintains independence
+ PASS:  OBSERVABLE METRICS - Comprehensive metrics collection and validation
 
 Business Value Justification (BVJ):
 - Segment: All customer tiers (WebSocket spikes affect all users)
@@ -207,7 +207,7 @@ class RealSpikeLoadGenerator:
         except Exception as e:
             raise RuntimeError(f"REAL BACKEND SERVICE VERIFICATION FAILED: {e}")
         
-        logger.info(f"✅ Real backend service verified on port {backend_service.port}")
+        logger.info(f" PASS:  Real backend service verified on port {backend_service.port}")
         
     async def generate_websocket_avalanche(self) -> Dict[str, Any]:
         """Generate WebSocket connection avalanche scenario with REAL connections."""
@@ -465,7 +465,7 @@ class TestWebSocketConnectionAvalanche:
         # Start REAL services for testing
         try:
             await self.services_manager.start_all_services(skip_frontend=True)
-            logger.info("✅ Real services started for spike testing")
+            logger.info(" PASS:  Real services started for spike testing")
         except Exception as e:
             pytest.fail(f"FAILED to start real services for spike testing: {e}")
         
@@ -504,7 +504,7 @@ class TestWebSocketConnectionAvalanche:
         # STRICT assertions for real service testing
         assert avalanche_results['success_rate'] >= SPIKE_TEST_CONFIG['success_rate_threshold'], \
             f"REAL WebSocket connection success rate too low: {avalanche_results['success_rate']:.2%} " \
-            f"(expected: ≥{SPIKE_TEST_CONFIG['success_rate_threshold']:.0%}). " \
+            f"(expected:  >= {SPIKE_TEST_CONFIG['success_rate_threshold']:.0%}). " \
             f"Successful: {avalanche_results['successful_connections']}/{avalanche_results['total_attempts']}. " \
             f"Error types: {avalanche_results.get('error_types', {})}"
             
@@ -527,8 +527,8 @@ class TestWebSocketConnectionAvalanche:
         assert avalanche_results.get('real_service_tested', False), \
             "Test must verify it ran against REAL service"
             
-        logger.info("✅ REAL WebSocket Connection Avalanche test completed successfully")
-        logger.info(f"📊 Final REAL metrics: Success rate: {avalanche_results['success_rate']:.2%}, "
+        logger.info(" PASS:  REAL WebSocket Connection Avalanche test completed successfully")
+        logger.info(f" CHART:  Final REAL metrics: Success rate: {avalanche_results['success_rate']:.2%}, "
                    f"Recovery time: {recovery_time:.2f}s, "
                    f"Memory growth: {self.load_generator.metrics.get_memory_growth():.1f}MB")
                    
@@ -569,7 +569,7 @@ class TestWebSocketConnectionAvalanche:
             assert avalanche_results.get('real_service_tested', False), \
                 "Performance test must verify it ran against REAL service"
                 
-            logger.info(f"✅ REAL Performance test completed: Spike duration: {spike_duration:.2f}s, "
+            logger.info(f" PASS:  REAL Performance test completed: Spike duration: {spike_duration:.2f}s, "
                        f"Recovery: {recovery_time:.2f}s, Success: {avalanche_results['success_rate']:.2%}")
         
         finally:
@@ -618,7 +618,7 @@ class TestWebSocketConnectionAvalanche:
         final_recovery = await self.load_generator.measure_real_recovery_time(from_spike=True)
         assert final_recovery < 30.0, f"Final REAL recovery too slow: {final_recovery:.2f}s"
         
-        logger.info("✅ REAL gradual load increase test completed successfully")
+        logger.info(" PASS:  REAL gradual load increase test completed successfully")
         
     @pytest.mark.asyncio
     async def test_websocket_connection_stability_during_load_real(self):
@@ -676,7 +676,7 @@ class TestWebSocketConnectionAvalanche:
             assert avalanche_results.get('real_service_tested', False), \
                 "Stability test must verify it ran against REAL service"
                 
-            logger.info(f"✅ REAL stability test completed: {survived_connections}/{len(stable_connections)} "
+            logger.info(f" PASS:  REAL stability test completed: {survived_connections}/{len(stable_connections)} "
                        f"stable connections survived, spike success: {avalanche_results['success_rate']:.2%}")
                        
         finally:
@@ -734,7 +734,7 @@ class TestWebSocketConnectionAvalanche:
             assert avalanche_results.get('real_service_tested', False), \
                 "Extreme load test must verify it ran against REAL service"
                 
-            logger.info(f"✅ REAL extreme load test completed: Duration: {extreme_duration:.2f}s, "
+            logger.info(f" PASS:  REAL extreme load test completed: Duration: {extreme_duration:.2f}s, "
                        f"Success: {avalanche_results['success_rate']:.2%}, Recovery: {recovery_time:.2f}s")
                        
         finally:
@@ -802,5 +802,5 @@ class TestWebSocketConnectionAvalanche:
         assert total_connections >= 40, \
             f"Too few total REAL connections succeeded across all bursts: {total_connections}"
             
-        logger.info(f"✅ REAL burst pattern test completed: {len(burst_results)} bursts, "
+        logger.info(f" PASS:  REAL burst pattern test completed: {len(burst_results)} bursts, "
                    f"overall success: {overall_success_rate:.2%}, final recovery: {final_recovery:.2f}s")

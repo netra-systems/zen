@@ -1,6 +1,6 @@
 """
 Redis test helpers for setup, assertions, and teardown operations
-Provides reusable functions to ensure all test functions stay ≤8 lines
+Provides reusable functions to ensure all test functions stay  <= 8 lines
 """
 
 import asyncio

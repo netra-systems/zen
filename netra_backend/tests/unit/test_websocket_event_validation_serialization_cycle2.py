@@ -106,7 +106,7 @@ class TestWebSocketEventValidationSerialization:
         # Test various content types
         test_contents = [
             "Simple thinking message",
-            "Complex thinking with special chars: áéíóú, 中文, 🤖",
+            "Complex thinking with special chars: [U+00E1][U+00E9][U+00ED][U+00F3][U+00FA], [U+4E2D][U+6587], [U+1F916]",
             "Multi-line thinking\nwith embedded\nnewlines",
             "JSON-like content: {\"analysis\": \"cost optimization\", \"confidence\": 0.85}",
             ""  # Empty content edge case

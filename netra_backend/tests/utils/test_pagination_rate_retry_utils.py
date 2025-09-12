@@ -1,6 +1,6 @@
 """
 Tests for pagination, rate limiting, and retry utilities (Tests 95-97).
-Each function ≤8 lines, using helper functions for setup and assertions.
+Each function  <= 8 lines, using helper functions for setup and assertions.
 """
 
 import sys

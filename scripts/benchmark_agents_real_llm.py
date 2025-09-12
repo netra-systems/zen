@@ -87,7 +87,7 @@ class RealLLMBenchmark:
             agent_type="supervisor"
         )
         
-        print(f"\n📊 Benchmarking SupervisorAgent...")
+        print(f"\n CHART:  Benchmarking SupervisorAgent...")
         
         try:
             # Initialize with real dependencies
@@ -101,7 +101,7 @@ class RealLLMBenchmark:
                     thread_id=str(uuid4())
                 )
                 benchmark.initialization_time = time.perf_counter() - init_start
-                print(f"  ✓ Initialization: {benchmark.initialization_time:.3f}s")
+                print(f"  [U+2713] Initialization: {benchmark.initialization_time:.3f}s")
                 
                 # Test scenarios with REAL LLM
                 scenarios = [
@@ -122,17 +122,17 @@ class RealLLMBenchmark:
                         exec_time = time.perf_counter() - exec_start
                         benchmark.execution_times.append(exec_time)
                         benchmark.scenarios_tested.append(scenario_name)
-                        print(f"    → {exec_time:.3f}s")
+                        print(f"     ->  {exec_time:.3f}s")
                     except Exception as e:
                         benchmark.errors.append(f"{scenario_name}: {str(e)}")
-                        print(f"    ✗ Error: {str(e)}")
+                        print(f"    [U+2717] Error: {str(e)}")
                 
                 # FIXED: break outside loop - using return instead
                 return
                 
         except Exception as e:
             benchmark.errors.append(f"Fatal: {str(e)}")
-            print(f"  ✗ Fatal error: {str(e)}")
+            print(f"  [U+2717] Fatal error: {str(e)}")
         
         return benchmark
     
@@ -145,13 +145,13 @@ class RealLLMBenchmark:
             agent_type="corpus_admin"
         )
         
-        print(f"\n📊 Benchmarking CorpusAdminSubAgent...")
+        print(f"\n CHART:  Benchmarking CorpusAdminSubAgent...")
         
         try:
             init_start = time.perf_counter()
             agent = CorpusAdminSubAgent(llm_client=self.llm_client)
             benchmark.initialization_time = time.perf_counter() - init_start
-            print(f"  ✓ Initialization: {benchmark.initialization_time:.3f}s")
+            print(f"  [U+2713] Initialization: {benchmark.initialization_time:.3f}s")
             
             # Real corpus management scenarios
             scenarios = [
@@ -177,14 +177,14 @@ class RealLLMBenchmark:
                     exec_time = time.perf_counter() - exec_start
                     benchmark.execution_times.append(exec_time)
                     benchmark.scenarios_tested.append(scenario_name)
-                    print(f"    → {exec_time:.3f}s")
+                    print(f"     ->  {exec_time:.3f}s")
                 except Exception as e:
                     benchmark.errors.append(f"{scenario_name}: {str(e)}")
-                    print(f"    ✗ Error: {str(e)}")
+                    print(f"    [U+2717] Error: {str(e)}")
                     
         except Exception as e:
             benchmark.errors.append(f"Fatal: {str(e)}")
-            print(f"  ✗ Fatal error: {str(e)}")
+            print(f"  [U+2717] Fatal error: {str(e)}")
         
         return benchmark
     
@@ -197,13 +197,13 @@ class RealLLMBenchmark:
             agent_type="synthetic_data"
         )
         
-        print(f"\n📊 Benchmarking SyntheticDataSubAgent...")
+        print(f"\n CHART:  Benchmarking SyntheticDataSubAgent...")
         
         try:
             init_start = time.perf_counter()
             agent = SyntheticDataSubAgent(llm_client=self.llm_client)
             benchmark.initialization_time = time.perf_counter() - init_start
-            print(f"  ✓ Initialization: {benchmark.initialization_time:.3f}s")
+            print(f"  [U+2713] Initialization: {benchmark.initialization_time:.3f}s")
             
             # Real data generation scenarios
             scenarios = [
@@ -233,14 +233,14 @@ class RealLLMBenchmark:
                     exec_time = time.perf_counter() - exec_start
                     benchmark.execution_times.append(exec_time)
                     benchmark.scenarios_tested.append(scenario_name)
-                    print(f"    → {exec_time:.3f}s")
+                    print(f"     ->  {exec_time:.3f}s")
                 except Exception as e:
                     benchmark.errors.append(f"{scenario_name}: {str(e)}")
-                    print(f"    ✗ Error: {str(e)}")
+                    print(f"    [U+2717] Error: {str(e)}")
                     
         except Exception as e:
             benchmark.errors.append(f"Fatal: {str(e)}")
-            print(f"  ✗ Fatal error: {str(e)}")
+            print(f"  [U+2717] Fatal error: {str(e)}")
         
         return benchmark
     
@@ -253,13 +253,13 @@ class RealLLMBenchmark:
             agent_type="supply_researcher"
         )
         
-        print(f"\n📊 Benchmarking SupplyResearcherAgent...")
+        print(f"\n CHART:  Benchmarking SupplyResearcherAgent...")
         
         try:
             init_start = time.perf_counter()
             agent = SupplyResearcherAgent(llm_client=self.llm_client)
             benchmark.initialization_time = time.perf_counter() - init_start
-            print(f"  ✓ Initialization: {benchmark.initialization_time:.3f}s")
+            print(f"  [U+2713] Initialization: {benchmark.initialization_time:.3f}s")
             
             # Real market research scenarios
             scenarios = [
@@ -289,14 +289,14 @@ class RealLLMBenchmark:
                     exec_time = time.perf_counter() - exec_start
                     benchmark.execution_times.append(exec_time)
                     benchmark.scenarios_tested.append(scenario_name)
-                    print(f"    → {exec_time:.3f}s")
+                    print(f"     ->  {exec_time:.3f}s")
                 except Exception as e:
                     benchmark.errors.append(f"{scenario_name}: {str(e)}")
-                    print(f"    ✗ Error: {str(e)}")
+                    print(f"    [U+2717] Error: {str(e)}")
                     
         except Exception as e:
             benchmark.errors.append(f"Fatal: {str(e)}")
-            print(f"  ✗ Fatal error: {str(e)}")
+            print(f"  [U+2717] Fatal error: {str(e)}")
         
         return benchmark
     
@@ -309,13 +309,13 @@ class RealLLMBenchmark:
             agent_type="actions_to_meet_goals"
         )
         
-        print(f"\n📊 Benchmarking ActionsToMeetGoalsSubAgent...")
+        print(f"\n CHART:  Benchmarking ActionsToMeetGoalsSubAgent...")
         
         try:
             init_start = time.perf_counter()
             agent = ActionsToMeetGoalsSubAgent(llm_client=self.llm_client)
             benchmark.initialization_time = time.perf_counter() - init_start
-            print(f"  ✓ Initialization: {benchmark.initialization_time:.3f}s")
+            print(f"  [U+2713] Initialization: {benchmark.initialization_time:.3f}s")
             
             # Real goal planning scenarios
             scenarios = [
@@ -345,14 +345,14 @@ class RealLLMBenchmark:
                     exec_time = time.perf_counter() - exec_start
                     benchmark.execution_times.append(exec_time)
                     benchmark.scenarios_tested.append(scenario_name)
-                    print(f"    → {exec_time:.3f}s")
+                    print(f"     ->  {exec_time:.3f}s")
                 except Exception as e:
                     benchmark.errors.append(f"{scenario_name}: {str(e)}")
-                    print(f"    ✗ Error: {str(e)}")
+                    print(f"    [U+2717] Error: {str(e)}")
                     
         except Exception as e:
             benchmark.errors.append(f"Fatal: {str(e)}")
-            print(f"  ✗ Fatal error: {str(e)}")
+            print(f"  [U+2717] Fatal error: {str(e)}")
         
         return benchmark
     
@@ -365,13 +365,13 @@ class RealLLMBenchmark:
             agent_type="optimizations_core"
         )
         
-        print(f"\n📊 Benchmarking OptimizationsCoreSubAgent...")
+        print(f"\n CHART:  Benchmarking OptimizationsCoreSubAgent...")
         
         try:
             init_start = time.perf_counter()
             agent = OptimizationsCoreSubAgent(llm_client=self.llm_client)
             benchmark.initialization_time = time.perf_counter() - init_start
-            print(f"  ✓ Initialization: {benchmark.initialization_time:.3f}s")
+            print(f"  [U+2713] Initialization: {benchmark.initialization_time:.3f}s")
             
             # Real optimization scenarios
             scenarios = [
@@ -401,14 +401,14 @@ class RealLLMBenchmark:
                     exec_time = time.perf_counter() - exec_start
                     benchmark.execution_times.append(exec_time)
                     benchmark.scenarios_tested.append(scenario_name)
-                    print(f"    → {exec_time:.3f}s")
+                    print(f"     ->  {exec_time:.3f}s")
                 except Exception as e:
                     benchmark.errors.append(f"{scenario_name}: {str(e)}")
-                    print(f"    ✗ Error: {str(e)}")
+                    print(f"    [U+2717] Error: {str(e)}")
                     
         except Exception as e:
             benchmark.errors.append(f"Fatal: {str(e)}")
-            print(f"  ✗ Fatal error: {str(e)}")
+            print(f"  [U+2717] Fatal error: {str(e)}")
         
         return benchmark
     
@@ -421,13 +421,13 @@ class RealLLMBenchmark:
             agent_type="reporting"
         )
         
-        print(f"\n📊 Benchmarking ReportingSubAgent...")
+        print(f"\n CHART:  Benchmarking ReportingSubAgent...")
         
         try:
             init_start = time.perf_counter()
             agent = ReportingSubAgent(llm_client=self.llm_client)
             benchmark.initialization_time = time.perf_counter() - init_start
-            print(f"  ✓ Initialization: {benchmark.initialization_time:.3f}s")
+            print(f"  [U+2713] Initialization: {benchmark.initialization_time:.3f}s")
             
             # Real reporting scenarios
             scenarios = [
@@ -457,14 +457,14 @@ class RealLLMBenchmark:
                     exec_time = time.perf_counter() - exec_start
                     benchmark.execution_times.append(exec_time)
                     benchmark.scenarios_tested.append(scenario_name)
-                    print(f"    → {exec_time:.3f}s")
+                    print(f"     ->  {exec_time:.3f}s")
                 except Exception as e:
                     benchmark.errors.append(f"{scenario_name}: {str(e)}")
-                    print(f"    ✗ Error: {str(e)}")
+                    print(f"    [U+2717] Error: {str(e)}")
                     
         except Exception as e:
             benchmark.errors.append(f"Fatal: {str(e)}")
-            print(f"  ✗ Fatal error: {str(e)}")
+            print(f"  [U+2717] Fatal error: {str(e)}")
         
         return benchmark
     
@@ -508,17 +508,17 @@ class RealLLMBenchmark:
         # Sort by average execution time
         rankings.sort(key=lambda x: x['avg'])
         
-        print("\n🏆 PERFORMANCE RANKINGS (by average execution time)")
+        print("\n TROPHY:  PERFORMANCE RANKINGS (by average execution time)")
         print("-" * 60)
         
         for rank, data in enumerate(rankings, 1):
-            medal = "🥇" if rank == 1 else "🥈" if rank == 2 else "🥉" if rank == 3 else f"{rank}."
+            medal = "[U+1F947]" if rank == 1 else "[U+1F948]" if rank == 2 else "[U+1F949]" if rank == 3 else f"{rank}."
             print(f"\n{medal} {data['name']}")
             print(f"   Average: {data['avg']:.3f}s | Min: {data['min']:.3f}s | Max: {data['max']:.3f}s")
             print(f"   Initialization: {data['init']:.3f}s")
             print(f"   Scenarios tested: {data['scenarios']}")
             if data['errors'] > 0:
-                print(f"   ⚠️ Errors: {data['errors']}")
+                print(f"    WARNING: [U+FE0F] Errors: {data['errors']}")
         
         # Speed comparison
         if len(rankings) >= 2:
@@ -529,9 +529,9 @@ class RealLLMBenchmark:
             print("\n" + "="*60)
             print("SPEED ANALYSIS")
             print("-" * 60)
-            print(f"🚀 Fastest: {fastest['name']} ({fastest['avg']:.3f}s)")
-            print(f"🐌 Slowest: {slowest['name']} ({slowest['avg']:.3f}s)")
-            print(f"⚡ Speed Difference: {speed_diff:.1f}x")
+            print(f"[U+1F680] Fastest: {fastest['name']} ({fastest['avg']:.3f}s)")
+            print(f"[U+1F40C] Slowest: {slowest['name']} ({slowest['avg']:.3f}s)")
+            print(f" LIGHTNING:  Speed Difference: {speed_diff:.1f}x")
         
         # Save results
         self.save_results()
@@ -583,9 +583,9 @@ class RealLLMBenchmark:
                     f.write(f"- **Errors**: {len(benchmark.errors)}\n")
                 f.write("\n")
         
-        print(f"\n✅ Results saved:")
-        print(f"  • JSON: {json_file}")
-        print(f"  • Report: {report_file}")
+        print(f"\n PASS:  Results saved:")
+        print(f"  [U+2022] JSON: {json_file}")
+        print(f"  [U+2022] Report: {report_file}")
 
 
 async def main():

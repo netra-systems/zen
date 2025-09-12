@@ -37,18 +37,18 @@ class WebSocketComponentErrorTester:
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import validate_websocket_component_health
             
-            print("🔍 Testing component health validation...")
+            print(" SEARCH:  Testing component health validation...")
             health_report = validate_websocket_component_health()
             
-            print(f"📊 Health Report Summary: {health_report.get('summary', 'Unknown')}")
-            print(f"🏥 Overall Health: {'✅ Healthy' if health_report.get('healthy', False) else '❌ Unhealthy'}")
+            print(f" CHART:  Health Report Summary: {health_report.get('summary', 'Unknown')}")
+            print(f"[U+1F3E5] Overall Health: {' PASS:  Healthy' if health_report.get('healthy', False) else ' FAIL:  Unhealthy'}")
             
             if health_report.get("failed_components"):
-                print(f"🚨 Failed Components: {health_report['failed_components']}")
+                print(f" ALERT:  Failed Components: {health_report['failed_components']}")
                 for component, details in health_report.get("component_details", {}).items():
                     if details.get("status") == "failed":
                         error_code = details.get("error_code", "unknown")
-                        print(f"   ❌ {component}: Code {error_code} - {details.get('error', 'Unknown error')}")
+                        print(f"    FAIL:  {component}: Code {error_code} - {details.get('error', 'Unknown error')}")
             
             return {
                 "test": "component_health_validation",
@@ -59,7 +59,7 @@ class WebSocketComponentErrorTester:
             }
             
         except Exception as e:
-            print(f"❌ Component health validation test failed: {e}")
+            print(f" FAIL:  Component health validation test failed: {e}")
             return {
                 "test": "component_health_validation", 
                 "success": False,
@@ -71,7 +71,7 @@ class WebSocketComponentErrorTester:
         try:
             from netra_backend.app.websocket_core.websocket_manager_factory import WebSocketComponentError
             
-            print("🧪 Testing WebSocket component error codes...")
+            print("[U+1F9EA] Testing WebSocket component error codes...")
             
             # Test different error types
             auth_error = WebSocketComponentError.auth_failure("Test auth failure")
@@ -86,7 +86,7 @@ class WebSocketComponentErrorTester:
                 "handler": handler_error.error_code
             }
             
-            print(f"🔢 Error Codes Generated:")
+            print(f"[U+1F522] Error Codes Generated:")
             for component, code in error_codes.items():
                 print(f"   {component}: {code}")
             
@@ -103,7 +103,7 @@ class WebSocketComponentErrorTester:
             }
             
         except Exception as e:
-            print(f"❌ WebSocket error codes test failed: {e}")
+            print(f" FAIL:  WebSocket error codes test failed: {e}")
             return {
                 "test": "websocket_error_codes",
                 "success": False,
@@ -113,7 +113,7 @@ class WebSocketComponentErrorTester:
     async def test_websocket_connection_with_error_reporting(self) -> Dict[str, Any]:
         """Test actual WebSocket connection to observe error reporting behavior."""
         try:
-            print("🌐 Testing WebSocket connection with error reporting...")
+            print("[U+1F310] Testing WebSocket connection with error reporting...")
             
             # Try to connect without authentication to trigger auth error
             try:
@@ -122,7 +122,7 @@ class WebSocketComponentErrorTester:
                     timeout=5.0,
                     close_timeout=2.0
                 ) as websocket:
-                    print("📡 WebSocket connected - sending test message...")
+                    print("[U+1F4E1] WebSocket connected - sending test message...")
                     
                     # Send a message to trigger processing
                     test_message = {
@@ -139,7 +139,7 @@ class WebSocketComponentErrorTester:
                             response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                             response_data = json.loads(response)
                             
-                            print(f"📨 Received response: {response_data.get('type', 'unknown')}")
+                            print(f"[U+1F4E8] Received response: {response_data.get('type', 'unknown')}")
                             
                             # Check for error responses
                             if response_data.get("type") == "error":
@@ -147,7 +147,7 @@ class WebSocketComponentErrorTester:
                                 error_code = error.get("code", "unknown")
                                 component = error.get("component", "unknown")
                                 
-                                print(f"🎯 Component Error Detected: {component} (Code: {error_code})")
+                                print(f" TARGET:  Component Error Detected: {component} (Code: {error_code})")
                                 error_messages.append(response_data)
                                 
                                 # Track error statistics
@@ -163,10 +163,10 @@ class WebSocketComponentErrorTester:
                             elif response_data.get("type") == "system_message":
                                 event = response_data.get("content", {}).get("event", "")
                                 if "error" in event.lower() or "recovery" in event.lower():
-                                    print(f"🔧 System Recovery Message: {event}")
+                                    print(f"[U+1F527] System Recovery Message: {event}")
                     
                     except asyncio.TimeoutError:
-                        print("⏰ Response timeout - checking collected error data...")
+                        print("[U+23F0] Response timeout - checking collected error data...")
                         pass
                     
                     return {
@@ -181,14 +181,14 @@ class WebSocketComponentErrorTester:
                     }
                     
             except websockets.exceptions.ConnectionClosedError as e:
-                print(f"🔌 WebSocket connection closed: Code {e.code} - {e.reason}")
+                print(f"[U+1F50C] WebSocket connection closed: Code {e.code} - {e.reason}")
                 
                 # Analyze close code for component-specific information
                 if e.code != 1011:
-                    print(f"✅ Non-generic close code detected: {e.code}")
+                    print(f" PASS:  Non-generic close code detected: {e.code}")
                     self.test_results["specific_component_errors"] += 1
                 else:
-                    print(f"❌ Generic 1011 close code detected")
+                    print(f" FAIL:  Generic 1011 close code detected")
                     self.test_results["generic_1011_errors"] += 1
                 
                 return {
@@ -201,7 +201,7 @@ class WebSocketComponentErrorTester:
                 }
                 
         except Exception as e:
-            print(f"❌ WebSocket connection test failed: {e}")
+            print(f" FAIL:  WebSocket connection test failed: {e}")
             return {
                 "test": "websocket_connection_error_reporting",
                 "success": False,
@@ -210,23 +210,23 @@ class WebSocketComponentErrorTester:
     
     async def run_comprehensive_test(self) -> Dict[str, Any]:
         """Run comprehensive test suite for component error reporting."""
-        print("🚀 Starting WebSocket Component Error Reporting Test Suite...")
+        print("[U+1F680] Starting WebSocket Component Error Reporting Test Suite...")
         print("=" * 70)
         
         test_results = []
         
         # Test 1: Component Health Validation
-        print("\n📋 TEST 1: Component Health Validation")
+        print("\n[U+1F4CB] TEST 1: Component Health Validation")
         health_test = await self.test_component_health_validation()
         test_results.append(health_test)
         
         # Test 2: Error Code Generation
-        print("\n📋 TEST 2: Error Code Generation")
+        print("\n[U+1F4CB] TEST 2: Error Code Generation")
         error_code_test = await self.test_websocket_error_codes()
         test_results.append(error_code_test)
         
         # Test 3: WebSocket Connection Error Reporting
-        print("\n📋 TEST 3: WebSocket Connection Error Reporting")
+        print("\n[U+1F4CB] TEST 3: WebSocket Connection Error Reporting")
         connection_test = await self.test_websocket_connection_with_error_reporting()
         test_results.append(connection_test)
         
@@ -245,24 +245,24 @@ class WebSocketComponentErrorTester:
         }
         
         print("\n" + "=" * 70)
-        print("📊 TEST SUITE RESULTS")
-        print(f"✅ Successful Tests: {successful_tests}/{len(test_results)}")
-        print(f"📈 Success Rate: {final_results['success_rate']:.1%}")
-        print(f"🎯 Specific Component Errors: {self.test_results['specific_component_errors']}")
-        print(f"❌ Generic 1011 Errors: {self.test_results['generic_1011_errors']}")
+        print(" CHART:  TEST SUITE RESULTS")
+        print(f" PASS:  Successful Tests: {successful_tests}/{len(test_results)}")
+        print(f"[U+1F4C8] Success Rate: {final_results['success_rate']:.1%}")
+        print(f" TARGET:  Specific Component Errors: {self.test_results['specific_component_errors']}")
+        print(f" FAIL:  Generic 1011 Errors: {self.test_results['generic_1011_errors']}")
         
         if self.test_results["component_errors_detected"]:
-            print(f"🔍 Components Detected: {set(self.test_results['component_errors_detected'])}")
+            print(f" SEARCH:  Components Detected: {set(self.test_results['component_errors_detected'])}")
         
         if self.test_results["error_codes_received"]:
-            print(f"🔢 Error Codes Received: {set(self.test_results['error_codes_received'])}")
+            print(f"[U+1F522] Error Codes Received: {set(self.test_results['error_codes_received'])}")
         
         return final_results
 
 
 async def main():
     """Main test execution function."""
-    print("🔧 WebSocket Component Error Reporting Test")
+    print("[U+1F527] WebSocket Component Error Reporting Test")
     print("Mission: Validate component-specific error reporting to replace generic 1011 errors")
     print()
     
@@ -273,14 +273,14 @@ async def main():
     with open("websocket_component_error_test_results.json", "w") as f:
         json.dump(results, f, indent=2)
     
-    print(f"\n💾 Results saved to: websocket_component_error_test_results.json")
+    print(f"\n[U+1F4BE] Results saved to: websocket_component_error_test_results.json")
     
     # Return success status for CI/CD
     if results["overall_success"]:
-        print("🎉 All tests passed!")
+        print(" CELEBRATION:  All tests passed!")
         return 0
     else:
-        print("❌ Some tests failed!")
+        print(" FAIL:  Some tests failed!")
         return 1
 
 

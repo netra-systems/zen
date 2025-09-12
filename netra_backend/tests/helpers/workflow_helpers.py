@@ -66,11 +66,11 @@ def setup_optimization_outcomes_content():
     - Use Flash Attention 2 for transformer layers
     
     Expected Outcomes:
-    - Latency: 450ms → 180ms p95 (60% reduction)
-    - Throughput: 1,200 → 3,600 RPS (3x increase)
-    - GPU utilization: 45% → 85% (better resource usage)
-    - Memory: 14GB → 8GB (43% reduction)
-    - Cost: $3,500 → $2,100/month (40% savings)
+    - Latency: 450ms  ->  180ms p95 (60% reduction)
+    - Throughput: 1,200  ->  3,600 RPS (3x increase)
+    - GPU utilization: 45%  ->  85% (better resource usage)
+    - Memory: 14GB  ->  8GB (43% reduction)
+    - Cost: $3,500  ->  $2,100/month (40% savings)
     
     Success Metrics:
     - All API endpoints respond < 200ms p95

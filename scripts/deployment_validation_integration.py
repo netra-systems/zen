@@ -159,7 +159,7 @@ class DeploymentValidator:
             Tuple of (success, stdout, stderr)
         """
         
-        print(f"🔍 Running: {check.name}")
+        print(f" SEARCH:  Running: {check.name}")
         if check.description:
             print(f"   {check.description}")
         
@@ -179,20 +179,20 @@ class DeploymentValidator:
             success = result.returncode == 0
             
             if success:
-                print(f"✅ {check.name} passed ({duration:.1f}s)")
+                print(f" PASS:  {check.name} passed ({duration:.1f}s)")
             else:
-                print(f"❌ {check.name} failed ({duration:.1f}s)")
+                print(f" FAIL:  {check.name} failed ({duration:.1f}s)")
                 
             return success, result.stdout, result.stderr
             
         except subprocess.TimeoutExpired:
             duration = time.time() - start_time
-            print(f"⏰ {check.name} timed out after {duration:.1f}s")
+            print(f"[U+23F0] {check.name} timed out after {duration:.1f}s")
             return False, "", f"Command timed out after {check.timeout}s"
             
         except Exception as e:
             duration = time.time() - start_time
-            print(f"💥 {check.name} error after {duration:.1f}s: {e}")
+            print(f"[U+1F4A5] {check.name} error after {duration:.1f}s: {e}")
             return False, "", str(e)
     
     def run_all_validations(self) -> Tuple[bool, List[Dict[str, Any]]]:
@@ -211,7 +211,7 @@ class DeploymentValidator:
         print(f"{'='*60}")
         print(f"Running {len(config.checks)} validation checks...")
         if self.strict_mode:
-            print("⚠️  STRICT MODE ENABLED: Warnings will fail deployment")
+            print(" WARNING: [U+FE0F]  STRICT MODE ENABLED: Warnings will fail deployment")
         print()
         
         for i, check in enumerate(config.checks, 1):
@@ -232,14 +232,14 @@ class DeploymentValidator:
             # Check if this failure should block deployment
             if not success and check.required:
                 all_passed = False
-                print(f"💥 REQUIRED check failed: {check.name}")
+                print(f"[U+1F4A5] REQUIRED check failed: {check.name}")
                 
                 if config.fail_fast:
-                    print("\n🚨 FAIL FAST MODE: Stopping validation due to required check failure")
+                    print("\n ALERT:  FAIL FAST MODE: Stopping validation due to required check failure")
                     break
                     
             elif not success:
-                print(f"⚠️  Optional check failed: {check.name}")
+                print(f" WARNING: [U+FE0F]  Optional check failed: {check.name}")
                 
             print()  # Add spacing between checks
         
@@ -259,10 +259,10 @@ class DeploymentValidator:
         print(f"Required Failures: {required_failures}")
         
         if all_passed:
-            print("\n✅ ALL VALIDATIONS PASSED")
+            print("\n PASS:  ALL VALIDATIONS PASSED")
             print(f"Environment configuration is valid for deployment to {self.environment}")
         else:
-            print(f"\n❌ VALIDATION FAILED")
+            print(f"\n FAIL:  VALIDATION FAILED")
             print(f"Deployment to {self.environment} is BLOCKED due to validation failures")
             
         print(f"{'='*60}")
@@ -286,7 +286,7 @@ class DeploymentValidator:
         print("="*60)
         
         for result in failed_checks:
-            print(f"\n❌ {result['check']}")
+            print(f"\n FAIL:  {result['check']}")
             print(f"   Required: {'Yes' if result['required'] else 'No'}")
             print(f"   Description: {result['description']}")
             
@@ -349,15 +349,15 @@ def integrate_with_deployment_script(environment: str, strict_mode: bool = False
             # Continue with normal deployment...
     """
     
-    print("\n" + "🔍" + " "*58 + "🔍")
+    print("\n" + " SEARCH: " + " "*58 + " SEARCH: ")
     print("  PRE-DEPLOYMENT VALIDATION INTEGRATION")
-    print("🔍" + " "*58 + "🔍")
+    print(" SEARCH: " + " "*58 + " SEARCH: ")
     print()
     print("This validation prevents configuration issues like:")
-    print("  • localhost URLs in staging/production environments")
-    print("  • Environment detection failures in Cloud Run")
-    print("  • Service URL misconfigurations")
-    print("  • Golden Path prerequisite failures")
+    print("  [U+2022] localhost URLs in staging/production environments")
+    print("  [U+2022] Environment detection failures in Cloud Run")
+    print("  [U+2022] Service URL misconfigurations")
+    print("  [U+2022] Golden Path prerequisite failures")
     print()
     print("These checks protect $500K+ ARR Golden Path functionality.")
     print()
@@ -366,17 +366,17 @@ def integrate_with_deployment_script(environment: str, strict_mode: bool = False
     validation_passed = run_pre_deployment_validation(environment, strict_mode)
     
     if validation_passed:
-        print("\n🚀 PRE-DEPLOYMENT VALIDATION PASSED")
+        print("\n[U+1F680] PRE-DEPLOYMENT VALIDATION PASSED")
         print("   Proceeding with deployment...")
         return True
     else:
-        print("\n🚨 PRE-DEPLOYMENT VALIDATION FAILED")
+        print("\n ALERT:  PRE-DEPLOYMENT VALIDATION FAILED")
         print("   Deployment BLOCKED to prevent environment configuration issues")
         print("\n   This protection prevents issues like:")
-        print("     • localhost:8081 being used in Cloud Run staging")  
-        print("     • Environment detection defaulting incorrectly")
-        print("     • Service health checks failing due to wrong URLs")
-        print("     • Golden Path validation failures")
+        print("     [U+2022] localhost:8081 being used in Cloud Run staging")  
+        print("     [U+2022] Environment detection defaulting incorrectly")
+        print("     [U+2022] Service health checks failing due to wrong URLs")
+        print("     [U+2022] Golden Path validation failures")
         print("\n   Fix the validation issues above and retry deployment.")
         return False
 

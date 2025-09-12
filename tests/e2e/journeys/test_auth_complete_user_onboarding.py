@@ -1,5 +1,5 @@
 """
-🌟 E2E TEST SUITE: Complete User Authentication Onboarding Journey
+[U+1F31F] E2E TEST SUITE: Complete User Authentication Onboarding Journey
 
 Tests the complete end-to-end user onboarding experience from first visit to successful chat.
 This validates the ENTIRE authentication flow that new users experience.
@@ -176,7 +176,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
         
         BUSINESS VALUE: This is the complete conversion funnel for new users.
         """
-        logger.info("🌟 E2E: Testing complete new user onboarding journey")
+        logger.info("[U+1F31F] E2E: Testing complete new user onboarding journey")
         
         # Generate unique user for this journey
         timestamp = int(time.time())
@@ -194,7 +194,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
         
         try:
             # STEP 1: User Registration (Conversion Point #1)
-            logger.info("📝 STEP 1: User Registration")
+            logger.info("[U+1F4DD] STEP 1: User Registration")
             self.validator.record_step("registration_started", "in_progress")
             
             async with httpx.AsyncClient() as client:
@@ -223,7 +223,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
                         "has_token": bool(access_token)
                     })
                     
-                    logger.info(f"✅ Registration successful for {user_email}")
+                    logger.info(f" PASS:  Registration successful for {user_email}")
                     
                 else:
                     error_text = register_response.text
@@ -234,7 +234,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
                     pytest.fail(f"USER JOURNEY FAILURE: Registration failed - {register_response.status_code}: {error_text}")
             
             # STEP 2: Immediate Token Validation (Critical for UX)
-            logger.info("🔑 STEP 2: Token Validation")
+            logger.info("[U+1F511] STEP 2: Token Validation")
             self.validator.record_step("token_validation_started", "in_progress")
             
             try:
@@ -267,7 +267,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
                 pytest.fail(f"USER JOURNEY FAILURE: Token validation error - {str(e)}")
             
             # STEP 3: Chat Access (Conversion Point #2) 
-            logger.info("💬 STEP 3: Chat Access")
+            logger.info("[U+1F4AC] STEP 3: Chat Access")
             self.validator.record_step("chat_access_started", "in_progress")
             
             try:
@@ -297,10 +297,10 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
                         "response_type": response_data.get("type")
                     })
                     
-                    logger.info("✅ Chat access successful")
+                    logger.info(" PASS:  Chat access successful")
                     
                     # STEP 4: First Chat Message (Conversion Point #3)
-                    logger.info("💭 STEP 4: First Chat Message")
+                    logger.info("[U+1F4AD] STEP 4: First Chat Message")
                     self.validator.record_step("first_chat_message_started", "in_progress")
                     
                     first_message = {
@@ -317,7 +317,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
                     })
                     
                     # STEP 5: First Agent Response (Conversion Point #4 - VALUE DELIVERY!)
-                    logger.info("🤖 STEP 5: First Agent Response (VALUE DELIVERY)")
+                    logger.info("[U+1F916] STEP 5: First Agent Response (VALUE DELIVERY)")
                     self.validator.record_step("first_agent_response_started", "in_progress")
                     
                     agent_responses = []
@@ -348,7 +348,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
                                         "response_time": time.time() - start_time
                                     })
                                     
-                                    logger.info(f"✅ First agent response received in {time.time() - start_time:.1f}s")
+                                    logger.info(f" PASS:  First agent response received in {time.time() - start_time:.1f}s")
                                     break
                     
                     except asyncio.TimeoutError:
@@ -396,7 +396,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
                 if conversion not in conversion_points:
                     pytest.fail(f"CONVERSION FAILURE: Missing critical conversion point {conversion}")
             
-            logger.info(f"🎉 COMPLETE USER JOURNEY SUCCESS: {user_email} onboarded in {total_duration:.1f}s")
+            logger.info(f" CELEBRATION:  COMPLETE USER JOURNEY SUCCESS: {user_email} onboarded in {total_duration:.1f}s")
             logger.info(f"   Conversion points: {list(conversion_points.keys())}")
             
         except Exception as e:
@@ -409,7 +409,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
         
         BUSINESS VALUE: Validates user retention and re-engagement flow.
         """
-        logger.info("🔄 E2E: Testing returning user login to chat journey")
+        logger.info(" CYCLE:  E2E: Testing returning user login to chat journey")
         
         # Pre-create user (simulate existing account)
         timestamp = int(time.time())
@@ -433,7 +433,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
         
         try:
             # STEP 1: User Login (Returning User Flow)
-            logger.info("🔑 STEP 1: Returning User Login")
+            logger.info("[U+1F511] STEP 1: Returning User Login")
             self.validator.record_step("login_started", "in_progress")
             
             # Simulate login with existing credentials (using test token for simplicity)
@@ -444,7 +444,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
             })
             
             # STEP 2: Immediate Chat Access (Should be seamless)
-            logger.info("💬 STEP 2: Immediate Chat Access")
+            logger.info("[U+1F4AC] STEP 2: Immediate Chat Access")
             self.validator.record_step("returning_chat_access_started", "in_progress")
             
             try:
@@ -494,7 +494,7 @@ class TestCompleteUserOnboardingJourney(BaseE2ETest):
             if validation["total_duration"] > 10:
                 pytest.fail(f"RETURNING USER UX FAILURE: Journey took {validation['total_duration']:.1f}s - should be < 10s")
             
-            logger.info(f"🎉 RETURNING USER JOURNEY SUCCESS: {user_email} re-engaged in {total_duration:.1f}s")
+            logger.info(f" CELEBRATION:  RETURNING USER JOURNEY SUCCESS: {user_email} re-engaged in {total_duration:.1f}s")
             
         except Exception as e:
             self.validator.record_step("returning_journey_failed", "failed", {"error": str(e)})
@@ -513,7 +513,7 @@ class TestOnboardingEdgeCases(BaseE2ETest):
         
         BUSINESS VALUE: Prevents user confusion when they try to register twice.
         """
-        logger.info("⚠️  E2E: Testing duplicate registration handling")
+        logger.info(" WARNING: [U+FE0F]  E2E: Testing duplicate registration handling")
         
         timestamp = int(time.time())
         user_email = f"duplicate-{timestamp}@netra.test"
@@ -553,7 +553,7 @@ class TestOnboardingEdgeCases(BaseE2ETest):
                        "exists" in error_data.get("detail", "").lower(), \
                        "Error message should clearly indicate duplicate email"
             
-        logger.info("✅ Duplicate registration handled gracefully")
+        logger.info(" PASS:  Duplicate registration handled gracefully")
     
     async def test_network_interruption_recovery(self):
         """
@@ -561,7 +561,7 @@ class TestOnboardingEdgeCases(BaseE2ETest):
         
         BUSINESS VALUE: Ensures onboarding completes even with poor connectivity.
         """
-        logger.info("📶 E2E: Testing network interruption recovery")
+        logger.info("[U+1F4F6] E2E: Testing network interruption recovery")
         
         timestamp = int(time.time())
         user_email = f"network-test-{timestamp}@netra.test"
@@ -611,7 +611,7 @@ class TestOnboardingEdgeCases(BaseE2ETest):
         except Exception as e:
             pytest.fail(f"Network recovery failed: {str(e)}")
         
-        logger.info("✅ Network interruption recovery successful")
+        logger.info(" PASS:  Network interruption recovery successful")
 
 
 if __name__ == "__main__":

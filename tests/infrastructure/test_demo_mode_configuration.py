@@ -20,8 +20,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md):
 
 DEMO MODE TEST FLOW:
 ```
-Environment Detection → Demo Mode Configuration → Auto User Creation →
-Authentication Bypass → Demo Functionality → Production Security Check
+Environment Detection  ->  Demo Mode Configuration  ->  Auto User Creation  -> 
+Authentication Bypass  ->  Demo Functionality  ->  Production Security Check
 ```
 
 This tests the DEMO_MODE=1 default behavior identified in Golden Path analysis

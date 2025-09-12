@@ -174,7 +174,7 @@ async def analyze_auth_sql_errors():
     with open(report_file, 'w') as f:
         json.dump(report, f, indent=2)
     
-    print(f"\n✅ Detailed report saved to: {report_file}")
+    print(f"\n PASS:  Detailed report saved to: {report_file}")
     
     # 7. Provide recommendations
     print("\n" + "=" * 80)
@@ -199,7 +199,7 @@ async def analyze_auth_sql_errors():
         print("   - Invalid connection string or credentials")
     
     if not sql_errors:
-        print("\n✅ No SQL-related errors found in the last 24 hours")
+        print("\n PASS:  No SQL-related errors found in the last 24 hours")
 
 
 if __name__ == "__main__":

@@ -172,7 +172,7 @@ def test_database_manager(database_url):
             try:
                 print("Attempting to initialize database manager...")
                 await manager.initialize()
-                print("✓ Database manager initialized successfully")
+                print("[U+2713] Database manager initialized successfully")
                 
                 # Test health check
                 print("Performing health check...")
@@ -312,7 +312,7 @@ def provide_fix_recommendations(reachable_services, unreachable_services):
     
     if not reachable_services:
         print("""
-🔴 CRITICAL: NO SERVICES ARE REACHABLE
+[U+1F534] CRITICAL: NO SERVICES ARE REACHABLE
 
 This indicates that Docker services are not running. Here's how to fix:
 
@@ -347,7 +347,7 @@ This indicates that Docker services are not running. Here's how to fix:
     
     elif len(unreachable_services) > len(reachable_services):
         print(f"""
-🟡 PARTIAL CONNECTIVITY: {len(reachable_services)} reachable, {len(unreachable_services)} unreachable
+[U+1F7E1] PARTIAL CONNECTIVITY: {len(reachable_services)} reachable, {len(unreachable_services)} unreachable
 
 Some services are running but not all. Specific fixes:
 
@@ -372,7 +372,7 @@ Some services are running but not all. Specific fixes:
     
     else:
         print(f"""
-🟢 GOOD CONNECTIVITY: {len(reachable_services)} services reachable
+[U+1F7E2] GOOD CONNECTIVITY: {len(reachable_services)} services reachable
 
 Most services are accessible. If database tests are still failing:
 
@@ -409,19 +409,19 @@ def main():
     # Test 1: Environment loading
     env_success, env = test_environment_loading()
     if not env_success:
-        print("\n❌ CRITICAL: Environment loading failed. Cannot proceed.")
+        print("\n FAIL:  CRITICAL: Environment loading failed. Cannot proceed.")
         return 1
     
     # Test 2: DatabaseURLBuilder
     builder_success, builder, database_url = test_database_url_builder(env)
     if not builder_success:
-        print("\n❌ CRITICAL: DatabaseURLBuilder failed. Cannot proceed.")
+        print("\n FAIL:  CRITICAL: DatabaseURLBuilder failed. Cannot proceed.")
         return 1
     
     # Test 3: Configuration loading
     config_success = test_config_loading()
     if not config_success:
-        print("\n⚠️  WARNING: Configuration loading failed. This may cause issues.")
+        print("\n WARNING: [U+FE0F]  WARNING: Configuration loading failed. This may cause issues.")
     
     # Test 4: Docker connectivity
     docker_success, reachable, unreachable = test_docker_connectivity()
@@ -431,25 +431,25 @@ def main():
     if database_url:
         db_success = test_database_manager(database_url)
     else:
-        print(f"\n⚠️  WARNING: No database URL generated - cannot test database connection")
+        print(f"\n WARNING: [U+FE0F]  WARNING: No database URL generated - cannot test database connection")
     
     # Summary
     print("\n" + "=" * 60)
     print("DIAGNOSTIC SUMMARY")
     print("=" * 60)
     
-    print(f"Environment Loading:  {'✅ PASS' if env_success else '❌ FAIL'}")
-    print(f"URL Builder:         {'✅ PASS' if builder_success else '❌ FAIL'}")
-    print(f"Configuration:       {'✅ PASS' if config_success else '⚠️  WARN'}")
-    print(f"Docker Connectivity: {'✅ PASS' if docker_success else '❌ FAIL'}")
-    print(f"Database Connection: {'✅ PASS' if db_success else '❌ FAIL'}")
-    print(f"Database URL Generated: {'✅ YES' if database_url else '❌ NO'}")
+    print(f"Environment Loading:  {' PASS:  PASS' if env_success else ' FAIL:  FAIL'}")
+    print(f"URL Builder:         {' PASS:  PASS' if builder_success else ' FAIL:  FAIL'}")
+    print(f"Configuration:       {' PASS:  PASS' if config_success else ' WARNING: [U+FE0F]  WARN'}")
+    print(f"Docker Connectivity: {' PASS:  PASS' if docker_success else ' FAIL:  FAIL'}")
+    print(f"Database Connection: {' PASS:  PASS' if db_success else ' FAIL:  FAIL'}")
+    print(f"Database URL Generated: {' PASS:  YES' if database_url else ' FAIL:  NO'}")
     
     if env_success and builder_success and database_url and db_success and docker_success:
-        print("\n🎉 ALL TESTS PASSED - Database connectivity should work perfectly!")
+        print("\n CELEBRATION:  ALL TESTS PASSED - Database connectivity should work perfectly!")
         return 0
     else:
-        print("\n⚠️  ISSUES DETECTED - Database connectivity problems found")
+        print("\n WARNING: [U+FE0F]  ISSUES DETECTED - Database connectivity problems found")
         provide_fix_recommendations(reachable if docker_success else [], unreachable if docker_success else [])
         return 1
 

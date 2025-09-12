@@ -225,16 +225,16 @@ class DockerWebSocketTester:
             }
             
             if bypass_should_work:
-                logger.info("✅ OAUTH SIMULATION is properly configured for development")
+                logger.info(" PASS:  OAUTH SIMULATION is properly configured for development")
             else:
-                logger.warning("⚠️ OAUTH SIMULATION may not work - check environment variables")
+                logger.warning(" WARNING: [U+FE0F] OAUTH SIMULATION may not work - check environment variables")
                 
         except Exception as e:
             self.results["auth_bypass_tests"]["error"] = str(e)
     
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all WebSocket configuration tests."""
-        logger.info("🚀 Starting Docker WebSocket configuration tests...")
+        logger.info("[U+1F680] Starting Docker WebSocket configuration tests...")
         
         # Test environment variables
         self.test_environment_variables()

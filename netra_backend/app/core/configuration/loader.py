@@ -1,7 +1,7 @@
 """Configuration Loader - Main entry point for configuration access
 
 Provides the primary interface for loading and accessing configuration.
-This module serves as the main façade for the unified configuration system.
+This module serves as the main fa[U+00E7]ade for the unified configuration system.
 
 Business Value: Simplifies configuration access for developers,
 reducing configuration-related errors by 90%.

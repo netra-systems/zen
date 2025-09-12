@@ -87,7 +87,7 @@ class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
         self.assertIsInstance(manager, WebSocketManager,
                             "Should return WebSocketManager instance")
         
-        logger.info("✅ TEST 1 PASSED: create_websocket_manager() is synchronous")
+        logger.info(" PASS:  TEST 1 PASSED: create_websocket_manager() is synchronous")
         
     async def test_await_on_synchronous_function_fails(self):
         """
@@ -108,7 +108,7 @@ class TestWebSocketManagerAwaitIssue(SSotAsyncTestCase):
         self.assertIn("can't be used in 'await' expression", error_message,
                      "Should get specific await error message")
         
-        logger.info(f"✅ TEST 2 PASSED: Await on sync function fails as expected: {error_message}")
+        logger.info(f" PASS:  TEST 2 PASSED: Await on sync function fails as expected: {error_message}")
 
 
 class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
@@ -188,7 +188,7 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
                 await self.handler.handle(self.user_id, test_payload)
         
         self.assertIn("can't be used in 'await' expression", str(context.exception))
-        logger.info("✅ TEST 3 PASSED: Demonstrated broken await pattern fails")
+        logger.info(" PASS:  TEST 3 PASSED: Demonstrated broken await pattern fails")
         
     @patch('netra_backend.app.services.websocket.quality_validation_handler.get_user_execution_context')
     @patch('netra_backend.app.services.websocket.quality_validation_handler.create_websocket_manager')
@@ -236,7 +236,7 @@ class TestQualityValidationHandlerAwaitFix(SSotAsyncTestCase):
         self.assertEqual(sent_message["type"], "content_validation_result")
         self.assertIn("payload", sent_message)
         
-        logger.info("✅ TEST 4 PASSED: Fixed pattern works correctly")
+        logger.info(" PASS:  TEST 4 PASSED: Fixed pattern works correctly")
 
 
 class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
@@ -297,7 +297,7 @@ class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
         self.assertIn("report", sent_message["payload"])
         self.assertIn("timestamp", sent_message["payload"])
         
-        logger.info("✅ TEST 5 PASSED: Quality report handler fixed pattern works")
+        logger.info(" PASS:  TEST 5 PASSED: Quality report handler fixed pattern works")
         
     @patch('netra_backend.app.services.websocket.quality_report_handler.get_user_execution_context')
     @patch('netra_backend.app.services.websocket.quality_report_handler.create_websocket_manager')
@@ -340,7 +340,7 @@ class TestQualityReportHandlerAwaitFix(SSotAsyncTestCase):
         self.assertEqual(sent_message["type"], "error")
         self.assertIn("Failed to generate report", sent_message["message"])
         
-        logger.info("✅ TEST 6 PASSED: Error handling fixed pattern works")
+        logger.info(" PASS:  TEST 6 PASSED: Error handling fixed pattern works")
 
 
 class TestQualityManagerAwaitFix(SSotAsyncTestCase):
@@ -398,7 +398,7 @@ class TestQualityManagerAwaitFix(SSotAsyncTestCase):
         self.assertEqual(sent_message["type"], "error")
         self.assertIn("Unknown message type: unknown_message_type", sent_message["message"])
         
-        logger.info("✅ TEST 7 PASSED: Quality manager unknown message handling fixed")
+        logger.info(" PASS:  TEST 7 PASSED: Quality manager unknown message handling fixed")
 
 
 class TestWebSocketEventDeliveryAfterFix(SSotAsyncTestCase):
@@ -449,7 +449,7 @@ class TestWebSocketEventDeliveryAfterFix(SSotAsyncTestCase):
         # Verify event was sent
         mock_websocket.send.assert_called_once()
         
-        logger.info("✅ TEST 8 PASSED: WebSocket event delivery works after fix")
+        logger.info(" PASS:  TEST 8 PASSED: WebSocket event delivery works after fix")
 
 
 # Test execution helper
@@ -484,10 +484,10 @@ async def run_all_tests():
                 # Run the test
                 await getattr(test_instance, test_method)()
                 passed_tests += 1
-                logger.info(f"✅ {test_method} PASSED")
+                logger.info(f" PASS:  {test_method} PASSED")
                 
             except Exception as e:
-                logger.error(f"❌ {test_method} FAILED: {str(e)}")
+                logger.error(f" FAIL:  {test_method} FAILED: {str(e)}")
     
     logger.info(f"\n{'='*60}")
     logger.info(f"TEST SUMMARY: {passed_tests}/{total_tests} tests passed")

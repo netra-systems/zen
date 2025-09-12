@@ -12,7 +12,7 @@ This test validates Critical Issue #2 from Golden Path:
 during WebSocket connection, affecting agent execution pipeline.
 
 CRITICAL REQUIREMENTS:
-1. Test complete agent pipeline (Triage→Data Helper→UVS Reporting) with real DB
+1. Test complete agent pipeline (Triage -> Data Helper -> UVS Reporting) with real DB
 2. Test agent result persistence to PostgreSQL
 3. Test thread management and conversation history
 4. Test agent state recovery from database
@@ -71,7 +71,7 @@ class TestAgentExecutionDatabaseIntegration(BaseIntegrationTest):
     @pytest.mark.real_services
     async def test_complete_agent_pipeline_with_real_database(self, real_services_fixture):
         """
-        Test complete agent pipeline (Triage→Data Helper→UVS Reporting) with real database.
+        Test complete agent pipeline (Triage -> Data Helper -> UVS Reporting) with real database.
         
         CRITICAL: This validates the entire Golden Path agent execution sequence
         persists correctly to database and maintains data integrity.
@@ -157,7 +157,7 @@ class TestAgentExecutionDatabaseIntegration(BaseIntegrationTest):
         for required_event in required_events:
             assert required_event in all_websocket_events, f"Missing WebSocket event: {required_event}"
         
-        self.logger.info(f"✅ Complete agent pipeline executed successfully for user {user_context.user_id}")
+        self.logger.info(f" PASS:  Complete agent pipeline executed successfully for user {user_context.user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -242,7 +242,7 @@ class TestAgentExecutionDatabaseIntegration(BaseIntegrationTest):
         assert latest_result["agent_id"] == "cost_analyzer_agent"
         assert latest_result["potential_savings"]["annual"] == 30000
         
-        self.logger.info(f"✅ Agent result persistence validated for user {user_context.user_id}")
+        self.logger.info(f" PASS:  Agent result persistence validated for user {user_context.user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -338,7 +338,7 @@ class TestAgentExecutionDatabaseIntegration(BaseIntegrationTest):
         assert "optimization_recommendations" in conversation_summary
         assert "implementation_status" in conversation_summary
         
-        self.logger.info(f"✅ Thread management and conversation history validated for thread {thread_id}")
+        self.logger.info(f" PASS:  Thread management and conversation history validated for thread {thread_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -443,7 +443,7 @@ class TestAgentExecutionDatabaseIntegration(BaseIntegrationTest):
         assert state_history[0]["step"] == "data_collection"
         assert state_history[1]["step"] == "cost_analysis"
         
-        self.logger.info(f"✅ Agent state recovery validated for execution {execution_id}")
+        self.logger.info(f" PASS:  Agent state recovery validated for execution {execution_id}")
     
     # Helper methods for database operations
     

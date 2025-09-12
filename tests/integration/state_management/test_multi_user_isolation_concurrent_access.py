@@ -2,7 +2,7 @@
 Test Multi-User State Isolation and Concurrent Access - State Management & Context Swimlane
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core multi-tenant platform functionality
+- Segment: All (Free  ->  Enterprise) - Core multi-tenant platform functionality
 - Business Goal: Ensure complete user data isolation and prevent state leakage between users
 - Value Impact: Protects user privacy and enables secure multi-user AI interactions
 - Strategic Impact: CRITICAL - User isolation is fundamental to platform security and scalability
@@ -393,7 +393,7 @@ class TestMultiUserIsolationConcurrentAccess(BaseIntegrationTest):
                 WHERE t.user_id = $1 AND m.content LIKE $2
             """, user_id, f"%User {user_index} Operation%")
             
-            expected_messages = 5 * 2  # 5 operations × 2 messages each
+            expected_messages = 5 * 2  # 5 operations  x  2 messages each
             assert len(user_messages) == expected_messages
             
             # Verify no messages from other users

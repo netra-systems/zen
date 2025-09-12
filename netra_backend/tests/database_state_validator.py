@@ -14,7 +14,7 @@ Features:
 - Test isolation verification
 - Automated anomaly detection
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 import asyncio

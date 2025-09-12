@@ -656,7 +656,7 @@ class TestWebSocketReconnectionDuringAgentExecution:
         simulator = WebSocketReconnectionSimulator()
         tester = RealWebSocketReconnectionTester(simulator)
         
-        logger.info("🚀 Starting long-running agent WebSocket reconnection survival test")
+        logger.info("[U+1F680] Starting long-running agent WebSocket reconnection survival test")
         
         reconnection_scenario = {
             "disruption_type": "connection_drop",
@@ -701,7 +701,7 @@ class TestWebSocketReconnectionDuringAgentExecution:
         assert continuity["data_integrity_rate"] >= 0.9, \
             f"Data integrity rate too low: {continuity['data_integrity_rate']:.1%}"
         
-        logger.info("✅ Long-running agent WebSocket reconnection survival VALIDATED")
+        logger.info(" PASS:  Long-running agent WebSocket reconnection survival VALIDATED")
         logger.info(f"  Execution duration: {result['execution_duration']:.1f}s")
         logger.info(f"  Events after reconnection: {result['events_after_reconnection']}")
         logger.info(f"  SLA compliance: {reconnection_report['sla_compliance_rate']:.1%}")
@@ -719,7 +719,7 @@ class TestWebSocketReconnectionDuringAgentExecution:
         simulator = WebSocketReconnectionSimulator()
         tester = RealWebSocketReconnectionTester(simulator)
         
-        logger.info(f"🚀 Starting {concurrent_agents} concurrent agent WebSocket reconnection isolation test")
+        logger.info(f"[U+1F680] Starting {concurrent_agents} concurrent agent WebSocket reconnection isolation test")
         
         async def isolated_agent_with_reconnection(agent_index: int) -> Dict[str, Any]:
             """Execute isolated agent with reconnection scenario."""
@@ -780,7 +780,7 @@ class TestWebSocketReconnectionDuringAgentExecution:
         assert reconnection_report["sla_compliance_rate"] >= 0.7, \
             f"SLA compliance rate too low during concurrent reconnection: {reconnection_report['sla_compliance_rate']:.1%}"
         
-        logger.info("✅ Concurrent agent WebSocket reconnection isolation VALIDATED")
+        logger.info(" PASS:  Concurrent agent WebSocket reconnection isolation VALIDATED")
         logger.info(f"  Agents: {len(successful_agents)}/{concurrent_agents}")
         logger.info(f"  Survived disruption: {agents_that_survived}/{len(successful_agents)}")
         logger.info(f"  Events after reconnection: {total_events_after_reconnection}")
@@ -798,7 +798,7 @@ class TestWebSocketReconnectionDuringAgentExecution:
         simulator = WebSocketReconnectionSimulator()
         tester = RealWebSocketReconnectionTester(simulator)
         
-        logger.info(f"🚀 Starting WebSocket reconnection SLA compliance test ({sla_test_scenarios} scenarios)")
+        logger.info(f"[U+1F680] Starting WebSocket reconnection SLA compliance test ({sla_test_scenarios} scenarios)")
         
         # Test various reconnection scenarios
         reconnection_scenarios = [
@@ -858,7 +858,7 @@ class TestWebSocketReconnectionDuringAgentExecution:
         assert reconnection_report["sla_compliance_rate"] >= 0.7, \
             f"Overall SLA compliance too low: {reconnection_report['sla_compliance_rate']:.1%} < 70%"
         
-        logger.info("✅ WebSocket reconnection SLA compliance VALIDATED")
+        logger.info(" PASS:  WebSocket reconnection SLA compliance VALIDATED")
         logger.info(f"  SLA tests: {len(successful_sla_tests)}/{sla_test_scenarios}")
         
         if not performance_metrics.get("no_data", False):
@@ -880,7 +880,7 @@ class TestWebSocketReconnectionDuringAgentExecution:
         simulator = WebSocketReconnectionSimulator()
         tester = RealWebSocketReconnectionTester(simulator)
         
-        logger.info(f"🚀 Starting agent execution data integrity during reconnection test")
+        logger.info(f"[U+1F680] Starting agent execution data integrity during reconnection test")
         
         # Test different agent types for data integrity
         agent_scenarios = [
@@ -961,7 +961,7 @@ class TestWebSocketReconnectionDuringAgentExecution:
         assert events_preserved >= len(successful_integrity_tests) * 0.9, \
             f"WebSocket events not preserved during reconnection: {events_preserved}/{len(successful_integrity_tests)}"
         
-        logger.info("✅ Agent execution data integrity during reconnection VALIDATED")
+        logger.info(" PASS:  Agent execution data integrity during reconnection VALIDATED")
         logger.info(f"  Integrity tests: {len(successful_integrity_tests)}/{len(integrity_results)}")
         logger.info(f"  Data integrity rate: {integrity_rate:.1%}")
         logger.info(f"  Events preserved: {events_preserved}/{len(successful_integrity_tests)}")

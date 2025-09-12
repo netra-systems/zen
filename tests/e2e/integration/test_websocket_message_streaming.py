@@ -237,7 +237,7 @@
 
                                     # REMOVED_SYNTAX_ERROR: return reconnection_result
 
-                                    # Helper methods (≤8 lines each per CLAUDE.md)
+                                    # Helper methods ( <= 8 lines each per CLAUDE.md)
 
 # REMOVED_SYNTAX_ERROR: async def _create_response_chunks(self, content: str, chunk_size: int) -> List[str]:
     # REMOVED_SYNTAX_ERROR: """Create response chunks for streaming."""

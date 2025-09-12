@@ -40,7 +40,7 @@ class DashboardHTMLComponents:
         """Generate header content"""
         return f"""
         <div class="header">
-            <h1>🏗️ Architecture Health Dashboard</h1>
+            <h1>[U+1F3D7][U+FE0F] Architecture Health Dashboard</h1>
             <p>Comprehensive monitoring of architectural compliance and code quality</p>
             <p>Last updated: {scan_timestamp.strftime('%Y-%m-%d %H:%M:%S')}</p>
         </div>"""
@@ -103,7 +103,7 @@ class DashboardHTMLComponents:
         """Generate charts section HTML"""
         return """
             <div class="charts-section">
-                <h2>📊 Violation Analysis</h2>
+                <h2> CHART:  Violation Analysis</h2>
                 <div class="charts-grid">
                     <div class="chart-container"><canvas id="violationChart"></canvas></div>
                     <div class="chart-container"><canvas id="severityChart"></canvas></div>
@@ -162,7 +162,7 @@ class DashboardHTMLComponents:
     @staticmethod
     def _generate_recommendations_css() -> str:
         """Generate CSS for recommendations section."""
-        return ".recommendations { background: #e7f3ff; border-radius: 8px; padding: 20px; margin-top: 30px; } .recommendations h3 { color: #0066cc; margin-bottom: 15px; } .recommendations ul { list-style: none; } .recommendations li { padding: 8px 0; border-bottom: 1px solid #ddd; position: relative; padding-left: 20px; } .recommendations li:before { content: '✓'; position: absolute; left: 0; color: #28a745; font-weight: bold; }"
+        return ".recommendations { background: #e7f3ff; border-radius: 8px; padding: 20px; margin-top: 30px; } .recommendations h3 { color: #0066cc; margin-bottom: 15px; } .recommendations ul { list-style: none; } .recommendations li { padding: 8px 0; border-bottom: 1px solid #ddd; position: relative; padding-left: 20px; } .recommendations li:before { content: '[U+2713]'; position: absolute; left: 0; color: #28a745; font-weight: bold; }"
 
     @staticmethod
     def _generate_tabs_css() -> str:

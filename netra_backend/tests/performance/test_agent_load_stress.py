@@ -35,7 +35,7 @@ from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 class AgentLoadTestFixtures:
 
-    """Fixtures for agent load testing with ≤8 line functions."""
+    """Fixtures for agent load testing with  <= 8 line functions."""
     
     @staticmethod
 

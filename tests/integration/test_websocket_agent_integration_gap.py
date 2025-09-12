@@ -341,7 +341,7 @@ class TestWebSocketAgentIntegrationGap(BaseIntegrationTest):
             try:
                 # Step 1: Factory configuration
                 websocket_factory.configure()
-                logger.info("✓ Factory configuration succeeded")
+                logger.info("[U+2713] Factory configuration succeeded")
             except Exception as e:
                 failure_points.append(f"Factory configuration: {e}")
             
@@ -352,7 +352,7 @@ class TestWebSocketAgentIntegrationGap(BaseIntegrationTest):
                 )
                 connection_pool = websocket_factory._connection_pool
                 assert connection_pool is not None, "Connection pool is None"
-                logger.info("✓ Connection pool available")
+                logger.info("[U+2713] Connection pool available")
             except Exception as e:
                 failure_points.append(f"Connection pool: {e}")
             
@@ -363,7 +363,7 @@ class TestWebSocketAgentIntegrationGap(BaseIntegrationTest):
                 )
                 agent_registry = websocket_factory._agent_registry
                 assert agent_registry is not None, "Agent registry is None"
-                logger.info("✓ Agent registry available")
+                logger.info("[U+2713] Agent registry available")
             except Exception as e:
                 failure_points.append(f"Agent registry: {e}")
             
@@ -374,7 +374,7 @@ class TestWebSocketAgentIntegrationGap(BaseIntegrationTest):
                 )
                 health_monitor = websocket_factory._health_monitor
                 assert health_monitor is not None, "Health monitor is None"
-                logger.info("✓ Health monitor available")
+                logger.info("[U+2713] Health monitor available")
             except Exception as e:
                 failure_points.append(f"Health monitor: {e}")
             
@@ -385,7 +385,7 @@ class TestWebSocketAgentIntegrationGap(BaseIntegrationTest):
                     websocket_client_id=str(user_context.websocket_client_id)
                 )
                 assert user_emitter is not None, "User emitter creation returned None"
-                logger.info("✓ User emitter created successfully")
+                logger.info("[U+2713] User emitter created successfully")
                 
                 # If we get here, the test should fail because the integration gap should prevent this
                 pytest.fail(

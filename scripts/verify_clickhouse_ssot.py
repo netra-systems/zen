@@ -132,9 +132,9 @@ def main():
     print("\n1. Checking deleted SSOT violation files...")
     passed, violations = check_deleted_files()
     if passed:
-        print("   ✅ All SSOT violation files properly deleted")
+        print("    PASS:  All SSOT violation files properly deleted")
     else:
-        print("   ❌ SSOT violation files still exist:")
+        print("    FAIL:  SSOT violation files still exist:")
         for file in violations:
             print(f"      - {file}")
         all_passed = False
@@ -143,18 +143,18 @@ def main():
     print("\n2. Checking canonical implementation...")
     passed, message = check_canonical_exists()
     if passed:
-        print(f"   ✅ {message}")
+        print(f"    PASS:  {message}")
     else:
-        print(f"   ❌ {message}")
+        print(f"    FAIL:  {message}")
         all_passed = False
     
     # Check 3: Documentation
     print("\n3. Checking documentation...")
     passed, issues = check_documentation()
     if passed:
-        print("   ✅ Documentation properly maintained")
+        print("    PASS:  Documentation properly maintained")
     else:
-        print("   ❌ Documentation issues found:")
+        print("    FAIL:  Documentation issues found:")
         for issue in issues:
             print(f"      - {issue}")
         all_passed = False
@@ -163,9 +163,9 @@ def main():
     print("\n4. Checking for old import patterns...")
     passed, violations = check_import_patterns()
     if passed:
-        print("   ✅ No old import patterns found")
+        print("    PASS:  No old import patterns found")
     else:
-        print(f"   ⚠️  Found {len(violations)} files with old imports:")
+        print(f"    WARNING: [U+FE0F]  Found {len(violations)} files with old imports:")
         for violation in violations[:5]:  # Show first 5
             print(f"      - {violation}")
         if len(violations) > 5:
@@ -175,7 +175,7 @@ def main():
     # Summary
     print("\n" + "=" * 70)
     if all_passed:
-        print("✅ CLICKHOUSE SSOT COMPLIANCE: PASSED")
+        print(" PASS:  CLICKHOUSE SSOT COMPLIANCE: PASSED")
         print("\nCanonical implementation properly maintained at:")
         print("  /netra_backend/app/db/clickhouse.py")
         print("\nUsage pattern:")
@@ -183,7 +183,7 @@ def main():
         print("  async with get_clickhouse_client() as client:")
         print("      results = await client.execute('SELECT 1')")
     else:
-        print("❌ CLICKHOUSE SSOT COMPLIANCE: FAILED")
+        print(" FAIL:  CLICKHOUSE SSOT COMPLIANCE: FAILED")
         print("\nPlease address the issues above to maintain SSOT compliance.")
         sys.exit(1)
     

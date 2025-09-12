@@ -201,7 +201,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_sequential_analysis_optimization_flow(self, real_services_fixture):
-        """Test sequential execution of analysis → optimization → action tools."""
+        """Test sequential execution of analysis  ->  optimization  ->  action tools."""
         self.logger.info("=== Testing Sequential Analysis-Optimization Flow ===")
         
         # Create authenticated user context
@@ -225,7 +225,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             sequential_results = {}
             
             # Step 1: Analysis
-            self.logger.info("🔍 Executing analysis phase...")
+            self.logger.info(" SEARCH:  Executing analysis phase...")
             analysis_result = await dispatcher.execute_tool(
                 tool_name="cost_analyzer",
                 parameters={"data_source": "aws_billing", "time_period": "30_days"}
@@ -235,7 +235,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             sequential_results['analysis'] = analysis_result.result
             
             # Step 2: Optimization (using analysis data)
-            self.logger.info("⚙️ Executing optimization phase...")
+            self.logger.info("[U+2699][U+FE0F] Executing optimization phase...")
             optimization_result = await dispatcher.execute_tool(
                 tool_name="cost_optimizer",
                 parameters={"analysis_data": analysis_result.result}
@@ -245,7 +245,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             sequential_results['optimization'] = optimization_result.result
             
             # Step 3: Action execution (using optimization recommendations)
-            self.logger.info("🚀 Executing action phase...")
+            self.logger.info("[U+1F680] Executing action phase...")
             action_result = await dispatcher.execute_tool(
                 tool_name="cost_action_executor",
                 parameters={
@@ -287,7 +287,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             
             self.assert_business_value_delivered(sequential_flow_result, "cost_savings")
             
-        self.logger.info("✅ Sequential analysis-optimization flow test passed")
+        self.logger.info(" PASS:  Sequential analysis-optimization flow test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -315,7 +315,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
         ) as dispatcher:
             
             # Execute analysis tools in parallel
-            self.logger.info("🔍 Executing parallel multi-domain analysis...")
+            self.logger.info(" SEARCH:  Executing parallel multi-domain analysis...")
             
             analysis_tasks = [
                 dispatcher.execute_tool("cost_analyzer", {"domain": "cost", "parallel": True}),
@@ -338,7 +338,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             }
             
             # Execute unified optimization using all analysis data
-            self.logger.info("⚙️ Executing unified optimization...")
+            self.logger.info("[U+2699][U+FE0F] Executing unified optimization...")
             unified_optimization_result = await dispatcher.execute_tool(
                 tool_name="unified_optimizer",
                 parameters={"analysis_data": combined_analysis}
@@ -380,7 +380,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             
             self.assert_business_value_delivered(parallel_flow_result, "insights")
             
-        self.logger.info("✅ Parallel multi-domain analysis flow test passed")
+        self.logger.info(" PASS:  Parallel multi-domain analysis flow test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -408,7 +408,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
         ) as dispatcher:
             
             # Step 1: Analysis to determine flow path
-            self.logger.info("🔍 Executing analysis for conditional branching...")
+            self.logger.info(" SEARCH:  Executing analysis for conditional branching...")
             analysis_result = await dispatcher.execute_tool(
                 tool_name="conditional_analyzer",
                 parameters={"branching_test": True}
@@ -428,14 +428,14 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             
             # Step 2: Conditional optimization based on analysis
             if is_high_impact:
-                self.logger.info("⚙️ Taking high-impact optimization path...")
+                self.logger.info("[U+2699][U+FE0F] Taking high-impact optimization path...")
                 optimization_result = await dispatcher.execute_tool(
                     tool_name="high_impact_optimizer",
                     parameters={"analysis_data": analysis_result.result, "impact_level": "high"}
                 )
                 chosen_path = "high_impact"
             else:
-                self.logger.info("⚙️ Taking low-impact optimization path...")
+                self.logger.info("[U+2699][U+FE0F] Taking low-impact optimization path...")
                 optimization_result = await dispatcher.execute_tool(
                     tool_name="low_impact_optimizer", 
                     parameters={"analysis_data": analysis_result.result, "impact_level": "low"}
@@ -452,7 +452,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
                 "path_taken": chosen_path
             }
             
-            self.logger.info(f"🚀 Executing actions for {chosen_path} path...")
+            self.logger.info(f"[U+1F680] Executing actions for {chosen_path} path...")
             action_result = await dispatcher.execute_tool(
                 tool_name="conditional_action_executor",
                 parameters=action_params
@@ -490,7 +490,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             
             self.assert_business_value_delivered(conditional_flow_result, "automation")
             
-        self.logger.info("✅ Conditional orchestration with branching test passed")
+        self.logger.info(" PASS:  Conditional orchestration with branching test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -526,7 +526,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             recovery_flow_results = {}
             
             # Step 1: Analysis (should succeed)
-            self.logger.info("🔍 Executing analysis phase...")
+            self.logger.info(" SEARCH:  Executing analysis phase...")
             analysis_result = await dispatcher.execute_tool(
                 tool_name="working_analyzer",
                 parameters={"recovery_test": True}
@@ -536,7 +536,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             recovery_flow_results['analysis'] = analysis_result.result
             
             # Step 2: Try primary optimizer (should fail)
-            self.logger.info("⚙️ Attempting primary optimization (expected to fail)...")
+            self.logger.info("[U+2699][U+FE0F] Attempting primary optimization (expected to fail)...")
             primary_optimization_result = await dispatcher.execute_tool(
                 tool_name="failing_optimizer",
                 parameters={"analysis_data": analysis_result.result}
@@ -546,7 +546,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             recovery_flow_results['primary_optimization_error'] = primary_optimization_result.error
             
             # Step 3: Fallback to backup optimizer
-            self.logger.info("🔄 Falling back to backup optimizer...")
+            self.logger.info(" CYCLE:  Falling back to backup optimizer...")
             backup_optimization_result = await dispatcher.execute_tool(
                 tool_name="backup_optimizer",
                 parameters={"analysis_data": analysis_result.result, "fallback_mode": True}
@@ -556,7 +556,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             recovery_flow_results['backup_optimization'] = backup_optimization_result.result
             
             # Step 4: Continue with action execution using backup results
-            self.logger.info("🚀 Executing actions with backup optimization results...")
+            self.logger.info("[U+1F680] Executing actions with backup optimization results...")
             action_result = await dispatcher.execute_tool(
                 tool_name="resilient_action_tool",
                 parameters={
@@ -593,7 +593,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             
             self.assert_business_value_delivered(error_recovery_result, "automation")
             
-        self.logger.info("✅ Error recovery in multi-tool flow test passed")
+        self.logger.info(" PASS:  Error recovery in multi-tool flow test passed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -649,7 +649,7 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             max_iterations = 2
             
             for iteration in range(max_iterations):
-                self.logger.info(f"🔄 Starting feedback loop iteration {iteration + 1}...")
+                self.logger.info(f" CYCLE:  Starting feedback loop iteration {iteration + 1}...")
                 
                 # Step 1: Analysis (refined in subsequent iterations)
                 analysis_params = {"iteration": iteration + 1}
@@ -692,9 +692,9 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
                 
                 # If we have some approved recommendations and this isn't the last iteration, continue
                 if refinement_needed > 0 and iteration < max_iterations - 1:
-                    self.logger.info("🔧 Refinement needed, continuing to next iteration...")
+                    self.logger.info("[U+1F527] Refinement needed, continuing to next iteration...")
                 else:
-                    self.logger.info("✅ Feedback loop complete")
+                    self.logger.info(" PASS:  Feedback loop complete")
                     break
             
             # Verify feedback loop progression
@@ -725,4 +725,4 @@ class TestMultiToolOrchestrationFlows(BaseIntegrationTest):
             
             self.assert_business_value_delivered(feedback_loop_result, "insights")
             
-        self.logger.info("✅ Complex orchestration with feedback loops test passed")
+        self.logger.info(" PASS:  Complex orchestration with feedback loops test passed")

@@ -80,7 +80,7 @@ class ToolRegistryRemediationValidator:
                 )
             except ValueError as e:
                 if "basemodel" in str(e).lower():
-                    self.logger.info("✅ BaseModel filtering working correctly")
+                    self.logger.info(" PASS:  BaseModel filtering working correctly")
                     return ValidationResult(
                         test_name="basemodel_filtering", 
                         success=True,
@@ -135,7 +135,7 @@ class ToolRegistryRemediationValidator:
             try:
                 result = registry.get_tool("nonexistent_tool")
                 if result is None:
-                    self.logger.info("✅ get_tool() compatibility method working")
+                    self.logger.info(" PASS:  get_tool() compatibility method working")
                     return ValidationResult(
                         test_name="api_compatibility",
                         success=True,
@@ -183,7 +183,7 @@ class ToolRegistryRemediationValidator:
             # Test cleanup function (safe to call with non-existent connection)
             cleanup_websocket_registries("test_connection_validation")
             
-            self.logger.info("✅ WebSocket cleanup functions accessible")
+            self.logger.info(" PASS:  WebSocket cleanup functions accessible")
             return ValidationResult(
                 test_name="websocket_cleanup",
                 success=True,
@@ -251,7 +251,7 @@ class ToolRegistryRemediationValidator:
                     duration_ms=(datetime.now() - start_time).total_seconds() * 1000
                 )
             
-            self.logger.info(f"✅ All {len(validated_pathways)} instantiation pathways working")
+            self.logger.info(f" PASS:  All {len(validated_pathways)} instantiation pathways working")
             return ValidationResult(
                 test_name="instantiation_pathways", 
                 success=True,
@@ -270,7 +270,7 @@ class ToolRegistryRemediationValidator:
     
     def run_quick_validation(self) -> Dict[str, Any]:
         """Run quick validation of core functionality."""
-        self.logger.info("🚀 Starting Quick Validation for GitHub Issue #110")
+        self.logger.info("[U+1F680] Starting Quick Validation for GitHub Issue #110")
         
         validations = [
             self.validate_basemodel_filtering,
@@ -284,9 +284,9 @@ class ToolRegistryRemediationValidator:
             self.results.append(result)
             
             if result.success:
-                self.logger.info(f"✅ {result.test_name}: PASSED ({result.duration_ms:.1f}ms)")
+                self.logger.info(f" PASS:  {result.test_name}: PASSED ({result.duration_ms:.1f}ms)")
             else:
-                self.logger.error(f"❌ {result.test_name}: FAILED - {result.error}")
+                self.logger.error(f" FAIL:  {result.test_name}: FAILED - {result.error}")
                 if result.details:
                     self.logger.error(f"   Details: {result.details}")
         
@@ -350,18 +350,18 @@ def main():
           f"({report['success_rate']:.1%})")
     
     if report['failed_tests'] > 0:
-        print("\n❌ FAILED TESTS:")
+        print("\n FAIL:  FAILED TESTS:")
         for test in report['test_results']:
             if test['status'] == 'FAILED':
                 print(f"  - {test['test_name']}: {test['error']}")
     else:
-        print("\n✅ ALL VALIDATIONS PASSED - Remediation appears successful")
+        print("\n PASS:  ALL VALIDATIONS PASSED - Remediation appears successful")
     
     if args.output:
         import json
         with open(args.output, 'w') as f:
             json.dump(report, f, indent=2)
-        print(f"\n📄 Full report saved to: {args.output}")
+        print(f"\n[U+1F4C4] Full report saved to: {args.output}")
     
     # Exit with appropriate code
     sys.exit(0 if report['overall_status'] == 'PASSED' else 1)

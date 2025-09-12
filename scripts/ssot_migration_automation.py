@@ -51,7 +51,7 @@ class SSOTMigrationAutomator:
         Returns:
             Dict mapping violation types to lists of violation details
         """
-        logger.info("🔍 Scanning for SSOT violations requiring migration...")
+        logger.info(" SEARCH:  Scanning for SSOT violations requiring migration...")
         
         violations = {
             'pytest_main_usage': [],
@@ -155,7 +155,7 @@ class SSOTMigrationAutomator:
         Returns:
             True if migration successful, False otherwise
         """
-        logger.info("🚀 Starting Golden Path test migration (Revenue Protection Priority)")
+        logger.info("[U+1F680] Starting Golden Path test migration (Revenue Protection Priority)")
         
         golden_path_patterns = [
             "**/golden_path/**/*.py",
@@ -170,22 +170,22 @@ class SSOTMigrationAutomator:
                 if self._should_skip_file(file_path):
                     continue
                     
-                logger.info(f"🔄 Migrating Golden Path file: {file_path}")
+                logger.info(f" CYCLE:  Migrating Golden Path file: {file_path}")
                 
                 if self._migrate_single_file(file_path):
                     migrated_files.append(file_path)
-                    logger.info(f"✅ Successfully migrated: {file_path}")
+                    logger.info(f" PASS:  Successfully migrated: {file_path}")
                 else:
-                    logger.error(f"❌ Failed to migrate: {file_path}")
+                    logger.error(f" FAIL:  Failed to migrate: {file_path}")
                     return False
         
         # Validate Golden Path still works after migration
         if not self._validate_golden_path_functionality():
-            logger.error("❌ Golden Path validation failed after migration")
+            logger.error(" FAIL:  Golden Path validation failed after migration")
             self._rollback_migrations(migrated_files)
             return False
             
-        logger.info(f"✅ Golden Path migration completed: {len(migrated_files)} files migrated")
+        logger.info(f" PASS:  Golden Path migration completed: {len(migrated_files)} files migrated")
         return True
     
     def migrate_category_tests(self, category: str) -> bool:
@@ -198,7 +198,7 @@ class SSOTMigrationAutomator:
         Returns:
             True if migration successful, False otherwise
         """
-        logger.info(f"🔄 Starting {category} test migration")
+        logger.info(f" CYCLE:  Starting {category} test migration")
         
         category_patterns = [
             f"**/test_{category}*.py",
@@ -214,23 +214,23 @@ class SSOTMigrationAutomator:
                     continue
                     
                 if self._contains_violations(file_path):
-                    logger.info(f"🔄 Migrating {category} file: {file_path}")
+                    logger.info(f" CYCLE:  Migrating {category} file: {file_path}")
                     
                     if self._migrate_single_file(file_path):
                         migrated_files.append(file_path)
-                        logger.info(f"✅ Successfully migrated: {file_path}")
+                        logger.info(f" PASS:  Successfully migrated: {file_path}")
                     else:
-                        logger.error(f"❌ Failed to migrate: {file_path}")
+                        logger.error(f" FAIL:  Failed to migrate: {file_path}")
                         self._rollback_migrations(migrated_files)
                         return False
         
         # Validate category tests still work
         if not self._validate_category_tests(category):
-            logger.error(f"❌ {category} test validation failed after migration")
+            logger.error(f" FAIL:  {category} test validation failed after migration")
             self._rollback_migrations(migrated_files)
             return False
             
-        logger.info(f"✅ {category} migration completed: {len(migrated_files)} files migrated")
+        logger.info(f" PASS:  {category} migration completed: {len(migrated_files)} files migrated")
         return True
     
     def _migrate_single_file(self, file_path: Path) -> bool:
@@ -317,7 +317,7 @@ exit_code, output = runner.run_tests({args})
     
     def _validate_golden_path_functionality(self) -> bool:
         """Validate Golden Path functionality after migration."""
-        logger.info("🔍 Validating Golden Path functionality...")
+        logger.info(" SEARCH:  Validating Golden Path functionality...")
         
         try:
             # Quick Golden Path smoke test
@@ -329,19 +329,19 @@ exit_code, output = runner.run_tests({args})
             ], capture_output=True, text=True, timeout=60)
             
             if result.returncode == 0:
-                logger.info("✅ Golden Path validation passed")
+                logger.info(" PASS:  Golden Path validation passed")
                 return True
             else:
-                logger.error(f"❌ Golden Path validation failed: {result.stderr}")
+                logger.error(f" FAIL:  Golden Path validation failed: {result.stderr}")
                 return False
                 
         except Exception as e:
-            logger.error(f"❌ Golden Path validation error: {e}")
+            logger.error(f" FAIL:  Golden Path validation error: {e}")
             return False
     
     def _validate_category_tests(self, category: str) -> bool:
         """Validate category tests after migration."""
-        logger.info(f"🔍 Validating {category} tests...")
+        logger.info(f" SEARCH:  Validating {category} tests...")
         
         try:
             result = subprocess.run([
@@ -352,14 +352,14 @@ exit_code, output = runner.run_tests({args})
             ], capture_output=True, text=True, timeout=120)
             
             if result.returncode == 0:
-                logger.info(f"✅ {category} test validation passed")
+                logger.info(f" PASS:  {category} test validation passed")
                 return True
             else:
-                logger.error(f"❌ {category} test validation failed: {result.stderr}")
+                logger.error(f" FAIL:  {category} test validation failed: {result.stderr}")
                 return False
                 
         except Exception as e:
-            logger.error(f"❌ {category} test validation error: {e}")
+            logger.error(f" FAIL:  {category} test validation error: {e}")
             return False
     
     def validate_ssot_compliance(self) -> Tuple[bool, Dict]:
@@ -369,7 +369,7 @@ exit_code, output = runner.run_tests({args})
         Returns:
             Tuple of (compliance_passed, compliance_report)
         """
-        logger.info("📊 Validating SSOT compliance...")
+        logger.info(" CHART:  Validating SSOT compliance...")
         
         violations = self.scan_ssot_violations()
         
@@ -385,9 +385,9 @@ exit_code, output = runner.run_tests({args})
         compliance_passed = total_violations < 10  # Allow some minor violations
         
         if compliance_passed:
-            logger.info(f"✅ SSOT compliance validated: {compliance_report['compliance_percentage']}%")
+            logger.info(f" PASS:  SSOT compliance validated: {compliance_report['compliance_percentage']}%")
         else:
-            logger.error(f"❌ SSOT compliance failed: {total_violations} violations remaining")
+            logger.error(f" FAIL:  SSOT compliance failed: {total_violations} violations remaining")
             
         return compliance_passed, compliance_report
     
@@ -407,12 +407,12 @@ exit_code, output = runner.run_tests({args})
     
     def _rollback_migrations(self, migrated_files: List[Path]):
         """Rollback migrations for failed migration attempt."""
-        logger.warning("🔄 Rolling back migrations due to validation failure...")
+        logger.warning(" CYCLE:  Rolling back migrations due to validation failure...")
         
         for file_path in migrated_files:
             self._restore_from_backup(file_path)
             
-        logger.warning("🔄 Rollback completed. System restored to previous state.")
+        logger.warning(" CYCLE:  Rollback completed. System restored to previous state.")
     
     def _restore_from_backup(self, file_path: Path):
         """Restore file from backup."""
@@ -476,7 +476,7 @@ exit_code, output = runner.run_tests({args})
     def _log_violation_summary(self, violations: Dict):
         """Log summary of violations found."""
         total = sum(len(v) for v in violations.values())
-        logger.info(f"📊 SSOT Violation Scan Complete: {total} violations found")
+        logger.info(f" CHART:  SSOT Violation Scan Complete: {total} violations found")
         
         for violation_type, violation_list in violations.items():
             if violation_list:
@@ -495,7 +495,7 @@ def main():
     parser.add_argument('--validate-compliance', action='store_true',
                        help='Validate SSOT compliance after migration')
     parser.add_argument('--full-migration', action='store_true',
-                       help='Perform complete migration (Golden Path → Integration → Unit → E2E)')
+                       help='Perform complete migration (Golden Path  ->  Integration  ->  Unit  ->  E2E)')
     
     args = parser.parse_args()
     
@@ -526,7 +526,7 @@ def main():
         print("\n" + "="*60)
         print("SSOT COMPLIANCE VALIDATION REPORT")
         print("="*60)
-        print(f"Compliance: {'✅ PASSED' if compliance_passed else '❌ FAILED'}")
+        print(f"Compliance: {' PASS:  PASSED' if compliance_passed else ' FAIL:  FAILED'}")
         print(f"Compliance Percentage: {report['compliance_percentage']}%")
         print(f"Total Violations: {report['total_violations']}")
         print(f"Business Impact: {report['business_impact']}")
@@ -534,7 +534,7 @@ def main():
     
     elif args.full_migration:
         # Full migration workflow
-        print("🚀 Starting Full SSOT Migration...")
+        print("[U+1F680] Starting Full SSOT Migration...")
         
         # Phase 3.1: Golden Path (Revenue Protection)
         if not migrator.migrate_golden_path_tests():
@@ -555,10 +555,10 @@ def main():
         # Final validation
         compliance_passed, report = migrator.validate_ssot_compliance()
         if compliance_passed:
-            print("✅ Full SSOT migration completed successfully!")
+            print(" PASS:  Full SSOT migration completed successfully!")
             print(f"Final compliance: {report['compliance_percentage']}%")
         else:
-            print("❌ Full migration validation failed")
+            print(" FAIL:  Full migration validation failed")
             sys.exit(1)
     
     else:

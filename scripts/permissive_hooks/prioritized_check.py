@@ -111,11 +111,11 @@ def main():
     
     # Show what we're checking
     priority_names = {
-        1: "🔴 CRITICAL (Core)",
-        2: "🟠 HIGH (App)",
-        3: "🟡 MEDIUM (Scripts)",
-        4: "🟢 LOW (Tests)",
-        5: "⚪ MINIMAL (Other)"
+        1: "[U+1F534] CRITICAL (Core)",
+        2: "[U+1F7E0] HIGH (App)",
+        3: "[U+1F7E1] MEDIUM (Scripts)",
+        4: "[U+1F7E2] LOW (Tests)",
+        5: "[U+26AA] MINIMAL (Other)"
     }
     
     for priority in sorted(files_by_priority.keys()):

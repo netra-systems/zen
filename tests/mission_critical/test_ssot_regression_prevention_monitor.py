@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🚨 MISSION CRITICAL: SSOT Regression Prevention Monitor Tests
+ ALERT:  MISSION CRITICAL: SSOT Regression Prevention Monitor Tests
 
 CRITICAL MISSION: Enhanced tests that serve as automated regression monitors
 Context: Transforms existing violation detection tests into continuous regression monitors
@@ -79,7 +79,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         self.monitoring_reports = []
         self.baseline_violations = {}
         
-        logger.info("🚀 Starting SSOT Regression Prevention Monitor")
+        logger.info("[U+1F680] Starting SSOT Regression Prevention Monitor")
         logger.info("=" * 60)
         logger.info("MISSION: Prevent reintroduction of resolved SSOT violations")
         logger.info("FOCUS: WebSocket auth patterns from GitHub Issue #300")
@@ -97,7 +97,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         PATTERN: verify_signature=False (CRITICAL security bypass)
         BUSINESS IMPACT: $500K+ ARR at risk if reintroduced
         """
-        logger.info("🔍 Testing for JWT signature bypass pattern regression")
+        logger.info(" SEARCH:  Testing for JWT signature bypass pattern regression")
         
         # Specific patterns from resolved GitHub Issue #300
         critical_patterns = [
@@ -140,7 +140,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         
         # Assert no critical violations found
         if violations_found:
-            logger.critical("🚨 CRITICAL REGRESSION: JWT signature bypass patterns detected!")
+            logger.critical(" ALERT:  CRITICAL REGRESSION: JWT signature bypass patterns detected!")
             for violation in violations_found:
                 logger.critical(f"  File: {violation['file']}:{violation['line']}")
                 logger.critical(f"  Code: {violation['content']}")
@@ -150,7 +150,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
                        f"patterns found. These were resolved in GitHub Issue #300 and must not be reintroduced. "
                        f"Business Impact: $500K+ ARR at risk from auth bypass vulnerability.")
         
-        logger.info("✅ No JWT signature bypass patterns detected - Issue #300 remains resolved")
+        logger.info(" PASS:  No JWT signature bypass patterns detected - Issue #300 remains resolved")
     
     @pytest.mark.critical
     @pytest.mark.ssot_compliance
@@ -161,7 +161,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         SSOT REQUIREMENT: All auth operations must use UnifiedAuthInterface
         This test prevents regression to direct JWT operations bypassing SSOT.
         """
-        logger.info("🔍 Testing UnifiedAuthInterface SSOT compliance")
+        logger.info(" SEARCH:  Testing UnifiedAuthInterface SSOT compliance")
         
         # Check for direct JWT imports/operations bypassing UnifiedAuthInterface
         ssot_violation_patterns = [
@@ -226,7 +226,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
                 filtered_violations.append(violation)
         
         if filtered_violations:
-            logger.error("🚨 SSOT REGRESSION: Direct JWT operations bypassing UnifiedAuthInterface!")
+            logger.error(" ALERT:  SSOT REGRESSION: Direct JWT operations bypassing UnifiedAuthInterface!")
             for violation in filtered_violations:
                 logger.error(f"  File: {violation['file']}:{violation['line']}")
                 logger.error(f"  Issue: {violation['description']}")
@@ -235,7 +235,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
             pytest.fail(f"SSOT COMPLIANCE REGRESSION: {len(filtered_violations)} violations found. "
                        f"All JWT operations must use UnifiedAuthInterface to maintain SSOT compliance.")
         
-        logger.info("✅ UnifiedAuthInterface SSOT compliance maintained")
+        logger.info(" PASS:  UnifiedAuthInterface SSOT compliance maintained")
     
     @pytest.mark.error
     @pytest.mark.websocket_security
@@ -246,7 +246,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         ARCHITECTURAL REQUIREMENT: WebSocket auth must be consistent with main auth
         This test prevents fallback mechanisms that compromise security.
         """
-        logger.info("🔍 Testing for WebSocket auth fallback pattern regression")
+        logger.info(" SEARCH:  Testing for WebSocket auth fallback pattern regression")
         
         fallback_patterns = [
             (r"fallback.*auth|auth.*fallback", "Authentication fallback mechanism"),
@@ -290,7 +290,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
                 logger.error(f"Error checking {file_path}: {e}")
         
         if violations_found:
-            logger.warning("⚠️  ARCHITECTURAL REGRESSION: WebSocket auth fallback patterns detected!")
+            logger.warning(" WARNING: [U+FE0F]  ARCHITECTURAL REGRESSION: WebSocket auth fallback patterns detected!")
             for violation in violations_found:
                 logger.warning(f"  File: {violation['file']}:{violation['line']}")
                 logger.warning(f"  Issue: {violation['description']}")
@@ -300,7 +300,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
             logger.warning(f"Found {len(violations_found)} WebSocket auth fallback patterns. "
                           f"These should be reviewed for SSOT compliance.")
         else:
-            logger.info("✅ No WebSocket auth fallback patterns detected")
+            logger.info(" PASS:  No WebSocket auth fallback patterns detected")
     
     @pytest.mark.integration  
     @pytest.mark.monitoring_integration
@@ -314,7 +314,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         if not MONITORING_AVAILABLE:
             pytest.skip("Monitoring system components not available")
             
-        logger.info("🔍 Testing monitoring system integration")
+        logger.info(" SEARCH:  Testing monitoring system integration")
         
         try:
             # Initialize monitoring system
@@ -330,7 +330,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
             assert isinstance(report.violations, list), "Violations must be a list"
             
             # Log monitoring results
-            logger.info(f"✅ Monitoring system integration successful")
+            logger.info(f" PASS:  Monitoring system integration successful")
             logger.info(f"   Files scanned: {report.total_files_scanned}")
             logger.info(f"   Violations found: {len(report.violations)}")
             logger.info(f"   Regressions: {report.regression_violations}")
@@ -364,7 +364,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         if not generate_baseline:
             pytest.skip("Baseline generation not requested (use --generate-baseline)")
             
-        logger.info("📊 Generating SSOT violation baseline")
+        logger.info(" CHART:  Generating SSOT violation baseline")
         
         try:
             monitor = SSOTComplianceMonitor(self.project_root)
@@ -376,7 +376,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
             # Save as baseline
             websocket_monitor._save_baseline_violations(violations)
             
-            logger.info(f"✅ Baseline generated with {len(violations)} violations")
+            logger.info(f" PASS:  Baseline generated with {len(violations)} violations")
             logger.info("   Future scans will use this baseline to detect regressions")
             
             # Log violation summary
@@ -402,7 +402,7 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
         This test validates that the system is ready for continuous monitoring
         in production environments.
         """
-        logger.info("🔍 Testing continuous monitoring readiness")
+        logger.info(" SEARCH:  Testing continuous monitoring readiness")
         
         readiness_checks = [
             ("Monitoring script executable", self._check_monitoring_script_executable),
@@ -417,18 +417,18 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
             try:
                 result = check_func()
                 if result:
-                    logger.info(f"✅ {check_name}: PASS")
+                    logger.info(f" PASS:  {check_name}: PASS")
                 else:
-                    logger.error(f"❌ {check_name}: FAIL")
+                    logger.error(f" FAIL:  {check_name}: FAIL")
                     failed_checks.append(check_name)
             except Exception as e:
-                logger.error(f"❌ {check_name}: ERROR - {e}")
+                logger.error(f" FAIL:  {check_name}: ERROR - {e}")
                 failed_checks.append(check_name)
         
         if failed_checks:
             pytest.fail(f"Continuous monitoring not ready. Failed checks: {', '.join(failed_checks)}")
         
-        logger.info("✅ System ready for continuous monitoring deployment")
+        logger.info(" PASS:  System ready for continuous monitoring deployment")
     
     def _check_monitoring_script_executable(self) -> bool:
         """Check if monitoring script is executable."""
@@ -464,9 +464,9 @@ class TestSSOTRegressionPrevention(SSotBaseTestCase):
     
     def tearDown(self):
         """Clean up test artifacts."""
-        logger.info("🧹 SSOT regression prevention test cleanup complete")
+        logger.info("[U+1F9F9] SSOT regression prevention test cleanup complete")
         if self.monitoring_reports:
-            logger.info(f"📊 Generated {len(self.monitoring_reports)} monitoring reports during testing")
+            logger.info(f" CHART:  Generated {len(self.monitoring_reports)} monitoring reports during testing")
 
 
 # Standalone execution for monitoring mode
@@ -483,7 +483,7 @@ if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
     
     if args.monitor_mode:
-        print("🚀 SSOT REGRESSION PREVENTION MONITOR MODE")
+        print("[U+1F680] SSOT REGRESSION PREVENTION MONITOR MODE")
         print("=" * 60)
         
         # Run monitoring mode
@@ -498,24 +498,24 @@ if __name__ == "__main__":
                 
                 # Save report
                 report_file = monitor.save_monitoring_report(report)
-                print(f"\n📄 Report saved to: {report_file}")
+                print(f"\n[U+1F4C4] Report saved to: {report_file}")
                 
                 # Exit with appropriate code
                 if report.security_critical_count > 0:
-                    print("\n🔴 CRITICAL security violations detected!")
+                    print("\n[U+1F534] CRITICAL security violations detected!")
                     sys.exit(2)
                 elif report.regression_violations > 0:
-                    print("\n🚨 REGRESSION violations detected!")
+                    print("\n ALERT:  REGRESSION violations detected!")
                     sys.exit(1)
                 else:
-                    print("\n✅ No violations detected")
+                    print("\n PASS:  No violations detected")
                     sys.exit(0)
                     
             except Exception as e:
-                print(f"\n❌ Monitoring failed: {e}")
+                print(f"\n FAIL:  Monitoring failed: {e}")
                 sys.exit(3)
         else:
-            print("❌ Monitoring components not available")
+            print(" FAIL:  Monitoring components not available")
             sys.exit(3)
     else:
         # Run as pytest

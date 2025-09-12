@@ -188,11 +188,11 @@ def main():
         print(f"\n  File: {rel_path}:")
         
         if issues['unified_manager_imports']:
-            print(f"    • {len(issues['unified_manager_imports'])} unified.manager import(s)")
+            print(f"    [U+2022] {len(issues['unified_manager_imports'])} unified.manager import(s)")
         if issues['connection_manager_imports']:  
-            print(f"    • {len(issues['connection_manager_imports'])} connection_manager import(s)")
+            print(f"    [U+2022] {len(issues['connection_manager_imports'])} connection_manager import(s)")
         if issues['unified_websocket_manager_usage']:
-            print(f"    • {len(issues['unified_websocket_manager_usage'])} UnifiedWebSocketManager usage(s)")
+            print(f"    [U+2022] {len(issues['unified_websocket_manager_usage'])} UnifiedWebSocketManager usage(s)")
     
     # Ask for confirmation (or run directly if --auto flag is present)
     if '--auto' in sys.argv or '--dry-run' in sys.argv:

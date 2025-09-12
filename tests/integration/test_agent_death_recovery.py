@@ -234,7 +234,7 @@
         # REMOVED_SYNTAX_ERROR: startup_notifications = websocket_bridge.get_notifications_by_type('execution_started')
         # REMOVED_SYNTAX_ERROR: assert len(startup_notifications) == 1
         # REMOVED_SYNTAX_ERROR: assert startup_notifications[0]['data']['agent_name'] == context.agent_name
-        # REMOVED_SYNTAX_ERROR: print("✅ Execution started notification sent")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  Execution started notification sent")
 
         # Simulate agent working normally
         # REMOVED_SYNTAX_ERROR: work_phases = [ )
@@ -253,11 +253,11 @@
         # Verify execution is healthy
         # REMOVED_SYNTAX_ERROR: status = await execution_tracker.get_execution_status(execution_id)
         # REMOVED_SYNTAX_ERROR: assert status.heartbeat_status.is_alive
-        # REMOVED_SYNTAX_ERROR: print("✅ Agent confirmed alive and working")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  Agent confirmed alive and working")
 
         # AGENT DEATH SIMULATION
         # REMOVED_SYNTAX_ERROR: print("\
-        # REMOVED_SYNTAX_ERROR: 💀 SIMULATING AGENT DEATH...")
+        # REMOVED_SYNTAX_ERROR: [U+1F480] SIMULATING AGENT DEATH...")
         # REMOVED_SYNTAX_ERROR: await simulator.die_silently()
 
         # Wait for death detection
@@ -298,7 +298,7 @@
                     # REMOVED_SYNTAX_ERROR: final_status = await execution_tracker.get_execution_status(execution_id)
                     # REMOVED_SYNTAX_ERROR: assert final_status.execution_record.state in [ExecutionState.FAILED, ExecutionState.TIMEOUT]
 
-                    # REMOVED_SYNTAX_ERROR: print("✅ INTEGRATION TEST PASSED: Agent death detected with proper notifications")
+                    # REMOVED_SYNTAX_ERROR: print(" PASS:  INTEGRATION TEST PASSED: Agent death detected with proper notifications")
                     # REMOVED_SYNTAX_ERROR: print("="*80)
 
                     # Removed problematic line: @pytest.mark.asyncio
@@ -346,23 +346,23 @@
                             # REMOVED_SYNTAX_ERROR: for simulator in simulators:
                                 # REMOVED_SYNTAX_ERROR: await simulator.do_work_phases([work_phase])
 
-                                # REMOVED_SYNTAX_ERROR: print("✅ All agents started working")
+                                # REMOVED_SYNTAX_ERROR: print(" PASS:  All agents started working")
 
                                 # Kill agents in different ways
                                 # REMOVED_SYNTAX_ERROR: print("\
-                                # REMOVED_SYNTAX_ERROR: 💀 Killing agents with different scenarios...")
+                                # REMOVED_SYNTAX_ERROR: [U+1F480] Killing agents with different scenarios...")
 
                                 # Agent 0: Silent death (heartbeat failure)
                                 # REMOVED_SYNTAX_ERROR: await simulators[0].die_silently()
-                                # REMOVED_SYNTAX_ERROR: print("💀 Agent 0: Silent death (heartbeat failure)")
+                                # REMOVED_SYNTAX_ERROR: print("[U+1F480] Agent 0: Silent death (heartbeat failure)")
 
                                 # Agent 1: Also silent death but we'll wait for timeout
                                 # REMOVED_SYNTAX_ERROR: await simulators[1].die_silently()
-                                # REMOVED_SYNTAX_ERROR: print("💀 Agent 1: Silent death (timeout)")
+                                # REMOVED_SYNTAX_ERROR: print("[U+1F480] Agent 1: Silent death (timeout)")
 
                                 # Agent 2: Explicit error
                                 # REMOVED_SYNTAX_ERROR: await simulators[2].fail_with_error("Simulated agent error")
-                                # REMOVED_SYNTAX_ERROR: print("💀 Agent 2: Explicit error")
+                                # REMOVED_SYNTAX_ERROR: print("[U+1F480] Agent 2: Explicit error")
 
                                 # Wait for all deaths to be detected
                                 # REMOVED_SYNTAX_ERROR: deaths_detected = [False, False, False]
@@ -397,7 +397,7 @@
                                                         # REMOVED_SYNTAX_ERROR: assert total_notifications >= 3, "formatted_string"
 
                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
-                                                        # REMOVED_SYNTAX_ERROR: print("✅ MULTI-AGENT DEATH TEST PASSED")
+                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  MULTI-AGENT DEATH TEST PASSED")
                                                         # REMOVED_SYNTAX_ERROR: print("="*80)
 
                                                         # Removed problematic line: @pytest.mark.asyncio
@@ -446,7 +446,7 @@
 
     # Simulate death
     # REMOVED_SYNTAX_ERROR: await simulator.die_silently()
-    # REMOVED_SYNTAX_ERROR: print("💀 Agent died silently")
+    # REMOVED_SYNTAX_ERROR: print("[U+1F480] Agent died silently")
 
     # Wait for death detection
     # REMOVED_SYNTAX_ERROR: death_detected = False
@@ -463,7 +463,7 @@
 
             # Simulate recovery attempt (new execution)
             # REMOVED_SYNTAX_ERROR: print("\
-            # REMOVED_SYNTAX_ERROR: 🔄 Attempting recovery...")
+            # REMOVED_SYNTAX_ERROR:  CYCLE:  Attempting recovery...")
 
             # REMOVED_SYNTAX_ERROR: recovery_simulator = AgentSimulator(execution_tracker)
             # REMOVED_SYNTAX_ERROR: recovery_context = AgentExecutionContext( )
@@ -501,8 +501,8 @@
             # REMOVED_SYNTAX_ERROR: recovery_notification = completion_notifications[-1]  # Latest completion
             # REMOVED_SYNTAX_ERROR: assert recovery_notification['data']['agent_name'] == 'recovery-agent-v2'
 
-            # REMOVED_SYNTAX_ERROR: print("✅ Recovery execution completed successfully")
-            # REMOVED_SYNTAX_ERROR: print("✅ RECOVERY TEST PASSED")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Recovery execution completed successfully")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  RECOVERY TEST PASSED")
             # REMOVED_SYNTAX_ERROR: print("="*80)
 
             # Removed problematic line: @pytest.mark.asyncio
@@ -550,7 +550,7 @@
                         # Check health with active executions
                         # REMOVED_SYNTAX_ERROR: active_health = await execution_tracker.get_health_status()
                         # REMOVED_SYNTAX_ERROR: print(f"\
-                        # REMOVED_SYNTAX_ERROR: 📊 Health with active executions:")
+                        # REMOVED_SYNTAX_ERROR:  CHART:  Health with active executions:")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -569,7 +569,7 @@
                         # Check health after deaths
                         # REMOVED_SYNTAX_ERROR: death_health = await execution_tracker.get_health_status()
                         # REMOVED_SYNTAX_ERROR: print(f"\
-                        # REMOVED_SYNTAX_ERROR: 💀 Health after agent deaths:")
+                        # REMOVED_SYNTAX_ERROR: [U+1F480] Health after agent deaths:")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -586,11 +586,11 @@
                         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(2)  # Let cleanup happen
                         # REMOVED_SYNTAX_ERROR: final_health = await execution_tracker.get_health_status()
                         # REMOVED_SYNTAX_ERROR: print(f"\
-                        # REMOVED_SYNTAX_ERROR: 🏁 Final health status:")
+                        # REMOVED_SYNTAX_ERROR: [U+1F3C1] Final health status:")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
-                        # REMOVED_SYNTAX_ERROR: print("✅ HEALTH MONITORING INTEGRATION TEST PASSED")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  HEALTH MONITORING INTEGRATION TEST PASSED")
                         # REMOVED_SYNTAX_ERROR: print("="*80)
 
                         # Removed problematic line: @pytest.mark.asyncio
@@ -604,7 +604,7 @@
 
                             # Get initial metrics
                             # REMOVED_SYNTAX_ERROR: initial_metrics = await execution_tracker.get_tracker_metrics()
-                            # REMOVED_SYNTAX_ERROR: print(f"📊 Initial metrics:")
+                            # REMOVED_SYNTAX_ERROR: print(f" CHART:  Initial metrics:")
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -650,21 +650,21 @@
 
                                     # Execute different outcomes
                                     # REMOVED_SYNTAX_ERROR: print("\
-                                    # REMOVED_SYNTAX_ERROR: 📊 Executing different scenarios...")
+                                    # REMOVED_SYNTAX_ERROR:  CHART:  Executing different scenarios...")
 
                                     # Success cases
                                     # REMOVED_SYNTAX_ERROR: await simulators[0].complete_successfully({"test": "success1"})
                                     # REMOVED_SYNTAX_ERROR: await simulators[4].complete_successfully({"test": "success2"})
-                                    # REMOVED_SYNTAX_ERROR: print("✅ Completed 2 successful executions")
+                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  Completed 2 successful executions")
 
                                     # Death cases
                                     # REMOVED_SYNTAX_ERROR: await simulators[1].die_silently()  # heartbeat death
                                     # REMOVED_SYNTAX_ERROR: await simulators[2].die_silently()  # timeout death
-                                    # REMOVED_SYNTAX_ERROR: print("💀 Killed 2 agents silently")
+                                    # REMOVED_SYNTAX_ERROR: print("[U+1F480] Killed 2 agents silently")
 
                                     # Explicit error
                                     # REMOVED_SYNTAX_ERROR: await simulators[3].fail_with_error("Explicit test failure")
-                                    # REMOVED_SYNTAX_ERROR: print("❌ Failed 1 agent explicitly")
+                                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  Failed 1 agent explicitly")
 
                                     # Wait for deaths to be detected
                                     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(10)
@@ -674,7 +674,7 @@
                                     # REMOVED_SYNTAX_ERROR: tracker_metrics = final_metrics['tracker_metrics']
 
                                     # REMOVED_SYNTAX_ERROR: print(f"\
-                                    # REMOVED_SYNTAX_ERROR: 📊 Final metrics:")
+                                    # REMOVED_SYNTAX_ERROR:  CHART:  Final metrics:")
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -697,7 +697,7 @@
                                     # REMOVED_SYNTAX_ERROR: assert abs(actual_rate - expected_rate) < 0.2, \
                                     # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                    # REMOVED_SYNTAX_ERROR: print("✅ METRICS TEST PASSED - All metrics accurate during death scenarios")
+                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  METRICS TEST PASSED - All metrics accurate during death scenarios")
                                     # REMOVED_SYNTAX_ERROR: print("="*80)
 
                                     # Removed problematic line: @pytest.mark.asyncio
@@ -742,7 +742,7 @@
                                                 # REMOVED_SYNTAX_ERROR: {'stage': 'concurrent_work', 'percentage': 30, 'message': 'Working concurrently...', 'duration': 0.2}
                                                 
 
-                                                # REMOVED_SYNTAX_ERROR: print("✅ All agents working")
+                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  All agents working")
 
                                                 # Kill most agents simultaneously
                                                 # REMOVED_SYNTAX_ERROR: kill_count = 6  # Kill 6 out of 8
@@ -765,7 +765,7 @@
 
                                                         # Wait for all deaths to be detected
                                                         # REMOVED_SYNTAX_ERROR: print("\
-                                                        # REMOVED_SYNTAX_ERROR: 🔍 Waiting for death detection...")
+                                                        # REMOVED_SYNTAX_ERROR:  SEARCH:  Waiting for death detection...")
                                                         # REMOVED_SYNTAX_ERROR: deaths_detected = 0
                                                         # REMOVED_SYNTAX_ERROR: max_wait_seconds = 20
 
@@ -793,7 +793,7 @@
                                                                                 # REMOVED_SYNTAX_ERROR: final_deaths_detected += 1
 
                                                                                 # REMOVED_SYNTAX_ERROR: print(f"\
-                                                                                # REMOVED_SYNTAX_ERROR: 📊 Final results:")
+                                                                                # REMOVED_SYNTAX_ERROR:  CHART:  Final results:")
                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -814,7 +814,7 @@
                                                                                 # REMOVED_SYNTAX_ERROR: assert total_death_notifications >= final_deaths_detected, \
                                                                                 # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                                                                # REMOVED_SYNTAX_ERROR: print("✅ CONCURRENT DEATH TEST PASSED")
+                                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  CONCURRENT DEATH TEST PASSED")
                                                                                 # REMOVED_SYNTAX_ERROR: print("="*80)
 
 

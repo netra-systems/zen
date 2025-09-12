@@ -85,7 +85,7 @@ class TestOrchestratorFactoryPatternIssue118:
         
         # CRITICAL ASSERTION: Must never be None (issue #118 root cause)
         assert orchestrator is not None, \
-            "🚨 CRITICAL FAILURE: Factory returned None orchestrator - Issue #118 not fixed!"
+            " ALERT:  CRITICAL FAILURE: Factory returned None orchestrator - Issue #118 not fixed!"
         
         # Validate correct type created
         assert isinstance(orchestrator, RequestScopedOrchestrator), \
@@ -149,7 +149,7 @@ class TestOrchestratorFactoryPatternIssue118:
         
         # CRITICAL: Each user must get separate orchestrator instance
         assert orchestrator1 is not orchestrator2, \
-            "🚨 CRITICAL: Same orchestrator instance shared between users - isolation violated!"
+            " ALERT:  CRITICAL: Same orchestrator instance shared between users - isolation violated!"
         
         # Validate user contexts are properly isolated
         assert orchestrator1.user_context.user_id != orchestrator2.user_context.user_id, \
@@ -289,7 +289,7 @@ class TestOrchestratorFactoryPatternIssue118:
         
         # CRITICAL: This must never be None (original issue #118)
         assert orchestrator is not None, \
-            "🚨 CRITICAL: Agent service core pattern returns None - Issue #118 not fixed!"
+            " ALERT:  CRITICAL: Agent service core pattern returns None - Issue #118 not fixed!"
         
         # Test that orchestrator can be used for execution context creation
         exec_context, notifier = await orchestrator.create_execution_context(

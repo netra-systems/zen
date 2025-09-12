@@ -427,14 +427,14 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
                     print(f"  Overall Status: {baseline_comparison['overall_performance_status']}")
                     
                     rt_comp = baseline_comparison['response_time_comparison']
-                    print(f"  P50 vs Baseline: {rt_comp['p50']['measured']:.1f}ms vs {rt_comp['p50']['baseline']:.1f}ms ({'✓' if rt_comp['p50']['meets_baseline'] else '❌'})")
-                    print(f"  P95 vs Baseline: {rt_comp['p95']['measured']:.1f}ms vs {rt_comp['p95']['baseline']:.1f}ms ({'✓' if rt_comp['p95']['meets_baseline'] else '❌'})")
-                    print(f"  P99 vs Baseline: {rt_comp['p99']['measured']:.1f}ms vs {rt_comp['p99']['baseline']:.1f}ms ({'✓' if rt_comp['p99']['meets_baseline'] else '❌'})")
+                    print(f"  P50 vs Baseline: {rt_comp['p50']['measured']:.1f}ms vs {rt_comp['p50']['baseline']:.1f}ms ({'[U+2713]' if rt_comp['p50']['meets_baseline'] else ' FAIL: '})")
+                    print(f"  P95 vs Baseline: {rt_comp['p95']['measured']:.1f}ms vs {rt_comp['p95']['baseline']:.1f}ms ({'[U+2713]' if rt_comp['p95']['meets_baseline'] else ' FAIL: '})")
+                    print(f"  P99 vs Baseline: {rt_comp['p99']['measured']:.1f}ms vs {rt_comp['p99']['baseline']:.1f}ms ({'[U+2713]' if rt_comp['p99']['meets_baseline'] else ' FAIL: '})")
                     
                     sr_comp = baseline_comparison['success_rate_comparison']
-                    print(f"  Success Rate: {sr_comp['measured']:.1f}% vs {sr_comp['target_baseline']:.1f}% target ({'✓' if sr_comp['meets_target'] else '❌'})")
+                    print(f"  Success Rate: {sr_comp['measured']:.1f}% vs {sr_comp['target_baseline']:.1f}% target ({'[U+2713]' if sr_comp['meets_target'] else ' FAIL: '})")
             else:
-                print(f"  ❌ No successful measurements obtained")
+                print(f"   FAIL:  No successful measurements obtained")
                 if baseline_performance.get('raw_measurements'):
                     error_types = {}
                     for measurement in baseline_performance['raw_measurements']:
@@ -450,7 +450,7 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
             # Success rate should be reasonable for staging environment
             if baseline_performance['success_rate'] > 0:
                 self.assertGreaterEqual(baseline_performance['success_rate'], 70.0,
-                                      "Staging environment should have ≥70% success rate for auth operations")
+                                      "Staging environment should have  >= 70% success rate for auth operations")
             
             # If successful measurements obtained, response times should be reasonable
             if baseline_performance.get('response_times'):
@@ -470,7 +470,7 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
                     self.assertGreater(optimization_potential_ms, 0.0,
                                      "Staging baseline should show timeout optimization potential")
                     
-                    print(f"\\n📊 OPTIMIZATION POTENTIAL IDENTIFIED:")
+                    print(f"\\n CHART:  OPTIMIZATION POTENTIAL IDENTIFIED:")
                     print(f"   Current Timeout Waste: {optimization_potential_ms:.0f}ms")
                     print(f"   Potential Performance Improvement: {(optimization_potential_ms / total_auth_timeout_ms * 100):.1f}%")
             
@@ -580,10 +580,10 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
                         print(f"    Results:")
                         print(f"      P95 Response Time: {scenario_p95:.1f}ms ({p95_degradation_ratio:.1f}x vs baseline)")
                         print(f"      Success Rate: {scenario_success_rate:.1f}% ({success_rate_degradation:+.1f}% vs baseline)")
-                        print(f"      Expected Degradation: ≤{scenario['expected_degradation_max']:.1f}x")
-                        print(f"      Meets Expectations: {'✓' if scenario_analysis['meets_expectations'] else '❌'}")
+                        print(f"      Expected Degradation:  <= {scenario['expected_degradation_max']:.1f}x")
+                        print(f"      Meets Expectations: {'[U+2713]' if scenario_analysis['meets_expectations'] else ' FAIL: '}")
                     else:
-                        print(f"    ❌ No successful operations under {scenario['name']} load")
+                        print(f"     FAIL:  No successful operations under {scenario['name']} load")
                         scenario_analysis['error'] = 'No successful operations completed'
                     
                     load_scenario_results[scenario['name']] = scenario_analysis
@@ -608,7 +608,7 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
                     print(f"\\n{scenario_name}:")
                     print(f"  P95: {bc['scenario_p95']:.1f}ms ({bc['p95_degradation_ratio']:.1f}x)")
                     print(f"  Success Rate: {bc['scenario_success_rate']:.1f}%")
-                    print(f"  Expectations Met: {'✓' if results['meets_expectations'] else '❌'}")
+                    print(f"  Expectations Met: {'[U+2713]' if results['meets_expectations'] else ' FAIL: '}")
                 
             # Calculate overall multi-user performance score
             if successful_scenarios:
@@ -636,7 +636,7 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
         # Overall performance score should be reasonable
         if multi_user_performance_score > 0:
             self.assertGreaterEqual(multi_user_performance_score, 33.0,
-                                  f"Multi-user performance score {multi_user_performance_score:.0f}% should be ≥33%")
+                                  f"Multi-user performance score {multi_user_performance_score:.0f}% should be  >= 33%")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -762,7 +762,7 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
                             print(f"      Buffer Utilization: {efficiency_metrics['buffer_utilization_pct']:.1f}%")
                             print(f"      Efficiency Ratio: {efficiency_metrics['efficiency_ratio']:.3f}")
                     else:
-                        print(f"    ❌ No successful measurements with this configuration")
+                        print(f"     FAIL:  No successful measurements with this configuration")
                         optimization_analysis['error'] = 'No successful measurements'
                     
                     optimization_results[scenario['name']] = optimization_analysis
@@ -819,7 +819,7 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
                     optimized_eff['success_rate'] >= baseline_eff['success_rate'] * 0.95  # Success rate maintained
                 )
                 
-                print(f"  Optimization Effective: {'✓' if optimization_effective else '❌'}")
+                print(f"  Optimization Effective: {'[U+2713]' if optimization_effective else ' FAIL: '}")
                 
         # Log all configuration results
         for config_name, results in optimization_results.items():
@@ -845,7 +845,7 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
             if 'optimization_effectiveness' in current_result:
                 current_success_rate = current_result['optimization_effectiveness']['success_rate']
                 self.assertGreaterEqual(current_success_rate, 70.0,
-                                      "Current configuration should maintain ≥70% success rate in staging")
+                                      "Current configuration should maintain  >= 70% success rate in staging")
         
         # If optimization comparison is possible, it should show some benefit
         if len(successful_configs) >= 2 and 'optimization_effective' in locals():
@@ -864,53 +864,53 @@ class TestGCPTimeoutOptimizationE2E(SSotAsyncTestCase):
         print("ISSUE #469: E2E STAGING GCP TIMEOUT OPTIMIZATION RECOMMENDATIONS")
         print(f"{'='*70}")
         
-        print("\\n🎯 E2E STAGING VALIDATION FINDINGS:")
-        print("   ✓ Real GCP staging environment provides measurable auth performance baselines")
-        print("   ✓ Multi-user concurrent load testing validates timeout behavior under realistic usage")
-        print("   ✓ Timeout optimization configurations show measurable performance improvements")
-        print("   ✓ Staging environment performance correlates with production expectations")
-        print("   ✓ E2E validation provides confidence for production deployment")
+        print("\\n TARGET:  E2E STAGING VALIDATION FINDINGS:")
+        print("   [U+2713] Real GCP staging environment provides measurable auth performance baselines")
+        print("   [U+2713] Multi-user concurrent load testing validates timeout behavior under realistic usage")
+        print("   [U+2713] Timeout optimization configurations show measurable performance improvements")
+        print("   [U+2713] Staging environment performance correlates with production expectations")
+        print("   [U+2713] E2E validation provides confidence for production deployment")
         
-        print("\\n💡 PRODUCTION DEPLOYMENT RECOMMENDATIONS:")
-        print("\\n   🚀 IMMEDIATE DEPLOYMENT (High Confidence):")
+        print("\\n IDEA:  PRODUCTION DEPLOYMENT RECOMMENDATIONS:")
+        print("\\n   [U+1F680] IMMEDIATE DEPLOYMENT (High Confidence):")
         print("      - Deploy optimized auth timeouts (50-70% reduction) to production")
         print("      - Implement environment variable overrides for operational flexibility")
         print("      - Enable real-time timeout performance monitoring")
         print("      - Set up automated timeout regression detection")
         
-        print("\\n   📊 MONITORING & ALERTING:")
+        print("\\n    CHART:  MONITORING & ALERTING:")
         print("      - Implement P95 response time alerts (baseline + 20% threshold)")
         print("      - Monitor timeout buffer utilization continuously")
         print("      - Alert on success rate degradation below 95%")
         print("      - Track multi-user performance degradation patterns")
         
-        print("\\n   🔧 OPERATIONAL PROCEDURES:")
+        print("\\n   [U+1F527] OPERATIONAL PROCEDURES:")
         print("      - Establish timeout configuration rollback procedures")
         print("      - Create performance regression incident response")
         print("      - Implement A/B testing for timeout optimizations")
         print("      - Develop load-based automatic timeout adjustment")
         
-        print("\\n   🏗️ LONG-TERM ARCHITECTURE:")
+        print("\\n   [U+1F3D7][U+FE0F] LONG-TERM ARCHITECTURE:")
         print("      - Implement customer-tier specific timeout profiles")
         print("      - Add intelligent timeout prediction based on usage patterns") 
         print("      - Create timeout optimization ML pipeline")
         print("      - Develop real-time timeout adjustment based on infrastructure metrics")
         
-        print("\\n📈 EXPECTED PRODUCTION IMPACT:")
-        print("      ⚡ Performance: 50-70% reduction in auth timeout waits")
-        print("      📊 Efficiency: 60-80% improvement in timeout buffer utilization")
-        print("      🚀 Scalability: Support 2-3x more concurrent users with same resources")
-        print("      💰 Cost Optimization: 30-50% reduction in timeout-related resource waste")
-        print("      📈 User Experience: Faster authentication and system responsiveness")
+        print("\\n[U+1F4C8] EXPECTED PRODUCTION IMPACT:")
+        print("       LIGHTNING:  Performance: 50-70% reduction in auth timeout waits")
+        print("       CHART:  Efficiency: 60-80% improvement in timeout buffer utilization")
+        print("      [U+1F680] Scalability: Support 2-3x more concurrent users with same resources")
+        print("      [U+1F4B0] Cost Optimization: 30-50% reduction in timeout-related resource waste")
+        print("      [U+1F4C8] User Experience: Faster authentication and system responsiveness")
         
-        print("\\n🎯 PRODUCTION DEPLOYMENT SUCCESS CRITERIA:")
-        print("      - P95 auth response times ≤150ms (vs current ~300ms baseline)")
-        print("      - Success rates maintained ≥99% under normal load")
+        print("\\n TARGET:  PRODUCTION DEPLOYMENT SUCCESS CRITERIA:")
+        print("      - P95 auth response times  <= 150ms (vs current ~300ms baseline)")
+        print("      - Success rates maintained  >= 99% under normal load")
         print("      - Timeout buffer utilization 60-80% (vs current <10%)")
-        print("      - Multi-user performance degradation ≤50% under 5x load")
+        print("      - Multi-user performance degradation  <= 50% under 5x load")
         print("      - Zero timeout-related production incidents")
         
-        print("\\n🔍 CONTINUOUS IMPROVEMENT PLAN:")
+        print("\\n SEARCH:  CONTINUOUS IMPROVEMENT PLAN:")
         print("      1. Weekly timeout performance review and optimization")
         print("      2. Monthly customer-tier specific timeout analysis")
         print("      3. Quarterly timeout architecture review and enhancement")

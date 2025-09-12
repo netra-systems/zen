@@ -57,7 +57,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         1. If user_sessions table exists: Validation PASSES
         2. If user_sessions table missing: Validation FAILS with critical error
         """
-        logger.info("🔍 CRITICAL TEST: Golden Path Validator user_sessions detection")
+        logger.info(" SEARCH:  CRITICAL TEST: Golden Path Validator user_sessions detection")
         
         # Create mock FastAPI app with database session
         mock_app = MagicMock()
@@ -88,7 +88,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
             
             # Check if user_sessions table validation passed or failed
             if auth_validation["success"]:
-                logger.info("✅ Golden Path Validator: user_sessions table exists and is accessible")
+                logger.info(" PASS:  Golden Path Validator: user_sessions table exists and is accessible")
                 
                 # Verify the table details were checked
                 details = auth_validation.get("details", {})
@@ -97,11 +97,11 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
                 assert "user_sessions" in tables, "user_sessions should be checked in table validation"
                 assert tables["user_sessions"] is True, "user_sessions table should exist"
                 
-                logger.info("✅ Golden Path Validator correctly validated user_sessions table structure")
+                logger.info(" PASS:  Golden Path Validator correctly validated user_sessions table structure")
                 
             else:
                 # This is the EXPECTED FAILURE case when reproducing the staging issue
-                logger.error("❌ Golden Path Validator detected missing user_sessions table")
+                logger.error(" FAIL:  Golden Path Validator detected missing user_sessions table")
                 
                 # Verify it's correctly identified as a critical failure
                 assert not result.overall_success, "Overall validation should fail when user_sessions missing"
@@ -112,17 +112,17 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
                 error_message = auth_validation["message"]
                 assert "user_sessions" in error_message.lower(), f"Error should mention user_sessions: {error_message}"
                 
-                logger.info("✅ Golden Path Validator correctly detected user_sessions table deployment failure")
+                logger.info(" PASS:  Golden Path Validator correctly detected user_sessions table deployment failure")
                 
                 # Log the business impact for visibility
                 for impact in result.business_impact_failures:
-                    logger.error(f"🚨 Business Impact: {impact}")
+                    logger.error(f" ALERT:  Business Impact: {impact}")
                 
                 # This test PASSES when it correctly detects the issue
                 # The failure is in the staging deployment, not in our validation logic
                 
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Golden Path Validator crashed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Golden Path Validator crashed: {e}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -138,7 +138,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         3. Required indexes
         4. Proper error reporting
         """
-        logger.info("🔍 CRITICAL TEST: Comprehensive user auth tables validation")
+        logger.info(" SEARCH:  CRITICAL TEST: Comprehensive user auth tables validation")
         
         # Create mock app with real database session
         mock_app = MagicMock()
@@ -174,7 +174,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
                 assert tables["users"] is True, "users table should exist"
                 assert tables["user_sessions"] is True, "user_sessions table should exist"
                 
-                logger.info("✅ All user authentication tables exist and are accessible")
+                logger.info(" PASS:  All user authentication tables exist and are accessible")
                 
             else:
                 # Failed validation - identify missing tables
@@ -182,27 +182,27 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
                     tables = details["tables"]
                     missing_tables = [table for table, exists in tables.items() if not exists]
                     
-                    logger.error(f"❌ Missing authentication tables: {missing_tables}")
+                    logger.error(f" FAIL:  Missing authentication tables: {missing_tables}")
                     
                     # Specifically check for user_sessions table issue
                     if "user_sessions" in missing_tables:
-                        logger.error("🚨 CRITICAL: user_sessions table missing - this breaks all authentication")
+                        logger.error(" ALERT:  CRITICAL: user_sessions table missing - this breaks all authentication")
                         
                         # Verify the error message is informative
                         assert "user_sessions" in validation_result["message"], "Error message should mention missing user_sessions"
                 
                 elif "missing_tables" in details:
                     missing_tables = details["missing_tables"]
-                    logger.error(f"❌ Missing tables identified: {missing_tables}")
+                    logger.error(f" FAIL:  Missing tables identified: {missing_tables}")
                     
                     if "user_sessions" in missing_tables:
-                        logger.error("🚨 CRITICAL: user_sessions missing from database deployment")
+                        logger.error(" ALERT:  CRITICAL: user_sessions missing from database deployment")
                 
                 # This is the expected case when reproducing the staging issue
-                logger.info("✅ Golden Path Validator correctly identified authentication table deployment issues")
+                logger.info(" PASS:  Golden Path Validator correctly identified authentication table deployment issues")
                 
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: User auth tables validation crashed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: User auth tables validation crashed: {e}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -214,7 +214,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         This test ensures that when user_sessions table is missing, the validator
         correctly reports the business impact (authentication failure, revenue loss).
         """
-        logger.info("🔍 CRITICAL TEST: Golden Path Validator business impact reporting")
+        logger.info(" SEARCH:  CRITICAL TEST: Golden Path Validator business impact reporting")
         
         mock_app = MagicMock()
         mock_app.state.db_session_factory = real_services_fixture["db_session_factory"]
@@ -251,14 +251,14 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
             )
             
             if auth_impact_reported:
-                logger.info("✅ Golden Path Validator correctly reported authentication business impact")
+                logger.info(" PASS:  Golden Path Validator correctly reported authentication business impact")
                 for impact in result.business_impact_failures:
-                    logger.warning(f"🚨 Business Impact: {impact}")
+                    logger.warning(f" ALERT:  Business Impact: {impact}")
             else:
-                logger.warning("⚠️ Business impact for authentication not found in failures")
+                logger.warning(" WARNING: [U+FE0F] Business impact for authentication not found in failures")
                 
         else:
-            logger.info("✅ Golden Path Validator passed - authentication tables are properly deployed")
+            logger.info(" PASS:  Golden Path Validator passed - authentication tables are properly deployed")
     
     @pytest.mark.integration 
     @pytest.mark.real_services
@@ -270,7 +270,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         This test ensures that the validator only fails when there's a real issue,
         not due to validation logic bugs or transient database connection issues.
         """
-        logger.info("🔍 CRITICAL TEST: Golden Path Validator false positive prevention")
+        logger.info(" SEARCH:  CRITICAL TEST: Golden Path Validator false positive prevention")
         
         mock_app = MagicMock()
         mock_app.state.db_session_factory = real_services_fixture["db_session_factory"]
@@ -298,13 +298,13 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         
         # Check for consistency - results should be the same
         if len(set(validation_runs)) == 1:
-            logger.info(f"✅ Golden Path Validator consistent: all runs {'passed' if validation_runs[0] else 'failed'}")
+            logger.info(f" PASS:  Golden Path Validator consistent: all runs {'passed' if validation_runs[0] else 'failed'}")
             
             if not validation_runs[0]:
-                logger.info("✅ Consistent failure indicates real issue (not false positive)")
+                logger.info(" PASS:  Consistent failure indicates real issue (not false positive)")
             
         else:
-            logger.warning(f"⚠️ Inconsistent results: {validation_runs}")
+            logger.warning(f" WARNING: [U+FE0F] Inconsistent results: {validation_runs}")
             logger.warning("This may indicate flaky validation logic or transient database issues")
             
             # Count the failures vs successes
@@ -320,11 +320,11 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         
         # Log final assessment
         if all(validation_runs):
-            logger.info("✅ All validation runs passed - user_sessions table is properly deployed")
+            logger.info(" PASS:  All validation runs passed - user_sessions table is properly deployed")
         elif not any(validation_runs):
-            logger.error("❌ All validation runs failed - user_sessions table deployment issue confirmed")
+            logger.error(" FAIL:  All validation runs failed - user_sessions table deployment issue confirmed")
         else:
-            logger.warning("⚠️ Mixed results - investigation needed for validation reliability")
+            logger.warning(" WARNING: [U+FE0F] Mixed results - investigation needed for validation reliability")
 
 
 class TestGoldenPathValidatorIntegrationWithMissingTable(BaseIntegrationTest):
@@ -344,7 +344,7 @@ class TestGoldenPathValidatorIntegrationWithMissingTable(BaseIntegrationTest):
         This test creates a controlled scenario where the user_sessions table
         is missing to verify the Golden Path Validator correctly fails validation.
         """
-        logger.info("🔍 CRITICAL TEST: Simulated missing user_sessions table scenario")
+        logger.info(" SEARCH:  CRITICAL TEST: Simulated missing user_sessions table scenario")
         
         # Create mock database session that simulates missing user_sessions table
         mock_session = AsyncMock()
@@ -404,11 +404,11 @@ class TestGoldenPathValidatorIntegrationWithMissingTable(BaseIntegrationTest):
                 missing_tables = details["missing_tables"]
                 assert "user_sessions" in missing_tables, "user_sessions should be in missing tables list"
             
-            logger.info("✅ Golden Path Validator correctly detected simulated missing user_sessions table")
+            logger.info(" PASS:  Golden Path Validator correctly detected simulated missing user_sessions table")
             logger.info(f"Error message: {result['message']}")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Golden Path Validator failed to handle missing table simulation: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Golden Path Validator failed to handle missing table simulation: {e}")
     
     @pytest.mark.integration
     @pytest.mark.critical
@@ -419,7 +419,7 @@ class TestGoldenPathValidatorIntegrationWithMissingTable(BaseIntegrationTest):
         This test runs the complete Golden Path validation with a simulated
         missing user_sessions table to verify end-to-end failure handling.
         """
-        logger.info("🔍 CRITICAL TEST: Full Golden Path validation with missing user_sessions")
+        logger.info(" SEARCH:  CRITICAL TEST: Full Golden Path validation with missing user_sessions")
         
         # Create comprehensive mock that simulates the staging database state
         mock_session = AsyncMock()
@@ -492,18 +492,18 @@ class TestGoldenPathValidatorIntegrationWithMissingTable(BaseIntegrationTest):
             )
             
             if auth_business_impact_found:
-                logger.info("✅ Business impact of missing user_sessions correctly reported")
+                logger.info(" PASS:  Business impact of missing user_sessions correctly reported")
             
-            logger.info("✅ Full Golden Path validation correctly failed with missing user_sessions table")
+            logger.info(" PASS:  Full Golden Path validation correctly failed with missing user_sessions table")
             logger.info(f"Critical failures: {len(result.critical_failures)}")
             logger.info(f"Business impact failures: {len(result.business_impact_failures)}")
             
             # Log all failures for visibility
             for failure in result.critical_failures:
-                logger.error(f"🚨 Critical Failure: {failure}")
+                logger.error(f" ALERT:  Critical Failure: {failure}")
                 
             for impact in result.business_impact_failures:
-                logger.error(f"💰 Business Impact: {impact}")
+                logger.error(f"[U+1F4B0] Business Impact: {impact}")
                 
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Full Golden Path validation crashed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Full Golden Path validation crashed: {e}")

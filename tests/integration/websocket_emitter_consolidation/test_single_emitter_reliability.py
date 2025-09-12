@@ -289,7 +289,7 @@ class TestSingleEmitterReliability(SSotAsyncTestCase):
         # ASSERTION: 100% delivery success rate
         assert reliability_analysis['success_rate'] >= 99.95, (
             f"Event delivery reliability below requirements! "
-            f"Success rate: {reliability_analysis['success_rate']:.2f}% (required: ≥99.95%). "
+            f"Success rate: {reliability_analysis['success_rate']:.2f}% (required:  >= 99.95%). "
             f"Single emitter must provide reliable event delivery."
         )
         
@@ -306,7 +306,7 @@ class TestSingleEmitterReliability(SSotAsyncTestCase):
         # ASSERTION: Event sequence integrity maintained
         assert reliability_analysis['sequence_integrity'] >= 95.0, (
             f"Event sequence integrity compromised! "
-            f"Integrity score: {reliability_analysis['sequence_integrity']:.1f}% (required: ≥95%). "
+            f"Integrity score: {reliability_analysis['sequence_integrity']:.1f}% (required:  >= 95%). "
             f"Single emitter must maintain event sequence order."
         )
 
@@ -372,7 +372,7 @@ class TestSingleEmitterReliability(SSotAsyncTestCase):
         memory_efficiency = performance_results.get('memory_efficiency', 0.9)
         assert memory_efficiency >= 0.8, (
             f"Memory efficiency poor! "
-            f"Efficiency: {memory_efficiency:.2f} (required: ≥0.8). "
+            f"Efficiency: {memory_efficiency:.2f} (required:  >= 0.8). "
             f"Single emitter must use memory efficiently."
         )
 
@@ -435,7 +435,7 @@ class TestSingleEmitterReliability(SSotAsyncTestCase):
         # ASSERTION: Business value fully preserved
         assert business_value_analysis['overall_score'] >= 95.0, (
             f"Business value preservation insufficient! "
-            f"Score: {business_value_analysis['overall_score']:.1f}% (required: ≥95%). "
+            f"Score: {business_value_analysis['overall_score']:.1f}% (required:  >= 95%). "
             f"Consolidation must preserve enterprise customer value."
         )
         
@@ -449,7 +449,7 @@ class TestSingleEmitterReliability(SSotAsyncTestCase):
         # ASSERTION: Customer experience quality maintained
         assert business_value_analysis['customer_experience_score'] >= 90.0, (
             f"Customer experience degraded! "
-            f"Score: {business_value_analysis['customer_experience_score']:.1f}% (required: ≥90%). "
+            f"Score: {business_value_analysis['customer_experience_score']:.1f}% (required:  >= 90%). "
             f"Single emitter must maintain excellent customer experience."
         )
         
@@ -457,7 +457,7 @@ class TestSingleEmitterReliability(SSotAsyncTestCase):
         revenue_protection_score = business_value_analysis.get('revenue_protection', 0)
         assert revenue_protection_score >= 99.0, (
             f"Revenue protection inadequate! "
-            f"Protection score: {revenue_protection_score:.1f}% (required: ≥99%). "
+            f"Protection score: {revenue_protection_score:.1f}% (required:  >= 99%). "
             f"Consolidation must protect $500K+ ARR."
         )
 

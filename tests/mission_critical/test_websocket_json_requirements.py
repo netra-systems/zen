@@ -348,9 +348,9 @@ class TestWebSocketJSONRequirements:
             {
                 "type": "agent_message",
                 "payload": {
-                    "content": "Analysis complete! 🎉 Results: áéíóú ñ çÇ",
-                    "languages": ["English", "Español", "Français", "Deutsch", "中文", "日本語", "العربية", "Русский"],
-                    "emojis": ["🚀", "💡", "⚡", "🌟", "🔧", "📊"],
+                    "content": "Analysis complete!  CELEBRATION:  Results: [U+00E1][U+00E9][U+00ED][U+00F3][U+00FA] [U+00F1] [U+00E7][U+00C7]",
+                    "languages": ["English", "Espa[U+00F1]ol", "Fran[U+00E7]ais", "Deutsch", "[U+4E2D][U+6587]", "[U+65E5][U+672C][U+8A9E]", "[U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]", "Pucck[U+0438][U+0439]"],
+                    "emojis": ["[U+1F680]", " IDEA: ", " LIGHTNING: ", "[U+1F31F]", "[U+1F527]", " CHART: "],
                     "special_chars": ["@", "#", "$", "%", "^", "&", "*", "(", ")", "[", "]", "{", "}"]
                 }
             },
@@ -361,10 +361,10 @@ class TestWebSocketJSONRequirements:
                         "en": "Hello World",
                         "es": "Hola Mundo", 
                         "fr": "Bonjour le Monde",
-                        "zh": "你好世界",
-                        "ja": "こんにちは世界",
-                        "ar": "مرحبا بالعالم",
-                        "ru": "Привет мир"
+                        "zh": "[U+4F60][U+597D][U+4E16][U+754C]",
+                        "ja": "[U+3053][U+3093][U+306B][U+3061][U+306F][U+4E16][U+754C]",
+                        "ar": "[U+0645][U+0631][U+062D][U+0628][U+0627] [U+0628][U+0627][U+0644][U+0639][U+0627][U+0644][U+0645]",
+                        "ru": "[U+041F]p[U+0438]vet m[U+0438]p"
                     }
                 }
             }
@@ -380,8 +380,8 @@ class TestWebSocketJSONRequirements:
             
             # REQUIREMENT: Unicode characters must be preserved
             if "content" in deserialized.get("payload", {}):
-                assert "🎉" in deserialized["payload"]["content"]
-                assert "áéíóú" in deserialized["payload"]["content"]
+                assert " CELEBRATION: " in deserialized["payload"]["content"]
+                assert "[U+00E1][U+00E9][U+00ED][U+00F3][U+00FA]" in deserialized["payload"]["content"]
 
     def test_requirement_9_datetime_serialization_consistency(self, websocket_manager):
         """REQUIREMENT 9: DateTime serialization must be consistent."""

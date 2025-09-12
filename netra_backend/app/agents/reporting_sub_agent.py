@@ -76,7 +76,7 @@ class ReportingSubAgent(BaseAgent):
             # Check if this is a DeepAgentState attempt for better error message
             if hasattr(user_context, '__class__') and 'DeepAgentState' in user_context.__class__.__name__:
                 raise ValueError(
-                    f"🚨 SECURITY VULNERABILITY: DeepAgentState is FORBIDDEN due to user isolation risks. "
+                    f" ALERT:  SECURITY VULNERABILITY: DeepAgentState is FORBIDDEN due to user isolation risks. "
                     f"ReportingSubAgent.execute_modern() attempted to use DeepAgentState which can cause "
                     f"data leakage between users. MIGRATION REQUIRED: Use UserExecutionContext pattern immediately. "
                     f"See issue #271 remediation plan for migration guide."
@@ -256,7 +256,7 @@ class ReportingSubAgent(BaseAgent):
                 await self.emit_agent_started("Generating your optimization report...")
             except Exception as e:
                 # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
-                self.logger.critical(f"🚨 CRITICAL: WebSocket agent_started event FAILED - user {context.user_id if context else 'unknown'}: {e}")
+                self.logger.critical(f" ALERT:  CRITICAL: WebSocket agent_started event FAILED - user {context.user_id if context else 'unknown'}: {e}")
                 # Try to use modern retry infrastructure for recovery
                 await self._attempt_critical_agent_event_recovery("agent_started", "Generating your optimization report...", context, e)
         
@@ -275,7 +275,7 @@ class ReportingSubAgent(BaseAgent):
                         await self.emit_thinking("Preparing guidance to help you get started...")
                 except Exception as e:
                     # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
-                    self.logger.critical(f"🚨 CRITICAL: WebSocket agent_thinking event FAILED - user {context.user_id if context else 'unknown'}: {e}")
+                    self.logger.critical(f" ALERT:  CRITICAL: WebSocket agent_thinking event FAILED - user {context.user_id if context else 'unknown'}: {e}")
                     # Try to use modern retry infrastructure for recovery
                     await self._attempt_critical_agent_event_recovery("agent_thinking", "Processing data analysis...", context, e)
             
@@ -300,7 +300,7 @@ class ReportingSubAgent(BaseAgent):
                     await self.emit_agent_completed(result)
                 except Exception as e:
                     # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
-                    self.logger.critical(f"🚨 CRITICAL: WebSocket agent_completed event FAILED - user {context.user_id if context else 'unknown'}: {e}")
+                    self.logger.critical(f" ALERT:  CRITICAL: WebSocket agent_completed event FAILED - user {context.user_id if context else 'unknown'}: {e}")
                     # Try to use modern retry infrastructure for recovery
                     await self._attempt_critical_agent_event_recovery("agent_completed", result, context, e)
             
@@ -1195,15 +1195,15 @@ class ReportingSubAgent(BaseAgent):
                 })
             
             if success:
-                self.logger.info(f"✅ RECOVERY SUCCESS: {event_type} event recovered for ReportingSubAgent - user {context.user_id}")
+                self.logger.info(f" PASS:  RECOVERY SUCCESS: {event_type} event recovered for ReportingSubAgent - user {context.user_id}")
             else:
-                self.logger.error(f"❌ RECOVERY FAILED: {event_type} event could not be recovered for ReportingSubAgent - user {context.user_id}")
+                self.logger.error(f" FAIL:  RECOVERY FAILED: {event_type} event could not be recovered for ReportingSubAgent - user {context.user_id}")
                 
         except Exception as recovery_error:
-            self.logger.error(f"💥 RECOVERY EXCEPTION: Agent event recovery system failed for {event_type}/ReportingSubAgent - user {context.user_id if context else 'unknown'}: {recovery_error}")
+            self.logger.error(f"[U+1F4A5] RECOVERY EXCEPTION: Agent event recovery system failed for {event_type}/ReportingSubAgent - user {context.user_id if context else 'unknown'}: {recovery_error}")
             # At this point we've tried everything - log as critical business impact
             self.logger.critical(
-                f"🚨 BUSINESS IMPACT: Complete WebSocket agent event failure for user {context.user_id if context else 'unknown'} "
+                f" ALERT:  BUSINESS IMPACT: Complete WebSocket agent event failure for user {context.user_id if context else 'unknown'} "
                 f"- agent: ReportingSubAgent, event: {event_type}. Chat functionality compromised. "
                 f"Original error: {original_error}, Recovery error: {recovery_error}"
             )

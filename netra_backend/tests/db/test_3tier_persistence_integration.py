@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Optimized data flow reduces costs and improves performance for business growth
 
 This test suite validates the 3-Tier Persistence Architecture as an integrated system.
-Critical for golden path: Redis (Tier 1) → PostgreSQL (Tier 2) → ClickHouse (Tier 3) data flow.
+Critical for golden path: Redis (Tier 1)  ->  PostgreSQL (Tier 2)  ->  ClickHouse (Tier 3) data flow.
 
 SSOT Compliance:
 - Tests the INTEGRATED data persistence strategy across all tiers
@@ -69,7 +69,7 @@ class TestRedisToPostgresDataFlow:
         """Test user session data flow from Redis cache to PostgreSQL.
         
         BVJ: User session management drives platform stickiness and engagement.
-        Golden Path: User login → Redis session cache → PostgreSQL session persistence.
+        Golden Path: User login  ->  Redis session cache  ->  PostgreSQL session persistence.
         """
         # Setup test data
         user_id = "user_123"
@@ -88,7 +88,7 @@ class TestRedisToPostgresDataFlow:
         
         with patch('netra_backend.app.db.postgres.get_async_db', return_value=mock_postgres_session):
             
-            # Simulate Tier 1 → Tier 2 data flow
+            # Simulate Tier 1  ->  Tier 2 data flow
             # Step 1: Check Redis for session (cache hit)
             cached_session = await mock_redis_client.get(f"user_session:{user_id}")
             assert cached_session is not None
@@ -114,7 +114,7 @@ class TestRedisToPostgresDataFlow:
         """Test chat message data flow from Redis to PostgreSQL.
         
         BVJ: Chat message persistence enables conversation history - 90% of platform value.
-        Golden Path: User message → Redis cache → PostgreSQL persistence → conversation continuity.
+        Golden Path: User message  ->  Redis cache  ->  PostgreSQL persistence  ->  conversation continuity.
         """
         # Setup test data
         thread_id = "thread_789"
@@ -169,7 +169,7 @@ class TestRedisToPostgresDataFlow:
         """Test agent execution state flow from Redis to PostgreSQL.
         
         BVJ: Agent state persistence enables execution recovery and optimization tracking.
-        Golden Path: Agent execution → Redis state cache → PostgreSQL state persistence.
+        Golden Path: Agent execution  ->  Redis state cache  ->  PostgreSQL state persistence.
         """
         # Setup test data
         run_id = "run_202"
@@ -254,7 +254,7 @@ class TestPostgresToClickHouseDataFlow:
         """Test user analytics data promotion from PostgreSQL to ClickHouse.
         
         BVJ: User analytics drive business decisions and optimization strategies.
-        Golden Path: User actions → PostgreSQL logging → ClickHouse analytics → business insights.
+        Golden Path: User actions  ->  PostgreSQL logging  ->  ClickHouse analytics  ->  business insights.
         """
         # Setup test data
         analytics_data = [
@@ -289,7 +289,7 @@ class TestPostgresToClickHouseDataFlow:
         with patch('netra_backend.app.db.postgres.get_async_db', return_value=mock_postgres_session), \
              patch('netra_backend.app.db.clickhouse.get_clickhouse_service', return_value=mock_clickhouse_service):
             
-            # Simulate Tier 2 → Tier 3 analytics data flow
+            # Simulate Tier 2  ->  Tier 3 analytics data flow
             # Step 1: Query completed user events from PostgreSQL
             async with get_async_db() as pg_session:
                 query_result = await pg_session.execute(
@@ -333,7 +333,7 @@ class TestPostgresToClickHouseDataFlow:
         """Test agent performance data promotion from PostgreSQL to ClickHouse.
         
         BVJ: Agent performance analytics enable optimization and business intelligence.
-        Golden Path: Agent executions → PostgreSQL tracking → ClickHouse analytics → performance insights.
+        Golden Path: Agent executions  ->  PostgreSQL tracking  ->  ClickHouse analytics  ->  performance insights.
         """
         # Setup test data
         performance_data = [
@@ -423,7 +423,7 @@ class TestPostgresToClickHouseDataFlow:
         """Test business metrics aggregation from PostgreSQL to ClickHouse.
         
         BVJ: Business metrics enable strategic decision making and revenue optimization.
-        Golden Path: Transactional data → PostgreSQL aggregation → ClickHouse business intelligence.
+        Golden Path: Transactional data  ->  PostgreSQL aggregation  ->  ClickHouse business intelligence.
         """
         # Setup test data
         daily_metrics = {
@@ -546,7 +546,7 @@ class Test3TierDataLifecycleManagement:
         """Test complete user journey data lifecycle across all 3 tiers.
         
         BVJ: Complete data lifecycle enables optimal performance and cost management.
-        Golden Path: User interaction → hot cache → warm persistence → cold analytics → business intelligence.
+        Golden Path: User interaction  ->  hot cache  ->  warm persistence  ->  cold analytics  ->  business intelligence.
         """
         # Setup test data for complete user journey
         user_journey_data = {
@@ -632,7 +632,7 @@ class Test3TierDataLifecycleManagement:
         """Test data tier optimization based on access patterns.
         
         BVJ: Intelligent data tiering reduces costs while maintaining performance.
-        Golden Path: Access pattern analysis → tier optimization → cost reduction → performance maintenance.
+        Golden Path: Access pattern analysis  ->  tier optimization  ->  cost reduction  ->  performance maintenance.
         """
         # Setup test data with different access patterns
         data_access_scenarios = [
@@ -716,7 +716,7 @@ class Test3TierDataLifecycleManagement:
         """Test cross-tier data consistency validation.
         
         BVJ: Data consistency across tiers ensures reliable business operations.
-        Golden Path: Data mutations → consistency checks → cross-tier synchronization → data integrity.
+        Golden Path: Data mutations  ->  consistency checks  ->  cross-tier synchronization  ->  data integrity.
         """
         # Setup test data for consistency validation
         consistency_test_data = {
@@ -819,7 +819,7 @@ class Test3TierArchitectureRealIntegration:
         """Test real 3-tier data flow with actual database services.
         
         BVJ: Validates 3-tier architecture works with real database constraints.
-        Golden Path: Real data flow → Redis → PostgreSQL → ClickHouse → business value.
+        Golden Path: Real data flow  ->  Redis  ->  PostgreSQL  ->  ClickHouse  ->  business value.
         """
         try:
             # Test data for real integration
@@ -890,7 +890,7 @@ class Test3TierArchitectureRealIntegration:
         """Test performance characteristics across all 3 tiers.
         
         BVJ: Validates performance meets business requirements for user experience.
-        Golden Path: Performance validation → tier optimization → optimal user experience.
+        Golden Path: Performance validation  ->  tier optimization  ->  optimal user experience.
         """
         try:
             performance_results = {

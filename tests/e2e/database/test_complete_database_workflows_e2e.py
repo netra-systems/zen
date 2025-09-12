@@ -247,7 +247,7 @@ class TestCompleteDatabaseWorkflowsE2E:
             messages = [
                 {"content": "First test message", "type": "user"},
                 {"content": "Second test message", "type": "user"},
-                {"content": "Third test message with special chars: éñüíó", "type": "user"}
+                {"content": "Third test message with special chars: [U+00E9][U+00F1][U+00FC][U+00ED][U+00F3]", "type": "user"}
             ]
             
             message_ids = []
@@ -649,8 +649,8 @@ class TestCompleteDatabaseWorkflowsE2E:
             integrity_test_data = {
                 "type": "create_thread",
                 "data": {
-                    "title": "Integrity Test: Special Chars éñüíóç",
-                    "context": "Testing with emojis 🚀🔥 and special chars < > & \" '"
+                    "title": "Integrity Test: Special Chars [U+00E9][U+00F1][U+00FC][U+00ED][U+00F3][U+00E7]",
+                    "context": "Testing with emojis [U+1F680] FIRE:  and special chars < > & \" '"
                 }
             }
             
@@ -667,8 +667,8 @@ class TestCompleteDatabaseWorkflowsE2E:
                     "thread_id": thread_id,
                     "content": """Complex message with:
                     - Line breaks
-                    - Unicode: ñáéíóúü
-                    - Emojis: 🚀🔥⚡
+                    - Unicode: [U+00F1][U+00E1][U+00E9][U+00ED][U+00F3][U+00FA][U+00FC]
+                    - Emojis: [U+1F680] FIRE:  LIGHTNING: 
                     - JSON-like: {"key": "value", "number": 123}
                     - HTML-like: <tag>content</tag>
                     - SQL-like: SELECT * FROM table WHERE id = 1;
@@ -695,15 +695,15 @@ class TestCompleteDatabaseWorkflowsE2E:
             
             # Verify special characters are preserved
             thread_data = verification_response["data"]
-            assert "éñüíóç" in thread_data["title"]
-            assert "🚀🔥" in thread_data["context"]
+            assert "[U+00E9][U+00F1][U+00FC][U+00ED][U+00F3][U+00E7]" in thread_data["title"]
+            assert "[U+1F680] FIRE: " in thread_data["context"]
             
             # Verify message content integrity
             message = thread_data["messages"][0]
             message_content = message["content"]
             
-            assert "ñáéíóúü" in message_content
-            assert "🚀🔥⚡" in message_content
+            assert "[U+00F1][U+00E1][U+00E9][U+00ED][U+00F3][U+00FA][U+00FC]" in message_content
+            assert "[U+1F680] FIRE:  LIGHTNING: " in message_content
             assert '{"key": "value", "number": 123}' in message_content
             assert "<tag>content</tag>" in message_content
             assert "SELECT * FROM table WHERE id = 1;" in message_content

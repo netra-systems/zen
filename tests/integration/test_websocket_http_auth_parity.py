@@ -314,7 +314,7 @@ class TestWebSocketHttpAuthParity(SSotAsyncTestCase):
         for result in negotiation_results:
             print(f"- {result['description']}: {result['negotiation_success']} (expected: {result['expected_success']})")
             if not result['matches_expectation']:
-                print(f"  ❌ MISMATCH: Got {result['negotiation_success']}, expected {result['expected_success']}")
+                print(f"   FAIL:  MISMATCH: Got {result['negotiation_success']}, expected {result['expected_success']}")
         
         # Check for mismatches
         mismatches = [r for r in negotiation_results if not r['matches_expectation']]

@@ -36,7 +36,7 @@ class CleanSlateExecutor:
         if self.dry_run:
             self.log(f"DRY RUN: Would execute - {action}")
             return False
-        response = input(f"\n⚠️  {action}\nContinue? (yes/no): ")
+        response = input(f"\n WARNING: [U+FE0F]  {action}\nContinue? (yes/no): ")
         return response.lower() == "yes"
     
     def run_command(self, cmd: List[str], check: bool = True) -> subprocess.CompletedProcess:
@@ -228,14 +228,14 @@ def main():
     
     args = parser.parse_args()
     
-    print("🧹 NETRA APEX CLEAN SLATE EXECUTOR")
+    print("[U+1F9F9] NETRA APEX CLEAN SLATE EXECUTOR")
     print("="*50)
     print("This will reset your project to a clean state.")
     print("Make sure you have committed any important changes!")
     print("="*50)
     
     if not args.dry_run:
-        response = input("\n⚠️  This is NOT a dry run. Continue? (yes/no): ")
+        response = input("\n WARNING: [U+FE0F]  This is NOT a dry run. Continue? (yes/no): ")
         if response.lower() != "yes":
             print("Aborted.")
             sys.exit(0)

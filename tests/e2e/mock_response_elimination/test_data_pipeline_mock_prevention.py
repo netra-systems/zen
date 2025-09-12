@@ -133,7 +133,7 @@ class TestDataPipelineMockPrevention(BaseE2ETest):
             analytics_data = response_data.get("analytics_data", {})
             metrics_data = response_data.get("metrics", [])
             
-            # ⚠️ THIS IS THE FAILING ASSERTION ⚠️
+            #  WARNING: [U+FE0F] THIS IS THE FAILING ASSERTION  WARNING: [U+FE0F]
             # If we received data, it must be authentic, not fabricated fallback data
             
             if analytics_data or metrics_data or any(
@@ -336,7 +336,7 @@ class TestDataPipelineMockPrevention(BaseE2ETest):
             )
             
             if has_cost_data:
-                # ⚠️ THIS IS THE FAILING ASSERTION ⚠️ 
+                #  WARNING: [U+FE0F] THIS IS THE FAILING ASSERTION  WARNING: [U+FE0F] 
                 # If we received cost/savings data, it must be authentic
                 
                 # Check for common mock financial indicators
@@ -532,7 +532,7 @@ class TestDataPipelineMockPrevention(BaseE2ETest):
             ))
             
             if has_dashboard_data:
-                # ⚠️ CRITICAL ENTERPRISE FAILING ASSERTION ⚠️
+                #  WARNING: [U+FE0F] CRITICAL ENTERPRISE FAILING ASSERTION  WARNING: [U+FE0F]
                 # Dashboard data for enterprise customers must be 100% authentic
                 
                 enterprise_forbidden_data_patterns = [

@@ -187,9 +187,9 @@ class DockerSecurityAuditor:
         
         except Exception as e:
             if self.strict_mode:
-                print(f"❌ Error checking file {file_path}: {e}", file=sys.stderr)
+                print(f" FAIL:  Error checking file {file_path}: {e}", file=sys.stderr)
             else:
-                print(f"⚠️  Warning: Could not check file {file_path}: {e}")
+                print(f" WARNING: [U+FE0F]  Warning: Could not check file {file_path}: {e}")
         
         return violations
     
@@ -235,13 +235,13 @@ class DockerSecurityAuditor:
     def print_violations_report(self) -> None:
         """Print comprehensive security violations report."""
         if not self.violations:
-            print("✅ DOCKER SECURITY AUDIT COMPLETE: No violations detected")
-            print(f"   📊 Scanned {self.checked_files} files, {self.total_lines_checked:,} lines")
+            print(" PASS:  DOCKER SECURITY AUDIT COMPLETE: No violations detected")
+            print(f"    CHART:  Scanned {self.checked_files} files, {self.total_lines_checked:,} lines")
             return
         
-        print("🔒" * 60)
+        print("[U+1F512]" * 60)
         print("DOCKER SECURITY AUDIT REPORT")
-        print("🔒" * 60)
+        print("[U+1F512]" * 60)
         print()
         
         # Summary by severity
@@ -249,11 +249,11 @@ class DockerSecurityAuditor:
         for violation in self.violations:
             severity_counts[violation.severity] = severity_counts.get(violation.severity, 0) + 1
         
-        print("📊 SUMMARY BY SEVERITY:")
+        print(" CHART:  SUMMARY BY SEVERITY:")
         for severity in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
             count = severity_counts.get(severity, 0)
             if count > 0:
-                emoji = '🚨' if severity == 'CRITICAL' else '⚠️' if severity == 'HIGH' else '💡'
+                emoji = ' ALERT: ' if severity == 'CRITICAL' else ' WARNING: [U+FE0F]' if severity == 'HIGH' else ' IDEA: '
                 print(f"   {emoji} {severity}: {count} violation(s)")
         print()
         
@@ -265,15 +265,15 @@ class DockerSecurityAuditor:
             violations_by_file[violation.file_path].append(violation)
         
         for file_path, file_violations in violations_by_file.items():
-            print(f"📁 FILE: {file_path}")
-            print(f"   🔍 {len(file_violations)} violation(s) detected")
+            print(f"[U+1F4C1] FILE: {file_path}")
+            print(f"    SEARCH:  {len(file_violations)} violation(s) detected")
             print()
             
             # Group by severity within file
             file_violations.sort(key=lambda v: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].index(v.severity))
             
             for violation in file_violations:
-                severity_emoji = '🚨' if violation.severity == 'CRITICAL' else '⚠️' if violation.severity == 'HIGH' else '💡'
+                severity_emoji = ' ALERT: ' if violation.severity == 'CRITICAL' else ' WARNING: [U+FE0F]' if violation.severity == 'HIGH' else ' IDEA: '
                 print(f"   {severity_emoji} Line {violation.line_num}: {violation.severity} - {violation.violation_type}")
                 print(f"      Code: {violation.line_content}")
                 print(f"      Issue: {violation.description}")
@@ -285,16 +285,16 @@ class DockerSecurityAuditor:
         high_count = severity_counts.get('HIGH', 0)
         
         if critical_count > 0 or high_count > 0:
-            print("💰 BUSINESS IMPACT ASSESSMENT:")
+            print("[U+1F4B0] BUSINESS IMPACT ASSESSMENT:")
             if critical_count > 0:
-                print(f"   🚨 CRITICAL: {critical_count} violation(s) pose immediate threat to $2M+ ARR")
+                print(f"    ALERT:  CRITICAL: {critical_count} violation(s) pose immediate threat to $2M+ ARR")
                 print("      Risk: Service outages, data loss, security breaches")
             if high_count > 0:
-                print(f"   ⚠️  HIGH: {high_count} violation(s) create significant security risks")
+                print(f"    WARNING: [U+FE0F]  HIGH: {high_count} violation(s) create significant security risks")
                 print("      Risk: Container escapes, privilege escalation, data exposure")
             print()
         
-        print("🛠️  REMEDIATION PRIORITY:")
+        print("[U+1F6E0][U+FE0F]  REMEDIATION PRIORITY:")
         print("   1. Fix CRITICAL violations immediately")
         print("   2. Address HIGH severity issues within 24 hours")
         print("   3. Plan MEDIUM severity fixes for next sprint")
@@ -302,11 +302,11 @@ class DockerSecurityAuditor:
         print()
         
         if critical_count > 0 and self.strict_mode:
-            print("❌ COMMIT BLOCKED - Fix critical violations before proceeding")
+            print(" FAIL:  COMMIT BLOCKED - Fix critical violations before proceeding")
         elif critical_count > 0:
-            print("⚠️  COMMIT ALLOWED - But fix critical violations ASAP")
+            print(" WARNING: [U+FE0F]  COMMIT ALLOWED - But fix critical violations ASAP")
         
-        print("🔒" * 60)
+        print("[U+1F512]" * 60)
     
     def export_json_report(self, output_path: str) -> None:
         """Export violations report as JSON."""
@@ -342,7 +342,7 @@ class DockerSecurityAuditor:
         with open(output_path, 'w') as f:
             json.dump(report_data, f, indent=2)
         
-        print(f"📄 JSON report exported to: {output_path}")
+        print(f"[U+1F4C4] JSON report exported to: {output_path}")
 
 
 def main():
@@ -380,7 +380,7 @@ def main():
     files_to_check = args.files if args.files else []
     
     if not files_to_check:
-        print("⚠️  No files provided - this auditor is designed for pre-commit hooks")
+        print(" WARNING: [U+FE0F]  No files provided - this auditor is designed for pre-commit hooks")
         return 0
     
     # Check files

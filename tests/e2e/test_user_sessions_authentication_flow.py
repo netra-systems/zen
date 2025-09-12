@@ -60,7 +60,7 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
         FAILURE SCENARIO: If user_sessions table is missing, this flow will fail
         at session management steps, preventing users from accessing chat.
         """
-        logger.info("🔍 CRITICAL E2E: Complete user authentication flow test")
+        logger.info(" SEARCH:  CRITICAL E2E: Complete user authentication flow test")
         
         # Step 1: Create authenticated user (requires user_sessions for session management)
         try:
@@ -75,11 +75,11 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             assert auth_user["jwt_token"] is not None, "JWT token should be created"
             assert auth_user["user_id"] is not None, "User ID should be assigned"
             
-            logger.info(f"✅ Step 1: User authentication successful for {auth_user['email']}")
+            logger.info(f" PASS:  Step 1: User authentication successful for {auth_user['email']}")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE Step 1: User authentication failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE Step 1: User authentication failed: {e}. "
                 f"This may indicate user_sessions table issues preventing auth operations."
             )
         
@@ -93,11 +93,11 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             assert token_validation["valid"] is True, "JWT token should be valid"
             assert token_validation["user_id"] == auth_user["user_id"], "Token user ID should match"
             
-            logger.info("✅ Step 2: JWT token validation successful")
+            logger.info(" PASS:  Step 2: JWT token validation successful")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE Step 2: JWT token validation failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE Step 2: JWT token validation failed: {e}. "
                 f"This may indicate session management issues related to user_sessions table."
             )
         
@@ -111,7 +111,7 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             assert "Authorization" in websocket_headers, "WebSocket headers should include Authorization"
             assert websocket_headers["Authorization"].startswith("Bearer "), "Should use Bearer token format"
             
-            logger.info("✅ Step 3: WebSocket authentication headers prepared")
+            logger.info(" PASS:  Step 3: WebSocket authentication headers prepared")
             
             # Test WebSocket connection (this tests the full auth pipeline)
             websocket_url = f"ws://localhost:8000/ws"
@@ -130,18 +130,18 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
                 }
                 
                 await websocket.send_json(auth_test_message)
-                logger.info("✅ Step 3: WebSocket connection and message send successful")
+                logger.info(" PASS:  Step 3: WebSocket connection and message send successful")
                 
                 # Try to receive response (validates the auth worked end-to-end)
                 try:
                     response = await asyncio.wait_for(websocket.receive_json(), timeout=5.0)
-                    logger.info(f"✅ Step 3: Received WebSocket response: {response.get('type', 'unknown')}")
+                    logger.info(f" PASS:  Step 3: Received WebSocket response: {response.get('type', 'unknown')}")
                 except asyncio.TimeoutError:
-                    logger.warning("⚠️ Step 3: WebSocket response timeout (may be normal for auth test)")
+                    logger.warning(" WARNING: [U+FE0F] Step 3: WebSocket response timeout (may be normal for auth test)")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE Step 3: WebSocket authentication failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE Step 3: WebSocket authentication failed: {e}. "
                 f"This indicates end-to-end authentication pipeline failure, "
                 f"possibly due to missing user_sessions table affecting session validation."
             )
@@ -160,24 +160,24 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             assert user_context.user_id is not None, "User context should have user ID"
             assert user_context.agent_context["jwt_token"] is not None, "User context should have JWT token"
             
-            logger.info("✅ Step 4: User context for chat functionality created successfully")
+            logger.info(" PASS:  Step 4: User context for chat functionality created successfully")
             
             # Validate the user context has all required components for chat
             required_context_fields = ["jwt_token", "user_email", "environment", "permissions"]
             for field in required_context_fields:
                 assert field in user_context.agent_context, f"User context missing {field}"
             
-            logger.info("✅ Step 4: User context validated for chat functionality access")
+            logger.info(" PASS:  Step 4: User context validated for chat functionality access")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE Step 4: Chat functionality access failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE Step 4: Chat functionality access failed: {e}. "
                 f"User authentication succeeded but chat access failed, "
                 f"indicating user_sessions table issues affecting user context creation."
             )
         
-        logger.info("🎉 COMPLETE SUCCESS: End-to-end authentication flow works correctly")
-        logger.info("✅ All steps passed - user_sessions table is functioning properly")
+        logger.info(" CELEBRATION:  COMPLETE SUCCESS: End-to-end authentication flow works correctly")
+        logger.info(" PASS:  All steps passed - user_sessions table is functioning properly")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -193,7 +193,7 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
         FAILURE SCENARIO: If user_sessions table is missing, session persistence
         will fail and users will need to re-authenticate constantly.
         """
-        logger.info("🔍 CRITICAL E2E: User session persistence test")
+        logger.info(" SEARCH:  CRITICAL E2E: User session persistence test")
         
         auth_helper = E2EAuthHelper(environment="test")
         
@@ -208,10 +208,10 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             initial_token = user_data["jwt_token"]
             user_id = user_data["user_id"]
             
-            logger.info(f"✅ Step 1: Initial session established for user {user_id}")
+            logger.info(f" PASS:  Step 1: Initial session established for user {user_id}")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE Step 1: Initial session creation failed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE Step 1: Initial session creation failed: {e}")
         
         # Step 2: Validate session persists across multiple requests
         try:
@@ -228,11 +228,11 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
                 # Simulate some delay between requests
                 await asyncio.sleep(0.5)
             
-            logger.info("✅ Step 2: Session persisted across multiple requests")
+            logger.info(" PASS:  Step 2: Session persisted across multiple requests")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE Step 2: Session persistence failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE Step 2: Session persistence failed: {e}. "
                 f"This indicates user_sessions table issues preventing session storage/retrieval."
             )
         
@@ -256,15 +256,15 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             assert second_validation["valid"] is True, "Second session should be valid"
             assert first_validation["user_id"] != second_validation["user_id"], "Sessions should have different users"
             
-            logger.info("✅ Step 3: Concurrent session management successful")
+            logger.info(" PASS:  Step 3: Concurrent session management successful")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE Step 3: Concurrent session management failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE Step 3: Concurrent session management failed: {e}. "
                 f"This indicates user_sessions table issues with multi-user session handling."
             )
         
-        logger.info("🎉 SUCCESS: User session persistence works correctly across requests")
+        logger.info(" CELEBRATION:  SUCCESS: User session persistence works correctly across requests")
     
     @pytest.mark.e2e  
     @pytest.mark.real_services
@@ -280,7 +280,7 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
         FAILURE SCENARIO: If user_sessions table is missing, authentication
         error handling and recovery may fail, leaving users unable to retry login.
         """
-        logger.info("🔍 CRITICAL E2E: Authentication failure recovery test")
+        logger.info(" SEARCH:  CRITICAL E2E: Authentication failure recovery test")
         
         auth_helper = E2EAuthHelper(environment="test")
         
@@ -293,10 +293,10 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             assert validation_result["valid"] is False, "Invalid token should fail validation"
             assert "error" in validation_result, "Should provide error details"
             
-            logger.info("✅ Step 1: Invalid token properly rejected")
+            logger.info(" PASS:  Step 1: Invalid token properly rejected")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE Step 1: Invalid token handling crashed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE Step 1: Invalid token handling crashed: {e}")
         
         # Step 2: Test expired token scenario
         try:
@@ -316,10 +316,10 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             assert expired_validation["valid"] is False, "Expired token should be rejected"
             assert "expired" in expired_validation.get("error", "").lower(), "Should indicate token expiration"
             
-            logger.info("✅ Step 2: Expired token properly rejected")
+            logger.info(" PASS:  Step 2: Expired token properly rejected")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE Step 2: Expired token handling failed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE Step 2: Expired token handling failed: {e}")
         
         # Step 3: Test successful recovery after failure
         try:
@@ -338,15 +338,15 @@ class TestUserSessionsAuthenticationE2E(BaseE2ETest):
             assert recovery_validation["valid"] is True, "Recovery authentication should succeed"
             assert recovery_validation["user_id"] == recovery_user["user_id"], "Recovery should have correct user"
             
-            logger.info("✅ Step 3: Authentication recovery successful after failures")
+            logger.info(" PASS:  Step 3: Authentication recovery successful after failures")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE Step 3: Authentication recovery failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE Step 3: Authentication recovery failed: {e}. "
                 f"This indicates user_sessions table issues preventing auth recovery operations."
             )
         
-        logger.info("🎉 SUCCESS: Authentication failure recovery scenarios work correctly")
+        logger.info(" CELEBRATION:  SUCCESS: Authentication failure recovery scenarios work correctly")
 
 
 class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
@@ -370,7 +370,7 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
         FAILURE SCENARIO: If user_sessions table is missing, multi-user session
         isolation cannot work, causing security and functionality issues.
         """
-        logger.info("🔍 CRITICAL E2E: Multi-user session isolation test")
+        logger.info(" SEARCH:  CRITICAL E2E: Multi-user session isolation test")
         
         # Create multiple test users simultaneously
         try:
@@ -405,13 +405,13 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
                 user_ids.add(user["user_id"])
                 tokens.add(user["jwt_token"])
                 
-                logger.info(f"✅ User {i}: {user['email']} - Unique session created")
+                logger.info(f" PASS:  User {i}: {user['email']} - Unique session created")
             
-            logger.info("✅ Multi-user session isolation successful - all users have separate sessions")
+            logger.info(" PASS:  Multi-user session isolation successful - all users have separate sessions")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Multi-user session isolation failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Multi-user session isolation failed: {e}. "
                 f"This indicates user_sessions table issues preventing proper session management."
             )
         
@@ -431,11 +431,11 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
                 assert validation["valid"] is True, f"User {i} token should be valid"
                 assert validation["user_id"] == users[i]["user_id"], f"User {i} token should match user ID"
             
-            logger.info("✅ Concurrent session validation successful - session isolation maintained")
+            logger.info(" PASS:  Concurrent session validation successful - session isolation maintained")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Concurrent session validation failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Concurrent session validation failed: {e}. "
                 f"This indicates user_sessions table concurrency issues."
             )
     
@@ -452,7 +452,7 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
         FAILURE SCENARIO: If user_sessions table is missing, permission-based
         authorization cannot work, causing security vulnerabilities.
         """
-        logger.info("🔍 CRITICAL E2E: Session-based authorization test")
+        logger.info(" SEARCH:  CRITICAL E2E: Session-based authorization test")
         
         # Create users with different permission levels
         try:
@@ -472,10 +472,10 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
                 permissions=["read", "write", "admin", "chat"]
             )
             
-            logger.info("✅ Created users with different permission levels")
+            logger.info(" PASS:  Created users with different permission levels")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Permission-based user creation failed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Permission-based user creation failed: {e}")
         
         # Validate permission isolation in sessions
         try:
@@ -498,11 +498,11 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
             assert "admin" in fullaccess_permissions, "Full access user should have admin permission"
             assert "chat" in fullaccess_permissions, "Full access user should have chat permission"
             
-            logger.info("✅ Permission-based authorization validation successful")
+            logger.info(" PASS:  Permission-based authorization validation successful")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Permission-based authorization failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Permission-based authorization failed: {e}. "
                 f"This indicates user_sessions table issues affecting permission management."
             )
     
@@ -519,7 +519,7 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
         FAILURE SCENARIO: If user_sessions table is missing, session cleanup
         cannot work, leading to security issues and resource leaks.
         """
-        logger.info("🔍 CRITICAL E2E: Session cleanup and security test")
+        logger.info(" SEARCH:  CRITICAL E2E: Session cleanup and security test")
         
         # Create test session that should be cleaned up
         try:
@@ -530,10 +530,10 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
             )
             
             test_token = test_user["jwt_token"]
-            logger.info(f"✅ Created test session for cleanup validation")
+            logger.info(f" PASS:  Created test session for cleanup validation")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Test session creation for cleanup failed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Test session creation for cleanup failed: {e}")
         
         # Test session expiry handling
         try:
@@ -553,11 +553,11 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
             expired_validation = await auth_helper.validate_jwt_token(short_token)
             assert expired_validation["valid"] is False, "Expired token should be invalid"
             
-            logger.info("✅ Session expiry handling works correctly")
+            logger.info(" PASS:  Session expiry handling works correctly")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Session expiry handling failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Session expiry handling failed: {e}. "
                 f"This indicates user_sessions table issues with expiry tracking."
             )
         
@@ -570,9 +570,9 @@ class TestUserSessionsDependentOperationsE2E(BaseE2ETest):
             assert current_validation["valid"] is True, "Valid session should not be affected by cleanup"
             assert current_validation["user_id"] == test_user["user_id"], "Session should maintain correct user"
             
-            logger.info("✅ Valid sessions unaffected by cleanup operations")
+            logger.info(" PASS:  Valid sessions unaffected by cleanup operations")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Valid session protection during cleanup failed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Valid session protection during cleanup failed: {e}")
         
-        logger.info("🎉 SUCCESS: Session cleanup and security operations work correctly")
+        logger.info(" CELEBRATION:  SUCCESS: Session cleanup and security operations work correctly")

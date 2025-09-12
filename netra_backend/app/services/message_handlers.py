@@ -108,10 +108,10 @@ class MessageHandlerService(IMessageHandlerService):
             try:
                 # Get connection info from WebSocket for association
                 # Note: This will be handled by the isolated manager
-                logger.info(f"✅ Thread association handled by isolated manager for user={user_context.user_id[:8]}..., thread={thread.id}")
+                logger.info(f" PASS:  Thread association handled by isolated manager for user={user_context.user_id[:8]}..., thread={thread.id}")
                 await asyncio.sleep(0.01)  # Small delay to ensure propagation
             except Exception as e:
-                logger.warning(f"⚠️ Could not update thread association: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Could not update thread association: {e}")
         
         await self._process_agent_request(user_context, user_request, thread, db_session, websocket_manager)
     
@@ -157,30 +157,30 @@ class MessageHandlerService(IMessageHandlerService):
     ) -> None:
         """Process the agent request"""
         user_id = user_context.user_id
-        logger.info(f"🎯 Starting agent request processing for user={user_id}, thread={thread.id}")
-        logger.info(f"📊 db_session status at start: {type(db_session)}, is None: {db_session is None}")
+        logger.info(f" TARGET:  Starting agent request processing for user={user_id}, thread={thread.id}")
+        logger.info(f" CHART:  db_session status at start: {type(db_session)}, is None: {db_session is None}")
         
         # CRITICAL FIX: Ensure thread association is established before processing
         # This prevents WebSocket emission failures during agent execution
         # The isolated manager handles thread associations internally
-        logger.info(f"✅ Using isolated WebSocket manager for user={user_id[:8]}..., thread={thread.id}")
+        logger.info(f" PASS:  Using isolated WebSocket manager for user={user_id[:8]}..., thread={thread.id}")
         # Continue - agent can execute with isolated WebSocket events
         
         await self._create_user_message(thread, user_request, user_id, db_session)
         run = await self._create_run(thread, db_session)
         
-        logger.info(f"📝 Configuring supervisor for user={user_id}")
+        logger.info(f"[U+1F4DD] Configuring supervisor for user={user_id}")
         self._configure_supervisor(user_id, thread, db_session, websocket_manager)
         
-        logger.info(f"🚀 Executing supervisor for run={run.id}")
+        logger.info(f"[U+1F680] Executing supervisor for run={run.id}")
         response = await self._execute_supervisor(user_request, thread, user_id, run, db_session)
         
-        logger.info(f"💾 Saving response for run={run.id}")
+        logger.info(f"[U+1F4BE] Saving response for run={run.id}")
         await self._save_response(thread, response, run, db_session)
         await self._complete_run(run, db_session)
         await self._send_completion(user_context, response, websocket_manager)
         
-        logger.info(f"✅ Agent request processing completed for user={user_id}, thread={thread.id}")
+        logger.info(f" PASS:  Agent request processing completed for user={user_id}, thread={thread.id}")
     
     async def _create_user_message(
         self, thread: Thread, content: str, user_id: str, db_session: AsyncSession
@@ -228,34 +228,34 @@ class MessageHandlerService(IMessageHandlerService):
             
             # MIGRATION NOTE: register_run_thread_mapping is deprecated in factory pattern
             # Event routing is now handled automatically through UserExecutionContext
-            logger.info(f"ℹ️ Bridge created for user isolation - run_id={run.id} → thread_id={thread.id}")
+            logger.info(f"[U+2139][U+FE0F] Bridge created for user isolation - run_id={run.id}  ->  thread_id={thread.id}")
                 
             # Store bridge for later user emitter creation (after UserExecutionContext is available)
             # The actual emitter will be created and set after context creation below
             self._bridge_for_supervisor = bridge
                 
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: Error registering run-thread mapping: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Agent events may be lost! User will not see AI working.")
-            logger.critical(f"🚨 Context: run_id={run.id}, thread_id={thread.id}, user_id={user_id[:8]}...")
+            logger.critical(f" ALERT:  CRITICAL: Error registering run-thread mapping: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: Agent events may be lost! User will not see AI working.")
+            logger.critical(f" ALERT:  Context: run_id={run.id}, thread_id={thread.id}, user_id={user_id[:8]}...")
             # LOUD ERROR: Log stack trace for debugging
             import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
             # Continue execution even if registration fails, but with loud warnings
         
         # Create UserExecutionContext for the new pattern
         from netra_backend.app.services.user_execution_context import UserExecutionContext
         
         # CRITICAL DEBUG: Log the db_session status
-        logger.info(f"🔍 DEBUG: db_session type: {type(db_session)}, is None: {db_session is None}")
+        logger.info(f" SEARCH:  DEBUG: db_session type: {type(db_session)}, is None: {db_session is None}")
         if db_session is None:
-            logger.error(f"🚨 CRITICAL: db_session is None! This will cause UserExecutionContext validation to fail")
-            logger.error(f"🚨 Stack trace for debugging:")
+            logger.error(f" ALERT:  CRITICAL: db_session is None! This will cause UserExecutionContext validation to fail")
+            logger.error(f" ALERT:  Stack trace for debugging:")
             import traceback
             logger.error(traceback.format_stack())
         
         # Create context with proper metadata using the passed db_session
-        logger.info(f"📝 Creating UserExecutionContext with: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+        logger.info(f"[U+1F4DD] Creating UserExecutionContext with: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
         
         try:
             context = UserExecutionContext(
@@ -268,7 +268,7 @@ class MessageHandlerService(IMessageHandlerService):
                     "timestamp": run.created_at
                 }
             )
-            logger.info(f"✅ Successfully created UserExecutionContext for user={user_id}, thread={thread.id}, run={run.id}")
+            logger.info(f" PASS:  Successfully created UserExecutionContext for user={user_id}, thread={thread.id}, run={run.id}")
             
             # CRITICAL: Create per-user WebSocket emitter (SECURITY: prevents cross-user leakage)
             if hasattr(self, '_bridge_for_supervisor'):
@@ -278,36 +278,36 @@ class MessageHandlerService(IMessageHandlerService):
                     # Set user-specific emitter on SupervisorAgent for real-time events
                     if hasattr(self.supervisor, 'set_websocket_emitter'):
                         self.supervisor.set_websocket_emitter(user_emitter)
-                        logger.info(f"✅ Set user-specific WebSocket emitter on SupervisorAgent for run_id={run.id}")
+                        logger.info(f" PASS:  Set user-specific WebSocket emitter on SupervisorAgent for run_id={run.id}")
                     elif hasattr(self.supervisor, 'set_websocket_bridge'):
                         # Backward compatibility: use bridge if emitter method not available
                         self.supervisor.set_websocket_bridge(self._bridge_for_supervisor, run.id)
-                        logger.warning(f"⚠️ Using legacy bridge method - supervisor should be updated to use set_websocket_emitter")
+                        logger.warning(f" WARNING: [U+FE0F] Using legacy bridge method - supervisor should be updated to use set_websocket_emitter")
                     else:
-                        logger.warning(f"⚠️ SupervisorAgent doesn't have WebSocket emitter or bridge methods")
+                        logger.warning(f" WARNING: [U+FE0F] SupervisorAgent doesn't have WebSocket emitter or bridge methods")
                         
                     # Cleanup temporary bridge reference
                     delattr(self, '_bridge_for_supervisor')
                     
                 except Exception as emitter_error:
-                    logger.critical(f"🚨 CRITICAL: Failed to create user emitter: {emitter_error}")
-                    logger.critical(f"🚨 BUSINESS VALUE FAILURE: Real-time agent events will be lost!")
-                    logger.critical(f"🚨 Impact: Users will not see AI working on their problems")
-                    logger.critical(f"🚨 Context: run_id={run.id}, user_id={user_id[:8]}..., thread_id={thread.id}")
+                    logger.critical(f" ALERT:  CRITICAL: Failed to create user emitter: {emitter_error}")
+                    logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: Real-time agent events will be lost!")
+                    logger.critical(f" ALERT:  Impact: Users will not see AI working on their problems")
+                    logger.critical(f" ALERT:  Context: run_id={run.id}, user_id={user_id[:8]}..., thread_id={thread.id}")
                     # LOUD ERROR: Log stack trace for debugging
                     import traceback
-                    logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+                    logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
                     # Continue execution without WebSocket events rather than failing completely
                     if hasattr(self, '_bridge_for_supervisor'):
                         delattr(self, '_bridge_for_supervisor')
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: Failed to create UserExecutionContext: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Agent execution cannot proceed!")
-            logger.critical(f"🚨 Impact: User request will fail completely")
-            logger.critical(f"🚨 Parameters were: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
+            logger.critical(f" ALERT:  CRITICAL: Failed to create UserExecutionContext: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: Agent execution cannot proceed!")
+            logger.critical(f" ALERT:  Impact: User request will fail completely")
+            logger.critical(f" ALERT:  Parameters were: user_id={user_id}, thread_id={thread.id}, run_id={run.id}, db_session={type(db_session)}")
             # LOUD ERROR: Log stack trace for debugging
             import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
             # Cleanup bridge reference on error
             if hasattr(self, '_bridge_for_supervisor'):
                 delattr(self, '_bridge_for_supervisor')
@@ -315,36 +315,36 @@ class MessageHandlerService(IMessageHandlerService):
         
         # Execute the supervisor with the new UserExecutionContext pattern
         try:
-            logger.info(f"🚀 Attempting to execute SupervisorAgent.execute() with context for run_id={run.id}")
+            logger.info(f"[U+1F680] Attempting to execute SupervisorAgent.execute() with context for run_id={run.id}")
             
             # Double-check the supervisor has execute method
             if not hasattr(self.supervisor, 'execute'):
-                logger.error(f"🚨 CRITICAL: SupervisorAgent does not have 'execute' method!")
-                logger.error(f"🚨 Available methods: {[m for m in dir(self.supervisor) if not m.startswith('_')]}")
+                logger.error(f" ALERT:  CRITICAL: SupervisorAgent does not have 'execute' method!")
+                logger.error(f" ALERT:  Available methods: {[m for m in dir(self.supervisor) if not m.startswith('_')]}")
                 raise AttributeError("SupervisorAgent missing execute method")
             
             result = await self.supervisor.execute(context, stream_updates=True)
-            logger.info(f"✅ SupervisorAgent executed successfully for run_id={run.id}")
-            logger.info(f"📊 Result type: {type(result)}, has content: {result is not None}")
+            logger.info(f" PASS:  SupervisorAgent executed successfully for run_id={run.id}")
+            logger.info(f" CHART:  Result type: {type(result)}, has content: {result is not None}")
             return result
         except AttributeError as e:
-            logger.critical(f"🚨 CRITICAL: AttributeError in SupervisorAgent execution for run_id={run.id}: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Agent execution failed - supervisor missing required method")
-            logger.critical(f"🚨 Impact: User will receive no AI response")
-            logger.critical(f"🚨 Supervisor type: {type(self.supervisor)}")
-            logger.critical(f"🚨 Available methods: {[m for m in dir(self.supervisor) if not m.startswith('_')]}")
+            logger.critical(f" ALERT:  CRITICAL: AttributeError in SupervisorAgent execution for run_id={run.id}: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: Agent execution failed - supervisor missing required method")
+            logger.critical(f" ALERT:  Impact: User will receive no AI response")
+            logger.critical(f" ALERT:  Supervisor type: {type(self.supervisor)}")
+            logger.critical(f" ALERT:  Available methods: {[m for m in dir(self.supervisor) if not m.startswith('_')]}")
             raise
         except ValueError as e:
-            logger.critical(f"🚨 CRITICAL: ValueError in SupervisorAgent execution for run_id={run.id}: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: UserExecutionContext validation failed")
-            logger.critical(f"🚨 Impact: User request cannot be processed")
-            logger.critical(f"🚨 Context details: user_id={context.user_id}, thread_id={context.thread_id}, run_id={context.run_id}")
+            logger.critical(f" ALERT:  CRITICAL: ValueError in SupervisorAgent execution for run_id={run.id}: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: UserExecutionContext validation failed")
+            logger.critical(f" ALERT:  Impact: User request cannot be processed")
+            logger.critical(f" ALERT:  Context details: user_id={context.user_id}, thread_id={context.thread_id}, run_id={context.run_id}")
             raise
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: SupervisorAgent execution failed for run_id={run.id}: {e}", exc_info=True)
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: Complete agent execution failure")
-            logger.critical(f"🚨 Impact: User will receive no AI response")
-            logger.critical(f"🚨 Exception type: {type(e).__name__}")
+            logger.critical(f" ALERT:  CRITICAL: SupervisorAgent execution failed for run_id={run.id}: {e}", exc_info=True)
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: Complete agent execution failure")
+            logger.critical(f" ALERT:  Impact: User will receive no AI response")
+            logger.critical(f" ALERT:  Exception type: {type(e).__name__}")
             raise
     
     async def _save_response(
@@ -391,20 +391,20 @@ class MessageHandlerService(IMessageHandlerService):
         
         # Don't process empty messages - prevents wasted agent resources
         if not text or not text.strip():
-            logger.error(f"🚨 ERROR: Empty message from user {user_id[:8]}... - potential UI/frontend issue")
-            logger.error(f"🚨 BUSINESS VALUE IMPACT: User attempted to send empty request")
-            logger.error(f"🚨 This may indicate frontend validation failure or API misuse")
+            logger.error(f" ALERT:  ERROR: Empty message from user {user_id[:8]}... - potential UI/frontend issue")
+            logger.error(f" ALERT:  BUSINESS VALUE IMPACT: User attempted to send empty request")
+            logger.error(f" ALERT:  This may indicate frontend validation failure or API misuse")
             try:
                 await websocket_manager.send_to_user({"type": "error", "message": "Please enter a message"})
             except Exception as send_error:
-                logger.critical(f"🚨 CRITICAL: Failed to send error message to user {user_id[:8]}...: {send_error}")
+                logger.critical(f" ALERT:  CRITICAL: Failed to send error message to user {user_id[:8]}...: {send_error}")
             return
         
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
         
         # CRITICAL FIX: Thread association is handled by isolated manager
         if thread and thread_id:
-            logger.info(f"✅ Thread association handled by isolated manager for user={user_id[:8]}..., thread={thread_id}")
+            logger.info(f" PASS:  Thread association handled by isolated manager for user={user_id[:8]}..., thread={thread_id}")
             await asyncio.sleep(0.01)  # Small delay to ensure propagation
         
         # Note: Broadcasting is handled by the isolated manager
@@ -439,12 +439,12 @@ class MessageHandlerService(IMessageHandlerService):
                 return None, None
             return await self._initialize_conversation(thread, text, references, user_id, db_session)
         except Exception as e:
-            logger.critical(f"🚨 CRITICAL: Error setting up thread/run for user {user_id[:8]}...: {e}")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User message processing cannot proceed")
-            logger.critical(f"🚨 Impact: User will receive no response to their message")
+            logger.critical(f" ALERT:  CRITICAL: Error setting up thread/run for user {user_id[:8]}...: {e}")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: User message processing cannot proceed")
+            logger.critical(f" ALERT:  Impact: User will receive no response to their message")
             # LOUD ERROR: Log stack trace for debugging
             import traceback
-            logger.critical(f"🚨 Stack trace: {traceback.format_exc()}")
+            logger.critical(f" ALERT:  Stack trace: {traceback.format_exc()}")
             return None, None
     
     async def _get_validated_thread(
@@ -474,10 +474,10 @@ class MessageHandlerService(IMessageHandlerService):
         """Create new thread for user"""
         thread = await self.thread_service.get_or_create_thread(user_id, db_session)
         if not thread:
-            logger.critical(f"🚨 CRITICAL: Could not get/create thread for user {user_id[:8]}...")
-            logger.critical(f"🚨 BUSINESS VALUE FAILURE: User cannot engage with system")
-            logger.critical(f"🚨 Impact: User will be unable to start conversations")
-            logger.critical(f"🚨 This is a DATABASE or SYSTEM FAILURE requiring immediate attention")
+            logger.critical(f" ALERT:  CRITICAL: Could not get/create thread for user {user_id[:8]}...")
+            logger.critical(f" ALERT:  BUSINESS VALUE FAILURE: User cannot engage with system")
+            logger.critical(f" ALERT:  Impact: User will be unable to start conversations")
+            logger.critical(f" ALERT:  This is a DATABASE or SYSTEM FAILURE requiring immediate attention")
         return thread
     
     async def _initialize_conversation(
@@ -586,19 +586,19 @@ class MessageHandlerService(IMessageHandlerService):
                 await websocket_manager.send_to_user(thread_data)
                 logger.info(f"Sent {len(messages)} messages to user {user_id} for thread {thread_id}")
             except Exception as e:
-                logger.error(f"🚨 ERROR: Error loading thread messages for user {user_id[:8]}..., thread {thread_id}: {e}")
-                logger.error(f"🚨 BUSINESS VALUE IMPACT: User cannot see conversation history")
-                logger.error(f"🚨 This degrades user experience - investigate database connectivity")
+                logger.error(f" ALERT:  ERROR: Error loading thread messages for user {user_id[:8]}..., thread {thread_id}: {e}")
+                logger.error(f" ALERT:  BUSINESS VALUE IMPACT: User cannot see conversation history")
+                logger.error(f" ALERT:  This degrades user experience - investigate database connectivity")
                 # LOUD ERROR: Log stack trace for debugging
                 import traceback
-                logger.error(f"🚨 Stack trace: {traceback.format_exc()}")
+                logger.error(f" ALERT:  Stack trace: {traceback.format_exc()}")
                 # Continue with thread switch even if message loading fails
         
         # Execute room switch (handled by isolated manager)
         await self._execute_thread_switch(user_context, thread_id, websocket_manager)
         
         # Note: WebSocket connection thread association is handled by the isolated manager
-        logger.info(f"✅ Thread switch completed using isolated manager for user={user_id[:8]}..., thread={thread_id}")
+        logger.info(f" PASS:  Thread switch completed using isolated manager for user={user_id[:8]}..., thread={thread_id}")
     
     async def _execute_thread_switch(self, user_context: UserExecutionContext, thread_id: str, websocket_manager) -> None:
         """Execute the thread switch operation"""

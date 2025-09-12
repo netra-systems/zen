@@ -30,7 +30,7 @@ async def run_rfc_6455_compliance_tests():
     try:
         from tests.websocket_auth_protocol_tdd.test_rfc_6455_subprotocol_compliance import RFC6455SubprotocolComplianceTest
         
-        print("🧪 RFC 6455 WebSocket Subprotocol Compliance Tests")
+        print("[U+1F9EA] RFC 6455 WebSocket Subprotocol Compliance Tests")
         print("=" * 60)
         
         # Create test instance
@@ -52,7 +52,7 @@ async def run_rfc_6455_compliance_tests():
         
         for method_name, description in test_methods:
             try:
-                print(f"\n📋 Running: {description}")
+                print(f"\n[U+1F4CB] Running: {description}")
                 method = getattr(test_instance, method_name)
                 
                 if asyncio.iscoroutinefunction(method):
@@ -60,24 +60,24 @@ async def run_rfc_6455_compliance_tests():
                 else:
                     method()
                     
-                print(f"✅ PASSED: {method_name}")
+                print(f" PASS:  PASSED: {method_name}")
                 passed += 1
                 
             except Exception as e:
-                print(f"❌ FAILED: {method_name}")
+                print(f" FAIL:  FAILED: {method_name}")
                 print(f"   Error: {str(e)}")
                 print(f"   This failure demonstrates the RFC 6455 violation")
                 failed += 1
         
-        print(f"\n📊 RFC 6455 Test Results:")
+        print(f"\n CHART:  RFC 6455 Test Results:")
         print(f"   Passed: {passed}")
         print(f"   Failed: {failed} (Expected - demonstrates bug)")
-        print(f"   Status: {'✅ TDD tests working correctly' if failed > 0 else '⚠️ Unexpected passes'}")
+        print(f"   Status: {' PASS:  TDD tests working correctly' if failed > 0 else ' WARNING: [U+FE0F] Unexpected passes'}")
         
         return failed > 0
         
     except Exception as e:
-        print(f"🚨 Error running RFC 6455 tests: {e}")
+        print(f" ALERT:  Error running RFC 6455 tests: {e}")
         traceback.print_exc()
         return False
 
@@ -87,7 +87,7 @@ async def run_jwt_extraction_tests():
     try:
         from tests.websocket_auth_protocol_tdd.test_jwt_extraction_integration import JWTExtractionIntegrationTest
         
-        print("\n🔐 JWT Extraction Integration Tests")
+        print("\n[U+1F510] JWT Extraction Integration Tests")
         print("=" * 60)
         
         test_instance = JWTExtractionIntegrationTest()
@@ -106,7 +106,7 @@ async def run_jwt_extraction_tests():
         
         for method_name, description in test_methods:
             try:
-                print(f"\n📋 Running: {description}")
+                print(f"\n[U+1F4CB] Running: {description}")
                 method = getattr(test_instance, method_name)
                 
                 if asyncio.iscoroutinefunction(method):
@@ -114,23 +114,23 @@ async def run_jwt_extraction_tests():
                 else:
                     method()
                     
-                print(f"✅ PASSED: {method_name}")
+                print(f" PASS:  PASSED: {method_name}")
                 passed += 1
                 
             except Exception as e:
-                print(f"❌ FAILED: {method_name}")
+                print(f" FAIL:  FAILED: {method_name}")
                 print(f"   Error: {str(e)}")
                 failed += 1
         
-        print(f"\n📊 JWT Extraction Test Results:")
+        print(f"\n CHART:  JWT Extraction Test Results:")
         print(f"   Passed: {passed}")
         print(f"   Failed: {failed}")
-        print(f"   Status: {'✅ JWT extraction working' if passed > failed else '⚠️ JWT extraction issues'}")
+        print(f"   Status: {' PASS:  JWT extraction working' if passed > failed else ' WARNING: [U+FE0F] JWT extraction issues'}")
         
         return passed > failed
         
     except Exception as e:
-        print(f"🚨 Error running JWT extraction tests: {e}")
+        print(f" ALERT:  Error running JWT extraction tests: {e}")
         traceback.print_exc()
         return False
 
@@ -140,7 +140,7 @@ async def run_agent_event_tests():
     try:
         from tests.websocket_auth_protocol_tdd.test_agent_event_delivery_failure import AgentEventDeliveryFailureTest
         
-        print("\n💼 Agent Event Delivery Failure Tests")
+        print("\n[U+1F4BC] Agent Event Delivery Failure Tests")
         print("=" * 60)
         
         test_instance = AgentEventDeliveryFailureTest()
@@ -163,7 +163,7 @@ async def run_agent_event_tests():
         
         for method_name, description in test_methods:
             try:
-                print(f"\n📋 Running: {description}")
+                print(f"\n[U+1F4CB] Running: {description}")
                 method = getattr(test_instance, method_name)
                 
                 if asyncio.iscoroutinefunction(method):
@@ -171,7 +171,7 @@ async def run_agent_event_tests():
                 else:
                     method()
                     
-                print(f"✅ PASSED: {method_name}")
+                print(f" PASS:  PASSED: {method_name}")
                 passed += 1
                 
                 # Count business impact demonstrations
@@ -179,32 +179,32 @@ async def run_agent_event_tests():
                     business_impact_demonstrated += 1
                 
             except Exception as e:
-                print(f"❌ FAILED: {method_name}")
+                print(f" FAIL:  FAILED: {method_name}")
                 print(f"   Error: {str(e)}")
                 failed += 1
                 
                 # Expected failures due to WebSocket connection issues
                 if "delivery_failure" in method_name:
-                    print(f"   ✅ Expected failure - demonstrates business impact")
+                    print(f"    PASS:  Expected failure - demonstrates business impact")
                     business_impact_demonstrated += 1
         
-        print(f"\n📊 Agent Event Test Results:")
+        print(f"\n CHART:  Agent Event Test Results:")
         print(f"   Passed: {passed}")
         print(f"   Failed: {failed} (Expected - WebSocket events can't deliver)")
         print(f"   Business Impact Demonstrated: {business_impact_demonstrated}/8 tests")
-        print(f"   Status: {'✅ Business impact validated' if business_impact_demonstrated >= 5 else '⚠️ Impact unclear'}")
+        print(f"   Status: {' PASS:  Business impact validated' if business_impact_demonstrated >= 5 else ' WARNING: [U+FE0F] Impact unclear'}")
         
         return business_impact_demonstrated >= 5
         
     except Exception as e:
-        print(f"🚨 Error running agent event tests: {e}")
+        print(f" ALERT:  Error running agent event tests: {e}")
         traceback.print_exc()
         return False
 
 
 async def main():
     """Main test runner for WebSocket TDD suite"""
-    print("🚀 WebSocket Authentication RFC 6455 TDD Test Suite")
+    print("[U+1F680] WebSocket Authentication RFC 6455 TDD Test Suite")
     print("Issue #280: WebSocket authentication failure - P0 CRITICAL affecting $500K+ ARR")
     print("TDD Strategy: Create failing tests, then implement fix")
     print("=" * 80)
@@ -215,36 +215,36 @@ async def main():
     event_results = await run_agent_event_tests()
     
     print("\n" + "=" * 80)
-    print("📋 TDD TEST SUITE SUMMARY")
+    print("[U+1F4CB] TDD TEST SUITE SUMMARY")
     print("=" * 80)
     
-    print(f"🧪 RFC 6455 Compliance: {'✅ Failures demonstrated' if rfc_results else '⚠️ No failures shown'}")
-    print(f"🔐 JWT Extraction: {'✅ Logic working' if jwt_results else '⚠️ Logic issues'}")
-    print(f"💼 Business Impact: {'✅ Impact demonstrated' if event_results else '⚠️ Impact unclear'}")
+    print(f"[U+1F9EA] RFC 6455 Compliance: {' PASS:  Failures demonstrated' if rfc_results else ' WARNING: [U+FE0F] No failures shown'}")
+    print(f"[U+1F510] JWT Extraction: {' PASS:  Logic working' if jwt_results else ' WARNING: [U+FE0F] Logic issues'}")
+    print(f"[U+1F4BC] Business Impact: {' PASS:  Impact demonstrated' if event_results else ' WARNING: [U+FE0F] Impact unclear'}")
     
     if rfc_results and jwt_results and event_results:
-        print("\n✅ TDD VALIDATION SUCCESSFUL")
-        print("   • RFC 6455 violations demonstrated")  
-        print("   • JWT extraction confirmed working")
-        print("   • Business impact quantified")
-        print("   • Ready for implementation phase")
-        print("\n🔧 NEXT STEP: Apply subprotocol parameter fix:")
-        print("   • websocket_ssot.py:298 → await websocket.accept(subprotocol='jwt-auth')")
-        print("   • websocket_ssot.py:393 → await websocket.accept(subprotocol='jwt-auth')")
-        print("   • websocket_ssot.py:461 → await websocket.accept(subprotocol='jwt-auth')")
-        print("   • websocket_ssot.py:539 → await websocket.accept(subprotocol='jwt-auth')")
+        print("\n PASS:  TDD VALIDATION SUCCESSFUL")
+        print("   [U+2022] RFC 6455 violations demonstrated")  
+        print("   [U+2022] JWT extraction confirmed working")
+        print("   [U+2022] Business impact quantified")
+        print("   [U+2022] Ready for implementation phase")
+        print("\n[U+1F527] NEXT STEP: Apply subprotocol parameter fix:")
+        print("   [U+2022] websocket_ssot.py:298  ->  await websocket.accept(subprotocol='jwt-auth')")
+        print("   [U+2022] websocket_ssot.py:393  ->  await websocket.accept(subprotocol='jwt-auth')")
+        print("   [U+2022] websocket_ssot.py:461  ->  await websocket.accept(subprotocol='jwt-auth')")
+        print("   [U+2022] websocket_ssot.py:539  ->  await websocket.accept(subprotocol='jwt-auth')")
         
     else:
-        print("\n⚠️ TDD VALIDATION INCOMPLETE")
-        print("   • Review test failures for specific issues")
-        print("   • May need test environment adjustments")
-        print("   • Core RFC 6455 issue may already be partially fixed")
+        print("\n WARNING: [U+FE0F] TDD VALIDATION INCOMPLETE")
+        print("   [U+2022] Review test failures for specific issues")
+        print("   [U+2022] May need test environment adjustments")
+        print("   [U+2022] Core RFC 6455 issue may already be partially fixed")
 
-    print("\n💰 BUSINESS IMPACT REMINDER:")
-    print("   • $500K+ ARR at risk")
-    print("   • Golden Path (login → AI responses) blocked")
-    print("   • All 5 critical WebSocket events failing")
-    print("   • Chat functionality (90% platform value) non-functional")
+    print("\n[U+1F4B0] BUSINESS IMPACT REMINDER:")
+    print("   [U+2022] $500K+ ARR at risk")
+    print("   [U+2022] Golden Path (login  ->  AI responses) blocked")
+    print("   [U+2022] All 5 critical WebSocket events failing")
+    print("   [U+2022] Chat functionality (90% platform value) non-functional")
 
 
 if __name__ == "__main__":

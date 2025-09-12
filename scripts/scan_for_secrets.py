@@ -314,12 +314,12 @@ def main():
     # Check for critical findings
     report = scanner.generate_report()
     if args.fail_on_critical and report['summary']['critical'] > 0:
-        print("\n❌ Critical secrets found! Exiting with error.")
+        print("\n FAIL:  Critical secrets found! Exiting with error.")
         sys.exit(1)
     elif report['summary']['critical'] > 0:
-        print("\n⚠️  Critical secrets found! Please remediate immediately.")
+        print("\n WARNING: [U+FE0F]  Critical secrets found! Please remediate immediately.")
     else:
-        print("\n✅ No critical secrets found.")
+        print("\n PASS:  No critical secrets found.")
 
 
 if __name__ == '__main__':

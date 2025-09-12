@@ -43,7 +43,7 @@ class WebSocketDeploymentValidator:
         
     async def validate_load_balancer_timeout_fix(self) -> Dict[str, Any]:
         """Validate load balancer 24-hour timeout fix."""
-        logger.info("🔍 Validating load balancer timeout configuration...")
+        logger.info(" SEARCH:  Validating load balancer timeout configuration...")
         
         result = {
             "test": "load_balancer_timeout_fix",
@@ -87,29 +87,29 @@ class WebSocketDeploymentValidator:
                 result["details"]["heartbeat_response"] = json.loads(heartbeat_response)
                 
                 result["status"] = "passed"
-                logger.success("✅ Load balancer timeout fix validated")
+                logger.success(" PASS:  Load balancer timeout fix validated")
                 
         except websockets.exceptions.InvalidHandshake as e:
             result["status"] = "failed"
             result["error"] = f"WebSocket handshake failed: {e}"
             result["details"]["handshake_error"] = str(e)
-            logger.error(f"❌ Load balancer handshake failed: {e}")
+            logger.error(f" FAIL:  Load balancer handshake failed: {e}")
             
         except asyncio.TimeoutError:
             result["status"] = "failed"
             result["error"] = "WebSocket connection timeout"
-            logger.error("❌ WebSocket connection timeout")
+            logger.error(" FAIL:  WebSocket connection timeout")
             
         except Exception as e:
             result["status"] = "failed"
             result["error"] = f"Unexpected error: {e}"
-            logger.error(f"❌ Load balancer validation failed: {e}")
+            logger.error(f" FAIL:  Load balancer validation failed: {e}")
             
         return result
         
     async def validate_403_handshake_fix(self) -> Dict[str, Any]:
         """Validate HTTP 403 WebSocket handshake fix."""
-        logger.info("🔍 Validating WebSocket 403 handshake fix...")
+        logger.info(" SEARCH:  Validating WebSocket 403 handshake fix...")
         
         result = {
             "test": "403_handshake_fix",
@@ -150,13 +150,13 @@ class WebSocketDeploymentValidator:
                     result["status"] = "passed"
                     result["details"]["authenticated_connection"] = True
                     result["details"]["response"] = response_data
-                    logger.success("✅ WebSocket 403 handshake fix validated")
+                    logger.success(" PASS:  WebSocket 403 handshake fix validated")
                     
         except websockets.exceptions.ConnectionClosedError as e:
             if e.code == 403:
                 result["status"] = "failed"
                 result["error"] = f"WebSocket still returning 403 Forbidden: {e}"
-                logger.error(f"❌ WebSocket 403 fix not working: {e}")
+                logger.error(f" FAIL:  WebSocket 403 fix not working: {e}")
             else:
                 result["status"] = "failed"
                 result["error"] = f"WebSocket connection closed: {e}"
@@ -164,13 +164,13 @@ class WebSocketDeploymentValidator:
         except Exception as e:
             result["status"] = "failed"
             result["error"] = f"403 handshake test failed: {e}"
-            logger.error(f"❌ WebSocket 403 validation failed: {e}")
+            logger.error(f" FAIL:  WebSocket 403 validation failed: {e}")
             
         return result
         
     async def validate_jwt_synchronization_fix(self) -> Dict[str, Any]:
         """Validate JWT token synchronization between services."""
-        logger.info("🔍 Validating JWT synchronization fix...")
+        logger.info(" SEARCH:  Validating JWT synchronization fix...")
         
         result = {
             "test": "jwt_synchronization_fix",
@@ -217,18 +217,18 @@ class WebSocketDeploymentValidator:
                     result["status"] = "passed"
                     result["details"]["jwt_validation_successful"] = True
                     result["details"]["response_type"] = response_data.get("type")
-                    logger.success("✅ JWT synchronization fix validated")
+                    logger.success(" PASS:  JWT synchronization fix validated")
                     
         except Exception as e:
             result["status"] = "failed"
             result["error"] = f"JWT synchronization test failed: {e}"
-            logger.error(f"❌ JWT synchronization validation failed: {e}")
+            logger.error(f" FAIL:  JWT synchronization validation failed: {e}")
             
         return result
         
     async def validate_agent_events_business_value(self) -> Dict[str, Any]:
         """Validate critical WebSocket agent events for chat business value."""
-        logger.info("🔍 Validating WebSocket agent events for chat business value...")
+        logger.info(" SEARCH:  Validating WebSocket agent events for chat business value...")
         
         result = {
             "test": "agent_events_business_value",
@@ -297,23 +297,23 @@ class WebSocketDeploymentValidator:
                     result["status"] = "failed"
                     result["error"] = f"Missing critical WebSocket events: {missing_events}"
                     result["details"]["missing_events"] = missing_events
-                    logger.error(f"❌ Missing critical events: {missing_events}")
+                    logger.error(f" FAIL:  Missing critical events: {missing_events}")
                 else:
                     result["status"] = "passed"
                     result["details"]["all_events_received"] = True
                     result["details"]["event_flow_complete"] = True
-                    logger.success("✅ All critical WebSocket agent events validated")
+                    logger.success(" PASS:  All critical WebSocket agent events validated")
                     
         except Exception as e:
             result["status"] = "failed"
             result["error"] = f"Agent events validation failed: {e}"
-            logger.error(f"❌ Agent events validation failed: {e}")
+            logger.error(f" FAIL:  Agent events validation failed: {e}")
             
         return result
         
     async def validate_multi_user_isolation(self) -> Dict[str, Any]:
         """Validate multi-user WebSocket isolation."""
-        logger.info("🔍 Validating multi-user WebSocket isolation...")
+        logger.info(" SEARCH:  Validating multi-user WebSocket isolation...")
         
         result = {
             "test": "multi_user_isolation",
@@ -396,18 +396,18 @@ class WebSocketDeploymentValidator:
                     result["details"]["isolation_maintained"] = True
                     result["details"]["user1_response_count"] = len(user1_responses)
                     result["details"]["user2_response_count"] = len(user2_responses)
-                    logger.success("✅ Multi-user WebSocket isolation validated")
+                    logger.success(" PASS:  Multi-user WebSocket isolation validated")
                     
         except Exception as e:
             result["status"] = "failed"
             result["error"] = f"Multi-user isolation test failed: {e}"
-            logger.error(f"❌ Multi-user isolation validation failed: {e}")
+            logger.error(f" FAIL:  Multi-user isolation validation failed: {e}")
             
         return result
         
     async def validate_websocket_health_endpoint(self) -> Dict[str, Any]:
         """Validate WebSocket health endpoint for monitoring."""
-        logger.info("🔍 Validating WebSocket health endpoint...")
+        logger.info(" SEARCH:  Validating WebSocket health endpoint...")
         
         result = {
             "test": "websocket_health_endpoint",
@@ -452,12 +452,12 @@ class WebSocketDeploymentValidator:
                             result["status"] = "passed"
                             result["details"]["health_status"] = health_status
                             result["details"]["service_info"] = health_data
-                            logger.success("✅ WebSocket health endpoint validated")
+                            logger.success(" PASS:  WebSocket health endpoint validated")
                             
         except Exception as e:
             result["status"] = "failed"
             result["error"] = f"Health endpoint test failed: {e}"
-            logger.error(f"❌ WebSocket health endpoint validation failed: {e}")
+            logger.error(f" FAIL:  WebSocket health endpoint validation failed: {e}")
             
         return result
         
@@ -500,7 +500,7 @@ class WebSocketDeploymentTestSuite:
         
     async def run_all_validations(self) -> Dict[str, Any]:
         """Run all WebSocket deployment validations."""
-        logger.info("🚀 Starting WebSocket deployment validation suite...")
+        logger.info("[U+1F680] Starting WebSocket deployment validation suite...")
         
         test_suite_results = {
             "test_suite": "websocket_deployment_validation",
@@ -561,11 +561,11 @@ class WebSocketDeploymentTestSuite:
         
         # Log summary
         if test_suite_results["summary"]["deployment_ready"]:
-            logger.success(f"🎉 WebSocket deployment validation PASSED: {success_rate}% success rate")
-            logger.success("✅ WebSocket deployment fixes validated and ready for production")
+            logger.success(f" CELEBRATION:  WebSocket deployment validation PASSED: {success_rate}% success rate")
+            logger.success(" PASS:  WebSocket deployment fixes validated and ready for production")
         else:
-            logger.error(f"❌ WebSocket deployment validation FAILED: {success_rate}% success rate")
-            logger.error("🚫 WebSocket deployment NOT ready - fix failing tests before deployment")
+            logger.error(f" FAIL:  WebSocket deployment validation FAILED: {success_rate}% success rate")
+            logger.error("[U+1F6AB] WebSocket deployment NOT ready - fix failing tests before deployment")
             
         return test_suite_results
 

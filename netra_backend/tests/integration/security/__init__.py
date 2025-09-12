@@ -12,7 +12,7 @@ This package contains focused integration tests for:
 - Data Access Audit: Resource-level access tracking with compliance flags
 - Compliance Reporting: SOC2/GDPR/HIPAA report generation and validation
 
-All tests maintain ≤8 lines per test function and ≤300 lines per module.
+All tests maintain  <= 8 lines per test function and  <= 300 lines per module.
 """
 
 from netra_backend.tests.integration.security.shared_fixtures import (

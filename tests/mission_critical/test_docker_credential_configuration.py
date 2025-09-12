@@ -395,7 +395,7 @@ class TestDockerCredentialSecurityInfrastructure:
         
     def test_credential_security_validation(self) -> CredentialSecurityMetrics:
         """Test security validation of all credential configurations."""
-        self.logger.info("🔐 Testing credential security validation")
+        self.logger.info("[U+1F510] Testing credential security validation")
         
         security_metrics = CredentialSecurityMetrics()
         
@@ -469,7 +469,7 @@ class TestDockerCredentialSecurityInfrastructure:
         if security_metrics.total_credentials_tested > 0:
             security_metrics.security_score = (security_metrics.secure_credentials / security_metrics.total_credentials_tested) * 100
         
-        self.logger.info(f"✅ Credential security validation:")
+        self.logger.info(f" PASS:  Credential security validation:")
         self.logger.info(f"   Total credentials tested: {security_metrics.total_credentials_tested}")
         self.logger.info(f"   Secure credentials: {security_metrics.secure_credentials}")
         self.logger.info(f"   Insecure credentials: {security_metrics.insecure_credentials}")
@@ -485,7 +485,7 @@ class TestDockerCredentialSecurityInfrastructure:
     
     def test_credential_performance_impact(self) -> Dict[str, Any]:
         """Test performance impact of credential operations."""
-        self.logger.info("📊 Testing credential performance impact")
+        self.logger.info(" CHART:  Testing credential performance impact")
         
         performance_results = {}
         
@@ -582,7 +582,7 @@ class TestDockerCredentialSecurityInfrastructure:
         }
         
         # Performance analysis
-        self.logger.info(f"✅ Credential performance impact:")
+        self.logger.info(f" PASS:  Credential performance impact:")
         self.logger.info(f"   Credential retrieval: {avg_retrieval_time:.2f}ms avg, {max_retrieval_time:.2f}ms max")
         self.logger.info(f"   URL construction: {avg_construction_time:.2f}ms avg, {max_construction_time:.2f}ms max")
         self.logger.info(f"   Concurrent access: {avg_concurrent_time:.2f}ms avg, {len(concurrent_times)}/15 successful")
@@ -596,7 +596,7 @@ class TestDockerCredentialSecurityInfrastructure:
     
     def test_cross_environment_credential_isolation(self) -> Dict[str, Any]:
         """Test credential isolation between environments."""
-        self.logger.info("🔒 Testing cross-environment credential isolation")
+        self.logger.info("[U+1F512] Testing cross-environment credential isolation")
         
         isolation_results = {
             'credential_leaks': [],
@@ -660,7 +660,7 @@ class TestDockerCredentialSecurityInfrastructure:
         
         total_violations = len(isolation_results['credential_leaks']) + len(isolation_results['environment_confusion'])
         
-        self.logger.info(f"✅ Cross-environment credential isolation:")
+        self.logger.info(f" PASS:  Cross-environment credential isolation:")
         self.logger.info(f"   Isolation score: {isolation_results['isolation_score']:.1f}%")
         self.logger.info(f"   Tests passed: {isolation_results['passed_tests']}/{isolation_results['total_tests']}")
         self.logger.info(f"   Credential leaks: {len(isolation_results['credential_leaks'])}")
@@ -681,7 +681,7 @@ class TestDockerCredentialSecurityInfrastructure:
     
     def test_security_vulnerability_detection(self) -> Dict[str, Any]:
         """Test detection of credential security vulnerabilities."""
-        self.logger.info("🚨 Testing security vulnerability detection")
+        self.logger.info(" ALERT:  Testing security vulnerability detection")
         
         vulnerability_results = {
             'vulnerabilities_found': [],
@@ -710,7 +710,7 @@ class TestDockerCredentialSecurityInfrastructure:
         if vulnerability_results['total_checks'] > 0:
             vulnerability_results['security_compliance_score'] = max(0, 100 - (total_vulnerabilities / vulnerability_results['total_checks'] * 10))
         
-        self.logger.info(f"✅ Security vulnerability detection:")
+        self.logger.info(f" PASS:  Security vulnerability detection:")
         self.logger.info(f"   Total checks performed: {vulnerability_results['total_checks']}")
         self.logger.info(f"   Vulnerabilities found: {total_vulnerabilities}")
         self.logger.info(f"   Security compliance score: {vulnerability_results['security_compliance_score']:.1f}%")
@@ -732,7 +732,7 @@ class TestDockerCredentialSecurityInfrastructure:
     
     def test_credential_rotation_readiness(self) -> Dict[str, Any]:
         """Test readiness for credential rotation scenarios."""
-        self.logger.info("🔄 Testing credential rotation readiness")
+        self.logger.info(" CYCLE:  Testing credential rotation readiness")
         
         rotation_results = {
             'rotation_capabilities': [],
@@ -854,7 +854,7 @@ class TestDockerCredentialSecurityInfrastructure:
         
         avg_downtime = statistics.mean([d.get('estimated_downtime_seconds', 60) for d in rotation_results['downtime_estimates']]) if rotation_results['downtime_estimates'] else 60
         
-        self.logger.info(f"✅ Credential rotation readiness:")
+        self.logger.info(f" PASS:  Credential rotation readiness:")
         self.logger.info(f"   Rotation score: {rotation_results['rotation_score']:.1f}%")
         self.logger.info(f"   Capabilities passed: {capabilities_passed}/{capabilities_tested}")
         self.logger.info(f"   Rollback ready: {rotation_results['rollback_readiness']}")
@@ -862,7 +862,7 @@ class TestDockerCredentialSecurityInfrastructure:
         
         # Log capability details
         for capability in rotation_results['rotation_capabilities']:
-            status = "✓" if capability['supported'] else "✗"
+            status = "[U+2713]" if capability['supported'] else "[U+2717]"
             self.logger.info(f"     {status} {capability['capability']}")
         
         # Rotation readiness assertions
@@ -873,7 +873,7 @@ class TestDockerCredentialSecurityInfrastructure:
     
     def test_compliance_with_security_standards(self) -> Dict[str, Any]:
         """Test compliance with security standards and best practices."""
-        self.logger.info("📋 Testing compliance with security standards")
+        self.logger.info("[U+1F4CB] Testing compliance with security standards")
         
         compliance_results = {
             'standards_checked': [],
@@ -906,7 +906,7 @@ class TestDockerCredentialSecurityInfrastructure:
         if compliance_results['compliance_scores']:
             compliance_results['overall_compliance_score'] = statistics.mean(compliance_results['compliance_scores'].values())
         
-        self.logger.info(f"✅ Security standards compliance:")
+        self.logger.info(f" PASS:  Security standards compliance:")
         self.logger.info(f"   Overall compliance: {compliance_results['overall_compliance_score']:.1f}%")
         
         for standard, score in compliance_results['compliance_scores'].items():

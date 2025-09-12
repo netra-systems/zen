@@ -403,11 +403,11 @@ class AgentPerformanceBenchmark:
         report.append("")
         
         # Performance Rankings
-        report.append("\n📊 PERFORMANCE RANKINGS (by average execution time)")
+        report.append("\n CHART:  PERFORMANCE RANKINGS (by average execution time)")
         report.append("-" * 60)
         
         for rank, data in enumerate(rankings, 1):
-            medal = "🥇" if rank == 1 else "🥈" if rank == 2 else "🥉" if rank == 3 else f"{rank}."
+            medal = "[U+1F947]" if rank == 1 else "[U+1F948]" if rank == 2 else "[U+1F949]" if rank == 3 else f"{rank}."
             report.append(f"\n{medal} {data['agent']}")
             report.append(f"   Type: {data['type']}")
             report.append(f"   Avg Time: {data['avg_time']:.3f}s")
@@ -416,7 +416,7 @@ class AgentPerformanceBenchmark:
             report.append(f"   Total Time: {data['total_time']:.3f}s")
             report.append(f"   Scenarios: {data['scenarios']}")
             if data['errors'] > 0:
-                report.append(f"   ⚠️ Errors: {data['errors']}")
+                report.append(f"    WARNING: [U+FE0F] Errors: {data['errors']}")
         
         # Detailed Results
         report.append("\n\n" + "="*60)
@@ -431,20 +431,20 @@ class AgentPerformanceBenchmark:
                 report.append("Scenarios Tested:")
                 for i, scenario in enumerate(benchmark.test_scenarios):
                     exec_time = benchmark.execution_times[i] if i < len(benchmark.execution_times) else 0
-                    report.append(f"  • {scenario}: {exec_time:.3f}s")
+                    report.append(f"  [U+2022] {scenario}: {exec_time:.3f}s")
             
             if benchmark.memory_usage and "error" not in benchmark.memory_usage:
                 report.append("\nMemory Usage:")
-                report.append(f"  • RSS: {benchmark.memory_usage.get('rss_mb', 0):.1f} MB")
-                report.append(f"  • VMS: {benchmark.memory_usage.get('vms_mb', 0):.1f} MB")
-                report.append(f"  • Percent: {benchmark.memory_usage.get('percent', 0):.1f}%")
+                report.append(f"  [U+2022] RSS: {benchmark.memory_usage.get('rss_mb', 0):.1f} MB")
+                report.append(f"  [U+2022] VMS: {benchmark.memory_usage.get('vms_mb', 0):.1f} MB")
+                report.append(f"  [U+2022] Percent: {benchmark.memory_usage.get('percent', 0):.1f}%")
             
             if benchmark.errors:
-                report.append("\n⚠️ Errors Encountered:")
+                report.append("\n WARNING: [U+FE0F] Errors Encountered:")
                 for error in benchmark.errors[:5]:  # Show first 5 errors
-                    report.append(f"  • {error}")
+                    report.append(f"  [U+2022] {error}")
                 if len(benchmark.errors) > 5:
-                    report.append(f"  • ... and {len(benchmark.errors) - 5} more")
+                    report.append(f"  [U+2022] ... and {len(benchmark.errors) - 5} more")
         
         # Summary Statistics
         report.append("\n\n" + "="*60)
@@ -463,9 +463,9 @@ class AgentPerformanceBenchmark:
         if rankings:
             fastest = rankings[0]
             slowest = rankings[-1]
-            report.append(f"\n🚀 Fastest Agent: {fastest['agent']} ({fastest['avg_time']:.3f}s avg)")
-            report.append(f"🐌 Slowest Agent: {slowest['agent']} ({slowest['avg_time']:.3f}s avg)")
-            report.append(f"⚡ Speed Difference: {(slowest['avg_time'] / fastest['avg_time']):.1f}x")
+            report.append(f"\n[U+1F680] Fastest Agent: {fastest['agent']} ({fastest['avg_time']:.3f}s avg)")
+            report.append(f"[U+1F40C] Slowest Agent: {slowest['agent']} ({slowest['avg_time']:.3f}s avg)")
+            report.append(f" LIGHTNING:  Speed Difference: {(slowest['avg_time'] / fastest['avg_time']):.1f}x")
         
         return "\n".join(report)
     
@@ -504,9 +504,9 @@ class AgentPerformanceBenchmark:
         with open(report_file, 'w') as f:
             f.write(self.generate_report())
         
-        print(f"\n✅ Results saved to:")
-        print(f"  • JSON: {json_file}")
-        print(f"  • Report: {report_file}")
+        print(f"\n PASS:  Results saved to:")
+        print(f"  [U+2022] JSON: {json_file}")
+        print(f"  [U+2022] Report: {report_file}")
         
         return json_file, report_file
 

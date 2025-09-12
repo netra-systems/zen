@@ -276,7 +276,7 @@ class TestEmergencyRollbackValidation:
                     # Note: terraform state pull -help returns non-zero but shows help
                     steps_completed.append("terraform_state_backup_tested")
                 else:
-                    print("⚠️ Terraform CLI not available - infrastructure rollback limited")
+                    print(" WARNING: [U+FE0F] Terraform CLI not available - infrastructure rollback limited")
             
             # Step 3: Test Cloud SQL backup validation
             cloudsql_commands = [
@@ -493,11 +493,11 @@ class TestEmergencyRollbackValidation:
         passed_checks = sum(1 for result in validation_results if result["success"])
         total_checks = len(validation_results)
         
-        print(f"\n✅ ROLLBACK SUCCESS CRITERIA VALIDATION:")
+        print(f"\n PASS:  ROLLBACK SUCCESS CRITERIA VALIDATION:")
         print(f"   Passed: {passed_checks}/{total_checks} checks")
         
         for result in validation_results:
-            status = "✅" if result["success"] else "❌"
+            status = " PASS: " if result["success"] else " FAIL: "
             print(f"   {status} {result['check']}")
             if result["error"]:
                 print(f"      Error: {result['error']}")
@@ -545,7 +545,7 @@ class TestEmergencyRollbackValidation:
         
         assert not timing_violations, f"Rollback timing requirements violated: {timing_violations}"
         
-        print("✅ ROLLBACK TIMING REQUIREMENTS MET:")
+        print(" PASS:  ROLLBACK TIMING REQUIREMENTS MET:")
         for requirement, max_time in timing_requirements.items():
             actual_time = simulated_timings[requirement]
             percentage = (actual_time / max_time) * 100
@@ -598,9 +598,9 @@ class TestEmergencyRollbackValidation:
             
             assert not missing_content, f"Missing rollback documentation: {missing_content}"
             
-            print("✅ ROLLBACK DOCUMENTATION VERIFIED:")
+            print(" PASS:  ROLLBACK DOCUMENTATION VERIFIED:")
             for content in required_rollback_content:
-                print(f"   ✓ {content}")
+                print(f"   [U+2713] {content}")
         else:
             pytest.skip("Test plan documentation not found")
 
@@ -641,7 +641,7 @@ class TestEmergencyRollbackValidation:
             # Verify escalation path has multiple levels
             assert len(procedure["escalation_path"]) >= 2, f"Insufficient escalation levels for {issue_type}"
         
-        print("✅ EMERGENCY PROCEDURES VERIFIED:")
+        print(" PASS:  EMERGENCY PROCEDURES VERIFIED:")
         for issue_type, procedure in emergency_procedures.items():
             print(f"   {issue_type}: {procedure['contact']} ({procedure['response_time_minutes']}min)")
 

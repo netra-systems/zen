@@ -94,7 +94,7 @@ def main():
         
         return 1
     else:
-        print("\n✓ All files have correct import order!")
+        print("\n[U+2713] All files have correct import order!")
         return 0
 
 if __name__ == '__main__':

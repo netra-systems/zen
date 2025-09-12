@@ -294,7 +294,7 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
             raise
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Database failure graceful degradation tested in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Database failure graceful degradation tested in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -407,7 +407,7 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
             raise
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ Cache unavailability graceful fallback tested in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  Cache unavailability graceful fallback tested in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -593,7 +593,7 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
             raise
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ External API timeout circuit breaker tested in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  External API timeout circuit breaker tested in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -815,7 +815,7 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
             raise
         
         test_duration = time.time() - test_start
-        self.logger.info(f"✅ WebSocket connection drop recovery tested in {test_duration:.3f}s")
+        self.logger.info(f" PASS:  WebSocket connection drop recovery tested in {test_duration:.3f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -875,7 +875,7 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
         
         test_duration = time.time() - test_start
         
-        self.logger.info("🛡️ SERVICE DEGRADATION ANALYSIS COMPLETE")
+        self.logger.info("[U+1F6E1][U+FE0F] SERVICE DEGRADATION ANALYSIS COMPLETE")
         self.logger.info(f"   Graceful degradation rate: {graceful_degradation_rate:.1%}")
         self.logger.info(f"   System resilience score: {business_impact_analysis['system_resilience_score']:.1%}")
         self.logger.info(f"   Business continuity verdict: {business_impact_analysis['business_continuity_verdict']}")
@@ -973,7 +973,7 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
         """Generate comprehensive service degradation resilience report."""
         report_timestamp = datetime.now(timezone.utc).isoformat()
         
-        self.logger.info("🛡️ SERVICE DEGRADATION RESILIENCE REPORT")
+        self.logger.info("[U+1F6E1][U+FE0F] SERVICE DEGRADATION RESILIENCE REPORT")
         self.logger.info("=" * 60)
         self.logger.info(f"Generated: {report_timestamp}")
         self.logger.info(f"Total scenarios tested: {analysis['total_degradation_scenarios_tested']}")
@@ -983,7 +983,7 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
         
         self.logger.info("BUSINESS FLOW PROTECTION ANALYSIS:")
         for flow, protected in analysis['critical_business_flows_protected'].items():
-            status = "✅ PROTECTED" if protected else "❌ AT RISK"
+            status = " PASS:  PROTECTED" if protected else " FAIL:  AT RISK"
             self.logger.info(f"  {flow}: {status}")
         
         self.logger.info("")
@@ -1000,7 +1000,7 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
         total_events = self.resilience_metrics.get('total_degradation_events', 0)
         successful_degradations = self.resilience_metrics.get('successful_graceful_degradations', 0)
         
-        self.logger.info("🔧 SERVICE DEGRADATION TEST SUMMARY")
+        self.logger.info("[U+1F527] SERVICE DEGRADATION TEST SUMMARY")
         self.logger.info(f"   Total degradation events tested: {total_events}")
         self.logger.info(f"   Successful graceful degradations: {successful_degradations}")
         
@@ -1009,11 +1009,11 @@ class TestServiceDegradationGracefulHandling(BaseIntegrationTest):
             self.logger.info(f"   Overall success rate: {success_rate:.1%}")
             
             if success_rate >= 0.8:
-                self.logger.info("   ✅ SYSTEM RESILIENCE: EXCELLENT")
+                self.logger.info("    PASS:  SYSTEM RESILIENCE: EXCELLENT")
             elif success_rate >= 0.7:
-                self.logger.info("   ⚠️  SYSTEM RESILIENCE: ACCEPTABLE")
+                self.logger.info("    WARNING: [U+FE0F]  SYSTEM RESILIENCE: ACCEPTABLE")
             else:
-                self.logger.info("   ❌ SYSTEM RESILIENCE: NEEDS IMPROVEMENT")
+                self.logger.info("    FAIL:  SYSTEM RESILIENCE: NEEDS IMPROVEMENT")
         else:
             self.logger.info("   No degradation events tested")
 

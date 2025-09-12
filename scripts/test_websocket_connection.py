@@ -65,7 +65,7 @@ async def test_websocket_connection():
                 connect_params['subprotocols'] = config['subprotocols']
                 
             async with websockets.connect(**connect_params) as websocket:
-                logger.info(f"✅ Connected successfully!")
+                logger.info(f" PASS:  Connected successfully!")
                 logger.info(f"Connection state: {websocket.state}")
                 logger.info(f"Subprotocol: {websocket.subprotocol}")
                 
@@ -75,14 +75,14 @@ async def test_websocket_connection():
                     "timestamp": datetime.now().isoformat()
                 }
                 await websocket.send(json.dumps(test_message))
-                logger.info(f"📤 Sent ping message: {test_message}")
+                logger.info(f"[U+1F4E4] Sent ping message: {test_message}")
                 
                 # Try to receive messages for 5 seconds
                 try:
                     message_count = 0
                     async for message in asyncio.wait_for(websocket.__aiter__(), timeout=5):
                         message_count += 1
-                        logger.info(f"📥 Received message {message_count}: {message[:200]}...")
+                        logger.info(f"[U+1F4E5] Received message {message_count}: {message[:200]}...")
                         
                         # Parse and log message type
                         try:
@@ -97,7 +97,7 @@ async def test_websocket_connection():
                                     "original_timestamp": data.get("timestamp")
                                 }
                                 await websocket.send(json.dumps(pong_message))
-                                logger.info(f"📤 Sent pong response")
+                                logger.info(f"[U+1F4E4] Sent pong response")
                                 
                         except json.JSONDecodeError:
                             logger.warning(f"   Could not parse message as JSON")
@@ -106,15 +106,15 @@ async def test_websocket_connection():
                             break
                             
                 except asyncio.TimeoutError:
-                    logger.info("⏱️ No more messages received (timeout)")
+                    logger.info("[U+23F1][U+FE0F] No more messages received (timeout)")
                     
                 # Check final connection state
                 logger.info(f"Final connection state: {websocket.state}")
                 
         except websockets.exceptions.WebSocketException as e:
-            logger.error(f"❌ WebSocket error: {e}")
+            logger.error(f" FAIL:  WebSocket error: {e}")
         except Exception as e:
-            logger.error(f"❌ Unexpected error: {e}", exc_info=True)
+            logger.error(f" FAIL:  Unexpected error: {e}", exc_info=True)
             
         await asyncio.sleep(1)  # Brief pause between tests
 
@@ -129,13 +129,13 @@ async def monitor_connection_lifecycle():
     headers = {"Origin": "http://localhost:3000"}
     
     try:
-        logger.info(f"🔌 Initiating connection to {url}")
+        logger.info(f"[U+1F50C] Initiating connection to {url}")
         websocket = await websockets.connect(
             url,
             additional_headers=headers
         )
         
-        logger.info(f"✅ Connection established")
+        logger.info(f" PASS:  Connection established")
         logger.info(f"   State: {websocket.state}")
         logger.info(f"   Local address: {websocket.local_address}")
         logger.info(f"   Remote address: {websocket.remote_address}")
@@ -155,20 +155,20 @@ async def monitor_connection_lifecycle():
             except asyncio.TimeoutError:
                 # Check if still connected
                 if websocket.state.value != 1:  # 1 = OPEN
-                    logger.warning(f"⚠️ Connection state changed: {websocket.state}")
+                    logger.warning(f" WARNING: [U+FE0F] Connection state changed: {websocket.state}")
                     break
                     
             except websockets.exceptions.ConnectionClosed as e:
-                logger.error(f"❌ Connection closed: code={e.code}, reason={e.reason}")
+                logger.error(f" FAIL:  Connection closed: code={e.code}, reason={e.reason}")
                 break
                 
         # Clean close
         if websocket.state.value == 1:
             await websocket.close()
-            logger.info("🔌 Connection closed cleanly")
+            logger.info("[U+1F50C] Connection closed cleanly")
             
     except Exception as e:
-        logger.error(f"❌ Error during lifecycle monitoring: {e}", exc_info=True)
+        logger.error(f" FAIL:  Error during lifecycle monitoring: {e}", exc_info=True)
 
 async def main():
     """Run all WebSocket tests."""

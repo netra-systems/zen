@@ -101,14 +101,14 @@ class DockerWorkflowValidator:
         self.ssot_enforcer = DockerSSOTEnforcer()
         self.results: List[ValidationResult] = []
         
-        logger.info("🔍 Docker Workflow Validator initialized")
+        logger.info(" SEARCH:  Docker Workflow Validator initialized")
         logger.info(f"   Project: {self.project_root}")
         logger.info(f"   Mode: {'Report Only' if report_only else 'Full Validation'}")
         logger.info(f"   Performance: {'Skipped' if quick else 'Included'}")
     
     def validate_all(self) -> WorkflowValidationReport:
         """Run complete validation suite"""
-        logger.info("🚀 Starting complete Docker workflow validation...")
+        logger.info("[U+1F680] Starting complete Docker workflow validation...")
         start_time = time.time()
         
         # Generate report immediately if report-only mode
@@ -129,22 +129,22 @@ class DockerWorkflowValidator:
         
         # Execute validation steps
         for step_name, validator_func in validation_steps:
-            logger.info(f"\n📋 Validating: {step_name}")
+            logger.info(f"\n[U+1F4CB] Validating: {step_name}")
             try:
                 result = validator_func()
                 self.results.append(result)
                 
                 if result.passed:
-                    logger.info(f"   ✅ {step_name}: PASSED")
+                    logger.info(f"    PASS:  {step_name}: PASSED")
                 else:
-                    logger.error(f"   ❌ {step_name}: FAILED - {result.message}")
+                    logger.error(f"    FAIL:  {step_name}: FAILED - {result.message}")
                     
                 if result.warnings:
                     for warning in result.warnings:
-                        logger.warning(f"   ⚠️  {warning}")
+                        logger.warning(f"    WARNING: [U+FE0F]  {warning}")
                         
             except Exception as e:
-                logger.error(f"   💥 {step_name}: ERROR - {e}")
+                logger.error(f"   [U+1F4A5] {step_name}: ERROR - {e}")
                 self.results.append(ValidationResult(
                     name=step_name,
                     passed=False,
@@ -158,7 +158,7 @@ class DockerWorkflowValidator:
         
         # Auto-fix if requested and there are fixable violations
         if self.fix_violations and not report.success:
-            logger.info("\n🔧 Auto-fixing violations...")
+            logger.info("\n[U+1F527] Auto-fixing violations...")
             self._auto_fix_violations()
         
         return report
@@ -195,7 +195,7 @@ class DockerWorkflowValidator:
             if len(compose_files) != 3:
                 warnings.append(f"Expected exactly 3 docker-compose files, found {len(compose_files)}")
             
-            # Check that exactly 9 Dockerfiles exist (3 services × 3 types)
+            # Check that exactly 9 Dockerfiles exist (3 services  x  3 types)
             dockerfiles = list(Path(self.project_root / "docker").glob("*.Dockerfile"))
             if len(dockerfiles) != 9:
                 warnings.append(f"Expected exactly 9 Dockerfiles, found {len(dockerfiles)}")
@@ -222,7 +222,7 @@ class DockerWorkflowValidator:
         start_time = time.time()
         
         try:
-            logger.info("   🔄 Testing refresh_dev.py --dry-run...")
+            logger.info("    CYCLE:  Testing refresh_dev.py --dry-run...")
             
             # Test dry-run mode first (safe)
             dry_run_result = subprocess.run([
@@ -292,7 +292,7 @@ class DockerWorkflowValidator:
         start_time = time.time()
         
         try:
-            logger.info("   🧪 Testing E2E Docker integration...")
+            logger.info("   [U+1F9EA] Testing E2E Docker integration...")
             
             # Test that unified test runner can handle Docker correctly
             test_runner_path = self.project_root / "tests" / "unified_test_runner.py"
@@ -339,7 +339,7 @@ class DockerWorkflowValidator:
                     environment_type=EnvironmentType.DEDICATED,
                     use_alpine=True
                 )
-                logger.info("   ✅ UnifiedDockerManager import successful")
+                logger.info("    PASS:  UnifiedDockerManager import successful")
                 
             except ImportError as e:
                 return ValidationResult(
@@ -376,7 +376,7 @@ class DockerWorkflowValidator:
         """Test optimized build performance"""
         start_time = time.time()
         
-        logger.info("   ⚡ Testing build performance...")
+        logger.info("    LIGHTNING:  Testing build performance...")
         
         try:
             # Test Alpine build performance (should be fast)
@@ -446,7 +446,7 @@ class DockerWorkflowValidator:
         start_time = time.time()
         
         try:
-            logger.info("   🚫 Scanning for forbidden fallback logic...")
+            logger.info("   [U+1F6AB] Scanning for forbidden fallback logic...")
             
             fallback_violations = []
             
@@ -539,7 +539,7 @@ class DockerWorkflowValidator:
     
     def _generate_report_only(self) -> WorkflowValidationReport:
         """Generate report without running tests"""
-        logger.info("📊 Generating report-only validation...")
+        logger.info(" CHART:  Generating report-only validation...")
         
         # Basic system state checks
         compose_files = list(self.project_root.glob("docker-compose*.yml"))
@@ -618,14 +618,14 @@ class DockerWorkflowValidator:
     
     def _auto_fix_violations(self):
         """Attempt to auto-fix found violations"""
-        logger.info("🔧 Attempting to auto-fix violations...")
+        logger.info("[U+1F527] Attempting to auto-fix violations...")
         
         for result in self.results:
             if result.passed:
                 continue
                 
             if "SSOT" in result.name and "obsolete_present" in result.details:
-                logger.info("   🧹 Attempting to clean up obsolete Docker files...")
+                logger.info("   [U+1F9F9] Attempting to clean up obsolete Docker files...")
                 try:
                     # Run SSOT enforcer cleanup
                     cleanup_result = subprocess.run([
@@ -635,10 +635,10 @@ class DockerWorkflowValidator:
                     ], capture_output=True, text=True)
                     
                     if "files to delete" in cleanup_result.stdout:
-                        logger.info("   ✅ Found obsolete files for cleanup")
-                        logger.info("   💡 Manual cleanup required - see SSOT enforcer output")
+                        logger.info("    PASS:  Found obsolete files for cleanup")
+                        logger.info("    IDEA:  Manual cleanup required - see SSOT enforcer output")
                 except Exception as e:
-                    logger.error(f"   ❌ Auto-fix failed: {e}")
+                    logger.error(f"    FAIL:  Auto-fix failed: {e}")
 
 
 def save_report(report: WorkflowValidationReport, output_path: Path):
@@ -673,7 +673,7 @@ def save_report(report: WorkflowValidationReport, output_path: Path):
     md_content = f"""# Docker Workflow Validation Report
 
 **Generated:** {report.timestamp}  
-**Status:** {'✅ PASSED' if report.success else '❌ FAILED'}
+**Status:** {' PASS:  PASSED' if report.success else ' FAIL:  FAILED'}
 
 ## Summary
 {chr(10).join(f'- **{k}**: {v}' for k, v in report.summary.items())}
@@ -685,7 +685,7 @@ def save_report(report: WorkflowValidationReport, output_path: Path):
 """
     
     for result in report.results:
-        status = "✅ PASSED" if result.passed else "❌ FAILED"
+        status = " PASS:  PASSED" if result.passed else " FAIL:  FAILED"
         md_content += f"""
 ### {result.name} - {status}
 
@@ -695,7 +695,7 @@ def save_report(report: WorkflowValidationReport, output_path: Path):
 """
         if result.warnings:
             md_content += "**Warnings:**\n"
-            md_content += "\n".join(f"- ⚠️ {w}" for w in result.warnings) + "\n\n"
+            md_content += "\n".join(f"-  WARNING: [U+FE0F] {w}" for w in result.warnings) + "\n\n"
         
         if result.details:
             md_content += "**Details:**\n"
@@ -710,7 +710,7 @@ def save_report(report: WorkflowValidationReport, output_path: Path):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(md_content)
     
-    logger.info(f"📊 Reports saved:")
+    logger.info(f" CHART:  Reports saved:")
     logger.info(f"   JSON: {json_path}")
     logger.info(f"   Markdown: {output_path}")
 
@@ -755,16 +755,16 @@ Examples:
     
     # Print summary
     if report.success:
-        logger.info("\n🎉 DOCKER WORKFLOW VALIDATION PASSED")
+        logger.info("\n CELEBRATION:  DOCKER WORKFLOW VALIDATION PASSED")
         logger.info("   All Docker improvements are working correctly")
         if report.summary.get('warnings', 0) > 0:
             logger.info(f"   Note: {report.summary['warnings']} warnings to address")
     else:
-        logger.error("\n💥 DOCKER WORKFLOW VALIDATION FAILED")
+        logger.error("\n[U+1F4A5] DOCKER WORKFLOW VALIDATION FAILED")
         logger.error(f"   {report.summary.get('failed', 0)} validations failed")
         logger.error("   See report for details and recommendations")
     
-    logger.info(f"\n📊 Detailed report: {args.output}")
+    logger.info(f"\n CHART:  Detailed report: {args.output}")
     
     sys.exit(0 if report.success else 1)
 

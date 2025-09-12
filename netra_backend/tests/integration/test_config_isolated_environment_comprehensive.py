@@ -970,9 +970,9 @@ ANOTHER_VALID=another_value
         
         # Test Case 4: Unicode and special characters
         unicode_test_vars = {
-            "UNICODE_VAR": "value_with_unicode_🚀_emoji",
+            "UNICODE_VAR": "value_with_unicode_[U+1F680]_emoji",
             "SPECIAL_CHARS": "value!@#$%^&*()_+-={}[]|\\:;\"'<>?,./ with spaces",
-            "ACCENTED_CHARS": "café_résumé_naïve_São_Paulo",
+            "ACCENTED_CHARS": "caf[U+00E9]_r[U+00E9]sum[U+00E9]_na[U+00EF]ve_S[U+00E3]o_Paulo",
         }
         
         for key, value in unicode_test_vars.items():

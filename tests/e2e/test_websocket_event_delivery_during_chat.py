@@ -168,7 +168,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
         Test complete WebSocket event sequence during AI chat processing with REAL services.
         
         CRITICAL: This validates the CORE business value delivery mechanism:
-        User Message → WebSocket Events Show AI Working → User Trusts System → Business Value
+        User Message  ->  WebSocket Events Show AI Working  ->  User Trusts System  ->  Business Value
         
         Business Value: Validates real-time transparency that builds user trust in AI system.
         """
@@ -184,7 +184,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
         websocket_url = self.get_env_var("WEBSOCKET_URL", "ws://localhost:8000/ws")
         headers = self._websocket_helper.get_websocket_headers()
         
-        self.logger.info(f"🔌 Connecting to WebSocket: {websocket_url}")
+        self.logger.info(f"[U+1F50C] Connecting to WebSocket: {websocket_url}")
         
         # Act - Connect and send business problem requiring AI processing
         async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
@@ -201,7 +201,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
             }
             
             await websocket.send(json.dumps(chat_request))
-            self.logger.info(f"📤 Sent chat request for comprehensive AI analysis")
+            self.logger.info(f"[U+1F4E4] Sent chat request for comprehensive AI analysis")
             
             # Collect WebSocket events with timeout for complete processing
             event_collection_timeout = 60.0  # Allow time for comprehensive analysis
@@ -214,21 +214,21 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
                     event = json.loads(event_data)
                     
                     self._event_collector.add_event(event)
-                    self.logger.info(f"📨 Received: {event.get('type', 'unknown')} event")
+                    self.logger.info(f"[U+1F4E8] Received: {event.get('type', 'unknown')} event")
                     
                     # Stop collecting when we receive final completion event
                     if event.get("type") == "agent_completed" and event.get("final", False):
-                        self.logger.info(f"✅ Received final completion event")
+                        self.logger.info(f" PASS:  Received final completion event")
                         break
                         
                 except asyncio.TimeoutError:
                     # Check if we have sufficient events for validation
                     if len(self._event_collector.events) >= 3:
-                        self.logger.info(f"⏰ Timeout but sufficient events collected: {len(self._event_collector.events)}")
+                        self.logger.info(f"[U+23F0] Timeout but sufficient events collected: {len(self._event_collector.events)}")
                         break
                     continue
                 except Exception as e:
-                    self.logger.error(f"❌ Error receiving WebSocket event: {e}")
+                    self.logger.error(f" FAIL:  Error receiving WebSocket event: {e}")
                     break
         
         # Assert - Validate all 5 REQUIRED WebSocket events were received
@@ -282,7 +282,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
         self.record_metric("responsive_ux_achieved", timing_analysis["responsive_ux"])
         self.record_metric("business_context_indicators", len(found_indicators))
         
-        self.logger.info(f"✅ WebSocket event delivery validated: {len(self._event_collector.events)} events, "
+        self.logger.info(f" PASS:  WebSocket event delivery validated: {len(self._event_collector.events)} events, "
                         f"responsive UX: {timing_analysis['responsive_ux']}")
     
     @pytest.mark.asyncio  
@@ -291,7 +291,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
         Test WebSocket event delivery remains reliable under concurrent chat load.
         
         CRITICAL: This validates system can maintain real-time UX under business load:
-        Multiple Users → Concurrent Chat → All Get Real-Time Events → Business Value Protected
+        Multiple Users  ->  Concurrent Chat  ->  All Get Real-Time Events  ->  Business Value Protected
         
         Business Value: Ensures chat transparency scales with user growth (revenue protection).
         """
@@ -323,7 +323,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
                 connection_tasks.append(connection_task)
             
             websocket_connections = await asyncio.gather(*connection_tasks)
-            self.logger.info(f"🔌 Established {len(websocket_connections)} concurrent WebSocket connections")
+            self.logger.info(f"[U+1F50C] Established {len(websocket_connections)} concurrent WebSocket connections")
             
             # Act - Send concurrent chat messages requiring AI processing
             chat_tasks = []
@@ -344,7 +344,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
             
             # Send all messages concurrently
             await asyncio.gather(*chat_tasks)
-            self.logger.info(f"📤 Sent {len(chat_tasks)} concurrent chat requests")
+            self.logger.info(f"[U+1F4E4] Sent {len(chat_tasks)} concurrent chat requests")
             
             # Collect events from all connections concurrently
             collection_timeout = 45.0
@@ -402,7 +402,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
         self.record_metric("successful_users", successful_users)
         self.record_metric("events_per_user_avg", total_events / concurrent_users)
         
-        self.logger.info(f"✅ Concurrent WebSocket event delivery validated: "
+        self.logger.info(f" PASS:  Concurrent WebSocket event delivery validated: "
                         f"{successful_users}/{concurrent_users} users successful, {total_events} total events")
     
     # Helper Methods
@@ -454,7 +454,7 @@ class TestWebSocketEventDeliveryDuringChat(SSotAsyncTestCase):
         if self._event_collector:
             self._event_collector.events.clear()
             
-        self.logger.info(f"✅ WebSocket event delivery E2E test completed successfully")
+        self.logger.info(f" PASS:  WebSocket event delivery E2E test completed successfully")
 
 
 if __name__ == "__main__":

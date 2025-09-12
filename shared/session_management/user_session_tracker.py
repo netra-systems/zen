@@ -5,7 +5,7 @@ as part of the SessionMetrics SSOT violation remediation. Previously, this funct
 was mixed into the name-conflicted SessionMetrics class.
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core chat continuity and user experience
+- Segment: All (Free  ->  Enterprise) - Core chat continuity and user experience
 - Business Goal: Enable seamless multi-turn AI conversations and user engagement tracking
 - Value Impact: Delivers 90% of platform value through reliable user session continuity
 - Strategic Impact: Foundation for user behavior analytics and engagement optimization

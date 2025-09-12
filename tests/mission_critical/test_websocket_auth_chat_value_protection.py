@@ -1,7 +1,7 @@
 """
 Mission Critical Tests for WebSocket Authentication Chat Value Protection
 
-🚨🚨🚨 MISSION CRITICAL - BUSINESS VALUE PROTECTION 🚨🚨🚨
+ ALERT:  ALERT:  ALERT:  MISSION CRITICAL - BUSINESS VALUE PROTECTION  ALERT:  ALERT:  ALERT: 
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise) - Chat is 90% of platform value delivery
@@ -10,11 +10,11 @@ Business Value Justification (BVJ):
 - Strategic Impact: Authentication must NEVER block legitimate users from chat
 
 MISSION CRITICAL REQUIREMENTS:
-🛡️ Chat Value Protection: Authentication must enable chat, never block it
-🔒 Security Without Barriers: Strong security that doesn't impede user experience
-⚡ Zero Downtime: Authentication failures must not cause chat outages
-🏃 Performance First: Sub-second authentication for real-time chat experience
-🔄 Graceful Degradation: Fallback mechanisms for authentication service issues
+[U+1F6E1][U+FE0F] Chat Value Protection: Authentication must enable chat, never block it
+[U+1F512] Security Without Barriers: Strong security that doesn't impede user experience
+ LIGHTNING:  Zero Downtime: Authentication failures must not cause chat outages
+[U+1F3C3] Performance First: Sub-second authentication for real-time chat experience
+ CYCLE:  Graceful Degradation: Fallback mechanisms for authentication service issues
 
 This test suite validates Mission Critical Chat Value Protection:
 - Authentication ENABLES chat functionality (never blocks legitimate users)
@@ -60,7 +60,7 @@ from shared.isolated_environment import get_env
 @pytest.mark.mission_critical
 class TestWebSocketAuthChatValueProtection:
     """
-    🚨 MISSION CRITICAL tests for WebSocket authentication chat value protection.
+     ALERT:  MISSION CRITICAL tests for WebSocket authentication chat value protection.
     
     CRITICAL: These tests ensure authentication ENABLES chat functionality
     and NEVER blocks legitimate users from accessing $120K+ MRR chat platform.
@@ -106,26 +106,26 @@ class TestWebSocketAuthChatValueProtection:
         from requests.exceptions import RequestException
         
         mission_critical_services = [
-            ("🔐 Authentication Service", f"{cls.auth_config.auth_service_url}/health"),
-            ("💬 Chat Backend Service", f"{cls.auth_config.backend_url}/health"), 
-            ("🌐 WebSocket Service", f"{cls.auth_config.backend_url}/api/websocket/health")
+            ("[U+1F510] Authentication Service", f"{cls.auth_config.auth_service_url}/health"),
+            ("[U+1F4AC] Chat Backend Service", f"{cls.auth_config.backend_url}/health"), 
+            ("[U+1F310] WebSocket Service", f"{cls.auth_config.backend_url}/api/websocket/health")
         ]
         
         for service_name, service_url in mission_critical_services:
             try:
                 response = requests.get(service_url, timeout=10)
                 if response.status_code >= 500:
-                    pytest.fail(f"❌ MISSION CRITICAL FAILURE: {service_name} is unhealthy (status: {response.status_code})")
+                    pytest.fail(f" FAIL:  MISSION CRITICAL FAILURE: {service_name} is unhealthy (status: {response.status_code})")
             except RequestException as e:
                 # Try base service URL as fallback
                 try:
                     base_url = "/".join(service_url.split("/")[:-1])
                     requests.get(base_url, timeout=5)
                 except RequestException:
-                    pytest.fail(f"❌ MISSION CRITICAL FAILURE: {service_name} unavailable - Chat functionality at risk: {e}")
+                    pytest.fail(f" FAIL:  MISSION CRITICAL FAILURE: {service_name} unavailable - Chat functionality at risk: {e}")
     
     def test_legitimate_users_always_access_chat_zero_false_negatives(self):
-        """🛡️ MISSION CRITICAL: Legitimate users ALWAYS access chat (zero false negatives)."""
+        """[U+1F6E1][U+FE0F] MISSION CRITICAL: Legitimate users ALWAYS access chat (zero false negatives)."""
         # Create multiple legitimate users
         legitimate_user_count = 5
         legitimate_users = []
@@ -231,25 +231,25 @@ class TestWebSocketAuthChatValueProtection:
         # Execute legitimate user access test
         access_results = asyncio.run(test_legitimate_user_chat_access())
         
-        # 🚨 MISSION CRITICAL VALIDATION: Zero false negatives allowed
+        #  ALERT:  MISSION CRITICAL VALIDATION: Zero false negatives allowed
         successful_access = [r for r in access_results if isinstance(r, dict) and r.get('chat_access')]
         failed_access = [r for r in access_results if isinstance(r, dict) and not r.get('chat_access')]
         
         # CRITICAL: ALL legitimate users must access chat
-        assert len(successful_access) == legitimate_user_count, f"❌ MISSION CRITICAL FAILURE: {len(failed_access)} legitimate users blocked from chat"
-        assert len(failed_access) == 0, f"❌ REVENUE IMPACT: Legitimate users blocked: {[f['failure_reason'] for f in failed_access]}"
+        assert len(successful_access) == legitimate_user_count, f" FAIL:  MISSION CRITICAL FAILURE: {len(failed_access)} legitimate users blocked from chat"
+        assert len(failed_access) == 0, f" FAIL:  REVENUE IMPACT: Legitimate users blocked: {[f['failure_reason'] for f in failed_access]}"
         
         # Performance requirements for chat access
         for result in successful_access:
             access_time = result.get('chat_access_time_ms', 0)
-            assert access_time < 5000, f"❌ CHAT UX FAILURE: User {result['user_index']} took {access_time}ms to access chat (limit: 5000ms)"
+            assert access_time < 5000, f" FAIL:  CHAT UX FAILURE: User {result['user_index']} took {access_time}ms to access chat (limit: 5000ms)"
         
         # Business impact validation
         business_success = [r for r in successful_access if r.get('business_impact') == 'SUCCESS - Revenue protected']
         assert len(business_success) == legitimate_user_count, "All legitimate users must protect revenue through chat access"
     
     def test_chat_sessions_survive_authentication_token_refresh(self):
-        """🔄 MISSION CRITICAL: Chat sessions survive authentication token refresh."""
+        """ CYCLE:  MISSION CRITICAL: Chat sessions survive authentication token refresh."""
         # Create user for token refresh testing
         refresh_user = self.auth_helper.create_authenticated_user(
             email=f'chat_refresh_user_{int(time.time())}@business.com',
@@ -366,7 +366,7 @@ class TestWebSocketAuthChatValueProtection:
                     }
                     
             except Exception as e:
-                pytest.fail(f"❌ MISSION CRITICAL FAILURE: Chat session failed during token refresh: {e}")
+                pytest.fail(f" FAIL:  MISSION CRITICAL FAILURE: Chat session failed during token refresh: {e}")
         
         # Execute token refresh survival test
         refresh_result = asyncio.run(test_chat_session_token_refresh_survival())
@@ -380,7 +380,7 @@ class TestWebSocketAuthChatValueProtection:
         assert refresh_result['chat_history_accessible'] is True, "Chat history must remain accessible"
     
     def test_business_continuity_during_auth_service_degradation(self):
-        """🏥 MISSION CRITICAL: Business continuity during auth service degradation."""
+        """[U+1F3E5] MISSION CRITICAL: Business continuity during auth service degradation."""
         # Create premium business user
         business_user = self.auth_helper.create_authenticated_user(
             email=f'business_continuity_user_{int(time.time())}@enterprise.com',
@@ -514,7 +514,7 @@ class TestWebSocketAuthChatValueProtection:
                     }
                     
             except Exception as e:
-                pytest.fail(f"❌ MISSION CRITICAL FAILURE: Business continuity test failed: {e}")
+                pytest.fail(f" FAIL:  MISSION CRITICAL FAILURE: Business continuity test failed: {e}")
         
         # Execute business continuity test
         continuity_result = asyncio.run(test_business_continuity_scenarios())
@@ -539,7 +539,7 @@ class TestWebSocketAuthChatValueProtection:
         assert len(successful_degradation) >= 1, "At least one degradation scenario must succeed for business continuity"
     
     def test_enterprise_customer_priority_authentication_processing(self):
-        """👑 MISSION CRITICAL: Enterprise customers receive priority authentication."""
+        """[U+1F451] MISSION CRITICAL: Enterprise customers receive priority authentication."""
         # Create enterprise and regular users
         enterprise_user = self.auth_helper.create_authenticated_user(
             email=f'enterprise_priority_user_{int(time.time())}@enterprise.com',
@@ -664,7 +664,7 @@ class TestWebSocketAuthChatValueProtection:
         assert regular_result['chat_response_received'] is True, "Regular user must receive chat response"
     
     def test_revenue_impact_assessment_for_authentication_failures(self):
-        """💰 MISSION CRITICAL: Revenue impact assessment for authentication failures."""
+        """[U+1F4B0] MISSION CRITICAL: Revenue impact assessment for authentication failures."""
         # Create different tiers of users
         user_tiers = [
             ('free', f'free_user_{int(time.time())}@free.com', ['websocket', 'chat']),
@@ -802,9 +802,9 @@ class TestWebSocketAuthChatValueProtection:
                 business_impact = assessment.get('business_impact', 'unknown')
                 
                 if business_impact == 'critical':
-                    pytest.fail(f"❌ CRITICAL REVENUE FAILURE: {tier} tier authentication failed - ${potential_loss}/hour at risk")
+                    pytest.fail(f" FAIL:  CRITICAL REVENUE FAILURE: {tier} tier authentication failed - ${potential_loss}/hour at risk")
                 elif business_impact == 'medium':
-                    pytest.fail(f"❌ MEDIUM REVENUE FAILURE: {tier} tier authentication failed - ${potential_loss}/hour at risk")
+                    pytest.fail(f" FAIL:  MEDIUM REVENUE FAILURE: {tier} tier authentication failed - ${potential_loss}/hour at risk")
         
         # Validate no critical tier failures
         assert revenue_result['critical_tier_failures'] == 0, "No critical tier authentication failures allowed"

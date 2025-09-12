@@ -5,7 +5,7 @@ This module tests Phase 1 implementation of ClickHouse cache isolation
 to ensure proper separation of cached query results between different users.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) 
+- Segment: ALL (Free  ->  Enterprise) 
 - Business Goal: Prevent data leakage between users via cache
 - Value Impact: Guarantees user data privacy and security
 - Revenue Impact: Prevents security breaches that could damage trust

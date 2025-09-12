@@ -148,7 +148,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
         # Generate test user IDs
         self.test_users = [f"test_user_{uuid.uuid4().hex[:8]}" for _ in range(3)]
         
-        logger.info(f"🧪 Agent Startup Integration Test Setup Complete")
+        logger.info(f"[U+1F9EA] Agent Startup Integration Test Setup Complete")
         logger.info(f"Test Users: {self.test_users}")
         
     def teardown_method(self, method=None):
@@ -184,7 +184,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
         - No shared state between user agents
         - User execution contexts are properly isolated
         """
-        logger.info("🧪 TEST 1: Agent factory creates isolated instances")
+        logger.info("[U+1F9EA] TEST 1: Agent factory creates isolated instances")
         
         user_contexts = {}
         agent_instances = {}
@@ -207,10 +207,10 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
                     {"thread_id": str(user_context.thread_id), "run_id": str(user_context.run_id)}
                 )
                 
-                logger.info(f"✅ Created user context for {user_id}")
+                logger.info(f" PASS:  Created user context for {user_id}")
                 
             except Exception as e:
-                logger.error(f"❌ Failed to create user context for {user_id}: {e}")
+                logger.error(f" FAIL:  Failed to create user context for {user_id}: {e}")
                 # Test should fail if we can't create real user contexts
                 self.fail(f"Failed to create user context for {user_id}: {e}")
         
@@ -227,7 +227,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
                 self.assertNotEqual(context_1.run_id, context_2.run_id)
                 self.assertIsNot(context_1, context_2)  # Different instances
         
-        logger.info(f"✅ Agent factory isolation test passed - {len(user_contexts)} isolated contexts created")
+        logger.info(f" PASS:  Agent factory isolation test passed - {len(user_contexts)} isolated contexts created")
         
     async def test_02_websocket_bridge_initialization(self):
         """
@@ -238,7 +238,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
         - Bridge has proper configuration
         - Bridge can handle multiple user connections
         """
-        logger.info("🧪 TEST 2: WebSocket bridge initialization")
+        logger.info("[U+1F9EA] TEST 2: WebSocket bridge initialization")
         
         try:
             # Create WebSocket manager using factory (real service)
@@ -256,10 +256,10 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
                 {"bridge_type": type(bridge).__name__}
             )
             
-            logger.info("✅ WebSocket bridge initialization test passed")
+            logger.info(" PASS:  WebSocket bridge initialization test passed")
             
         except Exception as e:
-            logger.error(f"❌ WebSocket bridge initialization failed: {e}")
+            logger.error(f" FAIL:  WebSocket bridge initialization failed: {e}")
             # This test should fail if WebSocket bridge cannot be initialized
             # This exposes real system issues (proper behavior)
             self.fail(f"WebSocket bridge initialization failed: {e}")
@@ -274,7 +274,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
         - No race conditions in agent initialization
         - Each user gets their own agent instance
         """
-        logger.info("🧪 TEST 3: Concurrent agent startup isolation")
+        logger.info("[U+1F9EA] TEST 3: Concurrent agent startup isolation")
         
         async def start_agent_for_user(user_id: str) -> Dict[str, Any]:
             """Start agent for a specific user and measure timing"""
@@ -312,7 +312,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
                 }
                 
             except Exception as e:
-                logger.error(f"❌ Concurrent startup failed for {user_id}: {e}")
+                logger.error(f" FAIL:  Concurrent startup failed for {user_id}: {e}")
                 return {
                     "user_id": user_id,
                     "success": False,
@@ -345,7 +345,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
         self.assertLess(max_duration, 2.0, f"Max startup duration {max_duration:.2f}s exceeds 2.0s threshold")
         self.assertLess(avg_duration, 1.0, f"Average startup duration {avg_duration:.2f}s exceeds 1.0s threshold")
         
-        logger.info(f"✅ Concurrent startup test passed - {len(successful_startups)} users, "
+        logger.info(f" PASS:  Concurrent startup test passed - {len(successful_startups)} users, "
                    f"avg: {avg_duration:.2f}s, max: {max_duration:.2f}s")
     
     async def test_04_websocket_events_during_startup(self):
@@ -359,7 +359,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
         - tool_completed event sent after tool execution
         - agent_completed event sent at startup completion
         """
-        logger.info("🧪 TEST 4: WebSocket events during startup")
+        logger.info("[U+1F9EA] TEST 4: WebSocket events during startup")
         
         expected_events = [
             "agent_started",
@@ -400,7 +400,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
                         max(event_indices.values()),
                         "agent_completed should be the last event")
         
-        logger.info(f"✅ WebSocket events test passed - all {len(expected_events)} events validated")
+        logger.info(f" PASS:  WebSocket events test passed - all {len(expected_events)} events validated")
     
     async def test_05_startup_performance_validation(self):
         """
@@ -411,7 +411,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
         - Resource usage is within acceptable bounds
         - No memory leaks during startup
         """
-        logger.info("🧪 TEST 5: Startup performance validation")
+        logger.info("[U+1F9EA] TEST 5: Startup performance validation")
         
         performance_results = {}
         
@@ -439,10 +439,10 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
             avg_startup_time = sum(total_times) / len(total_times)
             max_startup_time = max(total_times)
             
-            logger.info(f"✅ Performance validation passed - "
+            logger.info(f" PASS:  Performance validation passed - "
                        f"avg: {avg_startup_time:.2f}s, max: {max_startup_time:.2f}s")
         else:
-            logger.warning("⚠️  No performance metrics available - test environment may need real services")
+            logger.warning(" WARNING: [U+FE0F]  No performance metrics available - test environment may need real services")
     
     async def test_06_integration_with_runner_module(self):
         """
@@ -453,7 +453,7 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
         - Integration between E2E test and test runner works
         - Test results are properly formatted and returned
         """
-        logger.info("🧪 TEST 6: Integration with runner module")
+        logger.info("[U+1F9EA] TEST 6: Integration with runner module")
         
         try:
             # Run the agent startup test suite
@@ -473,10 +473,10 @@ class AgentStartupIntegrationTestSuite(SSotBaseTestCase):
             total_tests = summary.get("total", 0)
             self.assertGreater(total_tests, 0, "Should have at least one test in the suite")
             
-            logger.info(f"✅ Runner integration test passed - {total_tests} tests executed")
+            logger.info(f" PASS:  Runner integration test passed - {total_tests} tests executed")
             
         except Exception as e:
-            logger.error(f"❌ Runner integration failed: {e}")
+            logger.error(f" FAIL:  Runner integration failed: {e}")
             self.fail(f"Integration with runner module failed: {e}")
 
 
@@ -500,7 +500,7 @@ class AgentStartupIntegration:
             self._print_integration_summary(report)
             return self._calculate_exit_code(report)
         except Exception as e:
-            print(f"❌ Agent startup test integration failed: {e}")
+            print(f" FAIL:  Agent startup test integration failed: {e}")
             return 1
 
     def _print_integration_summary(self, report: Dict[str, Any]) -> None:
@@ -519,7 +519,7 @@ class AgentStartupIntegration:
         if summary:
             failed = summary.get('failed', 0)
             if failed > 0:
-                print(f"⚠️  {failed} tests failed")
+                print(f" WARNING: [U+FE0F]  {failed} tests failed")
 
     def _calculate_exit_code(self, report: Dict[str, Any]) -> int:
         """Calculate appropriate exit code from test results."""

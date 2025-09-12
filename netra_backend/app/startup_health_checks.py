@@ -296,7 +296,7 @@ class StartupHealthChecker:
         Returns:
             Tuple of (all_critical_healthy, list_of_results)
         """
-        logger.info("🏥 Starting startup health checks...")
+        logger.info("[U+1F3E5] Starting startup health checks...")
         
         # Define health check methods
         health_checks = {
@@ -316,14 +316,14 @@ class StartupHealthChecker:
             
             # Log result
             if result.status == ServiceStatus.HEALTHY:
-                logger.info(f"✅ {service_name}: {result.message} ({result.latency_ms:.1f}ms)" 
-                          if result.latency_ms else f"✅ {service_name}: {result.message}")
+                logger.info(f" PASS:  {service_name}: {result.message} ({result.latency_ms:.1f}ms)" 
+                          if result.latency_ms else f" PASS:  {service_name}: {result.message}")
             elif result.status == ServiceStatus.DEGRADED:
-                logger.warning(f"⚠️ {service_name}: {result.message}")
+                logger.warning(f" WARNING: [U+FE0F] {service_name}: {result.message}")
             elif result.status == ServiceStatus.NOT_CONFIGURED:
-                logger.warning(f"❓ {service_name}: {result.message}")
+                logger.warning(f"[U+2753] {service_name}: {result.message}")
             else:
-                logger.error(f"❌ {service_name}: {result.message}")
+                logger.error(f" FAIL:  {service_name}: {result.message}")
         
         # Check if all critical services are healthy
         all_critical_healthy = True
@@ -332,7 +332,7 @@ class StartupHealthChecker:
                 result = self.health_results[service_name]
                 if result.status not in [ServiceStatus.HEALTHY, ServiceStatus.DEGRADED]:
                     all_critical_healthy = False
-                    logger.error(f"🚨 CRITICAL service {service_name} is not healthy: {result.status}")
+                    logger.error(f" ALERT:  CRITICAL service {service_name} is not healthy: {result.status}")
         
         return all_critical_healthy, results
     
@@ -362,12 +362,12 @@ class StartupHealthChecker:
             for result in unhealthy_critical:
                 error_msg += f"  - {result.service_name}: {result.message}\n"
             
-            logger.error(f"🚨 STARTUP VALIDATION FAILED:\n{error_msg}")
+            logger.error(f" ALERT:  STARTUP VALIDATION FAILED:\n{error_msg}")
             
             if fail_on_critical:
                 raise RuntimeError(f"Startup validation failed: {len(unhealthy_critical)} critical services unhealthy")
         else:
-            logger.info("✅ All critical services passed health checks")
+            logger.info(" PASS:  All critical services passed health checks")
         
         # Log summary
         logger.info("Health Check Summary:")

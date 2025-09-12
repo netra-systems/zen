@@ -763,7 +763,7 @@ class TestScalabilityLimits:
         total_time = time.time() - start_time
         avg_response_time = sum(response_times) / len(response_times)
         
-        # With proper concurrency, 10 users × 1 second should take ~1-2 seconds total
+        # With proper concurrency, 10 users  x  1 second should take ~1-2 seconds total
         # Due to semaphore limiting, it will take longer
         
         # Business requirement: <2s response time

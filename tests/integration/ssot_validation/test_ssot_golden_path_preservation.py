@@ -5,7 +5,7 @@ PURPOSE: Ensure golden path works with consolidated UserExecutionContext
 and detect how SSOT violations block the critical user flow.
 
 This test is DESIGNED TO FAIL initially to prove SSOT violations are blocking
-the golden path: user login → chat request → AI response delivery.
+the golden path: user login  ->  chat request  ->  AI response delivery.
 
 Business Impact: $500K+ ARR DIRECTLY AT RISK from golden path failures
 caused by inconsistent UserExecutionContext implementations.
@@ -116,7 +116,7 @@ class TestSSotGoldenPathPreservation(SSotAsyncTestCase):
         """DESIGNED TO FAIL: Detect golden path blockage from UserExecutionContext SSOT violations.
         
         This test should FAIL because inconsistent UserExecutionContext implementations
-        block the golden path: user login → chat request → AI response.
+        block the golden path: user login  ->  chat request  ->  AI response.
         
         Expected Golden Path Violations:
         - Context creation failures blocking user sessions

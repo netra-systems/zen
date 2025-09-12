@@ -434,28 +434,28 @@ if __name__ == "__main__":
         
         try:
             await test_instance.test_load_balancer_routes_to_correct_backend_services()
-            print("✅ Load balancer routing to backend services working")
+            print(" PASS:  Load balancer routing to backend services working")
         except AssertionError as e:
-            print(f"❌ Load balancer routing failures:\n{e}")
+            print(f" FAIL:  Load balancer routing failures:\n{e}")
             return False
         
         try:
             await test_instance.test_load_balancer_health_check_endpoints()
-            print("✅ Load balancer health check endpoints working")
+            print(" PASS:  Load balancer health check endpoints working")
         except AssertionError as e:
-            print(f"❌ Health check failures:\n{e}")
+            print(f" FAIL:  Health check failures:\n{e}")
             return False
         
         try:
             await test_instance.test_load_balancer_websocket_routing()
-            print("✅ Load balancer WebSocket routing working")
+            print(" PASS:  Load balancer WebSocket routing working")
         except AssertionError as e:
-            print(f"❌ WebSocket routing failures:\n{e}")
+            print(f" FAIL:  WebSocket routing failures:\n{e}")
             return False
         
         return True
     
     if asyncio.run(run_tests()):
-        print("✅ All load balancer routing validation tests passed!")
+        print(" PASS:  All load balancer routing validation tests passed!")
     else:
         exit(1)

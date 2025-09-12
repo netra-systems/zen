@@ -318,19 +318,19 @@ class ServiceLifecycleManager:
             
             # Success
             await self._update_service_state(service, ServiceState.READY)
-            logger.info(f"  ✅ Service {service.name} initialized successfully")
+            logger.info(f"   PASS:  Service {service.name} initialized successfully")
             return True
             
         except asyncio.TimeoutError:
             service.last_error = f"Initialization timeout after {service.timeout_seconds}s"
             await self._update_service_state(service, ServiceState.FAILED)
-            logger.error(f"  ❌ Service {service.name} initialization timeout")
+            logger.error(f"   FAIL:  Service {service.name} initialization timeout")
             return False
             
         except Exception as e:
             service.last_error = str(e)
             await self._update_service_state(service, ServiceState.FAILED)
-            logger.error(f"  ❌ Service {service.name} initialization failed: {e}")
+            logger.error(f"   FAIL:  Service {service.name} initialization failed: {e}")
             return False
     
     async def _check_service_dependencies(self, service: ServiceRegistration) -> bool:

@@ -1,7 +1,7 @@
 """Coordination Health Monitor - Real-time multi-layer coordination tracking.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Foundation for all real-time features
+- Segment: ALL (Free  ->  Enterprise) - Foundation for all real-time features
 - Business Goal: Monitor and ensure multi-layer coordination health
 - Value Impact: Prevents silent coordination failures affecting user experience
 - Strategic Impact: CRITICAL - Protects $500K+ ARR Golden Path reliability
@@ -112,7 +112,7 @@ class CoordinationHealthMonitor:
         self._metrics_window_minutes = 60  # Keep metrics for 1 hour
         self._max_events_stored = 10000    # Limit memory usage
         
-        logger.info("🏥 CoordinationHealthMonitor initialized with thresholds: %s", self.health_thresholds)
+        logger.info("[U+1F3E5] CoordinationHealthMonitor initialized with thresholds: %s", self.health_thresholds)
         
     async def track_coordination_event(self, event_type: str, layers: List[CoordinationLayer], 
                                      timing_data: Dict[str, float], user_id: Optional[str] = None,
@@ -156,7 +156,7 @@ class CoordinationHealthMonitor:
         # Limit stored events to prevent memory growth
         if len(self.coordination_events) > self._max_events_stored:
             self.coordination_events = self.coordination_events[-self._max_events_stored//2:]
-            logger.debug("🧹 Trimmed coordination events to manage memory")
+            logger.debug("[U+1F9F9] Trimmed coordination events to manage memory")
             
         # Calculate timing gaps and evaluate health
         timing_gaps = self._calculate_timing_gaps(timing_data)
@@ -173,7 +173,7 @@ class CoordinationHealthMonitor:
         if health_status in [HealthStatus.WARNING, HealthStatus.CRITICAL, HealthStatus.FAILED]:
             await self._generate_health_alert(event, health_status, timing_gaps)
             
-        logger.debug(f"📊 Tracked coordination event {event_id}: {event_type} "
+        logger.debug(f" CHART:  Tracked coordination event {event_id}: {event_type} "
                     f"(layers: {[l.value for l in layers]}, health: {health_status.value})")
         
         return event_id
@@ -335,18 +335,18 @@ class CoordinationHealthMonitor:
         
         # Log alert based on severity
         if health_status == HealthStatus.CRITICAL:
-            logger.critical(f"🚨 CRITICAL coordination health alert {alert_id}: {error_message}")
+            logger.critical(f" ALERT:  CRITICAL coordination health alert {alert_id}: {error_message}")
         elif health_status == HealthStatus.WARNING:
-            logger.warning(f"⚠️ WARNING coordination health alert {alert_id}: {error_message}")
+            logger.warning(f" WARNING: [U+FE0F] WARNING coordination health alert {alert_id}: {error_message}")
             
-        logger.info(f"📊 Alert {alert_id} - User impact: {user_impact}")
+        logger.info(f" CHART:  Alert {alert_id} - User impact: {user_impact}")
         
         # Call registered alert callbacks
         for callback in self._alert_callbacks:
             try:
                 await callback(alert)
             except Exception as e:
-                logger.error(f"❌ Alert callback failed for {alert_id}: {e}")
+                logger.error(f" FAIL:  Alert callback failed for {alert_id}: {e}")
                 
     def _assess_user_impact(self, event_type: str, health_status: HealthStatus, 
                           timing_gaps: Dict[str, float]) -> str:
@@ -481,7 +481,7 @@ class CoordinationHealthMonitor:
             callback: Async function to call when alerts are generated
         """
         self._alert_callbacks.append(callback)
-        logger.debug(f"📞 Added alert callback: {callback.__name__}")
+        logger.debug(f"[U+1F4DE] Added alert callback: {callback.__name__}")
         
     def set_monitoring_enabled(self, enabled: bool):
         """Enable or disable coordination monitoring.
@@ -491,7 +491,7 @@ class CoordinationHealthMonitor:
         """
         self._monitoring_enabled = enabled
         status = "enabled" if enabled else "disabled"
-        logger.info(f"🏥 Coordination health monitoring {status}")
+        logger.info(f"[U+1F3E5] Coordination health monitoring {status}")
         
     async def cleanup_old_data(self, max_age_hours: int = 24):
         """Clean up old monitoring data to manage memory.
@@ -519,7 +519,7 @@ class CoordinationHealthMonitor:
         alerts_cleaned = old_alert_count - len(self.health_alerts)
         
         if events_cleaned > 0 or alerts_cleaned > 0:
-            logger.info(f"🧹 Cleaned up old monitoring data: {events_cleaned} events, {alerts_cleaned} alerts")
+            logger.info(f"[U+1F9F9] Cleaned up old monitoring data: {events_cleaned} events, {alerts_cleaned} alerts")
             
         return events_cleaned + alerts_cleaned
         

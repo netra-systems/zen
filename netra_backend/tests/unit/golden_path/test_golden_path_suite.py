@@ -270,20 +270,20 @@ def run_golden_path_unit_tests():
         "--disable-warnings"   # Reduce noise
     ]
     
-    print("🚀 Running Golden Path Unit Test Suite...")
-    print(f"📁 Test Directory: {golden_path_dir}")
-    print("🎯 Target: Business logic validation without external dependencies")
+    print("[U+1F680] Running Golden Path Unit Test Suite...")
+    print(f"[U+1F4C1] Test Directory: {golden_path_dir}")
+    print(" TARGET:  Target: Business logic validation without external dependencies")
     print("=" * 80)
     
     # Run the tests
     exit_code = pytest.main(pytest_args)
     
     if exit_code == 0:
-        print("✅ All Golden Path Unit Tests Passed!")
-        print("💼 Business logic validation complete - ready for integration testing")
+        print(" PASS:  All Golden Path Unit Tests Passed!")
+        print("[U+1F4BC] Business logic validation complete - ready for integration testing")
     else:
-        print("❌ Some Golden Path Unit Tests Failed")
-        print("🔍 Check the output above for business logic issues")
+        print(" FAIL:  Some Golden Path Unit Tests Failed")
+        print(" SEARCH:  Check the output above for business logic issues")
     
     return exit_code
 

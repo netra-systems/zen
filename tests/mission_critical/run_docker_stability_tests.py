@@ -29,43 +29,43 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
     
     # REMOVED_SYNTAX_ERROR: from test_framework.docker_rate_limiter import get_docker_rate_limiter
 
-    # REMOVED_SYNTAX_ERROR: print("✅ All imports successful!")
+    # REMOVED_SYNTAX_ERROR: print(" PASS:  All imports successful!")
 
     # Test basic functionality
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 🔒 Testing Force Flag Guardian...")
+    # REMOVED_SYNTAX_ERROR: [U+1F512] Testing Force Flag Guardian...")
     # REMOVED_SYNTAX_ERROR: guardian = DockerForceFlagGuardian()
 
     # REMOVED_SYNTAX_ERROR: try:
         # REMOVED_SYNTAX_ERROR: guardian.validate_command("docker rm -f test")
-        # REMOVED_SYNTAX_ERROR: print("❌ CRITICAL: Force flag not detected!")
+        # REMOVED_SYNTAX_ERROR: print(" FAIL:  CRITICAL: Force flag not detected!")
         # REMOVED_SYNTAX_ERROR: sys.exit(1)
         # REMOVED_SYNTAX_ERROR: except DockerForceFlagViolation:
-            # REMOVED_SYNTAX_ERROR: print("✅ Force flag guardian working correctly")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Force flag guardian working correctly")
 
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: ⏱️ Testing Rate Limiter...")
+            # REMOVED_SYNTAX_ERROR: [U+23F1][U+FE0F] Testing Rate Limiter...")
             # REMOVED_SYNTAX_ERROR: rate_limiter = get_docker_rate_limiter()
             # REMOVED_SYNTAX_ERROR: health = rate_limiter.health_check()
 
             # REMOVED_SYNTAX_ERROR: if health:
-                # REMOVED_SYNTAX_ERROR: print("✅ Docker rate limiter is healthy")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Docker rate limiter is healthy")
                 # REMOVED_SYNTAX_ERROR: else:
-                    # REMOVED_SYNTAX_ERROR: print("❌ Docker rate limiter unhealthy")
+                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  Docker rate limiter unhealthy")
                     # REMOVED_SYNTAX_ERROR: sys.exit(1)
 
                     # REMOVED_SYNTAX_ERROR: print(" )
-                    # REMOVED_SYNTAX_ERROR: 🐳 Testing Docker Daemon...")
+                    # REMOVED_SYNTAX_ERROR: [U+1F433] Testing Docker Daemon...")
                     # REMOVED_SYNTAX_ERROR: daemon_health = check_docker_daemon_health()
 
                     # REMOVED_SYNTAX_ERROR: if daemon_health:
-                        # REMOVED_SYNTAX_ERROR: print("✅ Docker daemon is healthy and responsive")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Docker daemon is healthy and responsive")
                         # REMOVED_SYNTAX_ERROR: else:
-                            # REMOVED_SYNTAX_ERROR: print("❌ Docker daemon is not healthy")
+                            # REMOVED_SYNTAX_ERROR: print(" FAIL:  Docker daemon is not healthy")
                             # REMOVED_SYNTAX_ERROR: sys.exit(1)
 
                             # REMOVED_SYNTAX_ERROR: print(" )
-                            # REMOVED_SYNTAX_ERROR: 📊 Testing Metrics Collection...")
+                            # REMOVED_SYNTAX_ERROR:  CHART:  Testing Metrics Collection...")
                             # REMOVED_SYNTAX_ERROR: metrics = DockerStabilityMetrics()
                             # REMOVED_SYNTAX_ERROR: metrics.record_operation("test_op", 1.5, True)
                             # REMOVED_SYNTAX_ERROR: metrics.record_force_flag_violation()
@@ -78,7 +78,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
                             # REMOVED_SYNTAX_ERROR: print(" )
                             # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-                            # REMOVED_SYNTAX_ERROR: print("✅ DOCKER STABILITY TEST SUITE VALIDATION PASSED")
+                            # REMOVED_SYNTAX_ERROR: print(" PASS:  DOCKER STABILITY TEST SUITE VALIDATION PASSED")
                             # REMOVED_SYNTAX_ERROR: print("=" * 60)
                             # REMOVED_SYNTAX_ERROR: print("The comprehensive test suite is ready for production use!")
                             # REMOVED_SYNTAX_ERROR: print(" )

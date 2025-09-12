@@ -214,12 +214,12 @@ class ComprehensiveTestValidator:
                 validation_results[suite_name] = result
                 
                 if result.overall_success:
-                    self.logger.info(f"✅ {suite_name} validation: SUCCESS")
+                    self.logger.info(f" PASS:  {suite_name} validation: SUCCESS")
                 else:
-                    self.logger.warning(f"⚠️ {suite_name} validation: ISSUES FOUND")
+                    self.logger.warning(f" WARNING: [U+FE0F] {suite_name} validation: ISSUES FOUND")
                     
             except Exception as e:
-                self.logger.error(f"❌ {suite_name} validation: FAILED - {e}")
+                self.logger.error(f" FAIL:  {suite_name} validation: FAILED - {e}")
                 validation_results[suite_name] = ValidationSuite(
                     name=suite_name,
                     tests=[],
@@ -259,7 +259,7 @@ class ComprehensiveTestValidator:
             report_lines.extend([
                 f"### {suite.name}",
                 "",
-                f"**Status:** {'✅ SUCCESS' if suite.overall_success else '⚠️ ISSUES FOUND'}",
+                f"**Status:** {' PASS:  SUCCESS' if suite.overall_success else ' WARNING: [U+FE0F] ISSUES FOUND'}",
                 f"**Tests:** {success_count}/{len(suite.results)} passed",
                 f"**Duration:** {suite.total_duration:.2f}s",
                 ""
@@ -267,14 +267,14 @@ class ComprehensiveTestValidator:
             
             # Individual test results
             for result in suite.results:
-                status_icon = "✅" if result.success else "❌"
+                status_icon = " PASS: " if result.success else " FAIL: "
                 report_lines.append(f"- {status_icon} {result.test_name}: {result.duration:.3f}s")
                 
                 if not result.success and result.error_message:
                     report_lines.append(f"  - Error: {result.error_message}")
                 
                 for warning in result.warnings:
-                    report_lines.append(f"  - ⚠️ Warning: {warning}")
+                    report_lines.append(f"  -  WARNING: [U+FE0F] Warning: {warning}")
             
             report_lines.append("")
         
@@ -405,7 +405,7 @@ async def main():
     """Main function for running comprehensive test validation."""
     validator = ComprehensiveTestValidator()
     
-    print("🧪 Starting PR-F Test Infrastructure Validation...")
+    print("[U+1F9EA] Starting PR-F Test Infrastructure Validation...")
     
     results = await validator.run_comprehensive_validation()
     report = validator.generate_validation_report(results)
@@ -419,14 +419,14 @@ async def main():
     with open(report_path, "w") as f:
         f.write(report)
     
-    print(f"\n📊 Validation report saved to: {report_path}")
+    print(f"\n CHART:  Validation report saved to: {report_path}")
     
     # Summary
     overall_success = all(suite.overall_success for suite in results.values())
     if overall_success:
-        print("✅ All test infrastructure validations passed!")
+        print(" PASS:  All test infrastructure validations passed!")
     else:
-        print("⚠️ Some validations found issues - review report for details")
+        print(" WARNING: [U+FE0F] Some validations found issues - review report for details")
     
     return 0 if overall_success else 1
 

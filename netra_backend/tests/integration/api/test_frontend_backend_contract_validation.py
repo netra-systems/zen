@@ -382,13 +382,13 @@ class TestFrontendBackendContractValidation(BaseIntegrationTest):
             failure_message = (
                 "COMPREHENSIVE API CONTRACT VALIDATION FAILURE:\n"
                 f"Contract violations ({len(contract_violations)}):\n"
-                + "\n".join(f"  ❌ {violation}" for violation in contract_violations)
+                + "\n".join(f"   FAIL:  {violation}" for violation in contract_violations)
             )
             
             if successful_contracts:
                 failure_message += (
                     f"\n\nWorking contracts ({len(successful_contracts)}):\n"
-                    + "\n".join(f"  ✅ {contract}" for contract in successful_contracts)
+                    + "\n".join(f"   PASS:  {contract}" for contract in successful_contracts)
                 )
             
             failure_message += (

@@ -22,7 +22,7 @@ from pathlib import Path
 
 def run_command(cmd, description):
     """Run a command and return the result."""
-    print(f"\n🔍 {description}")
+    print(f"\n SEARCH:  {description}")
     print(f"Command: {' '.join(cmd)}")
     print("-" * 60)
     
@@ -57,7 +57,7 @@ def main():
     
     for test_file in test_files:
         if not Path(test_file).exists():
-            print(f"❌ ERROR: Test file not found: {test_file}")
+            print(f" FAIL:  ERROR: Test file not found: {test_file}")
             all_tests_passed = False
             continue
         
@@ -66,10 +66,10 @@ def main():
         success = run_command(cmd, f"Running {test_file}")
         
         if not success:
-            print(f"❌ FAILED: {test_file}")
+            print(f" FAIL:  FAILED: {test_file}")
             all_tests_passed = False
         else:
-            print(f"✅ PASSED: {test_file}")
+            print(f" PASS:  PASSED: {test_file}")
     
     # Summary
     print("\n" + "=" * 80)
@@ -77,14 +77,14 @@ def main():
     print("=" * 80)
     
     if all_tests_passed:
-        print("✅ ALL VALIDATION TESTS PASSED")
-        print("\n📋 EVIDENCE COLLECTED:")
-        print("   • setUp() vs setup_method() incompatibility demonstrated")
-        print("   • ExecutionResult parameter incompatibility demonstrated")  
-        print("   • AttributeError: 'golden_user_context' reproduction confirmed")
-        print("   • TypeError for old ExecutionResult parameters confirmed")
-        print("   • Complete fixed pattern working correctly confirmed")
-        print("\n🎯 READY FOR FIX IMPLEMENTATION")
+        print(" PASS:  ALL VALIDATION TESTS PASSED")
+        print("\n[U+1F4CB] EVIDENCE COLLECTED:")
+        print("   [U+2022] setUp() vs setup_method() incompatibility demonstrated")
+        print("   [U+2022] ExecutionResult parameter incompatibility demonstrated")  
+        print("   [U+2022] AttributeError: 'golden_user_context' reproduction confirmed")
+        print("   [U+2022] TypeError for old ExecutionResult parameters confirmed")
+        print("   [U+2022] Complete fixed pattern working correctly confirmed")
+        print("\n TARGET:  READY FOR FIX IMPLEMENTATION")
         print("   The test implementations can now be used to:")
         print("   1. Validate the fix works correctly")
         print("   2. Prevent regression of these issues")
@@ -92,12 +92,12 @@ def main():
         
         return 0
     else:
-        print("❌ VALIDATION FAILED")
-        print("\n🔧 TROUBLESHOOTING:")
-        print("   • Check that all test dependencies are installed")
-        print("   • Verify you're running from the project root directory")
-        print("   • Ensure Python 3.7+ is being used")
-        print("   • Check that pytest is installed and accessible")
+        print(" FAIL:  VALIDATION FAILED")
+        print("\n[U+1F527] TROUBLESHOOTING:")
+        print("   [U+2022] Check that all test dependencies are installed")
+        print("   [U+2022] Verify you're running from the project root directory")
+        print("   [U+2022] Ensure Python 3.7+ is being used")
+        print("   [U+2022] Check that pytest is installed and accessible")
         
         return 1
 

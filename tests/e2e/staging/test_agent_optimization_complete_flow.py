@@ -57,7 +57,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
         5. Business value (cost savings) is delivered
         6. Data is persisted correctly
         """
-        self.logger.info("🚀 Starting Cost Optimizer Agent E2E Test with Authentication")
+        self.logger.info("[U+1F680] Starting Cost Optimizer Agent E2E Test with Authentication")
         
         # MANDATORY: Authenticate user first
         token, user_data = await create_authenticated_user(
@@ -66,7 +66,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             permissions=["read", "write", "agent_execute"]
         )
         
-        self.logger.info(f"✅ User authenticated: {user_data['email']}")
+        self.logger.info(f" PASS:  User authenticated: {user_data['email']}")
         
         # Connect WebSocket with authentication
         websocket_headers = self.auth_helper.get_websocket_headers(token)
@@ -82,7 +82,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
                 timeout=25.0
             )
             
-            self.logger.info("✅ WebSocket connected with authentication")
+            self.logger.info(" PASS:  WebSocket connected with authentication")
             
             # Send agent request for cost optimization
             agent_request = {
@@ -98,7 +98,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            self.logger.info("📤 Sending cost optimization request")
+            self.logger.info("[U+1F4E4] Sending cost optimization request")
             await websocket.send(json.dumps(agent_request))
             
             # Collect ALL WebSocket events
@@ -115,14 +115,14 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
                     event = json.loads(event_str)
                     events.append(event)
                     
-                    self.logger.info(f"📨 Received event: {event['type']}")
+                    self.logger.info(f"[U+1F4E8] Received event: {event['type']}")
                     
                     # Break when agent completes
                     if event["type"] == "agent_completed":
                         break
                         
             except asyncio.TimeoutError:
-                self.logger.error("❌ Timeout waiting for agent completion")
+                self.logger.error(" FAIL:  Timeout waiting for agent completion")
                 raise AssertionError("Agent did not complete within timeout")
             finally:
                 await websocket.close()
@@ -136,7 +136,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             assert "tool_completed" in event_types, "tool_completed event not sent"
             assert "agent_completed" in event_types, "agent_completed event not sent"
             
-            self.logger.info("✅ All 5 critical WebSocket events validated")
+            self.logger.info(" PASS:  All 5 critical WebSocket events validated")
             
             # Validate REAL business value delivered
             final_event = next(e for e in reversed(events) if e["type"] == "agent_completed")
@@ -153,16 +153,16 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             assert isinstance(savings.get("monthly_amount"), (int, float)), "Invalid savings amount"
             assert savings["monthly_amount"] > 0, "No cost savings identified"
             
-            self.logger.info(f"✅ Business value delivered: ${savings['monthly_amount']}/month potential savings")
+            self.logger.info(f" PASS:  Business value delivered: ${savings['monthly_amount']}/month potential savings")
             
             # Verify data persistence (thread and messages)
             thread_id = final_event["data"]["thread_id"]
             assert thread_id is not None, "No thread ID returned"
             
-            self.logger.info(f"✅ Cost Optimizer Agent E2E Test completed successfully")
+            self.logger.info(f" PASS:  Cost Optimizer Agent E2E Test completed successfully")
             
         except Exception as e:
-            self.logger.error(f"❌ Cost Optimizer Agent E2E Test failed: {e}")
+            self.logger.error(f" FAIL:  Cost Optimizer Agent E2E Test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -171,7 +171,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
     @pytest.mark.staging
     async def test_data_analysis_agent_file_processing(self, real_services, real_llm):
         """Test data analysis agent with file processing capabilities."""
-        self.logger.info("🚀 Starting Data Analysis Agent E2E Test")
+        self.logger.info("[U+1F680] Starting Data Analysis Agent E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -239,10 +239,10 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             assert "key_insights" in result, "No key insights provided"
             assert "trend_data" in result, "No trend data provided"
             
-            self.logger.info("✅ Data Analysis Agent E2E Test completed")
+            self.logger.info(" PASS:  Data Analysis Agent E2E Test completed")
             
         except Exception as e:
-            self.logger.error(f"❌ Data Analysis Agent test failed: {e}")
+            self.logger.error(f" FAIL:  Data Analysis Agent test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -251,7 +251,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
     @pytest.mark.staging
     async def test_multi_agent_orchestration_flow(self, real_services, real_llm):
         """Test multi-agent orchestration with complex workflow."""
-        self.logger.info("🚀 Starting Multi-Agent Orchestration E2E Test")
+        self.logger.info("[U+1F680] Starting Multi-Agent Orchestration E2E Test")
         
         # MANDATORY: Authenticate user  
         token, user_data = await create_authenticated_user(
@@ -327,10 +327,10 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             assert "performance_metrics" in result, "Missing performance metrics" 
             assert "strategic_recommendations" in result, "Missing strategic recommendations"
             
-            self.logger.info(f"✅ Multi-Agent Orchestration completed with {agent_switches} handoffs")
+            self.logger.info(f" PASS:  Multi-Agent Orchestration completed with {agent_switches} handoffs")
             
         except Exception as e:
-            self.logger.error(f"❌ Multi-Agent Orchestration test failed: {e}")
+            self.logger.error(f" FAIL:  Multi-Agent Orchestration test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -339,7 +339,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
     @pytest.mark.staging
     async def test_agent_error_handling_and_recovery(self, real_services, real_llm):
         """Test agent error handling and graceful recovery scenarios."""
-        self.logger.info("🚀 Starting Agent Error Handling E2E Test")
+        self.logger.info("[U+1F680] Starting Agent Error Handling E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -412,10 +412,10 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
                 result = final_event["data"]["result"]
                 assert "error_message" in result or "limitations" in result, "Should explain limitations to user"
             
-            self.logger.info("✅ Agent Error Handling E2E Test completed")
+            self.logger.info(" PASS:  Agent Error Handling E2E Test completed")
             
         except Exception as e:
-            self.logger.error(f"❌ Agent Error Handling test failed: {e}")
+            self.logger.error(f" FAIL:  Agent Error Handling test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -424,7 +424,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
     @pytest.mark.staging
     async def test_agent_tool_usage_and_results(self, real_services, real_llm):
         """Test agent tool execution and result processing."""
-        self.logger.info("🚀 Starting Agent Tool Usage E2E Test")
+        self.logger.info("[U+1F680] Starting Agent Tool Usage E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -495,10 +495,10 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             assert "tools_used" in result or len(tool_executions) > 0, "Tool usage not reflected in results"
             assert "report_content" in result or "analysis" in result, "No substantive results from tool usage"
             
-            self.logger.info(f"✅ Agent Tool Usage Test completed - {len(tool_executions)} tools used")
+            self.logger.info(f" PASS:  Agent Tool Usage Test completed - {len(tool_executions)} tools used")
             
         except Exception as e:
-            self.logger.error(f"❌ Agent Tool Usage test failed: {e}")
+            self.logger.error(f" FAIL:  Agent Tool Usage test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -507,7 +507,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
     @pytest.mark.staging
     async def test_long_running_agent_execution(self, real_services, real_llm):
         """Test long-running agent execution with sustained WebSocket connection."""
-        self.logger.info("🚀 Starting Long-Running Agent Execution E2E Test")
+        self.logger.info("[U+1F680] Starting Long-Running Agent Execution E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -557,7 +557,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
                     # Log progress for long-running operations
                     if event.get("type") == "agent_thinking":
                         progress = event.get("data", {}).get("progress", "unknown")
-                        self.logger.info(f"📊 Agent progress: {progress}")
+                        self.logger.info(f" CHART:  Agent progress: {progress}")
                     
                     if event["type"] == "agent_completed":
                         break
@@ -565,7 +565,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
                 except asyncio.TimeoutError:
                     # Check if we've gone too long without any events
                     if time.time() - last_heartbeat > 60:
-                        self.logger.warning("⚠️ No events received for 60s, may have stalled")
+                        self.logger.warning(" WARNING: [U+FE0F] No events received for 60s, may have stalled")
                         break
             
             await websocket.close()
@@ -588,10 +588,10 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             
             assert "analysis_results" in result or "summary" in result, "Missing analysis results"
             
-            self.logger.info(f"✅ Long-Running Agent Test completed in {execution_time:.1f}s")
+            self.logger.info(f" PASS:  Long-Running Agent Test completed in {execution_time:.1f}s")
             
         except Exception as e:
-            self.logger.error(f"❌ Long-Running Agent test failed: {e}")
+            self.logger.error(f" FAIL:  Long-Running Agent test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -600,7 +600,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
     @pytest.mark.staging
     async def test_agent_interruption_and_resume(self, real_services, real_llm):
         """Test agent interruption scenarios and graceful handling."""
-        self.logger.info("🚀 Starting Agent Interruption E2E Test")
+        self.logger.info("[U+1F680] Starting Agent Interruption E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -682,10 +682,10 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             has_graceful_completion = any(event_type in event_types for event_type in completion_events)
             assert has_graceful_completion, "Agent should handle interruption gracefully"
             
-            self.logger.info("✅ Agent Interruption Test completed")
+            self.logger.info(" PASS:  Agent Interruption Test completed")
             
         except Exception as e:
-            self.logger.error(f"❌ Agent Interruption test failed: {e}")
+            self.logger.error(f" FAIL:  Agent Interruption test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -694,7 +694,7 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
     @pytest.mark.staging
     async def test_agent_output_quality_validation(self, real_services, real_llm):
         """Test agent output quality and business value validation."""
-        self.logger.info("🚀 Starting Agent Output Quality E2E Test")
+        self.logger.info("[U+1F680] Starting Agent Output Quality E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -769,8 +769,8 @@ class TestAgentOptimizationCompleteFlow(BaseE2ETest):
             
             assert quality_score >= 2, f"Output quality score too low: {quality_score}/5"
             
-            self.logger.info(f"✅ Agent Output Quality Test completed - Quality score: {quality_score}/5")
+            self.logger.info(f" PASS:  Agent Output Quality Test completed - Quality score: {quality_score}/5")
             
         except Exception as e:
-            self.logger.error(f"❌ Agent Output Quality test failed: {e}")
+            self.logger.error(f" FAIL:  Agent Output Quality test failed: {e}")
             raise

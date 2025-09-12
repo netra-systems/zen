@@ -526,7 +526,7 @@ class TestOverlapAnalyzer:
             "",
             "### Similarity Breakdown",
             "",
-            f"- **Exact Duplicates**: {report['summary']['duplicate']} ⚠️" if report['summary']['duplicate'] > 0 else f"- **Exact Duplicates**: 0 ✅",
+            f"- **Exact Duplicates**: {report['summary']['duplicate']}  WARNING: [U+FE0F]" if report['summary']['duplicate'] > 0 else f"- **Exact Duplicates**: 0  PASS: ",
             f"- **Highly Similar**: {report['summary']['highly_similar']}",
             f"- **Similar**: {report['summary']['similar']}",
             f"- **Related**: {report['summary']['related']}",
@@ -575,13 +575,13 @@ class TestOverlapAnalyzer:
                     lines.append("**Top Overlaps:**")
                     lines.append("")
                     for overlap in overlaps:
-                        lines.append(f"- `{overlap['test1']}` ↔ `{overlap['test2']}` (similarity: {overlap['similarity']}, type: {overlap['type']})")
+                        lines.append(f"- `{overlap['test1']}` [U+2194] `{overlap['test2']}` (similarity: {overlap['similarity']}, type: {overlap['type']})")
                     lines.append("")
         
         # Add duplicates section if any
         if report['duplicates']:
             lines.extend([
-                "## Exact Duplicates ⚠️",
+                "## Exact Duplicates  WARNING: [U+FE0F]",
                 "",
                 "These test pairs appear to be exact duplicates and should be consolidated:",
                 ""
@@ -589,7 +589,7 @@ class TestOverlapAnalyzer:
             
             for dup in report['duplicates'][:20]:  # Show top 20
                 lines.append(f"1. `{dup['test1']}`")
-                lines.append(f"   ↔ `{dup['test2']}`")
+                lines.append(f"   [U+2194] `{dup['test2']}`")
                 lines.append(f"   (similarity: {dup['overall_similarity']})")
                 lines.append("")
         
@@ -604,7 +604,7 @@ class TestOverlapAnalyzer:
             
             for sim in report['highly_similar'][:20]:  # Show top 20
                 lines.append(f"- `{sim['test1']}`")
-                lines.append(f"  ↔ `{sim['test2']}`")
+                lines.append(f"  [U+2194] `{sim['test2']}`")
                 lines.append(f"  (similarity: {sim['overall_similarity']})")
                 lines.append("")
         

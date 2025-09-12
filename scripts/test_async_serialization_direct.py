@@ -83,7 +83,7 @@ async def test_event_loop_blocking():
             if duration > 0.05:
                 loop_blocked = True
                 max_block_duration = max(max_block_duration, duration)
-                print(f"⚠️  Event loop blocked for {duration*1000:.1f}ms")
+                print(f" WARNING: [U+FE0F]  Event loop blocked for {duration*1000:.1f}ms")
             
     # Start monitoring
     monitor_task = asyncio.create_task(monitor_loop())
@@ -248,22 +248,22 @@ async def main():
         print("="*60)
         
         if blocked:
-            print("🔴 CRITICAL: Event loop blocking detected!")
+            print("[U+1F534] CRITICAL: Event loop blocking detected!")
             print(f"   Maximum blocking duration: {max_duration*1000:.1f}ms")
             print("   Recommendation: Complete async serialization implementation")
         else:
-            print("🟢 Event loop remains responsive during serialization")
+            print("[U+1F7E2] Event loop remains responsive during serialization")
         
         # Check if async implementation exists
         manager = WebSocketManager()
         if hasattr(manager, '_serialize_message_safely_async'):
-            print("🟢 Async serialization method exists")
+            print("[U+1F7E2] Async serialization method exists")
             if hasattr(manager, '_serialization_executor'):
-                print("🟢 ThreadPoolExecutor is configured")
+                print("[U+1F7E2] ThreadPoolExecutor is configured")
             else:
-                print("🔴 ThreadPoolExecutor missing")
+                print("[U+1F534] ThreadPoolExecutor missing")
         else:
-            print("🔴 Async serialization method missing")
+            print("[U+1F534] Async serialization method missing")
             
     except KeyboardInterrupt:
         print("\nTest interrupted by user")

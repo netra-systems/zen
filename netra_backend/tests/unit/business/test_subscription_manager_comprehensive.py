@@ -717,9 +717,9 @@ class TestSubscriptionManagerEdgeCases(BaseTestCase):
         user_id = 12345
         
         unicode_plan_names = [
-            "企业版",      # Chinese 
-            "エンタープライズ", # Japanese
-            "премиум",     # Russian
+            "[U+4F01][U+4E1A][U+7248]",      # Chinese 
+            "[U+30A8][U+30F3][U+30BF][U+30FC][U+30D7][U+30E9][U+30A4][U+30BA]", # Japanese
+            "[U+043F]pem[U+0438]um",     # Russian
             "empresa",     # Spanish
             "entreprise",  # French
             "unternehmen", # German

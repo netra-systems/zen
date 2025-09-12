@@ -556,21 +556,21 @@ async def main():
         if 'summary' in benchmark_report:
             pass_rate = benchmark_report['summary'].get('pass_rate', 0)
             if pass_rate >= 90:
-                print(f"\n✅ Performance tests PASSED (Pass rate: {pass_rate:.1f}%)")
+                print(f"\n PASS:  Performance tests PASSED (Pass rate: {pass_rate:.1f}%)")
                 return 0
             else:
-                print(f"\n❌ Performance tests FAILED (Pass rate: {pass_rate:.1f}%)")
+                print(f"\n FAIL:  Performance tests FAILED (Pass rate: {pass_rate:.1f}%)")
                 return 1
         else:
-            print("\n⚠️  Unable to determine performance test results")
+            print("\n WARNING: [U+FE0F]  Unable to determine performance test results")
             return 2
     
     except KeyboardInterrupt:
-        print("\n🛑 Performance tests interrupted by user")
+        print("\n[U+1F6D1] Performance tests interrupted by user")
         return 130
     
     except Exception as e:
-        print(f"\n💥 Performance tests failed with error: {str(e)}")
+        print(f"\n[U+1F4A5] Performance tests failed with error: {str(e)}")
         if not args.quiet:
             traceback.print_exc()
         return 1

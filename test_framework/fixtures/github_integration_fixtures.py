@@ -359,7 +359,7 @@ class GitHubTestFixtures:
                             # Add cleanup comment
                             await client.post(
                                 f"{github_test_config.api_base_url}/repos/{github_test_config.repo_owner}/{github_test_config.repo_name}/issues/{issue_number}/comments",
-                                json={"body": "🧹 Automated test cleanup - issue closed after test completion"},
+                                json={"body": "[U+1F9F9] Automated test cleanup - issue closed after test completion"},
                                 headers={
                                     "Authorization": f"token {github_test_config.token}",
                                     "Accept": "application/vnd.github.v3+json"

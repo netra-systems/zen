@@ -1,7 +1,7 @@
-"""Triage agent recovery strategy with ≤8 line functions.
+"""Triage agent recovery strategy with  <= 8 line functions.
 
 Recovery strategy implementation for triage agent operations with aggressive
-function decomposition. All functions ≤8 lines.
+function decomposition. All functions  <= 8 lines.
 """
 
 import asyncio

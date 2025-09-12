@@ -122,7 +122,7 @@ class TestSSOTViolationDetection:
                 f"SSOT VIOLATION DETECTED: metadata type differs - SSOT: {type(ssot_message.metadata_)} vs Violation: {type(violation_message.metadata_)}"
             )
             
-            print("\n✅ ALL SSOT COMPLIANCE CHECKS PASSED")
+            print("\n PASS:  ALL SSOT COMPLIANCE CHECKS PASSED")
             print("If you see this message, the SSOT violation has been fixed!")
             
             # Clean up test data
@@ -145,13 +145,13 @@ if __name__ == "__main__":
     async def run_test():
         try:
             await test_instance.test_ssot_violation_structure_difference()
-            print("\n🎉 TEST PASSED - SSOT compliance verified!")
+            print("\n CELEBRATION:  TEST PASSED - SSOT compliance verified!")
         except AssertionError as e:
-            print(f"\n🚨 TEST FAILED - SSOT violation detected: {e}")
+            print(f"\n ALERT:  TEST FAILED - SSOT violation detected: {e}")
             print("\nThis is EXPECTED behavior before remediation!")
             return False
         except Exception as e:
-            print(f"\n💥 TEST ERROR: {e}")
+            print(f"\n[U+1F4A5] TEST ERROR: {e}")
             return False
         return True
     
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     result = asyncio.run(run_test())
     
     if not result:
-        print("\n📋 REMEDIATION REQUIRED:")
+        print("\n[U+1F4CB] REMEDIATION REQUIRED:")
         print("1. Fix test_framework/ssot/database.py:596")
         print("2. Replace 'session.add(message_data)' with MessageRepository.create_message()")
         print("3. Re-run this test to validate the fix")

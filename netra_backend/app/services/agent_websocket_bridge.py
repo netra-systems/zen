@@ -154,14 +154,14 @@ class AgentWebSocketBridge(MonitorableComponent):
         self._initialized = True
         if user_context:
             logger.info(
-                f"🌉 WEBSOCKET_BRIDGE_INIT: Agent WebSocket bridge initialized with user isolation. "
+                f"[U+1F309] WEBSOCKET_BRIDGE_INIT: Agent WebSocket bridge initialized with user isolation. "
                 f"User: {user_context.user_id[:8]}..., Mode: non-singleton, "
                 f"Thread: {user_context.thread_id}, Request: {user_context.request_id}, "
                 f"Business_context: Ready for real-time agent event delivery (critical for chat UX)"
             )
         else:
             logger.info(
-                f"🌉 WEBSOCKET_BRIDGE_INIT: Agent WebSocket bridge initialized (system mode). "
+                f"[U+1F309] WEBSOCKET_BRIDGE_INIT: Agent WebSocket bridge initialized (system mode). "
                 f"Mode: non-singleton, User_context: none, "
                 f"Business_context: System-level initialization for agent event infrastructure"
             )
@@ -170,7 +170,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """Initialize bridge configuration."""
         self.config = IntegrationConfig()
         logger.debug(
-            f"⚙️ BRIDGE_CONFIG_INIT: WebSocket-Agent integration configuration loaded. "
+            f"[U+2699][U+FE0F] BRIDGE_CONFIG_INIT: WebSocket-Agent integration configuration loaded. "
             f"Timeout: {self.config.initialization_timeout_s}s, "
             f"Health_check_interval: {self.config.health_check_interval_s}s, "
             f"Recovery_attempts: {self.config.recovery_max_attempts}, "
@@ -289,20 +289,20 @@ class AgentWebSocketBridge(MonitorableComponent):
                 else:
                     last_error = "WebSocket send_to_user returned False"
                     if attempt < max_retries - 1:  # Don't delay after last attempt
-                        logger.warning(f"⚠️ RETRY: {event_type} delivery failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay}s")
+                        logger.warning(f" WARNING: [U+FE0F] RETRY: {event_type} delivery failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay}s")
                         await asyncio.sleep(retry_delay)
                         retry_delay *= 2  # Exponential backoff
                     
             except Exception as e:
                 last_error = str(e)
                 if attempt < max_retries - 1:
-                    logger.warning(f"⚠️ RETRY: {event_type} exception (attempt {attempt + 1}/{max_retries}): {e}, retrying in {retry_delay}s")
+                    logger.warning(f" WARNING: [U+FE0F] RETRY: {event_type} exception (attempt {attempt + 1}/{max_retries}): {e}, retrying in {retry_delay}s")
                     await asyncio.sleep(retry_delay)
                     retry_delay *= 2
         
         if not success:
             # PHASE 4 FIX: Stop silent failures - raise exception for critical events
-            error_msg = f"🚨 CRITICAL: {event_type} delivery failed after {max_retries} attempts (run_id={run_id})"
+            error_msg = f" ALERT:  CRITICAL: {event_type} delivery failed after {max_retries} attempts (run_id={run_id})"
             logger.critical(error_msg)
             raise RuntimeError(f"CRITICAL event delivery failure: {error_msg}. Last error: {last_error}")
         
@@ -753,7 +753,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         try:
             if observer not in self._monitor_observers:
                 self._monitor_observers.append(observer)
-                logger.info(f"✅ Monitor observer registered: {type(observer).__name__}")
+                logger.info(f" PASS:  Monitor observer registered: {type(observer).__name__}")
                 logger.debug(f"Total registered observers: {len(self._monitor_observers)}")
             else:
                 logger.debug(f"Observer {type(observer).__name__} already registered")
@@ -1048,20 +1048,20 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         try:
             if not self._thread_registry:
-                logger.warning(f"🚨 REGISTRATION BLOCKED: Thread registry not available for run_id={run_id}")
+                logger.warning(f" ALERT:  REGISTRATION BLOCKED: Thread registry not available for run_id={run_id}")
                 return False
             
             success = await self._thread_registry.register(run_id, thread_id, metadata)
             
             if success:
-                logger.info(f"✅ MAPPING REGISTERED: run_id={run_id} → thread_id={thread_id} (metadata: {metadata})")
+                logger.info(f" PASS:  MAPPING REGISTERED: run_id={run_id}  ->  thread_id={thread_id} (metadata: {metadata})")
             else:
-                logger.error(f"🚨 REGISTRATION FAILED: run_id={run_id} → thread_id={thread_id}")
+                logger.error(f" ALERT:  REGISTRATION FAILED: run_id={run_id}  ->  thread_id={thread_id}")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 REGISTRATION EXCEPTION: run_id={run_id}, thread_id={thread_id}: {e}")
+            logger.error(f" ALERT:  REGISTRATION EXCEPTION: run_id={run_id}, thread_id={thread_id}: {e}")
             return False
     
     async def unregister_run_mapping(self, run_id: str) -> bool:
@@ -1082,12 +1082,12 @@ class AgentWebSocketBridge(MonitorableComponent):
             success = await self._thread_registry.unregister_run(run_id)
             
             if success:
-                logger.debug(f"🗑️ MAPPING UNREGISTERED: run_id={run_id}")
+                logger.debug(f"[U+1F5D1][U+FE0F] MAPPING UNREGISTERED: run_id={run_id}")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 UNREGISTRATION EXCEPTION: run_id={run_id}: {e}")
+            logger.error(f" ALERT:  UNREGISTRATION EXCEPTION: run_id={run_id}: {e}")
             return False
     
     async def get_thread_registry_status(self) -> Optional[Dict[str, Any]]:
@@ -1104,7 +1104,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             return await self._thread_registry.get_status()
             
         except Exception as e:
-            logger.error(f"🚨 Error getting thread registry status: {e}")
+            logger.error(f" ALERT:  Error getting thread registry status: {e}")
             return None
     
     # ===================== PER-REQUEST ORCHESTRATOR FACTORY =====================
@@ -1192,7 +1192,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Send agent started notification with guaranteed delivery.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -1209,13 +1209,13 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 3 FIX: Proper user context resolution for concurrent user isolation
             effective_user_context = user_context or self.user_context
             if not effective_user_context:
-                logger.error(f"🚨 EMISSION BLOCKED: No UserExecutionContext available for agent_started (run_id={run_id}, agent={agent_name})")
+                logger.error(f" ALERT:  EMISSION BLOCKED: No UserExecutionContext available for agent_started (run_id={run_id}, agent={agent_name})")
                 return False
             
             # PHASE 3 FIX: Validate user context matches run_id for proper routing
             if hasattr(effective_user_context, 'run_id') and effective_user_context.run_id != run_id:
                 logger.warning(
-                    f"⚠️ USER_CONTEXT_MISMATCH: Context run_id={effective_user_context.run_id} != event run_id={run_id}. "
+                    f" WARNING: [U+FE0F] USER_CONTEXT_MISMATCH: Context run_id={effective_user_context.run_id} != event run_id={run_id}. "
                     f"This may indicate concurrent user routing issues. Using event run_id for routing."
                 )
             
@@ -1224,7 +1224,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                 return False
             
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_started (run_id={run_id}, agent={agent_name})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for agent_started (run_id={run_id}, agent={agent_name})")
                 return False
             
             # Build standardized notification message with user_id for proper routing
@@ -1252,7 +1252,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 3 FIX: Log routing decision for concurrent user debugging
             if user_context and self.user_context and user_context != self.user_context:
                 logger.debug(
-                    f"🔄 CONCURRENT_USER_ROUTING: Using provided user_context (user={user_id}) instead of "
+                    f" CYCLE:  CONCURRENT_USER_ROUTING: Using provided user_context (user={user_id}) instead of "
                     f"bridge default (user={self.user_context.user_id}) for run_id={run_id}"
                 )
             
@@ -1292,14 +1292,14 @@ class AgentWebSocketBridge(MonitorableComponent):
                     else:
                         last_error = "WebSocket send_to_user returned False"
                         if attempt < max_retries - 1:  # Don't delay after last attempt
-                            logger.warning(f"⚠️ RETRY: agent_started delivery failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay}s")
+                            logger.warning(f" WARNING: [U+FE0F] RETRY: agent_started delivery failed (attempt {attempt + 1}/{max_retries}), retrying in {retry_delay}s")
                             await asyncio.sleep(retry_delay)
                             retry_delay *= 2  # Exponential backoff
                         
                 except Exception as e:
                     last_error = str(e)
                     if attempt < max_retries - 1:
-                        logger.warning(f"⚠️ RETRY: agent_started exception (attempt {attempt + 1}/{max_retries}): {e}, retrying in {retry_delay}s")
+                        logger.warning(f" WARNING: [U+FE0F] RETRY: agent_started exception (attempt {attempt + 1}/{max_retries}): {e}, retrying in {retry_delay}s")
                         await asyncio.sleep(retry_delay)
                         retry_delay *= 2
                     
@@ -1316,13 +1316,13 @@ class AgentWebSocketBridge(MonitorableComponent):
                     logger.warning(f"Event tracking update failed: {e}")
             
             if success:
-                logger.info(f"✅ EMISSION SUCCESS: agent_started → user={user_id} (run_id={run_id}, agent={agent_name})")
+                logger.info(f" PASS:  EMISSION SUCCESS: agent_started  ->  user={user_id} (run_id={run_id}, agent={agent_name})")
                 # PHASE 2 FIX: Track successful event delivery (to be implemented)
                 if hasattr(self, '_track_event_delivery'):
                     await self._track_event_delivery("agent_started", run_id, True)
             else:
                 # PHASE 4 FIX: Stop silent failures - raise exception for critical events
-                error_msg = f"🚨 CRITICAL: agent_started delivery failed after {max_retries} attempts (run_id={run_id}, agent={agent_name})"
+                error_msg = f" ALERT:  CRITICAL: agent_started delivery failed after {max_retries} attempts (run_id={run_id}, agent={agent_name})"
                 logger.critical(error_msg)
                 if hasattr(self, '_track_event_delivery'):
                     await self._track_event_delivery("agent_started", run_id, False)
@@ -1336,11 +1336,11 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 4 FIX: Enhanced error logging for debugging concurrent user issues
             effective_user_context = user_context or self.user_context
             user_id_info = effective_user_context.user_id if effective_user_context else 'unknown'
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_started failed (run_id={run_id}, agent={agent_name}, user_id={user_id_info}): {e}")
+            logger.error(f" ALERT:  EMISSION EXCEPTION: notify_agent_started failed (run_id={run_id}, agent={agent_name}, user_id={user_id_info}): {e}")
             
             # PHASE 4 FIX: Propagate critical errors instead of silent failure  
             if "CRITICAL" in str(e) or "user_id" in str(e).lower():
-                logger.critical(f"🚨 CRITICAL WebSocket routing error for run_id={run_id}, agent={agent_name}: {e}")
+                logger.critical(f" ALERT:  CRITICAL WebSocket routing error for run_id={run_id}, agent={agent_name}: {e}")
                 raise  # Don't allow critical routing errors to fail silently
             
             return False
@@ -1358,7 +1358,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Send agent thinking notification with progress context.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -1376,11 +1376,11 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Use UserExecutionContext for proper user_id routing
             effective_user_context = user_context or self.user_context
             if not effective_user_context:
-                logger.error(f"🚨 EMISSION BLOCKED: No UserExecutionContext available for agent_thinking (run_id={run_id}, agent={agent_name})")
+                logger.error(f" ALERT:  EMISSION BLOCKED: No UserExecutionContext available for agent_thinking (run_id={run_id}, agent={agent_name})")
                 return False
             
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_thinking (run_id={run_id}, agent={agent_name})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for agent_thinking (run_id={run_id}, agent={agent_name})")
                 return False
             
             # Build standardized notification message with user_id for proper routing
@@ -1433,22 +1433,22 @@ class AgentWebSocketBridge(MonitorableComponent):
                 try:
                     if success:
                         tracker.mark_event_confirmed(event_id)
-                        logger.debug(f"✅ EMISSION SUCCESS: agent_thinking → user={user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
+                        logger.debug(f" PASS:  EMISSION SUCCESS: agent_thinking  ->  user={user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
                     else:
                         tracker.mark_event_failed(event_id, "WebSocket send_to_user returned False")
-                        logger.error(f"🚨 EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
+                        logger.error(f" ALERT:  EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
                 except Exception as track_error:
                     logger.warning(f"Event tracking update failed: {track_error}")
             else:
                 if success:
-                    logger.debug(f"✅ EMISSION SUCCESS: agent_thinking → user={user_id} (run_id={run_id}, agent={agent_name})")
+                    logger.debug(f" PASS:  EMISSION SUCCESS: agent_thinking  ->  user={user_id} (run_id={run_id}, agent={agent_name})")
                 else:
-                    logger.error(f"🚨 EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name})")
+                    logger.error(f" ALERT:  EMISSION FAILED: agent_thinking send failed (run_id={run_id}, agent={agent_name})")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_thinking failed (run_id={run_id}, agent={agent_name}): {e}")
+            logger.error(f" ALERT:  EMISSION EXCEPTION: notify_agent_thinking failed (run_id={run_id}, agent={agent_name}): {e}")
             # PHASE 4 FIX: Propagate critical errors instead of silent failure
             if "CRITICAL" in str(e) or "user_id" in str(e).lower():
                 raise  # Don't allow critical routing errors to fail silently
@@ -1465,7 +1465,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Send tool execution start notification for transparency.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -1482,11 +1482,11 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Use UserExecutionContext for proper user_id routing
             effective_user_context = user_context or self.user_context
             if not effective_user_context:
-                logger.error(f"🚨 EMISSION BLOCKED: No UserExecutionContext available for tool_executing (run_id={run_id}, tool={tool_name})")
+                logger.error(f" ALERT:  EMISSION BLOCKED: No UserExecutionContext available for tool_executing (run_id={run_id}, tool={tool_name})")
                 return False
             
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for tool_executing (run_id={run_id}, tool={tool_name})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for tool_executing (run_id={run_id}, tool={tool_name})")
                 return False
             
             # Use agent name from context if not provided
@@ -1547,17 +1547,17 @@ class AgentWebSocketBridge(MonitorableComponent):
                 try:
                     if success:
                         tracker.mark_event_confirmed(tracker_event_id)
-                        logger.debug(f"✅ EMISSION SUCCESS: tool_executing → user={user_id} (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
+                        logger.debug(f" PASS:  EMISSION SUCCESS: tool_executing  ->  user={user_id} (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
                     else:
                         tracker.mark_event_failed(tracker_event_id, "WebSocket send_to_user returned False")
-                        logger.error(f"🚨 EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
+                        logger.error(f" ALERT:  EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
                 except Exception as track_error:
                     logger.warning(f"Event tracking update failed: {track_error}")
             else:
                 if success:
-                    logger.debug(f"✅ EMISSION SUCCESS: tool_executing → user={user_id} (run_id={run_id}, tool={tool_name})")
+                    logger.debug(f" PASS:  EMISSION SUCCESS: tool_executing  ->  user={user_id} (run_id={run_id}, tool={tool_name})")
                 else:
-                    logger.error(f"🚨 EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name})")
+                    logger.error(f" ALERT:  EMISSION FAILED: tool_executing send failed (run_id={run_id}, tool={tool_name})")
             
             # Legacy event confirmation if event_id is present (from parameters)
             if event_id and success:
@@ -1578,7 +1578,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_tool_executing failed (run_id={run_id}, tool={tool_name}): {e}")
+            logger.error(f" ALERT:  EMISSION EXCEPTION: notify_tool_executing failed (run_id={run_id}, tool={tool_name}): {e}")
             # PHASE 4 FIX: Propagate critical errors instead of silent failure
             if "CRITICAL" in str(e) or "user_id" in str(e).lower():
                 raise  # Don't allow critical routing errors to fail silently
@@ -1596,7 +1596,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Send tool execution completion notification with results.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -1614,11 +1614,11 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Use UserExecutionContext for proper user_id routing
             effective_user_context = user_context or self.user_context
             if not effective_user_context:
-                logger.error(f"🚨 EMISSION BLOCKED: No UserExecutionContext available for tool_completed (run_id={run_id}, tool={tool_name})")
+                logger.error(f" ALERT:  EMISSION BLOCKED: No UserExecutionContext available for tool_completed (run_id={run_id}, tool={tool_name})")
                 return False
             
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for tool_completed (run_id={run_id}, tool={tool_name})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for tool_completed (run_id={run_id}, tool={tool_name})")
                 return False
             
             # Use agent name from context if not provided
@@ -1680,17 +1680,17 @@ class AgentWebSocketBridge(MonitorableComponent):
                 try:
                     if success:
                         tracker.mark_event_confirmed(tracker_event_id)
-                        logger.debug(f"✅ EMISSION SUCCESS: tool_completed → user={user_id} (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
+                        logger.debug(f" PASS:  EMISSION SUCCESS: tool_completed  ->  user={user_id} (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
                     else:
                         tracker.mark_event_failed(tracker_event_id, "WebSocket send_to_user returned False")
-                        logger.error(f"🚨 EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
+                        logger.error(f" ALERT:  EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name}) [tracked: {tracker_event_id}]")
                 except Exception as track_error:
                     logger.warning(f"Event tracking update failed: {track_error}")
             else:
                 if success:
-                    logger.debug(f"✅ EMISSION SUCCESS: tool_completed → user={user_id} (run_id={run_id}, tool={tool_name})")
+                    logger.debug(f" PASS:  EMISSION SUCCESS: tool_completed  ->  user={user_id} (run_id={run_id}, tool={tool_name})")
                 else:
-                    logger.error(f"🚨 EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name})")
+                    logger.error(f" ALERT:  EMISSION FAILED: tool_completed send failed (run_id={run_id}, tool={tool_name})")
                 
             # Legacy event confirmation if event_id is present (from result)
             if event_id and success:
@@ -1711,7 +1711,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_tool_completed failed (run_id={run_id}, tool={tool_name}): {e}")
+            logger.error(f" ALERT:  EMISSION EXCEPTION: notify_tool_completed failed (run_id={run_id}, tool={tool_name}): {e}")
             # PHASE 4 FIX: Propagate critical errors instead of silent failure
             if "CRITICAL" in str(e) or "user_id" in str(e).lower():
                 raise  # Don't allow critical routing errors to fail silently
@@ -1729,7 +1729,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Send agent completion notification with final results.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -1746,11 +1746,11 @@ class AgentWebSocketBridge(MonitorableComponent):
             # PHASE 1 FIX: Use UserExecutionContext for proper user_id routing
             effective_user_context = user_context or self.user_context
             if not effective_user_context:
-                logger.error(f"🚨 EMISSION BLOCKED: No UserExecutionContext available for agent_completed (run_id={run_id}, agent={agent_name})")
+                logger.error(f" ALERT:  EMISSION BLOCKED: No UserExecutionContext available for agent_completed (run_id={run_id}, agent={agent_name})")
                 return False
             
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_completed (run_id={run_id}, agent={agent_name})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for agent_completed (run_id={run_id}, agent={agent_name})")
                 return False
             
             # Build standardized notification message with user_id for proper routing
@@ -1803,22 +1803,22 @@ class AgentWebSocketBridge(MonitorableComponent):
                 try:
                     if success:
                         tracker.mark_event_confirmed(event_id)
-                        logger.info(f"✅ EMISSION SUCCESS: agent_completed → user={user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
+                        logger.info(f" PASS:  EMISSION SUCCESS: agent_completed  ->  user={user_id} (run_id={run_id}, agent={agent_name}) [tracked: {event_id}]")
                     else:
                         tracker.mark_event_failed(event_id, "WebSocket send_to_user returned False - CRITICAL EVENT FAILURE")
-                        logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) [tracked: {event_id}] - CRITICAL EVENT")
+                        logger.error(f" ALERT:  EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) [tracked: {event_id}] - CRITICAL EVENT")
                 except Exception as track_error:
                     logger.warning(f"Event tracking update failed for critical event: {track_error}")
             else:
                 if success:
-                    logger.info(f"✅ EMISSION SUCCESS: agent_completed → user={user_id} (run_id={run_id}, agent={agent_name})")
+                    logger.info(f" PASS:  EMISSION SUCCESS: agent_completed  ->  user={user_id} (run_id={run_id}, agent={agent_name})")
                 else:
-                    logger.error(f"🚨 EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) - CRITICAL EVENT")
+                    logger.error(f" ALERT:  EMISSION FAILED: agent_completed send failed (run_id={run_id}, agent={agent_name}) - CRITICAL EVENT")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_completed failed (run_id={run_id}, agent={agent_name}): {e}")
+            logger.error(f" ALERT:  EMISSION EXCEPTION: notify_agent_completed failed (run_id={run_id}, agent={agent_name}): {e}")
             # PHASE 4 FIX: Propagate critical errors instead of silent failure
             if "CRITICAL" in str(e) or "user_id" in str(e).lower():
                 raise  # Don't allow critical routing errors to fail silently
@@ -1835,7 +1835,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Send agent error notification with context.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -1850,7 +1850,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         try:
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for agent_error (run_id={run_id}, agent={agent_name})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for agent_error (run_id={run_id}, agent={agent_name})")
                 return False
             
             # Build standardized notification message
@@ -1874,21 +1874,21 @@ class AgentWebSocketBridge(MonitorableComponent):
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
-                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                logger.error(f" ALERT:  EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
             # EMIT TO USER CHAT
             success = await self._websocket_manager.send_to_thread(thread_id, notification)
             
             if success:
-                logger.warning(f"⚠️ EMISSION SUCCESS: agent_error → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+                logger.warning(f" WARNING: [U+FE0F] EMISSION SUCCESS: agent_error  ->  thread={thread_id} (run_id={run_id}, agent={agent_name})")
             else:
-                logger.error(f"🚨 EMISSION FAILED: agent_error send failed (run_id={run_id}, agent={agent_name})")
+                logger.error(f" ALERT:  EMISSION FAILED: agent_error send failed (run_id={run_id}, agent={agent_name})")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_agent_error failed (run_id={run_id}, agent={agent_name}): {e}")
+            logger.error(f" ALERT:  EMISSION EXCEPTION: notify_agent_error failed (run_id={run_id}, agent={agent_name}): {e}")
             return False
     
     async def notify_agent_death(
@@ -1904,7 +1904,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         CRITICAL: This notification is sent when an agent dies silently without exceptions.
         This prevents the infinite loading state users experience.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -1919,7 +1919,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         try:
             if not self._websocket_manager:
-                logger.critical(f"🚨💀 CRITICAL: Cannot notify agent death - WebSocket manager unavailable (run_id={run_id}, agent={agent_name})")
+                logger.critical(f" ALERT: [U+1F480] CRITICAL: Cannot notify agent death - WebSocket manager unavailable (run_id={run_id}, agent={agent_name})")
                 return False
             
             # Build critical death notification
@@ -1940,7 +1940,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             # CRITICAL EMISSION: Resolve thread_id and emit with highest priority
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
-                logger.critical(f"🚨💀 CRITICAL: Cannot resolve thread_id for agent death notification (run_id={run_id})")
+                logger.critical(f" ALERT: [U+1F480] CRITICAL: Cannot resolve thread_id for agent death notification (run_id={run_id})")
                 return False
             
             # Emit death notification with critical priority
@@ -1950,14 +1950,14 @@ class AgentWebSocketBridge(MonitorableComponent):
             )
             
             if success:
-                logger.critical(f"💀 AGENT DEATH NOTIFIED: {agent_name} died due to {death_cause} (run_id={run_id}, thread={thread_id})")
+                logger.critical(f"[U+1F480] AGENT DEATH NOTIFIED: {agent_name} died due to {death_cause} (run_id={run_id}, thread={thread_id})")
             else:
-                logger.critical(f"🚨💀 FAILED to notify agent death: {agent_name} (run_id={run_id}, thread={thread_id})")
+                logger.critical(f" ALERT: [U+1F480] FAILED to notify agent death: {agent_name} (run_id={run_id}, thread={thread_id})")
             
             return success
             
         except Exception as e:
-            logger.critical(f"🚨💀 CRITICAL EXCEPTION: notify_agent_death failed (run_id={run_id}, agent={agent_name}): {e}")
+            logger.critical(f" ALERT: [U+1F480] CRITICAL EXCEPTION: notify_agent_death failed (run_id={run_id}, agent={agent_name}): {e}")
             return False
     
     def _get_user_friendly_death_message(self, death_cause: str, agent_name: str) -> str:
@@ -1980,7 +1980,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Send agent progress update notification.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -1994,7 +1994,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         try:
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for progress_update (run_id={run_id}, agent={agent_name})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for progress_update (run_id={run_id}, agent={agent_name})")
                 return False
             
             # Build standardized notification message
@@ -2013,21 +2013,21 @@ class AgentWebSocketBridge(MonitorableComponent):
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
-                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                logger.error(f" ALERT:  EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
             # EMIT TO USER CHAT
             success = await self._websocket_manager.send_to_thread(thread_id, notification)
             
             if success:
-                logger.debug(f"✅ EMISSION SUCCESS: progress_update → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+                logger.debug(f" PASS:  EMISSION SUCCESS: progress_update  ->  thread={thread_id} (run_id={run_id}, agent={agent_name})")
             else:
-                logger.error(f"🚨 EMISSION FAILED: progress_update send failed (run_id={run_id}, agent={agent_name})")
+                logger.error(f" ALERT:  EMISSION FAILED: progress_update send failed (run_id={run_id}, agent={agent_name})")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_progress_update failed (run_id={run_id}, agent={agent_name}): {e}")
+            logger.error(f" ALERT:  EMISSION EXCEPTION: notify_progress_update failed (run_id={run_id}, agent={agent_name}): {e}")
             return False
     
     async def notify_custom(
@@ -2040,7 +2040,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         Send custom notification with flexible data.
         
-        CRYSTAL CLEAR EMISSION PATH: Agent → Bridge → WebSocket Manager → User Chat
+        CRYSTAL CLEAR EMISSION PATH: Agent  ->  Bridge  ->  WebSocket Manager  ->  User Chat
         
         Args:
             run_id: Unique execution identifier for routing
@@ -2055,7 +2055,7 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         try:
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for custom notification (run_id={run_id}, type={notification_type})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for custom notification (run_id={run_id}, type={notification_type})")
                 return False
             
             # Build standardized notification message
@@ -2070,21 +2070,21 @@ class AgentWebSocketBridge(MonitorableComponent):
             # CRYSTAL CLEAR EMISSION: Resolve thread_id and emit
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
-                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                logger.error(f" ALERT:  EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
             # EMIT TO USER CHAT
             success = await self._websocket_manager.send_to_thread(thread_id, notification)
             
             if success:
-                logger.debug(f"✅ EMISSION SUCCESS: custom({notification_type}) → thread={thread_id} (run_id={run_id}, agent={agent_name})")
+                logger.debug(f" PASS:  EMISSION SUCCESS: custom({notification_type})  ->  thread={thread_id} (run_id={run_id}, agent={agent_name})")
             else:
-                logger.error(f"🚨 EMISSION FAILED: custom({notification_type}) send failed (run_id={run_id}, agent={agent_name})")
+                logger.error(f" ALERT:  EMISSION FAILED: custom({notification_type}) send failed (run_id={run_id}, agent={agent_name})")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 EMISSION EXCEPTION: notify_custom failed (run_id={run_id}, type={notification_type}): {e}")
+            logger.error(f" ALERT:  EMISSION EXCEPTION: notify_custom failed (run_id={run_id}, type={notification_type}): {e}")
             return False
     
     # ===================== CORE EVENT EMISSION METHOD =====================
@@ -2123,13 +2123,13 @@ class AgentWebSocketBridge(MonitorableComponent):
         try:
             # PHASE 2: Delegate to UnifiedWebSocketEmitter SSOT
             if not self._websocket_manager:
-                logger.warning(f"🚨 EMISSION BLOCKED: WebSocket manager unavailable for {event_type} (run_id={run_id})")
+                logger.warning(f" ALERT:  EMISSION BLOCKED: WebSocket manager unavailable for {event_type} (run_id={run_id})")
                 return False
             
             # Resolve user ID from run_id for emitter creation
             thread_id = await self._resolve_thread_id_from_run_id(run_id)
             if not thread_id:
-                logger.error(f"🚨 EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
+                logger.error(f" ALERT:  EMISSION FAILED: Cannot resolve thread_id for run_id={run_id}")
                 return False
             
             # Get or create UnifiedWebSocketEmitter for this user context
@@ -2164,14 +2164,14 @@ class AgentWebSocketBridge(MonitorableComponent):
             success = await emitter.emit(event_type, event_data)
             
             if success:
-                logger.debug(f"✅ SSOT EMISSION SUCCESS: {event_type} → thread={thread_id} (run_id={run_id})")
+                logger.debug(f" PASS:  SSOT EMISSION SUCCESS: {event_type}  ->  thread={thread_id} (run_id={run_id})")
             else:
-                logger.error(f"🚨 SSOT EMISSION FAILED: {event_type} send failed (run_id={run_id})")
+                logger.error(f" ALERT:  SSOT EMISSION FAILED: {event_type} send failed (run_id={run_id})")
             
             return success
             
         except Exception as e:
-            logger.error(f"🚨 SSOT EMISSION EXCEPTION: emit_agent_event delegation failed (event_type={event_type}, run_id={run_id}): {e}")
+            logger.error(f" ALERT:  SSOT EMISSION EXCEPTION: emit_agent_event delegation failed (event_type={event_type}, run_id={run_id}): {e}")
             return False
     
     def _validate_event_context(self, run_id: Optional[str], event_type: str, agent_name: Optional[str] = None) -> bool:
@@ -2195,36 +2195,36 @@ class AgentWebSocketBridge(MonitorableComponent):
         try:
             # CRITICAL CHECK: run_id cannot be None
             if run_id is None:
-                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id is None for {event_type} "
+                logger.error(f" ALERT:  CONTEXT VALIDATION FAILED: run_id is None for {event_type} "
                            f"(agent={agent_name or 'unknown'}). This would cause event misrouting!")
-                logger.error(f"🚨 SECURITY RISK: Events with None run_id can be delivered to wrong users!")
+                logger.error(f" ALERT:  SECURITY RISK: Events with None run_id can be delivered to wrong users!")
                 return False
             
             # CRITICAL CHECK: run_id cannot be 'registry' (system context)
             if run_id == 'registry':
-                logger.error(f"🚨 CONTEXT VALIDATION FAILED: run_id='registry' for {event_type} "
+                logger.error(f" ALERT:  CONTEXT VALIDATION FAILED: run_id='registry' for {event_type} "
                            f"(agent={agent_name or 'unknown'}). System context cannot emit user events!")
-                logger.error(f"🚨 SECURITY RISK: Registry context events would be broadcast to all users!")
+                logger.error(f" ALERT:  SECURITY RISK: Registry context events would be broadcast to all users!")
                 return False
             
             # VALIDATION CHECK: run_id should be a non-empty string
             if not isinstance(run_id, str) or not run_id.strip():
-                logger.error(f"🚨 CONTEXT VALIDATION FAILED: Invalid run_id '{run_id}' for {event_type} "
+                logger.error(f" ALERT:  CONTEXT VALIDATION FAILED: Invalid run_id '{run_id}' for {event_type} "
                            f"(agent={agent_name or 'unknown'}). run_id must be non-empty string!")
                 return False
             
             # VALIDATION CHECK: run_id should not contain suspicious patterns
             if self._is_suspicious_run_id(run_id):
-                logger.warning(f"⚠️ CONTEXT VALIDATION WARNING: Suspicious run_id pattern '{run_id}' for {event_type} "
+                logger.warning(f" WARNING: [U+FE0F] CONTEXT VALIDATION WARNING: Suspicious run_id pattern '{run_id}' for {event_type} "
                               f"(agent={agent_name or 'unknown'}). Event will be sent but flagged for monitoring.")
                 # Allow but log for monitoring - some legitimate run_ids might trigger this
             
             # Context validation passed
-            logger.debug(f"✅ CONTEXT VALIDATION PASSED: run_id={run_id} for {event_type} is valid")
+            logger.debug(f" PASS:  CONTEXT VALIDATION PASSED: run_id={run_id} for {event_type} is valid")
             return True
             
         except Exception as e:
-            logger.error(f"🚨 CONTEXT VALIDATION EXCEPTION: Validation failed for {event_type} "
+            logger.error(f" ALERT:  CONTEXT VALIDATION EXCEPTION: Validation failed for {event_type} "
                         f"(run_id={run_id}, agent={agent_name or 'unknown'}): {e}")
             return False
     
@@ -2304,15 +2304,15 @@ class AgentWebSocketBridge(MonitorableComponent):
         try:
             # Input validation with comprehensive logging
             if not run_id or not isinstance(run_id, str):
-                logger.error(f"🚨 RESOLUTION FAILED: Invalid run_id input type or empty: {run_id} (type: {type(run_id)})")
+                logger.error(f" ALERT:  RESOLUTION FAILED: Invalid run_id input type or empty: {run_id} (type: {type(run_id)})")
                 raise ValueError(f"Invalid run_id: must be non-empty string, got {type(run_id)}: {run_id}")
             
             run_id = run_id.strip()
             if not run_id:
-                logger.error("🚨 RESOLUTION FAILED: Empty run_id after stripping whitespace")
+                logger.error(" ALERT:  RESOLUTION FAILED: Empty run_id after stripping whitespace")
                 raise ValueError("Empty run_id after stripping whitespace")
             
-            logger.debug(f"🔍 THREAD RESOLUTION START: run_id={run_id}")
+            logger.debug(f" SEARCH:  THREAD RESOLUTION START: run_id={run_id}")
             
             # PRIORITY 1: ThreadRunRegistry lookup (PRIMARY SOURCE - MOST RELIABLE)
             # This is the golden source that should resolve 80%+ of requests
@@ -2322,16 +2322,16 @@ class AgentWebSocketBridge(MonitorableComponent):
                     if thread_id and isinstance(thread_id, str) and thread_id.strip():
                         resolution_time_ms = (time.time() - resolution_start_time) * 1000
                         resolution_source = "thread_registry"
-                        logger.info(f"✅ PRIORITY 1 SUCCESS: run_id={run_id} → thread_id={thread_id} via ThreadRunRegistry ({resolution_time_ms:.1f}ms)")
+                        logger.info(f" PASS:  PRIORITY 1 SUCCESS: run_id={run_id}  ->  thread_id={thread_id} via ThreadRunRegistry ({resolution_time_ms:.1f}ms)")
                         self._track_resolution_success(resolution_source, resolution_time_ms)
                         return thread_id
                     elif thread_id is not None:
-                        logger.warning(f"⚠️ PRIORITY 1 INVALID: ThreadRunRegistry returned invalid thread_id: '{thread_id}' for run_id={run_id}")
+                        logger.warning(f" WARNING: [U+FE0F] PRIORITY 1 INVALID: ThreadRunRegistry returned invalid thread_id: '{thread_id}' for run_id={run_id}")
                 except Exception as e:
-                    logger.warning(f"⚠️ PRIORITY 1 EXCEPTION: ThreadRunRegistry lookup failed for run_id={run_id}: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] PRIORITY 1 EXCEPTION: ThreadRunRegistry lookup failed for run_id={run_id}: {e}")
                     self._track_resolution_failure("thread_registry", str(e))
             else:
-                logger.debug(f"⚠️ PRIORITY 1 SKIP: ThreadRunRegistry not available for run_id={run_id}")
+                logger.debug(f" WARNING: [U+FE0F] PRIORITY 1 SKIP: ThreadRunRegistry not available for run_id={run_id}")
             
             # REMOVED: Orchestrator query - using per-request factory patterns
             # Thread resolution is handled per-request through factory methods
@@ -2349,7 +2349,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                             if connection_exists:
                                 resolution_time_ms = (time.time() - resolution_start_time) * 1000
                                 resolution_source = "websocket_manager"
-                                logger.info(f"✅ PRIORITY 3 SUCCESS: run_id={run_id} is valid thread_id with active WebSocket connection ({resolution_time_ms:.1f}ms)")
+                                logger.info(f" PASS:  PRIORITY 3 SUCCESS: run_id={run_id} is valid thread_id with active WebSocket connection ({resolution_time_ms:.1f}ms)")
                                 self._track_resolution_success(resolution_source, resolution_time_ms)
                                 return run_id
                         else:
@@ -2357,14 +2357,14 @@ class AgentWebSocketBridge(MonitorableComponent):
                             if self._is_valid_thread_format(run_id):
                                 resolution_time_ms = (time.time() - resolution_start_time) * 1000
                                 resolution_source = "direct_format"
-                                logger.info(f"✅ PRIORITY 3 SUCCESS: run_id={run_id} is valid thread_id format ({resolution_time_ms:.1f}ms)")
+                                logger.info(f" PASS:  PRIORITY 3 SUCCESS: run_id={run_id} is valid thread_id format ({resolution_time_ms:.1f}ms)")
                                 self._track_resolution_success(resolution_source, resolution_time_ms)
                                 return run_id
                 except Exception as e:
-                    logger.warning(f"⚠️ PRIORITY 3 EXCEPTION: WebSocketManager check failed for run_id={run_id}: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] PRIORITY 3 EXCEPTION: WebSocketManager check failed for run_id={run_id}: {e}")
                     self._track_resolution_failure("websocket_manager", str(e))
             else:
-                logger.debug(f"⚠️ PRIORITY 3 SKIP: WebSocketManager not available for run_id={run_id}")
+                logger.debug(f" WARNING: [U+FE0F] PRIORITY 3 SKIP: WebSocketManager not available for run_id={run_id}")
             
             # PRIORITY 4: Enhanced standardized pattern extraction (QUATERNARY SOURCE)
             # Extract thread_id from standardized run_id patterns with improved reliability
@@ -2373,22 +2373,22 @@ class AgentWebSocketBridge(MonitorableComponent):
                 if extracted_thread_id:
                     resolution_time_ms = (time.time() - resolution_start_time) * 1000
                     resolution_source = "pattern_extraction"
-                    logger.info(f"✅ PRIORITY 4 SUCCESS: run_id={run_id} → thread_id={extracted_thread_id} via pattern extraction ({resolution_time_ms:.1f}ms)")
+                    logger.info(f" PASS:  PRIORITY 4 SUCCESS: run_id={run_id}  ->  thread_id={extracted_thread_id} via pattern extraction ({resolution_time_ms:.1f}ms)")
                     self._track_resolution_success(resolution_source, resolution_time_ms)
                     
                     # OPTIONAL: Register this discovered mapping for future lookups
                     if self._thread_registry:
                         try:
                             await self._thread_registry.register(run_id, extracted_thread_id, {"source": "pattern_extraction"})
-                            logger.debug(f"📝 BACKFILL: Registered pattern-extracted mapping run_id={run_id} → thread_id={extracted_thread_id}")
+                            logger.debug(f"[U+1F4DD] BACKFILL: Registered pattern-extracted mapping run_id={run_id}  ->  thread_id={extracted_thread_id}")
                         except Exception as backfill_error:
-                            logger.debug(f"⚠️ BACKFILL FAILED: Could not register pattern mapping: {backfill_error}")
+                            logger.debug(f" WARNING: [U+FE0F] BACKFILL FAILED: Could not register pattern mapping: {backfill_error}")
                     
                     return extracted_thread_id
                 else:
-                    logger.debug(f"⚠️ PRIORITY 4 NO MATCH: No valid thread pattern found in run_id={run_id}")
+                    logger.debug(f" WARNING: [U+FE0F] PRIORITY 4 NO MATCH: No valid thread pattern found in run_id={run_id}")
             except Exception as e:
-                logger.warning(f"⚠️ PRIORITY 4 EXCEPTION: Pattern extraction failed for run_id={run_id}: {e}")
+                logger.warning(f" WARNING: [U+FE0F] PRIORITY 4 EXCEPTION: Pattern extraction failed for run_id={run_id}: {e}")
                 self._track_resolution_failure("pattern_extraction", str(e))
             
             # PRIORITY 5: ERROR logging and raise exception (NO SILENT FAILURES)
@@ -2407,9 +2407,9 @@ class AgentWebSocketBridge(MonitorableComponent):
             }
             
             # Log comprehensive ERROR with full context
-            logger.error(f"🚨 PRIORITY 5 RESOLUTION FAILURE: Unable to resolve thread_id for run_id={run_id} after trying all 5 priorities")
-            logger.error(f"🚨 RESOLUTION CONTEXT: {error_context}")
-            logger.error(f"🚨 BUSINESS IMPACT: User will not receive WebSocket notifications for run_id={run_id} - this breaks core chat functionality")
+            logger.error(f" ALERT:  PRIORITY 5 RESOLUTION FAILURE: Unable to resolve thread_id for run_id={run_id} after trying all 5 priorities")
+            logger.error(f" ALERT:  RESOLUTION CONTEXT: {error_context}")
+            logger.error(f" ALERT:  BUSINESS IMPACT: User will not receive WebSocket notifications for run_id={run_id} - this breaks core chat functionality")
             
             # Track the failure for metrics and monitoring
             self._track_resolution_failure("complete_failure", f"All 5 priorities failed for run_id={run_id}")
@@ -2423,8 +2423,8 @@ class AgentWebSocketBridge(MonitorableComponent):
         except Exception as e:
             # Catch any unexpected exceptions and wrap them
             resolution_time_ms = (time.time() - resolution_start_time) * 1000
-            logger.error(f"🚨 CRITICAL EXCEPTION: Unexpected exception during thread resolution for run_id={run_id}: {e}")
-            logger.error(f"🚨 RESOLUTION TIME: {resolution_time_ms:.1f}ms before exception")
+            logger.error(f" ALERT:  CRITICAL EXCEPTION: Unexpected exception during thread resolution for run_id={run_id}: {e}")
+            logger.error(f" ALERT:  RESOLUTION TIME: {resolution_time_ms:.1f}ms before exception")
             self._track_resolution_failure("critical_exception", str(e))
             raise ValueError(f"Critical exception during thread resolution for run_id={run_id}: {e}")
     
@@ -2545,18 +2545,18 @@ class AgentWebSocketBridge(MonitorableComponent):
         """
         try:
             if not run_id or not isinstance(run_id, str):
-                logger.debug(f"⚠️ INVALID INPUT: run_id={run_id} is not a valid string")
+                logger.debug(f" WARNING: [U+FE0F] INVALID INPUT: run_id={run_id} is not a valid string")
                 return None
             
             run_id = run_id.strip()
             if not run_id:
-                logger.debug(f"⚠️ EMPTY INPUT: run_id is empty after strip")
+                logger.debug(f" WARNING: [U+FE0F] EMPTY INPUT: run_id is empty after strip")
                 return None
             
             # PRIORITY 1: Handle direct thread format (legacy compatibility)
             # If run_id is already a thread_id format, return it directly
             if run_id.startswith("thread_") and "_run_" not in run_id and self._is_valid_thread_format(run_id):
-                logger.debug(f"✅ DIRECT THREAD FORMAT: run_id={run_id} is already a valid thread_id")
+                logger.debug(f" PASS:  DIRECT THREAD FORMAT: run_id={run_id} is already a valid thread_id")
                 return run_id
             
             # PRIORITY 2: Use UnifiedIDManager for SSOT extraction
@@ -2564,7 +2564,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             try:
                 extracted_thread_id = UnifiedIDManager.extract_thread_id(run_id)
             except NameError as e:
-                logger.critical(f"🚨 CRITICAL: UnifiedIDManager not available: {e}")
+                logger.critical(f" ALERT:  CRITICAL: UnifiedIDManager not available: {e}")
                 # Fallback to legacy extraction pattern
                 return self._legacy_thread_extraction(run_id) if hasattr(self, '_legacy_thread_extraction') else None
             
@@ -2582,7 +2582,7 @@ class AgentWebSocketBridge(MonitorableComponent):
                     format_version = 'unknown'
                 
                 logger.debug(
-                    f"✅ UNIFIED_ID_MANAGER SUCCESS: run_id={run_id} → thread_id={thread_id_with_prefix} "
+                    f" PASS:  UNIFIED_ID_MANAGER SUCCESS: run_id={run_id}  ->  thread_id={thread_id_with_prefix} "
                     f"(format: {format_version}, extracted: {extracted_thread_id})"
                 )
                 
@@ -2591,21 +2591,21 @@ class AgentWebSocketBridge(MonitorableComponent):
                     return thread_id_with_prefix
                 else:
                     logger.warning(
-                        f"⚠️ VALIDATION FAILED: Extracted thread_id '{thread_id_with_prefix}' from run_id='{run_id}' "
+                        f" WARNING: [U+FE0F] VALIDATION FAILED: Extracted thread_id '{thread_id_with_prefix}' from run_id='{run_id}' "
                         f"failed validation (format: {format_version})"
                     )
                     return None
             else:
                 # Log detailed failure information
                 logger.warning(
-                    f"⚠️ UNIFIED_ID_MANAGER FAILED: Could not extract thread_id from run_id='{run_id}'. "
+                    f" WARNING: [U+FE0F] UNIFIED_ID_MANAGER FAILED: Could not extract thread_id from run_id='{run_id}'. "
                     f"This may cause WebSocket routing failure."
                 )
                 return None
             
         except Exception as e:
             logger.error(
-                f"🚨 CRITICAL EXCEPTION: UnifiedIDManager extraction failed for run_id='{run_id}': {e}. "
+                f" ALERT:  CRITICAL EXCEPTION: UnifiedIDManager extraction failed for run_id='{run_id}': {e}. "
                 f"This will cause WebSocket routing failure."
             )
             return None
@@ -2665,12 +2665,12 @@ class AgentWebSocketBridge(MonitorableComponent):
             if self._resolution_metrics['total_resolutions'] % 100 == 0:
                 success_rate = (self._resolution_metrics['successful_resolutions'] / 
                                self._resolution_metrics['total_resolutions'])
-                logger.info(f"📊 RESOLUTION METRICS: {self._resolution_metrics['total_resolutions']} total, "
+                logger.info(f" CHART:  RESOLUTION METRICS: {self._resolution_metrics['total_resolutions']} total, "
                           f"{success_rate:.1%} success rate, "
                           f"{self._resolution_metrics['avg_resolution_time_ms']:.1f}ms avg time")
         
         except Exception as e:
-            logger.warning(f"⚠️ METRICS TRACKING ERROR: Failed to track resolution success: {e}")
+            logger.warning(f" WARNING: [U+FE0F] METRICS TRACKING ERROR: Failed to track resolution success: {e}")
     
     def _track_resolution_failure(self, failure_source: str, error_message: str) -> None:
         """
@@ -2721,17 +2721,17 @@ class AgentWebSocketBridge(MonitorableComponent):
             
             # Log failure metrics for critical issues
             if failure_source == "complete_failure":
-                logger.error("💥 COMPLETE RESOLUTION FAILURE: This is a critical business impact event")
+                logger.error("[U+1F4A5] COMPLETE RESOLUTION FAILURE: This is a critical business impact event")
             
             # Log failure summary periodically
             if self._resolution_metrics['failed_resolutions'] % 10 == 0:
                 failure_rate = (self._resolution_metrics['failed_resolutions'] / 
                                self._resolution_metrics['total_resolutions'])
-                logger.warning(f"📊 RESOLUTION FAILURES: {self._resolution_metrics['failed_resolutions']} failures, "
+                logger.warning(f" CHART:  RESOLUTION FAILURES: {self._resolution_metrics['failed_resolutions']} failures, "
                              f"{failure_rate:.1%} failure rate")
         
         except Exception as e:
-            logger.warning(f"⚠️ METRICS TRACKING ERROR: Failed to track resolution failure: {e}")
+            logger.warning(f" WARNING: [U+FE0F] METRICS TRACKING ERROR: Failed to track resolution failure: {e}")
     
     def get_resolution_metrics(self) -> Dict[str, Any]:
         """
@@ -2773,7 +2773,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             return metrics
             
         except Exception as e:
-            logger.error(f"🚨 Error getting resolution metrics: {e}")
+            logger.error(f" ALERT:  Error getting resolution metrics: {e}")
             return {
                 'error': f'Metrics retrieval failed: {e}',
                 'metrics_available': False,
@@ -2917,9 +2917,9 @@ class AgentWebSocketBridge(MonitorableComponent):
             ssot_enabled = config.ws_config.ssot_consolidation_enabled
             
             if ssot_enabled:
-                logger.info(f"🚀 PHASE 2 ACTIVE: SSOT consolidation enabled for user {user_context.user_id}")
+                logger.info(f"[U+1F680] PHASE 2 ACTIVE: SSOT consolidation enabled for user {user_context.user_id}")
             else:
-                logger.debug(f"📍 PHASE 2 INACTIVE: Using standard emitter for user {user_context.user_id}")
+                logger.debug(f" PIN:  PHASE 2 INACTIVE: Using standard emitter for user {user_context.user_id}")
             
             # Validate user context before creating emitter
             validated_context = validate_user_context(user_context)
@@ -2933,11 +2933,11 @@ class AgentWebSocketBridge(MonitorableComponent):
             
             # PHASE 2 MONITORING: Track emitter creation for race condition metrics
             emitter_type = "ssot_unified" if ssot_enabled else "standard_unified"
-            logger.info(f"✅ USER EMITTER CREATED: {user_context.get_correlation_id()} - type: {emitter_type}, isolated from other users")
+            logger.info(f" PASS:  USER EMITTER CREATED: {user_context.get_correlation_id()} - type: {emitter_type}, isolated from other users")
             return emitter
             
         except Exception as e:
-            logger.error(f"🚨 EMITTER CREATION FAILED: {e}")
+            logger.error(f" ALERT:  EMITTER CREATION FAILED: {e}")
             raise ValueError(f"Failed to create user emitter: {e}")
     
     @classmethod
@@ -2983,7 +2983,7 @@ class AgentWebSocketBridge(MonitorableComponent):
             return await bridge.create_user_emitter(user_context)
             
         except Exception as e:
-            logger.error(f"🚨 EMITTER FROM IDS FAILED: {e}")
+            logger.error(f" ALERT:  EMITTER FROM IDS FAILED: {e}")
             raise ValueError(f"Failed to create user emitter from IDs: {e}")
     
     @staticmethod
@@ -3473,7 +3473,7 @@ class WebSocketNotifier:
             }
             
             # Log critical alert
-            logger.critical(f"🚨 CRITICAL EVENT FAILURE: {alert_message}")
+            logger.critical(f" ALERT:  CRITICAL EVENT FAILURE: {alert_message}")
             
             # TODO: In production, send to monitoring system
             # await monitoring_system.send_alert(alert_message)

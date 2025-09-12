@@ -620,7 +620,7 @@ class TestWebSocketRaceConditionsGoldenPath(SSotAsyncTestCase):
         
         # Report race condition failures
         if self.race_condition_failures:
-            print(f"\n🚨 GOLDEN PATH RACE CONDITION FAILURES: {len(self.race_condition_failures)}")
+            print(f"\n ALERT:  GOLDEN PATH RACE CONDITION FAILURES: {len(self.race_condition_failures)}")
             for failure in self.race_condition_failures:
                 print(f"  - {failure['failure_type']}: {failure['details']}")
             
@@ -629,14 +629,14 @@ class TestWebSocketRaceConditionsGoldenPath(SSotAsyncTestCase):
         
         # Report business value metrics
         if self.business_value_metrics:
-            print(f"\n📈 BUSINESS VALUE METRICS:")
+            print(f"\n[U+1F4C8] BUSINESS VALUE METRICS:")
             for metric in self.business_value_metrics:
                 print(f"  - {metric['metric_type']}: {metric['value']}")
         
         # Report chat session summary
         if self.chat_sessions:
             successful_sessions = sum(1 for s in self.chat_sessions if s.get("business_value_delivered", False))
-            print(f"\n💬 CHAT SESSION SUMMARY:")
+            print(f"\n[U+1F4AC] CHAT SESSION SUMMARY:")
             print(f"  - Total sessions: {len(self.chat_sessions)}")
             print(f"  - Successful sessions: {successful_sessions}")
             print(f"  - Success rate: {successful_sessions/len(self.chat_sessions):.1%}")

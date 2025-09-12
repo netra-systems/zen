@@ -177,16 +177,16 @@ if __name__ == "__main__":
     for test in tests:
         try:
             test()
-            print(f"✅ {test.__name__}")
+            print(f" PASS:  {test.__name__}")
             passed += 1
         except Exception as e:
-            print(f"❌ {test.__name__}: {e}")
+            print(f" FAIL:  {test.__name__}: {e}")
             failed += 1
     
     print(f"\n{'='*50}")
     print(f"Test Results: {passed} passed, {failed} failed")
     
     if failed == 0:
-        print("✨ All tests passed! ErrorContext trace_id issue is fixed.")
+        print("[U+2728] All tests passed! ErrorContext trace_id issue is fixed.")
     else:
-        print("⚠️ Some tests failed. Please review the errors above.")
+        print(" WARNING: [U+FE0F] Some tests failed. Please review the errors above.")

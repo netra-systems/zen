@@ -522,7 +522,7 @@ async def main():
             scenario["connection_id"]
         )
         
-        print(f"  Result: {'✅ Success' if result.success else '❌ Failed'}")
+        print(f"  Result: {' PASS:  Success' if result.success else ' FAIL:  Failed'}")
         if result.error_message:
             print(f"  Error: {result.error_message}")
         print(f"  Response time: {result.response_time_ms:.1f}ms")

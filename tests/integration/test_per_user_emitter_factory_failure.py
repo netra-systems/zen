@@ -90,7 +90,7 @@ class TestPerUserEmitterFactoryFailure(BaseIntegrationTest):
             # Configure factory - this can fail due to SSOT validation
             try:
                 websocket_factory.configure()
-                logger.info("✓ WebSocket factory configuration succeeded")
+                logger.info("[U+2713] WebSocket factory configuration succeeded")
             except Exception as e:
                 factory_failures.append(f"Factory configuration failed: {e}")
                 pytest.fail(
@@ -118,7 +118,7 @@ class TestPerUserEmitterFactoryFailure(BaseIntegrationTest):
                         continue
                     
                     created_emitters[user_id] = user_emitter
-                    logger.info(f"✓ Created emitter for user {user_id}")
+                    logger.info(f"[U+2713] Created emitter for user {user_id}")
                     
                     # CRITICAL VALIDATION: Each emitter should be unique and isolated
                     assert hasattr(user_emitter, 'user_id'), (
@@ -314,7 +314,7 @@ class TestPerUserEmitterFactoryFailure(BaseIntegrationTest):
                     "Agent registry should not be initialized before configure()"
                 )
                 
-                logger.info("✓ Pre-configuration state correct")
+                logger.info("[U+2713] Pre-configuration state correct")
                 
             except Exception as e:
                 dependency_failures.append(f"Pre-configuration validation failed: {e}")
@@ -322,7 +322,7 @@ class TestPerUserEmitterFactoryFailure(BaseIntegrationTest):
             # Step 2: Test configuration process
             try:
                 websocket_factory.configure()
-                logger.info("✓ Factory configuration completed")
+                logger.info("[U+2713] Factory configuration completed")
             except Exception as e:
                 dependency_failures.append(f"Factory configuration failed: {e}")
                 pytest.fail(
@@ -350,7 +350,7 @@ class TestPerUserEmitterFactoryFailure(BaseIntegrationTest):
                         f"Dependency is None: {description} ({attr_name})"
                     )
                     
-                    logger.info(f"✓ {description} available")
+                    logger.info(f"[U+2713] {description} available")
                     
                 except Exception as e:
                     dependency_failures.append(f"{description} dependency failed: {e}")
@@ -366,7 +366,7 @@ class TestPerUserEmitterFactoryFailure(BaseIntegrationTest):
                 if user_emitter is None:
                     dependency_failures.append("create_user_emitter returned None despite available dependencies")
                 else:
-                    logger.info("✓ User emitter created with full dependency chain")
+                    logger.info("[U+2713] User emitter created with full dependency chain")
                     
             except Exception as e:
                 dependency_failures.append(f"User emitter creation failed with dependencies: {e}")

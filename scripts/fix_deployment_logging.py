@@ -27,7 +27,7 @@ class DeploymentLoggingFixer:
         
     def run(self) -> bool:
         """Run all deployment logging fixes."""
-        print("🔍 Analyzing deployment logging configuration...")
+        print(" SEARCH:  Analyzing deployment logging configuration...")
         
         # Step 1: Check current state
         if not self.analyze_current_state():
@@ -35,7 +35,7 @@ class DeploymentLoggingFixer:
             
         # Step 2: Apply fixes
         if self.issues_found:
-            print(f"\n⚠️  Found {len(self.issues_found)} issues to fix")
+            print(f"\n WARNING: [U+FE0F]  Found {len(self.issues_found)} issues to fix")
             if not self.apply_fixes():
                 return False
         
@@ -43,12 +43,12 @@ class DeploymentLoggingFixer:
         if not self.validate_deployment():
             return False
             
-        print("\n✅ Deployment logging configuration fixed successfully!")
+        print("\n PASS:  Deployment logging configuration fixed successfully!")
         return True
     
     def analyze_current_state(self) -> bool:
         """Analyze current logging configuration state."""
-        print("\n📊 Checking logging configuration...")
+        print("\n CHART:  Checking logging configuration...")
         
         # Check if shared logging exists
         shared_logging = self.project_root / "shared" / "logging"
@@ -121,7 +121,7 @@ class DeploymentLoggingFixer:
     
     def apply_fixes(self) -> bool:
         """Apply fixes for identified issues."""
-        print("\n🔧 Applying fixes...")
+        print("\n[U+1F527] Applying fixes...")
         
         for issue in self.issues_found:
             if issue['type'] == 'missing_shared_copy':
@@ -129,7 +129,7 @@ class DeploymentLoggingFixer:
                     return False
                     
             elif issue['type'] == 'old_imports':
-                print(f"  ⚠️  Manual fix needed: Update {issue['count']} files to use shared logging")
+                print(f"   WARNING: [U+FE0F]  Manual fix needed: Update {issue['count']} files to use shared logging")
                 self.fixes_applied.append({
                     'type': 'manual_required',
                     'description': 'Update imports to use shared.logging.unified_logger_factory'
@@ -150,7 +150,7 @@ class DeploymentLoggingFixer:
             
             # Check if already has shared copy
             if "COPY shared/ ./shared/" in content:
-                print(f"  ✓ {dockerfile} already copies shared directory")
+                print(f"  [U+2713] {dockerfile} already copies shared directory")
                 return True
             
             # Find where to insert the COPY command
@@ -173,18 +173,18 @@ class DeploymentLoggingFixer:
             if insert_index != -1:
                 lines.insert(insert_index, 'COPY shared/ ./shared/')
                 file_path.write_text('\n'.join(lines))
-                print(f"  ✓ Fixed {dockerfile} to copy shared directory")
+                print(f"  [U+2713] Fixed {dockerfile} to copy shared directory")
                 self.fixes_applied.append({
                     'type': 'dockerfile_fixed',
                     'file': dockerfile
                 })
                 return True
             else:
-                print(f"  ❌ Could not fix {dockerfile} - manual intervention needed")
+                print(f"   FAIL:  Could not fix {dockerfile} - manual intervention needed")
                 return False
                 
         except Exception as e:
-            print(f"  ❌ Error fixing {dockerfile}: {e}")
+            print(f"   FAIL:  Error fixing {dockerfile}: {e}")
             return False
     
     def fix_requirements(self, service: str, dependency: str) -> bool:
@@ -196,7 +196,7 @@ class DeploymentLoggingFixer:
             
             # Check if already has dependency
             if dependency.lower() in content.lower():
-                print(f"  ✓ {service} already has {dependency}")
+                print(f"  [U+2713] {service} already has {dependency}")
                 return True
             
             # Add dependency
@@ -207,7 +207,7 @@ class DeploymentLoggingFixer:
             lines.sort()
             
             req_path.write_text('\n'.join(lines) + '\n')
-            print(f"  ✓ Added {dependency} to {service}/requirements.txt")
+            print(f"  [U+2713] Added {dependency} to {service}/requirements.txt")
             self.fixes_applied.append({
                 'type': 'dependency_added',
                 'service': service,
@@ -216,12 +216,12 @@ class DeploymentLoggingFixer:
             return True
             
         except Exception as e:
-            print(f"  ❌ Error fixing requirements for {service}: {e}")
+            print(f"   FAIL:  Error fixing requirements for {service}: {e}")
             return False
     
     def validate_deployment(self) -> bool:
         """Validate deployment configuration is ready."""
-        print("\n🔍 Validating deployment configuration...")
+        print("\n SEARCH:  Validating deployment configuration...")
         
         validations = [
             self.validate_docker_builds(),
@@ -242,10 +242,10 @@ class DeploymentLoggingFixer:
             if file_path.exists():
                 content = file_path.read_text()
                 if "COPY shared/" not in content:
-                    print(f"    ❌ {dockerfile} missing shared directory copy")
+                    print(f"     FAIL:  {dockerfile} missing shared directory copy")
                     return False
         
-        print("    ✓ All Dockerfiles configured correctly")
+        print("    [U+2713] All Dockerfiles configured correctly")
         return True
     
     def validate_shared_imports(self) -> bool:
@@ -257,10 +257,10 @@ class DeploymentLoggingFixer:
         try:
             # Try importing shared logging
             from shared.logging.unified_logger_factory import get_logger
-            print("    ✓ Shared logging imports successfully")
+            print("    [U+2713] Shared logging imports successfully")
             return True
         except ImportError as e:
-            print(f"    ❌ Cannot import shared logging: {e}")
+            print(f"     FAIL:  Cannot import shared logging: {e}")
             return False
     
     def validate_environment_vars(self) -> bool:
@@ -280,9 +280,9 @@ class DeploymentLoggingFixer:
                     missing.append(var)
             
             if missing:
-                print(f"    ⚠️  Deployment script may need {', '.join(missing)} environment variables")
+                print(f"     WARNING: [U+FE0F]  Deployment script may need {', '.join(missing)} environment variables")
             else:
-                print("    ✓ Environment variables configured")
+                print("    [U+2713] Environment variables configured")
         
         return True
     
@@ -328,17 +328,17 @@ def main():
         report = fixer.generate_report()
         report_path = fixer.project_root / "DEPLOYMENT_LOGGING_REPORT.md"
         report_path.write_text(report)
-        print(f"\n📄 Report saved to: {report_path}")
+        print(f"\n[U+1F4C4] Report saved to: {report_path}")
         
         if not success:
-            print("\n❌ Deployment logging configuration has issues that need manual fixes")
+            print("\n FAIL:  Deployment logging configuration has issues that need manual fixes")
             sys.exit(1)
         else:
-            print("\n✅ Deployment logging configuration is ready!")
+            print("\n PASS:  Deployment logging configuration is ready!")
             sys.exit(0)
             
     except Exception as e:
-        print(f"\n❌ Error: {e}")
+        print(f"\n FAIL:  Error: {e}")
         sys.exit(1)
 
 

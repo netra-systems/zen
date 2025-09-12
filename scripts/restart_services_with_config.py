@@ -18,14 +18,14 @@ from pathlib import Path
 
 def main():
     """Main function to restart services with correct configuration."""
-    print("🔄 Restarting Netra Services with Configuration Fixes")
+    print(" CYCLE:  Restarting Netra Services with Configuration Fixes")
     print("=" * 60)
     
     project_root = Path(__file__).parent
     
     try:
         # Step 1: Apply configuration fixes
-        print("📋 Step 1: Applying configuration fixes...")
+        print("[U+1F4CB] Step 1: Applying configuration fixes...")
         fix_config_script = project_root / "fix_integration_config.py"
         
         if fix_config_script.exists():
@@ -34,14 +34,14 @@ def main():
             ], cwd=project_root)
             
             if result.returncode == 0:
-                print("✅ Configuration fixes applied successfully")
+                print(" PASS:  Configuration fixes applied successfully")
             else:
-                print("⚠️  Configuration fixes had issues but continuing...")
+                print(" WARNING: [U+FE0F]  Configuration fixes had issues but continuing...")
         else:
-            print("⚠️  Configuration fix script not found, skipping...")
+            print(" WARNING: [U+FE0F]  Configuration fix script not found, skipping...")
         
         # Step 2: Restart services using dev launcher
-        print("\n🚀 Step 2: Starting services with dev launcher...")
+        print("\n[U+1F680] Step 2: Starting services with dev launcher...")
         dev_launcher_path = project_root / "scripts" / "dev_launcher.py"
         
         if dev_launcher_path.exists():
@@ -51,20 +51,20 @@ def main():
             ], cwd=project_root)
             
             if result.returncode == 0:
-                print("✅ Services started successfully")
+                print(" PASS:  Services started successfully")
             else:
-                print(f"❌ Dev launcher failed with code {result.returncode}")
+                print(f" FAIL:  Dev launcher failed with code {result.returncode}")
                 return False
         else:
-            print(f"❌ Dev launcher not found at {dev_launcher_path}")
+            print(f" FAIL:  Dev launcher not found at {dev_launcher_path}")
             return False
         
         # Step 3: Wait for services to initialize
-        print("\n⏳ Step 3: Waiting for services to initialize...")
+        print("\n[U+23F3] Step 3: Waiting for services to initialize...")
         time.sleep(5)
         
         # Step 4: Run integration tests
-        print("\n🧪 Step 4: Running integration tests...")
+        print("\n[U+1F9EA] Step 4: Running integration tests...")
         integration_test_script = project_root / "integration_test.py"
         
         if integration_test_script.exists():
@@ -73,31 +73,31 @@ def main():
             ], cwd=project_root)
             
             if result.returncode == 0:
-                print("✅ Integration tests passed")
-                print("\n🎉 All services are running and integrated successfully!")
+                print(" PASS:  Integration tests passed")
+                print("\n CELEBRATION:  All services are running and integrated successfully!")
                 return True
             else:
-                print("⚠️  Integration tests found issues, but services are running")
+                print(" WARNING: [U+FE0F]  Integration tests found issues, but services are running")
                 print("Check the integration test results for details")
                 return True
         else:
-            print("⚠️  Integration test script not found, skipping validation...")
+            print(" WARNING: [U+FE0F]  Integration test script not found, skipping validation...")
             print("Services should be running - check manually")
             return True
             
     except Exception as e:
-        print(f"\n💥 Service restart failed: {e}")
+        print(f"\n[U+1F4A5] Service restart failed: {e}")
         return False
 
 def print_usage_instructions():
     """Print usage instructions for the user."""
-    print("\n📋 USAGE INSTRUCTIONS:")
+    print("\n[U+1F4CB] USAGE INSTRUCTIONS:")
     print("=" * 40)
     print("1. Frontend: http://localhost:3000")
     print("2. Backend API: http://localhost:8000")  
     print("3. Auth Service: http://localhost:8082 (or check service discovery)")
     print("4. WebSocket: ws://localhost:8000/ws")
-    print("\n🔧 TROUBLESHOOTING:")
+    print("\n[U+1F527] TROUBLESHOOTING:")
     print("- If auth service is on a different port, check service discovery files")
     print("- Run integration_test.py to validate all connections")
     print("- Check individual service logs in dev_launcher output")

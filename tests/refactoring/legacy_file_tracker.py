@@ -266,9 +266,9 @@ class LegacyFileTracker:
         }
         
         if verification['all_removed']:
-            logger.success("✓ All legacy files successfully removed!")
+            logger.success("[U+2713] All legacy files successfully removed!")
         else:
-            logger.error(f"✗ {verification['total_remaining']} legacy files still remain")
+            logger.error(f"[U+2717] {verification['total_remaining']} legacy files still remain")
             
         return verification
         

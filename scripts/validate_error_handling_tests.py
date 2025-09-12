@@ -133,15 +133,15 @@ def validate_business_value_justifications():
                 missing_bvj.append(pattern)
         
         if missing_bvj:
-            print(f"⚠️  {file_path} missing BVJ patterns: {missing_bvj}")
+            print(f" WARNING: [U+FE0F]  {file_path} missing BVJ patterns: {missing_bvj}")
         else:
-            print(f"✅ {file_path} has proper Business Value Justifications")
+            print(f" PASS:  {file_path} has proper Business Value Justifications")
     
     return True
 
 def validate_error_scenarios():
     """Validate comprehensive error scenario coverage."""
-    print("🔍 Validating Error Scenario Coverage...")
+    print(" SEARCH:  Validating Error Scenario Coverage...")
     
     # Check unit tests cover key error patterns
     unit_file = project_root / "netra_backend/tests/unit/error_handling/test_comprehensive_error_handling_unit.py"
@@ -159,9 +159,9 @@ def validate_error_scenarios():
     
     for scenario in unit_scenarios:
         if scenario not in unit_content:
-            print(f"⚠️  Unit tests missing scenario: {scenario}")
+            print(f" WARNING: [U+FE0F]  Unit tests missing scenario: {scenario}")
         else:
-            print(f"✅ Unit tests include: {scenario}")
+            print(f" PASS:  Unit tests include: {scenario}")
     
     # Check integration tests cover service interactions
     integration_file = project_root / "netra_backend/tests/integration/error_handling/test_comprehensive_error_handling_integration.py"
@@ -178,9 +178,9 @@ def validate_error_scenarios():
     
     for scenario in integration_scenarios:
         if scenario not in integration_content:
-            print(f"⚠️  Integration tests missing scenario: {scenario}")
+            print(f" WARNING: [U+FE0F]  Integration tests missing scenario: {scenario}")
         else:
-            print(f"✅ Integration tests include: {scenario}")
+            print(f" PASS:  Integration tests include: {scenario}")
     
     # Check E2E tests cover customer experience
     e2e_file = project_root / "tests/e2e/error_handling/test_comprehensive_error_handling_e2e.py"
@@ -195,15 +195,15 @@ def validate_error_scenarios():
     
     for scenario in e2e_scenarios:
         if scenario not in e2e_content:
-            print(f"⚠️  E2E tests missing scenario: {scenario}")
+            print(f" WARNING: [U+FE0F]  E2E tests missing scenario: {scenario}")
         else:
-            print(f"✅ E2E tests include: {scenario}")
+            print(f" PASS:  E2E tests include: {scenario}")
     
     return True
 
 def main():
     """Main validation function."""
-    print("🚀 Comprehensive Error Handling Test Validation")
+    print("[U+1F680] Comprehensive Error Handling Test Validation")
     print("=" * 50)
     
     validations = [
@@ -221,22 +221,22 @@ def main():
             if not result:
                 all_passed = False
         except Exception as e:
-            print(f"❌ Validation failed: {e}")
+            print(f" FAIL:  Validation failed: {e}")
             all_passed = False
         print()  # Add spacing between validations
     
     print("=" * 50)
     if all_passed:
-        print("✅ ALL VALIDATIONS PASSED")
-        print("\n🎯 COMPREHENSIVE ERROR HANDLING TEST SUITE READY:")
-        print("   • Unit Tests: Error boundaries, message clarity, graceful degradation")
-        print("   • Integration Tests: Real service error recovery and propagation") 
-        print("   • E2E Tests: Complete customer error experience with authentication")
-        print("   • SSOT Compliance: All tests follow CLAUDE.md guidelines")
-        print("   • Business Value: All tests justify customer and revenue impact")
+        print(" PASS:  ALL VALIDATIONS PASSED")
+        print("\n TARGET:  COMPREHENSIVE ERROR HANDLING TEST SUITE READY:")
+        print("   [U+2022] Unit Tests: Error boundaries, message clarity, graceful degradation")
+        print("   [U+2022] Integration Tests: Real service error recovery and propagation") 
+        print("   [U+2022] E2E Tests: Complete customer error experience with authentication")
+        print("   [U+2022] SSOT Compliance: All tests follow CLAUDE.md guidelines")
+        print("   [U+2022] Business Value: All tests justify customer and revenue impact")
         return 0
     else:
-        print("❌ SOME VALIDATIONS FAILED")
+        print(" FAIL:  SOME VALIDATIONS FAILED")
         print("Please review the issues above and fix before deployment.")
         return 1
 

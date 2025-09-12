@@ -5,7 +5,7 @@ This module tests for race conditions in UserExecutionContext creation and manag
 Validates that user contexts remain properly isolated under concurrent load.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) 
+- Segment: ALL (Free  ->  Enterprise) 
 - Business Goal: Ensure complete user data isolation and prevent data leakage
 - Value Impact: Guarantees user privacy and prevents cross-user contamination
 - Strategic Impact: CRITICAL - Multi-user isolation is fundamental security requirement
@@ -281,7 +281,7 @@ class TestUserContextIsolationRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ 100 concurrent context creations completed successfully in {creation_time:.2f}s. "
+            f" PASS:  100 concurrent context creations completed successfully in {creation_time:.2f}s. "
             f"Success rate: {successful_creations}/100, Isolation valid: {isolation_valid_count}/100, "
             f"ID collisions: {len(self.id_collisions)}, Isolation violations: {len(self.isolation_violations)}"
         )
@@ -395,7 +395,7 @@ class TestUserContextIsolationRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ User data isolation test passed: 5 users × 10 contexts = {len(all_contexts)} total contexts. "
+            f" PASS:  User data isolation test passed: 5 users  x  10 contexts = {len(all_contexts)} total contexts. "
             f"All contexts properly isolated with unique IDs."
         )
     
@@ -494,7 +494,7 @@ class TestUserContextIsolationRaces(SSotBaseTestCase):
                 raise AssertionError(f"Factory-created context failed isolation check: {e}")
         
         logger.info(
-            f"✅ Context factory concurrent access test passed: "
+            f" PASS:  Context factory concurrent access test passed: "
             f"{successful_batches}/20 successful batches, {len(all_factory_contexts)} total contexts, "
             f"all with unique IDs and proper isolation."
         )
@@ -559,7 +559,7 @@ class TestUserContextIsolationRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ Memory leak detection test passed: "
+            f" PASS:  Memory leak detection test passed: "
             f"{total_created} contexts created, {len(live_refs)} still live "
             f"(within acceptable range of <= {max_allowed_live})"
         )
@@ -641,7 +641,7 @@ class TestUserContextIsolationRaces(SSotBaseTestCase):
         )
         
         logger.info(
-            f"✅ ID generation collision test passed: "
+            f" PASS:  ID generation collision test passed: "
             f"{successful_batches}/15 successful batches, "
             f"all {len(generated_ids['request_ids'])} IDs unique across all types."
         )

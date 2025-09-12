@@ -84,7 +84,7 @@ class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
         canonical_router = self._get_canonical_router_signature()
         if not canonical_router:
             self.fail(
-                f"❌ CANONICAL ROUTER MISSING: {self.canonical_path} does not contain "
+                f" FAIL:  CANONICAL ROUTER MISSING: {self.canonical_path} does not contain "
                 f"MessageRouter class. Golden Path chat functionality requires canonical router."
             )
         
@@ -102,7 +102,7 @@ class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
             violation_summary = self._format_duplicate_violations(duplicate_analysis)
             
             self.fail(
-                f"❌ DUPLICATE ROUTER DETECTION: {len(duplicates)} potential MessageRouter "
+                f" FAIL:  DUPLICATE ROUTER DETECTION: {len(duplicates)} potential MessageRouter "
                 f"duplicates detected.\n"
                 f"BUSINESS IMPACT: Multiple routers cause WebSocket race conditions, "
                 f"connection conflicts, and chat functionality failures.\n"
@@ -110,7 +110,7 @@ class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
                 f"DETECTED DUPLICATES:\n{violation_summary}"
             )
         
-        self.logger.info("✅ No duplicate MessageRouter implementations detected")
+        self.logger.info(" PASS:  No duplicate MessageRouter implementations detected")
 
     def test_canonical_router_signature_stability(self):
         """Test that canonical MessageRouter maintains stable signature.
@@ -131,7 +131,7 @@ class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
             if signature_changes['breaking_changes']:
                 breaking_summary = self._format_breaking_changes(signature_changes)
                 self.fail(
-                    f"❌ BREAKING SIGNATURE CHANGES: Canonical MessageRouter signature "
+                    f" FAIL:  BREAKING SIGNATURE CHANGES: Canonical MessageRouter signature "
                     f"has breaking changes that may affect existing consumers.\n"
                     f"BUSINESS IMPACT: Breaking changes cause runtime errors in "
                     f"WebSocket message processing, disrupting chat functionality.\n"
@@ -144,7 +144,7 @@ class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
         
         # Save current signature as new baseline
         self._save_baseline_signature(canonical_router)
-        self.logger.info("✅ MessageRouter signature is stable")
+        self.logger.info(" PASS:  MessageRouter signature is stable")
 
     def test_router_naming_convention_compliance(self):
         """Test that router-like classes follow naming conventions.
@@ -167,14 +167,14 @@ class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
         if naming_violations:
             naming_summary = self._format_naming_violations(naming_violations)
             self.fail(
-                f"❌ NAMING CONVENTION VIOLATIONS: {len(naming_violations)} router classes "
+                f" FAIL:  NAMING CONVENTION VIOLATIONS: {len(naming_violations)} router classes "
                 f"violate naming conventions.\n"
                 f"BUSINESS IMPACT: Poor naming makes code harder to understand and maintain, "
                 f"increasing risk of bugs in chat functionality.\n"
                 f"VIOLATIONS:\n{naming_summary}"
             )
         
-        self.logger.info("✅ All router classes follow naming conventions")
+        self.logger.info(" PASS:  All router classes follow naming conventions")
 
     def test_router_complexity_within_limits(self):
         """Test that router implementations stay within complexity limits.
@@ -210,14 +210,14 @@ class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
         if complexity_violations:
             complexity_summary = self._format_complexity_violations(complexity_violations)
             self.fail(
-                f"❌ COMPLEXITY VIOLATIONS: {len(complexity_violations)} router classes "
+                f" FAIL:  COMPLEXITY VIOLATIONS: {len(complexity_violations)} router classes "
                 f"exceed complexity limits.\n"
                 f"BUSINESS IMPACT: Overly complex routers are harder to maintain and "
                 f"more likely to contain bugs that break chat functionality.\n"
                 f"VIOLATIONS:\n{complexity_summary}"
             )
         
-        self.logger.info("✅ All router classes maintain reasonable complexity")
+        self.logger.info(" PASS:  All router classes maintain reasonable complexity")
 
     def test_automated_duplicate_detection_system_health(self):
         """Test that the duplicate detection system itself is working correctly.
@@ -262,14 +262,14 @@ class TestMessageRouterDuplicateDetection(SSotBaseTestCase, unittest.TestCase):
         if test_results['error_count'] > 0:
             system_summary = self._format_system_health_issues(test_results)
             self.fail(
-                f"❌ DETECTION SYSTEM ISSUES: {test_results['error_count']} problems "
+                f" FAIL:  DETECTION SYSTEM ISSUES: {test_results['error_count']} problems "
                 f"found in automated duplicate detection system.\n"
                 f"BUSINESS IMPACT: Broken detection allows duplicate routers to be "
                 f"created unnoticed, risking chat functionality failures.\n"
                 f"SYSTEM ISSUES:\n{system_summary}"
             )
         
-        self.logger.info("✅ Automated duplicate detection system is healthy")
+        self.logger.info(" PASS:  Automated duplicate detection system is healthy")
 
     def _get_canonical_router_signature(self) -> Optional[RouterSignature]:
         """Get signature of the canonical MessageRouter implementation."""

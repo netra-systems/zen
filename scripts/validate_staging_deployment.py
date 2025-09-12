@@ -79,7 +79,7 @@ class StagingValidator:
         # First run comprehensive validation if available
         comprehensive_passed = True
         if use_comprehensive and HAS_COMPREHENSIVE_VALIDATOR:
-            print("🔍 COMPREHENSIVE VALIDATION FRAMEWORK")
+            print(" SEARCH:  COMPREHENSIVE VALIDATION FRAMEWORK")
             print("=" * 60)
             
             # Set environment to staging for validation
@@ -98,7 +98,7 @@ class StagingValidator:
                 comprehensive_passed = report["overall_status"] in ["passed", "warning"]
                 
             except Exception as e:
-                print(f"❌ COMPREHENSIVE VALIDATION ERROR: {e}")
+                print(f" FAIL:  COMPREHENSIVE VALIDATION ERROR: {e}")
                 if verbose:
                     import traceback
                     print(traceback.format_exc())
@@ -111,7 +111,7 @@ class StagingValidator:
                     del os.environ["ENVIRONMENT"]
         
         # Run GCP-specific validation checks
-        print("\n🔍 GCP STAGING DEPLOYMENT VALIDATION")
+        print("\n SEARCH:  GCP STAGING DEPLOYMENT VALIDATION")
         print("=" * 50)
         
         checks = [
@@ -133,48 +133,48 @@ class StagingValidator:
         results = []
         
         for check_name, check_func in checks:
-            print(f"\n🔍 {check_name}...")
+            print(f"\n SEARCH:  {check_name}...")
             try:
                 success, message = check_func()
-                status = "✅ PASS" if success else "❌ FAIL" 
+                status = " PASS:  PASS" if success else " FAIL:  FAIL" 
                 print(f"   {status}: {message}")
                 results.append((check_name, success, message))
                 if not success:
                     gcp_passed = False
             except Exception as e:
                 error_msg = str(e) if not verbose else f"{e}\n{traceback.format_exc() if 'traceback' in sys.modules else ''}"
-                print(f"   ❌ ERROR: {error_msg}")
+                print(f"    FAIL:  ERROR: {error_msg}")
                 results.append((check_name, False, error_msg))
                 gcp_passed = False
                 
         print("\n" + "=" * 50)
-        print("📋 GCP VALIDATION SUMMARY")
+        print("[U+1F4CB] GCP VALIDATION SUMMARY")
         print("=" * 50)
         
         for check_name, success, message in results:
-            status = "✅" if success else "❌"
+            status = " PASS: " if success else " FAIL: "
             print(f"{status} {check_name}")
             if not success:
-                print(f"   → {message}")
+                print(f"    ->  {message}")
         
         # Combined results
         all_passed = comprehensive_passed and gcp_passed
         
         print("\n" + "=" * 60)
-        print("🎯 OVERALL DEPLOYMENT READINESS")
+        print(" TARGET:  OVERALL DEPLOYMENT READINESS")
         print("=" * 60)
         
-        comp_status = "✅ PASS" if comprehensive_passed else "❌ FAIL"
-        gcp_status = "✅ PASS" if gcp_passed else "❌ FAIL"
+        comp_status = " PASS:  PASS" if comprehensive_passed else " FAIL:  FAIL"
+        gcp_status = " PASS:  PASS" if gcp_passed else " FAIL:  FAIL"
         
         print(f"Comprehensive Validation: {comp_status}")
         print(f"GCP-Specific Validation: {gcp_status}")
         
         if all_passed:
-            print(f"\n🎉 ALL VALIDATIONS PASSED - Ready for deployment!")
+            print(f"\n CELEBRATION:  ALL VALIDATIONS PASSED - Ready for deployment!")
             print(f"Deploy with: python scripts/deploy_to_gcp.py --project {self.project_id} --build-local --run-checks")
         else:
-            print(f"\n🚨 VALIDATION FAILED - Fix issues before deployment!")
+            print(f"\n ALERT:  VALIDATION FAILED - Fix issues before deployment!")
             if not comprehensive_passed:
                 print("   - Fix comprehensive validation issues first")
             if not gcp_passed:

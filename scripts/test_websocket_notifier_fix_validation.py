@@ -4,7 +4,7 @@ WebSocketNotifier Factory Method Fix Validation
 ===============================================
 
 Validates that the SSOT-compliant fix enables Golden Path functionality:
-- Users login → get AI responses 
+- Users login  ->  get AI responses 
 - WebSocket events deliver all 5 critical events
 - Factory method works correctly with user isolation
 - No breaking changes to existing functionality
@@ -29,7 +29,7 @@ class GoldenPathValidation:
     
     def run_all_validations(self) -> Dict[str, Any]:
         """Run comprehensive validation suite."""
-        print("🚀 VALIDATING WEBSOCKET NOTIFIER FIX FOR GOLDEN PATH")
+        print("[U+1F680] VALIDATING WEBSOCKET NOTIFIER FIX FOR GOLDEN PATH")
         print("=" * 60)
         
         validations = [
@@ -43,15 +43,15 @@ class GoldenPathValidation:
         
         for test_name, test_func in validations:
             try:
-                print(f"\n📋 Testing: {test_name}")
+                print(f"\n[U+1F4CB] Testing: {test_name}")
                 result = test_func()
                 self.results[test_name] = {"status": "PASS", "details": result}
-                print(f"✅ {test_name}: PASSED")
+                print(f" PASS:  {test_name}: PASSED")
             except Exception as e:
                 error_msg = f"{test_name} failed: {str(e)}"
                 self.results[test_name] = {"status": "FAIL", "error": error_msg}
                 self.errors.append(error_msg)
-                print(f"❌ {test_name}: FAILED - {str(e)}")
+                print(f" FAIL:  {test_name}: FAILED - {str(e)}")
                 # Print traceback for debugging
                 traceback.print_exc()
         
@@ -227,20 +227,20 @@ class GoldenPathValidation:
         }
         
         print("\n" + "=" * 60)
-        print("🎯 GOLDEN PATH VALIDATION REPORT")
+        print(" TARGET:  GOLDEN PATH VALIDATION REPORT")
         print("=" * 60)
-        print(f"📊 Tests Run: {total_tests}")
-        print(f"✅ Passed: {passed_tests}")
-        print(f"❌ Failed: {failed_tests}")
-        print(f"📈 Success Rate: {report['summary']['success_rate']}")
+        print(f" CHART:  Tests Run: {total_tests}")
+        print(f" PASS:  Passed: {passed_tests}")
+        print(f" FAIL:  Failed: {failed_tests}")
+        print(f"[U+1F4C8] Success Rate: {report['summary']['success_rate']}")
         
         if report['summary']['golden_path_enabled']:
-            print("\n🚀 GOLDEN PATH ENABLED: Users can login → receive AI responses")
-            print("💰 BUSINESS IMPACT: $80K+ MRR protected")
-            print("🎉 WebSocket event delivery working for all 5 critical events")
+            print("\n[U+1F680] GOLDEN PATH ENABLED: Users can login  ->  receive AI responses")
+            print("[U+1F4B0] BUSINESS IMPACT: $80K+ MRR protected")
+            print(" CELEBRATION:  WebSocket event delivery working for all 5 critical events")
         else:
-            print("\n🚨 GOLDEN PATH BLOCKED: Fix incomplete")
-            print("💸 BUSINESS RISK: $80K+ MRR at risk")
+            print("\n ALERT:  GOLDEN PATH BLOCKED: Fix incomplete")
+            print("[U+1F4B8] BUSINESS RISK: $80K+ MRR at risk")
             for error in self.errors:
                 print(f"   - {error}")
         
@@ -254,10 +254,10 @@ def main():
     
     # Return appropriate exit code
     if report['summary']['golden_path_enabled']:
-        print("\n✅ ALL VALIDATIONS PASSED - Golden Path functionality restored")
+        print("\n PASS:  ALL VALIDATIONS PASSED - Golden Path functionality restored")
         return 0
     else:
-        print("\n❌ VALIDATIONS FAILED - Golden Path still blocked")
+        print("\n FAIL:  VALIDATIONS FAILED - Golden Path still blocked")
         return 1
 
 

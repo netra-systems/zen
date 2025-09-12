@@ -1063,5 +1063,5 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         
         # Final validation log
         self.logger.info(
-            "🚀 CACHE PHASE VALIDATION COMPLETE: Redis cache infrastructure is ready to support real-time chat functionality"
+            "[U+1F680] CACHE PHASE VALIDATION COMPLETE: Redis cache infrastructure is ready to support real-time chat functionality"
         )

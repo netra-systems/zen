@@ -9,12 +9,12 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core UX for multi-conversation Chat platform workflow
 
 CRITICAL REQUIREMENTS:
-- ✅ Real authentication via e2e_auth_helper.py (NO MOCKS = ABOMINATION) 
-- ✅ Full Docker stack + Database + WebSocket
-- ✅ Thread context preservation validation across switches
-- ✅ Message history persistence per thread
-- ✅ WebSocket room switching validation
-- ✅ Tests designed to FAIL initially (find thread switching edge case bugs)
+-  PASS:  Real authentication via e2e_auth_helper.py (NO MOCKS = ABOMINATION) 
+-  PASS:  Full Docker stack + Database + WebSocket
+-  PASS:  Thread context preservation validation across switches
+-  PASS:  Message history persistence per thread
+-  PASS:  WebSocket room switching validation
+-  PASS:  Tests designed to FAIL initially (find thread switching edge case bugs)
 
 This test validates that users can seamlessly switch between multiple conversation
 threads while maintaining perfect context isolation and history preservation.
@@ -102,9 +102,9 @@ class ThreadSwitchingTracker:
         # Initialize WebSocket room if first thread for user
         if user_id not in self.websocket_rooms:
             self.websocket_rooms[user_id] = thread_id
-            logger.info(f"🏠 User {user_id} initial WebSocket room set to thread {thread_id}")
+            logger.info(f"[U+1F3E0] User {user_id} initial WebSocket room set to thread {thread_id}")
         
-        logger.info(f"📝 Initialized thread {thread_id} for user {user_id}: {thread_title}")
+        logger.info(f"[U+1F4DD] Initialized thread {thread_id} for user {user_id}: {thread_title}")
     
     def track_message(self, user_id: str, thread_id: str, message_type: str, message_data: Dict):
         """Track message in specific thread."""
@@ -128,7 +128,7 @@ class ThreadSwitchingTracker:
             self.thread_states[thread_id]["message_count"] += 1
             self.thread_states[thread_id]["last_accessed"] = time.time()
         
-        logger.debug(f"💬 Tracked {message_type} message in thread {thread_id} for user {user_id}")
+        logger.debug(f"[U+1F4AC] Tracked {message_type} message in thread {thread_id} for user {user_id}")
     
     def track_thread_switch(self, user_id: str, from_thread_id: str, to_thread_id: str, switch_reason: str = "user_action"):
         """Track thread switching event with context validation."""
@@ -177,9 +177,9 @@ class ThreadSwitchingTracker:
                 "failure_type": "context_preservation"
             }
             self.context_preservation_failures.append(failure_entry)
-            logger.error(f"🚨 CONTEXT PRESERVATION FAILURE: User {user_id} switch from {from_thread_id} to {to_thread_id}")
+            logger.error(f" ALERT:  CONTEXT PRESERVATION FAILURE: User {user_id} switch from {from_thread_id} to {to_thread_id}")
         
-        logger.info(f"🔄 User {user_id} switched from thread {from_thread_id} to {to_thread_id}")
+        logger.info(f" CYCLE:  User {user_id} switched from thread {from_thread_id} to {to_thread_id}")
         return len(self.thread_switches) - 1  # Return switch index
     
     def complete_thread_switch(self, switch_index: int, completion_data: Dict = None):
@@ -190,7 +190,7 @@ class ThreadSwitchingTracker:
             switch_entry["switch_duration"] = completion_time - switch_entry["timestamp"]
             switch_entry["completion_data"] = completion_data or {}
             
-            logger.debug(f"✅ Thread switch completed in {switch_entry['switch_duration']:.3f}s")
+            logger.debug(f" PASS:  Thread switch completed in {switch_entry['switch_duration']:.3f}s")
     
     def _validate_context_preservation(self, from_thread_id: str, to_thread_id: str) -> bool:
         """Validate that thread context is preserved across switches."""
@@ -316,7 +316,7 @@ class ThreadSwitchingWebSocketClient:
             self.websocket = await self.auth_helper.connect_authenticated_websocket(timeout=timeout)
             self.is_connected = True
             
-            logger.info(f"🔌 User {self.user_id} connected for thread switching tests")
+            logger.info(f"[U+1F50C] User {self.user_id} connected for thread switching tests")
             
             # Start message monitoring
             monitor_task = asyncio.create_task(self._monitor_thread_messages())
@@ -334,10 +334,10 @@ class ThreadSwitchingWebSocketClient:
                     await self.websocket.close()
                     self.is_connected = False
                 
-                logger.info(f"🔌 User {self.user_id} disconnected from thread switching tests")
+                logger.info(f"[U+1F50C] User {self.user_id} disconnected from thread switching tests")
         
         except Exception as e:
-            logger.error(f"❌ User {self.user_id} thread switching WebSocket connection failed: {e}")
+            logger.error(f" FAIL:  User {self.user_id} thread switching WebSocket connection failed: {e}")
             raise
     
     async def _monitor_thread_messages(self):
@@ -361,7 +361,7 @@ class ThreadSwitchingWebSocketClient:
                                 message_data
                             )
                         
-                        logger.debug(f"📨 User {self.user_id} received {message_type} in thread {thread_id}")
+                        logger.debug(f"[U+1F4E8] User {self.user_id} received {message_type} in thread {thread_id}")
                     
                     except json.JSONDecodeError:
                         pass  # Non-JSON messages are okay
@@ -400,7 +400,7 @@ class ThreadSwitchingWebSocketClient:
         if self.current_thread_id is None:
             self.current_thread_id = thread_id
         
-        logger.info(f"📝 User {self.user_id} created conversation thread {thread_id}: {thread_title}")
+        logger.info(f"[U+1F4DD] User {self.user_id} created conversation thread {thread_id}: {thread_title}")
         return thread_id
     
     async def switch_to_thread(self, target_thread_id: str, switch_reason: str = "user_action") -> int:
@@ -433,7 +433,7 @@ class ThreadSwitchingWebSocketClient:
         # Update current thread
         self.current_thread_id = target_thread_id
         
-        logger.info(f"🔄 User {self.user_id} switching from {from_thread_id} to {target_thread_id}")
+        logger.info(f" CYCLE:  User {self.user_id} switching from {from_thread_id} to {target_thread_id}")
         
         # Brief delay to allow server to process switch
         await asyncio.sleep(0.2)
@@ -468,7 +468,7 @@ class ThreadSwitchingWebSocketClient:
         if self.current_thread_id in self.user_threads:
             self.user_threads[self.current_thread_id]["message_count"] += 1
         
-        logger.info(f"💬 User {self.user_id} sent message in thread {self.current_thread_id}")
+        logger.info(f"[U+1F4AC] User {self.user_id} sent message in thread {self.current_thread_id}")
         return message_id
     
     async def get_thread_history(self, thread_id: str) -> Dict:
@@ -526,9 +526,9 @@ class TestThreadSwitchingConsistencyE2E:
         cls.env = get_env()
         cls.test_environment = cls.env.get("TEST_ENV", cls.env.get("ENVIRONMENT", "test"))
         
-        logger.info("🚀 Starting Thread Switching Consistency E2E Tests")
-        logger.info(f"📍 Environment: {cls.test_environment}")
-        logger.info("🎯 Testing thread switching with context preservation")
+        logger.info("[U+1F680] Starting Thread Switching Consistency E2E Tests")
+        logger.info(f" PIN:  Environment: {cls.test_environment}")
+        logger.info(" TARGET:  Testing thread switching with context preservation")
     
     def setup_method(self, method):
         """Set up each test method."""
@@ -536,11 +536,11 @@ class TestThreadSwitchingConsistencyE2E:
         self.switching_tracker = ThreadSwitchingTracker(self.test_environment)
         self.test_clients: List[ThreadSwitchingWebSocketClient] = []
         
-        logger.info(f"🧪 Starting test: {method.__name__}")
+        logger.info(f"[U+1F9EA] Starting test: {method.__name__}")
     
     def teardown_method(self, method):
         """Clean up test resources."""
-        logger.info(f"🧹 Cleaning up test: {method.__name__}")
+        logger.info(f"[U+1F9F9] Cleaning up test: {method.__name__}")
         self.test_clients.clear()
     
     @pytest.mark.e2e
@@ -557,7 +557,7 @@ class TestThreadSwitchingConsistencyE2E:
         Success Criteria: Perfect context preservation across switches
         """
         test_start_time = time.time()
-        logger.info("🔄 CRITICAL: Testing basic thread switching context preservation")
+        logger.info(" CYCLE:  CRITICAL: Testing basic thread switching context preservation")
         
         try:
             # Create authenticated user
@@ -576,7 +576,7 @@ class TestThreadSwitchingConsistencyE2E:
             self.test_clients.append(client)
             
             async with client.connect(timeout=30.0):
-                logger.info(f"✅ Connected user {client.user_id} for basic thread switching test")
+                logger.info(f" PASS:  Connected user {client.user_id} for basic thread switching test")
                 
                 # Create two conversation threads
                 thread_1_id = await client.create_conversation_thread(
@@ -590,7 +590,7 @@ class TestThreadSwitchingConsistencyE2E:
                 )
                 
                 # Add messages to Thread 1
-                logger.info("💬 Adding messages to Thread 1...")
+                logger.info("[U+1F4AC] Adding messages to Thread 1...")
                 await client.switch_to_thread(thread_1_id, "initial_selection")
                 
                 await client.send_message_in_current_thread("How can I optimize database queries?")
@@ -599,7 +599,7 @@ class TestThreadSwitchingConsistencyE2E:
                 await asyncio.sleep(0.5)
                 
                 # Switch to Thread 2 and add messages
-                logger.info("🔄 Switching to Thread 2...")
+                logger.info(" CYCLE:  Switching to Thread 2...")
                 switch_1_index = await client.switch_to_thread(thread_2_id, "user_switching")
                 
                 await client.send_message_in_current_thread("What are the latest security vulnerabilities?")
@@ -608,14 +608,14 @@ class TestThreadSwitchingConsistencyE2E:
                 await asyncio.sleep(0.5)
                 
                 # Switch back to Thread 1
-                logger.info("🔄 Switching back to Thread 1...")
+                logger.info(" CYCLE:  Switching back to Thread 1...")
                 switch_2_index = await client.switch_to_thread(thread_1_id, "return_to_conversation")
                 
                 await client.send_message_in_current_thread("Also, what about connection pooling?")
                 await asyncio.sleep(0.5)
                 
                 # Switch back to Thread 2
-                logger.info("🔄 Final switch to Thread 2...")
+                logger.info(" CYCLE:  Final switch to Thread 2...")
                 switch_3_index = await client.switch_to_thread(thread_2_id, "final_check")
                 
                 await client.send_message_in_current_thread("What about rate limiting?")
@@ -636,7 +636,7 @@ class TestThreadSwitchingConsistencyE2E:
                 # Generate switching report
                 report = self.switching_tracker.generate_switching_report()
                 
-                logger.info("📊 BASIC THREAD SWITCHING RESULTS:")
+                logger.info(" CHART:  BASIC THREAD SWITCHING RESULTS:")
                 logger.info(f"   Thread Switches: {report['switching_analysis']['switch_count']}")
                 logger.info(f"   Context Preservation Rate: {report['switching_analysis']['context_preservation_rate']:.2%}")
                 logger.info(f"   Thread 1 History Preserved: {thread_1_history['preserved']}")
@@ -645,9 +645,9 @@ class TestThreadSwitchingConsistencyE2E:
                 
                 # CRITICAL ASSERTIONS - Expected to FAIL initially
                 if not thread_1_history["preserved"] or not thread_2_history["preserved"]:
-                    logger.error("🚨 THREAD HISTORY PRESERVATION FAILURE")
-                    logger.error(f"🔍 Thread 1 preserved: {thread_1_history['preserved']}")
-                    logger.error(f"🔍 Thread 2 preserved: {thread_2_history['preserved']}")
+                    logger.error(" ALERT:  THREAD HISTORY PRESERVATION FAILURE")
+                    logger.error(f" SEARCH:  Thread 1 preserved: {thread_1_history['preserved']}")
+                    logger.error(f" SEARCH:  Thread 2 preserved: {thread_2_history['preserved']}")
                     
                     # Expected failure - thread history not preserved
                     pytest.fail(
@@ -657,11 +657,11 @@ class TestThreadSwitchingConsistencyE2E:
                     )
                 
                 if report["context_preservation_failures"] > 0:
-                    logger.error("🚨 CONTEXT PRESERVATION FAILURES DETECTED")
-                    logger.error(f"🔍 Found {report['context_preservation_failures']} failures")
+                    logger.error(" ALERT:  CONTEXT PRESERVATION FAILURES DETECTED")
+                    logger.error(f" SEARCH:  Found {report['context_preservation_failures']} failures")
                     
                     for failure in self.switching_tracker.context_preservation_failures:
-                        logger.error(f"🔍 Failure: {failure}")
+                        logger.error(f" SEARCH:  Failure: {failure}")
                     
                     # Expected failure - context preservation issues
                     pytest.fail(
@@ -670,8 +670,8 @@ class TestThreadSwitchingConsistencyE2E:
                     )
                 
                 if not current_context["valid"]:
-                    logger.error("🚨 CURRENT CONTEXT VALIDATION FAILURE")
-                    logger.error(f"🔍 Context validation: {current_context}")
+                    logger.error(" ALERT:  CURRENT CONTEXT VALIDATION FAILURE")
+                    logger.error(f" SEARCH:  Context validation: {current_context}")
                     
                     pytest.fail(
                         f"CURRENT CONTEXT FAILURE: Current thread context invalid. "
@@ -679,7 +679,7 @@ class TestThreadSwitchingConsistencyE2E:
                     )
                 
                 # Success validations
-                logger.info("✅ SUCCESS: Perfect thread switching context preservation!")
+                logger.info(" PASS:  SUCCESS: Perfect thread switching context preservation!")
                 
                 # Verify sufficient message history
                 assert thread_1_history["message_count"] >= 3, \
@@ -699,8 +699,8 @@ class TestThreadSwitchingConsistencyE2E:
         
         except Exception as e:
             report = self.switching_tracker.generate_switching_report()
-            logger.error(f"📊 Partial results: {report}")
-            logger.error(f"❌ Basic thread switching test failed: {e}")
+            logger.error(f" CHART:  Partial results: {report}")
+            logger.error(f" FAIL:  Basic thread switching test failed: {e}")
             raise
         
         # Verify test duration
@@ -708,7 +708,7 @@ class TestThreadSwitchingConsistencyE2E:
         assert actual_duration > 6.0, \
             f"Thread switching test completed too quickly ({actual_duration:.2f}s)"
         
-        logger.info(f"✅ Basic thread switching test completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Basic thread switching test completed in {actual_duration:.2f}s")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -724,7 +724,7 @@ class TestThreadSwitchingConsistencyE2E:
         Success Criteria: Stable context preservation under rapid switching stress
         """
         test_start_time = time.time()
-        logger.info("⚡ CRITICAL: Testing rapid thread switching stability")
+        logger.info(" LIGHTNING:  CRITICAL: Testing rapid thread switching stability")
         
         # Rapid switching test configuration
         num_threads = 5
@@ -748,11 +748,11 @@ class TestThreadSwitchingConsistencyE2E:
             self.test_clients.append(client)
             
             async with client.connect(timeout=35.0):
-                logger.info(f"✅ Connected user {client.user_id} for rapid switching test")
+                logger.info(f" PASS:  Connected user {client.user_id} for rapid switching test")
                 
                 # Create multiple threads
                 thread_ids = []
-                logger.info(f"📝 Creating {num_threads} conversation threads...")
+                logger.info(f"[U+1F4DD] Creating {num_threads} conversation threads...")
                 for i in range(num_threads):
                     thread_id = await client.create_conversation_thread(
                         f"Rapid Test Thread {i}",
@@ -767,7 +767,7 @@ class TestThreadSwitchingConsistencyE2E:
                     await asyncio.sleep(rapid_switch_delay)
                 
                 # Perform rapid switching pattern
-                logger.info("⚡ Starting rapid thread switching pattern...")
+                logger.info(" LIGHTNING:  Starting rapid thread switching pattern...")
                 switch_indices = []
                 
                 for switch_round in range(switches_per_thread):
@@ -803,7 +803,7 @@ class TestThreadSwitchingConsistencyE2E:
                 preserved_threads = sum(1 for v in thread_validations.values() if v["preserved"])
                 total_switches = len(switch_indices)
                 
-                logger.info("📊 RAPID THREAD SWITCHING RESULTS:")
+                logger.info(" CHART:  RAPID THREAD SWITCHING RESULTS:")
                 logger.info(f"   Total Threads: {num_threads}")
                 logger.info(f"   Preserved Threads: {preserved_threads}/{num_threads}")
                 logger.info(f"   Total Switches: {total_switches}")
@@ -813,13 +813,13 @@ class TestThreadSwitchingConsistencyE2E:
                 
                 # CRITICAL ASSERTIONS - Expected to FAIL initially due to race conditions
                 if preserved_threads < num_threads:
-                    logger.error("🚨 RAPID SWITCHING THREAD PRESERVATION FAILURE")
-                    logger.error(f"🔍 Only {preserved_threads}/{num_threads} threads preserved")
+                    logger.error(" ALERT:  RAPID SWITCHING THREAD PRESERVATION FAILURE")
+                    logger.error(f" SEARCH:  Only {preserved_threads}/{num_threads} threads preserved")
                     
                     # Log failed thread details
                     for thread_id, validation in thread_validations.items():
                         if not validation["preserved"]:
-                            logger.error(f"🔍 Failed thread {thread_id}: {validation}")
+                            logger.error(f" SEARCH:  Failed thread {thread_id}: {validation}")
                     
                     # Expected failure - rapid switching causes data loss
                     pytest.fail(
@@ -828,8 +828,8 @@ class TestThreadSwitchingConsistencyE2E:
                     )
                 
                 if report["context_preservation_failures"] > 0:
-                    logger.error("🚨 RAPID SWITCHING CONTEXT FAILURES")
-                    logger.error(f"🔍 Found {report['context_preservation_failures']} context failures")
+                    logger.error(" ALERT:  RAPID SWITCHING CONTEXT FAILURES")
+                    logger.error(f" SEARCH:  Found {report['context_preservation_failures']} context failures")
                     
                     pytest.fail(
                         f"RAPID SWITCHING CONTEXT FAILURE: {report['context_preservation_failures']} failures. "
@@ -837,8 +837,8 @@ class TestThreadSwitchingConsistencyE2E:
                     )
                 
                 if report["switching_analysis"]["avg_switch_duration"] > 1.0:
-                    logger.error("🚨 RAPID SWITCHING PERFORMANCE DEGRADATION")
-                    logger.error(f"🔍 Switch duration: {report['switching_analysis']['avg_switch_duration']:.3f}s")
+                    logger.error(" ALERT:  RAPID SWITCHING PERFORMANCE DEGRADATION")
+                    logger.error(f" SEARCH:  Switch duration: {report['switching_analysis']['avg_switch_duration']:.3f}s")
                     
                     pytest.fail(
                         f"RAPID SWITCHING PERFORMANCE FAILURE: {report['switching_analysis']['avg_switch_duration']:.3f}s "
@@ -846,7 +846,7 @@ class TestThreadSwitchingConsistencyE2E:
                     )
                 
                 # Success validations
-                logger.info("✅ SUCCESS: Perfect rapid thread switching stability!")
+                logger.info(" PASS:  SUCCESS: Perfect rapid thread switching stability!")
                 
                 # Verify all threads have expected messages
                 expected_messages_per_thread = 1 + switches_per_thread  # Initial + rapid messages
@@ -860,8 +860,8 @@ class TestThreadSwitchingConsistencyE2E:
         
         except Exception as e:
             report = self.switching_tracker.generate_switching_report()
-            logger.error(f"📊 Rapid switching partial results: {report}")
-            logger.error(f"❌ Rapid thread switching test failed: {e}")
+            logger.error(f" CHART:  Rapid switching partial results: {report}")
+            logger.error(f" FAIL:  Rapid thread switching test failed: {e}")
             raise
         
         # Verify significant test duration for rapid switching
@@ -869,7 +869,7 @@ class TestThreadSwitchingConsistencyE2E:
         assert actual_duration > 8.0, \
             f"Rapid switching test completed too quickly ({actual_duration:.2f}s)"
         
-        logger.info(f"✅ Rapid thread switching test completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Rapid thread switching test completed in {actual_duration:.2f}s")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -885,7 +885,7 @@ class TestThreadSwitchingConsistencyE2E:
         Success Criteria: Perfect isolation during concurrent multi-user thread switching
         """
         test_start_time = time.time()
-        logger.info("👥🔄 CRITICAL: Testing multi-user thread switching isolation")
+        logger.info("[U+1F465] CYCLE:  CRITICAL: Testing multi-user thread switching isolation")
         
         # Multi-user switching test configuration
         num_users = 3
@@ -897,7 +897,7 @@ class TestThreadSwitchingConsistencyE2E:
         
         try:
             # Create multiple authenticated users
-            logger.info(f"🔐 Creating {num_users} users for concurrent thread switching...")
+            logger.info(f"[U+1F510] Creating {num_users} users for concurrent thread switching...")
             for user_idx in range(num_users):
                 user_context = await create_authenticated_user_context(
                     user_email=f"multi_user_switching_{user_idx}_{int(time.time())}@example.com",
@@ -913,7 +913,7 @@ class TestThreadSwitchingConsistencyE2E:
                 user_clients.append(client)
                 self.test_clients.append(client)
                 
-                logger.info(f"✅ Created switching user {user_idx}: {client.user_id}")
+                logger.info(f" PASS:  Created switching user {user_idx}: {client.user_id}")
             
             # Execute concurrent thread switching scenarios
             for user_idx, client in enumerate(user_clients):
@@ -925,7 +925,7 @@ class TestThreadSwitchingConsistencyE2E:
                 switching_tasks.append(task)
             
             # Run all user switching scenarios concurrently
-            logger.info("🚀 Executing concurrent multi-user thread switching...")
+            logger.info("[U+1F680] Executing concurrent multi-user thread switching...")
             user_results = await asyncio.gather(*switching_tasks, return_exceptions=True)
             
             # Analyze multi-user switching results
@@ -936,20 +936,20 @@ class TestThreadSwitchingConsistencyE2E:
             
             for user_idx, result in enumerate(user_results):
                 if isinstance(result, Exception):
-                    logger.error(f"❌ User {user_idx} thread switching failed: {result}")
+                    logger.error(f" FAIL:  User {user_idx} thread switching failed: {result}")
                 else:
                     successful_users += 1
                     total_switches_completed += result.get("switches_completed", 0)
                     cross_user_contamination += result.get("cross_user_issues", 0)
                     context_preservation_failures += result.get("context_failures", 0)
                     
-                    logger.info(f"👤 User {user_idx}: {result.get('switches_completed', 0)} switches, "
+                    logger.info(f"[U+1F464] User {user_idx}: {result.get('switches_completed', 0)} switches, "
                               f"Context preserved: {result.get('context_preserved', True)}")
             
             # Generate comprehensive multi-user report
             report = self.switching_tracker.generate_switching_report()
             
-            logger.info("📊 MULTI-USER THREAD SWITCHING ISOLATION RESULTS:")
+            logger.info(" CHART:  MULTI-USER THREAD SWITCHING ISOLATION RESULTS:")
             logger.info(f"   Successful Users: {successful_users}/{num_users}")
             logger.info(f"   Total Switches Completed: {total_switches_completed}")
             logger.info(f"   Cross-User Contamination Issues: {cross_user_contamination}")
@@ -958,8 +958,8 @@ class TestThreadSwitchingConsistencyE2E:
             
             # CRITICAL ASSERTIONS - Expected to FAIL initially
             if cross_user_contamination > 0:
-                logger.error("🚨 CROSS-USER THREAD SWITCHING CONTAMINATION")
-                logger.error(f"🔍 Found {cross_user_contamination} cross-user issues")
+                logger.error(" ALERT:  CROSS-USER THREAD SWITCHING CONTAMINATION")
+                logger.error(f" SEARCH:  Found {cross_user_contamination} cross-user issues")
                 
                 # Expected failure - multi-user isolation breaks
                 pytest.fail(
@@ -969,8 +969,8 @@ class TestThreadSwitchingConsistencyE2E:
                 )
             
             if context_preservation_failures > 0:
-                logger.error("🚨 MULTI-USER CONTEXT PRESERVATION FAILURES")
-                logger.error(f"🔍 Found {context_preservation_failures} context failures")
+                logger.error(" ALERT:  MULTI-USER CONTEXT PRESERVATION FAILURES")
+                logger.error(f" SEARCH:  Found {context_preservation_failures} context failures")
                 
                 pytest.fail(
                     f"MULTI-USER CONTEXT FAILURE: {context_preservation_failures} context preservation failures. "
@@ -978,8 +978,8 @@ class TestThreadSwitchingConsistencyE2E:
                 )
             
             if successful_users < num_users:
-                logger.error("🚨 MULTI-USER SWITCHING SYSTEM FAILURES")
-                logger.error(f"🔍 Only {successful_users}/{num_users} users completed successfully")
+                logger.error(" ALERT:  MULTI-USER SWITCHING SYSTEM FAILURES")
+                logger.error(f" SEARCH:  Only {successful_users}/{num_users} users completed successfully")
                 
                 pytest.fail(
                     f"MULTI-USER SWITCHING FAILURE: Only {successful_users}/{num_users} users successful. "
@@ -987,7 +987,7 @@ class TestThreadSwitchingConsistencyE2E:
                 )
             
             # Success validations
-            logger.info("✅ SUCCESS: Perfect multi-user thread switching isolation!")
+            logger.info(" PASS:  SUCCESS: Perfect multi-user thread switching isolation!")
             
             # Verify switching load handling
             expected_total_switches = num_users * switches_per_user
@@ -1000,8 +1000,8 @@ class TestThreadSwitchingConsistencyE2E:
         
         except Exception as e:
             report = self.switching_tracker.generate_switching_report()
-            logger.error(f"📊 Multi-user switching partial results: {report}")
-            logger.error(f"❌ Multi-user thread switching isolation test failed: {e}")
+            logger.error(f" CHART:  Multi-user switching partial results: {report}")
+            logger.error(f" FAIL:  Multi-user thread switching isolation test failed: {e}")
             raise
         
         # Verify significant test duration for complex scenario
@@ -1009,7 +1009,7 @@ class TestThreadSwitchingConsistencyE2E:
         assert actual_duration > 12.0, \
             f"Multi-user switching test completed too quickly ({actual_duration:.2f}s)"
         
-        logger.info(f"✅ Multi-user thread switching isolation test completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Multi-user thread switching isolation test completed in {actual_duration:.2f}s")
     
     async def _execute_user_thread_switching_scenario(self, client: ThreadSwitchingWebSocketClient,
                                                     num_threads: int, num_switches: int, user_idx: int) -> Dict:
@@ -1062,7 +1062,7 @@ class TestThreadSwitchingConsistencyE2E:
                 # For this test, we assume isolation is maintained if context is valid
         
         except Exception as e:
-            logger.error(f"❌ User {user_idx} thread switching scenario failed: {e}")
+            logger.error(f" FAIL:  User {user_idx} thread switching scenario failed: {e}")
             raise
         
         return {
@@ -1094,14 +1094,14 @@ if __name__ == "__main__":
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    logger.info("🚀 Starting Thread Switching Consistency E2E Test Suite")
-    logger.info("📋 Tests included:")
+    logger.info("[U+1F680] Starting Thread Switching Consistency E2E Test Suite")
+    logger.info("[U+1F4CB] Tests included:")
     logger.info("   1. test_basic_thread_switching_context_preservation")
     logger.info("   2. test_rapid_thread_switching_stability")
     logger.info("   3. test_multi_user_thread_switching_isolation")
-    logger.info("🎯 Business Value: Ensures seamless multi-conversation Chat UX")
-    logger.info("🔧 Requirements: Full Docker stack + Database + WebSocket")
-    logger.info("⚠️  Expected: Initial FAILURES due to thread switching edge case bugs")
+    logger.info(" TARGET:  Business Value: Ensures seamless multi-conversation Chat UX")
+    logger.info("[U+1F527] Requirements: Full Docker stack + Database + WebSocket")
+    logger.info(" WARNING: [U+FE0F]  Expected: Initial FAILURES due to thread switching edge case bugs")
     
     # Run tests
     pytest.main([__file__, "-v", "-s", "--tb=short"])

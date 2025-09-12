@@ -258,7 +258,7 @@ class AlpineContainerTester:
                 if regular_mem > 0 and alpine_mem > 0:
                     savings_pct = (regular_mem - alpine_mem) / regular_mem * 100
                     memory_savings[service] = savings_pct
-                    self.log(f"Service {service}: {regular_mem:.1f}MB → {alpine_mem:.1f}MB ({savings_pct:.1f}% savings)")
+                    self.log(f"Service {service}: {regular_mem:.1f}MB  ->  {alpine_mem:.1f}MB ({savings_pct:.1f}% savings)")
             
             self.test_results["performance_tests"]["memory_comparison"] = memory_stats
             self.test_results["performance_tests"]["memory_savings"] = memory_savings

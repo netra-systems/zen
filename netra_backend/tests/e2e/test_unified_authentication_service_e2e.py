@@ -96,7 +96,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         self.test_users = []
         self.test_tokens = []
         
-        self.logger.info(f"🧪 E2E Auth Test Setup: backend={backend_port}, auth={auth_port}")
+        self.logger.info(f"[U+1F9EA] E2E Auth Test Setup: backend={backend_port}, auth={auth_port}")
     
     async def _ensure_services_ready(self) -> bool:
         """Ensure all required services are ready for E2E testing."""
@@ -127,10 +127,10 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                     auth_healthy = False
                 
                 if not backend_healthy or not auth_healthy:
-                    self.logger.error("❌ Required services not ready. Run: python tests/unified_test_runner.py --real-services")
+                    self.logger.error(" FAIL:  Required services not ready. Run: python tests/unified_test_runner.py --real-services")
                     return False
                 
-                self.logger.info("✅ All services ready for E2E authentication tests")
+                self.logger.info(" PASS:  All services ready for E2E authentication tests")
                 return True
                 
         except Exception as e:
@@ -146,7 +146,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if test_duration < 0.01:  # Less than 10ms indicates fake test
             pytest.fail(f"E2E test completed in {test_duration:.4f}s - This indicates test was not actually executed with real services")
         
-        self.logger.info(f"✅ E2E Auth Test Duration: {test_duration:.2f}s (valid E2E timing)")
+        self.logger.info(f" PASS:  E2E Auth Test Duration: {test_duration:.2f}s (valid E2E timing)")
         
         # Run async cleanup
         asyncio.run(self._async_cleanup())
@@ -165,7 +165,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         self.test_users.clear()
         self.test_tokens.clear()
         
-        self.logger.info("🧹 E2E Auth Test Cleanup Complete")
+        self.logger.info("[U+1F9F9] E2E Auth Test Cleanup Complete")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -190,7 +190,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("🚀 Testing complete user auth to agent flow (core revenue path)")
+        self.logger.info("[U+1F680] Testing complete user auth to agent flow (core revenue path)")
         
         # Step 1: Create authenticated test user
         test_user_id = f"e2e_test_user_{uuid.uuid4().hex[:8]}"
@@ -216,7 +216,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         assert auth_result.user_id == test_user_id, "User ID mismatch in auth result"
         assert test_email in auth_result.email, "Email mismatch in auth result"
         
-        self.logger.info(f"✅ Step 1: User authenticated successfully - {test_user_id[:8]}...")
+        self.logger.info(f" PASS:  Step 1: User authenticated successfully - {test_user_id[:8]}...")
         
         # Step 3: Establish WebSocket connection with authentication
         websocket_headers = self.auth_helper.get_websocket_headers(jwt_token)
@@ -252,7 +252,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         response = await asyncio.wait_for(websocket.receive_json(), timeout=10.0)
         assert response is not None, "No response from authenticated WebSocket"
         
-        self.logger.info(f"✅ Step 2: Real WebSocket authentication validated - {test_user_id[:8]}...")
+        self.logger.info(f" PASS:  Step 2: Real WebSocket authentication validated - {test_user_id[:8]}...")
         
         # CRITICAL: Validate E2E timing - tests completing in 0.00s automatically fail
         execution_time = time.time() - execution_start_time
@@ -270,7 +270,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         
         # Send agent request
         await WebSocketTestHelpers.send_test_message(websocket, agent_request, timeout=10.0)
-        self.logger.info("✅ Step 3: Agent request sent - waiting for business value delivery...")
+        self.logger.info(" PASS:  Step 3: Agent request sent - waiting for business value delivery...")
         
         # Step 5: Collect WebSocket events (business value delivery indicators)
         collected_events = []
@@ -284,7 +284,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                 )
                 collected_events.append(event)
                 
-                self.logger.info(f"📨 Received event: {event.get('type', 'unknown')}")
+                self.logger.info(f"[U+1F4E8] Received event: {event.get('type', 'unknown')}")
                 
                 # Break on agent completion (business value delivered)
                 if event.get("type") == "agent_completed":
@@ -323,14 +323,14 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             f"Length: {len(response_content)}"
         )
         
-        self.logger.info(f"✅ Step 4: Business value delivered - {len(response_content)} chars of actionable content")
+        self.logger.info(f" PASS:  Step 4: Business value delivered - {len(response_content)} chars of actionable content")
         
         # Step 7: Validate authentication statistics and SSOT compliance
         auth_stats = self.unified_auth.get_authentication_stats()
         assert auth_stats["ssot_enforcement"]["ssot_compliant"], "SSOT compliance violation detected"
         assert auth_stats["statistics"]["success_rate_percent"] > 0, "No successful authentications recorded"
         
-        self.logger.info("✅ Step 5: SSOT authentication compliance validated")
+        self.logger.info(" PASS:  Step 5: SSOT authentication compliance validated")
         
         # CRITICAL: Validate E2E execution timing - tests completing in 0.00s automatically fail
         execution_time = time.time() - execution_start_time
@@ -341,10 +341,10 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         
         # Test completed successfully - full revenue pipeline validated
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🎉 COMPLETE USER AUTH TO AGENT FLOW SUCCESS: {duration:.2f}s (execution: {execution_time:.3f}s)")
-        self.logger.info(f"✅ Revenue pipeline validated: Auth → WebSocket → Agent → Business Value")
-        self.logger.info(f"📊 Events received: {len(collected_events)}, Types: {event_types}")
-        self.logger.info(f"⏱️ Execution timing validated: {execution_time:.3f}s (real services confirmed)")
+        self.logger.info(f" CELEBRATION:  COMPLETE USER AUTH TO AGENT FLOW SUCCESS: {duration:.2f}s (execution: {execution_time:.3f}s)")
+        self.logger.info(f" PASS:  Revenue pipeline validated: Auth  ->  WebSocket  ->  Agent  ->  Business Value")
+        self.logger.info(f" CHART:  Events received: {len(collected_events)}, Types: {event_types}")
+        self.logger.info(f"[U+23F1][U+FE0F] Execution timing validated: {execution_time:.3f}s (real services confirmed)")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -360,7 +360,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("💬 Testing WebSocket auth enables chat value delivery")
+        self.logger.info("[U+1F4AC] Testing WebSocket auth enables chat value delivery")
         
         # Create authenticated user for chat
         chat_user_id = f"chat_user_{uuid.uuid4().hex[:8]}"
@@ -410,7 +410,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         total_chat_events = []
         
         for i, chat_msg in enumerate(chat_messages):
-            self.logger.info(f"📤 Sending chat message {i+1}: '{chat_msg['message'][:50]}...'")
+            self.logger.info(f"[U+1F4E4] Sending chat message {i+1}: '{chat_msg['message'][:50]}...'")
             
             await WebSocketTestHelpers.send_test_message(websocket, chat_msg, timeout=10.0)
             
@@ -435,7 +435,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                     break
             
             total_chat_events.extend(chat_events)
-            self.logger.info(f"📥 Chat message {i+1} generated {len(chat_events)} events")
+            self.logger.info(f"[U+1F4E5] Chat message {i+1} generated {len(chat_events)} events")
         
         # Validate chat functionality delivered business value
         assert len(total_chat_events) >= 2, f"Insufficient chat events: {len(total_chat_events)}"
@@ -455,10 +455,10 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         
         assert valuable_responses > 0, "Chat responses lack business value - revenue impact detected"
         
-        self.logger.info(f"✅ Chat value validated: {len(chat_responses)} responses, {valuable_responses} with business value")
+        self.logger.info(f" PASS:  Chat value validated: {len(chat_responses)} responses, {valuable_responses} with business value")
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"💬 WEBSOCKET CHAT VALUE SUCCESS: {duration:.2f}s")
+        self.logger.info(f"[U+1F4AC] WEBSOCKET CHAT VALUE SUCCESS: {duration:.2f}s")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -476,7 +476,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("👥 Testing multi-user authentication isolation (enterprise security)")
+        self.logger.info("[U+1F465] Testing multi-user authentication isolation (enterprise security)")
         
         # Create multiple test users representing different customer segments
         users = []
@@ -500,7 +500,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             users.append(user_data)
             self.test_tokens.append(token)
         
-        self.logger.info(f"👤 Created {len(users)} test users across customer segments")
+        self.logger.info(f"[U+1F464] Created {len(users)} test users across customer segments")
         
         # Test concurrent authentication and isolation
         concurrent_auths = []
@@ -531,7 +531,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                 premium_perm = f"{user['segment']}_premium"
                 assert premium_perm in auth_result.permissions, f"Missing premium permission for {user['segment']}"
         
-        self.logger.info("✅ All concurrent authentications succeeded with proper isolation")
+        self.logger.info(" PASS:  All concurrent authentications succeeded with proper isolation")
         
         # Test WebSocket isolation - multiple users connecting simultaneously
         websocket_connections = []
@@ -585,7 +585,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                     f"User isolation violation: {user['segment']} user received response for {response_user_id}"
                 )
         
-        self.logger.info("✅ Multi-user WebSocket isolation validated - no data leaks detected")
+        self.logger.info(" PASS:  Multi-user WebSocket isolation validated - no data leaks detected")
         
         # Test cross-user access prevention
         # Try to access another user's data with wrong token
@@ -604,11 +604,11 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             assert malicious_auth.user_id == user1["user_id"], "Should authenticate as token owner"
             assert malicious_auth.user_id != user2["user_id"], "Cross-user access detected - security violation"
         
-        self.logger.info("✅ Cross-user access prevention validated")
+        self.logger.info(" PASS:  Cross-user access prevention validated")
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"👥 MULTI-USER ISOLATION SUCCESS: {duration:.2f}s")
-        self.logger.info(f"🛡️  Enterprise security validated - no data leaks between {len(users)} users")
+        self.logger.info(f"[U+1F465] MULTI-USER ISOLATION SUCCESS: {duration:.2f}s")
+        self.logger.info(f"[U+1F6E1][U+FE0F]  Enterprise security validated - no data leaks between {len(users)} users")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -626,7 +626,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("🔒 Testing auth failure prevents agent access (revenue protection)")
+        self.logger.info("[U+1F512] Testing auth failure prevents agent access (revenue protection)")
         
         # Test cases for authentication failures
         auth_failure_scenarios = [
@@ -653,7 +653,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         ]
         
         for scenario in auth_failure_scenarios:
-            self.logger.info(f"🧪 Testing scenario: {scenario['name']}")
+            self.logger.info(f"[U+1F9EA] Testing scenario: {scenario['name']}")
             
             # Test token authentication failure
             auth_result = await self.unified_auth.authenticate_token(
@@ -684,10 +684,10 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                 
             except Exception as e:
                 # Expected failure - authentication should prevent connection
-                self.logger.info(f"✅ WebSocket correctly rejected {scenario['name']}: {type(e).__name__}")
+                self.logger.info(f" PASS:  WebSocket correctly rejected {scenario['name']}: {type(e).__name__}")
         
         # Test agent request with invalid authentication
-        self.logger.info("🤖 Testing agent access prevention with invalid auth")
+        self.logger.info("[U+1F916] Testing agent access prevention with invalid auth")
         
         # Attempt agent request with invalid token
         invalid_token = "fake.agent.access.token"
@@ -722,14 +722,14 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         except (ConnectionRefusedError, Exception) as e:
             # Expected - unauthorized connection should be rejected
             unauthorized_connection_failed = True
-            self.logger.info(f"✅ Unauthorized WebSocket connection properly rejected: {type(e).__name__}")
+            self.logger.info(f" PASS:  Unauthorized WebSocket connection properly rejected: {type(e).__name__}")
         
         assert unauthorized_connection_failed, "Unauthorized WebSocket connection should have failed"
         
-        self.logger.info("✅ All authentication failures properly blocked agent access")
+        self.logger.info(" PASS:  All authentication failures properly blocked agent access")
         
         # Test valid authentication allows agent access (positive control)
-        self.logger.info("🔓 Testing valid auth allows agent access (positive control)")
+        self.logger.info("[U+1F513] Testing valid auth allows agent access (positive control)")
         
         valid_user_id = f"valid_user_{uuid.uuid4().hex[:8]}"
         valid_token = self.auth_helper.create_test_jwt_token(
@@ -780,11 +780,11 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             # Mock connection might not fully simulate agent execution
             self.logger.info(f"Agent execution simulation: {e}")
         
-        self.logger.info("✅ Valid authentication allows proper agent access")
+        self.logger.info(" PASS:  Valid authentication allows proper agent access")
         
         duration = time.time() - self.test_start_time  
-        self.logger.info(f"🔒 AUTH FAILURE PREVENTION SUCCESS: {duration:.2f}s")
-        self.logger.info("💰 Revenue protection validated - unauthorized access blocked")
+        self.logger.info(f"[U+1F512] AUTH FAILURE PREVENTION SUCCESS: {duration:.2f}s")
+        self.logger.info("[U+1F4B0] Revenue protection validated - unauthorized access blocked")
     
     def _create_expired_jwt_token(self) -> str:
         """Create an expired JWT token for testing."""
@@ -815,7 +815,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("🔄 Testing complete OAuth to WebSocket flow (enterprise feature)")
+        self.logger.info(" CYCLE:  Testing complete OAuth to WebSocket flow (enterprise feature)")
         
         # Simulate OAuth flow by creating proper JWT token with OAuth-like claims
         oauth_user_id = f"oauth_user_{uuid.uuid4().hex[:8]}"
@@ -851,7 +851,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         assert "enterprise.com" in oauth_auth_result.email, "OAuth email mismatch"
         assert "oauth_authenticated" in oauth_auth_result.permissions, "OAuth permission missing"
         
-        self.logger.info(f"✅ OAuth authentication successful for {oauth_user_id[:8]}...")
+        self.logger.info(f" PASS:  OAuth authentication successful for {oauth_user_id[:8]}...")
         
         # Test WebSocket connection with OAuth token
         oauth_headers = self.auth_helper.get_websocket_headers(oauth_enhanced_token)
@@ -884,7 +884,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             )
             
             assert oauth_response.get("type") != "error", f"OAuth WebSocket should not error: {oauth_response}"
-            self.logger.info(f"✅ OAuth WebSocket message successful: {oauth_response.get('type')}")
+            self.logger.info(f" PASS:  OAuth WebSocket message successful: {oauth_response.get('type')}")
             
         except Exception as e:
             self.logger.warning(f"Using mock WebSocket for OAuth test: {e}")
@@ -899,8 +899,8 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             }, timeout=5.0)
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🔄 OAUTH TO WEBSOCKET SUCCESS: {duration:.2f}s")
-        self.logger.info("🏢 Enterprise OAuth integration validated")
+        self.logger.info(f" CYCLE:  OAUTH TO WEBSOCKET SUCCESS: {duration:.2f}s")
+        self.logger.info("[U+1F3E2] Enterprise OAuth integration validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -915,7 +915,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("🔧 Testing service authentication for backend communication")
+        self.logger.info("[U+1F527] Testing service authentication for backend communication")
         
         # Create service authentication token
         service_name = "backend_service"
@@ -937,7 +937,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         assert f"service_{service_name}" in service_auth_result.user_id, "Service ID mismatch"
         assert "service_access" in service_auth_result.permissions, "Service permissions missing"
         
-        self.logger.info(f"✅ Service authentication successful for {service_name}")
+        self.logger.info(f" PASS:  Service authentication successful for {service_name}")
         
         # Test service-to-service communication capability
         service_context_result = await self.unified_auth.authenticate_token(
@@ -950,8 +950,8 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         assert service_context_result.metadata.get("context") == "internal_service", "Service context mismatch"
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🔧 SERVICE AUTHENTICATION SUCCESS: {duration:.2f}s")
-        self.logger.info("🤝 Backend service communication validated")
+        self.logger.info(f"[U+1F527] SERVICE AUTHENTICATION SUCCESS: {duration:.2f}s")
+        self.logger.info("[U+1F91D] Backend service communication validated")
     
     @pytest.mark.e2e 
     @pytest.mark.real_services
@@ -966,7 +966,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("🔄 Testing authentication recovery after failures")
+        self.logger.info(" CYCLE:  Testing authentication recovery after failures")
         
         # Test recovery from invalid token attempts
         recovery_user_id = f"recovery_user_{uuid.uuid4().hex[:8]}"
@@ -1001,7 +1001,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             assert recovery_result.success, f"Recovery should succeed after failure: {recovery_result.error}"
             assert recovery_result.user_id == recovery_user_id, "Recovery user ID mismatch"
         
-        self.logger.info("✅ Authentication recovery validated after all failure scenarios")
+        self.logger.info(" PASS:  Authentication recovery validated after all failure scenarios")
         
         # Test system health after failures
         auth_health = await self.unified_auth.health_check()
@@ -1021,8 +1021,8 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         assert success_rate > 20, f"Recovery success rate too low: {success_rate:.1f}%"
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🔄 AUTHENTICATION RECOVERY SUCCESS: {duration:.2f}s")
-        self.logger.info(f"📊 Recovery stats: {success_count}/{total_attempts} success ({success_rate:.1f}%)")
+        self.logger.info(f" CYCLE:  AUTHENTICATION RECOVERY SUCCESS: {duration:.2f}s")
+        self.logger.info(f" CHART:  Recovery stats: {success_count}/{total_attempts} success ({success_rate:.1f}%)")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -1037,7 +1037,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("🔄 Testing cross-protocol authentication consistency")
+        self.logger.info(" CYCLE:  Testing cross-protocol authentication consistency")
         
         # Create test user for cross-protocol testing
         cross_user_id = f"cross_protocol_user_{uuid.uuid4().hex[:8]}"
@@ -1059,7 +1059,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         
         auth_results = []
         for context, context_name in contexts_to_test:
-            self.logger.info(f"🧪 Testing {context_name} authentication")
+            self.logger.info(f"[U+1F9EA] Testing {context_name} authentication")
             
             auth_result = await self.unified_auth.authenticate_token(
                 cross_token,
@@ -1087,11 +1087,11 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                 f"Permissions inconsistent in {context_name}: {base_perms} vs {context_perms}"
             )
         
-        self.logger.info("✅ Authentication consistency validated across all protocols")
+        self.logger.info(" PASS:  Authentication consistency validated across all protocols")
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🔄 CROSS-PROTOCOL CONSISTENCY SUCCESS: {duration:.2f}s")
-        self.logger.info(f"✅ Validated consistency across {len(contexts_to_test)} protocols")
+        self.logger.info(f" CYCLE:  CROSS-PROTOCOL CONSISTENCY SUCCESS: {duration:.2f}s")
+        self.logger.info(f" PASS:  Validated consistency across {len(contexts_to_test)} protocols")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -1106,7 +1106,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("🧵 Testing authentication enables thread persistence")
+        self.logger.info("[U+1F9F5] Testing authentication enables thread persistence")
         
         # Create authenticated user for thread testing
         thread_user_id = f"thread_user_{uuid.uuid4().hex[:8]}"
@@ -1143,16 +1143,16 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            self.logger.info(f"💬 Created thread {i}: {thread_id[:8]}...")
+            self.logger.info(f"[U+1F4AC] Created thread {i}: {thread_id[:8]}...")
         
         # Verify all threads belong to the authenticated user
         assert len(thread_ids) == 3, "Not all threads created"
         assert len(set(thread_ids)) == 3, "Duplicate thread IDs detected"
         
-        self.logger.info(f"✅ Thread persistence validated: {len(thread_ids)} threads for user {thread_user_id[:8]}...")
+        self.logger.info(f" PASS:  Thread persistence validated: {len(thread_ids)} threads for user {thread_user_id[:8]}...")
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🧵 THREAD PERSISTENCE SUCCESS: {duration:.2f}s")
+        self.logger.info(f"[U+1F9F5] THREAD PERSISTENCE SUCCESS: {duration:.2f}s")
     
     @pytest.mark.e2e
     @pytest.mark.real_services  
@@ -1167,7 +1167,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("⚡ Testing concurrent user authentication (load test)")
+        self.logger.info(" LIGHTNING:  Testing concurrent user authentication (load test)")
         
         # Create multiple concurrent users
         concurrent_user_count = 10
@@ -1219,11 +1219,11 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             f"Concurrent authentication too slow: {concurrent_duration:.2f}s for {concurrent_user_count} users"
         )
         
-        self.logger.info(f"✅ Concurrent authentication: {len(successful_auths)}/{concurrent_user_count} success")
-        self.logger.info(f"📊 Performance: {concurrent_duration:.2f}s total, {avg_time_per_user:.3f}s/user")
+        self.logger.info(f" PASS:  Concurrent authentication: {len(successful_auths)}/{concurrent_user_count} success")
+        self.logger.info(f" CHART:  Performance: {concurrent_duration:.2f}s total, {avg_time_per_user:.3f}s/user")
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"⚡ CONCURRENT USERS SUCCESS: {duration:.2f}s")
+        self.logger.info(f" LIGHTNING:  CONCURRENT USERS SUCCESS: {duration:.2f}s")
         
         # Log any failures for debugging
         if failed_auths:
@@ -1291,7 +1291,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("🎭 Testing staging authentication deployment scenario")
+        self.logger.info("[U+1F3AD] Testing staging authentication deployment scenario")
         
         # Create staging-like configuration
         staging_user_id = f"staging_user_{uuid.uuid4().hex[:8]}"
@@ -1332,15 +1332,15 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         assert staging_headers["X-Test-Environment"] == "staging", "Wrong staging environment value"
         assert "X-E2E-Test" in staging_headers, "Missing E2E test header"
         
-        self.logger.info("✅ Staging authentication headers validated")
+        self.logger.info(" PASS:  Staging authentication headers validated")
         
         # Simulate staging deployment health check
         auth_health = await self.unified_auth.health_check()
         assert auth_health["status"] in ["healthy", "degraded"], f"Auth service not ready for staging: {auth_health['status']}"
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"🎭 STAGING DEPLOYMENT VALIDATION SUCCESS: {duration:.2f}s")
-        self.logger.info("🚀 Authentication ready for production deployment")
+        self.logger.info(f"[U+1F3AD] STAGING DEPLOYMENT VALIDATION SUCCESS: {duration:.2f}s")
+        self.logger.info("[U+1F680] Authentication ready for production deployment")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -1355,7 +1355,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("⚡ Testing authentication performance under real load")
+        self.logger.info(" LIGHTNING:  Testing authentication performance under real load")
         
         # Performance test configuration
         load_test_config = {
@@ -1407,7 +1407,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                 else:
                     performance_results.append(result)
             
-            self.logger.info(f"📊 Batch {batch_num + 1}: {len(batch_results)} requests in {batch_duration:.2f}s")
+            self.logger.info(f" CHART:  Batch {batch_num + 1}: {len(batch_results)} requests in {batch_duration:.2f}s")
             
             # Brief pause between batches to simulate realistic load
             if batch_num < load_test_config["concurrent_batches"] - 1:
@@ -1433,12 +1433,12 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
             f"Total test time too slow: {total_duration:.2f}s (max: {load_test_config['max_total_time']}s)"
         )
         
-        self.logger.info(f"⚡ Performance Results:")
-        self.logger.info(f"  📊 Total requests: {len(performance_results)}")
-        self.logger.info(f"  ✅ Success rate: {success_rate:.1f}%")
-        self.logger.info(f"  ⏱️  Average auth time: {avg_auth_time:.3f}s")
-        self.logger.info(f"  🏎️  Max auth time: {max_auth_time:.3f}s")
-        self.logger.info(f"  🚀 Throughput: {throughput:.1f} auths/second")
+        self.logger.info(f" LIGHTNING:  Performance Results:")
+        self.logger.info(f"   CHART:  Total requests: {len(performance_results)}")
+        self.logger.info(f"   PASS:  Success rate: {success_rate:.1f}%")
+        self.logger.info(f"  [U+23F1][U+FE0F]  Average auth time: {avg_auth_time:.3f}s")
+        self.logger.info(f"  [U+1F3CE][U+FE0F]  Max auth time: {max_auth_time:.3f}s")
+        self.logger.info(f"  [U+1F680] Throughput: {throughput:.1f} auths/second")
         
         # Log failures for debugging
         if failed_requests:
@@ -1447,7 +1447,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                 self.logger.warning(f"  Failure {i+1}: {failure.get('error', 'unknown')}")
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"⚡ PERFORMANCE LOAD TEST SUCCESS: {duration:.2f}s")
+        self.logger.info(f" LIGHTNING:  PERFORMANCE LOAD TEST SUCCESS: {duration:.2f}s")
     
     async def _performance_auth_test(self, user_id: str, token: str, request_id: int) -> Dict[str, Any]:
         """Helper method for performance authentication testing."""
@@ -1495,7 +1495,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         if not services_ready:
             pytest.skip("Required services not available for E2E testing")
         
-        self.logger.info("💰 Testing authentication enables complete business value delivery")
+        self.logger.info("[U+1F4B0] Testing authentication enables complete business value delivery")
         
         # Create premium customer user
         premium_user_id = f"premium_customer_{uuid.uuid4().hex[:8]}"
@@ -1518,7 +1518,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         assert "premium_features" in premium_auth.permissions, "Premium permissions missing"
         assert "ai_agents" in premium_auth.permissions, "AI agent permissions missing"
         
-        self.logger.info(f"✅ Premium customer authenticated: {premium_user_id[:8]}...")
+        self.logger.info(f" PASS:  Premium customer authenticated: {premium_user_id[:8]}...")
         
         # Step 2: Test business value delivery through WebSocket
         try:
@@ -1570,7 +1570,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         business_value_delivered = []
         
         for i, request in enumerate(business_requests):
-            self.logger.info(f"🧠 Sending business intelligence request {i+1}: {request['expected_value']}")
+            self.logger.info(f"[U+1F9E0] Sending business intelligence request {i+1}: {request['expected_value']}")
             
             await WebSocketTestHelpers.send_test_message(websocket, request, timeout=10.0)
             
@@ -1613,7 +1613,7 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
                 
                 business_value_delivered.append(business_value_entry)
                 
-                self.logger.info(f"📊 Request {i+1} value score: {value_score}, length: {len(response_content)}")
+                self.logger.info(f" CHART:  Request {i+1} value score: {value_score}, length: {len(response_content)}")
                 
             except asyncio.TimeoutError:
                 self.logger.warning(f"Request {i+1} timed out - may indicate service issues")
@@ -1657,18 +1657,18 @@ class TestUnifiedAuthenticationServiceE2E(BaseE2ETest):
         )
         
         # Final business value summary
-        self.logger.info("💰 BUSINESS VALUE DELIVERY SUMMARY:")
-        self.logger.info(f"  🎯 Value delivery rate: {business_value_rate:.1f}% ({successful_responses}/{total_requests})")
-        self.logger.info(f"  📝 Total response content: {total_content_length} characters")
-        self.logger.info(f"  🧠 Average value score: {avg_value_score:.1f}")
-        self.logger.info(f"  🔐 Auth success rate: {business_success_rate:.1f}%")
+        self.logger.info("[U+1F4B0] BUSINESS VALUE DELIVERY SUMMARY:")
+        self.logger.info(f"   TARGET:  Value delivery rate: {business_value_rate:.1f}% ({successful_responses}/{total_requests})")
+        self.logger.info(f"  [U+1F4DD] Total response content: {total_content_length} characters")
+        self.logger.info(f"  [U+1F9E0] Average value score: {avg_value_score:.1f}")
+        self.logger.info(f"  [U+1F510] Auth success rate: {business_success_rate:.1f}%")
         
         duration = time.time() - self.test_start_time
-        self.logger.info(f"💰 BUSINESS VALUE VALIDATION SUCCESS: {duration:.2f}s")
-        self.logger.info("🚀 Authentication successfully enables $120K+ MRR business value delivery!")
+        self.logger.info(f"[U+1F4B0] BUSINESS VALUE VALIDATION SUCCESS: {duration:.2f}s")
+        self.logger.info("[U+1F680] Authentication successfully enables $120K+ MRR business value delivery!")
         
         # Log individual business value results for debugging
         for i, bv in enumerate(business_value_delivered):
-            status = "✅" if bv["business_value_detected"] else "❌"
+            status = " PASS: " if bv["business_value_detected"] else " FAIL: "
             self.logger.info(f"  {status} Request {i+1} ({bv['request_type']}): "
                            f"score={bv['value_score']}, length={bv['response_length']}")

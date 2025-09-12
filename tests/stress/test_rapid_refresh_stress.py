@@ -88,7 +88,7 @@ class RapidRefreshStressTests:
         Simulates user frantically hitting F5.
         """
         test_name = "sequential_rapid_refresh"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"\n SEARCH:  Testing: {test_name}")
         
         try:
             context = await browser.new_context()
@@ -145,7 +145,7 @@ class RapidRefreshStressTests:
                     'test': test_name,
                     'increase_mb': memory_increase
                 })
-                print(f"⚠️ Memory increase detected: {memory_increase:.2f}MB")
+                print(f" WARNING: [U+FE0F] Memory increase detected: {memory_increase:.2f}MB")
             
             # Check for performance degradation
             if len(refresh_times) > 10:
@@ -157,7 +157,7 @@ class RapidRefreshStressTests:
                         'test': test_name,
                         'degradation': (second_half_avg / first_half_avg - 1) * 100
                     })
-                    print(f"⚠️ Performance degradation: {(second_half_avg / first_half_avg - 1) * 100:.1f}%")
+                    print(f" WARNING: [U+FE0F] Performance degradation: {(second_half_avg / first_half_avg - 1) * 100:.1f}%")
             
             # Verify chat still works
             await page.wait_for_selector('[data-testid="main-chat"], .chat-interface', timeout=5000)
@@ -167,13 +167,13 @@ class RapidRefreshStressTests:
             if len(errors_encountered) > refresh_count * 0.1:  # More than 10% errors
                 raise AssertionError(f"Too many errors: {len(errors_encountered)}/{refresh_count}")
             
-            print(f"✅ {test_name}: Handled {refresh_count} rapid refreshes")
+            print(f" PASS:  {test_name}: Handled {refresh_count} rapid refreshes")
             print(f"   Average refresh time: {sum(refresh_times)/len(refresh_times):.2f}s")
             self.test_results['passed'] += 1
             return True
             
         except Exception as e:
-            print(f"❌ {test_name}: {str(e)}")
+            print(f" FAIL:  {test_name}: {str(e)}")
             self.test_results['failed'] += 1
             return False
         finally:
@@ -185,7 +185,7 @@ class RapidRefreshStressTests:
         Simulates multiple browser tabs being refreshed simultaneously.
         """
         test_name = "concurrent_refresh_multiple_tabs"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"\n SEARCH:  Testing: {test_name}")
         
         try:
             num_tabs = 5
@@ -264,23 +264,23 @@ class RapidRefreshStressTests:
                     'increase_mb': memory_increase,
                     'tabs': num_tabs
                 })
-                print(f"⚠️ High memory usage: {memory_increase:.2f}MB for {num_tabs} tabs")
+                print(f" WARNING: [U+FE0F] High memory usage: {memory_increase:.2f}MB for {num_tabs} tabs")
             
             if cpu_usage > 80:
-                print(f"⚠️ High CPU usage: {cpu_usage:.1f}%")
+                print(f" WARNING: [U+FE0F] High CPU usage: {cpu_usage:.1f}%")
             
             error_rate = total_errors / (total_refreshes + total_errors) if total_refreshes > 0 else 1
             if error_rate > 0.2:  # More than 20% error rate
                 raise AssertionError(f"High error rate: {error_rate:.1%}")
             
-            print(f"✅ {test_name}: {num_tabs} tabs handled {total_refreshes} refreshes")
+            print(f" PASS:  {test_name}: {num_tabs} tabs handled {total_refreshes} refreshes")
             print(f"   Average refresh time: {sum(all_refresh_times)/len(all_refresh_times):.2f}s")
             print(f"   Memory increase: {memory_increase:.2f}MB")
             self.test_results['passed'] += 1
             return True
             
         except Exception as e:
-            print(f"❌ {test_name}: {str(e)}")
+            print(f" FAIL:  {test_name}: {str(e)}")
             self.test_results['failed'] += 1
             return False
         finally:
@@ -292,7 +292,7 @@ class RapidRefreshStressTests:
         Simulates refresh during message sending, agent processing, etc.
         """
         test_name = "refresh_during_active_operations"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"\n SEARCH:  Testing: {test_name}")
         
         try:
             context = await browser.new_context()
@@ -336,12 +336,12 @@ class RapidRefreshStressTests:
             if error_rate > 0.5:  # More than 50% failure
                 raise AssertionError(f"High failure rate during active operations: {error_rate:.1%}")
             
-            print(f"✅ {test_name}: {successful_operations}/10 operations survived refresh")
+            print(f" PASS:  {test_name}: {successful_operations}/10 operations survived refresh")
             self.test_results['passed'] += 1
             return True
             
         except Exception as e:
-            print(f"❌ {test_name}: {str(e)}")
+            print(f" FAIL:  {test_name}: {str(e)}")
             self.test_results['failed'] += 1
             return False
         finally:
@@ -353,7 +353,7 @@ class RapidRefreshStressTests:
         Performs many refreshes and monitors memory growth.
         """
         test_name = "memory_leak_detection"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"\n SEARCH:  Testing: {test_name}")
         
         try:
             context = await browser.new_context()
@@ -414,19 +414,19 @@ class RapidRefreshStressTests:
                 raise AssertionError(f"Memory leak detected: {memory_growth_rate:.2f}MB per refresh")
             
             if total_growth > 50:  # More than 50MB total
-                print(f"⚠️ High memory growth: {total_growth:.2f}MB")
+                print(f" WARNING: [U+FE0F] High memory growth: {total_growth:.2f}MB")
                 self.test_results['memory_leaks'].append({
                     'test': test_name,
                     'total_growth_mb': total_growth,
                     'per_refresh_mb': memory_growth_rate
                 })
             
-            print(f"✅ {test_name}: Memory growth acceptable ({memory_growth_rate:.3f}MB/refresh)")
+            print(f" PASS:  {test_name}: Memory growth acceptable ({memory_growth_rate:.3f}MB/refresh)")
             self.test_results['passed'] += 1
             return True
             
         except Exception as e:
-            print(f"❌ {test_name}: {str(e)}")
+            print(f" FAIL:  {test_name}: {str(e)}")
             self.test_results['failed'] += 1
             return False
         finally:
@@ -438,7 +438,7 @@ class RapidRefreshStressTests:
         Ensures old connections are properly closed and not leaked.
         """
         test_name = "websocket_connection_limits"
-        print(f"\n🔍 Testing: {test_name}")
+        print(f"\n SEARCH:  Testing: {test_name}")
         
         try:
             context = await browser.new_context()
@@ -479,10 +479,10 @@ class RapidRefreshStressTests:
             
             # Check for connection leaks
             if open_connections > 2:  # Should only have 1 active, allow 2 for transition
-                print(f"⚠️ {open_connections} WebSocket connections still open")
+                print(f" WARNING: [U+FE0F] {open_connections} WebSocket connections still open")
             
             if total_connections > 25:  # Should be close to refresh count
-                print(f"⚠️ Excessive WebSocket connections created: {total_connections}")
+                print(f" WARNING: [U+FE0F] Excessive WebSocket connections created: {total_connections}")
             
             await context.close()
             
@@ -490,13 +490,13 @@ class RapidRefreshStressTests:
             if open_connections > 3:
                 raise AssertionError(f"WebSocket connection leak: {open_connections} connections still open")
             
-            print(f"✅ {test_name}: WebSocket connections properly managed")
+            print(f" PASS:  {test_name}: WebSocket connections properly managed")
             print(f"   Total created: {total_connections}, Still open: {open_connections}")
             self.test_results['passed'] += 1
             return True
             
         except Exception as e:
-            print(f"❌ {test_name}: {str(e)}")
+            print(f" FAIL:  {test_name}: {str(e)}")
             self.test_results['failed'] += 1
             return False
         finally:
@@ -505,7 +505,7 @@ class RapidRefreshStressTests:
     async def run_all_tests(self, browser: Browser) -> Dict[str, Any]:
         """Run all rapid refresh stress tests."""
         print("\n" + "=" * 60)
-        print("💨 STRESS TEST: Rapid Page Refresh Suite")
+        print("[U+1F4A8] STRESS TEST: Rapid Page Refresh Suite")
         print("=" * 60)
         
         initial_resources = self.get_resource_metrics()
@@ -526,7 +526,7 @@ class RapidRefreshStressTests:
                 
                 await test_func(browser)
             except Exception as e:
-                print(f"❌ Unexpected error in {test_func.__name__}: {str(e)}")
+                print(f" FAIL:  Unexpected error in {test_func.__name__}: {str(e)}")
                 self.test_results['failed'] += 1
                 self.test_results['total'] += 1
         
@@ -542,25 +542,25 @@ class RapidRefreshStressTests:
         
         # Print summary
         print("\n" + "=" * 60)
-        print("📊 STRESS TEST RESULTS SUMMARY")
+        print(" CHART:  STRESS TEST RESULTS SUMMARY")
         print("=" * 60)
         print(f"Total Tests: {self.test_results['total']}")
-        print(f"Passed: {self.test_results['passed']} ✅")
-        print(f"Failed: {self.test_results['failed']} ❌")
+        print(f"Passed: {self.test_results['passed']}  PASS: ")
+        print(f"Failed: {self.test_results['failed']}  FAIL: ")
         
         if self.test_results['memory_leaks']:
-            print("\n⚠️ MEMORY LEAK WARNINGS:")
+            print("\n WARNING: [U+FE0F] MEMORY LEAK WARNINGS:")
             for leak in self.test_results['memory_leaks']:
                 print(f"  - {leak['test']}: {leak.get('increase_mb', 'N/A')}MB increase")
         
         if self.test_results['performance_degradation']:
-            print("\n⚠️ PERFORMANCE DEGRADATION:")
+            print("\n WARNING: [U+FE0F] PERFORMANCE DEGRADATION:")
             for deg in self.test_results['performance_degradation']:
                 print(f"  - {deg['test']}: {deg['degradation']:.1f}% slower")
         
         overall_metrics = self.test_results['resource_metrics'].get('overall', {})
         if overall_metrics:
-            print("\n📈 OVERALL RESOURCE USAGE:")
+            print("\n[U+1F4C8] OVERALL RESOURCE USAGE:")
             print(f"  Memory increase: {overall_metrics['memory_increase_mb']:.2f}MB")
             print(f"  Peak CPU: {overall_metrics['peak_cpu']:.1f}%")
         
@@ -568,11 +568,11 @@ class RapidRefreshStressTests:
         critical_issues = len(self.test_results['memory_leaks']) + len(self.test_results['performance_degradation'])
         
         if self.test_results['failed'] == 0 and critical_issues == 0:
-            print("\n✅ ALL STRESS TESTS PASSED - System handles rapid refresh excellently!")
+            print("\n PASS:  ALL STRESS TESTS PASSED - System handles rapid refresh excellently!")
         elif critical_issues > 0:
-            print(f"\n⚠️ {critical_issues} PERFORMANCE ISSUES DETECTED - Review resource management")
+            print(f"\n WARNING: [U+FE0F] {critical_issues} PERFORMANCE ISSUES DETECTED - Review resource management")
         else:
-            print(f"\n❌ {self.test_results['failed']} TESTS FAILED - System stability issues detected")
+            print(f"\n FAIL:  {self.test_results['failed']} TESTS FAILED - System stability issues detected")
         
         return self.test_results
 

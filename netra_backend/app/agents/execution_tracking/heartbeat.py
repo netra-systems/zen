@@ -82,7 +82,7 @@ class HeartbeatMonitor:
         self._recovery_triggers = 0
         
         logger.info(
-            f"✅ HeartbeatMonitor initialized: {heartbeat_interval_seconds}s interval, "
+            f" PASS:  HeartbeatMonitor initialized: {heartbeat_interval_seconds}s interval, "
             f"{timeout_seconds}s timeout, max {max_missed_heartbeats} missed beats"
         )
     
@@ -101,7 +101,7 @@ class HeartbeatMonitor:
         
         async with self._lock:
             if execution_id in self._monitored_executions:
-                logger.warning(f"⚠️ Already monitoring execution {execution_id}")
+                logger.warning(f" WARNING: [U+FE0F] Already monitoring execution {execution_id}")
                 return
             
             now = datetime.now(UTC)
@@ -121,7 +121,7 @@ class HeartbeatMonitor:
         if not self._is_running:
             await self._start_monitor_task()
         
-        logger.info(f"💗 Started heartbeat monitoring for execution {execution_id}")
+        logger.info(f"[U+1F497] Started heartbeat monitoring for execution {execution_id}")
     
     async def send_heartbeat(self, execution_id: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
         """Send heartbeat for an execution.
@@ -147,7 +147,7 @@ class HeartbeatMonitor:
             status.missed_heartbeats = 0
             status.is_alive = True
             
-        logger.debug(f"💗 Heartbeat received for execution {execution_id}")
+        logger.debug(f"[U+1F497] Heartbeat received for execution {execution_id}")
         return True
     
     async def stop_monitoring(self, execution_id: str) -> bool:
@@ -165,7 +165,7 @@ class HeartbeatMonitor:
             
             del self._monitored_executions[execution_id]
         
-        logger.info(f"🛑 Stopped heartbeat monitoring for execution {execution_id}")
+        logger.info(f"[U+1F6D1] Stopped heartbeat monitoring for execution {execution_id}")
         return True
     
     async def is_alive(self, execution_id: str) -> Optional[bool]:
@@ -228,7 +228,7 @@ class HeartbeatMonitor:
         
         self._is_running = True
         self._monitor_task = asyncio.create_task(self._monitor_loop())
-        logger.info("🔍 Started heartbeat monitoring loop")
+        logger.info(" SEARCH:  Started heartbeat monitoring loop")
     
     async def _monitor_loop(self) -> None:
         """Main monitoring loop that checks for missed heartbeats."""
@@ -261,7 +261,7 @@ class HeartbeatMonitor:
                         self._heartbeat_failures += 1
                         
                         logger.critical(
-                            f"💀 AGENT DEATH DETECTED: {execution_id} - "
+                            f"[U+1F480] AGENT DEATH DETECTED: {execution_id} - "
                             f"{status.missed_heartbeats} missed heartbeats "
                             f"(last: {status.last_heartbeat.isoformat()})"
                         )
@@ -275,7 +275,7 @@ class HeartbeatMonitor:
         self._recovery_triggers += 1
         
         logger.critical(
-            f"🚨 TRIGGERING RECOVERY for dead agent: {execution_id} - "
+            f" ALERT:  TRIGGERING RECOVERY for dead agent: {execution_id} - "
             f"Recovery delay: {self.recovery_delay}s"
         )
         
@@ -377,7 +377,7 @@ class HeartbeatMonitor:
                 
                 if status.missed_heartbeats >= self.max_missed_heartbeats:
                     status.is_alive = False
-                    logger.warning(f"⚠️ Force check detected dead execution: {execution_id}")
+                    logger.warning(f" WARNING: [U+FE0F] Force check detected dead execution: {execution_id}")
             
             return status.is_alive
     
@@ -406,7 +406,7 @@ class HeartbeatMonitor:
             status.last_heartbeat = now
             status.next_expected = now + timedelta(seconds=self.heartbeat_interval)
             
-        logger.info(f"🔄 Manually revived execution: {execution_id}")
+        logger.info(f" CYCLE:  Manually revived execution: {execution_id}")
         return True
     
     async def shutdown(self) -> None:
@@ -423,7 +423,7 @@ class HeartbeatMonitor:
         async with self._lock:
             self._monitored_executions.clear()
         
-        logger.info("🛑 HeartbeatMonitor shutdown completed")
+        logger.info("[U+1F6D1] HeartbeatMonitor shutdown completed")
     
     def __len__(self) -> int:
         """Return number of monitored executions."""

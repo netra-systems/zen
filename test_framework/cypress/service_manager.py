@@ -135,7 +135,7 @@ class ServiceDependencyManager:
         """Log the status of all services."""
         logger.info("Service status summary:")
         for service_name, is_healthy in self.service_health.items():
-            status = "✓ HEALTHY" if is_healthy else "✗ UNHEALTHY"
+            status = "[U+2713] HEALTHY" if is_healthy else "[U+2717] UNHEALTHY"
             required = "REQUIRED" if self.required_services[service_name].get("required", True) else "OPTIONAL"
             logger.info(f"  {service_name}: {status} ({required})")
     

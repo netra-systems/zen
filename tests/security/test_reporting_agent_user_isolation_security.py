@@ -158,7 +158,7 @@ class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
         if cross_contamination_detected:
             violation_details = self._format_security_violations()
             assert False, (
-                f"🚨 CRITICAL SECURITY BREACH: Cross-user data access detected! "
+                f" ALERT:  CRITICAL SECURITY BREACH: Cross-user data access detected! "
                 f"User B (attacker) gained access to User A's (victim) confidential data. "
                 f"{violation_details}. DeepAgentState creates user isolation vulnerabilities. "
                 f"Migration to UserExecutionContext required immediately."
@@ -313,7 +313,7 @@ class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
         if memory_attack_detected:
             attack_details = self._format_memory_attack_evidence(memory_references)
             assert False, (
-                f"🚨 MEMORY REFERENCE ATTACK DETECTED: Malicious user can access other "
+                f" ALERT:  MEMORY REFERENCE ATTACK DETECTED: Malicious user can access other "
                 f"users' data through shared memory references. {attack_details}. "
                 f"DeepAgentState creates exploitable memory vulnerabilities. "
                 f"UserExecutionContext migration required for memory isolation."
@@ -488,7 +488,7 @@ class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
         # AFTER migration: Should detect no contamination (test passes)
         if cache_contamination_detected:
             assert False, (
-                f"🚨 CACHE POISONING ATTACK DETECTED: Shared cache contains mixed user data. "
+                f" ALERT:  CACHE POISONING ATTACK DETECTED: Shared cache contains mixed user data. "
                 f"Cache contamination creates cross-user data leakage vulnerabilities. "
                 f"User-isolated caching required with UserExecutionContext."
             )
@@ -554,7 +554,7 @@ class TestReportingAgentUserIsolationSecurity(SSotAsyncTestCase):
         # AFTER migration: Should detect no attacks (test passes)
         if serialization_attack_detected:
             assert False, (
-                f"🚨 SERIALIZATION ATTACK DETECTED: Cross-user data accessible through "
+                f" ALERT:  SERIALIZATION ATTACK DETECTED: Cross-user data accessible through "
                 f"object serialization. Serialized objects contain references to other "
                 f"users' confidential data. UserExecutionContext required for isolation."
             )

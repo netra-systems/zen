@@ -409,13 +409,13 @@ class SecretsAuditor:
         
         # Print healthy secrets
         if healthy:
-            print(f"\n✅ HEALTHY SECRETS ({len(healthy)}):")
+            print(f"\n PASS:  HEALTHY SECRETS ({len(healthy)}):")
             for name, _ in healthy:
-                print(f"  ✓ {name}")
+                print(f"  [U+2713] {name}")
         
         # Print warnings
         if warnings:
-            print(f"\n⚠️  WARNINGS ({len(warnings)}):")
+            print(f"\n WARNING: [U+FE0F]  WARNINGS ({len(warnings)}):")
             for name, result in warnings:
                 print(f"\n  {name}:")
                 for warning in result.warnings:
@@ -423,7 +423,7 @@ class SecretsAuditor:
         
         # Print critical issues
         if critical:
-            print(f"\n❌ CRITICAL ISSUES ({len(critical)}):")
+            print(f"\n FAIL:  CRITICAL ISSUES ({len(critical)}):")
             for name, result in critical:
                 print(f"\n  {name}:")
                 for issue in result.issues:
@@ -469,7 +469,7 @@ class SecretsAuditor:
                 f,
                 indent=2
             )
-        print(f"\n📄 Detailed report saved to: {report_file}")
+        print(f"\n[U+1F4C4] Detailed report saved to: {report_file}")
         
         return len(critical) == 0, self.results
 
@@ -501,10 +501,10 @@ def main():
     success, results = auditor.run_full_audit()
     
     if not success:
-        print("\n❌ Audit failed - critical issues found")
+        print("\n FAIL:  Audit failed - critical issues found")
         exit(1)
     else:
-        print("\n✅ Audit passed")
+        print("\n PASS:  Audit passed")
         exit(0)
 
 

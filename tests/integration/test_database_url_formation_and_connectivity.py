@@ -299,7 +299,7 @@
                                                         # REMOVED_SYNTAX_ERROR: other_issues.append(issue)
 
                                                         # REMOVED_SYNTAX_ERROR: if not issues:
-                                                            # REMOVED_SYNTAX_ERROR: print("  ✅ No URL formation issues detected")
+                                                            # REMOVED_SYNTAX_ERROR: print("   PASS:  No URL formation issues detected")
 
                                                             # Assert no critical issues that would cause connection failures
                                                             # REMOVED_SYNTAX_ERROR: assert len(critical_issues) == 0, ( )
@@ -315,12 +315,12 @@
                                                                 # Warn about high-priority issues
                                                                 # REMOVED_SYNTAX_ERROR: if high_issues:
                                                                     # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                    # REMOVED_SYNTAX_ERROR: ⚠️  High-priority issues that should be addressed:")
+                                                                    # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  High-priority issues that should be addressed:")
                                                                     # REMOVED_SYNTAX_ERROR: for issue in high_issues:
                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                         # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                        # REMOVED_SYNTAX_ERROR: ✅ Database URL formation analysis completed")
+                                                                        # REMOVED_SYNTAX_ERROR:  PASS:  Database URL formation analysis completed")
 
                                                                         # Removed problematic line: @pytest.mark.asyncio
                                                                         # Removed problematic line: async def test_database_url_connectivity_verification(self, diagnostic):
@@ -365,7 +365,7 @@
 
                                                                                                 # Display detailed results
                                                                                                 # REMOVED_SYNTAX_ERROR: for result in connectivity_results:
-                                                                                                    # REMOVED_SYNTAX_ERROR: status = "✅ SUCCESS" if result['success'] else "❌ FAILED"
+                                                                                                    # REMOVED_SYNTAX_ERROR: status = " PASS:  SUCCESS" if result['success'] else " FAIL:  FAILED"
                                                                                                     # REMOVED_SYNTAX_ERROR: time_str = "formatted_string" if result['connection_time'] else "N/A"
 
                                                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -401,11 +401,11 @@
                                                                                                             # REMOVED_SYNTAX_ERROR: auth_config_results = [item for item in []]]
                                                                                                             # REMOVED_SYNTAX_ERROR: if auth_config_results and not auth_config_results[0]['success']:
                                                                                                                 # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                                # REMOVED_SYNTAX_ERROR: ⚠️  WARNING: Primary auth_config URL failed but other URLs work.")
+                                                                                                                # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  WARNING: Primary auth_config URL failed but other URLs work.")
                                                                                                                 # REMOVED_SYNTAX_ERROR: print(f"This indicates the auth service may not be using the optimal URL.")
 
                                                                                                                 # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                                # REMOVED_SYNTAX_ERROR: ✅ Database URL connectivity verification completed")
+                                                                                                                # REMOVED_SYNTAX_ERROR:  PASS:  Database URL connectivity verification completed")
 
 # REMOVED_SYNTAX_ERROR: def test_ssl_parameter_compatibility_check(self):
     # REMOVED_SYNTAX_ERROR: '''
@@ -489,7 +489,7 @@
                                                     # REMOVED_SYNTAX_ERROR: else:
                                                         # REMOVED_SYNTAX_ERROR: env.set('DATABASE_URL', 'sqlite+aiosqlite:///test.db')
 
-                                                        # REMOVED_SYNTAX_ERROR: print(f"  ✅ SSL parameter transformation working")
+                                                        # REMOVED_SYNTAX_ERROR: print(f"   PASS:  SSL parameter transformation working")
 
                                                         # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                             # REMOVED_SYNTAX_ERROR: compatibility_issues.append("formatted_string")
@@ -503,7 +503,7 @@
                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                 # REMOVED_SYNTAX_ERROR: if not compatibility_issues:
-                                                                    # REMOVED_SYNTAX_ERROR: print("  ✅ All SSL parameter transformations working correctly")
+                                                                    # REMOVED_SYNTAX_ERROR: print("   PASS:  All SSL parameter transformations working correctly")
 
                                                                     # Assert no critical SSL compatibility issues
                                                                     # REMOVED_SYNTAX_ERROR: critical_ssl_issues = [item for item in []]
@@ -519,7 +519,7 @@
                                                                         
 
                                                                         # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                        # REMOVED_SYNTAX_ERROR: ✅ SSL parameter compatibility check completed")
+                                                                        # REMOVED_SYNTAX_ERROR:  PASS:  SSL parameter compatibility check completed")
 
 
                                                                         # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
@@ -561,8 +561,8 @@
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                         # REMOVED_SYNTAX_ERROR: if successful:
-                            # REMOVED_SYNTAX_ERROR: print("✅ Database URL formation and connectivity working")
+                            # REMOVED_SYNTAX_ERROR: print(" PASS:  Database URL formation and connectivity working")
                             # REMOVED_SYNTAX_ERROR: else:
-                                # REMOVED_SYNTAX_ERROR: print("❌ Database URL formation or connectivity issues found")
+                                # REMOVED_SYNTAX_ERROR: print(" FAIL:  Database URL formation or connectivity issues found")
 
                                 # REMOVED_SYNTAX_ERROR: asyncio.run(main())

@@ -11,14 +11,14 @@ CRITICAL SSOT COMPLIANCE:
 This module replaces ALL existing WebSocket authentication implementations:
 
 ELIMINATED (SSOT Violations):
-❌ websocket_core/auth.py - WebSocketAuthenticator class
-❌ user_context_extractor.py - 4 different JWT validation methods  
-❌ Pre-connection validation logic in websocket.py
-❌ Environment-specific authentication branching
+ FAIL:  websocket_core/auth.py - WebSocketAuthenticator class
+ FAIL:  user_context_extractor.py - 4 different JWT validation methods  
+ FAIL:  Pre-connection validation logic in websocket.py
+ FAIL:  Environment-specific authentication branching
 
 PRESERVED (SSOT Sources):
-✅ netra_backend.app.services.unified_authentication_service.py
-✅ netra_backend.app.clients.auth_client_core.py (as underlying implementation)
+ PASS:  netra_backend.app.services.unified_authentication_service.py
+ PASS:  netra_backend.app.clients.auth_client_core.py (as underlying implementation)
 
 This module provides WebSocket-specific wrappers around the SSOT authentication
 service while maintaining full SSOT compliance.
@@ -70,12 +70,12 @@ def extract_e2e_context_from_websocket(websocket: WebSocket) -> Optional[Dict[st
         # ISSUE #135 TERTIARY FIX: Pre-validate critical environment variables and auth context
         env_validation_result = _validate_critical_environment_configuration()
         if not env_validation_result["valid"]:
-            logger.error(f"🚨 CRITICAL ENV VALIDATION FAILED: {env_validation_result['errors']}")
+            logger.error(f" ALERT:  CRITICAL ENV VALIDATION FAILED: {env_validation_result['errors']}")
             # Continue processing but log the issues for debugging
             for error in env_validation_result["errors"]:
-                logger.error(f"❌ ENV CONFIG ERROR: {error}")
+                logger.error(f" FAIL:  ENV CONFIG ERROR: {error}")
         else:
-            logger.debug(f"✅ Environment configuration validation passed")
+            logger.debug(f" PASS:  Environment configuration validation passed")
         
         from shared.isolated_environment import get_env
         
@@ -364,14 +364,14 @@ class UnifiedWebSocketAuthenticator:
         }
         
         logger.info(f"SSOT WEBSOCKET AUTH: Starting authentication (state: {_safe_websocket_state_for_logging(connection_state)})")
-        logger.debug(f"🔐 WEBSOCKET AUTH ATTEMPT DEBUG: {json.dumps(auth_attempt_debug, indent=2)}")
+        logger.debug(f"[U+1F510] WEBSOCKET AUTH ATTEMPT DEBUG: {json.dumps(auth_attempt_debug, indent=2)}")
         
         try:
             # PHASE 1 FIX: Check authentication circuit breaker before proceeding
             circuit_state = await self._check_circuit_breaker()
             if circuit_state == "OPEN":
                 error_msg = "Authentication circuit breaker is OPEN - too many recent failures"
-                logger.critical(f"🚨 CIRCUIT BREAKER OPEN: {error_msg} (connection_id: {preliminary_connection_id or 'unknown'}, failure_count: {self._circuit_breaker['failure_count']})")
+                logger.critical(f" ALERT:  CIRCUIT BREAKER OPEN: {error_msg} (connection_id: {preliminary_connection_id or 'unknown'}, failure_count: {self._circuit_breaker['failure_count']})")
                 logger.warning(f"SSOT WEBSOCKET AUTH: {error_msg}")
                 self._websocket_auth_failures += 1
                 
@@ -384,7 +384,7 @@ class UnifiedWebSocketAuthenticator:
             # Validate WebSocket connection state first
             if not self._is_websocket_valid_for_auth(websocket):
                 error_msg = f"WebSocket in invalid state for authentication: {_safe_websocket_state_for_logging(connection_state)}"
-                logger.critical(f"🚨 WEBSOCKET STATE ERROR: {error_msg} (connection_id: {preliminary_connection_id or 'unknown'})")
+                logger.critical(f" ALERT:  WEBSOCKET STATE ERROR: {error_msg} (connection_id: {preliminary_connection_id or 'unknown'})")
                 logger.error(f"SSOT WEBSOCKET AUTH: {error_msg}")
                 await self._record_circuit_breaker_failure()
                 self._websocket_auth_failures += 1
@@ -439,7 +439,7 @@ class UnifiedWebSocketAuthenticator:
                 }
                 
                 logger.warning(f"SSOT WEBSOCKET AUTH: Authentication failed - {auth_result.error}")
-                logger.error(f"🚨 WEBSOCKET AUTH FAILURE DEBUG: {json.dumps(failure_debug, indent=2)}")
+                logger.error(f" ALERT:  WEBSOCKET AUTH FAILURE DEBUG: {json.dumps(failure_debug, indent=2)}")
                 self._websocket_auth_failures += 1
                 
                 return WebSocketAuthResult(
@@ -479,7 +479,7 @@ class UnifiedWebSocketAuthenticator:
             }
             
             logger.info(f"SSOT WEBSOCKET AUTH: Success for user {auth_result.user_id[:8] if auth_result.user_id else '[NO_USER_ID]'}... (client_id: {user_context.websocket_client_id})")
-            logger.debug(f"✅ WEBSOCKET AUTH SUCCESS DEBUG: {json.dumps(success_debug, indent=2)}")
+            logger.debug(f" PASS:  WEBSOCKET AUTH SUCCESS DEBUG: {json.dumps(success_debug, indent=2)}")
             self._websocket_auth_successes += 1
             
             return websocket_auth_result
@@ -505,7 +505,7 @@ class UnifiedWebSocketAuthenticator:
             }
             
             logger.error(f"SSOT WEBSOCKET AUTH: Unexpected error during authentication: {e}", exc_info=True)
-            logger.error(f"🔥 WEBSOCKET AUTH EXCEPTION DEBUG: {json.dumps(exception_debug, indent=2)}")
+            logger.error(f" FIRE:  WEBSOCKET AUTH EXCEPTION DEBUG: {json.dumps(exception_debug, indent=2)}")
             self._websocket_auth_failures += 1
             
             return WebSocketAuthResult(
@@ -761,7 +761,7 @@ class UnifiedWebSocketAuthenticator:
             auth_result: Failed authentication result
             close_connection: Whether to close WebSocket connection after error
         """
-        logger.critical(f"🚨 HANDLING AUTH FAILURE: {auth_result.error_code}: {auth_result.error_message} (close_connection: {close_connection})")
+        logger.critical(f" ALERT:  HANDLING AUTH FAILURE: {auth_result.error_code}: {auth_result.error_message} (close_connection: {close_connection})")
         logger.warning(f"SSOT WEBSOCKET AUTH: Handling auth failure - {auth_result.error_code}: {auth_result.error_message}")
         
         try:
@@ -1603,12 +1603,12 @@ def _validate_critical_environment_configuration() -> Dict[str, Any]:
         
         # Log validation summary
         if validation_result["valid"]:
-            logger.debug(f"🔍 ENV VALIDATION: {len(validation_result['checks_performed'])} checks passed")
+            logger.debug(f" SEARCH:  ENV VALIDATION: {len(validation_result['checks_performed'])} checks passed")
         else:
-            logger.error(f"🔍 ENV VALIDATION: {len(validation_result['errors'])} critical errors found")
+            logger.error(f" SEARCH:  ENV VALIDATION: {len(validation_result['errors'])} critical errors found")
         
         if validation_result["warnings"]:
-            logger.warning(f"🔍 ENV VALIDATION: {len(validation_result['warnings'])} warnings found")
+            logger.warning(f" SEARCH:  ENV VALIDATION: {len(validation_result['warnings'])} warnings found")
             
     except Exception as e:
         validation_result["valid"] = False
@@ -1699,12 +1699,12 @@ def _validate_auth_service_health() -> Dict[str, Any]:
             return health_result
         
         health_result["service_available"] = True
-        logger.debug("✅ AUTH SERVICE: Unified authentication service is available")
+        logger.debug(" PASS:  AUTH SERVICE: Unified authentication service is available")
         
     except Exception as e:
         health_result["healthy"] = False
         health_result["error"] = f"Auth service check failed: {e}"
-        logger.warning(f"⚠️ AUTH SERVICE: Health check failed - {e}")
+        logger.warning(f" WARNING: [U+FE0F] AUTH SERVICE: Health check failed - {e}")
     
     return health_result
 

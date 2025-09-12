@@ -203,7 +203,7 @@ class CloudRunURLMigrator:
             changes = self.analyze_file_changes(file_path)
             if changes:
                 for old_url, new_url, description in changes:
-                    logger.info(f"  {old_url} → {new_url}")
+                    logger.info(f"  {old_url}  ->  {new_url}")
                 
                 if self.dry_run:
                     logger.info(f"  [DRY RUN] Would migrate {len(changes)} URLs")
@@ -212,10 +212,10 @@ class CloudRunURLMigrator:
                     success = self.migrate_file(file_path)
                     if success:
                         results['migrated_files'].append(str(file_path))
-                        logger.info(f"  ✅ Successfully migrated")
+                        logger.info(f"   PASS:  Successfully migrated")
                     else:
                         results['failed_files'].append(str(file_path))
-                        logger.error(f"  ❌ Migration failed")
+                        logger.error(f"   FAIL:  Migration failed")
         
         # Save migration log
         if not self.dry_run and self.changes_log:
@@ -232,12 +232,12 @@ class CloudRunURLMigrator:
         
         remaining_files = self.find_files_with_cloud_run_urls()
         if remaining_files:
-            logger.error(f"❌ {len(remaining_files)} files still contain Cloud Run URLs:")
+            logger.error(f" FAIL:  {len(remaining_files)} files still contain Cloud Run URLs:")
             for file_path in remaining_files:
                 logger.error(f"  - {file_path.relative_to(self.project_root)}")
             return False
         
-        logger.info("✅ Validation successful - no Cloud Run URLs found")
+        logger.info(" PASS:  Validation successful - no Cloud Run URLs found")
         return True
     
     def rollback_migration(self, migration_log_path: Path) -> bool:
@@ -258,11 +258,11 @@ class CloudRunURLMigrator:
                 else:
                     logger.error(f"  Backup not found: {backup_file}")
             
-            logger.info("✅ Rollback completed")
+            logger.info(" PASS:  Rollback completed")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Rollback failed: {e}")
+            logger.error(f" FAIL:  Rollback failed: {e}")
             return False
 
 
@@ -311,10 +311,10 @@ def main():
         # Validate migration
         success = migrator.validate_migration()
         if not success:
-            logger.error("❌ Migration validation failed!")
+            logger.error(" FAIL:  Migration validation failed!")
             sys.exit(1)
     
-    logger.info("✅ Migration completed successfully!")
+    logger.info(" PASS:  Migration completed successfully!")
 
 
 if __name__ == "__main__":

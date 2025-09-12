@@ -79,11 +79,11 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         test_user_id = f"e2e-oauth-staging-{int(time.time())}-{uuid.uuid4().hex[:6]}"
         test_email = f"e2e-oauth-{test_user_id}@staging.netra.ai"
         
-        print(f"🎯 Testing complete OAuth onboarding for user: {test_email}")
-        print(f"🌐 Staging environment: {self.staging_config.auth_service_url}")
+        print(f" TARGET:  Testing complete OAuth onboarding for user: {test_email}")
+        print(f"[U+1F310] Staging environment: {self.staging_config.auth_service_url}")
         
         # Step 1: OAuth Authentication (simulated for staging)
-        print("📝 Step 1: OAuth Authentication...")
+        print("[U+1F4DD] Step 1: OAuth Authentication...")
         
         access_token = await self.auth_helper.get_staging_token_async(
             email=test_email,
@@ -97,10 +97,10 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         token_valid = await self.auth_helper.validate_token(access_token)
         assert token_valid is True, "OAuth-generated token must validate successfully with auth service"
         
-        print(f"✅ OAuth authentication successful, token length: {len(access_token)}")
+        print(f" PASS:  OAuth authentication successful, token length: {len(access_token)}")
         
         # Step 2: User Profile Creation/Retrieval
-        print("👤 Step 2: User Profile Access...")
+        print("[U+1F464] Step 2: User Profile Access...")
         
         import httpx
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -117,19 +117,19 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
             
             if profile_response.status_code == 200:
                 profile_data = profile_response.json()
-                print(f"✅ User profile exists: {profile_data.get('email', 'unknown')}")
+                print(f" PASS:  User profile exists: {profile_data.get('email', 'unknown')}")
             else:
-                print("ℹ️ User profile not yet created (404 is acceptable for new users)")
+                print("[U+2139][U+FE0F] User profile not yet created (404 is acceptable for new users)")
         
         # Step 3: WebSocket Authentication and Connection
-        print("🔌 Step 3: WebSocket Authentication...")
+        print("[U+1F50C] Step 3: WebSocket Authentication...")
         
         try:
             websocket = await self.websocket_auth_helper.connect_authenticated_websocket(timeout=20.0)
-            print("✅ WebSocket connection established with OAuth authentication")
+            print(" PASS:  WebSocket connection established with OAuth authentication")
             
             # Step 4: Send authenticated message to verify WebSocket works
-            print("💬 Step 4: Authenticated WebSocket Message...")
+            print("[U+1F4AC] Step 4: Authenticated WebSocket Message...")
             
             test_message = {
                 "type": "ping",
@@ -145,27 +145,27 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
                 response_raw = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 response = json.loads(response_raw)
                 
-                print(f"✅ WebSocket response received: {response.get('type', 'unknown')}")
+                print(f" PASS:  WebSocket response received: {response.get('type', 'unknown')}")
                 assert response is not None, "WebSocket must respond to authenticated message"
                 
             except asyncio.TimeoutError:
-                print("⚠️ WebSocket response timeout (may be acceptable if server doesn't respond to ping)")
+                print(" WARNING: [U+FE0F] WebSocket response timeout (may be acceptable if server doesn't respond to ping)")
                 # Not failing here as some WebSocket implementations don't respond to ping
             
             await websocket.close()
             
         except Exception as e:
             # If WebSocket fails, provide detailed debugging info
-            print(f"❌ WebSocket connection failed: {e}")
-            print(f"🔍 WebSocket URL: {self.staging_config.websocket_url}")
-            print(f"🔑 Auth token provided: {bool(access_token)}")
-            print(f"📋 Headers sent: {list(self.auth_helper.get_websocket_headers(access_token).keys())}")
+            print(f" FAIL:  WebSocket connection failed: {e}")
+            print(f" SEARCH:  WebSocket URL: {self.staging_config.websocket_url}")
+            print(f"[U+1F511] Auth token provided: {bool(access_token)}")
+            print(f"[U+1F4CB] Headers sent: {list(self.auth_helper.get_websocket_headers(access_token).keys())}")
             
             # Re-raise to fail the test with full context
             raise AssertionError(f"WebSocket authentication failed for OAuth user: {e}")
         
         # Step 5: API Access with OAuth Token
-        print("🔧 Step 5: API Access Verification...")
+        print("[U+1F527] Step 5: API Access Verification...")
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Test basic API endpoint access
@@ -179,9 +179,9 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
                 f"got {api_response.status_code}: {api_response.text}"
             )
             
-            print(f"✅ API access successful with OAuth token: {api_response.status_code}")
+            print(f" PASS:  API access successful with OAuth token: {api_response.status_code}")
         
-        print(f"🎉 Complete OAuth onboarding flow successful for {test_email}")
+        print(f" CELEBRATION:  Complete OAuth onboarding flow successful for {test_email}")
     
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -196,7 +196,7 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         num_users = 3
         user_contexts = []
         
-        print(f"👥 Testing concurrent OAuth authentication for {num_users} users")
+        print(f"[U+1F465] Testing concurrent OAuth authentication for {num_users} users")
         
         for i in range(num_users):
             user_id = f"e2e-oauth-concurrent-{i}-{int(time.time())}-{uuid.uuid4().hex[:4]}"
@@ -255,7 +255,7 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
             
             if result["success"]:
                 successful_auths += 1
-                print(f"✅ {user_info}: Authentication successful")
+                print(f" PASS:  {user_info}: Authentication successful")
                 
                 # Verify token isolation - each token must be unique and contain correct user data
                 import jwt as jwt_lib
@@ -264,7 +264,7 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
                 assert decoded["email"] == result["email"], f"{user_info}: Token must contain correct email"
                 
             else:
-                print(f"❌ {user_info}: Authentication failed - {result.get('error', 'unknown error')}")
+                print(f" FAIL:  {user_info}: Authentication failed - {result.get('error', 'unknown error')}")
                 
         # Require at least majority of authentications to succeed
         success_rate = successful_auths / len(user_contexts)
@@ -273,12 +273,12 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
             f"({successful_auths}/{len(user_contexts)} succeeded)"
         )
         
-        print(f"✅ Concurrent OAuth authentication successful: {success_rate:.1%} success rate")
+        print(f" PASS:  Concurrent OAuth authentication successful: {success_rate:.1%} success rate")
         
         # Test concurrent WebSocket connections for successful authentications
         successful_users = [r for r in auth_results if r["success"]]
         if successful_users:
-            print(f"🔌 Testing concurrent WebSocket connections for {len(successful_users)} users")
+            print(f"[U+1F50C] Testing concurrent WebSocket connections for {len(successful_users)} users")
             
             async def test_websocket_connection(user_result):
                 """Test WebSocket connection for single user."""
@@ -309,7 +309,7 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
             ws_successes = sum(1 for r in ws_results if not isinstance(r, Exception) and r.get("websocket_success", False))
             ws_success_rate = ws_successes / len(ws_tasks) if ws_tasks else 0
             
-            print(f"🔌 WebSocket concurrent connections: {ws_success_rate:.1%} success rate ({ws_successes}/{len(ws_tasks)})")
+            print(f"[U+1F50C] WebSocket concurrent connections: {ws_success_rate:.1%} success rate ({ws_successes}/{len(ws_tasks)})")
             
             # WebSocket success rate requirement is lower due to staging environment limitations
             assert ws_success_rate >= 0.5, f"WebSocket concurrent connection success rate too low: {ws_success_rate:.1%}"
@@ -327,7 +327,7 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         test_user_id = f"e2e-oauth-persistence-{int(time.time())}-{uuid.uuid4().hex[:6]}"
         test_email = f"e2e-persistence-{test_user_id}@staging.netra.ai"
         
-        print(f"🔄 Testing OAuth session persistence for: {test_email}")
+        print(f" CYCLE:  Testing OAuth session persistence for: {test_email}")
         
         # Step 1: Initial OAuth authentication
         access_token = await self.auth_helper.get_staging_token_async(
@@ -348,7 +348,7 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         
         async with httpx.AsyncClient(timeout=30.0) as client:
             for i, endpoint in enumerate(api_endpoints):
-                print(f"📡 Request {i+1}: {endpoint}")
+                print(f"[U+1F4E1] Request {i+1}: {endpoint}")
                 
                 response = await client.get(
                     f"{self.staging_config.backend_url}{endpoint}",
@@ -370,13 +370,13 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
                     f"got {response.status_code}: {response.text}"
                 )
                 
-                print(f"✅ Request {i+1} successful: {response.status_code} ({result['response_time']:.2f}s)")
+                print(f" PASS:  Request {i+1} successful: {response.status_code} ({result['response_time']:.2f}s)")
                 
                 # Brief delay between requests to test session persistence over time
                 await asyncio.sleep(0.5)
         
         # Step 3: Test WebSocket session persistence
-        print("🔌 Testing WebSocket session persistence...")
+        print("[U+1F50C] Testing WebSocket session persistence...")
         
         try:
             # Connect WebSocket with same OAuth token
@@ -392,16 +392,16 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                print(f"📤 Sent WebSocket message {i+1}")
+                print(f"[U+1F4E4] Sent WebSocket message {i+1}")
                 
                 # Brief delay between messages
                 await asyncio.sleep(0.5)
             
             await websocket.close()
-            print("✅ WebSocket session persistence verified")
+            print(" PASS:  WebSocket session persistence verified")
             
         except Exception as e:
-            print(f"⚠️ WebSocket persistence test failed (may be acceptable): {e}")
+            print(f" WARNING: [U+FE0F] WebSocket persistence test failed (may be acceptable): {e}")
             # Don't fail the test here as WebSocket implementation may vary
         
         # Assert: All API requests succeeded with persistent session
@@ -414,8 +414,8 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
         )
         
         avg_response_time = sum(r["response_time"] for r in session_results) / total_requests
-        print(f"🎯 Session persistence verified: {successful_requests}/{total_requests} requests successful")
-        print(f"⚡ Average response time: {avg_response_time:.2f}s")
+        print(f" TARGET:  Session persistence verified: {successful_requests}/{total_requests} requests successful")
+        print(f" LIGHTNING:  Average response time: {avg_response_time:.2f}s")
         
         # Verify session didn't degrade over time (response times should be consistent)
         first_response_time = session_results[0]["response_time"]
@@ -428,4 +428,4 @@ class TestOAuthEndToEndAuthenticationStaging(BaseE2ETest):
             f"{time_degradation:.1%} increase from {first_response_time:.2f}s to {last_response_time:.2f}s"
         )
         
-        print(f"✅ OAuth session persistence test complete: Performance stable over time")
+        print(f" PASS:  OAuth session persistence test complete: Performance stable over time")

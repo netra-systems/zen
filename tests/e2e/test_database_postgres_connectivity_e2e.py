@@ -82,7 +82,7 @@ class TestDatabasePostgresConnectivityE2E:
                 result = conn.execute(text("SELECT 1 as connectivity_test"))
                 test_value = result.fetchone()[0]
                 assert test_value == 1, f"Database connectivity test failed: {test_value}"
-                logger.info("✓ Real PostgreSQL basic connectivity test passed")
+                logger.info("[U+2713] Real PostgreSQL basic connectivity test passed")
 
             # Test 2: Real transaction capability
             with engine.begin() as conn:
@@ -108,7 +108,7 @@ class TestDatabasePostgresConnectivityE2E:
                 """))
                 retrieved_data = result.fetchone()[0]
                 assert retrieved_data == 'real_db_test', f"Transaction test failed: {retrieved_data}"
-                logger.info("✓ Real PostgreSQL transaction test passed")
+                logger.info("[U+2713] Real PostgreSQL transaction test passed")
 
             # Test 3: Connection pool validation
             active_connections = []
@@ -122,17 +122,17 @@ class TestDatabasePostgresConnectivityE2E:
             for conn in active_connections:
                 conn.close()
             
-            logger.info("✓ Real PostgreSQL connection pool test passed")
+            logger.info("[U+2713] Real PostgreSQL connection pool test passed")
 
         except Exception as e:
-            logger.error(f"❌ Real PostgreSQL connectivity test failed: {e}")
+            logger.error(f" FAIL:  Real PostgreSQL connectivity test failed: {e}")
             pytest.fail(f"Real PostgreSQL connectivity failed: {e}")
         
         # Ensure test used real database (execution time check)
         execution_time = time.time() - start_time
         assert execution_time > 0.1, f"Database test executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real PostgreSQL connectivity validation completed in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real PostgreSQL connectivity validation completed in {execution_time:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -160,7 +160,7 @@ class TestDatabasePostgresConnectivityE2E:
             if user_record:
                 assert user_record[0] == "db_test@example.com", "Email mismatch in database"
                 assert user_record[1] == user_data['user_id'], "User ID mismatch in database"
-                logger.info("✓ User successfully persisted in real database")
+                logger.info("[U+2713] User successfully persisted in real database")
             else:
                 logger.warning("User not found in database - may be using separate auth database")
         
@@ -175,7 +175,7 @@ class TestDatabasePostgresConnectivityE2E:
         execution_time = time.time() - start_time
         assert execution_time > 0.5, f"Auth integration test executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Auth service real database integration validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Auth service real database integration validated in {execution_time:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -210,7 +210,7 @@ class TestDatabasePostgresConnectivityE2E:
                 response = await client.get(f"http://localhost:8000{endpoint}", headers=headers)
                 # Session validation should work consistently across endpoints
                 assert response.status_code in [200, 401, 403, 404], f"Session validation failed for {endpoint}: {response.status_code}"
-                logger.info(f"✓ Session validation passed for {endpoint}: {response.status_code}")
+                logger.info(f"[U+2713] Session validation passed for {endpoint}: {response.status_code}")
         
         # Test auth service session validation
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -221,7 +221,7 @@ class TestDatabasePostgresConnectivityE2E:
         execution_time = time.time() - start_time
         assert execution_time > 0.3, f"Session test executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real session management across services validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real session management across services validated in {execution_time:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -268,7 +268,7 @@ class TestDatabasePostgresConnectivityE2E:
                 except asyncio.TimeoutError:
                     logger.info("WebSocket connected but no auth response (acceptable - connection established)")
                 
-            logger.info("✓ Real WebSocket authentication test completed")
+            logger.info("[U+2713] Real WebSocket authentication test completed")
             
         except Exception as e:
             logger.warning(f"WebSocket authentication test encountered: {e}")
@@ -285,7 +285,7 @@ class TestDatabasePostgresConnectivityE2E:
         execution_time = time.time() - start_time
         assert execution_time > 0.2, f"WebSocket test executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real WebSocket authentication with database validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real WebSocket authentication with database validated in {execution_time:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -341,7 +341,7 @@ class TestDatabasePostgresConnectivityE2E:
         execution_time = time.time() - start_time
         assert execution_time > 0.2, f"Health check test executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real service health with database dependency validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real service health with database dependency validated in {execution_time:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -389,7 +389,7 @@ class TestDatabasePostgresConnectivityE2E:
             if isinstance(result, Exception):
                 pytest.fail(f"User {i+1} operations failed: {result}")
             else:
-                logger.info(f"✓ {result}")
+                logger.info(f"[U+2713] {result}")
         
         # Test database-level isolation by checking connection pools
         with engine.connect() as conn:
@@ -405,7 +405,7 @@ class TestDatabasePostgresConnectivityE2E:
         execution_time = time.time() - start_time
         assert execution_time > 1.0, f"Multi-user test executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real multi-user database isolation validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real multi-user database isolation validated in {execution_time:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -458,7 +458,7 @@ class TestDatabasePostgresConnectivityE2E:
         
         # Log performance metrics
         for metric, duration in performance_metrics.items():
-            logger.info(f"✓ {metric}: {duration:.4f}s")
+            logger.info(f"[U+2713] {metric}: {duration:.4f}s")
             assert duration < 5.0, f"Performance metric {metric} too slow: {duration:.4f}s"
         
         # Test database statistics queries
@@ -489,7 +489,7 @@ class TestDatabasePostgresConnectivityE2E:
         execution_time = time.time() - start_time
         assert execution_time > 0.1, f"Performance monitoring executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Real database performance monitoring completed in {execution_time:.2f}s")
+        logger.info(f" PASS:  Real database performance monitoring completed in {execution_time:.2f}s")
         logger.info(f"Performance summary: {performance_metrics}")
 
 
@@ -543,13 +543,13 @@ class TestDatabaseNamingConventionE2E:
             actual_db_name = result.fetchone()[0]
             
             assert actual_db_name == database_name, f"Database name mismatch: expected {database_name}, got {actual_db_name}"
-            logger.info(f"✓ Connected to correct database: {actual_db_name}")
+            logger.info(f"[U+2713] Connected to correct database: {actual_db_name}")
         
         # Ensure real validation was performed
         execution_time = time.time() - start_time
         assert execution_time > 0.05, f"Naming validation executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Database naming validation completed in {execution_time:.2f}s")
+        logger.info(f" PASS:  Database naming validation completed in {execution_time:.2f}s")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -608,7 +608,7 @@ class TestDatabaseNamingConventionE2E:
         execution_time = time.time() - start_time
         assert execution_time > 0.1, f"Cross-service test executed too quickly ({execution_time:.3f}s) - likely mocked"
         
-        logger.info(f"✅ Cross-service database synchronization validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  Cross-service database synchronization validated in {execution_time:.2f}s")
         logger.info(f"All services correctly using database: {main_db_name}")
 
 

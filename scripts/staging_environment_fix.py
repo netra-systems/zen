@@ -133,10 +133,10 @@ def check_gcp_auth() -> bool:
 def setup_gcp_secrets() -> bool:
     """Create all required secrets in GCP Secret Manager."""
     if not check_gcp_auth():
-        print("❌ Not authenticated with GCP. Run: gcloud auth login")
+        print(" FAIL:  Not authenticated with GCP. Run: gcloud auth login")
         return False
     
-    print(f"🔧 Setting up secrets in GCP project: {GCP_PROJECT}")
+    print(f"[U+1F527] Setting up secrets in GCP project: {GCP_PROJECT}")
     
     # Generate secrets
     secrets_data = {
@@ -164,7 +164,7 @@ def setup_gcp_secrets() -> bool:
             ], capture_output=True, text=True)
             
             if result.returncode != 0 and "already exists" not in result.stderr:
-                print(f"⚠️  Failed to create secret {secret_name}: {result.stderr}")
+                print(f" WARNING: [U+FE0F]  Failed to create secret {secret_name}: {result.stderr}")
                 continue
             
             # Add secret version
@@ -185,20 +185,20 @@ def setup_gcp_secrets() -> bool:
             
             if add_result.returncode == 0:
                 if "PLACEHOLDER" in secret_value:
-                    print(f"⚠️  Created {secret_name} with PLACEHOLDER - MUST UPDATE MANUALLY")
+                    print(f" WARNING: [U+FE0F]  Created {secret_name} with PLACEHOLDER - MUST UPDATE MANUALLY")
                 else:
-                    print(f"✅ Created secret: {secret_name}")
+                    print(f" PASS:  Created secret: {secret_name}")
                 success_count += 1
             else:
-                print(f"❌ Failed to add secret version for {secret_name}: {add_result.stderr}")
+                print(f" FAIL:  Failed to add secret version for {secret_name}: {add_result.stderr}")
                 
         except Exception as e:
-            print(f"❌ Error creating secret {secret_name}: {e}")
+            print(f" FAIL:  Error creating secret {secret_name}: {e}")
     
-    print(f"\n📊 Secret creation summary: {success_count}/{total_secrets} secrets created")
+    print(f"\n CHART:  Secret creation summary: {success_count}/{total_secrets} secrets created")
     
     if success_count < total_secrets:
-        print("\n⚠️  MANUAL STEPS REQUIRED:")
+        print("\n WARNING: [U+FE0F]  MANUAL STEPS REQUIRED:")
         print("   1. Set real GEMINI_API_KEY in gemini-api-key-staging")
         print("   2. Set real Google OAuth credentials in google-oauth-*-staging secrets") 
         print("   3. Set real ClickHouse password in clickhouse-password-staging")
@@ -209,7 +209,7 @@ def setup_gcp_secrets() -> bool:
 
 def validate_staging_config() -> bool:
     """Validate staging configuration meets requirements."""
-    print("🔍 Validating staging configuration...")
+    print(" SEARCH:  Validating staging configuration...")
     
     # Test with proper staging environment variables
     test_env = os.environ.copy()
@@ -250,16 +250,16 @@ print("VALIDATION_RESULT:", result)
         ], env=test_env, capture_output=True, text=True, cwd=project_root)
         
         if "VALIDATION_RESULT: True" in result.stdout:
-            print("✅ Staging configuration validation PASSED")
+            print(" PASS:  Staging configuration validation PASSED")
             return True
         else:
-            print("❌ Staging configuration validation FAILED")
+            print(" FAIL:  Staging configuration validation FAILED")
             print("STDOUT:", result.stdout[-1000:])  # Last 1000 chars
             print("STDERR:", result.stderr[-1000:])  # Last 1000 chars
             return False
             
     except Exception as e:
-        print(f"❌ Validation error: {e}")
+        print(f" FAIL:  Validation error: {e}")
         return False
 
 
@@ -308,33 +308,33 @@ def main():
     if args.setup_secrets:
         success = setup_gcp_secrets()
         if success:
-            print("\n✅ All secrets created successfully!")
+            print("\n PASS:  All secrets created successfully!")
         else:
-            print("\n❌ Some secrets failed to create. See output above.")
+            print("\n FAIL:  Some secrets failed to create. See output above.")
             sys.exit(1)
     
     elif args.validate_config:
         success = validate_staging_config()
         if success:
-            print("\n✅ Staging configuration is valid!")
+            print("\n PASS:  Staging configuration is valid!")
         else:
-            print("\n❌ Staging configuration validation failed!")
+            print("\n FAIL:  Staging configuration validation failed!")
             sys.exit(1)
     
     elif args.generate_deploy_command:
         command = generate_deployment_command()
-        print("🚀 Deployment command:")
+        print("[U+1F680] Deployment command:")
         print(command)
     
     else:
         parser.print_help()
         
-        print("\n📋 Current status:")
+        print("\n[U+1F4CB] Current status:")
         print(f"   GCP Project: {GCP_PROJECT}")
         print(f"   Required secrets: {len(REQUIRED_SECRETS)}")
         print(f"   Environment variables: {len(STAGING_ENV_VARS)}")
         
-        auth_status = "✅ Authenticated" if check_gcp_auth() else "❌ Not authenticated"
+        auth_status = " PASS:  Authenticated" if check_gcp_auth() else " FAIL:  Not authenticated"
         print(f"   GCP Auth: {auth_status}")
 
 

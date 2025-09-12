@@ -77,7 +77,7 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         assert "send_event" in error_message
         assert "Mock object has no attribute" in error_message
         
-        logger.info(f"✅ Successfully reproduced Golden Path WebSocket mock error: {error_message}")
+        logger.info(f" PASS:  Successfully reproduced Golden Path WebSocket mock error: {error_message}")
 
     async def test_websocket_bridge_actual_interface_discovery(self):
         """DISCOVERY TEST: Document actual AgentWebSocketBridge interface.
@@ -113,7 +113,7 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         assert not hasattr(real_bridge, 'send_event'), \
             "AgentWebSocketBridge should NOT have 'send_event' method"
         
-        logger.info("✅ AgentWebSocketBridge interface documented for Golden Path test correction")
+        logger.info(" PASS:  AgentWebSocketBridge interface documented for Golden Path test correction")
 
     async def test_websocket_bridge_correct_mock_pattern(self):
         """PASSING TEST: Demonstrate correct WebSocket bridge mocking pattern.
@@ -149,7 +149,7 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         websocket_bridge.notify_agent_started.assert_called_once()
         websocket_bridge.notify_agent_completed.assert_called_once()
         
-        logger.info("✅ Correct WebSocket bridge mocking pattern validated")
+        logger.info(" PASS:  Correct WebSocket bridge mocking pattern validated")
 
     async def test_user_websocket_emitter_interface_validation(self):
         """UNIT TEST: Validate UserWebSocketEmitter interface used in factory pattern.
@@ -187,7 +187,7 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         mock_bridge.notify_tool_completed.assert_called_once()
         mock_bridge.notify_agent_completed.assert_called_once()
         
-        logger.info("✅ UserWebSocketEmitter interface validation completed")
+        logger.info(" PASS:  UserWebSocketEmitter interface validation completed")
 
     async def test_websocket_event_delivery_patterns(self):
         """INTEGRATION TEST: Validate WebSocket event delivery patterns for Golden Path.
@@ -276,7 +276,7 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         for event in sent_events:
             self.assertEqual(event['run_id'], self.test_run_id)
         
-        logger.info("✅ Complete WebSocket event delivery pattern validated")
+        logger.info(" PASS:  Complete WebSocket event delivery pattern validated")
 
     async def test_websocket_bridge_error_handling(self):
         """UNIT TEST: Validate WebSocket bridge error handling patterns.
@@ -304,7 +304,7 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
                 # Should not propagate exception in production code
                 self.fail(f"WebSocket bridge should handle errors gracefully: {e}")
         
-        logger.info("✅ WebSocket bridge error handling validated")
+        logger.info(" PASS:  WebSocket bridge error handling validated")
 
     async def test_golden_path_websocket_mock_correction_example(self):
         """EXAMPLE TEST: Show how to correct Golden Path WebSocket mocking.
@@ -314,7 +314,7 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         """
         # BEFORE: Incorrect Golden Path pattern (causes AttributeError)
         # websocket_bridge = AsyncMock(spec=AgentWebSocketBridge)
-        # websocket_bridge.send_event.assert_called()  # ❌ FAILS
+        # websocket_bridge.send_event.assert_called()  #  FAIL:  FAILS
         
         # AFTER: Correct Golden Path pattern
         websocket_bridge = MagicMock(spec=AgentWebSocketBridge)
@@ -365,7 +365,7 @@ class TestWebSocketBridgeInterfaces(SSotAsyncTestCase):
         completed_call = websocket_bridge.notify_agent_completed.call_args
         self.assertEqual(completed_call.kwargs['run_id'], self.test_run_id)
         
-        logger.info("✅ Golden Path WebSocket mocking correction example validated")
+        logger.info(" PASS:  Golden Path WebSocket mocking correction example validated")
 
     def teardown_method(self, method):
         """Clean up test environment."""

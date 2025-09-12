@@ -142,7 +142,7 @@ class TestToolEventDeliveryConfirmation:
             
             assert False, "EXPECTED TO FAIL: No connection failure detection, but test passed"
         except (AttributeError, KeyError):
-            logger.info("✅ EXPECTED FAILURE: Connection failure detection is missing as expected")
+            logger.info(" PASS:  EXPECTED FAILURE: Connection failure detection is missing as expected")
 
     async def test_event_delivery_timeout_with_real_network_delay(self):
         """FAILING TEST: Event delivery timeout with simulated network latency.

@@ -377,7 +377,7 @@ class TestWebSocketHandlerSetupInheritance(SSotBaseTestCase):
                 f"Discovered classes: {sorted(discovered_names)}"
             )
         
-        print(f"\n✓ Successfully discovered {len(test_classes)} test classes:")
+        print(f"\n[U+2713] Successfully discovered {len(test_classes)} test classes:")
         for class_name in sorted(test_classes.keys()):
             print(f"  - {class_name}")
     
@@ -411,7 +411,7 @@ class TestWebSocketHandlerSetupInheritance(SSotBaseTestCase):
                 f"They can cause test infrastructure failures that mask revenue-critical bugs."
             )
         
-        print("✓ All test classes have proper setup_method() inheritance")
+        print("[U+2713] All test classes have proper setup_method() inheritance")
     
     def test_verify_specific_known_violations(self):
         """
@@ -506,7 +506,7 @@ class TestWebSocketHandlerSetupInheritance(SSotBaseTestCase):
         if remediation_counts:
             self.record_metric("avg_remediation_steps", sum(remediation_counts) / len(remediation_counts))
         
-        print("✓ All violations have detailed remediation steps")
+        print("[U+2713] All violations have detailed remediation steps")
     
     def test_file_path_accuracy(self):
         """Test that violation reports contain accurate file paths and line numbers."""
@@ -530,7 +530,7 @@ class TestWebSocketHandlerSetupInheritance(SSotBaseTestCase):
             
             print(f"  {violation.test_class_name}: Line {violation.line_number}")
         
-        print("✓ All violation reports have accurate file paths and line numbers")
+        print("[U+2713] All violation reports have accurate file paths and line numbers")
     
     def _format_violation_report(self, violations: List[SetupMethodInheritanceViolation]) -> str:
         """Format a comprehensive violation report."""
@@ -569,7 +569,7 @@ class TestWebSocketHandlerSetupInheritance(SSotBaseTestCase):
     def _format_single_violation(self, violation: SetupMethodInheritanceViolation) -> str:
         """Format a single violation for detailed display."""
         return (
-            f"\n  ❌ {violation.test_class_name} ({violation.file_path}:{violation.line_number})\n"
+            f"\n   FAIL:  {violation.test_class_name} ({violation.file_path}:{violation.line_number})\n"
             f"     Problem: {violation.details}\n"
             f"     Fix: {violation.remediation_steps[0] if violation.remediation_steps else 'No remediation provided'}\n"
         )

@@ -87,8 +87,8 @@ class TestWebSocketImportResolution(SSotBaseTestCase):
                 # This is the EXPECTED failure - the bug is reproduced
                 if "get_connection_state_machine" in str(e):
                     # CRITICAL: This confirms the import scope bug exists
-                    print(f"✅ IMPORT SCOPE BUG REPRODUCED: {e}")
-                    print("🚨 This test PROVES the bug exists on line 1179 of websocket.py")
+                    print(f" PASS:  IMPORT SCOPE BUG REPRODUCED: {e}")
+                    print(" ALERT:  This test PROVES the bug exists on line 1179 of websocket.py")
                     # Re-raise to make test fail hard as designed
                     raise AssertionError(f"IMPORT SCOPE BUG CONFIRMED: {e}")
                 else:
@@ -97,14 +97,14 @@ class TestWebSocketImportResolution(SSotBaseTestCase):
             except ImportError as e:
                 # Import issues also indicate the scope problem
                 if "get_connection_state_machine" in str(e):
-                    print(f"✅ IMPORT SCOPE BUG REPRODUCED via ImportError: {e}")
+                    print(f" PASS:  IMPORT SCOPE BUG REPRODUCED via ImportError: {e}")
                     raise AssertionError(f"IMPORT SCOPE BUG CONFIRMED via ImportError: {e}")
                 else:
                     raise
             except AttributeError as e:
                 # Module doesn't have the function in global scope
                 if "get_connection_state_machine" in str(e):
-                    print(f"✅ IMPORT SCOPE BUG REPRODUCED via AttributeError: {e}")
+                    print(f" PASS:  IMPORT SCOPE BUG REPRODUCED via AttributeError: {e}")
                     raise AssertionError(f"IMPORT SCOPE BUG CONFIRMED via AttributeError: {e}")
                 else:
                     raise
@@ -148,7 +148,7 @@ class TestWebSocketImportResolution(SSotBaseTestCase):
             
         except NameError as e:
             if "get_connection_state_machine" in str(e):
-                print(f"✅ FUNCTION-SCOPED IMPORT TIMING BUG REPRODUCED: {e}")
+                print(f" PASS:  FUNCTION-SCOPED IMPORT TIMING BUG REPRODUCED: {e}")
                 raise AssertionError(f"TIMING BUG CONFIRMED: {e}")
             else:
                 raise
@@ -185,8 +185,8 @@ class TestWebSocketImportResolution(SSotBaseTestCase):
                 
             except NameError as e:
                 if "get_connection_state_machine" in str(e):
-                    print(f"✅ EXCEPTION HANDLER SCOPE BUG REPRODUCED: {e}")
-                    print("🚨 Exception handler at line 1214 cannot access function-scoped import")
+                    print(f" PASS:  EXCEPTION HANDLER SCOPE BUG REPRODUCED: {e}")
+                    print(" ALERT:  Exception handler at line 1214 cannot access function-scoped import")
                     raise AssertionError(f"EXCEPTION HANDLER SCOPE BUG CONFIRMED: {e}")
                 else:
                     raise
@@ -253,7 +253,7 @@ def test_module_import_verification():
                     f"Function called at line {earliest_call} "
                     f"but imported at line {latest_import}"
                 )
-                print(f"✅ {error_msg}")
+                print(f" PASS:  {error_msg}")
                 raise AssertionError(error_msg)
         
         # If we reach here, either the bug doesn't exist or wasn't detected
@@ -263,7 +263,7 @@ def test_module_import_verification():
         pytest.fail("websocket.py file not found - cannot verify import scope bug")
     except Exception as e:
         # Any exception here suggests the bug exists
-        print(f"✅ EXCEPTION DURING IMPORT VERIFICATION: {e}")
+        print(f" PASS:  EXCEPTION DURING IMPORT VERIFICATION: {e}")
         raise AssertionError(f"IMPORT VERIFICATION FAILED (bug likely exists): {e}")
 
 

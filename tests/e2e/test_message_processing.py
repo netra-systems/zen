@@ -228,7 +228,7 @@ class TestMessageProcessing:
             for i in range(3):
                 message_data = {
                     "thread_id": thread_id,
-                    "content": f"Test message {i} with unicode: 你好 émojis: 🚀",
+                    "content": f"Test message {i} with unicode: [U+4F60][U+597D] [U+00E9]mojis: [U+1F680]",
                     "role": "user",
                     "metadata": {
                         "client_id": str(uuid.uuid4()),

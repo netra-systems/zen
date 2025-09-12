@@ -412,7 +412,7 @@ class StagingFrontendBackendIntegrationTestRunner:
             
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all frontend-backend integration tests."""
-        print(f"🌐 Running Frontend-Backend Integration Tests")
+        print(f"[U+1F310] Running Frontend-Backend Integration Tests")
         print(f"Environment: {self.environment}")
         print(f"Frontend URL: {StagingConfig.get_service_url('frontend')}")
         print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
@@ -420,7 +420,7 @@ class StagingFrontendBackendIntegrationTestRunner:
         print()
         
         # Get test token first
-        print("🔑 Getting test token...")
+        print("[U+1F511] Getting test token...")
         self.access_token = await self.get_test_token()
         print(f"     Token obtained: {bool(self.access_token)}")
         print()
@@ -430,7 +430,7 @@ class StagingFrontendBackendIntegrationTestRunner:
         # Test 10.1: Frontend accessibility
         frontend_result = await self.test_frontend_accessibility()
         results["frontend_accessibility"] = frontend_result
-        print(f"10.1 ✅ Frontend accessible: {frontend_result['success']}")
+        print(f"10.1  PASS:  Frontend accessible: {frontend_result['success']}")
         
         # Test 10.2: CORS integration
         cors_results = await self.test_cors_frontend_backend()
@@ -439,7 +439,7 @@ class StagingFrontendBackendIntegrationTestRunner:
             result.get("success", False) for key, result in cors_results.items() 
             if key.startswith("cors") and isinstance(result, dict)
         )
-        print(f"10.2 ✅ CORS integration: {cors_working}")
+        print(f"10.2  PASS:  CORS integration: {cors_working}")
         
         # Test 10.3: API endpoints
         api_results = await self.test_api_endpoints_from_frontend_perspective()
@@ -448,19 +448,19 @@ class StagingFrontendBackendIntegrationTestRunner:
             result.get("success", False) for key, result in api_results.items()
             if key.startswith("api") and isinstance(result, dict)
         )
-        print(f"10.3 ✅ API endpoints: {api_endpoints_working}")
+        print(f"10.3  PASS:  API endpoints: {api_endpoints_working}")
         
         # Test 10.4: WebSocket integration
         ws_result = await self.test_websocket_frontend_integration()
         results["websocket_integration"] = ws_result
         ws_working = ws_result.get("success", False) or ws_result.get("skipped", False)
-        print(f"10.4 ✅ WebSocket integration: {ws_working}")
+        print(f"10.4  PASS:  WebSocket integration: {ws_working}")
         
         # Test 10.5: Authentication flow
         auth_flow_result = await self.test_authentication_flow_integration()
         results["auth_flow_integration"] = auth_flow_result
         auth_flow_working = auth_flow_result.get("success", False)
-        print(f"10.5 ✅ Auth flow integration: {auth_flow_working}")
+        print(f"10.5  PASS:  Auth flow integration: {auth_flow_working}")
         
         # Calculate summary
         all_tests = {k: v for k, v in results.items() if isinstance(v, dict) and "success" in v}
@@ -491,15 +491,15 @@ class StagingFrontendBackendIntegrationTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed ({results['summary']['skipped_tests']} skipped)")
-        print(f"🌐 Frontend accessible: {'✅ Yes' if frontend_accessible else '❌ No'}")
-        print(f"🔗 CORS working: {'✅ Yes' if cors_working else '❌ No'}")
-        print(f"🔌 API integration: {'✅ Working' if api_endpoints_working else '❌ Issues'}")
-        print(f"📡 WebSocket integration: {'✅ Working' if ws_working else '❌ Issues'}")
-        print(f"🔐 Auth flow: {'✅ Working' if auth_flow_working else '❌ Issues'}")
+        print(f" CHART:  Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed ({results['summary']['skipped_tests']} skipped)")
+        print(f"[U+1F310] Frontend accessible: {' PASS:  Yes' if frontend_accessible else ' FAIL:  No'}")
+        print(f"[U+1F517] CORS working: {' PASS:  Yes' if cors_working else ' FAIL:  No'}")
+        print(f"[U+1F50C] API integration: {' PASS:  Working' if api_endpoints_working else ' FAIL:  Issues'}")
+        print(f"[U+1F4E1] WebSocket integration: {' PASS:  Working' if ws_working else ' FAIL:  Issues'}")
+        print(f"[U+1F510] Auth flow: {' PASS:  Working' if auth_flow_working else ' FAIL:  Issues'}")
         
         if results["summary"]["critical_integration_failure"]:
-            print("🚨 CRITICAL: Frontend-backend integration failure!")
+            print(" ALERT:  CRITICAL: Frontend-backend integration failure!")
             
         return results
 

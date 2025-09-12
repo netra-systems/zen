@@ -249,7 +249,7 @@ class StartupProgressTracker:
         """Mark startup beginning."""
         self.start_time = time.time()
         if self.mode == StartupMode.MINIMAL:
-            print("⚡ Starting Netra Apex Development Environment...")
+            print(" LIGHTNING:  Starting Netra Apex Development Environment...")
         
     def service_starting(self, name: str):
         """Mark service as starting."""
@@ -271,7 +271,7 @@ class StartupProgressTracker:
             
             if self.mode == StartupMode.MINIMAL:
                 # Single line progress
-                print(f"✅ {name:<15} [Port: {port:<5}] {duration:.1f}s")
+                print(f" PASS:  {name:<15} [Port: {port:<5}] {duration:.1f}s")
             
     def service_failed(self, name: str, error: str):
         """Mark service as failed."""
@@ -280,7 +280,7 @@ class StartupProgressTracker:
             self.services[name]["error"] = error
             
             if self.mode == StartupMode.MINIMAL:
-                print(f"❌ {name:<15} Failed: {error}")
+                print(f" FAIL:  {name:<15} Failed: {error}")
     
     def complete(self):
         """Show completion summary."""
@@ -290,7 +290,7 @@ class StartupProgressTracker:
         total_time = time.time() - self.start_time
         
         if self.mode == StartupMode.MINIMAL:
-            print(f"\n🚀 System Ready ({total_time:.1f}s)")
+            print(f"\n[U+1F680] System Ready ({total_time:.1f}s)")
             
             # Show service URLs
             for name, info in self.services.items():

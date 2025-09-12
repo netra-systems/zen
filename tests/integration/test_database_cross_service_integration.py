@@ -473,7 +473,7 @@ class TestDatabaseCrossServiceIntegration(SSotBaseTestCase):
             assert len(other_secrets) == 2, f"Other users' data should exist but be isolated from user {i}"
             
         self.record_metric("multi_user_isolation_verified", len(users_data))
-        self.increment_db_query_count(12)  # 3 users × 4 queries each
+        self.increment_db_query_count(12)  # 3 users  x  4 queries each
 
     @pytest.mark.asyncio
     async def test_foreign_key_constraints_referential_integrity(self):
@@ -684,7 +684,7 @@ class TestDatabaseCrossServiceIntegration(SSotBaseTestCase):
         
         self.record_metric("average_pool_query_time_ms", avg_query_time)
         self.record_metric("rapid_queries_successful", len(query_results))
-        self.increment_db_query_count(20)  # 10 queries × 2 databases
+        self.increment_db_query_count(20)  # 10 queries  x  2 databases
 
     @pytest.mark.asyncio
     async def test_audit_logging_cross_service_compliance(self):

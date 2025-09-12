@@ -1,7 +1,7 @@
 # REMOVED_SYNTAX_ERROR: '''Agent State Validator - Unified System Testing Phase 5
 # REMOVED_SYNTAX_ERROR: Validates agent initialization, transitions, and resource usage.
 # REMOVED_SYNTAX_ERROR: BVJ: Enterprise/Growth segment - $50K+ revenue protection from session failures.
-# REMOVED_SYNTAX_ERROR: Architecture: ≤300 lines, ≤8 lines per function, modular validators.
+# REMOVED_SYNTAX_ERROR: Architecture:  <= 300 lines,  <= 8 lines per function, modular validators.
 # REMOVED_SYNTAX_ERROR: '''
 
 import asyncio

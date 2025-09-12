@@ -101,7 +101,7 @@ class TestDatabaseConnectionPoolStress:
 
     # # Assertions
 # assert success_rate >= 0.95, \
-    # f"Database operation success rate too low: {success_rate:.2%} (expected: ≥95%)"
+    # f"Database operation success rate too low: {success_rate:.2%} (expected:  >= 95%)"
 
     # assert duration < 30.0, \
     # f"Database stress test took too long: {duration:.2f}s (expected: <30s)"

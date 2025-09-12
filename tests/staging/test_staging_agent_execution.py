@@ -334,14 +334,14 @@ class StagingAgentExecutionTestRunner:
         
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all agent execution tests."""
-        print(f"🤖 Running Agent Execution Tests")
+        print(f"[U+1F916] Running Agent Execution Tests")
         print(f"Environment: {self.environment}")
         print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
         print(f"WebSocket URL: {self.get_websocket_url()}")
         print()
         
         # Get test token first
-        print("🔑 Getting test token...")
+        print("[U+1F511] Getting test token...")
         self.access_token = await self.get_test_token()
         print(f"     Token obtained: {bool(self.access_token)}")
         print()
@@ -358,7 +358,7 @@ class StagingAgentExecutionTestRunner:
             print(f"     Testing {agent_type} agent via HTTP...")
             http_result = await self.test_agent_http_execution(agent_type)
             results[f"{agent_type}_http_execution"] = http_result
-            print(f"     ✅ {agent_type} HTTP: {http_result['success']}")
+            print(f"      PASS:  {agent_type} HTTP: {http_result['success']}")
             
         # Test 9.3: WebSocket agent execution for primary agent
         print("9.3 Testing WebSocket agent execution...")
@@ -368,11 +368,11 @@ class StagingAgentExecutionTestRunner:
         ws_result = await self.test_agent_websocket_execution(primary_agent)
         results[f"{primary_agent}_websocket_execution"] = ws_result
         
-        print(f"     ✅ {primary_agent} WebSocket: {ws_result['success']}")
-        print(f"     📋 All required events: {ws_result.get('all_required_events', False)}")
+        print(f"      PASS:  {primary_agent} WebSocket: {ws_result['success']}")
+        print(f"     [U+1F4CB] All required events: {ws_result.get('all_required_events', False)}")
         
         if ws_result.get('missing_events'):
-            print(f"     ⚠️  Missing events: {ws_result['missing_events']}")
+            print(f"      WARNING: [U+FE0F]  Missing events: {ws_result['missing_events']}")
             
         # Calculate summary
         all_tests = {k: v for k, v in results.items() if isinstance(v, dict) and "success" in v}
@@ -407,14 +407,14 @@ class StagingAgentExecutionTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed ({results['summary']['skipped_tests']} skipped)")
-        print(f"🤖 Core agent functionality: {'✅ Working' if core_agent_functionality else '❌ Broken'}")
-        print(f"🔌 HTTP execution: {'✅ Working' if http_execution_working else '❌ Failed'}")
-        print(f"📡 WebSocket execution: {'✅ Working' if websocket_execution_working else '❌ Failed'}")
-        print(f"📋 WebSocket events: {'✅ Complete' if websocket_events_complete else '❌ Missing events'}")
+        print(f" CHART:  Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed ({results['summary']['skipped_tests']} skipped)")
+        print(f"[U+1F916] Core agent functionality: {' PASS:  Working' if core_agent_functionality else ' FAIL:  Broken'}")
+        print(f"[U+1F50C] HTTP execution: {' PASS:  Working' if http_execution_working else ' FAIL:  Failed'}")
+        print(f"[U+1F4E1] WebSocket execution: {' PASS:  Working' if websocket_execution_working else ' FAIL:  Failed'}")
+        print(f"[U+1F4CB] WebSocket events: {' PASS:  Complete' if websocket_events_complete else ' FAIL:  Missing events'}")
         
         if results["summary"]["critical_agent_failure"]:
-            print("🚨 CRITICAL: Core agent functionality is broken!")
+            print(" ALERT:  CRITICAL: Core agent functionality is broken!")
             
         return results
 

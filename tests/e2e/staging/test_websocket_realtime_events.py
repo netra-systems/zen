@@ -133,9 +133,9 @@ class TestWebSocketRealTimeEvents:
                 try:
                     async with session.get(endpoint, timeout=15) as resp:
                         assert resp.status == 200, f"Staging {service} service unhealthy: {resp.status}"
-                        logger.info(f"✅ Staging {service} service healthy")
+                        logger.info(f" PASS:  Staging {service} service healthy")
                 except Exception as e:
-                    pytest.fail(f"❌ Staging {service} service unavailable: {e}")
+                    pytest.fail(f" FAIL:  Staging {service} service unavailable: {e}")
     
     async def _cleanup_websocket_connections(self):
         """Clean up all WebSocket connections created during testing."""
@@ -191,22 +191,22 @@ class TestWebSocketRealTimeEvents:
                     first_event_time = time.time() - start_time
                 
                 event_type = event.get("type", "unknown")
-                logger.info(f"📥 Received WebSocket event: {event_type}")
+                logger.info(f"[U+1F4E5] Received WebSocket event: {event_type}")
                 
                 # Check for completion events
                 if event_type in ["agent_completed", "error", "connection_closed"]:
-                    logger.info(f"🏁 Received completion event: {event_type}")
+                    logger.info(f"[U+1F3C1] Received completion event: {event_type}")
                     break
                     
             except asyncio.TimeoutError:
                 # Timeout is expected during monitoring - continue
                 continue
             except websockets.exceptions.ConnectionClosed:
-                logger.warning("🔌 WebSocket connection closed during monitoring")
+                logger.warning("[U+1F50C] WebSocket connection closed during monitoring")
                 break
             except Exception as e:
                 error_count += 1
-                logger.warning(f"⚠️ Error during WebSocket monitoring: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Error during WebSocket monitoring: {e}")
                 if error_count > 5:  # Too many errors
                     break
         
@@ -251,7 +251,7 @@ class TestWebSocketRealTimeEvents:
             websocket = await self._create_authenticated_websocket_connection(timeout=25.0)
             connection_time = time.time() - connection_start
             
-            logger.info(f"🔌 WebSocket connected in {connection_time:.2f}s")
+            logger.info(f"[U+1F50C] WebSocket connected in {connection_time:.2f}s")
             
             # Step 2: Send message that triggers agent execution with events
             agent_request = {
@@ -270,7 +270,7 @@ class TestWebSocketRealTimeEvents:
             }
             
             await websocket.send(json.dumps(agent_request))
-            logger.info(f"📤 Sent agent execution request")
+            logger.info(f"[U+1F4E4] Sent agent execution request")
             
             # Step 3: Monitor real-time event streaming
             expected_events = [
@@ -370,7 +370,7 @@ class TestWebSocketRealTimeEvents:
             assert real_time_quality_score >= 0.6, f"Real-time quality too low: {real_time_quality_score:.1%}"
             assert result.business_value_delivered, "Real-time event streaming failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: Real-time event streaming delivers engaging user experience")
+            logger.info(f" PASS:  BUSINESS VALUE: Real-time event streaming delivers engaging user experience")
             logger.info(f"   Events received: {len(events)}")
             logger.info(f"   Event types: {', '.join(set(event_types_received))}")
             logger.info(f"   First event time: {metrics.first_event_time:.1f}s")
@@ -380,7 +380,7 @@ class TestWebSocketRealTimeEvents:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Agent execution event streaming test failed: {e}")
+            logger.error(f" FAIL:  Agent execution event streaming test failed: {e}")
             pytest.fail(f"Agent execution real-time event streaming failed: {e}")
     
     @pytest.mark.asyncio
@@ -406,7 +406,7 @@ class TestWebSocketRealTimeEvents:
         
         try:
             # Step 1: Establish initial connection and test stability
-            logger.info(f"🔄 Testing WebSocket connection resilience and reconnection")
+            logger.info(f" CYCLE:  Testing WebSocket connection resilience and reconnection")
             
             # Test 1: Basic connection stability
             websocket_1 = await self._create_authenticated_websocket_connection(timeout=25.0)
@@ -440,7 +440,7 @@ class TestWebSocketRealTimeEvents:
                     
                 except Exception as e:
                     stability_errors += 1
-                    logger.warning(f"⚠️ Stability test error {stability_errors}: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Stability test error {stability_errors}: {e}")
                     if stability_errors > 3:
                         break
             
@@ -487,7 +487,7 @@ class TestWebSocketRealTimeEvents:
                     # Brief pause between connections
                     await asyncio.sleep(2.0)
                     
-                    logger.info(f"✅ Reconnection attempt {reconnect_attempt + 1} successful: {reconnect_time:.2f}s")
+                    logger.info(f" PASS:  Reconnection attempt {reconnect_attempt + 1} successful: {reconnect_time:.2f}s")
                     
                 except Exception as e:
                     reconnect_time = time.time() - reconnect_start
@@ -497,7 +497,7 @@ class TestWebSocketRealTimeEvents:
                         "connection_time": reconnect_time,
                         "error": str(e)
                     })
-                    logger.warning(f"⚠️ Reconnection attempt {reconnect_attempt + 1} failed: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Reconnection attempt {reconnect_attempt + 1} failed: {e}")
             
             # Test 3: Concurrent connection handling
             concurrent_connections = []
@@ -582,7 +582,7 @@ class TestWebSocketRealTimeEvents:
             assert successful_concurrent >= 2, f"Too few successful concurrent connections: {successful_concurrent}/3"
             assert result.business_value_delivered, "Connection resilience failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: WebSocket connections demonstrate enterprise-grade reliability")
+            logger.info(f" PASS:  BUSINESS VALUE: WebSocket connections demonstrate enterprise-grade reliability")
             logger.info(f"   Stability success rate: {stability_success_rate:.1%}")
             logger.info(f"   Reconnection success rate: {reconnection_success_rate:.1%}")
             logger.info(f"   Average reconnection time: {average_reconnection_time:.1f}s")
@@ -591,7 +591,7 @@ class TestWebSocketRealTimeEvents:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ WebSocket resilience test failed: {e}")
+            logger.error(f" FAIL:  WebSocket resilience test failed: {e}")
             pytest.fail(f"WebSocket connection resilience and reconnection failed: {e}")
     
     @pytest.mark.asyncio
@@ -618,7 +618,7 @@ class TestWebSocketRealTimeEvents:
         try:
             # Step 1: Establish WebSocket and initiate long operation
             websocket = await self._create_authenticated_websocket_connection(timeout=25.0)
-            logger.info(f"🔌 WebSocket connected for long operation test")
+            logger.info(f"[U+1F50C] WebSocket connected for long operation test")
             
             # Send request for comprehensive long-running analysis
             long_operation_request = {
@@ -643,7 +643,7 @@ class TestWebSocketRealTimeEvents:
             }
             
             await websocket.send(json.dumps(long_operation_request))
-            logger.info(f"📤 Sent long operation request")
+            logger.info(f"[U+1F4E4] Sent long operation request")
             
             # Step 2: Monitor progress updates over extended period
             progress_events = []
@@ -682,7 +682,7 @@ class TestWebSocketRealTimeEvents:
                             "type": event_type,
                             "description": event.get("description", "")
                         })
-                        logger.info(f"📊 Progress update: {event_type}")
+                        logger.info(f" CHART:  Progress update: {event_type}")
                     
                     # Analyze content for engagement quality
                     content = (
@@ -708,7 +708,7 @@ class TestWebSocketRealTimeEvents:
                     
                     # Check for completion
                     if event_type in ["agent_completed", "agent_response"] and len(content) > 200:
-                        logger.info(f"🏁 Long operation completed with substantial response")
+                        logger.info(f"[U+1F3C1] Long operation completed with substantial response")
                         break
                         
                 except asyncio.TimeoutError:
@@ -716,10 +716,10 @@ class TestWebSocketRealTimeEvents:
                     gap_duration = time.time() - last_progress_time
                     if gap_duration > 30.0:  # More than 30 seconds without update
                         engagement_metrics["user_engagement_maintained"] = False
-                        logger.warning(f"⚠️ Long gap in progress updates: {gap_duration:.1f}s")
+                        logger.warning(f" WARNING: [U+FE0F] Long gap in progress updates: {gap_duration:.1f}s")
                     continue
                 except Exception as e:
-                    logger.warning(f"⚠️ Error during progress monitoring: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Error during progress monitoring: {e}")
                     break
             
             await websocket.close()
@@ -778,7 +778,7 @@ class TestWebSocketRealTimeEvents:
             assert engagement_metrics["user_engagement_maintained"], "User engagement not maintained during long operation"
             assert result.business_value_delivered, "Long operation progress updates failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: Real-time progress updates maintain user engagement during long operations")
+            logger.info(f" PASS:  BUSINESS VALUE: Real-time progress updates maintain user engagement during long operations")
             logger.info(f"   Progress updates received: {engagement_metrics['progress_updates_received']}")
             logger.info(f"   Update frequency: {engagement_metrics['progress_frequency']:.3f} updates/sec")
             logger.info(f"   Max gap between updates: {max_gap_between_updates:.1f}s")
@@ -788,7 +788,7 @@ class TestWebSocketRealTimeEvents:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Long operation progress test failed: {e}")
+            logger.error(f" FAIL:  Long operation progress test failed: {e}")
             pytest.fail(f"Real-time progress updates during long operations failed: {e}")
     
     @pytest.mark.asyncio
@@ -817,7 +817,7 @@ class TestWebSocketRealTimeEvents:
             num_concurrent_users = 4
             user_connections = []
             
-            logger.info(f"🔌 Creating {num_concurrent_users} concurrent WebSocket connections for isolation test")
+            logger.info(f"[U+1F50C] Creating {num_concurrent_users} concurrent WebSocket connections for isolation test")
             
             for user_index in range(num_concurrent_users):
                 # Create unique user context
@@ -855,10 +855,10 @@ class TestWebSocketRealTimeEvents:
                     })
                     
                     self.active_websockets.append(websocket)
-                    logger.info(f"✅ User {user_index} WebSocket connected")
+                    logger.info(f" PASS:  User {user_index} WebSocket connected")
                     
                 except Exception as e:
-                    logger.warning(f"⚠️ Failed to connect WebSocket for user {user_index}: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Failed to connect WebSocket for user {user_index}: {e}")
             
             assert len(user_connections) >= 3, f"Too few WebSocket connections: {len(user_connections)}/4"
             
@@ -1022,7 +1022,7 @@ class TestWebSocketRealTimeEvents:
             assert isolation_metrics["isolation_success_rate"] >= 0.9, f"Isolation success rate too low: {isolation_metrics['isolation_success_rate']:.1%}"
             assert result.business_value_delivered, "Multi-user WebSocket isolation failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: WebSocket events maintain strict multi-user isolation")
+            logger.info(f" PASS:  BUSINESS VALUE: WebSocket events maintain strict multi-user isolation")
             logger.info(f"   Successful multi-user communications: {len(successful_results)}/{num_concurrent_users}")
             logger.info(f"   Users receiving own data: {isolation_metrics['users_receiving_own_data']}/{len(successful_results)}")
             logger.info(f"   Isolation violations: {isolation_metrics['isolation_violations']}")
@@ -1031,7 +1031,7 @@ class TestWebSocketRealTimeEvents:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ Multi-user WebSocket isolation test failed: {e}")
+            logger.error(f" FAIL:  Multi-user WebSocket isolation test failed: {e}")
             pytest.fail(f"Multi-user WebSocket event isolation failed: {e}")
     
     @pytest.mark.asyncio
@@ -1178,7 +1178,7 @@ class TestWebSocketRealTimeEvents:
                         "scenario_time": scenario_time
                     })
                     
-                    logger.info(f"✅ Error scenario '{scenario['name']}' completed: {scenario_time:.1f}s")
+                    logger.info(f" PASS:  Error scenario '{scenario['name']}' completed: {scenario_time:.1f}s")
                     
                 except Exception as e:
                     error_handling_results.append({
@@ -1187,7 +1187,7 @@ class TestWebSocketRealTimeEvents:
                         "error": str(e),
                         "scenario_time": time.time() - scenario_start
                     })
-                    logger.warning(f"⚠️ Error scenario '{scenario['name']}' failed: {e}")
+                    logger.warning(f" WARNING: [U+FE0F] Error scenario '{scenario['name']}' failed: {e}")
                 
                 # Brief pause between error scenarios
                 await asyncio.sleep(2.0)
@@ -1222,12 +1222,12 @@ class TestWebSocketRealTimeEvents:
                 recovery_time = time.time() - recovery_start
                 recovery_success = len(recovery_events) > 0
                 
-                logger.info(f"✅ System recovery test: {recovery_success} ({recovery_time:.1f}s)")
+                logger.info(f" PASS:  System recovery test: {recovery_success} ({recovery_time:.1f}s)")
                 
             except Exception as e:
                 recovery_success = False
                 recovery_time = time.time() - recovery_start
-                logger.warning(f"⚠️ System recovery test failed: {e}")
+                logger.warning(f" WARNING: [U+FE0F] System recovery test failed: {e}")
             
             # Step 4: Evaluate error handling effectiveness
             successful_error_scenarios = sum(1 for r in error_handling_results if r.get("success", False))
@@ -1273,7 +1273,7 @@ class TestWebSocketRealTimeEvents:
             assert recovery_success, "System failed to recover after error scenarios"
             assert result.business_value_delivered, "WebSocket error handling failed to deliver business value"
             
-            logger.info(f"✅ BUSINESS VALUE: WebSocket error handling demonstrates production readiness")
+            logger.info(f" PASS:  BUSINESS VALUE: WebSocket error handling demonstrates production readiness")
             logger.info(f"   Baseline operation: {baseline_success}")
             logger.info(f"   Error scenarios handled: {successful_error_scenarios}/{len(error_test_scenarios)}")
             logger.info(f"   System recovery: {recovery_success}")
@@ -1282,7 +1282,7 @@ class TestWebSocketRealTimeEvents:
             
         except Exception as e:
             execution_time = time.time() - start_time
-            logger.error(f"❌ WebSocket error handling test failed: {e}")
+            logger.error(f" FAIL:  WebSocket error handling test failed: {e}")
             pytest.fail(f"WebSocket error handling and recovery flows failed: {e}")
 
 

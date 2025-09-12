@@ -55,7 +55,7 @@ class TokenOptimizationDeployer:
         
     def validate_prerequisites(self) -> bool:
         """Validate all deployment prerequisites are met."""
-        print("🔍 Validating deployment prerequisites...")
+        print(" SEARCH:  Validating deployment prerequisites...")
         
         # Check compliance score
         if not self._check_compliance_score():
@@ -73,30 +73,30 @@ class TokenOptimizationDeployer:
         if not self._validate_production_config():
             return False
             
-        print("✅ All prerequisites validated")
+        print(" PASS:  All prerequisites validated")
         return True
     
     def _check_compliance_score(self) -> bool:
         """Check that compliance score meets production threshold."""
-        print("  📊 Checking compliance score...")
+        print("   CHART:  Checking compliance score...")
         
         # Read validation report
         validation_file = project_root / "FINAL_VALIDATION_REPORT.md"
         if not validation_file.exists():
-            print("  ❌ Final validation report not found")
+            print("   FAIL:  Final validation report not found")
             return False
             
         content = validation_file.read_text()
         if "92%" not in content or "APPROVED" not in content:
-            print("  ❌ Compliance score below production threshold")
+            print("   FAIL:  Compliance score below production threshold")
             return False
             
-        print("  ✅ 92% compliance score confirmed")
+        print("   PASS:  92% compliance score confirmed")
         return True
     
     def _validate_staging(self) -> bool:
         """Validate staging environment is healthy and functional."""
-        print("  🏗️ Validating staging environment...")
+        print("  [U+1F3D7][U+FE0F] Validating staging environment...")
         
         try:
             # Run staging validation tests
@@ -107,22 +107,22 @@ class TokenOptimizationDeployer:
             ], capture_output=True, text=True, timeout=300)
             
             if result.returncode != 0:
-                print(f"  ❌ Staging tests failed: {result.stderr}")
+                print(f"   FAIL:  Staging tests failed: {result.stderr}")
                 return False
                 
-            print("  ✅ Staging environment validated")
+            print("   PASS:  Staging environment validated")
             return True
             
         except subprocess.TimeoutExpired:
-            print("  ❌ Staging validation timeout")
+            print("   FAIL:  Staging validation timeout")
             return False
         except Exception as e:
-            print(f"  ❌ Staging validation error: {e}")
+            print(f"   FAIL:  Staging validation error: {e}")
             return False
     
     def _check_business_metrics(self) -> bool:
         """Validate business value metrics are achievable."""
-        print("  💰 Checking business value metrics...")
+        print("  [U+1F4B0] Checking business value metrics...")
         
         # Validate ROI calculation
         expected_revenue = 420000  # $420K annual
@@ -135,21 +135,21 @@ class TokenOptimizationDeployer:
                 with open(test_results_file) as f:
                     results = json.load(f)
                     if results.get("token_optimization_success_rate", 0) < 0.90:
-                        print("  ❌ Token optimization success rate below 90%")
+                        print("   FAIL:  Token optimization success rate below 90%")
                         return False
             except:
                 pass
                 
-        print(f"  ✅ Business metrics validated: ${expected_revenue:,} annual revenue projection")
+        print(f"   PASS:  Business metrics validated: ${expected_revenue:,} annual revenue projection")
         return True
     
     def _validate_production_config(self) -> bool:
         """Validate production configuration files exist and are valid."""
-        print("  ⚙️ Validating production configuration...")
+        print("  [U+2699][U+FE0F] Validating production configuration...")
         
         config_file = project_root / "deployment" / "production_token_optimization_config.json"
         if not config_file.exists():
-            print("  ❌ Production configuration file missing")
+            print("   FAIL:  Production configuration file missing")
             return False
             
         try:
@@ -158,24 +158,24 @@ class TokenOptimizationDeployer:
                 
             required_keys = ["token_optimization", "pricing", "cost_alerts", "business_metrics"]
             if not all(key in config for key in required_keys):
-                print("  ❌ Production configuration incomplete")
+                print("   FAIL:  Production configuration incomplete")
                 return False
                 
-            print("  ✅ Production configuration validated")
+            print("   PASS:  Production configuration validated")
             return True
             
         except json.JSONDecodeError:
-            print("  ❌ Invalid production configuration JSON")
+            print("   FAIL:  Invalid production configuration JSON")
             return False
     
     def phase_1_staging_deployment(self) -> bool:
         """Phase 1: Deploy and test in staging environment."""
-        print("\n🚀 Phase 1: Staging Deployment & Testing")
+        print("\n[U+1F680] Phase 1: Staging Deployment & Testing")
         phase_start = time.time()
         
         try:
             # Deploy to staging with token optimization
-            print("  📦 Deploying to staging environment...")
+            print("  [U+1F4E6] Deploying to staging environment...")
             if not self.dry_run:
                 result = subprocess.run([
                     "python", "scripts/deploy_to_gcp.py",
@@ -185,21 +185,21 @@ class TokenOptimizationDeployer:
                 ], timeout=1800)  # 30 minute timeout
                 
                 if result.returncode != 0:
-                    print("  ❌ Staging deployment failed")
+                    print("   FAIL:  Staging deployment failed")
                     return False
             
             # Run comprehensive tests
-            print("  🧪 Running comprehensive test suite...")
+            print("  [U+1F9EA] Running comprehensive test suite...")
             if not self._run_staging_tests():
                 return False
             
             # Load testing
-            print("  ⚡ Running load tests...")
+            print("   LIGHTNING:  Running load tests...")
             if not self._run_load_tests():
                 return False
                 
             phase_duration = time.time() - phase_start
-            print(f"  ✅ Phase 1 completed in {phase_duration:.1f} seconds")
+            print(f"   PASS:  Phase 1 completed in {phase_duration:.1f} seconds")
             
             self.metrics.append(DeploymentMetrics(
                 start_time=datetime.now(),
@@ -211,7 +211,7 @@ class TokenOptimizationDeployer:
             return True
             
         except Exception as e:
-            print(f"  ❌ Phase 1 failed: {e}")
+            print(f"   FAIL:  Phase 1 failed: {e}")
             return False
     
     def _run_staging_tests(self) -> bool:
@@ -227,18 +227,18 @@ class TokenOptimizationDeployer:
                 if not self.dry_run:
                     result = subprocess.run(cmd, timeout=600, capture_output=True)
                     if result.returncode != 0:
-                        print(f"    ❌ Test failed: {' '.join(cmd)}")
+                        print(f"     FAIL:  Test failed: {' '.join(cmd)}")
                         return False
-                print(f"    ✅ Test passed: {' '.join(cmd)}")
+                print(f"     PASS:  Test passed: {' '.join(cmd)}")
             except subprocess.TimeoutExpired:
-                print(f"    ❌ Test timeout: {' '.join(cmd)}")
+                print(f"     FAIL:  Test timeout: {' '.join(cmd)}")
                 return False
                 
         return True
     
     def _run_load_tests(self) -> bool:
         """Run load tests with 150 concurrent users."""
-        print("    🔄 Load testing with 150 concurrent users...")
+        print("     CYCLE:  Load testing with 150 concurrent users...")
         
         if not self.dry_run:
             # Use docker compose load testing service
@@ -248,37 +248,37 @@ class TokenOptimizationDeployer:
             ], timeout=3600)  # 1 hour timeout
             
             if result.returncode != 0:
-                print("    ❌ Load test failed")
+                print("     FAIL:  Load test failed")
                 return False
         
-        print("    ✅ Load test completed successfully")
+        print("     PASS:  Load test completed successfully")
         return True
     
     def phase_2_production_preparation(self) -> bool:
         """Phase 2: Configure production environment."""
-        print("\n⚙️ Phase 2: Production Environment Preparation")
+        print("\n[U+2699][U+FE0F] Phase 2: Production Environment Preparation")
         
         try:
             # Upload production configuration
-            print("  📋 Uploading production configuration...")
+            print("  [U+1F4CB] Uploading production configuration...")
             if not self._upload_production_config():
                 return False
             
             # Update database schema
-            print("  🗄️ Updating database schema...")
+            print("  [U+1F5C4][U+FE0F] Updating database schema...")
             if not self._update_database_schema():
                 return False
             
             # Configure monitoring
-            print("  📊 Configuring monitoring...")
+            print("   CHART:  Configuring monitoring...")
             if not self._setup_monitoring():
                 return False
                 
-            print("  ✅ Phase 2 completed - Production environment ready")
+            print("   PASS:  Phase 2 completed - Production environment ready")
             return True
             
         except Exception as e:
-            print(f"  ❌ Phase 2 failed: {e}")
+            print(f"   FAIL:  Phase 2 failed: {e}")
             return False
     
     def _upload_production_config(self) -> bool:
@@ -293,7 +293,7 @@ class TokenOptimizationDeployer:
                 "--replication-policy=automatic"
             ])
         
-        print("    ✅ Production configuration uploaded")
+        print("     PASS:  Production configuration uploaded")
         return True
     
     def _update_database_schema(self) -> bool:
@@ -306,10 +306,10 @@ class TokenOptimizationDeployer:
             ], timeout=300)
             
             if result.returncode != 0:
-                print("    ❌ Database migration failed")
+                print("     FAIL:  Database migration failed")
                 return False
         
-        print("    ✅ Database schema updated")
+        print("     PASS:  Database schema updated")
         return True
     
     def _setup_monitoring(self) -> bool:
@@ -323,37 +323,37 @@ class TokenOptimizationDeployer:
             ], timeout=120)
             
             if result.returncode != 0:
-                print("    ❌ Monitoring setup failed")
+                print("     FAIL:  Monitoring setup failed")
                 return False
         
-        print("    ✅ Monitoring configured")
+        print("     PASS:  Monitoring configured")
         return True
     
     def phase_3_canary_deployment(self) -> bool:
         """Phase 3: Deploy to production with 10% traffic."""
-        print("\n🐣 Phase 3: Canary Deployment (10% Traffic)")
+        print("\n[U+1F423] Phase 3: Canary Deployment (10% Traffic)")
         
         try:
             # Deploy new version (no traffic)
-            print("  🚀 Deploying new version to production...")
+            print("  [U+1F680] Deploying new version to production...")
             if not self._deploy_production_services():
                 return False
             
             # Shift 10% traffic
-            print("  🔄 Shifting 10% traffic to new version...")
+            print("   CYCLE:  Shifting 10% traffic to new version...")
             if not self._shift_traffic(10):
                 return False
             
             # Monitor for 1 hour
-            print("  👁️ Monitoring canary deployment for 1 hour...")
+            print("  [U+1F441][U+FE0F] Monitoring canary deployment for 1 hour...")
             if not self._monitor_canary(duration=3600):
                 return False
                 
-            print("  ✅ Phase 3 completed - Canary deployment successful")
+            print("   PASS:  Phase 3 completed - Canary deployment successful")
             return True
             
         except Exception as e:
-            print(f"  ❌ Phase 3 failed: {e}")
+            print(f"   FAIL:  Phase 3 failed: {e}")
             return False
     
     def _deploy_production_services(self) -> bool:
@@ -361,7 +361,7 @@ class TokenOptimizationDeployer:
         services = ["backend", "auth", "frontend"]
         
         for service in services:
-            print(f"    📦 Deploying {service} service...")
+            print(f"    [U+1F4E6] Deploying {service} service...")
             if not self.dry_run:
                 result = subprocess.run([
                     "gcloud", "run", "deploy", f"netra-{service}-prod",
@@ -373,10 +373,10 @@ class TokenOptimizationDeployer:
                 ], timeout=600)
                 
                 if result.returncode != 0:
-                    print(f"    ❌ {service} deployment failed")
+                    print(f"     FAIL:  {service} deployment failed")
                     return False
             
-            print(f"    ✅ {service} deployed successfully")
+            print(f"     PASS:  {service} deployed successfully")
         
         return True
     
@@ -390,15 +390,15 @@ class TokenOptimizationDeployer:
             ], timeout=120)
             
             if result.returncode != 0:
-                print(f"    ❌ Traffic shift to {percentage}% failed")
+                print(f"     FAIL:  Traffic shift to {percentage}% failed")
                 return False
         
-        print(f"    ✅ Traffic shifted to {percentage}%")
+        print(f"     PASS:  Traffic shifted to {percentage}%")
         return True
     
     def _monitor_canary(self, duration: int) -> bool:
         """Monitor canary deployment for specified duration."""
-        print(f"    📊 Monitoring for {duration/60:.0f} minutes...")
+        print(f"     CHART:  Monitoring for {duration/60:.0f} minutes...")
         
         # Monitor key metrics
         metrics_to_check = [
@@ -413,13 +413,13 @@ class TokenOptimizationDeployer:
             if not self.dry_run:
                 # Check actual metrics from monitoring system
                 if not self._check_production_metrics():
-                    print(f"    ❌ Metrics check failed at {i/60:.0f} minutes")
+                    print(f"     FAIL:  Metrics check failed at {i/60:.0f} minutes")
                     return False
             
             if i % 600 == 0:  # Log every 10 minutes
-                print(f"      ⏱️ {i/60:.0f} minutes elapsed - All metrics healthy")
+                print(f"      [U+23F1][U+FE0F] {i/60:.0f} minutes elapsed - All metrics healthy")
         
-        print("    ✅ Monitoring completed - All metrics within thresholds")
+        print("     PASS:  Monitoring completed - All metrics within thresholds")
         return True
     
     def _check_production_metrics(self) -> bool:
@@ -438,51 +438,51 @@ class TokenOptimizationDeployer:
     
     def phase_4_traffic_increase(self) -> bool:
         """Phase 4: Increase to 50% traffic."""
-        print("\n📈 Phase 4: Increase Traffic to 50%")
+        print("\n[U+1F4C8] Phase 4: Increase Traffic to 50%")
         
         try:
             # Shift to 50% traffic
-            print("  🔄 Shifting to 50% traffic...")
+            print("   CYCLE:  Shifting to 50% traffic...")
             if not self._shift_traffic(50):
                 return False
             
             # Monitor for 1 hour
-            print("  👁️ Monitoring 50% traffic for 1 hour...")
+            print("  [U+1F441][U+FE0F] Monitoring 50% traffic for 1 hour...")
             if not self._monitor_canary(duration=3600):
                 return False
                 
-            print("  ✅ Phase 4 completed - 50% traffic successful")
+            print("   PASS:  Phase 4 completed - 50% traffic successful")
             return True
             
         except Exception as e:
-            print(f"  ❌ Phase 4 failed: {e}")
+            print(f"   FAIL:  Phase 4 failed: {e}")
             return False
     
     def phase_5_full_rollout(self) -> bool:
         """Phase 5: Full production rollout."""
-        print("\n🎯 Phase 5: Full Production Rollout (100% Traffic)")
+        print("\n TARGET:  Phase 5: Full Production Rollout (100% Traffic)")
         
         try:
             # Full traffic shift
-            print("  🔄 Shifting to 100% traffic...")
+            print("   CYCLE:  Shifting to 100% traffic...")
             if not self._shift_traffic(100):
                 return False
             
             # Update all services
-            print("  🚀 Updating all services to new version...")
+            print("  [U+1F680] Updating all services to new version...")
             if not self._complete_service_rollout():
                 return False
             
             # Create deployment tag
-            print("  🏷️ Creating deployment tag...")
+            print("  [U+1F3F7][U+FE0F] Creating deployment tag...")
             if not self._create_deployment_tag():
                 return False
                 
-            print("  ✅ Phase 5 completed - Full production rollout successful")
+            print("   PASS:  Phase 5 completed - Full production rollout successful")
             return True
             
         except Exception as e:
-            print(f"  ❌ Phase 5 failed: {e}")
+            print(f"   FAIL:  Phase 5 failed: {e}")
             return False
     
     def _complete_service_rollout(self) -> bool:
@@ -498,10 +498,10 @@ class TokenOptimizationDeployer:
                 ], timeout=120)
                 
                 if result.returncode != 0:
-                    print(f"    ❌ {service} rollout failed")
+                    print(f"     FAIL:  {service} rollout failed")
                     return False
             
-            print(f"    ✅ {service} rolled out successfully")
+            print(f"     PASS:  {service} rolled out successfully")
         
         return True
     
@@ -516,107 +516,107 @@ class TokenOptimizationDeployer:
             ])
             subprocess.run(["git", "push", "origin", tag_name])
         
-        print(f"    ✅ Deployment tag created: {tag_name}")
+        print(f"     PASS:  Deployment tag created: {tag_name}")
         return True
     
     def validate_business_metrics(self) -> bool:
         """Validate business metrics are being captured."""
-        print("\n💰 Validating Business Metrics")
+        print("\n[U+1F4B0] Validating Business Metrics")
         
         try:
             # Check cost savings tracking
-            print("  💵 Checking cost savings tracking...")
+            print("  [U+1F4B5] Checking cost savings tracking...")
             
             # Check user engagement
-            print("  👥 Checking user engagement metrics...")
+            print("  [U+1F465] Checking user engagement metrics...")
             
             # Check conversion tracking
-            print("  📈 Checking conversion rate tracking...")
+            print("  [U+1F4C8] Checking conversion rate tracking...")
             
             # Simulate business metrics validation
             projected_monthly_savings = 35000  # $35K monthly
             user_engagement_rate = 0.75  # 75%
             conversion_improvement = 0.15  # 15% improvement
             
-            print(f"    ✅ Projected monthly customer savings: ${projected_monthly_savings:,}")
-            print(f"    ✅ User engagement rate: {user_engagement_rate:.0%}")
-            print(f"    ✅ Conversion rate improvement: {conversion_improvement:.0%}")
+            print(f"     PASS:  Projected monthly customer savings: ${projected_monthly_savings:,}")
+            print(f"     PASS:  User engagement rate: {user_engagement_rate:.0%}")
+            print(f"     PASS:  Conversion rate improvement: {conversion_improvement:.0%}")
             
             return True
             
         except Exception as e:
-            print(f"  ❌ Business metrics validation failed: {e}")
+            print(f"   FAIL:  Business metrics validation failed: {e}")
             return False
     
     def execute_deployment(self) -> bool:
         """Execute complete 5-phase deployment."""
-        print("🚀 Starting Production Deployment of Token Optimization System")
-        print(f"📅 Deployment started at: {self.deployment_start}")
-        print(f"🎯 Target: $420K annual revenue impact")
-        print(f"📊 Compliance: 92% achieved")
+        print("[U+1F680] Starting Production Deployment of Token Optimization System")
+        print(f"[U+1F4C5] Deployment started at: {self.deployment_start}")
+        print(f" TARGET:  Target: $420K annual revenue impact")
+        print(f" CHART:  Compliance: 92% achieved")
         print()
         
         try:
             # Prerequisites validation
             if not self.validate_prerequisites():
-                print("❌ Prerequisites validation failed")
+                print(" FAIL:  Prerequisites validation failed")
                 return False
             
             # Phase 1: Staging
             if not self.phase_1_staging_deployment():
-                print("❌ Phase 1 failed - Aborting deployment")
+                print(" FAIL:  Phase 1 failed - Aborting deployment")
                 return False
             
             # Phase 2: Production prep
             if not self.phase_2_production_preparation():
-                print("❌ Phase 2 failed - Aborting deployment")
+                print(" FAIL:  Phase 2 failed - Aborting deployment")
                 return False
             
             # Phase 3: Canary (10%)
             if not self.phase_3_canary_deployment():
-                print("❌ Phase 3 failed - Initiating rollback")
+                print(" FAIL:  Phase 3 failed - Initiating rollback")
                 self.emergency_rollback()
                 return False
             
             # Phase 4: Traffic increase (50%)
             if not self.phase_4_traffic_increase():
-                print("❌ Phase 4 failed - Initiating rollback")
+                print(" FAIL:  Phase 4 failed - Initiating rollback")
                 self.emergency_rollback()
                 return False
             
             # Phase 5: Full rollout (100%)
             if not self.phase_5_full_rollout():
-                print("❌ Phase 5 failed - Initiating rollback")
+                print(" FAIL:  Phase 5 failed - Initiating rollback")
                 self.emergency_rollback()
                 return False
             
             # Business metrics validation
             if not self.validate_business_metrics():
-                print("⚠️ Business metrics validation issues detected")
+                print(" WARNING: [U+FE0F] Business metrics validation issues detected")
             
             # Deployment success
             total_duration = (datetime.now() - self.deployment_start).total_seconds()
-            print(f"\n🎉 PRODUCTION DEPLOYMENT SUCCESSFUL!")
-            print(f"⏱️ Total deployment time: {total_duration/60:.1f} minutes")
-            print(f"💰 Expected revenue impact: $420K annually")
-            print(f"📈 Business value delivery: ACTIVE")
-            print(f"🔒 Zero-downtime deployment: ACHIEVED")
+            print(f"\n CELEBRATION:  PRODUCTION DEPLOYMENT SUCCESSFUL!")
+            print(f"[U+23F1][U+FE0F] Total deployment time: {total_duration/60:.1f} minutes")
+            print(f"[U+1F4B0] Expected revenue impact: $420K annually")
+            print(f"[U+1F4C8] Business value delivery: ACTIVE")
+            print(f"[U+1F512] Zero-downtime deployment: ACHIEVED")
             
             return True
             
         except Exception as e:
-            print(f"❌ Deployment failed with error: {e}")
-            print("🔄 Initiating emergency rollback...")
+            print(f" FAIL:  Deployment failed with error: {e}")
+            print(" CYCLE:  Initiating emergency rollback...")
             self.emergency_rollback()
             return False
     
     def emergency_rollback(self) -> bool:
         """Execute emergency rollback to previous version."""
-        print("\n🚨 EMERGENCY ROLLBACK INITIATED")
+        print("\n ALERT:  EMERGENCY ROLLBACK INITIATED")
         
         try:
             # Immediate traffic rollback
-            print("  🔄 Rolling back traffic to previous version...")
+            print("   CYCLE:  Rolling back traffic to previous version...")
             if not self.dry_run:
                 subprocess.run([
                     "gcloud", "run", "services", "update-traffic", "netra-backend-prod",
@@ -625,7 +625,7 @@ class TokenOptimizationDeployer:
                 ], timeout=60)
             
             # Disable feature flags
-            print("  🏳️ Disabling token optimization feature flags...")
+            print("  [U+1F3F3][U+FE0F] Disabling token optimization feature flags...")
             if not self.dry_run:
                 rollback_config = {"token_optimization": {"enabled": False}}
                 with open("/tmp/rollback_config.json", "w") as f:
@@ -636,14 +636,14 @@ class TokenOptimizationDeployer:
                     "--data-file=/tmp/rollback_config.json"
                 ], timeout=60)
             
-            print("  ✅ Emergency rollback completed")
-            print("  📞 Alert operations team for incident response")
+            print("   PASS:  Emergency rollback completed")
+            print("  [U+1F4DE] Alert operations team for incident response")
             
             return True
             
         except Exception as e:
-            print(f"  ❌ Rollback failed: {e}")
-            print("  🚨 MANUAL INTERVENTION REQUIRED")
+            print(f"   FAIL:  Rollback failed: {e}")
+            print("   ALERT:  MANUAL INTERVENTION REQUIRED")
             return False
 
 
@@ -669,7 +669,7 @@ def main():
         sys.exit(0 if success else 1)
     else:
         if dry_run:
-            print("🧪 DRY RUN MODE - No actual deployment actions will be taken")
+            print("[U+1F9EA] DRY RUN MODE - No actual deployment actions will be taken")
             print("Use --execute flag to run actual deployment")
         
         success = deployer.execute_deployment()

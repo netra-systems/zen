@@ -37,11 +37,11 @@ class TestRealWebSocketMessageRouting:
     """Test real WebSocket message routing to correct handlers.
     
     CRITICAL: Tests that messages are properly routed to their handlers:
-    - Connection messages → Connection handler
-    - Agent messages → Agent handler  
-    - User messages → Message handler
-    - Heartbeat messages → Health handler
-    - Error messages → Error handler
+    - Connection messages  ->  Connection handler
+    - Agent messages  ->  Agent handler  
+    - User messages  ->  Message handler
+    - Heartbeat messages  ->  Health handler
+    - Error messages  ->  Error handler
     
     Validates routing accuracy for chat value delivery.
     """

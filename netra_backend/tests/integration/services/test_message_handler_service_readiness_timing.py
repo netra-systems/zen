@@ -36,7 +36,7 @@ class TestServiceReadinessTiming:
     @pytest.fixture(autouse=True)
     async def setup_real_services(self):
         """Setup with real Docker services."""
-        logger.info("🐳 Setting up real Docker services for readiness timing tests")
+        logger.info("[U+1F433] Setting up real Docker services for readiness timing tests")
         
         # Allow services time to start up if just launched
         await asyncio.sleep(2.0)
@@ -54,7 +54,7 @@ class TestServiceReadinessTiming:
         # Check Redis
         try:
             await redis_manager.ping()
-            logger.info("✅ Redis service available")
+            logger.info(" PASS:  Redis service available")
         except Exception as e:
             pytest.skip(f"Redis service not available for integration test: {e}")
         
@@ -62,7 +62,7 @@ class TestServiceReadinessTiming:
         try:
             async for db in get_async_db():
                 await db.execute("SELECT 1")
-                logger.info("✅ PostgreSQL service available")
+                logger.info(" PASS:  PostgreSQL service available")
                 break
         except Exception as e:
             pytest.skip(f"PostgreSQL service not available for integration test: {e}")
@@ -86,7 +86,7 @@ class TestServiceReadinessTiming:
         
         EXPECTED TO FAIL: Timing race condition in service startup.
         """
-        logger.info("🔬 Testing message queue startup race condition with real services")
+        logger.info("[U+1F52C] Testing message queue startup race condition with real services")
         
         # Create message queue with real Redis
         message_queue = MessageQueue()
@@ -115,10 +115,10 @@ class TestServiceReadinessTiming:
             await message_queue.stop_processing()
             
         except Exception as e:
-            logger.error(f"❌ Message queue startup race condition reproduced: {e}")
+            logger.error(f" FAIL:  Message queue startup race condition reproduced: {e}")
             
         # FAILURE EXPECTED: Race condition exists in real environment
-        logger.error("❌ Message queue processes without handler validation")
+        logger.error(" FAIL:  Message queue processes without handler validation")
         assert False, "MESSAGE QUEUE RACE CONDITION: Processing starts before handlers validated"
     
     @pytest.mark.asyncio
@@ -130,7 +130,7 @@ class TestServiceReadinessTiming:
         
         EXPECTED TO FAIL: Redis connection timing issues.
         """
-        logger.info("🔬 Testing Redis connection race during message processing")
+        logger.info("[U+1F52C] Testing Redis connection race during message processing")
         
         # Force Redis connection reset to simulate startup conditions
         try:
@@ -163,7 +163,7 @@ class TestServiceReadinessTiming:
             pass
         
         # FAILURE EXPECTED: Redis connection timing issue
-        logger.error("❌ Redis connection race condition reproduced")
+        logger.error(" FAIL:  Redis connection race condition reproduced")
         assert False, "REDIS CONNECTION RACE: Message processing fails due to connection timing"
     
     @pytest.mark.asyncio
@@ -175,7 +175,7 @@ class TestServiceReadinessTiming:
         
         EXPECTED TO FAIL: Database session timing issues.
         """
-        logger.info("🔬 Testing database session race during handler processing")
+        logger.info("[U+1F52C] Testing database session race during handler processing")
         
         from netra_backend.app.services.websocket.message_handler import ThreadHistoryHandler
         from netra_backend.app.services.database.unit_of_work import get_unit_of_work
@@ -202,10 +202,10 @@ class TestServiceReadinessTiming:
         ]
         
         if db_errors:
-            logger.error(f"❌ Database session race conditions detected: {len(db_errors)}")
+            logger.error(f" FAIL:  Database session race conditions detected: {len(db_errors)}")
         
         # FAILURE EXPECTED: Database session timing issues
-        logger.error("❌ Database session race conditions during concurrent access")
+        logger.error(" FAIL:  Database session race conditions during concurrent access")
         assert False, "DATABASE SESSION RACE: Concurrent handler processing causes session conflicts"
     
     @pytest.mark.asyncio
@@ -217,7 +217,7 @@ class TestServiceReadinessTiming:
         
         EXPECTED TO FAIL: Middleware readiness validation gaps.
         """
-        logger.info("🔬 Testing WebSocket readiness middleware with real services")
+        logger.info("[U+1F52C] Testing WebSocket readiness middleware with real services")
         
         # Create mock app state for testing
         class MockAppState:
@@ -233,7 +233,7 @@ class TestServiceReadinessTiming:
             
             # Health check might pass even when services aren't fully ready
             if health_result.get("websocket_ready") is True:
-                logger.warning("⚠️ Readiness check passed but services may not be fully operational")
+                logger.warning(" WARNING: [U+FE0F] Readiness check passed but services may not be fully operational")
                 
                 # Try actual operations to verify readiness
                 # Redis operation
@@ -249,13 +249,13 @@ class TestServiceReadinessTiming:
                     break
                 
             else:
-                logger.info("✅ Readiness check properly detected unready services")
+                logger.info(" PASS:  Readiness check properly detected unready services")
                 
         except Exception as e:
-            logger.error(f"❌ Service readiness validation failed: {e}")
+            logger.error(f" FAIL:  Service readiness validation failed: {e}")
         
         # FAILURE EXPECTED: Readiness validation may be insufficient
-        logger.error("❌ WebSocket readiness middleware validation may be insufficient")
+        logger.error(" FAIL:  WebSocket readiness middleware validation may be insufficient")
         assert False, "WEBSOCKET READINESS ISSUE: Middleware may allow connections before services fully ready"
     
     @pytest.mark.asyncio
@@ -267,7 +267,7 @@ class TestServiceReadinessTiming:
         
         EXPECTED TO FAIL: Service startup order issues.
         """
-        logger.info("🔬 Testing service startup order dependency validation")
+        logger.info("[U+1F52C] Testing service startup order dependency validation")
         
         # REPRODUCE: Simulate out-of-order service startup
         components_status = {
@@ -296,24 +296,24 @@ class TestServiceReadinessTiming:
                 elif service == "message_queue":
                     # Message queue should depend on Redis
                     if not components_status["redis"]:
-                        logger.error("❌ Message queue starting before Redis ready")
+                        logger.error(" FAIL:  Message queue starting before Redis ready")
                     message_queue = MessageQueue()
                     components_status[service] = True
                     
                 elif service == "websocket_manager":
                     # WebSocket manager should depend on database and Redis
                     if not (components_status["redis"] and components_status["database"]):
-                        logger.error("❌ WebSocket manager starting before dependencies ready")
+                        logger.error(" FAIL:  WebSocket manager starting before dependencies ready")
                     components_status[service] = True
                     
                 elif service == "message_handlers":
                     # Message handlers should depend on all previous services
                     if not all(components_status[dep] for dep in startup_order[:-1]):
-                        logger.error("❌ Message handlers starting before all dependencies ready")
+                        logger.error(" FAIL:  Message handlers starting before all dependencies ready")
                     components_status[service] = True
                     
             except Exception as e:
-                logger.error(f"❌ Service {service} dependency failure: {e}")
+                logger.error(f" FAIL:  Service {service} dependency failure: {e}")
                 components_status[service] = False
         
         # Check for dependency violations
@@ -326,10 +326,10 @@ class TestServiceReadinessTiming:
             dependency_violations.append("Message handlers started before dependencies")
         
         if dependency_violations:
-            logger.error(f"❌ Dependency violations detected: {dependency_violations}")
+            logger.error(f" FAIL:  Dependency violations detected: {dependency_violations}")
         
         # FAILURE EXPECTED: Service startup order issues
-        logger.error("❌ Service startup order dependency violations detected")
+        logger.error(" FAIL:  Service startup order dependency violations detected")
         assert False, f"SERVICE STARTUP ORDER ISSUE: Dependency violations - {dependency_violations}"
 
 
@@ -347,7 +347,7 @@ class TestBackgroundTaskStabilityValidation:
         
         EXPECTED TO FAIL: Background processor stability issues.
         """
-        logger.info("🔬 Testing message queue background processor stability")
+        logger.info("[U+1F52C] Testing message queue background processor stability")
         
         message_queue = MessageQueue()
         
@@ -380,10 +380,10 @@ class TestBackgroundTaskStabilityValidation:
             await message_queue.stop_processing()
             
         except Exception as e:
-            logger.error(f"❌ Background processor stability issue: {e}")
+            logger.error(f" FAIL:  Background processor stability issue: {e}")
         
         # FAILURE EXPECTED: Background processor may not be stable under load
-        logger.error("❌ Background processor stability issues under load")
+        logger.error(" FAIL:  Background processor stability issues under load")
         assert False, "BACKGROUND PROCESSOR STABILITY: Issues detected under message load"
     
     @pytest.mark.asyncio
@@ -395,7 +395,7 @@ class TestBackgroundTaskStabilityValidation:
         
         EXPECTED TO FAIL: Redis connection recovery issues.
         """
-        logger.info("🔬 Testing Redis connection recovery during background tasks")
+        logger.info("[U+1F52C] Testing Redis connection recovery during background tasks")
         
         message_queue = MessageQueue()
         
@@ -438,8 +438,8 @@ class TestBackgroundTaskStabilityValidation:
             await message_queue.stop_processing()
             
         except Exception as e:
-            logger.error(f"❌ Redis connection recovery issue: {e}")
+            logger.error(f" FAIL:  Redis connection recovery issue: {e}")
         
         # FAILURE EXPECTED: Redis recovery may not work properly
-        logger.error("❌ Redis connection recovery issues during background processing")
+        logger.error(" FAIL:  Redis connection recovery issues during background processing")
         assert False, "REDIS RECOVERY ISSUE: Background tasks fail to recover from Redis connection loss"

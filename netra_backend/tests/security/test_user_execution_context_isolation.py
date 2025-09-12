@@ -137,7 +137,7 @@ class TestUserExecutionContextIsolationValidation:
         assert "user_b_secure" not in str(user_a_dict).lower()
         assert "user_a_secure" not in str(user_b_dict).lower()
         
-        print("✓ SECURITY VALIDATED: Complete user context isolation confirmed")
+        print("[U+2713] SECURITY VALIDATED: Complete user context isolation confirmed")
 
     def test_memory_isolation_and_garbage_collection_safety(self):
         """
@@ -249,7 +249,7 @@ class TestUserExecutionContextIsolationValidation:
         assert context_b.agent_context["shared_data"]["nested"] == "value_b"
         assert context_a.agent_context["shared_data"]["nested"] == "modified_by_a"
         
-        print("✓ SECURITY VALIDATED: Memory isolation and garbage collection safety confirmed")
+        print("[U+2713] SECURITY VALIDATED: Memory isolation and garbage collection safety confirmed")
 
     def test_concurrent_user_execution_security(self):
         """
@@ -384,7 +384,7 @@ class TestUserExecutionContextIsolationValidation:
                     assert context1.user_id != context2.user_id
                     assert context1.request_id != context2.request_id
         
-        print("✓ SECURITY VALIDATED: Concurrent user execution security confirmed")
+        print("[U+2713] SECURITY VALIDATED: Concurrent user execution security confirmed")
 
     def test_authentication_context_security(self):
         """
@@ -524,7 +524,7 @@ class TestUserExecutionContextIsolationValidation:
         assert regular_audit["user_id"] == "regular_secure_user"
         assert admin_audit["correlation_id"] != regular_audit["correlation_id"]
         
-        print("✓ SECURITY VALIDATED: Authentication context security confirmed")
+        print("[U+2713] SECURITY VALIDATED: Authentication context security confirmed")
 
     def test_factory_method_security_validation(self):
         """
@@ -659,7 +659,7 @@ class TestUserExecutionContextIsolationValidation:
         with pytest.raises((TypeError, InvalidContextError)):
             validate_user_context(None)
         
-        print("✓ SECURITY VALIDATED: Factory method security confirmed")
+        print("[U+2713] SECURITY VALIDATED: Factory method security confirmed")
 
     def test_context_isolation_violation_detection(self):
         """
@@ -749,7 +749,7 @@ class TestUserExecutionContextIsolationValidation:
         assert "other_user" not in str(audit_trail).lower()
         assert "cross_contamination" not in str(audit_trail).lower()
         
-        print("✓ SECURITY VALIDATED: Context isolation violation detection confirmed")
+        print("[U+2713] SECURITY VALIDATED: Context isolation violation detection confirmed")
 
     async def test_managed_context_lifecycle_security(self):
         """
@@ -810,7 +810,7 @@ class TestUserExecutionContextIsolationValidation:
         post_cleanup_isolation = test_context.verify_isolation()
         assert post_cleanup_isolation == True
         
-        print("✓ SECURITY VALIDATED: Managed context lifecycle security confirmed")
+        print("[U+2713] SECURITY VALIDATED: Managed context lifecycle security confirmed")
 
 
 if __name__ == "__main__":

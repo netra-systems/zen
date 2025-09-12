@@ -74,7 +74,7 @@ class TestWebSocketDualInterfaceViolations(SSotBaseTestCase):
         
         EXPECTED BEHAVIOR: Test should PASS after SSOT remediation.
         """
-        logger.info("🚨 TESTING: WebSocket interface consistency in AgentRegistry (SSOT-compliant)")
+        logger.info(" ALERT:  TESTING: WebSocket interface consistency in AgentRegistry (SSOT-compliant)")
         
         # Create user session - this should use ONE interface type
         user_session = UserAgentSession(self.test_user_id)
@@ -112,7 +112,7 @@ class TestWebSocketDualInterfaceViolations(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail due to signature mismatches.
         """
-        logger.info("🚨 TESTING: WebSocket interface type signature consistency")
+        logger.info(" ALERT:  TESTING: WebSocket interface type signature consistency")
         
         # Get method signatures from both interfaces
         manager_methods = self._get_public_methods(WebSocketManager)
@@ -159,7 +159,7 @@ class TestWebSocketDualInterfaceViolations(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail due to MRO violations.
         """
-        logger.info("🚨 TESTING: Method Resolution Order in WebSocket inheritance")
+        logger.info(" ALERT:  TESTING: Method Resolution Order in WebSocket inheritance")
         
         # CRITICAL: Test MRO chain for WebSocket-related classes
         registry_mro = AgentRegistry.__mro__
@@ -210,7 +210,7 @@ class TestWebSocketDualInterfaceViolations(SSotBaseTestCase):
         
         EXPECTED BEHAVIOR: Should pass with proper SSOT initialization patterns.
         """
-        logger.info("🚨 TESTING: WebSocket interface initialization race conditions")
+        logger.info(" ALERT:  TESTING: WebSocket interface initialization race conditions")
         
         # CRITICAL: Simulate concurrent initialization
         user_sessions = []
@@ -290,7 +290,7 @@ class TestWebSocketDualInterfaceViolations(SSotBaseTestCase):
         
         EXPECTED BEHAVIOR: Should pass with proper SSOT method dispatch.
         """
-        logger.info("🚨 TESTING: WebSocket interface method dispatch correctness")
+        logger.info(" ALERT:  TESTING: WebSocket interface method dispatch correctness")
         
         # CRITICAL: Create session with dual interface setup
         user_session = UserAgentSession(self.test_user_id)
@@ -401,7 +401,7 @@ class TestWebSocketInterfaceIntegrationViolations(SSotBaseTestCase):
         
         EXPECTED FAILURE: Should fail with interface conflict errors.
         """
-        logger.info("🚨 INTEGRATION TEST: Real WebSocket interface conflicts")
+        logger.info(" ALERT:  INTEGRATION TEST: Real WebSocket interface conflicts")
         
         # CRITICAL: Create real components that expose interface issues
         user_context = UserExecutionContext(

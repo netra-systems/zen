@@ -1,6 +1,6 @@
 """
 Helper functions for ClickHouse array syntax testing.
-All functions ≤8 lines per requirements.
+All functions  <= 8 lines per requirements.
 """
 
 from typing import List

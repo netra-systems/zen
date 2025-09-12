@@ -103,20 +103,20 @@ def main():
     # Check if test file exists
     test_file_path = project_root / "tests" / "e2e" / "test_real_agent_tool_dispatcher.py"
     if not test_file_path.exists():
-        print(f"❌ Test file not found: {test_file_path}")
+        print(f" FAIL:  Test file not found: {test_file_path}")
         return 1
     
-    print("✅ Test file found")
+    print(" PASS:  Test file found")
     print()
     
     # Run tests
     success = run_e2e_tests(test_filter, verbose=not args.quiet)
     
     if success:
-        print("\n✅ All tests passed!")
+        print("\n PASS:  All tests passed!")
         return 0
     else:
-        print("\n❌ Some tests failed")
+        print("\n FAIL:  Some tests failed")
         return 1
 
 

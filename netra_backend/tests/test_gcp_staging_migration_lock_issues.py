@@ -78,7 +78,7 @@ class TestMigrationLockIssues:
                     'timeout'
                 ]), f"Expected migration lock error but got: {e}"
                 
-                print(f"✅ Migration lock acquisition failure correctly detected: {e}")
+                print(f" PASS:  Migration lock acquisition failure correctly detected: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -125,7 +125,7 @@ class TestMigrationLockIssues:
                     deadlock_failures += 1
         
         assert deadlock_failures >= 2, f"Expected multiple deadlock failures, got results: {results}"
-        print(f"✅ Concurrent migration deadlock correctly detected: {deadlock_failures}/3 failed")
+        print(f" PASS:  Concurrent migration deadlock correctly detected: {deadlock_failures}/3 failed")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -169,7 +169,7 @@ class TestMigrationLockIssues:
             except asyncio.TimeoutError:
                 elapsed = asyncio.get_event_loop().time() - start_time
                 assert elapsed >= 2.0, f"Should have waited for lock timeout: {elapsed}s"
-                print(f"✅ Stale migration lock correctly caused timeout after {elapsed:.2f}s")
+                print(f" PASS:  Stale migration lock correctly caused timeout after {elapsed:.2f}s")
                 
             except Exception as e:
                 error_msg = str(e).lower()
@@ -181,7 +181,7 @@ class TestMigrationLockIssues:
                     'canceling'
                 ]), f"Expected stale lock timeout error but got: {e}"
                 
-                print(f"✅ Stale migration lock correctly detected: {e}")
+                print(f" PASS:  Stale migration lock correctly detected: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -216,13 +216,13 @@ class TestMigrationLockIssues:
             for retry in range(max_retries):
                 try:
                     execute_migration(get_logger())
-                    print(f"✅ Migration succeeded on retry {retry + 1}/{max_retries}")
+                    print(f" PASS:  Migration succeeded on retry {retry + 1}/{max_retries}")
                     break
                 except Exception as e:
                     error_msg = str(e).lower()
                     
                     if retry < max_retries - 1 and 'timeout' in error_msg:
-                        print(f"⚠️ Migration timeout on attempt {retry + 1}, retrying...")
+                        print(f" WARNING: [U+FE0F] Migration timeout on attempt {retry + 1}, retrying...")
                         await asyncio.sleep(0.1)  # Brief delay before retry
                         continue
                     else:
@@ -233,7 +233,7 @@ class TestMigrationLockIssues:
                             'statement timeout'
                         ]), f"Expected timeout error on final retry but got: {e}"
                         
-                        print(f"✅ Migration lock timeout detected after {retry + 1} attempts: {e}")
+                        print(f" PASS:  Migration lock timeout detected after {retry + 1} attempts: {e}")
                         break
             else:
                 pytest.fail("Migration should have either succeeded or failed with timeout")
@@ -302,7 +302,7 @@ class TestMigrationLockIssues:
                                 'current'
                             ]), f"Expected migration state inconsistency error but got: {e}"
                             
-                            print(f"✅ Alembic migration state inconsistency detected: {e}")
+                            print(f" PASS:  Alembic migration state inconsistency detected: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -351,7 +351,7 @@ class TestMigrationLockIssues:
                     'failed'
                 ]), f"Expected migration failure error but got: {e}"
                 
-                print(f"✅ Migration failed and lock was properly cleaned up: {e}")
+                print(f" PASS:  Migration failed and lock was properly cleaned up: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -379,7 +379,7 @@ class TestMigrationLockIssues:
                     'connection'
                 ]), f"Expected connection pool exhaustion error but got: {e}"
                 
-                print(f"✅ Migration connection pool exhaustion correctly detected: {e}")
+                print(f" PASS:  Migration connection pool exhaustion correctly detected: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -428,7 +428,7 @@ class TestMigrationLockIssues:
                 
                 # Verify rollback was attempted
                 # In real scenario, we'd check if rollback was called on the transaction
-                print(f"✅ Migration rollback correctly triggered due to lock issues: {e}")
+                print(f" PASS:  Migration rollback correctly triggered due to lock issues: {e}")
     
     @pytest.mark.staging
     def test_staging_migration_lock_configuration(self):
@@ -446,7 +446,7 @@ class TestMigrationLockIssues:
                 if migration_timeout > 300:  # 5 minutes
                     raise ValueError(f"Migration lock timeout too high for staging: {migration_timeout}s")
                 
-                print(f"✅ Staging migration lock timeout configured: {migration_timeout}s")
+                print(f" PASS:  Staging migration lock timeout configured: {migration_timeout}s")
                 
             except Exception as e:
                 error_msg = str(e).lower()
@@ -457,7 +457,7 @@ class TestMigrationLockIssues:
                     'staging'
                 ]), f"Expected migration configuration error but got: {e}"
                 
-                print(f"✅ Staging migration lock configuration issue detected: {e}")
+                print(f" PASS:  Staging migration lock configuration issue detected: {e}")
 
 
 if __name__ == "__main__":

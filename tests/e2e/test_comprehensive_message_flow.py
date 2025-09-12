@@ -2,7 +2,7 @@
 # REMOVED_SYNTAX_ERROR: '''Comprehensive Message Flow Test Suite for Netra Apex
 
 # REMOVED_SYNTAX_ERROR: CRITICAL: This test suite validates the entire message pipeline through the Netra stack.
-# REMOVED_SYNTAX_ERROR: Tests 20+ message types flowing from Frontend → Backend → WebSocket → Agent → Tool → Result → Frontend
+# REMOVED_SYNTAX_ERROR: Tests 20+ message types flowing from Frontend  ->  Backend  ->  WebSocket  ->  Agent  ->  Tool  ->  Result  ->  Frontend
 
 # REMOVED_SYNTAX_ERROR: Business Value Justification:
     # REMOVED_SYNTAX_ERROR: - Segment: Platform/Internal & All User Segments
@@ -199,7 +199,7 @@
     # Unicode and internationalization
     # REMOVED_SYNTAX_ERROR: MessageTestCase( )
     # REMOVED_SYNTAX_ERROR: MessageType.UNICODE_EMOJI,
-    # REMOVED_SYNTAX_ERROR: "Hello! 👋 🚀 🎉 Testing emoji support 🔥 ✨ 🌟",
+    # REMOVED_SYNTAX_ERROR: "Hello! [U+1F44B] [U+1F680]  CELEBRATION:  Testing emoji support  FIRE:  [U+2728] [U+1F31F]",
     # REMOVED_SYNTAX_ERROR: ["utf8_encoding", "emoji_validation", "websocket_frame"],
     # REMOVED_SYNTAX_ERROR: 80.0,
     # REMOVED_SYNTAX_ERROR: ["encoding_corruption", "emoji_overflow"],
@@ -639,17 +639,17 @@ queuedAt: Date.now()
     # REMOVED_SYNTAX_ERROR: """Generate multilingual text."""
     # REMOVED_SYNTAX_ERROR: return '''
     # REMOVED_SYNTAX_ERROR: English: Hello, this is a test message.
-    # REMOVED_SYNTAX_ERROR: Español: Hola, este es un mensaje de prueba.
-    # REMOVED_SYNTAX_ERROR: Français: Bonjour, ceci est un message de test.
+    # REMOVED_SYNTAX_ERROR: Espa[U+00F1]ol: Hola, este es un mensaje de prueba.
+    # REMOVED_SYNTAX_ERROR: Fran[U+00E7]ais: Bonjour, ceci est un message de test.
     # REMOVED_SYNTAX_ERROR: Deutsch: Hallo, das ist eine Testnachricht.
-    # REMOVED_SYNTAX_ERROR: 中文: 你好，这是一条测试消息。
-    # REMOVED_SYNTAX_ERROR: 日本語: こんにちは、これはテストメッセージです。
-    # REMOVED_SYNTAX_ERROR: 한국어: 안녕하세요, 이것은 테스트 메시지입니다.
-    # REMOVED_SYNTAX_ERROR: العربية: مرحبا، هذه رسالة اختبار.
-    # REMOVED_SYNTAX_ERROR: Русский: Привет, это тестовое сообщение.
-    # REMOVED_SYNTAX_ERROR: हिन्दी: नमस्ते, यह एक परीक्षण संदेश है।
-    # REMOVED_SYNTAX_ERROR: עברית: שלום, זה הודעת בדיקה.
-    # REMOVED_SYNTAX_ERROR: Ελληνικά: Γεια σου, αυτό είναι ένα δοκιμαστικό μήνυμα.
+    # REMOVED_SYNTAX_ERROR: [U+4E2D][U+6587]: [U+4F60][U+597D][U+FF0C][U+8FD9][U+662F][U+4E00][U+6761][U+6D4B][U+8BD5][U+6D88][U+606F][U+3002]
+    # REMOVED_SYNTAX_ERROR: [U+65E5][U+672C][U+8A9E]: [U+3053][U+3093][U+306B][U+3061][U+306F][U+3001][U+3053][U+308C][U+306F][U+30C6][U+30B9][U+30C8][U+30E1][U+30C3][U+30BB][U+30FC][U+30B8][U+3067][U+3059][U+3002]
+    # REMOVED_SYNTAX_ERROR: [U+D55C][U+AD6D][U+C5B4]: [U+C548][U+B155][U+D558][U+C138][U+C694], [U+C774][U+AC83][U+C740] [U+D14C][U+C2A4][U+D2B8] [U+BA54][U+C2DC][U+C9C0][U+C785][U+B2C8][U+B2E4].
+    # REMOVED_SYNTAX_ERROR: [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]: [U+0645][U+0631][U+062D][U+0628][U+0627][U+060C] [U+0647][U+0630][U+0647] [U+0631][U+0633][U+0627][U+0644][U+0629] [U+0627][U+062E][U+062A][U+0628][U+0627][U+0631].
+    # REMOVED_SYNTAX_ERROR: Pucck[U+0438][U+0439]: [U+041F]p[U+0438]vet, [U+044D]to tectovoe coo[U+0431][U+0449]en[U+0438]e.
+    # REMOVED_SYNTAX_ERROR: [U+0939][U+093F][U+0928][U+094D][U+0926][U+0940]: [U+0928][U+092E][U+0938][U+094D][U+0924][U+0947], [U+092F][U+0939] [U+090F][U+0915] [U+092A][U+0930][U+0940][U+0915][U+094D][U+0937][U+0923] [U+0938][U+0902][U+0926][U+0947][U+0936] [U+0939][U+0948][U+0964]
+    # REMOVED_SYNTAX_ERROR: [U+05E2][U+05D1][U+05E8][U+05D9][U+05EA]: [U+05E9][U+05DC][U+05D5][U+05DD], [U+05D6][U+05D4] [U+05D4][U+05D5][U+05D3][U+05E2][U+05EA] [U+05D1][U+05D3][U+05D9][U+05E7][U+05D4].
+    # REMOVED_SYNTAX_ERROR: [U+0395][U+03BB][U+03BB][U+03B7][U+03BD][U+03B9][U+03BA][U+03AC]: [U+0393][U+03B5][U+03B9][U+03B1] [U+03C3][U+03BF][U+03C5], [U+03B1][U+03C5][U+03C4][U+03CC] [U+03B5][U+03AF][U+03BD][U+03B1][U+03B9] [U+03AD][U+03BD][U+03B1] [U+03B4][U+03BF][U+03BA][U+03B9][U+03BC][U+03B1][U+03C3][U+03C4][U+03B9][U+03BA][U+03CC] [U+03BC][U+03AE][U+03BD][U+03C5][U+03BC][U+03B1].
     # REMOVED_SYNTAX_ERROR: '''
 
     # REMOVED_SYNTAX_ERROR: @staticmethod
@@ -1378,7 +1378,7 @@ queuedAt: Date.now()
                                         # REMOVED_SYNTAX_ERROR: errors.append("formatted_string")
                                         # REMOVED_SYNTAX_ERROR: frame_data = serialized_message
 
-                                        # 3. Stack Flow Simulation (Frontend → Backend → WebSocket → Agent → Tool)
+                                        # 3. Stack Flow Simulation (Frontend  ->  Backend  ->  WebSocket  ->  Agent  ->  Tool)
                                         # REMOVED_SYNTAX_ERROR: try:
                                             # REMOVED_SYNTAX_ERROR: flow_result = await self._simulate_stack_flow(frame_data, test_case)
                                             # REMOVED_SYNTAX_ERROR: transformations_applied.extend(flow_result.get("transformations", []))

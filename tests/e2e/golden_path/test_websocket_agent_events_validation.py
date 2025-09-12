@@ -197,10 +197,10 @@ class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
         unique_event_types = set(received_types)
         self.record_metric("unique_event_types", len(unique_event_types))
         
-        print(f"\n✅ WEBSOCKET EVENTS VALIDATION SUCCESS:")
-        print(f"   📊 Total events received: {len(collected_events)}")
-        print(f"   📡 Event types: {unique_event_types}")
-        print(f"   ✅ All 5 critical events present: {all(et in received_types for et in required_event_types)}")
+        print(f"\n PASS:  WEBSOCKET EVENTS VALIDATION SUCCESS:")
+        print(f"    CHART:  Total events received: {len(collected_events)}")
+        print(f"   [U+1F4E1] Event types: {unique_event_types}")
+        print(f"    PASS:  All 5 critical events present: {all(et in received_types for et in required_event_types)}")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -285,9 +285,9 @@ class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
         self.record_metric("total_events_for_timing", len(events_with_timing))
         self.record_metric("event_timing_validated", True)
         
-        print(f"\n✅ EVENT TIMING VALIDATION SUCCESS:")
-        print(f"   ⏱️ First event delay: {first_event_delay:.2f}s")
-        print(f"   📊 Total events tracked: {len(events_with_timing)}")
+        print(f"\n PASS:  EVENT TIMING VALIDATION SUCCESS:")
+        print(f"   [U+23F1][U+FE0F] First event delay: {first_event_delay:.2f}s")
+        print(f"    CHART:  Total events tracked: {len(events_with_timing)}")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -358,7 +358,7 @@ class TestWebSocketAgentEventsValidation(SSotAsyncTestCase):
         self.record_metric("normal_events_received", len(normal_events))
         self.record_metric("error_handling_validated", True)
         
-        print(f"\n✅ ERROR HANDLING VALIDATION SUCCESS:")
-        print(f"   📊 Total events: {len(all_events)}")
-        print(f"   ❌ Error events: {len(error_events)}")
-        print(f"   ✅ Normal events: {len(normal_events)}")
+        print(f"\n PASS:  ERROR HANDLING VALIDATION SUCCESS:")
+        print(f"    CHART:  Total events: {len(all_events)}")
+        print(f"    FAIL:  Error events: {len(error_events)}")
+        print(f"    PASS:  Normal events: {len(normal_events)}")

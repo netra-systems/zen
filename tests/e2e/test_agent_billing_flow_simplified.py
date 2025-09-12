@@ -1,7 +1,7 @@
 """E2E Agent Billing Flow Test - Real Services Compliance Update
 
 CRITICAL E2E test for agent billing accuracy focused on business value.
-Validates complete agent execution → billing flow with REAL services only.
+Validates complete agent execution  ->  billing flow with REAL services only.
 
 Business Value Justification (BVJ):
 1. Segment: ALL paid tiers (revenue tracking critical)
@@ -17,7 +17,7 @@ ARCHITECTURAL COMPLIANCE PER CLAUDE.md:
 - Real databases, real authentication, real billing systems
 
 TECHNICAL DETAILS:
-- Tests complete chat flow: WebSocket → Agent → Tool execution → Billing
+- Tests complete chat flow: WebSocket  ->  Agent  ->  Tool execution  ->  Billing
 - Uses real database connections for billing validation
 - Validates WebSocket agent events for substantive chat value
 - Performance testing with real service execution

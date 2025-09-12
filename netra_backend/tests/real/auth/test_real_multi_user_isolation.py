@@ -70,7 +70,7 @@ class TestRealMultiUserIsolation:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for multi-user isolation testing."""
-        print("🐳 Starting Docker services for multi-user isolation tests...")
+        print("[U+1F433] Starting Docker services for multi-user isolation tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -82,13 +82,13 @@ class TestRealMultiUserIsolation:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for multi-user isolation tests")
+            print(" PASS:  Docker services ready for multi-user isolation tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for isolation tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for isolation tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after multi-user isolation tests...")
+            print("[U+1F9F9] Cleaning up Docker services after multi-user isolation tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -111,10 +111,10 @@ class TestRealMultiUserIsolation:
         try:
             client = redis.from_url(redis_url, decode_responses=True)
             await client.ping()
-            print(f"✅ Connected to Redis at {redis_url} for isolation tests")
+            print(f" PASS:  Connected to Redis at {redis_url} for isolation tests")
             yield client
         except Exception as e:
-            pytest.fail(f"❌ Failed to connect to Redis for isolation tests: {e}")
+            pytest.fail(f" FAIL:  Failed to connect to Redis for isolation tests: {e}")
         finally:
             if 'client' in locals():
                 await client.aclose()
@@ -230,7 +230,7 @@ class TestRealMultiUserIsolation:
                         assert context["isolation_boundary"] != other_context["isolation_boundary"]
                         assert context["data_namespace"] != other_context["data_namespace"]
             
-            print(f"✅ User context factory isolation validated for {len(users)} users")
+            print(f" PASS:  User context factory isolation validated for {len(users)} users")
             
         finally:
             # Cleanup all contexts
@@ -292,10 +292,10 @@ class TestRealMultiUserIsolation:
                                 assert f"user {other_user_id}" not in message["content"].lower()
                                 assert message["user_id"] != other_user_id
             
-            print(f"✅ User data segregation validated for {len(users_data)} users")
+            print(f" PASS:  User data segregation validated for {len(users_data)} users")
             
         except Exception as e:
-            pytest.fail(f"❌ User data segregation test failed: {e}")
+            pytest.fail(f" FAIL:  User data segregation test failed: {e}")
 
     @pytest.mark.asyncio
     async def test_concurrent_user_operations_isolation(self, redis_client, real_db_session):
@@ -351,7 +351,7 @@ class TestRealMultiUserIsolation:
             # Verify no exceptions occurred
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
-                    pytest.fail(f"❌ Concurrent operation failed for user {concurrent_users[i]}: {result}")
+                    pytest.fail(f" FAIL:  Concurrent operation failed for user {concurrent_users[i]}: {result}")
             
             # Verify complete isolation between concurrent users
             for i, result in enumerate(results):
@@ -385,7 +385,7 @@ class TestRealMultiUserIsolation:
                                 assert operation["operation_id"] != other_operation["operation_id"]
                                 assert operation["user_id"] != other_operation["user_id"]
             
-            print(f"✅ Concurrent user operations isolation validated for {len(concurrent_users)} users")
+            print(f" PASS:  Concurrent user operations isolation validated for {len(concurrent_users)} users")
             
         finally:
             # Cleanup operation data
@@ -478,7 +478,7 @@ class TestRealMultiUserIsolation:
                         assert (context["event_handlers"]["handler_scope"] != 
                                other_context["event_handlers"]["handler_scope"])
             
-            print(f"✅ WebSocket user context isolation validated for {len(websocket_users)} users")
+            print(f" PASS:  WebSocket user context isolation validated for {len(websocket_users)} users")
             
         finally:
             # Cleanup WebSocket contexts and messages
@@ -576,7 +576,7 @@ class TestRealMultiUserIsolation:
                         if context["role"] != other_context["role"]:
                             assert context["permissions"] != other_context["permissions"]
             
-            print(f"✅ User permission boundary enforcement validated for {len(permission_test_users)} users")
+            print(f" PASS:  User permission boundary enforcement validated for {len(permission_test_users)} users")
             
         finally:
             # Cleanup permission contexts
@@ -642,7 +642,7 @@ class TestRealMultiUserIsolation:
             # Verify no exceptions during high load
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
-                    pytest.fail(f"❌ High load test failed for user {high_load_users[i]}: {result}")
+                    pytest.fail(f" FAIL:  High load test failed for user {high_load_users[i]}: {result}")
             
             # Critical data leakage verification
             for i, result in enumerate(results):
@@ -678,7 +678,7 @@ class TestRealMultiUserIsolation:
                                 assert (data_point["session_data"]["session_secret"] != 
                                        other_data_point["session_data"]["session_secret"])
             
-            print(f"✅ Data leakage prevention validated under high load for {len(high_load_users)} users")
+            print(f" PASS:  Data leakage prevention validated under high load for {len(high_load_users)} users")
             
         finally:
             # Cleanup sensitive data
@@ -749,7 +749,7 @@ class TestRealMultiUserIsolation:
                     assert parsed["user_id"] == user_id
                     assert parsed["user_id"] != cleanup_user_id
             
-            print(f"✅ User context cleanup validated - User {cleanup_user_id} cleaned, others preserved")
+            print(f" PASS:  User context cleanup validated - User {cleanup_user_id} cleaned, others preserved")
             
         finally:
             # Cleanup remaining test data

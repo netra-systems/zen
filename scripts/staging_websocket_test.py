@@ -34,7 +34,7 @@ STAGING_WEBSOCKET_URL = "wss://netra-backend-staging-701982941522.us-central1.ru
 
 async def test_staging_health_check():
     """Test staging backend health - must respond in <1 second"""
-    print("\n🏥 Testing Staging Backend Health...")
+    print("\n[U+1F3E5] Testing Staging Backend Health...")
     start_time = time.time()
     
     async with httpx.AsyncClient(timeout=30) as client:
@@ -45,13 +45,13 @@ async def test_staging_health_check():
         health_data = response.json()
         assert health_data.get("status") == "healthy", f"Service not healthy: {health_data}"
         
-        print(f"✅ Backend Health: {health_data.get('status')} (Response time: {elapsed:.3f}s)")
+        print(f" PASS:  Backend Health: {health_data.get('status')} (Response time: {elapsed:.3f}s)")
         return elapsed
 
 
 async def test_websocket_connection():
     """Test WebSocket connection to staging environment"""
-    print("\n🔌 Testing WebSocket Connection...")
+    print("\n[U+1F50C] Testing WebSocket Connection...")
     start_time = time.time()
     
     try:
@@ -62,28 +62,28 @@ async def test_websocket_connection():
                 STAGING_WEBSOCKET_URL,
                 close_timeout=10
             ) as ws:
-                print("❌ ERROR: Connected without authentication!")
+                print(" FAIL:  ERROR: Connected without authentication!")
                 return False
         except websockets.exceptions.InvalidStatus as e:
             if "403" in str(e):
-                print("✅ Correctly rejected unauthenticated connection")
+                print(" PASS:  Correctly rejected unauthenticated connection")
             else:
-                print(f"❌ Unexpected auth error: {e}")
+                print(f" FAIL:  Unexpected auth error: {e}")
                 return False
         
         # For now, test basic connection setup (auth would require E2E setup)
         elapsed = time.time() - start_time
-        print(f"✅ WebSocket security validation completed (Time: {elapsed:.3f}s)")
+        print(f" PASS:  WebSocket security validation completed (Time: {elapsed:.3f}s)")
         return elapsed
         
     except Exception as e:
-        print(f"❌ WebSocket test failed: {e}")
+        print(f" FAIL:  WebSocket test failed: {e}")
         return False
 
 
 async def test_api_endpoints():
     """Test critical API endpoints"""
-    print("\n🚀 Testing Critical API Endpoints...")
+    print("\n[U+1F680] Testing Critical API Endpoints...")
     start_time = time.time()
     
     critical_endpoints = [
@@ -102,9 +102,9 @@ async def test_api_endpoints():
                 
                 status_ok = response.status_code == expected_status
                 if status_ok:
-                    print(f"✅ {endpoint}: {response.status_code} ({endpoint_elapsed:.3f}s)")
+                    print(f" PASS:  {endpoint}: {response.status_code} ({endpoint_elapsed:.3f}s)")
                 else:
-                    print(f"❌ {endpoint}: {response.status_code} (expected {expected_status})")
+                    print(f" FAIL:  {endpoint}: {response.status_code} (expected {expected_status})")
                 
                 results.append({
                     'endpoint': endpoint,
@@ -115,7 +115,7 @@ async def test_api_endpoints():
                 })
                 
             except Exception as e:
-                print(f"❌ {endpoint}: Failed - {e}")
+                print(f" FAIL:  {endpoint}: Failed - {e}")
                 results.append({
                     'endpoint': endpoint,
                     'success': False,
@@ -124,14 +124,14 @@ async def test_api_endpoints():
     
     total_elapsed = time.time() - start_time
     successful = sum(1 for r in results if r.get('success', False))
-    print(f"✅ API Endpoints: {successful}/{len(critical_endpoints)} passed (Total time: {total_elapsed:.3f}s)")
+    print(f" PASS:  API Endpoints: {successful}/{len(critical_endpoints)} passed (Total time: {total_elapsed:.3f}s)")
     
     return results
 
 
 async def test_auth_service_health():
     """Test auth service health"""
-    print("\n🔐 Testing Auth Service Health...")
+    print("\n[U+1F510] Testing Auth Service Health...")
     start_time = time.time()
     
     try:
@@ -143,21 +143,21 @@ async def test_auth_service_health():
             health_data = response.json()
             assert health_data.get("status") == "healthy", f"Auth not healthy: {health_data}"
             
-            print(f"✅ Auth Service Health: {health_data.get('status')} (Response time: {elapsed:.3f}s)")
+            print(f" PASS:  Auth Service Health: {health_data.get('status')} (Response time: {elapsed:.3f}s)")
             print(f"   Database Status: {health_data.get('database_status', 'unknown')}")
             print(f"   Environment: {health_data.get('environment', 'unknown')}")
             
             return elapsed
             
     except Exception as e:
-        print(f"❌ Auth service test failed: {e}")
+        print(f" FAIL:  Auth service test failed: {e}")
         return False
 
 
 async def main():
     """Run all critical P0 tests for staging environment"""
     print("=" * 80)
-    print("🚨 CRITICAL P0 STAGING TESTS - GOLDEN PATH VALIDATION")
+    print(" ALERT:  CRITICAL P0 STAGING TESTS - GOLDEN PATH VALIDATION")
     print("Business Impact: $500K+ ARR Protection")
     print("Environment: Staging")
     print(f"Timestamp: {datetime.now().isoformat()}")
@@ -171,7 +171,7 @@ async def main():
         backend_time = await test_staging_health_check()
         results['backend_health'] = {'success': True, 'time': backend_time}
     except Exception as e:
-        print(f"❌ Backend health failed: {e}")
+        print(f" FAIL:  Backend health failed: {e}")
         results['backend_health'] = {'success': False, 'error': str(e)}
     
     # Test 2: Auth Service Health
@@ -179,7 +179,7 @@ async def main():
         auth_time = await test_auth_service_health()
         results['auth_health'] = {'success': True, 'time': auth_time}
     except Exception as e:
-        print(f"❌ Auth health failed: {e}")
+        print(f" FAIL:  Auth health failed: {e}")
         results['auth_health'] = {'success': False, 'error': str(e)}
     
     # Test 3: API Endpoints
@@ -187,7 +187,7 @@ async def main():
         api_results = await test_api_endpoints()
         results['api_endpoints'] = api_results
     except Exception as e:
-        print(f"❌ API endpoints failed: {e}")
+        print(f" FAIL:  API endpoints failed: {e}")
         results['api_endpoints'] = {'success': False, 'error': str(e)}
     
     # Test 4: WebSocket Connection
@@ -195,14 +195,14 @@ async def main():
         ws_time = await test_websocket_connection()
         results['websocket'] = {'success': True, 'time': ws_time}
     except Exception as e:
-        print(f"❌ WebSocket test failed: {e}")
+        print(f" FAIL:  WebSocket test failed: {e}")
         results['websocket'] = {'success': False, 'error': str(e)}
     
     total_time = time.time() - overall_start
     
     # Summary Report
     print("\n" + "=" * 80)
-    print("🏁 CRITICAL P0 TEST RESULTS SUMMARY")
+    print("[U+1F3C1] CRITICAL P0 TEST RESULTS SUMMARY")
     print("=" * 80)
     
     successful_tests = 0
@@ -215,17 +215,17 @@ async def main():
             total_endpoints = len(result)
             if successful_endpoints == total_endpoints:
                 successful_tests += 1
-            print(f"✅ {test_name}: {successful_endpoints}/{total_endpoints} passed")
+            print(f" PASS:  {test_name}: {successful_endpoints}/{total_endpoints} passed")
         elif result.get('success'):
             successful_tests += 1
             response_time = result.get('time', 0)
-            print(f"✅ {test_name}: PASSED ({response_time:.3f}s)")
+            print(f" PASS:  {test_name}: PASSED ({response_time:.3f}s)")
         else:
             error = result.get('error', 'Unknown error')
-            print(f"❌ {test_name}: FAILED - {error}")
+            print(f" FAIL:  {test_name}: FAILED - {error}")
     
     print(f"\nOverall: {successful_tests}/{total_tests} critical tests passed")
-    print(f"Total execution time: {total_time:.3f}s (>0.5s requirement: {'✅' if total_time > 0.5 else '❌'})")
+    print(f"Total execution time: {total_time:.3f}s (>0.5s requirement: {' PASS: ' if total_time > 0.5 else ' FAIL: '})")
     
     # Success criteria validation
     success_criteria = {
@@ -238,18 +238,18 @@ async def main():
     
     all_passed = all(success_criteria.values())
     
-    print(f"\n📊 SUCCESS CRITERIA:")
+    print(f"\n CHART:  SUCCESS CRITERIA:")
     for criterion, passed in success_criteria.items():
-        status = "✅" if passed else "❌"
+        status = " PASS: " if passed else " FAIL: "
         print(f"{status} {criterion}")
     
-    print(f"\n🎯 GOLDEN PATH STATUS: {'✅ READY' if all_passed else '❌ NOT READY'}")
+    print(f"\n TARGET:  GOLDEN PATH STATUS: {' PASS:  READY' if all_passed else ' FAIL:  NOT READY'}")
     
     if not all_passed:
-        print("\n⚠️  DEPLOYMENT BLOCKED - Critical issues found")
+        print("\n WARNING: [U+FE0F]  DEPLOYMENT BLOCKED - Critical issues found")
         exit(1)
     else:
-        print("\n🚀 DEPLOYMENT APPROVED - All critical tests passed")
+        print("\n[U+1F680] DEPLOYMENT APPROVED - All critical tests passed")
     
     return results
 

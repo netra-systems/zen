@@ -241,22 +241,22 @@ class TestWebSocketAuthFixVerification(StagingTestBase):
         fix_working = connection_success or server_error_occurred or not auth_rejection_occurred
         
         if connection_success:
-            print("[PASS] ✅ WebSocket authentication fix SUCCESSFUL - Full connectivity restored")
-            print("[PASS] ✅ JWT secret consistency achieved between WebSocket and REST")
-            print("[PASS] ✅ $50K MRR chat functionality is FULLY OPERATIONAL")
+            print("[PASS]  PASS:  WebSocket authentication fix SUCCESSFUL - Full connectivity restored")
+            print("[PASS]  PASS:  JWT secret consistency achieved between WebSocket and REST")
+            print("[PASS]  PASS:  $50K MRR chat functionality is FULLY OPERATIONAL")
             
         elif server_error_occurred:
-            print("[PARTIAL PASS] ⚠️ WebSocket JWT authentication fix WORKING - No 403 errors")
-            print("[PARTIAL PASS] ⚠️ JWT secret consistency achieved (server has separate issues)")
-            print("[PARTIAL PASS] ⚠️ $50K MRR chat functionality authentication is FIXED")
+            print("[PARTIAL PASS]  WARNING: [U+FE0F] WebSocket JWT authentication fix WORKING - No 403 errors")
+            print("[PARTIAL PASS]  WARNING: [U+FE0F] JWT secret consistency achieved (server has separate issues)")
+            print("[PARTIAL PASS]  WARNING: [U+FE0F] $50K MRR chat functionality authentication is FIXED")
             
         elif not auth_rejection_occurred:
-            print("[PASS] ✅ WebSocket authentication fix VERIFIED - No auth rejections")
+            print("[PASS]  PASS:  WebSocket authentication fix VERIFIED - No auth rejections")
             
         else:
-            print("[FAIL] ❌ WebSocket authentication fix FAILED - Still getting 403 errors")
-            print("[FAIL] ❌ JWT secret consistency NOT achieved")
-            print("[FAIL] ❌ $50K MRR chat functionality is STILL BROKEN")
+            print("[FAIL]  FAIL:  WebSocket authentication fix FAILED - Still getting 403 errors")
+            print("[FAIL]  FAIL:  JWT secret consistency NOT achieved")
+            print("[FAIL]  FAIL:  $50K MRR chat functionality is STILL BROKEN")
         
         assert fix_working, "WebSocket JWT authentication fix verification failed - still getting 403 errors"
         print("[PASS] WebSocket authentication 403 fix verification completed successfully")
@@ -315,12 +315,12 @@ class TestWebSocketAuthFixVerification(StagingTestBase):
         
         # Verify JWT parity
         if rest_success and websocket_success:
-            print("[PASS] ✅ JWT parity verified - Both WebSocket and REST accept same tokens")
+            print("[PASS]  PASS:  JWT parity verified - Both WebSocket and REST accept same tokens")
         elif websocket_403_error:
-            print("[FAIL] ❌ JWT parity BROKEN - WebSocket rejects tokens REST accepts")
+            print("[FAIL]  FAIL:  JWT parity BROKEN - WebSocket rejects tokens REST accepts")
             pytest.fail("WebSocket-REST JWT parity broken - different JWT validation logic")
         else:
-            print("[INFO] ⚠️ JWT parity test inconclusive - both endpoints may have auth issues")
+            print("[INFO]  WARNING: [U+FE0F] JWT parity test inconclusive - both endpoints may have auth issues")
         
         # The main assertion: WebSocket should not uniquely reject tokens with 403
         assert not websocket_403_error, "WebSocket authentication uses different JWT logic than REST"
@@ -344,15 +344,15 @@ if __name__ == "__main__":
             await test_class.test_websocket_rest_jwt_parity()
             
             print("\n" + "=" * 80)
-            print("✅ ALL VERIFICATION TESTS PASSED")
-            print("✅ WebSocket Authentication 403 Fix is WORKING")
-            print("✅ $50K MRR Chat Functionality is RESTORED")
+            print(" PASS:  ALL VERIFICATION TESTS PASSED")
+            print(" PASS:  WebSocket Authentication 403 Fix is WORKING")
+            print(" PASS:  $50K MRR Chat Functionality is RESTORED")
             print("=" * 80)
             
         except Exception as e:
-            print(f"\n❌ VERIFICATION FAILED: {e}")
-            print("❌ WebSocket Authentication 403 Fix needs more work")
-            print("❌ $50K MRR Chat Functionality is still broken")
+            print(f"\n FAIL:  VERIFICATION FAILED: {e}")
+            print(" FAIL:  WebSocket Authentication 403 Fix needs more work")
+            print(" FAIL:  $50K MRR Chat Functionality is still broken")
             sys.exit(1)
         finally:
             test_class.teardown_class()

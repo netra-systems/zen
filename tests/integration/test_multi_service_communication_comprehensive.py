@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Platform reliability foundation for user trust, scalability, and operational excellence
 
 This comprehensive test suite validates the complete microservice architecture communication patterns:
-1. User Registration → Login → Agent Execution → Data Storage workflow
+1. User Registration  ->  Login  ->  Agent Execution  ->  Data Storage workflow
 2. Cross-service data flow and user context propagation 
 3. Service mesh HTTP/WebSocket communication patterns
 4. Error propagation and recovery scenarios
@@ -63,7 +63,7 @@ class TestMultiServiceCommunication(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_complete_user_journey_across_all_services(self, real_services_fixture):
-        """Test complete user journey: Registration → Login → Agent Execution → Data Storage.
+        """Test complete user journey: Registration  ->  Login  ->  Agent Execution  ->  Data Storage.
         
         BVJ: This test validates the core user value proposition - users can register,
         authenticate, execute agents, and have their data properly stored across services.
@@ -91,7 +91,7 @@ class TestMultiServiceCommunication(BaseIntegrationTest):
             assert registration_result["email"] == self.test_email
             user_id = registration_result["user_id"]
             
-            # Step 2: User Login (Auth Service → Token Generation)
+            # Step 2: User Login (Auth Service  ->  Token Generation)
             self.logger.info("Step 2: Logging in user to obtain JWT token")
             login_data = {
                 "email": self.test_email,
@@ -110,7 +110,7 @@ class TestMultiServiceCommunication(BaseIntegrationTest):
             assert "refresh_token" in login_result
             access_token = login_result["access_token"]
             
-            # Step 3: Token Validation (Auth Service ↔ Backend Service)
+            # Step 3: Token Validation (Auth Service [U+2194] Backend Service)
             self.logger.info("Step 3: Validating token cross-service communication")
             auth_headers = {"Authorization": f"Bearer {access_token}"}
             
@@ -176,7 +176,7 @@ class TestMultiServiceCommunication(BaseIntegrationTest):
                 auth_event_types = [e.get("type") for e in auth_events]
                 assert "authenticated" in auth_event_types or "connection_ack" in auth_event_types
                 
-                # Step 6: Agent Execution (Backend ↔ LLM Services ↔ WebSocket)
+                # Step 6: Agent Execution (Backend [U+2194] LLM Services [U+2194] WebSocket)
                 self.logger.info("Step 6: Executing agent with cross-service communication")
                 
                 agent_request = {
@@ -227,7 +227,7 @@ class TestMultiServiceCommunication(BaseIntegrationTest):
                 final_result = completed_events[0]
                 assert "result" in final_result or "response" in final_result
         
-        # Step 7: Data Persistence Validation (Backend ↔ Database Services)
+        # Step 7: Data Persistence Validation (Backend [U+2194] Database Services)
         self.logger.info("Step 7: Validating data persistence across services")
         
         async with httpx.AsyncClient(timeout=15.0) as client:
@@ -319,7 +319,7 @@ class TestMultiServiceCommunication(BaseIntegrationTest):
         # Test HTTP communication patterns
         async with httpx.AsyncClient(timeout=15.0) as client:
             
-            # Pattern 1: Auth Service ↔ Backend Service communication
+            # Pattern 1: Auth Service [U+2194] Backend Service communication
             health_checks = []
             
             # Check Auth Service health

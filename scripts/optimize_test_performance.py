@@ -406,7 +406,7 @@ def main():
         print("\nRecommendation: Review the generated report and apply optimizations to improve test suite performance.")
         return 1 if total_issues > 20 else 0
     else:
-        print("✓ Test suite looks well optimized!")
+        print("[U+2713] Test suite looks well optimized!")
         return 0
 
 

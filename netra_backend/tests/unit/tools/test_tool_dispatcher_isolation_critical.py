@@ -114,7 +114,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - Constructor accepts string IDs (VIOLATION)
         BUSINESS RISK: String IDs enable tool execution in wrong user contexts
         """
-        print("🚨 TESTING: Tool dispatcher constructor string ID acceptance")
+        print(" ALERT:  TESTING: Tool dispatcher constructor string ID acceptance")
         
         # Create user context with string IDs (the problematic way)
         string_user_id = "tool_test_user_123"  # VIOLATION: str instead of UserID
@@ -139,7 +139,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 f"This enables tool execution context mixing between users."
             )
             self.isolation_violations.append(violation_msg)
-            print(f"❌ {violation_msg}")
+            print(f" FAIL:  {violation_msg}")
             
             # Test if dispatcher stores the context properly
             if hasattr(dispatcher, 'user_context') and dispatcher.user_context:
@@ -149,7 +149,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 if hasattr(stored_context, 'user_id') and isinstance(stored_context.user_id, str):
                     violation = f"Dispatcher stores user_id as str: {type(stored_context.user_id)}"
                     self.isolation_violations.append(violation)
-                    print(f"❌ Storage violation: {violation}")
+                    print(f" FAIL:  Storage violation: {violation}")
             
             # Record metrics
             self.record_metric("dispatcher_accepts_string_context", True)
@@ -164,14 +164,14 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
             
         except TypeError as e:
             # If we get a TypeError, type safety IS working (test passes)
-            print(f"✅ Type safety working in tool dispatcher: {e}")
+            print(f" PASS:  Type safety working in tool dispatcher: {e}")
             self.record_metric("dispatcher_rejects_string_context", True)
             
         except Exception as e:
             # Unexpected error - still a violation because it should be a TypeError
             violation_msg = f"UNEXPECTED ERROR in tool dispatcher constructor: {e}"
             self.isolation_violations.append(violation_msg)
-            print(f"⚠️  {violation_msg}")
+            print(f" WARNING: [U+FE0F]  {violation_msg}")
             pytest.fail(f"Unexpected error (should be TypeError for string IDs): {e}")
     
     def test_tool_execution_with_wrong_user_context_detection(self):
@@ -181,7 +181,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - No detection of wrong user context
         BUSINESS RISK: Tools execute with User A's context but User B's data
         """
-        print("🚨 TESTING: Tool execution wrong user context detection")
+        print(" ALERT:  TESTING: Tool execution wrong user context detection")
         
         context_violations = []
         
@@ -222,7 +222,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 f"executed tool for {user_b_id}. Result: {wrong_context_execution}"
             )
             context_violations.append(violation)
-            print(f"❌ Context mixing violation: {violation}")
+            print(f" FAIL:  Context mixing violation: {violation}")
             
             # Track the problematic execution
             exec_id = wrong_context_execution.get("execution_id", "unknown")
@@ -238,7 +238,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
             
         except Exception as context_error:
             # If we got an exception, context validation might be working
-            print(f"✅ Context validation blocked wrong user execution: {context_error}")
+            print(f" PASS:  Context validation blocked wrong user execution: {context_error}")
         
         # Test 2: Try to execute tools simultaneously with mixed contexts
         mixed_executions = []
@@ -275,10 +275,10 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                                 f"Tool execution for {exec_user} contains data from {other_user}"
                             )
                             context_violations.append(violation)
-                            print(f"❌ Data contamination: {violation}")
+                            print(f" FAIL:  Data contamination: {violation}")
             
         except Exception as e:
-            print(f"⚠️ Error in mixed context test: {e}")
+            print(f" WARNING: [U+FE0F] Error in mixed context test: {e}")
         
         # Test 3: Check dispatcher state isolation
         if hasattr(dispatcher_a, 'executed_tools') and hasattr(dispatcher_b, 'executed_tools'):
@@ -289,7 +289,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
             if id(tools_a) == id(tools_b):
                 violation = "Tool dispatchers share executed_tools list - state not isolated"
                 context_violations.append(violation)
-                print(f"❌ Shared state violation: {violation}")
+                print(f" FAIL:  Shared state violation: {violation}")
             
             # Check if tools executed by one dispatcher appear in the other
             for tool_a in tools_a:
@@ -297,7 +297,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 if tool_a_user and tool_a_user != user_a_id:
                     violation = f"Dispatcher A contains tool for wrong user: {tool_a_user}"
                     context_violations.append(violation)
-                    print(f"❌ Cross-dispatcher contamination: {violation}")
+                    print(f" FAIL:  Cross-dispatcher contamination: {violation}")
         
         # Record metrics
         self.record_metric("context_violations", len(context_violations))
@@ -313,7 +313,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 f"user contexts, causing cross-user data access: {context_violations}"
             )
         
-        print("✅ Tool context validation appears intact")
+        print(" PASS:  Tool context validation appears intact")
     
     def test_concurrent_tool_executions_isolation_boundaries(self):
         """
@@ -322,7 +322,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - Concurrent executions breach isolation boundaries
         BUSINESS RISK: Race conditions cause tool results to mix between users
         """
-        print("🚨 TESTING: Concurrent tool execution isolation boundaries")
+        print(" ALERT:  TESTING: Concurrent tool execution isolation boundaries")
         
         isolation_breaches = []
         
@@ -351,7 +351,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 self.dispatchers[user["user_id"]] = dispatcher
                 
             except Exception as e:
-                print(f"❌ Failed to create dispatcher for user {user['user_id']}: {e}")
+                print(f" FAIL:  Failed to create dispatcher for user {user['user_id']}: {e}")
         
         print(f"Created {len(self.dispatchers)} tool dispatchers for concurrent testing")
         
@@ -423,12 +423,12 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                         if other_user_id.lower() in execution_str:
                             breach = f"User {user_id} execution contains other user ID: {other_user_id}"
                             isolation_breaches.append(breach)
-                            print(f"❌ ID contamination breach: {breach}")
+                            print(f" FAIL:  ID contamination breach: {breach}")
                         
                         if other_sensitive in execution_str:
                             breach = f"User {user_id} execution contains other user's sensitive data"
                             isolation_breaches.append(breach)
-                            print(f"❌ Sensitive data breach: {breach}")
+                            print(f" FAIL:  Sensitive data breach: {breach}")
         
         # Check 2: Verify tool dispatcher state isolation after concurrent execution
         user_ids = [user["user_id"] for user in concurrent_users]
@@ -452,7 +452,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                     if id(tools_a) == id(tools_b):
                         breach = f"Dispatchers {user_id_a} and {user_id_b} share tool execution state"
                         isolation_breaches.append(breach)
-                        print(f"❌ Critical state sharing breach: {breach}")
+                        print(f" FAIL:  Critical state sharing breach: {breach}")
                     
                     # Check for cross-dispatcher tool contamination
                     for tool in tools_a:
@@ -460,7 +460,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                         if tool_user and tool_user == user_id_b:
                             breach = f"Dispatcher {user_id_a} contains tool execution for {user_id_b}"
                             isolation_breaches.append(breach)
-                            print(f"❌ Cross-dispatcher breach: {breach}")
+                            print(f" FAIL:  Cross-dispatcher breach: {breach}")
         
         # Check 3: Memory isolation verification
         dispatcher_memory_ids = {}
@@ -470,7 +470,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 other_user = dispatcher_memory_ids[memory_id]
                 breach = f"Dispatchers {user_id} and {other_user} share memory location: {memory_id}"
                 isolation_breaches.append(breach)
-                print(f"❌ Memory sharing breach: {breach}")
+                print(f" FAIL:  Memory sharing breach: {breach}")
             else:
                 dispatcher_memory_ids[memory_id] = user_id
         
@@ -498,7 +498,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 f"compromised, enabling cross-user data contamination: {isolation_breaches}"
             )
         
-        print("✅ Concurrent tool execution isolation appears intact")
+        print(" PASS:  Concurrent tool execution isolation appears intact")
     
     def test_tool_result_serialization_user_data_leakage(self):
         """
@@ -507,7 +507,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - Tool results leak user data between contexts
         BUSINESS RISK: Serialized tool results contain wrong user's sensitive data
         """
-        print("🚨 TESTING: Tool result serialization user data leakage")
+        print(" ALERT:  TESTING: Tool result serialization user data leakage")
         
         leakage_incidents = []
         
@@ -556,7 +556,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 user_executions[user["user_id"]] = []
                 
             except Exception as e:
-                print(f"❌ Failed to setup user {user['user_id']}: {e}")
+                print(f" FAIL:  Failed to setup user {user['user_id']}: {e}")
         
         # Execute tools for each user with sensitive data
         for user in sensitive_users:
@@ -587,7 +587,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                     user_executions[user_id].append(tool_result)
                     
                 except Exception as e:
-                    print(f"⚠️ Tool execution failed for {user_id}/{tool_name}: {e}")
+                    print(f" WARNING: [U+FE0F] Tool execution failed for {user_id}/{tool_name}: {e}")
         
         print(f"Executed tools for {len(user_executions)} users with sensitive data")
         
@@ -616,7 +616,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                                 f"'{other_user['sensitive_data']}'"
                             )
                             leakage_incidents.append(leakage)
-                            print(f"❌ Sensitive data leakage: {leakage}")
+                            print(f" FAIL:  Sensitive data leakage: {leakage}")
                         
                         if other_classification in result_str and other_classification != "PUBLIC":
                             leakage = (
@@ -624,7 +624,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                                 f"'{other_classification}'"
                             )
                             leakage_incidents.append(leakage)
-                            print(f"❌ Classification leakage: {leakage}")
+                            print(f" FAIL:  Classification leakage: {leakage}")
         
         # Check 2: Cross-classification contamination (critical security issue)
         enterprise_results = user_executions.get("serialization_enterprise_user", [])
@@ -637,7 +637,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
             if "ENTERPRISE" in free_str or "TRADE_SECRETS" in free_str:
                 leakage = "Free user results contain enterprise confidential data"
                 leakage_incidents.append(leakage)
-                print(f"❌ Critical privilege escalation: {leakage}")
+                print(f" FAIL:  Critical privilege escalation: {leakage}")
         
         # Government data should never appear in non-government results  
         for user_id, results in user_executions.items():
@@ -647,7 +647,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                     if "CLASSIFIED" in result_str or "GOVERNMENT" in result_str:
                         leakage = f"Non-government user {user_id} has government classified data"
                         leakage_incidents.append(leakage)
-                        print(f"❌ Critical security breach: {leakage}")
+                        print(f" FAIL:  Critical security breach: {leakage}")
         
         # Check 3: Serialization metadata leakage
         all_results = []
@@ -666,7 +666,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                         if exec_id_a and exec_id_b and exec_id_a == exec_id_b:
                             leakage = f"Shared execution ID between results: {exec_id_a}"
                             leakage_incidents.append(leakage)
-                            print(f"❌ Execution ID collision: {leakage}")
+                            print(f" FAIL:  Execution ID collision: {leakage}")
         
         # Record detailed metrics
         self.record_metric("sensitive_users_tested", len(sensitive_users))
@@ -693,7 +693,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
                 f"tool execution contexts, causing serious security violations: {leakage_incidents}"
             )
         
-        print("✅ Tool result serialization appears secure")
+        print(" PASS:  Tool result serialization appears secure")
     
     def teardown_method(self, method):
         """Enhanced teardown with isolation violation reporting."""
@@ -701,7 +701,7 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
         
         # Report all isolation violations found during test
         if self.isolation_violations:
-            print(f"\n🚨 CRITICAL TOOL ISOLATION VIOLATIONS: {len(self.isolation_violations)}")
+            print(f"\n ALERT:  CRITICAL TOOL ISOLATION VIOLATIONS: {len(self.isolation_violations)}")
             for i, violation in enumerate(self.isolation_violations, 1):
                 print(f"  {i}. {violation}")
             
@@ -720,12 +720,12 @@ class TestToolDispatcherIsolationFailures(SSotBaseTestCase):
             self.record_metric("state_violations", len(state_violations)) 
             self.record_metric("execution_violations", len(execution_violations))
         else:
-            print("\n✅ No tool isolation violations detected (unexpected - tests designed to fail)")
+            print("\n PASS:  No tool isolation violations detected (unexpected - tests designed to fail)")
             self.record_metric("total_isolation_violations", 0)
         
         # Generate tool isolation summary report
         test_metrics = self.get_all_metrics()
-        print(f"\n📊 Tool Dispatcher Isolation Test Metrics:")
+        print(f"\n CHART:  Tool Dispatcher Isolation Test Metrics:")
         for metric, value in test_metrics.items():
             if any(keyword in metric for keyword in ["violation", "breach", "leakage", "contamination"]):
                 print(f"  {metric}: {value}")

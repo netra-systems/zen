@@ -512,7 +512,7 @@ class TestHighLoadConcurrentStress(SSotBaseTestCase):
         
         # Allow for some failures under extreme stress, but most should succeed
         success_rate = len(successful_results) / len(results)
-        assert success_rate >= 0.8, f"Success rate should be ≥80% under stress, got {success_rate:.1%}"
+        assert success_rate >= 0.8, f"Success rate should be  >= 80% under stress, got {success_rate:.1%}"
         
         # Performance under stress
         assert total_stress_execution_time < 10.0, f"25 concurrent stress executions should complete in <10s, took {total_stress_execution_time:.2f}s"
@@ -524,12 +524,12 @@ class TestHighLoadConcurrentStress(SSotBaseTestCase):
         
         # WebSocket performance under stress
         total_ws_events = stress_websocket_manager._stress_metrics["total_events"]
-        assert total_ws_events >= 100, f"Should have generated ≥100 WebSocket events under stress, got {total_ws_events}"
-        assert peak_events >= 10, f"Peak events per second should be ≥10 under stress, got {peak_events}"
+        assert total_ws_events >= 100, f"Should have generated  >= 100 WebSocket events under stress, got {total_ws_events}"
+        assert peak_events >= 10, f"Peak events per second should be  >= 10 under stress, got {peak_events}"
         
         # LLM manager stress metrics
         llm_metrics = mock_llm_manager.stress_metrics
-        assert llm_metrics["max_concurrent"] >= 10, f"Should have handled ≥10 concurrent LLM requests, max was {llm_metrics['max_concurrent']}"
+        assert llm_metrics["max_concurrent"] >= 10, f"Should have handled  >= 10 concurrent LLM requests, max was {llm_metrics['max_concurrent']}"
     
     @pytest.mark.asyncio
     async def test_sustained_concurrent_load_memory_leak_detection(self, mock_llm_manager, stress_websocket_manager, 
@@ -729,12 +729,12 @@ class TestHighLoadConcurrentStress(SSotBaseTestCase):
         assert len(successful_results) >= 12, f"At least 80% should succeed under WebSocket stress, got {len(successful_results)}/15"
         
         # WebSocket throughput assertions
-        assert total_events >= 200, f"Should generate ≥200 WebSocket events under stress, got {total_events}"
-        assert max_events_per_second >= 20, f"Peak throughput should be ≥20 events/sec, got {max_events_per_second}"
+        assert total_events >= 200, f"Should generate  >= 200 WebSocket events under stress, got {total_events}"
+        assert max_events_per_second >= 20, f"Peak throughput should be  >= 20 events/sec, got {max_events_per_second}"
         
         # Delivery reliability should remain high even under stress
         reliability = throughput_metrics["delivery_reliability"]
-        assert reliability >= 0.95, f"WebSocket delivery reliability should be ≥95% under stress, got {reliability:.1%}"
+        assert reliability >= 0.95, f"WebSocket delivery reliability should be  >= 95% under stress, got {reliability:.1%}"
         
         # Backpressure should be reasonable
         backpressure_rate = backpressure_events / total_events if total_events > 0 else 0
@@ -742,7 +742,7 @@ class TestHighLoadConcurrentStress(SSotBaseTestCase):
         
         # Average throughput should be sustained
         avg_throughput = throughput_metrics["avg_throughput"]
-        assert avg_throughput >= 10, f"Average throughput should be ≥10 events/sec, got {avg_throughput:.1f}"
+        assert avg_throughput >= 10, f"Average throughput should be  >= 10 events/sec, got {avg_throughput:.1f}"
 
 
 # ============================================================================

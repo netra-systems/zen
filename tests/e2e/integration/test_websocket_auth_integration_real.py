@@ -2,7 +2,7 @@
 WebSocket Authentication Integration Test - REAL SERVICES ONLY
 
 Critical E2E test for WebSocket authentication integration using real services.
-Validates complete auth flow: registration → login → WebSocket auth → agent interaction.
+Validates complete auth flow: registration  ->  login  ->  WebSocket auth  ->  agent interaction.
 
 Business Value Justification (BVJ):
 1. Segment: ALL user tiers (critical authentication path)
@@ -240,7 +240,7 @@ class TestRealWebSocketAuthIntegration:
         """
         CRITICAL: Test complete authentication to WebSocket flow with real services.
         
-        Validates: Registration → Login → JWT → WebSocket Auth → Agent Interaction
+        Validates: Registration  ->  Login  ->  JWT  ->  WebSocket Auth  ->  Agent Interaction
         """
         # Step 1: Create real authenticated user
         user_data = await auth_test_core.create_real_authenticated_user(PlanTier.PRO)

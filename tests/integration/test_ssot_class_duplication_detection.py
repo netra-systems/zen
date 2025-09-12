@@ -99,7 +99,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
         
         This test will FAIL if duplicate classes are found, proving SSOT violations.
         """
-        print(f"\n🔍 SCANNING CODEBASE FOR DUPLICATE CLASSES")
+        print(f"\n SEARCH:  SCANNING CODEBASE FOR DUPLICATE CLASSES")
         print(f"Scan paths: {[str(p) for p in self.scan_paths]}")
         
         # Scan all Python files for class definitions
@@ -111,9 +111,9 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
                 files_scanned, classes_found = self._scan_directory_for_classes(scan_path)
                 total_files += files_scanned
                 total_classes += classes_found
-                print(f"  📁 {scan_path.name}: {files_scanned} files, {classes_found} classes")
+                print(f"  [U+1F4C1] {scan_path.name}: {files_scanned} files, {classes_found} classes")
         
-        print(f"\n📊 SCAN RESULTS:")
+        print(f"\n CHART:  SCAN RESULTS:")
         print(f"  Total files scanned: {total_files}")
         print(f"  Total classes found: {total_classes}")
         print(f"  Unique class names: {len(self.discovered_classes)}")
@@ -126,10 +126,10 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
         }
         
         if duplicates:
-            print(f"\n❌ SSOT VIOLATIONS FOUND: {len(duplicates)} duplicate class names")
+            print(f"\n FAIL:  SSOT VIOLATIONS FOUND: {len(duplicates)} duplicate class names")
             
             for class_name, class_defs in duplicates.items():
-                print(f"\n🚨 DUPLICATE CLASS: {class_name}")
+                print(f"\n ALERT:  DUPLICATE CLASS: {class_name}")
                 for i, class_def in enumerate(class_defs):
                     print(f"  {i+1}. {class_def.module_path} (line {class_def.line_number})")
                     print(f"     Fields: {sorted(class_def.fields)}")
@@ -157,9 +157,9 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
                 f"Each concept should have ONE canonical implementation per service."
             )
         
-        print(f"✅ No critical SSOT violations found")
+        print(f" PASS:  No critical SSOT violations found")
         if len(self.ssot_violations) > 0:
-            print(f"⚠️ Found {len(self.ssot_violations)} non-critical duplicate classes")
+            print(f" WARNING: [U+FE0F] Found {len(self.ssot_violations)} non-critical duplicate classes")
     
     def test_session_metrics_specific_ssot_violation(self):
         """
@@ -167,7 +167,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
         
         This test directly validates the known SessionMetrics issue.
         """
-        print(f"\n🎯 SPECIFIC TEST: SessionMetrics SSOT Violation")
+        print(f"\n TARGET:  SPECIFIC TEST: SessionMetrics SSOT Violation")
         
         # Look for SessionMetrics classes specifically
         session_metrics_classes = self.discovered_classes.get("SessionMetrics", [])
@@ -178,11 +178,11 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
             pytest.skip("No SessionMetrics classes found - may not be scanned properly")
         
         if len(session_metrics_classes) == 1:
-            print("✅ Only one SessionMetrics class found - SSOT compliance confirmed")
+            print(" PASS:  Only one SessionMetrics class found - SSOT compliance confirmed")
             return
         
         # Multiple SessionMetrics classes found - analyze the violation
-        print(f"\n❌ SSOT VIOLATION: {len(session_metrics_classes)} SessionMetrics classes found")
+        print(f"\n FAIL:  SSOT VIOLATION: {len(session_metrics_classes)} SessionMetrics classes found")
         
         field_comparison = {}
         method_comparison = {}
@@ -205,7 +205,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
         for methods in method_comparison.values():
             all_methods.update(methods)
         
-        print(f"\n📊 INTERFACE ANALYSIS:")
+        print(f"\n CHART:  INTERFACE ANALYSIS:")
         print(f"  All fields across classes: {sorted(all_fields)}")
         print(f"  All methods across classes: {sorted(all_methods)}")
         
@@ -221,7 +221,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
                 }
         
         if field_differences:
-            print(f"\n🐛 FIELD INTERFACE MISMATCHES:")
+            print(f"\n[U+1F41B] FIELD INTERFACE MISMATCHES:")
             for class_name, diffs in field_differences.items():
                 print(f"  {class_name}:")
                 if diffs['missing']:
@@ -234,7 +234,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
         found_issue_fields = all_fields & known_issue_fields
         
         if found_issue_fields:
-            print(f"\n⚠️ KNOWN ISSUE FIELDS DETECTED: {found_issue_fields}")
+            print(f"\n WARNING: [U+FE0F] KNOWN ISSUE FIELDS DETECTED: {found_issue_fields}")
             print("These are the specific fields that cause AttributeError in request_scoped_session_factory.py")
         
         # This test should FAIL to prove the SSOT violation
@@ -251,7 +251,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
         
         These are class names that often cause system-wide issues when duplicated.
         """
-        print(f"\n🚨 TESTING CRITICAL CLASS PATTERNS")
+        print(f"\n ALERT:  TESTING CRITICAL CLASS PATTERNS")
         print(f"Critical patterns: {self.critical_patterns}")
         
         critical_violations_found = []
@@ -260,7 +260,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
             classes = self.discovered_classes.get(pattern, [])
             
             if len(classes) > 1:
-                print(f"\n❌ CRITICAL VIOLATION: {pattern}")
+                print(f"\n FAIL:  CRITICAL VIOLATION: {pattern}")
                 print(f"  Found in {len(classes)} locations:")
                 
                 for class_def in classes:
@@ -281,9 +281,9 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
                         if method_diff:
                             print(f"    Method differences: {sorted(method_diff)}")
             elif len(classes) == 1:
-                print(f"✅ {pattern}: Single implementation (SSOT compliant)")
+                print(f" PASS:  {pattern}: Single implementation (SSOT compliant)")
             else:
-                print(f"ℹ️ {pattern}: Not found in scanned paths")
+                print(f"[U+2139][U+FE0F] {pattern}: Not found in scanned paths")
         
         if critical_violations_found:
             pytest.fail(
@@ -292,7 +292,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
                 f"Immediate action required to consolidate duplicate implementations."
             )
         
-        print("✅ All critical class patterns have single implementations")
+        print(" PASS:  All critical class patterns have single implementations")
     
     def test_import_path_consistency(self):
         """
@@ -301,7 +301,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
         This validates that import statements won't accidentally import
         the wrong class due to naming conflicts.
         """
-        print(f"\n📦 TESTING IMPORT PATH CONSISTENCY")
+        print(f"\n[U+1F4E6] TESTING IMPORT PATH CONSISTENCY")
         
         # Find classes that could cause import confusion
         problematic_imports = []
@@ -323,28 +323,28 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
                     })
         
         if problematic_imports:
-            print(f"\n❌ IMPORT PATH CONFLICTS FOUND: {len(problematic_imports)}")
+            print(f"\n FAIL:  IMPORT PATH CONFLICTS FOUND: {len(problematic_imports)}")
             
             for conflict in problematic_imports:
                 class_name = conflict['class_name']
                 modules = conflict['modules']
-                print(f"\n🚨 CONFLICT: {class_name}")
+                print(f"\n ALERT:  CONFLICT: {class_name}")
                 print(f"  Top-level modules: {sorted(modules)}")
                 
                 for class_def in conflict['definitions']:
                     print(f"    from {class_def.module_path} import {class_name}")
                 
-                print("  ⚠️ Risk: Import statements may import wrong class")
+                print("   WARNING: [U+FE0F] Risk: Import statements may import wrong class")
         
         # Check for specific SessionMetrics import conflicts
         session_metrics_classes = self.discovered_classes.get("SessionMetrics", [])
         if len(session_metrics_classes) > 1:
-            print(f"\n🎯 SessionMetrics Import Analysis:")
+            print(f"\n TARGET:  SessionMetrics Import Analysis:")
             for class_def in session_metrics_classes:
                 print(f"  from {class_def.module_path} import SessionMetrics")
             
-            print("  ❌ Risk: Code importing 'SessionMetrics' may get wrong implementation")
-            print("  💡 Solution: Use fully qualified imports or rename classes")
+            print("   FAIL:  Risk: Code importing 'SessionMetrics' may get wrong implementation")
+            print("   IDEA:  Solution: Use fully qualified imports or rename classes")
         
         if problematic_imports:
             pytest.fail(
@@ -353,7 +353,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
                 f"Resolve by renaming classes or consolidating implementations."
             )
         
-        print("✅ No import path conflicts found")
+        print(" PASS:  No import path conflicts found")
     
     def _scan_directory_for_classes(self, directory: Path) -> Tuple[int, int]:
         """Scan a directory for Python files and extract class definitions."""
@@ -376,7 +376,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
                     
             except Exception as e:
                 # Skip files that can't be parsed (binary, etc.)
-                print(f"  ⚠️ Skipped {python_file.name}: {e}")
+                print(f"   WARNING: [U+FE0F] Skipped {python_file.name}: {e}")
                 continue
         
         return files_scanned, classes_found
@@ -458,13 +458,13 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
     
     def test_generate_ssot_violation_report(self):
         """Generate comprehensive report of all SSOT violations found."""
-        print(f"\n📄 GENERATING SSOT VIOLATION REPORT")
+        print(f"\n[U+1F4C4] GENERATING SSOT VIOLATION REPORT")
         
         if not self.ssot_violations:
-            print("✅ No SSOT violations to report")
+            print(" PASS:  No SSOT violations to report")
             return
         
-        print(f"\n🚨 SSOT VIOLATIONS SUMMARY")
+        print(f"\n ALERT:  SSOT VIOLATIONS SUMMARY")
         print(f"Total violations: {len(self.ssot_violations)}")
         
         by_severity = defaultdict(list)
@@ -513,7 +513,7 @@ class TestSSotClassDuplicationDetection(SSotBaseTestCase):
         
         # Save report (optional - for debugging)
         report_content = "\n".join(report_lines)
-        print(f"\n📋 DETAILED REPORT:")
+        print(f"\n[U+1F4CB] DETAILED REPORT:")
         print(report_content[:1000] + "..." if len(report_content) > 1000 else report_content)
         
         # Fail if critical violations found

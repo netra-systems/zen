@@ -100,20 +100,20 @@ class P1CriticalFixValidator:
                 _add_fallback_session_middleware
             )
             fix_results["import_successful"] = True
-            logger.info("✅ Enhanced SessionMiddleware functions imported successfully")
+            logger.info(" PASS:  Enhanced SessionMiddleware functions imported successfully")
             
             # Check if enhanced error handling exists
             setup_source = inspect.getsource(setup_session_middleware)
             if "enhanced error handling" in setup_source.lower() and "critical fix" in setup_source.lower():
                 fix_results["enhanced_error_handling"] = True
-                logger.info("✅ Enhanced error handling detected in setup_session_middleware")
+                logger.info(" PASS:  Enhanced error handling detected in setup_session_middleware")
             
             # Check if environment validation exists
             try:
                 validate_source = inspect.getsource(_validate_and_get_secret_key)
                 if "environment variable" in validate_source.lower() and "SECRET_KEY" in validate_source:
                     fix_results["environment_validation"] = True
-                    logger.info("✅ Environment variable validation detected")
+                    logger.info(" PASS:  Environment variable validation detected")
             except Exception as e:
                 logger.warning(f"Could not inspect _validate_and_get_secret_key: {e}")
             
@@ -122,7 +122,7 @@ class P1CriticalFixValidator:
                 fallback_source = inspect.getsource(_add_fallback_session_middleware)
                 if "fallback" in fallback_source.lower() and "SessionMiddleware" in fallback_source:
                     fix_results["fallback_middleware"] = True
-                    logger.info("✅ Fallback SessionMiddleware implementation detected")
+                    logger.info(" PASS:  Fallback SessionMiddleware implementation detected")
             except Exception as e:
                 logger.warning(f"Could not inspect _add_fallback_session_middleware: {e}")
             
@@ -139,16 +139,16 @@ class P1CriticalFixValidator:
                 
                 # This should not raise an error with proper implementation
                 fix_results["secret_key_validation"] = True
-                logger.info("✅ Secret key validation logic appears functional")
+                logger.info(" PASS:  Secret key validation logic appears functional")
                 
             except Exception as e:
                 logger.warning(f"Secret key validation test failed: {e}")
         
         except ImportError as e:
-            logger.error(f"❌ Could not import SessionMiddleware enhancements: {e}")
+            logger.error(f" FAIL:  Could not import SessionMiddleware enhancements: {e}")
             fix_results["import_successful"] = False
         except Exception as e:
-            logger.error(f"❌ SessionMiddleware validation failed: {e}")
+            logger.error(f" FAIL:  SessionMiddleware validation failed: {e}")
         
         self.results["sessionmiddleware_fix"] = fix_results
         
@@ -157,7 +157,7 @@ class P1CriticalFixValidator:
         total_checks = len(fix_results)
         success_percentage = (successful_checks / total_checks) * 100
         
-        logger.info(f"📊 SessionMiddleware Fix Status: {successful_checks}/{total_checks} checks passed ({success_percentage:.1f}%)")
+        logger.info(f" CHART:  SessionMiddleware Fix Status: {successful_checks}/{total_checks} checks passed ({success_percentage:.1f}%)")
     
     def validate_windows_asyncio_fix(self) -> None:
         """Validate Windows asyncio deadlock fix."""
@@ -182,14 +182,14 @@ class P1CriticalFixValidator:
                     windows_asyncio_safe
                 )
                 fix_results["windows_safe_module"] = True
-                logger.info("✅ Windows-safe asyncio module imported successfully")
+                logger.info(" PASS:  Windows-safe asyncio module imported successfully")
                 
                 # Test Windows detection
                 safe_patterns = WindowsAsyncioSafePatterns()
                 logger.info(f"Platform detection: is_windows={safe_patterns.is_windows}")
                 
             except ImportError as e:
-                logger.error(f"❌ Could not import Windows-safe asyncio module: {e}")
+                logger.error(f" FAIL:  Could not import Windows-safe asyncio module: {e}")
                 return
             
             # Check WebSocket integration
@@ -200,19 +200,19 @@ class P1CriticalFixValidator:
                     
                     if "windows_safe_sleep" in websocket_source:
                         fix_results["sleep_replacements"] = True
-                        logger.info("✅ Windows-safe sleep replacements detected in WebSocket module")
+                        logger.info(" PASS:  Windows-safe sleep replacements detected in WebSocket module")
                     
                     if "windows_safe_wait_for" in websocket_source:
                         fix_results["wait_for_replacements"] = True
-                        logger.info("✅ Windows-safe wait_for replacements detected in WebSocket module")
+                        logger.info(" PASS:  Windows-safe wait_for replacements detected in WebSocket module")
                     
                     if "@windows_asyncio_safe" in websocket_source:
                         fix_results["decorator_applied"] = True
-                        logger.info("✅ Windows asyncio safe decorator applied to WebSocket handlers")
+                        logger.info(" PASS:  Windows asyncio safe decorator applied to WebSocket handlers")
                     
                     if "from netra_backend.app.core.windows_asyncio_safe import" in websocket_source:
                         fix_results["websocket_integration"] = True
-                        logger.info("✅ Windows-safe asyncio integration detected in WebSocket module")
+                        logger.info(" PASS:  Windows-safe asyncio integration detected in WebSocket module")
                 
             except Exception as e:
                 logger.warning(f"Could not analyze WebSocket source: {e}")
@@ -245,13 +245,13 @@ class P1CriticalFixValidator:
                 
                 if test_result:
                     fix_results["safe_patterns_implemented"] = True
-                    logger.info("✅ Windows-safe asyncio patterns functional test passed")
+                    logger.info(" PASS:  Windows-safe asyncio patterns functional test passed")
                 
             except Exception as e:
                 logger.warning(f"Windows-safe patterns functional test failed: {e}")
         
         except Exception as e:
-            logger.error(f"❌ Windows asyncio validation failed: {e}")
+            logger.error(f" FAIL:  Windows asyncio validation failed: {e}")
         
         self.results["windows_asyncio_fix"] = fix_results
         
@@ -260,7 +260,7 @@ class P1CriticalFixValidator:
         total_checks = len(fix_results)
         success_percentage = (successful_checks / total_checks) * 100
         
-        logger.info(f"📊 Windows Asyncio Fix Status: {successful_checks}/{total_checks} checks passed ({success_percentage:.1f}%)")
+        logger.info(f" CHART:  Windows Asyncio Fix Status: {successful_checks}/{total_checks} checks passed ({success_percentage:.1f}%)")
     
     def determine_overall_status(self) -> None:
         """Determine overall validation status."""
@@ -283,37 +283,37 @@ class P1CriticalFixValidator:
     def generate_validation_report(self) -> None:
         """Generate validation report."""
         logger.info("\n" + "="*80)
-        logger.info("🎯 P1 CRITICAL FIXES VALIDATION REPORT")
+        logger.info(" TARGET:  P1 CRITICAL FIXES VALIDATION REPORT")
         logger.info("="*80)
         
         # SessionMiddleware Fix Report
-        logger.info("\n📋 PRIORITY 1: SessionMiddleware Configuration Fix")
+        logger.info("\n[U+1F4CB] PRIORITY 1: SessionMiddleware Configuration Fix")
         sm_results = self.results["sessionmiddleware_fix"]
         for check, passed in sm_results.items():
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             logger.info(f"  {status} {check.replace('_', ' ').title()}")
         
         # Windows Asyncio Fix Report  
-        logger.info("\n🪟 PRIORITY 2: Windows Asyncio Deadlock Fix")
+        logger.info("\n[U+1FA9F] PRIORITY 2: Windows Asyncio Deadlock Fix")
         wa_results = self.results["windows_asyncio_fix"]
         for check, passed in wa_results.items():
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             logger.info(f"  {status} {check.replace('_', ' ').title()}")
         
         # Overall Status
         overall_status = self.results["overall_status"]
         overall_score = self.results.get("overall_score", 0)
         
-        logger.info(f"\n🎯 OVERALL STATUS: {overall_status.upper()} ({overall_score:.1f}%)")
+        logger.info(f"\n TARGET:  OVERALL STATUS: {overall_status.upper()} ({overall_score:.1f}%)")
         
         if overall_status == "excellent":
-            logger.info("🎉 All critical fixes successfully implemented!")
+            logger.info(" CELEBRATION:  All critical fixes successfully implemented!")
         elif overall_status == "good":
-            logger.info("✅ Most critical fixes implemented, minor issues detected")
+            logger.info(" PASS:  Most critical fixes implemented, minor issues detected")
         elif overall_status == "partial":
-            logger.info("⚠️ Some critical fixes missing, requires attention")
+            logger.info(" WARNING: [U+FE0F] Some critical fixes missing, requires attention")
         else:
-            logger.info("❌ Critical fixes validation failed, immediate action required")
+            logger.info(" FAIL:  Critical fixes validation failed, immediate action required")
         
         logger.info("\n" + "="*80)
 
@@ -329,13 +329,13 @@ def main():
     # Return appropriate exit code
     overall_status = results.get("overall_status", "failed")
     if overall_status in ["excellent", "good"]:
-        print(f"\n✅ Validation completed successfully: {overall_status}")
+        print(f"\n PASS:  Validation completed successfully: {overall_status}")
         sys.exit(0)
     elif overall_status == "partial":
-        print(f"\n⚠️ Validation completed with warnings: {overall_status}")
+        print(f"\n WARNING: [U+FE0F] Validation completed with warnings: {overall_status}")
         sys.exit(1)
     else:
-        print(f"\n❌ Validation failed: {overall_status}")
+        print(f"\n FAIL:  Validation failed: {overall_status}")
         sys.exit(2)
 
 

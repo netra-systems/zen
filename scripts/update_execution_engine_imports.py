@@ -118,16 +118,16 @@ class ImportUpdater:
                     f.write(content)
                 
                 if self.verbose:
-                    print(f"✅ Updated: {file_path}")
+                    print(f" PASS:  Updated: {file_path}")
             
             elif modified and self.dry_run:
                 if self.verbose:
-                    print(f"📋 Would update: {file_path}")
+                    print(f"[U+1F4CB] Would update: {file_path}")
             
             return modified
             
         except Exception as e:
-            print(f"❌ Error processing {file_path}: {e}")
+            print(f" FAIL:  Error processing {file_path}: {e}")
             return False
     
     def update_test_file_patterns(self, file_path: Path, content: str) -> bool:
@@ -159,7 +159,7 @@ class ImportUpdater:
             if re.search(pattern, content):
                 # Don't actually modify test files automatically - they may need manual review
                 if self.verbose:
-                    print(f"  🔍 Test pattern found in {file_path}: {pattern}")
+                    print(f"   SEARCH:  Test pattern found in {file_path}: {pattern}")
                     print(f"     Consider updating to: {replacement}")
         
         return modified
@@ -213,24 +213,24 @@ class ImportUpdater:
     
     def run(self) -> None:
         """Run the import update process."""
-        print("🔄 Starting execution engine import consolidation...")
+        print(" CYCLE:  Starting execution engine import consolidation...")
         
         if self.dry_run:
-            print("📋 DRY RUN MODE - No files will be modified")
+            print("[U+1F4CB] DRY RUN MODE - No files will be modified")
         
         # Find files to process
         python_files = self.find_python_files()
-        print(f"📁 Found {len(python_files)} Python files to process")
+        print(f"[U+1F4C1] Found {len(python_files)} Python files to process")
         
         # Analyze current imports
         if self.verbose:
-            print("\n📊 Analyzing current import patterns...")
+            print("\n CHART:  Analyzing current import patterns...")
             import_counts = self.analyze_imports(python_files)
             for pattern, count in sorted(import_counts.items()):
                 print(f"  {pattern}: {count} occurrences")
         
         # Process files
-        print(f"\n🔧 Processing files...")
+        print(f"\n[U+1F527] Processing files...")
         for file_path in python_files:
             if self.update_file_imports(file_path):
                 self.changes_made += 1
@@ -240,16 +240,16 @@ class ImportUpdater:
                 print(f"  Processed {self.files_processed}/{len(python_files)} files...")
         
         # Summary
-        print(f"\n✅ Import consolidation complete!")
-        print(f"📊 Files processed: {self.files_processed}")
-        print(f"🔄 Files modified: {self.changes_made}")
+        print(f"\n PASS:  Import consolidation complete!")
+        print(f" CHART:  Files processed: {self.files_processed}")
+        print(f" CYCLE:  Files modified: {self.changes_made}")
         
         if self.dry_run:
-            print("📋 This was a dry run - no files were actually modified")
-            print("📋 Run without --dry-run to apply changes")
+            print("[U+1F4CB] This was a dry run - no files were actually modified")
+            print("[U+1F4CB] Run without --dry-run to apply changes")
         
         # Next steps
-        print(f"\n🔄 Next steps:")
+        print(f"\n CYCLE:  Next steps:")
         print(f"1. Review modified files for correctness")
         print(f"2. Run tests to ensure no regressions")
         print(f"3. Update any remaining manual patterns")

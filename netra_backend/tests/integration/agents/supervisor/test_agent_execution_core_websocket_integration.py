@@ -429,7 +429,7 @@ class TestAgentExecutionCoreWebSocketIntegration(BaseIntegrationTest):
         
         # Verify total event count (each run should have at least 2 events)
         total_events = len(event_collector.events)
-        assert total_events >= 6  # 3 runs × 2 events minimum
+        assert total_events >= 6  # 3 runs  x  2 events minimum
     
     @pytest.mark.integration
     @pytest.mark.real_services

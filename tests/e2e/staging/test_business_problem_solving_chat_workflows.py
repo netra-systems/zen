@@ -8,7 +8,7 @@ pay us to solve real business problems through AI-powered chat interactions.
 
 Business Value Justification (BVJ):  
 - Segment: All (Free, Early, Mid, Enterprise) - core value proposition for all segments
-- Business Goal: Validate complete business problem → AI analysis → actionable solutions workflow
+- Business Goal: Validate complete business problem  ->  AI analysis  ->  actionable solutions workflow
 - Value Impact: Ensures customers receive substantive ROI through AI-powered business insights  
 - Strategic Impact: Protects $500K+ ARR by validating core value delivery mechanism
 
@@ -207,7 +207,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
         Test complete cost optimization problem solving workflow in staging environment.
         
         CRITICAL: This tests the PRIMARY revenue-generating workflow:
-        Customer Cost Problem → AI Analysis → Specific Recommendations → Quantified Savings → Customer ROI
+        Customer Cost Problem  ->  AI Analysis  ->  Specific Recommendations  ->  Quantified Savings  ->  Customer ROI
         
         Business Value: Validates the core value proposition that customers pay premium for.
         """
@@ -223,7 +223,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
         websocket_url = self._staging_config.urls.websocket_url
         headers = self._websocket_helper.get_websocket_headers()
         
-        self.logger.info(f"🔌 Connecting to staging WebSocket: {websocket_url}")
+        self.logger.info(f"[U+1F50C] Connecting to staging WebSocket: {websocket_url}")
         
         business_problem = (
             "Our company is spending $50,000 monthly on cloud infrastructure (AWS, Azure, GCP) "
@@ -257,7 +257,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
             }
             
             await websocket.send(json.dumps(problem_request))
-            self.logger.info(f"📤 Sent comprehensive cost optimization problem to staging")
+            self.logger.info(f"[U+1F4E4] Sent comprehensive cost optimization problem to staging")
             
             # Collect WebSocket events and final response
             collection_timeout = 120.0  # Extended timeout for comprehensive analysis
@@ -274,7 +274,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
                         "staging_environment": True
                     })
                     
-                    self.logger.info(f"📨 Staging event: {event.get('type', 'unknown')}")
+                    self.logger.info(f"[U+1F4E8] Staging event: {event.get('type', 'unknown')}")
                     
                     # Capture final response with business recommendations
                     if event.get("type") in ["agent_completed", "final_response", "business_analysis_complete"]:
@@ -287,7 +287,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
                         break
                     continue
                 except Exception as e:
-                    self.logger.error(f"❌ Error in staging WebSocket communication: {e}")
+                    self.logger.error(f" FAIL:  Error in staging WebSocket communication: {e}")
                     break
         
         # Assert - Validate comprehensive business value delivery
@@ -360,7 +360,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
         self.record_metric("substantive_value_delivered", business_metrics.is_substantive_value())
         self.record_metric("response_length_chars", len(response_content))
         
-        self.logger.info(f"✅ Staging cost optimization workflow delivered substantive business value: "
+        self.logger.info(f" PASS:  Staging cost optimization workflow delivered substantive business value: "
                         f"score {business_value_score:.2f}, {business_metrics.specific_recommendations_count} recommendations")
     
     @pytest.mark.asyncio
@@ -369,7 +369,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
         Test complete performance optimization workflow with technical analysis in staging.
         
         CRITICAL: This tests TECHNICAL business problem solving workflow:
-        Performance Issues → Technical Analysis → Optimization Strategies → Implementation Plan → Business Impact
+        Performance Issues  ->  Technical Analysis  ->  Optimization Strategies  ->  Implementation Plan  ->  Business Impact
         
         Business Value: Validates technical problem solving that drives Mid/Enterprise customer retention.
         """
@@ -418,7 +418,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
             }
             
             await websocket.send(json.dumps(technical_request))
-            self.logger.info(f"📤 Sent technical performance problem to staging")
+            self.logger.info(f"[U+1F4E4] Sent technical performance problem to staging")
             
             # Collect technical analysis events
             collection_timeout = 90.0
@@ -435,7 +435,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
                         "technical_analysis": True
                     })
                     
-                    self.logger.info(f"📨 Technical analysis event: {event.get('type', 'unknown')}")
+                    self.logger.info(f"[U+1F4E8] Technical analysis event: {event.get('type', 'unknown')}")
                     
                     # Capture technical response
                     if event.get("type") in ["agent_completed", "technical_analysis_complete", "final_response"]:
@@ -448,7 +448,7 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
                         break
                     continue
                 except Exception as e:
-                    self.logger.error(f"❌ Error in staging technical analysis: {e}")
+                    self.logger.error(f" FAIL:  Error in staging technical analysis: {e}")
                     break
         
         # Assert - Validate comprehensive technical business value
@@ -520,14 +520,14 @@ class TestBusinessProblemSolvingChatWorkflows(SSotAsyncTestCase):
         self.record_metric("business_impact_included", len(found_business_terms) >= 2)
         self.record_metric("technical_response_length", len(technical_content))
         
-        self.logger.info(f"✅ Staging technical optimization workflow delivered comprehensive analysis: "
+        self.logger.info(f" PASS:  Staging technical optimization workflow delivered comprehensive analysis: "
                         f"score {technical_value_score:.2f}, {technical_metrics.specific_recommendations_count} technical recommendations")
     
     def teardown_method(self, method=None):
         """Cleanup after business workflow tests."""
         super().teardown_method(method)
         
-        self.logger.info(f"✅ Business problem solving chat workflow staging test completed successfully")
+        self.logger.info(f" PASS:  Business problem solving chat workflow staging test completed successfully")
 
 
 if __name__ == "__main__":

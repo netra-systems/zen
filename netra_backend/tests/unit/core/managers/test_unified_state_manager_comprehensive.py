@@ -1694,10 +1694,10 @@ class TestErrorHandlingAndEdgeCases(BaseTestCase):
         
         # Test unicode strings
         unicode_data = {
-            "emoji_key": "🚀🤖💻",
-            "chinese": "你好世界",
-            "arabic": "مرحبا بالعالم",
-            "emoji_mix": "Hello 👋 World 🌍",
+            "emoji_key": "[U+1F680][U+1F916][U+1F4BB]",
+            "chinese": "[U+4F60][U+597D][U+4E16][U+754C]",
+            "arabic": "[U+0645][U+0631][U+062D][U+0628][U+0627] [U+0628][U+0627][U+0644][U+0639][U+0627][U+0644][U+0645]",
+            "emoji_mix": "Hello [U+1F44B] World [U+1F30D]",
             "special_chars": "!@#$%^&*()_+-=[]{}|;':\",./<>?"
         }
         

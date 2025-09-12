@@ -76,7 +76,7 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         assert breaker is mock_breaker_instance
         
         # Success: AuthCircuitBreakerManager properly delegates to UnifiedCircuitBreaker
-        print(f"✅ DELEGATION CREATION VERIFIED: AuthCircuitBreakerManager delegates to UnifiedCircuitBreaker "
+        print(f" PASS:  DELEGATION CREATION VERIFIED: AuthCircuitBreakerManager delegates to UnifiedCircuitBreaker "
               f"with failure_threshold={config_arg.failure_threshold}, recovery_timeout={config_arg.recovery_timeout}")
 
     @pytest.mark.unit
@@ -113,7 +113,7 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         assert breaker4 is mock_breaker_instance  # Mock returns same instance, but would be different in real scenario
         
         # Success: AuthCircuitBreakerManager properly caches breaker instances
-        print(f"✅ CACHING VERIFIED: AuthCircuitBreakerManager properly caches breaker instances")
+        print(f" PASS:  CACHING VERIFIED: AuthCircuitBreakerManager properly caches breaker instances")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation
@@ -154,7 +154,7 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         assert mock_breaker2.success_count == 0
         
         # Success: reset_all() properly resets all UnifiedCircuitBreaker instances
-        print(f"✅ RESET_ALL DELEGATION VERIFIED: All UnifiedCircuitBreaker instances reset to CLOSED state")
+        print(f" PASS:  RESET_ALL DELEGATION VERIFIED: All UnifiedCircuitBreaker instances reset to CLOSED state")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation
@@ -201,7 +201,7 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
         assert auth_cb_manager._breakers[expected_breaker_name] is mock_breaker_instance
         
         # Success: call_with_breaker properly delegates to UnifiedCircuitBreaker.call()
-        print(f"✅ CALL_WITH_BREAKER DELEGATION VERIFIED: Proper delegation with breaker name: {expected_breaker_name}")
+        print(f" PASS:  CALL_WITH_BREAKER DELEGATION VERIFIED: Proper delegation with breaker name: {expected_breaker_name}")
 
     @pytest.mark.unit
     @pytest.mark.ssot_delegation
@@ -247,7 +247,7 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
             assert config.name == "auth_config_test"
             
             # Success: AuthCircuitBreakerManager properly maps config to UnifiedCircuitConfig
-            print(f"✅ CONFIG MAPPING VERIFIED: failure_threshold={config.failure_threshold}, "
+            print(f" PASS:  CONFIG MAPPING VERIFIED: failure_threshold={config.failure_threshold}, "
                   f"recovery_timeout={config.recovery_timeout}, timeout_seconds={config.timeout_seconds}")
 
     @pytest.mark.unit
@@ -276,4 +276,4 @@ class TestAuthClientCacheSSOT(SSotBaseTestCase):
             mock_breaker.call.assert_called_once_with(failing_auth_function)
             
             # Success: AuthCircuitBreakerManager properly delegates error handling to UnifiedCircuitBreaker
-            print(f"✅ ERROR HANDLING DELEGATION VERIFIED: Exception propagation through UnifiedCircuitBreaker works correctly")
+            print(f" PASS:  ERROR HANDLING DELEGATION VERIFIED: Exception propagation through UnifiedCircuitBreaker works correctly")

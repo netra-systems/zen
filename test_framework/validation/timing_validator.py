@@ -261,9 +261,9 @@ class TimingValidator:
         # Log critical violations immediately
         for violation in violations:
             if violation.criticality == TimingCriticality.CRITICAL:
-                logger.error(f"🚨 CRITICAL TIMING VIOLATION: {violation.description}")
+                logger.error(f" ALERT:  CRITICAL TIMING VIOLATION: {violation.description}")
             elif violation.user_abandonment_risk > 0.6:
-                logger.warning(f"⚠️ HIGH ABANDONMENT RISK: {violation.description}")
+                logger.warning(f" WARNING: [U+FE0F] HIGH ABANDONMENT RISK: {violation.description}")
         
         return violations
     
@@ -493,7 +493,7 @@ class TimingValidator:
                     error_parts.append(f"- {v.description} (abandonment risk: {v.user_abandonment_risk:.1%})")
             
             error_message = (
-                "🚨 TIMING PERFORMANCE FAILURE - WebSocket events too slow for business value!\n"
+                " ALERT:  TIMING PERFORMANCE FAILURE - WebSocket events too slow for business value!\n"
                 + "\n".join(error_parts) + "\n\n"
                 f"Session duration: {result.total_duration_ms:.0f}ms, Events: {result.total_events}\n"
                 "This timing will cause user frustration and abandonment."

@@ -57,7 +57,7 @@
         # Removed problematic line: async def test_tool_execution_without_context():
             # REMOVED_SYNTAX_ERROR: """Test that tool execution without context raises WebSocketContextValidationError."""
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: ✅ Testing: Tool execution without context...")
+            # REMOVED_SYNTAX_ERROR:  PASS:  Testing: Tool execution without context...")
 
             # REMOVED_SYNTAX_ERROR: engine = UnifiedToolExecutionEngine()
             # REMOVED_SYNTAX_ERROR: engine.notification_monitor = Magic
@@ -67,7 +67,7 @@
                 # REMOVED_SYNTAX_ERROR: tool_name="TestTool",
                 # REMOVED_SYNTAX_ERROR: tool_input={"param": "value"}
                 
-                # REMOVED_SYNTAX_ERROR: print("❌ FAILED: Should have raised WebSocketContextValidationError")
+                # REMOVED_SYNTAX_ERROR: print(" FAIL:  FAILED: Should have raised WebSocketContextValidationError")
                 # REMOVED_SYNTAX_ERROR: return False
                 # REMOVED_SYNTAX_ERROR: except WebSocketContextValidationError as e:
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -81,7 +81,7 @@
                         # Removed problematic line: async def test_tool_execution_without_bridge():
                             # REMOVED_SYNTAX_ERROR: """Test that tool execution without WebSocket bridge raises exception."""
                             # REMOVED_SYNTAX_ERROR: print(" )
-                            # REMOVED_SYNTAX_ERROR: ✅ Testing: Tool execution without bridge...")
+                            # REMOVED_SYNTAX_ERROR:  PASS:  Testing: Tool execution without bridge...")
 
                             # REMOVED_SYNTAX_ERROR: engine = UnifiedToolExecutionEngine()
                             # REMOVED_SYNTAX_ERROR: engine.websocket_bridge = None  # No bridge available
@@ -98,7 +98,7 @@
                                 # REMOVED_SYNTAX_ERROR: tool_name="TestTool",
                                 # REMOVED_SYNTAX_ERROR: tool_input={"param": "value"}
                                 
-                                # REMOVED_SYNTAX_ERROR: print("❌ FAILED: Should have raised WebSocketBridgeUnavailableError")
+                                # REMOVED_SYNTAX_ERROR: print(" FAIL:  FAILED: Should have raised WebSocketBridgeUnavailableError")
                                 # REMOVED_SYNTAX_ERROR: return False
                                 # REMOVED_SYNTAX_ERROR: except WebSocketBridgeUnavailableError as e:
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -114,7 +114,7 @@
                                         # Removed problematic line: async def test_agent_notification_failure():
                                             # REMOVED_SYNTAX_ERROR: """Test that failed agent notifications raise WebSocketSendFailureError."""
                                             # REMOVED_SYNTAX_ERROR: print(" )
-                                            # REMOVED_SYNTAX_ERROR: ✅ Testing: Agent notification failure...")
+                                            # REMOVED_SYNTAX_ERROR:  PASS:  Testing: Agent notification failure...")
 
                                             # Create mock WebSocket bridge that returns failure
                                             # REMOVED_SYNTAX_ERROR: websocket = TestWebSocketConnection()
@@ -129,7 +129,7 @@
 
                                             # REMOVED_SYNTAX_ERROR: try:
                                                 # REMOVED_SYNTAX_ERROR: await emitter.notify_agent_started("TestAgent", {"context": "data"})
-                                                # REMOVED_SYNTAX_ERROR: print("❌ FAILED: Should have raised WebSocketSendFailureError")
+                                                # REMOVED_SYNTAX_ERROR: print(" FAIL:  FAILED: Should have raised WebSocketSendFailureError")
                                                 # REMOVED_SYNTAX_ERROR: return False
                                                 # REMOVED_SYNTAX_ERROR: except WebSocketSendFailureError as e:
                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -144,7 +144,7 @@
                                                         # Removed problematic line: async def test_message_buffer_overflow():
                                                             # REMOVED_SYNTAX_ERROR: """Test that message buffer overflow raises WebSocketBufferOverflowError."""
                                                             # REMOVED_SYNTAX_ERROR: print(" )
-                                                            # REMOVED_SYNTAX_ERROR: ✅ Testing: Message buffer overflow...")
+                                                            # REMOVED_SYNTAX_ERROR:  PASS:  Testing: Message buffer overflow...")
 
                                                             # REMOVED_SYNTAX_ERROR: config = BufferConfig( )
                                                             # REMOVED_SYNTAX_ERROR: max_message_size_bytes=100,  # Small limit for testing
@@ -163,7 +163,7 @@
                                                                 # REMOVED_SYNTAX_ERROR: message=large_message,
                                                                 # REMOVED_SYNTAX_ERROR: priority=BufferPriority.HIGH
                                                                 
-                                                                # REMOVED_SYNTAX_ERROR: print("❌ FAILED: Should have raised WebSocketBufferOverflowError")
+                                                                # REMOVED_SYNTAX_ERROR: print(" FAIL:  FAILED: Should have raised WebSocketBufferOverflowError")
                                                                 # REMOVED_SYNTAX_ERROR: return False
                                                                 # REMOVED_SYNTAX_ERROR: except WebSocketBufferOverflowError as e:
                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -201,12 +201,12 @@
     # REMOVED_SYNTAX_ERROR: if failed == 0:
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
         # REMOVED_SYNTAX_ERROR: print(" )
-        # REMOVED_SYNTAX_ERROR: 🎯 WebSocket failures are now LOUD and visible!")
-        # REMOVED_SYNTAX_ERROR: print("🔊 No more silent failures - users will be informed of issues!")
+        # REMOVED_SYNTAX_ERROR:  TARGET:  WebSocket failures are now LOUD and visible!")
+        # REMOVED_SYNTAX_ERROR: print("[U+1F50A] No more silent failures - users will be informed of issues!")
         # REMOVED_SYNTAX_ERROR: else:
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: ⚠️ Some silent failures may still exist!")
+            # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F] Some silent failures may still exist!")
 
             # REMOVED_SYNTAX_ERROR: return failed == 0
 

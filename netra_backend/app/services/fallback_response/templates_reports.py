@@ -90,10 +90,10 @@ class ReportTemplates:
     
     def _build_comprehensive_requirements(self) -> str:
         """Build comprehensive report requirements."""
-        return ("• Specific metrics to include\n"
-                "• Reporting period and scope\n"
-                "• Target audience (technical/executive)\n"
-                "• Key questions to address\n")
+        return ("[U+2022] Specific metrics to include\n"
+                "[U+2022] Reporting period and scope\n"
+                "[U+2022] Target audience (technical/executive)\n"
+                "[U+2022] Key questions to address\n")
     
     def _get_additional_input_template(self) -> str:
         """Get report additional input template."""
@@ -104,10 +104,10 @@ class ReportTemplates:
     
     def _build_additional_requirements(self) -> str:
         """Build additional input requirements."""
-        return ("• Data sources to analyze\n"
-                "• Comparison baselines\n"
-                "• Success metrics\n"
-                "• Stakeholder requirements\n")
+        return ("[U+2022] Data sources to analyze\n"
+                "[U+2022] Comparison baselines\n"
+                "[U+2022] Success metrics\n"
+                "[U+2022] Stakeholder requirements\n")
     
     def _get_specific_insights_template(self) -> str:
         """Get report specific insights template."""
@@ -119,10 +119,10 @@ class ReportTemplates:
     
     def _build_insights_requirements(self) -> str:
         """Build specific insights requirements."""
-        return ("• Share recent performance data\n"
-                "• Highlight areas of concern\n"
-                "• Specify desired report sections\n"
-                "• Indicate decision points needing data\n")
+        return ("[U+2022] Share recent performance data\n"
+                "[U+2022] Highlight areas of concern\n"
+                "[U+2022] Specify desired report sections\n"
+                "[U+2022] Indicate decision points needing data\n")
     
     def _get_actionable_template(self) -> str:
         """Get report actionable template."""
@@ -134,10 +134,10 @@ class ReportTemplates:
     
     def _build_actionable_requirements(self) -> str:
         """Build actionable report requirements."""
-        return ("• Quantitative data points\n"
-                "• Comparison periods\n"
-                "• Business impact metrics\n"
-                "• Specific recommendations needed\n")
+        return ("[U+2022] Quantitative data points\n"
+                "[U+2022] Comparison periods\n"
+                "[U+2022] Business impact metrics\n"
+                "[U+2022] Specific recommendations needed\n")
     
     def _get_implementation_template(self) -> str:
         """Get action plan implementation template."""
@@ -148,10 +148,10 @@ class ReportTemplates:
     
     def _build_implementation_requirements(self) -> str:
         """Build implementation requirements."""
-        return ("• Clear objectives and success criteria\n"
-                "• Available resources and timeline\n"
-                "• Current state and dependencies\n"
-                "• Risk tolerance and constraints\n")
+        return ("[U+2022] Clear objectives and success criteria\n"
+                "[U+2022] Available resources and timeline\n"
+                "[U+2022] Current state and dependencies\n"
+                "[U+2022] Risk tolerance and constraints\n")
     
     def _get_clarification_template(self) -> str:
         """Get action plan clarification template."""
@@ -162,10 +162,10 @@ class ReportTemplates:
     
     def _build_clarification_questions(self) -> str:
         """Build clarification questions."""
-        return ("• What specific outcome are you targeting?\n"
-                "• What's your implementation timeline?\n"
-                "• What resources are available?\n"
-                "• Are there any blockers or dependencies?\n")
+        return ("[U+2022] What specific outcome are you targeting?\n"
+                "[U+2022] What's your implementation timeline?\n"
+                "[U+2022] What resources are available?\n"
+                "[U+2022] Are there any blockers or dependencies?\n")
     
     def _get_quality_template(self) -> str:
         """Get action plan quality template."""
@@ -177,9 +177,9 @@ class ReportTemplates:
     
     def _build_quality_questions(self) -> str:
         """Build quality assessment questions."""
-        return ("• What's the primary goal?\n"
-                "• What have you tried already?\n"
-                "• What specific challenges are you facing?\n")
+        return ("[U+2022] What's the primary goal?\n"
+                "[U+2022] What have you tried already?\n"
+                "[U+2022] What specific challenges are you facing?\n")
     
     def _get_refinement_template(self) -> str:
         """Get action plan refinement template."""
@@ -191,10 +191,10 @@ class ReportTemplates:
     
     def _build_refinement_requirements(self) -> str:
         """Build refinement requirements."""
-        return ("• Priority order of tasks\n"
-                "• Technical constraints\n"
-                "• Team capabilities\n"
-                "• Acceptable risk level\n")
+        return ("[U+2022] Priority order of tasks\n"
+                "[U+2022] Technical constraints\n"
+                "[U+2022] Team capabilities\n"
+                "[U+2022] Acceptable risk level\n")
     
     def _get_categorization_template(self) -> str:
         """Get triage categorization template."""
@@ -205,10 +205,10 @@ class ReportTemplates:
     
     def _build_categorization_questions(self) -> str:
         """Build categorization questions."""
-        return ("• Is this about performance, functionality, or cost?\n"
-                "• What system or component is affected?\n"
-                "• What's the urgency level?\n"
-                "• What outcome are you seeking?\n")
+        return ("[U+2022] Is this about performance, functionality, or cost?\n"
+                "[U+2022] What system or component is affected?\n"
+                "[U+2022] What's the urgency level?\n"
+                "[U+2022] What outcome are you seeking?\n")
     
     def _get_context_template(self) -> str:
         """Get triage context template."""
@@ -219,7 +219,7 @@ class ReportTemplates:
     
     def _build_context_requirements(self) -> str:
         """Build context requirements."""
-        return ("• Primary concern (latency/throughput/accuracy/cost)\n"
-                "• Current vs. desired state\n"
-                "• Available resources\n"
-                "• Timeline constraints\n")
+        return ("[U+2022] Primary concern (latency/throughput/accuracy/cost)\n"
+                "[U+2022] Current vs. desired state\n"
+                "[U+2022] Available resources\n"
+                "[U+2022] Timeline constraints\n")

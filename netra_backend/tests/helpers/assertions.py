@@ -1,7 +1,7 @@
 """Assertion and reference test helper functions.
 
 This module provides assertion helpers and reference test operations
-on database repositories. All functions are ≤8 lines.
+on database repositories. All functions are  <= 8 lines.
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 

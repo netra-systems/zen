@@ -1,5 +1,5 @@
 """
-DeepAgentState → UserExecutionContext Migration Test Suite
+DeepAgentState  ->  UserExecutionContext Migration Test Suite
 
 This test suite validates the migration from DeepAgentState to UserExecutionContext
 for Issue #271 remediation (user isolation vulnerability).

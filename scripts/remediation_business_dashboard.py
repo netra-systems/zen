@@ -490,7 +490,7 @@ class BusinessValueDashboard:
 # Executive Remediation Business Report
 *Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
 
-## 📊 Business Impact Summary
+##  CHART:  Business Impact Summary
 
 ### Financial Metrics
 - **MRR Currently at Risk:** ${metrics['summary']['total_mrr_at_risk']:,.0f}
@@ -503,7 +503,7 @@ class BusinessValueDashboard:
 - **Completed This Period:** {metrics['summary']['issues_by_status'].get('completed', 0) + metrics['summary']['issues_by_status'].get('validated', 0)}
 - **Average Resolution Time:** {metrics['temporal_analysis']['last_30_days']['avg_resolution_time_hours']:.1f} hours
 
-## 🎯 Risk Assessment
+##  TARGET:  Risk Assessment
 
 ### Current Risk Level: **{metrics['business_impact_forecast']['risk_level'].upper()}**
 
@@ -519,10 +519,10 @@ class BusinessValueDashboard:
             for issue in p0_issues.get('issues', [])[:3]:  # Top 3 P0 issues
                 report += f"  - {issue['issue_id']}: {issue['title']} (${issue['mrr_at_risk']:,.0f} at risk)\n"
         else:
-            report += "- ✅ No active P0 issues\n"
+            report += "-  PASS:  No active P0 issues\n"
         
         report += f"""
-## 📈 Performance Trends
+## [U+1F4C8] Performance Trends
 
 ### Resolution Performance
 - **7-day trend:** {metrics['temporal_analysis']['resolution_time_trend']}
@@ -530,7 +530,7 @@ class BusinessValueDashboard:
 - **Issues resolved (7d):** {metrics['temporal_analysis']['last_7_days']['issues_resolved']}
 - **Issues created (7d):** {metrics['temporal_analysis']['last_7_days']['issues_created']}
 
-## 🔮 Forecast & Recommendations
+## [U+1F52E] Forecast & Recommendations
 
 ### Next 24 Hours
 - **Additional MRR at risk:** ${metrics['business_impact_forecast']['next_24_hours']['mrr_at_risk'] - metrics['summary']['total_mrr_at_risk']:,.0f}
@@ -543,7 +543,7 @@ class BusinessValueDashboard:
             report += f"- {action}\n"
         
         report += f"""
-## 💡 Prevention & Process Improvements
+##  IDEA:  Prevention & Process Improvements
 
 ### Prevention Value This Period
 - **Total prevention value:** ${metrics['prevention_value']['total_prevention_value']:,.0f}
@@ -560,7 +560,7 @@ class BusinessValueDashboard:
         if 'roi_analysis' in metrics and metrics['roi_analysis']:
             roi = metrics['roi_analysis']
             report += f"""
-## 💰 Return on Investment Analysis
+## [U+1F4B0] Return on Investment Analysis
 
 - **ROI Ratio:** {roi['roi_ratio']:.1f}:1 (${roi['roi_ratio']:.1f} value for every $1 spent)
 - **ROI Percentage:** {roi['roi_percentage']:.1f}%
@@ -569,25 +569,25 @@ class BusinessValueDashboard:
 *ROI Interpretation:*
 """
             if roi['roi_percentage'] > 500:
-                report += "- 🟢 **Excellent ROI** - Remediation process highly effective\n"
+                report += "- [U+1F7E2] **Excellent ROI** - Remediation process highly effective\n"
             elif roi['roi_percentage'] > 200:
-                report += "- 🟡 **Good ROI** - Remediation process effective\n"
+                report += "- [U+1F7E1] **Good ROI** - Remediation process effective\n"
             elif roi['roi_percentage'] > 0:
-                report += "- 🟠 **Positive ROI** - Remediation process beneficial\n"
+                report += "- [U+1F7E0] **Positive ROI** - Remediation process beneficial\n"
             else:
-                report += "- 🔴 **Negative ROI** - Process improvement needed\n"
+                report += "- [U+1F534] **Negative ROI** - Process improvement needed\n"
         
         report += f"""
 ---
 
-## 📋 Key Performance Indicators
+## [U+1F4CB] Key Performance Indicators
 
 | Metric | Current | Target | Status |
 |--------|---------|---------|---------|
-| MRR at Risk | ${metrics['summary']['total_mrr_at_risk']:,.0f} | <${self.business_config['base_mrr'] * 0.05:,.0f} | {"🔴" if metrics['summary']['total_mrr_at_risk'] > self.business_config['base_mrr'] * 0.05 else "🟢"} |
-| P0 Resolution Time | {p0_issues.get('avg_age_hours', 0):.1f}h | <24h | {"🔴" if p0_issues.get('avg_age_hours', 0) > 24 else "🟢"} |
-| Active P0 Issues | {p0_issues.get('count', 0)} | 0 | {"🔴" if p0_issues.get('count', 0) > 0 else "🟢"} |
-| Prevention Score | {metrics['prevention_value']['prevention_effectiveness_score']:.1f}% | >90% | {"🔴" if metrics['prevention_value']['prevention_effectiveness_score'] < 90 else "🟢"} |
+| MRR at Risk | ${metrics['summary']['total_mrr_at_risk']:,.0f} | <${self.business_config['base_mrr'] * 0.05:,.0f} | {"[U+1F534]" if metrics['summary']['total_mrr_at_risk'] > self.business_config['base_mrr'] * 0.05 else "[U+1F7E2]"} |
+| P0 Resolution Time | {p0_issues.get('avg_age_hours', 0):.1f}h | <24h | {"[U+1F534]" if p0_issues.get('avg_age_hours', 0) > 24 else "[U+1F7E2]"} |
+| Active P0 Issues | {p0_issues.get('count', 0)} | 0 | {"[U+1F534]" if p0_issues.get('count', 0) > 0 else "[U+1F7E2]"} |
+| Prevention Score | {metrics['prevention_value']['prevention_effectiveness_score']:.1f}% | >90% | {"[U+1F534]" if metrics['prevention_value']['prevention_effectiveness_score'] < 90 else "[U+1F7E2]"} |
 
 ---
 
@@ -647,38 +647,38 @@ class BusinessValueDashboard:
 <body>
     <div class="dashboard">
         <div class="header">
-            <h1>🎯 Remediation Business Dashboard</h1>
+            <h1> TARGET:  Remediation Business Dashboard</h1>
             <div class="subtitle">Real-time business value tracking and system health monitoring</div>
         </div>
         
         <div class="metrics-grid">
             <div class="metric-card">
-                <h3>💰 MRR at Risk</h3>
+                <h3>[U+1F4B0] MRR at Risk</h3>
                 <div class="metric-value {'negative' if metrics['summary']['total_mrr_at_risk'] > 5000 else 'warning' if metrics['summary']['total_mrr_at_risk'] > 1000 else 'positive'}">${metrics['summary']['total_mrr_at_risk']:,.0f}</div>
                 <div class="metric-subtitle">Monthly recurring revenue at risk from active issues</div>
             </div>
             
             <div class="metric-card">
-                <h3>🛡️ MRR Protected</h3>
+                <h3>[U+1F6E1][U+FE0F] MRR Protected</h3>
                 <div class="metric-value positive">${metrics['summary']['total_mrr_protected']:,.0f}</div>
                 <div class="metric-subtitle">Revenue protected through successful remediation</div>
             </div>
             
             <div class="metric-card">
-                <h3>📊 ROI</h3>
+                <h3> CHART:  ROI</h3>
                 <div class="metric-value {'positive' if metrics['summary']['overall_roi'] > 200 else 'warning' if metrics['summary']['overall_roi'] > 0 else 'negative'}">{metrics['summary']['overall_roi']:.0f}%</div>
                 <div class="metric-subtitle">Return on investment for remediation efforts</div>
             </div>
             
             <div class="metric-card">
-                <h3>⏱️ Avg Resolution Time</h3>
+                <h3>[U+23F1][U+FE0F] Avg Resolution Time</h3>
                 <div class="metric-value neutral">{metrics['temporal_analysis']['last_30_days']['avg_resolution_time_hours']:.1f}h</div>
                 <div class="metric-subtitle">Average time to resolve issues (30-day average)</div>
             </div>
         </div>
         
         <div class="forecast">
-            <h2>🔮 Business Impact Forecast</h2>
+            <h2>[U+1F52E] Business Impact Forecast</h2>
             <p><strong>Risk Level:</strong> {metrics['business_impact_forecast']['risk_level'].upper()}</p>
             <p><strong>Next 24h MRR Impact:</strong> ${metrics['business_impact_forecast']['next_24_hours']['mrr_at_risk']:,.0f}</p>
             <p><strong>Expected Resolutions:</strong> {metrics['business_impact_forecast']['next_24_hours']['expected_resolutions']:.0f}</p>
@@ -716,7 +716,7 @@ class BusinessValueDashboard:
         if metrics['business_impact_forecast']['recommended_actions']:
             html += f"""
         <div class="actions">
-            <h3>🎯 Recommended Actions</h3>
+            <h3> TARGET:  Recommended Actions</h3>
             <ul>
 """
             for action in metrics['business_impact_forecast']['recommended_actions'][:5]:

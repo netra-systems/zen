@@ -115,7 +115,7 @@
 
     # REMOVED_SYNTAX_ERROR: for event in self.REQUIRED_EVENTS:
         # REMOVED_SYNTAX_ERROR: count = self.event_counts.get(event, 0)
-        # REMOVED_SYNTAX_ERROR: status = "✅" if count > 0 else "❌"
+        # REMOVED_SYNTAX_ERROR: status = " PASS: " if count > 0 else " FAIL: "
         # REMOVED_SYNTAX_ERROR: report.append("formatted_string")
 
         # REMOVED_SYNTAX_ERROR: if failures:

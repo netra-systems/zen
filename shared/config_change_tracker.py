@@ -243,7 +243,7 @@ class ConfigChangeTracker:
             
             # Special handling for SERVICE_SECRET
             if key == 'SERVICE_SECRET':
-                impact = (f"🚨 ULTRA CRITICAL - SERVICE_SECRET changed! "
+                impact = (f" ALERT:  ULTRA CRITICAL - SERVICE_SECRET changed! "
                          f"{config_info['dependencies']} dependencies affected. "
                          f"System-wide auth failure possible!")
         
@@ -277,12 +277,12 @@ class ConfigChangeTracker:
         if key in self.CRITICAL_CONFIGS:
             config_info = self.CRITICAL_CONFIGS[key]
             risk_level = RiskLevel.CRITICAL  # Deletion is always critical
-            impact = f"🚨 CRITICAL DELETION - {config_info['impact']}"
+            impact = f" ALERT:  CRITICAL DELETION - {config_info['impact']}"
             affected_services = config_info['services']
             
             # Special handling for SERVICE_SECRET
             if key == 'SERVICE_SECRET':
-                impact = (f"💀 SYSTEM FAILURE IMMINENT - SERVICE_SECRET deleted! "
+                impact = (f"[U+1F480] SYSTEM FAILURE IMMINENT - SERVICE_SECRET deleted! "
                          f"{config_info['dependencies']} dependencies will fail!")
         
         elif key in self.OAUTH_CONFIGS:
@@ -401,13 +401,13 @@ class ConfigChangeTracker:
             
             # Report critical changes first
             if RiskLevel.CRITICAL in by_risk:
-                report.append("\n## 🚨 CRITICAL Changes\n")
+                report.append("\n##  ALERT:  CRITICAL Changes\n")
                 for change in by_risk[RiskLevel.CRITICAL]:
                     report.append(f"- **{change.key}** ({change.change_type.value})")
                     report.append(f"  - Impact: {change.impact_analysis}")
                     report.append(f"  - Services: {', '.join(change.affected_services)}")
                     if change.requires_migration:
-                        report.append("  - ⚠️ REQUIRES DATA MIGRATION")
+                        report.append("  -  WARNING: [U+FE0F] REQUIRES DATA MIGRATION")
                     report.append("")
             
             # Report other changes

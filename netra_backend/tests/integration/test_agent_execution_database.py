@@ -325,7 +325,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
         # Validate historical data retrieval
         assert result2["historical_data_count"] >= 1  # Should have historical data from first execution
         
-        logger.info(f"✅ Agent state persistence test passed - {result2['execution_count']} executions with {len(result2['database_operations'])} DB operations")
+        logger.info(f" PASS:  Agent state persistence test passed - {result2['execution_count']} executions with {len(result2['database_operations'])} DB operations")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -395,7 +395,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
         assert result1["business_value"]["conversation_continuity"] is True
         assert result2["business_value"]["conversation_continuity"] is True
         
-        logger.info(f"✅ Database transaction isolation test passed - 2 users executed concurrently in {execution_time:.3f}s")
+        logger.info(f" PASS:  Database transaction isolation test passed - 2 users executed concurrently in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -434,7 +434,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
         assert result2["business_value"]["cross_session_recovery"] is True
         assert result2["business_value"]["state_persistence"] is True
         
-        logger.info("✅ Cross-session state recovery test passed")
+        logger.info(" PASS:  Cross-session state recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -472,7 +472,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
         assert result["success"] is True
         assert "commit_transaction" in result["database_operations"]
         
-        logger.info("✅ Database error handling and rollback test passed")
+        logger.info(" PASS:  Database error handling and rollback test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -529,7 +529,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
         operations_per_second = successful_operations / execution_time
         assert operations_per_second >= 1.0  # At least 1 operation per second
         
-        logger.info(f"✅ Database performance test passed - {successful_operations}/{concurrent_operations} operations in {execution_time:.3f}s ({operations_per_second:.2f} ops/sec)")
+        logger.info(f" PASS:  Database performance test passed - {successful_operations}/{concurrent_operations} operations in {execution_time:.3f}s ({operations_per_second:.2f} ops/sec)")
 
     @pytest.mark.integration
     @pytest.mark.real_services 
@@ -570,7 +570,7 @@ class TestAgentExecutionDatabase(BaseIntegrationTest):
         assert final_result["historical_data_count"] >= 2  # Should have data from previous executions
         assert final_result["business_value"]["data_integrity"] is True
         
-        logger.info("✅ Data consistency test passed - 3 sequential operations with maintained integrity")
+        logger.info(" PASS:  Data consistency test passed - 3 sequential operations with maintained integrity")
 
 
 if __name__ == "__main__":

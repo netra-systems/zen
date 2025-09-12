@@ -364,7 +364,7 @@ class APIGovernanceFramework:
         self.api_registry.save_registry()
         self.change_manager.save_requests()
         
-        print("✅ API Governance Framework initialized")
+        print(" PASS:  API Governance Framework initialized")
     
     def validate_interface_change(self, interface_name: str, proposed_changes: Dict[str, Any]) -> Dict[str, Any]:
         """Validate a proposed interface change"""
@@ -599,11 +599,11 @@ class APIGovernanceFramework:
 
 ### Async Type Patterns
 ```python
-# ✅ CORRECT
+#  PASS:  CORRECT
 async def process_user_data(user_id: str) -> UserResult:
     pass
 
-# ❌ INCORRECT
+#  FAIL:  INCORRECT
 async def process_user_data(user_id) -> Coroutine:
     pass
 ```
@@ -761,9 +761,9 @@ def main() -> int:
     
     if args.initialize:
         framework.initialize_governance()
-        print("✅ API Governance Framework initialized successfully")
-        print("📁 Configuration files created in current directory")
-        print("📚 Policy documents generated in docs/api_governance/")
+        print(" PASS:  API Governance Framework initialized successfully")
+        print("[U+1F4C1] Configuration files created in current directory")
+        print("[U+1F4DA] Policy documents generated in docs/api_governance/")
         return 0
     
     if args.dashboard:
@@ -772,7 +772,7 @@ def main() -> int:
         if args.json:
             print(json.dumps(dashboard_data, indent=2))
         else:
-            print("🎯 API Governance Dashboard")
+            print(" TARGET:  API Governance Dashboard")
             print("=" * 50)
             
             summary = dashboard_data['summary']
@@ -782,14 +782,14 @@ def main() -> int:
             print(f"Pending Change Requests: {summary['pending_change_requests']}")
             print(f"High Impact Requests: {summary['high_impact_requests']}")
             
-            print("\n📊 Governance Health:")
+            print("\n CHART:  Governance Health:")
             health = dashboard_data['governance_health']
             print(f"Policy Compliance: {health['policy_compliance']:.1%}")
             print(f"Review Board Active: {health['review_board_active']}")
             print(f"Pending Approvals: {health['pending_approvals']}")
             
             if dashboard_data['risk_assessment']:
-                print("\n⚠️ Risk Assessment:")
+                print("\n WARNING: [U+FE0F] Risk Assessment:")
                 for risk in dashboard_data['risk_assessment']:
                     print(f"  {risk['level'].upper()}: {risk['description']}")
                     print(f"    Recommendation: {risk['recommendation']}")
@@ -809,11 +809,11 @@ def main() -> int:
                 serializable_requests.append(req_dict)
             print(json.dumps(serializable_requests, indent=2))
         else:
-            print(f"📋 Pending Change Requests ({len(pending_requests)})")
+            print(f"[U+1F4CB] Pending Change Requests ({len(pending_requests)})")
             print("=" * 50)
             
             for req in pending_requests:
-                print(f"\n🔄 {req.id}")
+                print(f"\n CYCLE:  {req.id}")
                 print(f"Interface: {req.interface_name}")
                 print(f"Impact: {req.impact_level.value.upper()}")
                 print(f"Proposed by: {req.proposed_by}")
@@ -826,7 +826,7 @@ def main() -> int:
     if args.validate_change and args.interface_name:
         # This would need actual change data in a real implementation
         print(f"Validating changes to {args.interface_name}...")
-        print("⚠️ Change validation requires actual change data")
+        print(" WARNING: [U+FE0F] Change validation requires actual change data")
         print("Use --create-request for interactive change request creation")
         return 0
     
@@ -843,7 +843,7 @@ def main() -> int:
         framework.api_registry.register_interface(interface)
         framework.api_registry.save_registry()
         
-        print(f"✅ Registered interface: {args.interface_name}")
+        print(f" PASS:  Registered interface: {args.interface_name}")
         return 0
     
     # Default: show help and current status

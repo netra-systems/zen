@@ -458,12 +458,12 @@ class RealServicesManager:
         for service_name, connect_func in services_to_check:
             try:
                 await connect_func()
-                logger.info(f"✅ {service_name} is available")
+                logger.info(f" PASS:  {service_name} is available")
             except ServiceUnavailableError as e:
-                logger.error(f"❌ {service_name} is unavailable: {e}")
+                logger.error(f" FAIL:  {service_name} is unavailable: {e}")
                 raise
             except Exception as e:
-                logger.error(f"❌ {service_name} connection error: {e}")
+                logger.error(f" FAIL:  {service_name} connection error: {e}")
                 raise ServiceUnavailableError(f"{service_name} connection failed: {e}")
     
     async def get_http_client(self) -> HTTPTestClient:

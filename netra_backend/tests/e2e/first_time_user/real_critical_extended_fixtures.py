@@ -7,7 +7,7 @@ Real Critical User Journey Extended Fixtures - Team, Error Recovery, and Cross-S
 3. **Value Impact**: Extended fixtures enable comprehensive testing of revenue-critical features
 4. **Revenue Impact**: Complete test coverage = reliable conversion optimization
 
-**ARCHITECTURE**: ≤300 lines, ≤8 lines per function as per CLAUDE.md requirements
+**ARCHITECTURE**:  <= 300 lines,  <= 8 lines per function as per CLAUDE.md requirements
 Provides specialized pytest fixtures for advanced real service testing scenarios.
 """
 

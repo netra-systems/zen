@@ -11,7 +11,7 @@ CRITICAL: Tests validate that all report generation and delivery is properly aut
 authorized, and isolated per user. Security breaches or unauthorized data access would
 be catastrophic for business trust and regulatory compliance.
 
-Golden Path Focus: Authentication → Authorization → Report access → Secure delivery → Audit trail
+Golden Path Focus: Authentication  ->  Authorization  ->  Report access  ->  Secure delivery  ->  Audit trail
 NO MOCKS: Uses real services to test actual authentication flows and security mechanisms
 """
 
@@ -695,7 +695,7 @@ class TestAuthenticationAwareReportDeliveryIntegration(BaseIntegrationTest):
         # Final validation
         assert isolation_summary["all_cross_access_denied"] is True
         assert isolation_summary["legitimate_access_preserved"] is True
-        assert len(cross_access_attempts) == 6  # 3 users × 2 other users each = 6 attempts
+        assert len(cross_access_attempts) == 6  # 3 users  x  2 other users each = 6 attempts
 
     @pytest.mark.asyncio
     async def test_api_key_authentication_for_programmatic_access(self, real_services_fixture):

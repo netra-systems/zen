@@ -186,7 +186,7 @@ async def minimal_suite():
 @pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_minimal_3agent_workflow(minimal_suite):
-    """Test minimal 3-agent workflow: Triage → Data → Reporting."""
+    """Test minimal 3-agent workflow: Triage  ->  Data  ->  Reporting."""
     suite = minimal_suite
     
     # Create basic state
@@ -217,7 +217,7 @@ async def test_minimal_3agent_workflow(minimal_suite):
     assert suite.websocket_manager.send_agent_update.call_count >= 3, \
         "Should send updates for each agent"
     
-    print(f"✓ Minimal 3-agent workflow completed successfully")
+    print(f"[U+2713] Minimal 3-agent workflow completed successfully")
     print(f"  - Agents executed: {results['metrics']['agents_executed']}")
     print(f"  - Successful handoffs: {results['metrics']['successful_handoffs']}")
     print(f"  - Total time: {results['metrics']['total_execution_time']:.2f}s")
@@ -274,7 +274,7 @@ async def test_3agent_state_propagation(minimal_suite):
         assert snapshot['message_count'] >= initial_message_count, \
             f"Messages lost by {snapshot['agent']}"
     
-    print(f"✓ State propagation validated across 3 agents")
+    print(f"[U+2713] State propagation validated across 3 agents")
 
 
 @pytest.mark.e2e
@@ -317,4 +317,4 @@ async def test_3agent_failure_isolation(minimal_suite):
     assert reporting_executed, "Reporting should execute despite data failure"
     assert state.user_request is not None, "State should be preserved despite failures"
     
-    print(f"✓ Failure isolation validated - workflow continued despite agent failure")
+    print(f"[U+2713] Failure isolation validated - workflow continued despite agent failure")

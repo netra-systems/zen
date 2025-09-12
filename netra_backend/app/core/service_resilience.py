@@ -38,7 +38,7 @@ class ServiceRegistry:
         service_info = self.services.get(name)
         if not service_info:
             if self.graceful_mode:
-                logger.warning(f"🚨 SERVICE REGISTRY: Service '{name}' not registered "
+                logger.warning(f" ALERT:  SERVICE REGISTRY: Service '{name}' not registered "
                               f"(graceful_mode: enabled, "
                               f"action: returning_none, "
                               f"golden_path_impact: {self._assess_service_impact(name)}, "
@@ -47,13 +47,13 @@ class ServiceRegistry:
             raise ValueError(f"Service '{name}' not found")
             
         if service_info['available']:
-            logger.debug(f"✅ SERVICE AVAILABLE: Service '{name}' is healthy and available "
+            logger.debug(f" PASS:  SERVICE AVAILABLE: Service '{name}' is healthy and available "
                         f"(service_status: available)")
             return service_info['service']
             
         # Service unavailable, try fallback
         if name in self.fallbacks:
-            logger.warning(f"🔧 GRACEFUL DEGRADATION: Using fallback for unavailable service '{name}' "
+            logger.warning(f"[U+1F527] GRACEFUL DEGRADATION: Using fallback for unavailable service '{name}' "
                           f"(service_status: unavailable, "
                           f"fallback_activated: true, "
                           f"golden_path_impact: {self._assess_service_impact(name)}, "
@@ -61,7 +61,7 @@ class ServiceRegistry:
             return self.fallbacks[name]
             
         if service_info['critical'] and not self.graceful_mode:
-            logger.critical(f"🚨 CRITICAL SERVICE FAILURE: Critical service '{name}' is unavailable "
+            logger.critical(f" ALERT:  CRITICAL SERVICE FAILURE: Critical service '{name}' is unavailable "
                            f"(critical: true, "
                            f"graceful_mode: disabled, "
                            f"fallback_available: false, "
@@ -69,7 +69,7 @@ class ServiceRegistry:
                            f"action: raising_exception)")
             raise RuntimeError(f"Critical service '{name}' is unavailable")
             
-        logger.warning(f"⚠️ SERVICE DEGRADATION: Service '{name}' unavailable with no fallback "
+        logger.warning(f" WARNING: [U+FE0F] SERVICE DEGRADATION: Service '{name}' unavailable with no fallback "
                       f"(service_status: unavailable, "
                       f"fallback_available: false, "
                       f"graceful_mode: enabled, "
@@ -91,7 +91,7 @@ class ServiceRegistry:
             
             # Log circuit breaker activation
             if previous_status:  # Service was previously available
-                logger.critical(f"🚨 CIRCUIT BREAKER ACTIVATED: Service '{name}' marked as unavailable "
+                logger.critical(f" ALERT:  CIRCUIT BREAKER ACTIVATED: Service '{name}' marked as unavailable "
                                f"(previous_status: available, "
                                f"new_status: unavailable, "
                                f"critical: {service_info['critical']}, "
@@ -99,11 +99,11 @@ class ServiceRegistry:
                                f"golden_path_impact: {self._assess_service_impact(name)}, "
                                f"circuit_breaker_action: Service calls will be blocked or fallback activated)")
             else:
-                logger.warning(f"⚠️ SERVICE STATUS UPDATE: Service '{name}' remains unavailable "
+                logger.warning(f" WARNING: [U+FE0F] SERVICE STATUS UPDATE: Service '{name}' remains unavailable "
                               f"(status: already_unavailable, "
                               f"circuit_breaker_status: already_active)")
         else:
-            logger.error(f"🚨 SERVICE REGISTRY ERROR: Cannot mark unknown service '{name}' as unavailable "
+            logger.error(f" ALERT:  SERVICE REGISTRY ERROR: Cannot mark unknown service '{name}' as unavailable "
                         f"(action: service_not_registered, "
                         f"recovery_action: Register service before marking unavailable)")
     
@@ -141,17 +141,17 @@ def optional_service(service_name: str, fallback_result: Any = None):
         async def async_wrapper(*args, **kwargs):
             service = service_registry.get_service(service_name)
             if service is None:
-                logger.warning(f"🔧 GRACEFUL DEGRADATION: Service '{service_name}' unavailable, using fallback "
+                logger.warning(f"[U+1F527] GRACEFUL DEGRADATION: Service '{service_name}' unavailable, using fallback "
                               f"(function: {func.__name__}, "
                               f"fallback_type: {type(fallback_result).__name__}, "
                               f"degradation_mode: fallback_result)")
                 return fallback_result
             try:
                 result = await func(*args, **kwargs)
-                logger.debug(f"✅ SERVICE OPERATION SUCCESS: Function '{func.__name__}' completed with service '{service_name}'")
+                logger.debug(f" PASS:  SERVICE OPERATION SUCCESS: Function '{func.__name__}' completed with service '{service_name}'")
                 return result
             except Exception as e:
-                logger.critical(f"🚨 SERVICE OPERATION FAILURE: Function '{func.__name__}' failed with service '{service_name}' "
+                logger.critical(f" ALERT:  SERVICE OPERATION FAILURE: Function '{func.__name__}' failed with service '{service_name}' "
                                f"(exception_type: {type(e).__name__}, "
                                f"exception_message: {str(e)}, "
                                f"circuit_breaker_action: Marking service unavailable, "
@@ -164,17 +164,17 @@ def optional_service(service_name: str, fallback_result: Any = None):
         def sync_wrapper(*args, **kwargs):
             service = service_registry.get_service(service_name)
             if service is None:
-                logger.warning(f"🔧 GRACEFUL DEGRADATION: Service '{service_name}' unavailable, using fallback "
+                logger.warning(f"[U+1F527] GRACEFUL DEGRADATION: Service '{service_name}' unavailable, using fallback "
                               f"(function: {func.__name__}, "
                               f"fallback_type: {type(fallback_result).__name__}, "
                               f"degradation_mode: fallback_result)")
                 return fallback_result
             try:
                 result = func(*args, **kwargs)
-                logger.debug(f"✅ SERVICE OPERATION SUCCESS: Function '{func.__name__}' completed with service '{service_name}'")
+                logger.debug(f" PASS:  SERVICE OPERATION SUCCESS: Function '{func.__name__}' completed with service '{service_name}'")
                 return result
             except Exception as e:
-                logger.critical(f"🚨 SERVICE OPERATION FAILURE: Function '{func.__name__}' failed with service '{service_name}' "
+                logger.critical(f" ALERT:  SERVICE OPERATION FAILURE: Function '{func.__name__}' failed with service '{service_name}' "
                                f"(exception_type: {type(e).__name__}, "
                                f"exception_message: {str(e)}, "
                                f"circuit_breaker_action: Marking service unavailable, "

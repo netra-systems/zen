@@ -59,7 +59,7 @@ class TestRealAdminAuditTrailValidation:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start REAL Docker services for audit trail testing."""
-        print("🐳 Starting Docker services for REAL audit trail tests...")
+        print("[U+1F433] Starting Docker services for REAL audit trail tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -71,13 +71,13 @@ class TestRealAdminAuditTrailValidation:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for REAL audit trail tests")
+            print(" PASS:  Docker services ready for REAL audit trail tests")
             yield
             
         except Exception as e:
-            raise Exception(f"❌ HARD FAILURE: Failed to start Docker services for audit trail tests: {e}")
+            raise Exception(f" FAIL:  HARD FAILURE: Failed to start Docker services for audit trail tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after audit trail tests...")
+            print("[U+1F9F9] Cleaning up Docker services after audit trail tests...")
             await docker_manager.cleanup_async()
     
     @pytest.fixture
@@ -117,13 +117,13 @@ class TestRealAdminAuditTrailValidation:
         real_db_session: AsyncSession
     ):
         """Test that admin viewing users creates REAL audit entry in database."""
-        print(f"🔍 Testing admin users view audit trail for admin: {authenticated_admin.email}")
+        print(f" SEARCH:  Testing admin users view audit trail for admin: {authenticated_admin.email}")
         
         # Get baseline audit count before operation
         baseline_count = await self._count_audit_entries_for_user(
             real_db_session, authenticated_admin.user_id
         )
-        print(f"📊 Baseline audit entries for admin: {baseline_count}")
+        print(f" CHART:  Baseline audit entries for admin: {baseline_count}")
         
         # Perform REAL admin operation - view users
         async with httpx.AsyncClient() as client:
@@ -140,7 +140,7 @@ class TestRealAdminAuditTrailValidation:
                 f"HARD FAILURE: Admin users view failed with {response.status_code}: {response.text}"
             )
         
-        print(f"✅ Admin users view successful: {response.status_code}")
+        print(f" PASS:  Admin users view successful: {response.status_code}")
         
         # Wait for audit entry to be written (async processing)
         await asyncio.sleep(2)
@@ -169,7 +169,7 @@ class TestRealAdminAuditTrailValidation:
         # Validate audit entry structure
         self._validate_audit_entry_structure(audit_entry, "ADMIN_USERS_VIEWED")
         
-        print(f"✅ REAL audit entry validated: {audit_entry.event_type} at {audit_entry.created_at}")
+        print(f" PASS:  REAL audit entry validated: {audit_entry.event_type} at {audit_entry.created_at}")
 
     async def test_admin_user_suspend_creates_audit_entry(
         self,
@@ -178,7 +178,7 @@ class TestRealAdminAuditTrailValidation:
         real_db_session: AsyncSession
     ):
         """Test that admin suspending user creates REAL audit entry in database."""
-        print(f"⏸️ Testing admin user suspend audit trail for admin: {authenticated_admin.email}")
+        print(f"[U+23F8][U+FE0F] Testing admin user suspend audit trail for admin: {authenticated_admin.email}")
         
         # Get baseline audit count
         baseline_count = await self._count_audit_entries_for_user(
@@ -201,7 +201,7 @@ class TestRealAdminAuditTrailValidation:
                 f"HARD FAILURE: Admin user suspend failed with {response.status_code}: {response.text}"
             )
         
-        print(f"✅ Admin user suspend successful: {response.status_code}")
+        print(f" PASS:  Admin user suspend successful: {response.status_code}")
         
         # Wait for audit entry
         await asyncio.sleep(2)
@@ -232,7 +232,7 @@ class TestRealAdminAuditTrailValidation:
                     "HARD FAILURE: Audit entry missing target_user_id in metadata"
                 )
         
-        print(f"✅ REAL audit entry validated for user suspend: {audit_entry.event_type}")
+        print(f" PASS:  REAL audit entry validated for user suspend: {audit_entry.event_type}")
 
     async def test_admin_user_reactivate_creates_audit_entry(
         self,
@@ -241,7 +241,7 @@ class TestRealAdminAuditTrailValidation:
         real_db_session: AsyncSession
     ):
         """Test that admin reactivating user creates REAL audit entry in database."""
-        print(f"▶️ Testing admin user reactivate audit trail for admin: {authenticated_admin.email}")
+        print(f"[U+25B6][U+FE0F] Testing admin user reactivate audit trail for admin: {authenticated_admin.email}")
         
         # Get baseline audit count
         baseline_count = await self._count_audit_entries_for_user(
@@ -264,7 +264,7 @@ class TestRealAdminAuditTrailValidation:
                 f"HARD FAILURE: Admin user reactivate failed with {response.status_code}: {response.text}"
             )
         
-        print(f"✅ Admin user reactivate successful: {response.status_code}")
+        print(f" PASS:  Admin user reactivate successful: {response.status_code}")
         
         # Wait for audit entry
         await asyncio.sleep(2)
@@ -287,7 +287,7 @@ class TestRealAdminAuditTrailValidation:
         
         self._validate_audit_entry_structure(audit_entry, "ADMIN_USER_REACTIVATED")
         
-        print(f"✅ REAL audit entry validated for user reactivate: {audit_entry.event_type}")
+        print(f" PASS:  REAL audit entry validated for user reactivate: {audit_entry.event_type}")
 
     async def test_complete_admin_audit_trail_validation(
         self,
@@ -296,7 +296,7 @@ class TestRealAdminAuditTrailValidation:
         real_db_session: AsyncSession
     ):
         """Test complete admin audit trail by performing multiple operations."""
-        print(f"🔄 Testing complete admin audit trail validation for: {authenticated_admin.email}")
+        print(f" CYCLE:  Testing complete admin audit trail validation for: {authenticated_admin.email}")
         
         # Get baseline audit count
         baseline_count = await self._count_audit_entries_for_user(
@@ -327,7 +327,7 @@ class TestRealAdminAuditTrailValidation:
                         f"HARD FAILURE: Operation {method} {url} failed with {response.status_code}: {response.text}"
                     )
                 
-                print(f"✅ Operation successful: {method} {url} -> {response.status_code}")
+                print(f" PASS:  Operation successful: {method} {url} -> {response.status_code}")
                 await asyncio.sleep(1)  # Allow time for audit entry creation
         
         # Wait for all audit entries to be processed
@@ -363,7 +363,7 @@ class TestRealAdminAuditTrailValidation:
                     f"HARD FAILURE: Missing audit entry for {expected_type} - admin operation was not logged!"
                 )
         
-        print(f"✅ Complete admin audit trail validated: {len(recent_entries)} entries created")
+        print(f" PASS:  Complete admin audit trail validated: {len(recent_entries)} entries created")
         print(f"   Event types: {actual_event_types}")
         
         return {
@@ -379,7 +379,7 @@ class TestRealAdminAuditTrailValidation:
         real_db_session: AsyncSession
     ):
         """Test REAL audit trail performance with database timing."""
-        print(f"⏱️ Testing audit trail performance for admin: {authenticated_admin.email}")
+        print(f"[U+23F1][U+FE0F] Testing audit trail performance for admin: {authenticated_admin.email}")
         
         # Test audit query performance with REAL database
         start_time = time.time()
@@ -402,7 +402,7 @@ class TestRealAdminAuditTrailValidation:
                     f"HARD FAILURE: Audit query too slow: {query_time:.3f}s (max: 2.0s)"
                 )
             
-            print(f"✅ Audit query performance validated: {query_time:.3f}s for {len(audit_entries)} entries")
+            print(f" PASS:  Audit query performance validated: {query_time:.3f}s for {len(audit_entries)} entries")
             
             return {
                 "success": True,
@@ -489,7 +489,7 @@ class TestRealAdminAuditTrailValidation:
                 f"HARD FAILURE: Audit entry timestamp too old: {audit_entry.created_at}"
             )
         
-        print(f"✅ Audit entry structure validated: {audit_entry.event_type} at {audit_entry.created_at}")
+        print(f" PASS:  Audit entry structure validated: {audit_entry.event_type} at {audit_entry.created_at}")
 
 
 if __name__ == "__main__":

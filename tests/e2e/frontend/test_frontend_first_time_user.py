@@ -5,7 +5,7 @@ Business Value Justification (BVJ):
 - Segment: Free tier (critical for conversion)
 - Business Goal: Optimize first-time user experience for 80% activation rate
 - Value Impact: Reduces time-to-value from 10 minutes to 2 minutes
-- Strategic Impact: $300K MRR from improved Free → Early conversion
+- Strategic Impact: $300K MRR from improved Free  ->  Early conversion
 
 Tests first-time user experience and onboarding from frontend perspective.
 """

@@ -2,13 +2,13 @@
 Payment Upgrade Flow Tester - E2E Revenue Protection Testing
 
 BVJ (Business Value Justification):
-1. Segment: Free → Paid conversion (100% of new revenue)
-2. Business Goal: Validate complete signup → payment → tier upgrade flow
+1. Segment: Free  ->  Paid conversion (100% of new revenue)
+2. Business Goal: Validate complete signup  ->  payment  ->  tier upgrade flow
 3. Value Impact: Protects $99-999/month per user revenue pipeline
 4. Revenue Impact: Each test failure caught saves $10K+ MRR from payment issues
 
 REQUIREMENTS:
-- Complete user journey: signup → payment → tier upgrade
+- Complete user journey: signup  ->  payment  ->  tier upgrade
 - Real authentication and JWT validation
 - Mock payment provider (Stripe simulation)
 - Billing record creation in ClickHouse
@@ -25,7 +25,7 @@ from tests.e2e.payment_flow_manager import PaymentFlowManager
 
 
 class PaymentUpgradeFlowTester:
-    """Test #1: Complete User Signup → Payment → Tier Upgrade Flow."""
+    """Test #1: Complete User Signup  ->  Payment  ->  Tier Upgrade Flow."""
     
     def __init__(self, auth_tester):
         self.auth_tester = auth_tester

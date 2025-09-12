@@ -137,7 +137,7 @@ class TestWebSocketAgentExecutionAuthorizationValidation(BaseIntegrationTest):
         auth_events = [e for e in bridge.events if e.get("authorized") is True]
         assert len(auth_events) >= 2  # Start and completion events
         
-        self.logger.info("✅ Authorization validation test PASSED")
+        self.logger.info(" PASS:  Authorization validation test PASSED")
 
 
 if __name__ == "__main__":

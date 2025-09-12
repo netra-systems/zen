@@ -278,21 +278,21 @@ class IDGenerationSSotChecker:
         
         # Summary
         summary = results['summary']
-        report.append(f"📊 SUMMARY:")
-        report.append(f"  • Files Checked: {summary['total_files_checked']}")
-        report.append(f"  • Violations Found: {summary['total_violations']}")
-        report.append(f"  • Compliance Score: {summary['compliance_score']:.2%}")
-        report.append(f"  • Contract Validation: {'✅ PASS' if summary['contracts_valid'] else '❌ FAIL'}")
+        report.append(f" CHART:  SUMMARY:")
+        report.append(f"  [U+2022] Files Checked: {summary['total_files_checked']}")
+        report.append(f"  [U+2022] Violations Found: {summary['total_violations']}")
+        report.append(f"  [U+2022] Compliance Score: {summary['compliance_score']:.2%}")
+        report.append(f"  [U+2022] Contract Validation: {' PASS:  PASS' if summary['contracts_valid'] else ' FAIL:  FAIL'}")
         report.append("")
         
         # Contract validation details
         contract_results = results['contract_validation']
         if not contract_results['valid']:
-            report.append("🚨 CONTRACT VALIDATION FAILURES:")
+            report.append(" ALERT:  CONTRACT VALIDATION FAILURES:")
             for missing in contract_results.get('missing_methods', []):
-                report.append(f"  • Missing: {missing}")
+                report.append(f"  [U+2022] Missing: {missing}")
             for mismatch in contract_results.get('signature_mismatches', []):
-                report.append(f"  • Signature: {mismatch}")
+                report.append(f"  [U+2022] Signature: {mismatch}")
             report.append("")
         
         # Violations by type
@@ -303,11 +303,11 @@ class IDGenerationSSotChecker:
                     violations_by_type[violation.violation_type] = []
                 violations_by_type[violation.violation_type].append(violation)
             
-            report.append("🔍 VIOLATIONS BY TYPE:")
+            report.append(" SEARCH:  VIOLATIONS BY TYPE:")
             for violation_type, violations in violations_by_type.items():
-                report.append(f"\n  📋 {violation_type.replace('_', ' ').title()} ({len(violations)} violations):")
+                report.append(f"\n  [U+1F4CB] {violation_type.replace('_', ' ').title()} ({len(violations)} violations):")
                 for violation in violations[:5]:  # Show first 5 of each type
-                    report.append(f"    📄 {violation.file_path}:{violation.line_number}")
+                    report.append(f"    [U+1F4C4] {violation.file_path}:{violation.line_number}")
                     report.append(f"       Code: {violation.code_line}")
                     report.append(f"       Fix: {violation.suggested_fix}")
                     report.append("")
@@ -317,18 +317,18 @@ class IDGenerationSSotChecker:
                     report.append("")
         
         # Recommendations
-        report.append("💡 RECOMMENDATIONS:")
+        report.append(" IDEA:  RECOMMENDATIONS:")
         if summary['compliance_score'] < 0.8:
-            report.append("  🔧 CRITICAL: Multiple SSOT violations detected")
-            report.append("     • Run with --fix to auto-fix simple violations")
-            report.append("     • Manually review complex ID generation patterns")
-            report.append("     • Add contract validation to CI/CD pipeline")
+            report.append("  [U+1F527] CRITICAL: Multiple SSOT violations detected")
+            report.append("     [U+2022] Run with --fix to auto-fix simple violations")
+            report.append("     [U+2022] Manually review complex ID generation patterns")
+            report.append("     [U+2022] Add contract validation to CI/CD pipeline")
         elif summary['compliance_score'] < 0.95:
-            report.append("  ⚠️  MODERATE: Some violations need attention")
-            report.append("     • Address remaining violations for full compliance")
+            report.append("   WARNING: [U+FE0F]  MODERATE: Some violations need attention")
+            report.append("     [U+2022] Address remaining violations for full compliance")
         else:
-            report.append("  ✅ GOOD: High compliance score achieved")
-            report.append("     • Consider adding this check to pre-commit hooks")
+            report.append("   PASS:  GOOD: High compliance score achieved")
+            report.append("     [U+2022] Consider adding this check to pre-commit hooks")
         
         report.append("")
         report.append("=" * 80)
@@ -378,7 +378,7 @@ def main():
     
     # Auto-fix if requested
     if args.fix:
-        print("🔧 Auto-fix functionality not yet implemented")
+        print("[U+1F527] Auto-fix functionality not yet implemented")
         print("   Manual fixes required for SSOT compliance")
     
     # Exit code based on compliance

@@ -24,7 +24,7 @@ async def test_websocket_connection_established_timeout():
     2. Client waits for "connection_established" welcome message
     3. Message never arrives, causing asyncio.TimeoutError after 10s
     """
-    print("🚨 WebSocket Connection Timeout Reproduction Test")
+    print(" ALERT:  WebSocket Connection Timeout Reproduction Test")
     print("=" * 60)
     
     config = get_staging_config()
@@ -54,10 +54,10 @@ async def test_websocket_connection_established_timeout():
             close_timeout=10
         ) as ws:
             connection_established = True
-            print(f"✅ WebSocket connection established at {datetime.now().isoformat()}")
+            print(f" PASS:  WebSocket connection established at {datetime.now().isoformat()}")
             
             # This is the critical test - wait for connection_established message
-            print("🔍 Waiting for 'connection_established' welcome message...")
+            print(" SEARCH:  Waiting for 'connection_established' welcome message...")
             print("   Expected message format: {\"event\": \"connection_established\", \"connection_ready\": true}")
             print("   Timeout: 10 seconds")
             
@@ -66,34 +66,34 @@ async def test_websocket_connection_established_timeout():
                 welcome_response = await asyncio.wait_for(ws.recv(), timeout=10.0)
                 welcome_message_received = True
                 
-                print(f"✅ Welcome message received: {welcome_response}")
+                print(f" PASS:  Welcome message received: {welcome_response}")
                 
                 # Parse and validate message format
                 try:
                     welcome_data = json.loads(welcome_response)
                     
                     if welcome_data.get("event") == "connection_established":
-                        print("✅ Correct message type: connection_established")
+                        print(" PASS:  Correct message type: connection_established")
                         
                         if welcome_data.get("connection_ready"):
-                            print("✅ Connection ready flag present")
+                            print(" PASS:  Connection ready flag present")
                         else:
-                            print("⚠️ Connection ready flag missing")
+                            print(" WARNING: [U+FE0F] Connection ready flag missing")
                             
                         if welcome_data.get("connection_id"):
-                            print(f"✅ Connection ID: {welcome_data['connection_id']}")
+                            print(f" PASS:  Connection ID: {welcome_data['connection_id']}")
                         else:
-                            print("⚠️ Connection ID missing")
+                            print(" WARNING: [U+FE0F] Connection ID missing")
                             
                     else:
-                        print(f"❌ Unexpected message type: {welcome_data.get('event')}")
+                        print(f" FAIL:  Unexpected message type: {welcome_data.get('event')}")
                         
                 except json.JSONDecodeError as e:
-                    print(f"❌ Welcome message is not valid JSON: {e}")
+                    print(f" FAIL:  Welcome message is not valid JSON: {e}")
                     
             except asyncio.TimeoutError:
                 timeout_occurred = True
-                print("❌ TIMEOUT: No welcome message received within 10 seconds")
+                print(" FAIL:  TIMEOUT: No welcome message received within 10 seconds")
                 print("   This confirms the bug - connection_established message not sent")
                 
     except websockets.exceptions.InvalidStatus as e:
@@ -101,28 +101,28 @@ async def test_websocket_connection_established_timeout():
         status_code = getattr(e, 'status_code', 0)
         
         if status_code in [401, 403]:
-            print(f"❌ Authentication failed: {e}")
+            print(f" FAIL:  Authentication failed: {e}")
             print("   This indicates JWT token or auth service issues")
         else:
-            print(f"❌ WebSocket connection failed: {e}")
+            print(f" FAIL:  WebSocket connection failed: {e}")
             raise
             
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f" FAIL:  Unexpected error: {e}")
         raise
         
     finally:
         duration = time.time() - start_time
         print("\n" + "=" * 60)
-        print("📊 Test Results Summary")
+        print(" CHART:  Test Results Summary")
         print("=" * 60)
         print(f"Test Duration: {duration:.3f}s")
-        print(f"Connection Established: {'✅ YES' if connection_established else '❌ NO'}")
-        print(f"Welcome Message Received: {'✅ YES' if welcome_message_received else '❌ NO'}")
-        print(f"Timeout Occurred: {'❌ YES' if timeout_occurred else '✅ NO'}")
+        print(f"Connection Established: {' PASS:  YES' if connection_established else ' FAIL:  NO'}")
+        print(f"Welcome Message Received: {' PASS:  YES' if welcome_message_received else ' FAIL:  NO'}")
+        print(f"Timeout Occurred: {' FAIL:  YES' if timeout_occurred else ' PASS:  NO'}")
         
         if connection_established and not welcome_message_received:
-            print("\n🔍 DIAGNOSIS:")
+            print("\n SEARCH:  DIAGNOSIS:")
             print("   - WebSocket connection succeeds (authentication working)")
             print("   - Welcome message never arrives (server-side issue)")
             print("   - Likely causes:")
@@ -132,7 +132,7 @@ async def test_websocket_connection_established_timeout():
             print("     4. Code execution never reaches welcome message logic")
             
         if timeout_occurred:
-            print("\n🚨 BUG CONFIRMED:")
+            print("\n ALERT:  BUG CONFIRMED:")
             print("   This reproduces the exact issue from test_001_websocket_connection_real")
             print("   The WebSocket server is not sending the expected welcome message")
             
@@ -143,10 +143,10 @@ async def test_websocket_connection_established_timeout():
         bug_reproduced = connection_established and not welcome_message_received and timeout_occurred
         
         if bug_reproduced:
-            print("\n✅ BUG SUCCESSFULLY REPRODUCED")
+            print("\n PASS:  BUG SUCCESSFULLY REPRODUCED")
             print("   Ready for root cause fix implementation")
         else:
-            print("\n❓ Bug not reproduced - may be intermittent or already fixed")
+            print("\n[U+2753] Bug not reproduced - may be intermittent or already fixed")
             
         return {
             "bug_reproduced": bug_reproduced,
@@ -162,12 +162,12 @@ if __name__ == "__main__":
     result = asyncio.run(test_websocket_connection_established_timeout())
     
     if result["bug_reproduced"]:
-        print("\n🔧 NEXT STEPS:")
+        print("\n[U+1F527] NEXT STEPS:")
         print("1. Examine WebSocket endpoint authentication flow")
         print("2. Check service dependencies in staging environment")  
         print("3. Add comprehensive logging to WebSocket handler")
         print("4. Implement SSOT-compliant fix")
         exit(1)  # Exit with error to indicate bug confirmed
     else:
-        print("\n✅ No timeout issue detected")
+        print("\n PASS:  No timeout issue detected")
         exit(0)

@@ -310,10 +310,10 @@ def main():
     
     # Exit with appropriate code
     if report.violation_count > 0:
-        print(f"\n❌ COMPLIANCE CHECK FAILED: {report.violation_count} violations found")
+        print(f"\n FAIL:  COMPLIANCE CHECK FAILED: {report.violation_count} violations found")
         return 1
     else:
-        print("\n✅ COMPLIANCE CHECK PASSED: No violations found")
+        print("\n PASS:  COMPLIANCE CHECK PASSED: No violations found")
         return 0
 
 

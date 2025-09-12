@@ -240,19 +240,19 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
         
         # Log detailed analysis results
         self.logger.info(f"WebSocket Import Analysis Results:")
-        self.logger.info(f"📊 Total files scanned: {analysis_result.total_files_scanned}")
-        self.logger.info(f"📂 Files with WebSocket imports: {analysis_result.files_with_websocket_imports}")
-        self.logger.info(f"✅ Canonical imports found: {analysis_result.canonical_imports_found}")
-        self.logger.info(f"🚨 Violations found: {analysis_result.violation_count}")
-        self.logger.info(f"📈 Compliance score: {analysis_result.compliance_score:.1f}%")
+        self.logger.info(f" CHART:  Total files scanned: {analysis_result.total_files_scanned}")
+        self.logger.info(f"[U+1F4C2] Files with WebSocket imports: {analysis_result.files_with_websocket_imports}")
+        self.logger.info(f" PASS:  Canonical imports found: {analysis_result.canonical_imports_found}")
+        self.logger.info(f" ALERT:  Violations found: {analysis_result.violation_count}")
+        self.logger.info(f"[U+1F4C8] Compliance score: {analysis_result.compliance_score:.1f}%")
         
         # Log first 10 violations for immediate action
         if analysis_result.violations:
-            self.logger.warning("❌ Top 10 WebSocket import violations:")
+            self.logger.warning(" FAIL:  Top 10 WebSocket import violations:")
             for i, violation in enumerate(analysis_result.violations[:10], 1):
                 self.logger.warning(f"   {i}. {violation.file_path}:{violation.line_number}")
-                self.logger.warning(f"      ❌ {violation.import_statement}")
-                self.logger.warning(f"      ✅ {violation.canonical_replacement}")
+                self.logger.warning(f"       FAIL:  {violation.import_statement}")
+                self.logger.warning(f"       PASS:  {violation.canonical_replacement}")
         
         # ASSERTION: Fail if violations exceed threshold
         # Start with current state, gradually reduce threshold as remediation progresses
@@ -260,13 +260,13 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
             f"WebSocket import violations ({analysis_result.violation_count}) exceed threshold "
             f"({self.CURRENT_VIOLATION_THRESHOLD}). "
             f"\n\nREMEDIATION REQUIRED:"
-            f"\n• Target: Reduce violations to <{self.TARGET_VIOLATION_THRESHOLD} for Phase 1"
-            f"\n• Current compliance score: {analysis_result.compliance_score:.1f}%"
-            f"\n• Files needing remediation: {len(set(v.file_path for v in analysis_result.violations))}"
+            f"\n[U+2022] Target: Reduce violations to <{self.TARGET_VIOLATION_THRESHOLD} for Phase 1"
+            f"\n[U+2022] Current compliance score: {analysis_result.compliance_score:.1f}%"
+            f"\n[U+2022] Files needing remediation: {len(set(v.file_path for v in analysis_result.violations))}"
             f"\n\nIMPORT REMEDIATION GUIDE:"
-            f"\n✅ USE: from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory"
-            f"\n❌ AVOID: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"
-            f"\n❌ AVOID: from netra_backend.app.websocket_core.manager import WebSocketManager"
+            f"\n PASS:  USE: from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory"
+            f"\n FAIL:  AVOID: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"
+            f"\n FAIL:  AVOID: from netra_backend.app.websocket_core.manager import WebSocketManager"
             f"\n\nSee CANONICAL IMPORT GUIDE in canonical_imports.py for complete migration instructions."
         )
 
@@ -288,11 +288,11 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
         self.logger.info(f"Direct UnifiedWebSocketManager import violations: {len(unified_manager_violations)}")
         
         if unified_manager_violations:
-            self.logger.warning("❌ Direct UnifiedWebSocketManager imports found:")
+            self.logger.warning(" FAIL:  Direct UnifiedWebSocketManager imports found:")
             for violation in unified_manager_violations[:5]:  # Show first 5
-                self.logger.warning(f"   📁 {violation.file_path}:{violation.line_number}")
-                self.logger.warning(f"   ❌ {violation.import_statement}")
-                self.logger.warning(f"   ✅ {violation.canonical_replacement}")
+                self.logger.warning(f"   [U+1F4C1] {violation.file_path}:{violation.line_number}")
+                self.logger.warning(f"    FAIL:  {violation.import_statement}")
+                self.logger.warning(f"    PASS:  {violation.canonical_replacement}")
 
         # ASSERTION: No direct UnifiedWebSocketManager imports allowed
         assert len(unified_manager_violations) == 0, (
@@ -300,10 +300,10 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
             f"These bypass user isolation security requirements.\n\n"
             f"SECURITY VIOLATION: Direct manager imports prevent proper user context isolation.\n"
             f"REMEDIATION: Replace with factory pattern:\n"
-            f"✅ from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory\n"
-            f"✅ factory = WebSocketManagerFactory()\n"
-            f"✅ manager = await factory.create_isolated_manager(user_id, connection_id)\n\n"
-            f"❌ from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"
+            f" PASS:  from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory\n"
+            f" PASS:  factory = WebSocketManagerFactory()\n"
+            f" PASS:  manager = await factory.create_isolated_manager(user_id, connection_id)\n\n"
+            f" FAIL:  from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager"
         )
 
     def test_canonical_import_coverage_progression(self):
@@ -322,7 +322,7 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
         progression_score = (canonical_files / total_websocket_files * 100) if total_websocket_files > 0 else 0
         
         # Log progression metrics
-        self.logger.info("📈 Canonical Import Progression Metrics:")
+        self.logger.info("[U+1F4C8] Canonical Import Progression Metrics:")
         self.logger.info(f"   Total WebSocket files: {total_websocket_files}")
         self.logger.info(f"   Files using canonical imports: {canonical_files}")
         self.logger.info(f"   Files with violations: {violation_files}")
@@ -339,7 +339,7 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
         
         for threshold, message in milestones:
             if progression_score >= threshold:
-                self.logger.info(f"🎉 Milestone achieved: {message} ({progression_score:.1f}%)")
+                self.logger.info(f" CELEBRATION:  Milestone achieved: {message} ({progression_score:.1f}%)")
         
         # Document current state for tracking
         metrics = {
@@ -366,7 +366,7 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
         analysis_result = self._scan_codebase_for_violations()
         
         if not analysis_result.violations:
-            self.logger.info("✅ No WebSocket import violations found - SSOT compliance achieved!")
+            self.logger.info(" PASS:  No WebSocket import violations found - SSOT compliance achieved!")
             return
         
         # Group violations by type for targeted remediation
@@ -377,13 +377,13 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
                 violation_groups[violation_type] = []
             violation_groups[violation_type].append(violation)
         
-        self.logger.info("🔧 WEBSOCKET IMPORT REMEDIATION GUIDE")
+        self.logger.info("[U+1F527] WEBSOCKET IMPORT REMEDIATION GUIDE")
         self.logger.info("=" * 60)
         
         for violation_type, violations in violation_groups.items():
-            self.logger.info(f"\n❌ VIOLATION TYPE: {violation_type}")
-            self.logger.info(f"📊 Count: {len(violations)} occurrences")
-            self.logger.info(f"📁 Example files:")
+            self.logger.info(f"\n FAIL:  VIOLATION TYPE: {violation_type}")
+            self.logger.info(f" CHART:  Count: {len(violations)} occurrences")
+            self.logger.info(f"[U+1F4C1] Example files:")
             
             # Show up to 3 examples
             for violation in violations[:3]:
@@ -395,12 +395,12 @@ class TestWebSocketImportSSotCompliance(SSotBaseTestCase):
                 self.logger.info(f"   ... and {len(violations) - 3} more files")
         
         # Provide batch remediation script template
-        self.logger.info("\n🤖 AUTOMATED REMEDIATION:")
+        self.logger.info("\n[U+1F916] AUTOMATED REMEDIATION:")
         self.logger.info("Use this sed command pattern for batch replacement:")
         self.logger.info("find . -name '*.py' -exec sed -i 's/old_pattern/new_pattern/g' {} +")
         
         # Document remediation priority
-        self.logger.info(f"\n📋 REMEDIATION PRIORITY:")
+        self.logger.info(f"\n[U+1F4CB] REMEDIATION PRIORITY:")
         self.logger.info(f"1. Fix direct UnifiedWebSocketManager imports (security critical)")
         self.logger.info(f"2. Replace singleton get_websocket_manager() calls") 
         self.logger.info(f"3. Standardize factory imports to canonical path")

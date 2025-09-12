@@ -232,7 +232,7 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
         Test concurrent user isolation with 10+ users executing agents simultaneously.
         
         BVJ: Enterprise security - ensures complete user isolation at moderate scale
-        Critical Path: 10+ users → Concurrent execution → No data leakage → Isolated results
+        Critical Path: 10+ users  ->  Concurrent execution  ->  No data leakage  ->  Isolated results
         """
         # Arrange: Create 12 users for concurrent execution testing
         num_users = 12
@@ -367,7 +367,7 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
         Test WebSocket event isolation with concurrent users.
         
         BVJ: User experience - ensures users only see their own agent events
-        Critical Path: Concurrent users → WebSocket events → User-specific delivery → No cross-contamination
+        Critical Path: Concurrent users  ->  WebSocket events  ->  User-specific delivery  ->  No cross-contamination
         """
         # Arrange: Create 8 users for WebSocket isolation testing
         num_users = 8
@@ -477,7 +477,7 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
         Test memory isolation under concurrent load to prevent data leakage.
         
         BVJ: Enterprise security - ensures user data doesn't leak between concurrent sessions
-        Critical Path: Concurrent users → Memory isolation → No shared state → No data leakage
+        Critical Path: Concurrent users  ->  Memory isolation  ->  No shared state  ->  No data leakage
         """
         # Arrange: Create 15 users with distinct data for memory isolation testing
         num_users = 15
@@ -691,7 +691,7 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
         Test system performance under heavy concurrent load with 20+ users.
         
         BVJ: Platform scalability - ensures system maintains performance with high concurrency
-        Critical Path: 20+ users → High load → <2s response time → System stability
+        Critical Path: 20+ users  ->  High load  ->  <2s response time  ->  System stability
         """
         # Arrange: Create 25 users for heavy load testing
         num_users = 25
@@ -824,7 +824,7 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
             
             success_rate = len(successful_results) / num_users
             assert success_rate >= 0.95, \
-                f"Success rate too low under load: {success_rate:.2%} (should be ≥95%)"
+                f"Success rate too low under load: {success_rate:.2%} (should be  >= 95%)"
             
             if failed_results:
                 print(f"Warning: {len(failed_results)} executions failed under heavy load: {failed_results[:3]}...")
@@ -857,7 +857,7 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
                 # Verify throughput
                 throughput = num_users / total_execution_time
                 assert throughput >= 1.0, \
-                    f"Throughput too low: {throughput:.2f} users/second (should be ≥1.0)"
+                    f"Throughput too low: {throughput:.2f} users/second (should be  >= 1.0)"
                 
                 # Store detailed performance metrics
                 self.performance_metrics['heavy_load_20_users'] = {
@@ -874,7 +874,7 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
                 }
                 
                 # Log performance results
-                print(f"\n🚀 Heavy Load Performance Results (25 users):")
+                print(f"\n[U+1F680] Heavy Load Performance Results (25 users):")
                 print(f"  Success Rate: {success_rate:.1%}")
                 print(f"  Total Time: {total_execution_time:.3f}s")
                 print(f"  Avg Response: {avg_response_time:.3f}s")
@@ -902,7 +902,7 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
         Test factory pattern user isolation under concurrent load.
         
         BVJ: Architecture compliance - ensures factory pattern creates proper isolation under load
-        Critical Path: Concurrent load → Factory pattern → User-specific instances → No shared state
+        Critical Path: Concurrent load  ->  Factory pattern  ->  User-specific instances  ->  No shared state
         """
         # Arrange: Create 16 users for factory pattern testing
         num_users = 16
@@ -1105,12 +1105,12 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
         # It should be run after other concurrency tests to compile metrics
         
         print("\n" + "="*80)
-        print("🎯 MULTI-USER CONCURRENCY TEST SUMMARY")
+        print(" TARGET:  MULTI-USER CONCURRENCY TEST SUMMARY")
         print("="*80)
         
         if self.performance_metrics:
             for test_name, metrics in self.performance_metrics.items():
-                print(f"\n📊 {test_name.upper().replace('_', ' ')}:")
+                print(f"\n CHART:  {test_name.upper().replace('_', ' ')}:")
                 
                 for metric_name, value in metrics.items():
                     if isinstance(value, float):
@@ -1125,19 +1125,19 @@ class TestMultiUserAgentExecutionIsolationComprehensive(SSotAsyncTestCase):
         else:
             print("No performance metrics available. Run concurrency tests first.")
         
-        print(f"\n🛡️ ISOLATION SUMMARY:")
+        print(f"\n[U+1F6E1][U+FE0F] ISOLATION SUMMARY:")
         print(f"  Total Isolation Violations: {len(self.user_isolation_violations)}")
         print(f"  WebSocket Event Tracking: {len(self.websocket_event_tracking)} users")
         print(f"  Concurrent Executions Tracked: {len(self.concurrent_executions)}")
         
         if self.user_isolation_violations:
-            print(f"\n⚠️ ISOLATION VIOLATIONS DETECTED:")
+            print(f"\n WARNING: [U+FE0F] ISOLATION VIOLATIONS DETECTED:")
             for i, violation in enumerate(self.user_isolation_violations[:5]):  # Show first 5
                 print(f"  {i+1}. {violation['violation_type']}: {violation}")
             if len(self.user_isolation_violations) > 5:
                 print(f"  ... and {len(self.user_isolation_violations) - 5} more")
         else:
-            print(f"\n✅ NO ISOLATION VIOLATIONS DETECTED - SYSTEM SECURE")
+            print(f"\n PASS:  NO ISOLATION VIOLATIONS DETECTED - SYSTEM SECURE")
         
         print("="*80)
         

@@ -458,7 +458,7 @@
 
             # Calculate memory increase
             # REMOVED_SYNTAX_ERROR: base_increase = service_config["limit_mb"] * pressure_rate / 10  # Per 0.1 second
-            # REMOVED_SYNTAX_ERROR: random_variance = random.uniform(0.5, 1.5)  # ±50% variance
+            # REMOVED_SYNTAX_ERROR: random_variance = random.uniform(0.5, 1.5)  #  +/- 50% variance
             # REMOVED_SYNTAX_ERROR: memory_increase = base_increase * random_variance
 
             # REMOVED_SYNTAX_ERROR: new_memory = current_usage["current_mb"] + memory_increase
@@ -1174,10 +1174,10 @@
 
                                                             # REMOVED_SYNTAX_ERROR: print("Running BRUTAL Orchestration Chaos Engineering & Edge Case Tests...")
                                                             # REMOVED_SYNTAX_ERROR: print("=" * 90)
-                                                            # REMOVED_SYNTAX_ERROR: print("💥 CHAOS MODE: Testing network partitions, resource exhaustion, Byzantine faults")
-                                                            # REMOVED_SYNTAX_ERROR: print("🔥 Security attacks, split-brain scenarios, cascade failure prevention")
-                                                            # REMOVED_SYNTAX_ERROR: print("⚠️  WARNING: These tests simulate production disasters and extreme conditions")
-                                                            # REMOVED_SYNTAX_ERROR: print("🛡️  Validating 99.9% uptime SLA under the most severe failure scenarios")
+                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F4A5] CHAOS MODE: Testing network partitions, resource exhaustion, Byzantine faults")
+                                                            # REMOVED_SYNTAX_ERROR: print(" FIRE:  Security attacks, split-brain scenarios, cascade failure prevention")
+                                                            # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  WARNING: These tests simulate production disasters and extreme conditions")
+                                                            # REMOVED_SYNTAX_ERROR: print("[U+1F6E1][U+FE0F]  Validating 99.9% uptime SLA under the most severe failure scenarios")
                                                             # REMOVED_SYNTAX_ERROR: print("=" * 90)
 
                                                             # REMOVED_SYNTAX_ERROR: result = pytest.main(pytest_args)
@@ -1185,18 +1185,18 @@
                                                             # REMOVED_SYNTAX_ERROR: if result == 0:
                                                                 # REMOVED_SYNTAX_ERROR: print(" )
                                                                 # REMOVED_SYNTAX_ERROR: " + "=" * 90)
-                                                                # REMOVED_SYNTAX_ERROR: print("✅ ALL CHAOS ENGINEERING TESTS PASSED")
-                                                                # REMOVED_SYNTAX_ERROR: print("🛡️  Orchestration system is BULLETPROOF against extreme failure conditions")
-                                                                # REMOVED_SYNTAX_ERROR: print("🚀 Enterprise-ready for 100+ services with 99.9% uptime SLA guaranteed")
-                                                                # REMOVED_SYNTAX_ERROR: print("💪 Byzantine fault tolerance, DDoS resilience, split-brain prevention VERIFIED")
+                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL CHAOS ENGINEERING TESTS PASSED")
+                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F6E1][U+FE0F]  Orchestration system is BULLETPROOF against extreme failure conditions")
+                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F680] Enterprise-ready for 100+ services with 99.9% uptime SLA guaranteed")
+                                                                # REMOVED_SYNTAX_ERROR: print("[U+1F4AA] Byzantine fault tolerance, DDoS resilience, split-brain prevention VERIFIED")
                                                                 # REMOVED_SYNTAX_ERROR: print("=" * 90)
                                                                 # REMOVED_SYNTAX_ERROR: else:
                                                                     # REMOVED_SYNTAX_ERROR: print(" )
                                                                     # REMOVED_SYNTAX_ERROR: " + "=" * 90)
-                                                                    # REMOVED_SYNTAX_ERROR: print("❌ CHAOS ENGINEERING TESTS FAILED")
-                                                                    # REMOVED_SYNTAX_ERROR: print("🚨 Orchestration system VULNERABLE to extreme failure conditions")
-                                                                    # REMOVED_SYNTAX_ERROR: print("⚠️  NOT ready for enterprise deployment - critical resilience gaps detected")
-                                                                    # REMOVED_SYNTAX_ERROR: print("🔧 Fix Byzantine fault tolerance, network partition handling, or security vulnerabilities")
+                                                                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  CHAOS ENGINEERING TESTS FAILED")
+                                                                    # REMOVED_SYNTAX_ERROR: print(" ALERT:  Orchestration system VULNERABLE to extreme failure conditions")
+                                                                    # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  NOT ready for enterprise deployment - critical resilience gaps detected")
+                                                                    # REMOVED_SYNTAX_ERROR: print("[U+1F527] Fix Byzantine fault tolerance, network partition handling, or security vulnerabilities")
                                                                     # REMOVED_SYNTAX_ERROR: print("=" * 90)
 
                                                                     # REMOVED_SYNTAX_ERROR: sys.exit(result)

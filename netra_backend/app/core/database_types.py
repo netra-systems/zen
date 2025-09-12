@@ -1,7 +1,7 @@
 """Database-specific types and configurations.
 
 Core types for database operations, configurations, and metrics.
-All functions ≤8 lines, file ≤300 lines.
+All functions  <= 8 lines, file  <= 300 lines.
 """
 
 from dataclasses import dataclass

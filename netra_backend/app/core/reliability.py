@@ -1,6 +1,6 @@
 """Comprehensive reliability infrastructure for Netra agents.
 
-⚠️  MIGRATION TO UNIFIED RELIABILITY MANAGER ⚠️
+ WARNING: [U+FE0F]  MIGRATION TO UNIFIED RELIABILITY MANAGER  WARNING: [U+FE0F]
 
 This module is being migrated to use UnifiedReliabilityManager as the SSOT.
 The AgentReliabilityWrapper class now delegates to the unified implementation
@@ -35,7 +35,7 @@ logger = central_logger.get_logger(__name__)
 class AgentReliabilityWrapper:
     """Comprehensive reliability wrapper for agent operations
     
-    ⚠️  DEPRECATED: This class now delegates to UnifiedReliabilityManager.
+     WARNING: [U+FE0F]  DEPRECATED: This class now delegates to UnifiedReliabilityManager.
     Use get_reliability_manager() directly for new code.
     """
     

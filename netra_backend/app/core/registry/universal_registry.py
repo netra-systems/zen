@@ -400,12 +400,12 @@ class UniversalRegistry(Generic[T]):
         """Validate item before registration."""
         # CRITICAL FIX: Prevent BaseModel classes from being registered as tools
         if self._is_basemodel_class_or_instance(item):
-            logger.warning(f"❌ Rejected BaseModel registration attempt: {key} (type: {type(item).__name__}) - BaseModel classes are data schemas, not executable tools")
+            logger.warning(f" FAIL:  Rejected BaseModel registration attempt: {key} (type: {type(item).__name__}) - BaseModel classes are data schemas, not executable tools")
             return False
         
         # CRITICAL FIX: For tool registries, validate tool interface
         if self.name == "ToolRegistry" and not self._is_valid_tool(item):
-            logger.warning(f"❌ Rejected invalid tool registration attempt: {key} (type: {type(item).__name__}) - Missing required tool interface")
+            logger.warning(f" FAIL:  Rejected invalid tool registration attempt: {key} (type: {type(item).__name__}) - Missing required tool interface")
             return False
         
         for validator in self._validation_handlers:
@@ -435,18 +435,18 @@ class UniversalRegistry(Generic[T]):
             
             # Check if it's a BaseModel instance
             if isinstance(item, BaseModel):
-                logger.debug(f"🔍 Detected BaseModel instance: {type(item).__name__}")
+                logger.debug(f" SEARCH:  Detected BaseModel instance: {type(item).__name__}")
                 return True
                 
             # Check if it's a BaseModel class
             if isinstance(item, type) and issubclass(item, BaseModel):
-                logger.debug(f"🔍 Detected BaseModel class: {item.__name__}")
+                logger.debug(f" SEARCH:  Detected BaseModel class: {item.__name__}")
                 return True
                 
             # Check for metaclass name that causes the "modelmetaclass" error
             metaclass_name = type(type(item)).__name__.lower()
             if metaclass_name == "modelmetaclass":
-                logger.debug(f"🔍 Detected modelmetaclass: {type(item).__name__}")
+                logger.debug(f" SEARCH:  Detected modelmetaclass: {type(item).__name__}")
                 return True
                 
         except ImportError:
@@ -706,7 +706,7 @@ class AgentRegistry(UniversalRegistry['BaseAgent']):
             def enhance_with_websockets(self, websocket_bridge):
                 """Mock enhancement method for WebSocket integration."""
                 self._websocket_enhanced = True
-                logger.info("✅ Mock tool dispatcher enhanced with WebSocket notifications")
+                logger.info(" PASS:  Mock tool dispatcher enhanced with WebSocket notifications")
         
         self._tool_dispatcher = MockToolDispatcher(self)
         logger.debug("Created mock tool dispatcher for AgentRegistry")
@@ -720,7 +720,7 @@ class AgentRegistry(UniversalRegistry['BaseAgent']):
             # For mock tool dispatcher, just mark it as enhanced
             if hasattr(self._tool_dispatcher, '_websocket_enhanced'):
                 self._tool_dispatcher._websocket_enhanced = True
-                logger.info("✅ Mock tool dispatcher enhanced with WebSocket notifications")
+                logger.info(" PASS:  Mock tool dispatcher enhanced with WebSocket notifications")
             else:
                 # For real tool dispatcher, use the enhancement function
                 from netra_backend.app.agents.unified_tool_execution import enhance_tool_dispatcher_with_notifications
@@ -731,7 +731,7 @@ class AgentRegistry(UniversalRegistry['BaseAgent']):
                     websocket_manager=self.websocket_manager,
                     enable_notifications=True
                 )
-                logger.info("✅ Tool dispatcher enhanced with WebSocket notifications")
+                logger.info(" PASS:  Tool dispatcher enhanced with WebSocket notifications")
             
         except Exception as e:
             logger.error(f"Failed to enhance tool dispatcher with WebSocket notifications: {e}")

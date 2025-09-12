@@ -161,7 +161,7 @@
                 # REMOVED_SYNTAX_ERROR: Test 1: Agent service creation properly fails...")
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: test_suite.test_agent_service_creation_properly_fails()
-                    # REMOVED_SYNTAX_ERROR: print("✗ Test should have raised NotImplementedError!")
+                    # REMOVED_SYNTAX_ERROR: print("[U+2717] Test should have raised NotImplementedError!")
                     # REMOVED_SYNTAX_ERROR: except NotImplementedError as e:
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -169,19 +169,19 @@
                         # REMOVED_SYNTAX_ERROR: print(" )
                         # REMOVED_SYNTAX_ERROR: Test 2: MCP service creation works without agent service...")
                         # REMOVED_SYNTAX_ERROR: test_suite.test_mcp_service_creation_works_without_agent_service()
-                        # REMOVED_SYNTAX_ERROR: print("✓ MCP service can be created without agent_service (it"s optional)")
+                        # REMOVED_SYNTAX_ERROR: print("[U+2713] MCP service can be created without agent_service (it"s optional)")
 
                         # Test 3: Verify None is being passed
                         # REMOVED_SYNTAX_ERROR: print(" )
                         # REMOVED_SYNTAX_ERROR: Test 3: Verifying service factory passes None dependencies...")
                         # REMOVED_SYNTAX_ERROR: test_suite.test_service_factory_passes_none_dependencies()
-                        # REMOVED_SYNTAX_ERROR: print("✓ Confirmed: Service factory passes None for all dependencies")
+                        # REMOVED_SYNTAX_ERROR: print("[U+2713] Confirmed: Service factory passes None for all dependencies")
 
                         # Test 4: Show correct behavior
                         # REMOVED_SYNTAX_ERROR: print(" )
                         # REMOVED_SYNTAX_ERROR: Test 4: Demonstrating correct initialization with dependencies...")
                         # REMOVED_SYNTAX_ERROR: test_suite.test_expected_behavior_with_proper_dependencies()
-                        # REMOVED_SYNTAX_ERROR: print("✓ Services work correctly when proper dependencies are provided")
+                        # REMOVED_SYNTAX_ERROR: print("[U+2713] Services work correctly when proper dependencies are provided")
 
                         # REMOVED_SYNTAX_ERROR: print(" )
                         # REMOVED_SYNTAX_ERROR: " + "=" * 60)

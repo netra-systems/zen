@@ -3,9 +3,9 @@ REAL First User Journey E2E Test - COMPLETELY REWRITTEN
 NO MOCKS, NO FAKES, NO CHEATING - REAL BUSINESS VALUE PROTECTION
 
 Business Value Justification (BVJ):
-- Segment: Free → Paid conversion (100% new revenue pipeline protection)
+- Segment: Free  ->  Paid conversion (100% new revenue pipeline protection)
 - Business Goal: Prevent $50K+ MRR loss from broken user onboarding
-- Value Impact: Validates complete new user registration → first successful AI chat interaction
+- Value Impact: Validates complete new user registration  ->  first successful AI chat interaction
 - Strategic Impact: CRITICAL revenue protection - first-time user experience drives all new customer acquisition
 
 This test protects the entire new user acquisition funnel:
@@ -111,7 +111,7 @@ class FirstUserJourneyValidator:
         timestamp = time.time() - self.start_time
         self.milestones.append((timestamp, milestone, data or {}))
         self.timing_metrics[milestone] = timestamp
-        logger.info(f"🎯 User journey milestone: {milestone} at {timestamp:.2f}s")
+        logger.info(f" TARGET:  User journey milestone: {milestone} at {timestamp:.2f}s")
     
     def validate_complete_journey(self) -> tuple[bool, List[str]]:
         """Validate that the complete first user journey succeeded."""
@@ -253,40 +253,40 @@ class FirstUserJourneyValidator:
             "=" * 80,
             "FIRST USER JOURNEY VALIDATION REPORT",
             "=" * 80,
-            f"Journey Result: {'✅ NEW USER SUCCESS' if is_valid else '❌ ONBOARDING FAILED'}",
+            f"Journey Result: {' PASS:  NEW USER SUCCESS' if is_valid else ' FAIL:  ONBOARDING FAILED'}",
             f"Total Journey Time: {metrics['total_journey_time']:.2f}s",
             f"User Email: {metrics['user_email']}",
             f"User ID: {metrics['user_id']}",
             "",
-            "🎯 Journey Milestones Status:",
+            " TARGET:  Journey Milestones Status:",
         ]
         
         for milestone in ONBOARDING_MILESTONES:
-            status = "✅" if milestone in [m[1] for m in self.milestones] else "❌"
+            status = " PASS: " if milestone in [m[1] for m in self.milestones] else " FAIL: "
             timing = self.timing_metrics.get(milestone, 0)
             report.append(f"  {status} {milestone} ({timing:.2f}s)")
         
         report.extend([
             "",
-            "🔥 Critical Events Status:",
+            " FIRE:  Critical Events Status:",
         ])
         
         for event in CRITICAL_ONBOARDING_EVENTS:
-            status = "✅" if event in self.event_types else "❌"
+            status = " PASS: " if event in self.event_types else " FAIL: "
             report.append(f"  {status} {event}")
         
         if errors:
-            report.extend(["", "❌ ONBOARDING FAILURES:"] + [f"  - {e}" for e in errors])
+            report.extend(["", " FAIL:  ONBOARDING FAILURES:"] + [f"  - {e}" for e in errors])
         
         report.extend([
             "",
-            "⚡ Performance Metrics:",
+            " LIGHTNING:  Performance Metrics:",
             f"  Registration: {metrics['registration_time']:.2f}s (max {MAX_REGISTRATION_TIME}s)",
             f"  Verification: {metrics['verification_time']:.2f}s (max {MAX_VERIFICATION_TIME}s)", 
             f"  First Login: {metrics['first_login_time']:.2f}s (max {MAX_FIRST_LOGIN_TIME}s)",
             f"  First Chat: {metrics['first_chat_time']:.2f}s (max {MAX_FIRST_CHAT_TIME}s)",
             "",
-            "🚀 Journey Timeline:",
+            "[U+1F680] Journey Timeline:",
         ])
         
         for i, (timestamp, milestone, data) in enumerate(self.milestones[:10]):
@@ -344,7 +344,7 @@ class TestFirstUserJourneyE2E:
         email_service: EmailService,
         db_manager: DatabaseTestManager
     ):
-        """Test COMPLETE first user journey: Registration → Verification → Login → First Chat.
+        """Test COMPLETE first user journey: Registration  ->  Verification  ->  Login  ->  First Chat.
         
         This test validates the entire new user acquisition funnel using REAL services:
         - Real user registration with database persistence
@@ -356,15 +356,15 @@ class TestFirstUserJourneyE2E:
         CRITICAL: Uses REAL authentication, REAL database, REAL WebSocket.
         Will FAIL HARD if onboarding system is broken. NO MOCKS.
         """
-        logger.info("🚀 Starting REAL complete first user journey test")
+        logger.info("[U+1F680] Starting REAL complete first user journey test")
         
         # STEP 1: Create new user registration data
         user_data = self._create_new_user_data()
         journey_validator.user_data = user_data
-        logger.info(f"👤 Testing with new user: {user_data['email']}")
+        logger.info(f"[U+1F464] Testing with new user: {user_data['email']}")
         
         # STEP 2: Register new user with REAL database persistence
-        logger.info("📝 STEP 1: Registering new user...")
+        logger.info("[U+1F4DD] STEP 1: Registering new user...")
         start_reg = time.time()
         
         try:
@@ -379,23 +379,23 @@ class TestFirstUserJourneyE2E:
                 # Create user with real user service
                 created_user = await user_service.create(db_session, obj_in=user_create)
                 
-                assert created_user is not None, "❌ CRITICAL: User registration failed!"
-                assert created_user.email == user_data["email"], "❌ CRITICAL: Email mismatch after registration!"
-                assert created_user.id is not None, "❌ CRITICAL: No user ID generated!"
+                assert created_user is not None, " FAIL:  CRITICAL: User registration failed!"
+                assert created_user.email == user_data["email"], " FAIL:  CRITICAL: Email mismatch after registration!"
+                assert created_user.id is not None, " FAIL:  CRITICAL: No user ID generated!"
                 
                 journey_validator.user_data["user_id"] = created_user.id
                 journey_validator.record_event({"type": "user_registered", "data": {"user_id": created_user.id}})
-                logger.info(f"✅ User registered successfully: {created_user.id}")
+                logger.info(f" PASS:  User registered successfully: {created_user.id}")
                 
         except Exception as e:
-            assert False, f"❌ CRITICAL REGISTRATION FAILURE: {str(e)}"
+            assert False, f" FAIL:  CRITICAL REGISTRATION FAILURE: {str(e)}"
         
         journey_validator.record_milestone("registration_complete")
         reg_time = time.time() - start_reg
-        assert reg_time < MAX_REGISTRATION_TIME, f"❌ REGISTRATION TOO SLOW: {reg_time:.2f}s"
+        assert reg_time < MAX_REGISTRATION_TIME, f" FAIL:  REGISTRATION TOO SLOW: {reg_time:.2f}s"
         
         # STEP 3: Send email verification with REAL email service
-        logger.info("📧 STEP 2: Sending email verification...")
+        logger.info("[U+1F4E7] STEP 2: Sending email verification...")
         start_verify = time.time()
         
         verification_token = f"verify_{uuid.uuid4().hex}"
@@ -404,23 +404,23 @@ class TestFirstUserJourneyE2E:
             verification_token
         )
         
-        assert verification_sent, "❌ CRITICAL: Email verification sending failed!"
+        assert verification_sent, " FAIL:  CRITICAL: Email verification sending failed!"
         journey_validator.verification_token = verification_token
         journey_validator.record_event({"type": "verification_sent", "data": {"token": verification_token}})
-        logger.info(f"📨 Verification email sent with token: {verification_token}")
+        logger.info(f"[U+1F4E8] Verification email sent with token: {verification_token}")
         
         # Verify the email verification token works
         verification_valid = await email_service.verify_token(verification_token)
-        assert verification_valid, "❌ CRITICAL: Email verification token validation failed!"
+        assert verification_valid, " FAIL:  CRITICAL: Email verification token validation failed!"
         
         journey_validator.record_event({"type": "email_verified", "data": {"token": verification_token}})
         journey_validator.record_milestone("verification_complete")
         verify_time = time.time() - start_verify
-        assert verify_time < MAX_VERIFICATION_TIME, f"❌ VERIFICATION TOO SLOW: {verify_time:.2f}s"
-        logger.info("✅ Email verification completed successfully")
+        assert verify_time < MAX_VERIFICATION_TIME, f" FAIL:  VERIFICATION TOO SLOW: {verify_time:.2f}s"
+        logger.info(" PASS:  Email verification completed successfully")
         
         # STEP 4: Authenticate user and get real JWT token
-        logger.info("🔐 STEP 3: Authenticating user...")
+        logger.info("[U+1F510] STEP 3: Authenticating user...")
         start_auth = time.time()
         
         try:
@@ -431,16 +431,16 @@ class TestFirstUserJourneyE2E:
                 force_new=True
             )
             
-            assert token is not None, "❌ CRITICAL: Authentication failed - no token returned!"
-            assert user_info is not None, "❌ CRITICAL: Authentication failed - no user info returned!"
+            assert token is not None, " FAIL:  CRITICAL: Authentication failed - no token returned!"
+            assert user_info is not None, " FAIL:  CRITICAL: Authentication failed - no user info returned!"
             
             journey_validator.auth_token = token
             journey_validator.record_event({"type": "first_login", "data": {"token_length": len(token)}})
             journey_validator.record_milestone("authentication_success")
             
             auth_time = time.time() - start_auth
-            assert auth_time < MAX_FIRST_LOGIN_TIME, f"❌ FIRST LOGIN TOO SLOW: {auth_time:.2f}s"
-            logger.info(f"✅ User authenticated successfully with JWT token")
+            assert auth_time < MAX_FIRST_LOGIN_TIME, f" FAIL:  FIRST LOGIN TOO SLOW: {auth_time:.2f}s"
+            logger.info(f" PASS:  User authenticated successfully with JWT token")
             
         except Exception as e:
             # If direct auth fails, try creating test JWT token for the user
@@ -449,23 +449,23 @@ class TestFirstUserJourneyE2E:
                 user_id=journey_validator.user_data["user_id"],
                 email=user_data["email"]
             )
-            assert token is not None, "❌ CRITICAL: Test token creation also failed!"
+            assert token is not None, " FAIL:  CRITICAL: Test token creation also failed!"
             journey_validator.auth_token = token
             journey_validator.record_milestone("authentication_success")
-            logger.info("✅ Test JWT token created for authentication")
+            logger.info(" PASS:  Test JWT token created for authentication")
         
         # STEP 5: Connect to WebSocket with authenticated token
-        logger.info("🌐 STEP 4: Connecting to WebSocket with authentication...")
+        logger.info("[U+1F310] STEP 4: Connecting to WebSocket with authentication...")
         
         try:
             websocket = await auth_helper.connect_authenticated_websocket(timeout=15.0)
-            assert websocket is not None, "❌ CRITICAL: WebSocket connection failed!"
-            logger.info("✅ Authenticated WebSocket connection established")
+            assert websocket is not None, " FAIL:  CRITICAL: WebSocket connection failed!"
+            logger.info(" PASS:  Authenticated WebSocket connection established")
         except Exception as e:
-            assert False, f"❌ CRITICAL WEBSOCKET CONNECTION FAILURE: {str(e)}"
+            assert False, f" FAIL:  CRITICAL WEBSOCKET CONNECTION FAILURE: {str(e)}"
         
         # STEP 6: Send first chat message and validate AI response
-        logger.info("💬 STEP 5: Sending first chat message...")
+        logger.info("[U+1F4AC] STEP 5: Sending first chat message...")
         start_chat = time.time()
         
         first_message = {
@@ -480,7 +480,7 @@ class TestFirstUserJourneyE2E:
             }
         }
         
-        logger.info("📤 Sending first chat message to AI agent...")
+        logger.info("[U+1F4E4] Sending first chat message to AI agent...")
         await websocket.send(json.dumps(first_message))
         
         # Listen for AI agent response events
@@ -496,92 +496,92 @@ class TestFirstUserJourneyE2E:
                 
                 event_type = event.get("type", "unknown")
                 agent_events_received.add(event_type)
-                logger.info(f"📥 Agent event: {event_type}")
+                logger.info(f"[U+1F4E5] Agent event: {event_type}")
                 
                 # Check for completion
                 if event_type in ["agent_completed", "final_report"]:
                     received_agent_complete = True
                     journey_validator.record_milestone("first_chat_success")
-                    logger.info(f"🎯 First chat completed: {event_type}")
+                    logger.info(f" TARGET:  First chat completed: {event_type}")
                     
                     # Validate we got actual content
                     content = event.get("data", {}).get("content", "")
-                    assert len(content) > 10, "❌ CRITICAL: Agent response too short - not helpful for new user!"
-                    logger.info(f"✅ Received substantial response ({len(content)} chars)")
+                    assert len(content) > 10, " FAIL:  CRITICAL: Agent response too short - not helpful for new user!"
+                    logger.info(f" PASS:  Received substantial response ({len(content)} chars)")
                     break
                     
             except asyncio.TimeoutError:
-                logger.info("⏱️ Timeout waiting for agent response")
+                logger.info("[U+23F1][U+FE0F] Timeout waiting for agent response")
                 if len(agent_events_received) > 2:
-                    logger.info("✅ Received some agent activity, considering successful")
+                    logger.info(" PASS:  Received some agent activity, considering successful")
                     journey_validator.record_milestone("first_chat_success")
                     break
             except Exception as e:
-                logger.error(f"❌ Error receiving agent response: {e}")
+                logger.error(f" FAIL:  Error receiving agent response: {e}")
                 break
         
         # Close WebSocket
         await websocket.close()
-        logger.info("🔌 WebSocket connection closed")
+        logger.info("[U+1F50C] WebSocket connection closed")
         
         chat_time = time.time() - start_chat
-        assert chat_time < MAX_FIRST_CHAT_TIME, f"❌ FIRST CHAT TOO SLOW: {chat_time:.2f}s"
+        assert chat_time < MAX_FIRST_CHAT_TIME, f" FAIL:  FIRST CHAT TOO SLOW: {chat_time:.2f}s"
         
         # Assert we got critical agent events
         critical_agent_events = {"agent_started", "agent_thinking", "agent_completed"}
         received_critical = critical_agent_events.intersection(agent_events_received)
-        assert len(received_critical) >= 2, f"❌ CRITICAL: Missing agent events: {critical_agent_events - agent_events_received}"
+        assert len(received_critical) >= 2, f" FAIL:  CRITICAL: Missing agent events: {critical_agent_events - agent_events_received}"
         
         # STEP 7: Validate user plan initialization (Free tier setup)
-        logger.info("📋 STEP 6: Validating user plan initialization...")
+        logger.info("[U+1F4CB] STEP 6: Validating user plan initialization...")
         
         # Check that user has proper free tier plan
         free_plan = PLAN_DEFINITIONS[PlanTier.FREE]
-        assert free_plan.features.max_threads == 5, "❌ Free plan configuration error"
-        assert free_plan.features.max_corpus_size == 1000, "❌ Free plan configuration error"
+        assert free_plan.features.max_threads == 5, " FAIL:  Free plan configuration error"
+        assert free_plan.features.max_corpus_size == 1000, " FAIL:  Free plan configuration error"
         
         journey_validator.record_event({"type": "plan_initialized", "data": {"tier": "free"}})
         journey_validator.record_milestone("onboarding_complete")
         
-        logger.info("✅ User plan validation completed")
+        logger.info(" PASS:  User plan validation completed")
         
         # STEP 8: Generate comprehensive validation report
         report = journey_validator.generate_journey_report()
-        logger.info(f"📊 First User Journey Report:\n{report}")
+        logger.info(f" CHART:  First User Journey Report:\n{report}")
         
         # STEP 9: CRITICAL FINAL ASSERTIONS - Will FAIL HARD if journey broken
         is_valid, errors = journey_validator.validate_complete_journey()
         
         # Assert complete journey succeeded
-        assert is_valid, f"❌ FIRST USER JOURNEY FAILED:\n{chr(10).join(errors)}"
+        assert is_valid, f" FAIL:  FIRST USER JOURNEY FAILED:\n{chr(10).join(errors)}"
         
         # Assert all critical milestones reached
         milestone_types = {m[1] for m in journey_validator.milestones}
         missing_milestones = ONBOARDING_MILESTONES - milestone_types
-        assert len(missing_milestones) == 0, f"❌ MISSING ONBOARDING MILESTONES: {missing_milestones}"
+        assert len(missing_milestones) == 0, f" FAIL:  MISSING ONBOARDING MILESTONES: {missing_milestones}"
         
         # Assert performance requirements met
         metrics = journey_validator.get_journey_metrics()
         total_time = metrics["total_journey_time"]
-        assert total_time < MAX_TOTAL_JOURNEY_TIME, f"❌ COMPLETE JOURNEY TOO SLOW: {total_time:.2f}s"
+        assert total_time < MAX_TOTAL_JOURNEY_TIME, f" FAIL:  COMPLETE JOURNEY TOO SLOW: {total_time:.2f}s"
         
         # Assert user data integrity
-        assert journey_validator.user_data["user_id"] is not None, "❌ User ID not preserved"
-        assert journey_validator.auth_token is not None, "❌ Authentication token not preserved"
-        assert journey_validator.verification_token is not None, "❌ Verification token not preserved"
+        assert journey_validator.user_data["user_id"] is not None, " FAIL:  User ID not preserved"
+        assert journey_validator.auth_token is not None, " FAIL:  Authentication token not preserved"
+        assert journey_validator.verification_token is not None, " FAIL:  Verification token not preserved"
         
-        logger.info("✅ COMPLETE FIRST USER JOURNEY VALIDATION PASSED!")
-        logger.info(f"🎉 New user onboarding successful in {total_time:.2f}s")
-        logger.info(f"💰 Protected: Registration→Chat pipeline ($50K+ MRR protection)")
+        logger.info(" PASS:  COMPLETE FIRST USER JOURNEY VALIDATION PASSED!")
+        logger.info(f" CELEBRATION:  New user onboarding successful in {total_time:.2f}s")
+        logger.info(f"[U+1F4B0] Protected: Registration -> Chat pipeline ($50K+ MRR protection)")
         
         # Business value confirmation
-        logger.info("💼 BUSINESS VALUE PROTECTED:")
-        logger.info("  ✅ New user registration works (prevents signup failures)")
-        logger.info("  ✅ Email verification works (prevents 30% dropout)")  
-        logger.info("  ✅ First login works (prevents authentication failures)")
-        logger.info("  ✅ First AI chat works (prevents 60% early churn)")
-        logger.info("  ✅ User plans initialize (prevents billing issues)")
-        logger.info("  ✅ Complete funnel works (protects $50K+ MRR)")
+        logger.info("[U+1F4BC] BUSINESS VALUE PROTECTED:")
+        logger.info("   PASS:  New user registration works (prevents signup failures)")
+        logger.info("   PASS:  Email verification works (prevents 30% dropout)")  
+        logger.info("   PASS:  First login works (prevents authentication failures)")
+        logger.info("   PASS:  First AI chat works (prevents 60% early churn)")
+        logger.info("   PASS:  User plans initialize (prevents billing issues)")
+        logger.info("   PASS:  Complete funnel works (protects $50K+ MRR)")
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -592,7 +592,7 @@ class TestFirstUserJourneyE2E:
         email_service: EmailService
     ):
         """Test that first user journey handles errors gracefully without breaking."""
-        logger.info("🔧 Testing first user journey error resilience")
+        logger.info("[U+1F527] Testing first user journey error resilience")
         
         # Test scenario: Try to register with invalid email format
         invalid_user_data = {
@@ -605,17 +605,17 @@ class TestFirstUserJourneyE2E:
         try:
             user_create = UserCreate(**invalid_user_data)
             # If validation passes (it shouldn't), that's also fine - system is resilient
-            logger.info("✅ System accepts invalid email (resilient behavior)")
+            logger.info(" PASS:  System accepts invalid email (resilient behavior)")
         except Exception as e:
-            logger.info(f"✅ System properly validates email format: {type(e).__name__}")
+            logger.info(f" PASS:  System properly validates email format: {type(e).__name__}")
         
         # Test scenario: Try to use invalid verification token
         invalid_token = "invalid_token_12345"
         verification_result = await email_service.verify_token(invalid_token)
         
         # System should handle invalid token gracefully
-        assert verification_result == False, "❌ System should reject invalid verification token"
-        logger.info("✅ System properly rejects invalid verification token")
+        assert verification_result == False, " FAIL:  System should reject invalid verification token"
+        logger.info(" PASS:  System properly rejects invalid verification token")
         
         # Test scenario: Try WebSocket connection without auth
         try:
@@ -627,12 +627,12 @@ class TestFirstUserJourneyE2E:
                 timeout=5.0
             )
             await websocket.close()
-            logger.info("✅ System allows connection without auth (permissive)")
+            logger.info(" PASS:  System allows connection without auth (permissive)")
         except Exception as e:
-            logger.info(f"✅ System properly requires authentication: {type(e).__name__}")
+            logger.info(f" PASS:  System properly requires authentication: {type(e).__name__}")
         
-        logger.info("✅ First user journey error resilience test PASSED!")
-        logger.info("🛡️ System handles errors gracefully without breaking onboarding")
+        logger.info(" PASS:  First user journey error resilience test PASSED!")
+        logger.info("[U+1F6E1][U+FE0F] System handles errors gracefully without breaking onboarding")
 
 
 if __name__ == "__main__":

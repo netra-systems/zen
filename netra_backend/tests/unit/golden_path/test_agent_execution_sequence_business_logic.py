@@ -3,12 +3,12 @@ Golden Path Unit Tests: Agent Execution Sequence Business Logic
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise, Platform/Internal)
-- Business Goal: Ensure correct Data→Optimization→Report sequence delivers maximum AI value
+- Business Goal: Ensure correct Data -> Optimization -> Report sequence delivers maximum AI value
 - Value Impact: Proper execution order maximizes analysis quality and user satisfaction
 - Strategic/Revenue Impact: Critical for $500K+ ARR - correct sequence enables upselling and retention
 
 CRITICAL: This test validates the business logic for the agent execution sequence that delivers
-the core AI value proposition. The Data→Optimization→Report sequence is fundamental to
+the core AI value proposition. The Data -> Optimization -> Report sequence is fundamental to
 providing actionable insights that justify customer spend and enable business growth.
 
 Key Sequence Areas Tested:

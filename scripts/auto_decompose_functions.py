@@ -427,7 +427,7 @@ class FunctionDecomposer:
             report.append("SUGGESTED DECOMPOSITION:")
             
             for func in decomp.suggested_functions:
-                report.append(f"  • {func['name']}() - {func['purpose']}")
+                report.append(f"  [U+2022] {func['name']}() - {func['purpose']}")
                 report.append(f"    Parameters: {', '.join(func['parameters'])}")
                 report.append(f"    Expected lines: {func['lines']}")
             

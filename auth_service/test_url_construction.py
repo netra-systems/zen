@@ -162,12 +162,12 @@ def analyze_connection_issue():
     try:
         database_url = AuthConfig.get_database_url()
         if "/cloudsql/" in database_url:
-            observations.append("✓ Using Cloud SQL Unix socket connection")
-            observations.append("✓ This is the correct method for GCP Cloud Run")
+            observations.append("[U+2713] Using Cloud SQL Unix socket connection")
+            observations.append("[U+2713] This is the correct method for GCP Cloud Run")
         else:
-            observations.append("✗ Not using Cloud SQL socket - this could be the issue")
+            observations.append("[U+2717] Not using Cloud SQL socket - this could be the issue")
     except Exception as e:
-        observations.append(f"✗ Error getting database URL: {e}")
+        observations.append(f"[U+2717] Error getting database URL: {e}")
     
     # 2. Check credentials format
     env_manager = get_env()
@@ -175,22 +175,22 @@ def analyze_connection_issue():
     postgres_password = env_manager.get("POSTGRES_PASSWORD")
     
     if postgres_user == "postgres":
-        observations.append("✓ Using standard 'postgres' user")
+        observations.append("[U+2713] Using standard 'postgres' user")
     else:
         observations.append(f"? Using non-standard user: {postgres_user}")
     
     if postgres_password and len(postgres_password) >= 16:
-        observations.append("✓ Password has sufficient length")
+        observations.append("[U+2713] Password has sufficient length")
     elif postgres_password:
         observations.append(f"? Password seems short ({len(postgres_password)} chars)")
     else:
-        observations.append("✗ No password configured")
+        observations.append("[U+2717] No password configured")
     
     # 3. Environment analysis
     if env_manager.get("ENVIRONMENT") == "staging":
-        observations.append("✓ Environment set to 'staging'")
+        observations.append("[U+2713] Environment set to 'staging'")
     else:
-        observations.append("✗ Environment not set to 'staging'")
+        observations.append("[U+2717] Environment not set to 'staging'")
     
     logger.info("Connection Analysis:")
     for obs in observations:
@@ -228,12 +228,12 @@ def main():
         logger.info(f"\n--- {test_name} ---")
         try:
             if test_func():
-                logger.info(f"✓ {test_name} PASSED")
+                logger.info(f"[U+2713] {test_name} PASSED")
                 passed += 1
             else:
-                logger.error(f"✗ {test_name} FAILED")
+                logger.error(f"[U+2717] {test_name} FAILED")
         except Exception as e:
-            logger.error(f"✗ {test_name} CRASHED: {e}")
+            logger.error(f"[U+2717] {test_name} CRASHED: {e}")
     
     print("\n" + "=" * 50)
     print(f"Results: {passed}/{len(tests)} tests passed")

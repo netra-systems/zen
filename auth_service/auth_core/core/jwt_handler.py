@@ -112,7 +112,7 @@ class JWTHandler:
         try:
             # Early rejection of mock tokens for security
             if token and token.startswith("mock_"):
-                logger.critical(f"🚨 JWT MOCK TOKEN: Mock token detected in JWT validation: {token[:20]}... (SECURITY RISK)")
+                logger.critical(f" ALERT:  JWT MOCK TOKEN: Mock token detected in JWT validation: {token[:20]}... (SECURITY RISK)")
                 logger.error(f"Mock token detected in JWT validation: {token[:20]}...")
                 environment = get_env().get("ENVIRONMENT", "production").lower()
                 if environment not in ["test", "development"]:
@@ -120,7 +120,7 @@ class JWTHandler:
                 return None  # Reject mock tokens even in test env for JWT handler
             # Check if token is blacklisted first - critical security check
             if self.is_token_blacklisted(token):
-                logger.critical(f"🚨 JWT BLACKLISTED: Token is blacklisted - potential security threat (token_prefix: {token[:20] if token else 'none'}...)")
+                logger.critical(f" ALERT:  JWT BLACKLISTED: Token is blacklisted - potential security threat (token_prefix: {token[:20] if token else 'none'}...)")
                 logger.debug("Token is blacklisted")
                 return None
             
@@ -139,28 +139,28 @@ class JWTHandler:
             
             # Validate token format first to prevent "Not enough segments" errors
             if not token or not isinstance(token, str):
-                logger.critical(f"🚨 JWT FORMAT ERROR: Token is None or not a string (type: {type(token)})")
+                logger.critical(f" ALERT:  JWT FORMAT ERROR: Token is None or not a string (type: {type(token)})")
                 logger.warning("Invalid token format: token is None or not a string")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
             
             token_parts = token.split('.')
             if len(token_parts) != 3:
-                logger.critical(f"🚨 JWT STRUCTURE ERROR: Invalid token format - expected 3 segments, got {len(token_parts)} (token_prefix: {token[:20]}...)")
+                logger.critical(f" ALERT:  JWT STRUCTURE ERROR: Invalid token format - expected 3 segments, got {len(token_parts)} (token_prefix: {token[:20]}...)")
                 logger.warning(f"Invalid token format: expected 3 segments, got {len(token_parts)}")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
             
             # Check if token is blacklisted first
             if self.is_token_blacklisted(token):
-                logger.critical(f"🚨 JWT BLACKLISTED: Token is blacklisted (duplicate check) - potential replay attack")
+                logger.critical(f" ALERT:  JWT BLACKLISTED: Token is blacklisted (duplicate check) - potential replay attack")
                 logger.warning("Token is blacklisted")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
             
             # CONSOLIDATED: Validate token security (algorithm, format, etc.) - moved from oauth_security.py
             if not self._validate_token_security_consolidated(token):
-                logger.critical(f"🚨 JWT SECURITY FAILURE: Token failed security validation - possible algorithm confusion or malformed token")
+                logger.critical(f" ALERT:  JWT SECURITY FAILURE: Token failed security validation - possible algorithm confusion or malformed token")
                 logger.warning("Token failed security validation")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
@@ -180,7 +180,7 @@ class JWTHandler:
             )
             
             if payload.get("token_type") != token_type:
-                logger.critical(f"🚨 JWT TYPE MISMATCH: Invalid token type - expected {token_type}, got {payload.get('token_type')}")
+                logger.critical(f" ALERT:  JWT TYPE MISMATCH: Invalid token type - expected {token_type}, got {payload.get('token_type')}")
                 logger.warning(f"Invalid token type: expected {token_type}")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
@@ -188,28 +188,28 @@ class JWTHandler:
             # Check if user is blacklisted
             user_id = payload.get("sub")
             if user_id and self.is_user_blacklisted(user_id):
-                logger.critical(f"🚨 JWT USER BLACKLISTED: User {user_id[:8]}... is blacklisted - access denied")
+                logger.critical(f" ALERT:  JWT USER BLACKLISTED: User {user_id[:8]}... is blacklisted - access denied")
                 logger.warning(f"User {user_id} is blacklisted")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
             
             # Additional security checks
             if not self._validate_token_claims(payload):
-                logger.critical(f"🚨 JWT CLAIMS FAILURE: Token claims validation failed - missing required claims or invalid issuer")
+                logger.critical(f" ALERT:  JWT CLAIMS FAILURE: Token claims validation failed - missing required claims or invalid issuer")
                 logger.warning("Token claims validation failed")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
             
             # Enhanced JWT validation (optimized for performance)
             if not self._validate_enhanced_jwt_claims_fast(payload):
-                logger.critical(f"🚨 JWT ENHANCED FAILURE: Enhanced JWT claims validation failed - audience, issuer, or environment mismatch")
+                logger.critical(f" ALERT:  JWT ENHANCED FAILURE: Enhanced JWT claims validation failed - audience, issuer, or environment mismatch")
                 logger.warning("Enhanced JWT claims validation failed")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
             
             # CRITICAL FIX: Cross-service validation
             if not self._validate_cross_service_token(payload, token):
-                logger.critical(f"🚨 JWT CROSS-SERVICE FAILURE: Cross-service token validation failed - issuer/audience mismatch or token too old")
+                logger.critical(f" ALERT:  JWT CROSS-SERVICE FAILURE: Cross-service token validation failed - issuer/audience mismatch or token too old")
                 logger.warning("Cross-service token validation failed")
                 jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
                 return None
@@ -225,17 +225,17 @@ class JWTHandler:
             return payload
             
         except jwt.ExpiredSignatureError:
-            logger.warning(f"🔑 JWT EXPIRED: Token expired - user needs to re-authenticate")
+            logger.warning(f"[U+1F511] JWT EXPIRED: Token expired - user needs to re-authenticate")
             logger.info("Token expired")
             jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
             return None
         except jwt.InvalidTokenError as e:
-            logger.critical(f"🚨 JWT INVALID: Invalid token error - {e} (possibly tampered or malformed)")
+            logger.critical(f" ALERT:  JWT INVALID: Invalid token error - {e} (possibly tampered or malformed)")
             logger.warning(f"Invalid token: {e}")
             jwt_validation_cache.cache_validation_result(cache_key, None, ttl=60)
             return None
         except Exception as e:
-            logger.critical(f"🚨 JWT VALIDATION EXCEPTION: Unexpected error during token validation: {e} (type: {type(e).__name__})")
+            logger.critical(f" ALERT:  JWT VALIDATION EXCEPTION: Unexpected error during token validation: {e} (type: {type(e).__name__})")
             logger.error(f"Unexpected error during token validation: {e}")
             return None
     

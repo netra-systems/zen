@@ -25,7 +25,7 @@ def test_basic_socket_binding():
     """Test basic socket binding to port 8000."""
     import socket
     
-    logger.info("🧪 Testing basic socket binding to port 8000...")
+    logger.info("[U+1F9EA] Testing basic socket binding to port 8000...")
     
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -35,11 +35,11 @@ def test_basic_socket_binding():
             sock.listen(1)
             
             actual_port = sock.getsockname()[1]
-            logger.info(f"✅ Successfully bound to port {actual_port}")
+            logger.info(f" PASS:  Successfully bound to port {actual_port}")
             return True
             
     except OSError as e:
-        logger.error(f"❌ Socket binding failed: {e}")
+        logger.error(f" FAIL:  Socket binding failed: {e}")
         if e.errno == 10013:
             logger.error("   This is the [WinError 10013] permission error!")
         elif e.errno == 10048:
@@ -48,7 +48,7 @@ def test_basic_socket_binding():
 
 def test_uvicorn_binding():
     """Test uvicorn binding directly without the full app."""
-    logger.info("🧪 Testing uvicorn binding to port 8000...")
+    logger.info("[U+1F9EA] Testing uvicorn binding to port 8000...")
     
     try:
         import uvicorn
@@ -93,7 +93,7 @@ def test_uvicorn_binding():
         try:
             response = requests.get("http://127.0.0.1:8000/test", timeout=5)
             if response.status_code == 200:
-                logger.info("✅ Uvicorn server started successfully and is responding")
+                logger.info(" PASS:  Uvicorn server started successfully and is responding")
                 
                 # Shutdown server
                 server.should_exit = True
@@ -101,26 +101,26 @@ def test_uvicorn_binding():
                 
                 return True
             else:
-                logger.error(f"❌ Server responded with status {response.status_code}")
+                logger.error(f" FAIL:  Server responded with status {response.status_code}")
                 return False
                 
         except requests.exceptions.ConnectionError:
-            logger.error("❌ Could not connect to test server")
+            logger.error(" FAIL:  Could not connect to test server")
             return False
         except requests.exceptions.RequestException as e:
-            logger.error(f"❌ Request failed: {e}")
+            logger.error(f" FAIL:  Request failed: {e}")
             return False
             
     except ImportError as e:
-        logger.error(f"❌ Missing required package: {e}")
+        logger.error(f" FAIL:  Missing required package: {e}")
         return False
     except Exception as e:
-        logger.error(f"❌ Uvicorn test failed: {e}")
+        logger.error(f" FAIL:  Uvicorn test failed: {e}")
         return False
 
 def test_backend_main_directly():
     """Test importing and running the backend main module."""
-    logger.info("🧪 Testing backend main module import...")
+    logger.info("[U+1F9EA] Testing backend main module import...")
     
     try:
         # Set environment variables needed for testing
@@ -131,29 +131,29 @@ def test_backend_main_directly():
         # Try importing the main module
         from netra_backend.app.main import app, _get_uvicorn_config
         
-        logger.info("✅ Successfully imported backend main module")
+        logger.info(" PASS:  Successfully imported backend main module")
         
         # Get uvicorn config
         config = _get_uvicorn_config()
         logger.info(f"   Backend configured to run on: {config['host']}:{config['port']}")
         
         if config['port'] == 8000:
-            logger.info("✅ Backend is configured to use port 8000")
+            logger.info(" PASS:  Backend is configured to use port 8000")
             return True
         else:
-            logger.warning(f"⚠️  Backend is configured to use port {config['port']} instead of 8000")
+            logger.warning(f" WARNING: [U+FE0F]  Backend is configured to use port {config['port']} instead of 8000")
             return False
             
     except ImportError as e:
-        logger.error(f"❌ Failed to import backend main: {e}")
+        logger.error(f" FAIL:  Failed to import backend main: {e}")
         return False
     except Exception as e:
-        logger.error(f"❌ Backend main test failed: {e}")
+        logger.error(f" FAIL:  Backend main test failed: {e}")
         return False
 
 def run_comprehensive_test():
     """Run all tests to identify the exact source of the port binding issue."""
-    logger.info("🚀 Starting comprehensive port 8000 binding test")
+    logger.info("[U+1F680] Starting comprehensive port 8000 binding test")
     logger.info("=" * 60)
     
     tests = [
@@ -164,33 +164,33 @@ def run_comprehensive_test():
     
     results = []
     for test_name, test_func in tests:
-        logger.info(f"\n📋 Running test: {test_name}")
+        logger.info(f"\n[U+1F4CB] Running test: {test_name}")
         try:
             result = test_func()
             results.append((test_name, result))
-            logger.info(f"   Result: {'✅ PASS' if result else '❌ FAIL'}")
+            logger.info(f"   Result: {' PASS:  PASS' if result else ' FAIL:  FAIL'}")
         except Exception as e:
-            logger.error(f"   💥 Exception: {e}")
+            logger.error(f"   [U+1F4A5] Exception: {e}")
             results.append((test_name, False))
     
     logger.info("\n" + "=" * 60)
-    logger.info("📊 TEST SUMMARY:")
+    logger.info(" CHART:  TEST SUMMARY:")
     logger.info("=" * 60)
     
     all_passed = True
     for test_name, result in results:
-        status = "✅ PASS" if result else "❌ FAIL"
+        status = " PASS:  PASS" if result else " FAIL:  FAIL"
         logger.info(f"   {test_name}: {status}")
         if not result:
             all_passed = False
     
     logger.info("=" * 60)
     if all_passed:
-        logger.info("🎉 ALL TESTS PASSED - Port 8000 should work for the backend!")
+        logger.info(" CELEBRATION:  ALL TESTS PASSED - Port 8000 should work for the backend!")
         logger.info("   The socket permission error may be resolved or intermittent.")
         logger.info("   Try running the dev launcher again.")
     else:
-        logger.error("💥 SOME TESTS FAILED - Port 8000 binding has issues")
+        logger.error("[U+1F4A5] SOME TESTS FAILED - Port 8000 binding has issues")
         logger.error("   This confirms there's a Windows socket permission problem.")
         logger.error("   Try running as Administrator or use the port cleanup script.")
     

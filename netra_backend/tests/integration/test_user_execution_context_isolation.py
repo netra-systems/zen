@@ -101,7 +101,7 @@ class TestUserExecutionContextIsolation(BaseIntegrationTest):
         # Test metadata isolation (should be separate dict instance)
         assert id(test_user_context.metadata) != id(original_metadata)
         
-        self.logger.info("✅ UserExecutionContext immutability patterns validated")
+        self.logger.info(" PASS:  UserExecutionContext immutability patterns validated")
     
     @pytest.mark.integration
     async def test_user_execution_context_creation_patterns(self):
@@ -150,7 +150,7 @@ class TestUserExecutionContextIsolation(BaseIntegrationTest):
                 run_id="valid_run"
             )
         
-        self.logger.info("✅ UserExecutionContext creation patterns validated")
+        self.logger.info(" PASS:  UserExecutionContext creation patterns validated")
     
     @pytest.mark.integration
     async def test_user_execution_context_isolation_between_users(self):
@@ -201,7 +201,7 @@ class TestUserExecutionContextIsolation(BaseIntegrationTest):
         assert user1_dict != user2_dict
         assert user1_dict["user_id"] != user2_dict["user_id"]
         
-        self.logger.info("✅ UserExecutionContext isolation between users validated")
+        self.logger.info(" PASS:  UserExecutionContext isolation between users validated")
     
     @pytest.mark.integration
     async def test_user_execution_context_database_session_patterns(self, mock_db_session):
@@ -239,7 +239,7 @@ class TestUserExecutionContextIsolation(BaseIntegrationTest):
         assert "db_session" not in serialized
         assert serialized["has_db_session"] is True
         
-        self.logger.info("✅ UserExecutionContext database session patterns validated")
+        self.logger.info(" PASS:  UserExecutionContext database session patterns validated")
     
     @pytest.mark.integration
     async def test_user_execution_context_child_context_patterns(self):
@@ -292,7 +292,7 @@ class TestUserExecutionContextIsolation(BaseIntegrationTest):
         assert grandchild_context.metadata["parent_request_id"] == child_context.request_id
         assert grandchild_context.user_id == parent_context.user_id
         
-        self.logger.info("✅ UserExecutionContext child context patterns validated")
+        self.logger.info(" PASS:  UserExecutionContext child context patterns validated")
     
     @pytest.mark.integration
     async def test_user_execution_context_websocket_connection_patterns(self):
@@ -330,7 +330,7 @@ class TestUserExecutionContextIsolation(BaseIntegrationTest):
         serialized = context_with_ws.to_dict()
         assert serialized["websocket_connection_id"] == ws_connection_id
         
-        self.logger.info("✅ UserExecutionContext WebSocket connection patterns validated")
+        self.logger.info(" PASS:  UserExecutionContext WebSocket connection patterns validated")
     
     @pytest.mark.integration
     async def test_user_execution_context_concurrent_isolation_safety(self):
@@ -404,7 +404,7 @@ class TestUserExecutionContextIsolation(BaseIntegrationTest):
         # Validate all users had unique IDs
         assert len(user_ids) == 5
         
-        self.logger.info("✅ UserExecutionContext concurrent isolation safety validated")
+        self.logger.info(" PASS:  UserExecutionContext concurrent isolation safety validated")
 
 
 # Additional helper functions for context validation

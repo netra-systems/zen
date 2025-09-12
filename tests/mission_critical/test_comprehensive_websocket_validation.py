@@ -548,7 +548,7 @@
 
 # REMOVED_SYNTAX_ERROR: async def _test_special_characters(self, emitter: UserWebSocketEmitter, user_context: Dict[str, str]) -> bool:
     # REMOVED_SYNTAX_ERROR: """Test handling of special characters and unicode."""
-    # REMOVED_SYNTAX_ERROR: special_text = "Hello 🌟 Special chars: áéíóú ñ çÇ 中文 русский العربية 🚀💯🔥"
+    # REMOVED_SYNTAX_ERROR: special_text = "Hello [U+1F31F] Special chars: [U+00E1][U+00E9][U+00ED][U+00F3][U+00FA] [U+00F1] [U+00E7][U+00C7] [U+4E2D][U+6587] pucck[U+0438][U+0439] [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629] [U+1F680][U+1F4AF] FIRE: "
 
     # REMOVED_SYNTAX_ERROR: await emitter.notify_agent_thinking("TestAgent", user_context['run_id'], special_text)
     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)
@@ -563,7 +563,7 @@
         # Test JSON serialization with unicode
         # REMOVED_SYNTAX_ERROR: json_str = json.dumps(event, ensure_ascii=False)
         # REMOVED_SYNTAX_ERROR: deserialized = json.loads(json_str)
-        # REMOVED_SYNTAX_ERROR: return "🌟" in deserialized["data"]["thinking"]
+        # REMOVED_SYNTAX_ERROR: return "[U+1F31F]" in deserialized["data"]["thinking"]
 
         # REMOVED_SYNTAX_ERROR: return False
 
@@ -630,7 +630,7 @@
     # REMOVED_SYNTAX_ERROR: """Run all validation tests and return comprehensive results."""
     # REMOVED_SYNTAX_ERROR: logger.info(" )
     # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-    # REMOVED_SYNTAX_ERROR: logger.info("🚀 COMPREHENSIVE WEBSOCKET VALIDATION SUITE")
+    # REMOVED_SYNTAX_ERROR: logger.info("[U+1F680] COMPREHENSIVE WEBSOCKET VALIDATION SUITE")
     # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
 
     # REMOVED_SYNTAX_ERROR: self.setup_test_environment()
@@ -702,7 +702,7 @@
     # REMOVED_SYNTAX_ERROR: """Print comprehensive validation summary."""
     # REMOVED_SYNTAX_ERROR: logger.info(" )
     # REMOVED_SYNTAX_ERROR: " + "=" * 80)
-    # REMOVED_SYNTAX_ERROR: logger.info("📊 COMPREHENSIVE VALIDATION RESULTS")
+    # REMOVED_SYNTAX_ERROR: logger.info(" CHART:  COMPREHENSIVE VALIDATION RESULTS")
     # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
 
     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
@@ -714,16 +714,16 @@
         # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
         # REMOVED_SYNTAX_ERROR: logger.info(f" )
-        # REMOVED_SYNTAX_ERROR: 📋 REQUIRED EVENT COVERAGE:")
+        # REMOVED_SYNTAX_ERROR: [U+1F4CB] REQUIRED EVENT COVERAGE:")
         # REMOVED_SYNTAX_ERROR: for event in self.REQUIRED_EVENTS:
-            # REMOVED_SYNTAX_ERROR: status = "✅" if event in all_events_found else "❌"
+            # REMOVED_SYNTAX_ERROR: status = " PASS: " if event in all_events_found else " FAIL: "
             # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
             # REMOVED_SYNTAX_ERROR: if missing_required_events:
                 # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
                 # REMOVED_SYNTAX_ERROR: else:
                     # REMOVED_SYNTAX_ERROR: logger.info(f" )
-                    # REMOVED_SYNTAX_ERROR: ✅ ALL REQUIRED EVENTS VALIDATED!")
+                    # REMOVED_SYNTAX_ERROR:  PASS:  ALL REQUIRED EVENTS VALIDATED!")
 
                     # REMOVED_SYNTAX_ERROR: coverage = self.validation_results['event_coverage']['coverage_percentage']
                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
@@ -731,7 +731,7 @@
                     # Performance metrics
                     # REMOVED_SYNTAX_ERROR: pool_metrics = self.mock_connection_pool.get_pool_metrics()
                     # REMOVED_SYNTAX_ERROR: logger.info(f" )
-                    # REMOVED_SYNTAX_ERROR: 🔧 CONNECTION POOL METRICS:")
+                    # REMOVED_SYNTAX_ERROR: [U+1F527] CONNECTION POOL METRICS:")
                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
@@ -740,13 +740,13 @@
                     # REMOVED_SYNTAX_ERROR: len(missing_required_events) == 0 and
                     # REMOVED_SYNTAX_ERROR: coverage >= 100.0):
                         # REMOVED_SYNTAX_ERROR: logger.info(f" )
-                        # REMOVED_SYNTAX_ERROR: 🎉 COMPREHENSIVE VALIDATION: ✅ PASSED")
-                        # REMOVED_SYNTAX_ERROR: logger.info(f"   ✅ All tests passed")
-                        # REMOVED_SYNTAX_ERROR: logger.info(f"   ✅ All required events validated")
-                        # REMOVED_SYNTAX_ERROR: logger.info(f"   ✅ 100% event coverage achieved")
+                        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  COMPREHENSIVE VALIDATION:  PASS:  PASSED")
+                        # REMOVED_SYNTAX_ERROR: logger.info(f"    PASS:  All tests passed")
+                        # REMOVED_SYNTAX_ERROR: logger.info(f"    PASS:  All required events validated")
+                        # REMOVED_SYNTAX_ERROR: logger.info(f"    PASS:  100% event coverage achieved")
                         # REMOVED_SYNTAX_ERROR: else:
                             # REMOVED_SYNTAX_ERROR: logger.error(f" )
-                            # REMOVED_SYNTAX_ERROR: 🚨 COMPREHENSIVE VALIDATION: ❌ FAILED")
+                            # REMOVED_SYNTAX_ERROR:  ALERT:  COMPREHENSIVE VALIDATION:  FAIL:  FAILED")
                             # REMOVED_SYNTAX_ERROR: if missing_required_events:
                                 # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: if self.validation_results['failed_tests'] > 0:

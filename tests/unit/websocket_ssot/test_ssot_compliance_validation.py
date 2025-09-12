@@ -31,9 +31,9 @@ class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
             for component in required_components:
                 assert hasattr(ssot_module, component), f"SSOT module missing component: {component}"
             
-            print("✅ SSOT PRINCIPLE: Single authoritative source validated")
-            print(f"✅ CANONICAL PATH: {ssot_path}")
-            print(f"✅ COMPONENTS: {required_components}")
+            print(" PASS:  SSOT PRINCIPLE: Single authoritative source validated")
+            print(f" PASS:  CANONICAL PATH: {ssot_path}")
+            print(f" PASS:  COMPONENTS: {required_components}")
             
         except ImportError as e:
             pytest.fail(f"SSOT path validation failed: {e}")
@@ -61,9 +61,9 @@ class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
         
         assert len(blocked_paths) == len(alternative_paths), "All alternative paths should be blocked"
         
-        print("✅ NO DUPLICATES: All alternative paths correctly blocked")
-        print(f"✅ BLOCKED PATHS: {blocked_paths}")
-        print("✅ SSOT INTEGRITY: Single implementation maintained")
+        print(" PASS:  NO DUPLICATES: All alternative paths correctly blocked")
+        print(f" PASS:  BLOCKED PATHS: {blocked_paths}")
+        print(" PASS:  SSOT INTEGRITY: Single implementation maintained")
 
     def test_ssot_import_path_consistency_across_environments(self):
         """
@@ -88,14 +88,14 @@ class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
             try:
                 exec(import_statement)
                 successful_scenarios.append(scenario_name)
-                print(f"✅ {scenario_name.upper()}: {import_statement}")
+                print(f" PASS:  {scenario_name.upper()}: {import_statement}")
             except ImportError as e:
                 pytest.fail(f"SSOT import scenario '{scenario_name}' failed: {e}")
         
         assert len(successful_scenarios) == len(import_scenarios), "All import scenarios should work"
         
-        print("✅ ENVIRONMENT CONSISTENCY: All import scenarios work across environments")
-        print(f"✅ VALIDATED SCENARIOS: {successful_scenarios}")
+        print(" PASS:  ENVIRONMENT CONSISTENCY: All import scenarios work across environments")
+        print(f" PASS:  VALIDATED SCENARIOS: {successful_scenarios}")
 
     def test_ssot_module_completeness_and_interface_validation(self):
         """
@@ -123,10 +123,10 @@ class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
             import netra_backend.app.services.agent_websocket_bridge as bridge_module
             assert bridge_module.__doc__ is not None or hasattr(bridge_module, '__file__'), "Module should have documentation or file reference"
             
-            print("✅ INTERFACE VALIDATION: Function signature correct")
-            print(f"✅ FUNCTION PARAMETERS: {func_params}")
-            print("✅ CLASS VALIDATION: AgentWebSocketBridge properly defined")
-            print("✅ MODULE COMPLETENESS: All required interfaces present")
+            print(" PASS:  INTERFACE VALIDATION: Function signature correct")
+            print(f" PASS:  FUNCTION PARAMETERS: {func_params}")
+            print(" PASS:  CLASS VALIDATION: AgentWebSocketBridge properly defined")
+            print(" PASS:  MODULE COMPLETENESS: All required interfaces present")
             
         except (ImportError, AssertionError) as e:
             pytest.fail(f"SSOT interface validation failed: {e}")
@@ -150,11 +150,11 @@ class TestWebSocketSSOTComplianceValidation(SSotBaseTestCase):
             class_init_sig = inspect.signature(AgentWebSocketBridge.__init__)
             init_params = list(class_init_sig.parameters.keys())
             
-            print("✅ COMPATIBILITY: Function interface stable")
-            print(f"✅ FUNCTION DEFAULTS: {'Available' if has_defaults else 'Parameters required'}")
-            print("✅ CLASS INTERFACE: Constructor signature accessible")
-            print(f"✅ CONSTRUCTOR PARAMS: {init_params}")
-            print("✅ BACKWARD COMPATIBILITY: Interface boundaries maintained")
+            print(" PASS:  COMPATIBILITY: Function interface stable")
+            print(f" PASS:  FUNCTION DEFAULTS: {'Available' if has_defaults else 'Parameters required'}")
+            print(" PASS:  CLASS INTERFACE: Constructor signature accessible")
+            print(f" PASS:  CONSTRUCTOR PARAMS: {init_params}")
+            print(" PASS:  BACKWARD COMPATIBILITY: Interface boundaries maintained")
             
         except (ImportError, TypeError) as e:
             pytest.fail(f"Backward compatibility validation failed: {e}")
@@ -189,9 +189,9 @@ class TestWebSocketSSOTRegressionPrevention(SSotBaseTestCase):
         assert len(accidentally_working) == 0, f"Broken paths working unexpectedly: {accidentally_working}"
         assert len(correctly_blocked) == len(broken_paths), "All broken paths should remain blocked"
         
-        print("✅ REGRESSION PREVENTION: All broken paths correctly blocked")
-        print(f"✅ MONITORED PATHS: {len(correctly_blocked)}")
-        print("✅ NO ACCIDENTAL ACTIVATION: Broken imports remain non-functional")
+        print(" PASS:  REGRESSION PREVENTION: All broken paths correctly blocked")
+        print(f" PASS:  MONITORED PATHS: {len(correctly_blocked)}")
+        print(" PASS:  NO ACCIDENTAL ACTIVATION: Broken imports remain non-functional")
 
     def test_regression_prevention_ssot_path_monitoring(self):
         """
@@ -216,9 +216,9 @@ class TestWebSocketSSOTRegressionPrevention(SSotBaseTestCase):
             
             assert len(available_components) == len(components), f"Missing components: {set(components) - set(available_components)}"
             
-            print("✅ SSOT PATH MONITORING: Working path remains functional")
-            print(f"✅ PATH: {ssot_path}")
-            print(f"✅ COMPONENTS: {available_components}")
+            print(" PASS:  SSOT PATH MONITORING: Working path remains functional")
+            print(f" PASS:  PATH: {ssot_path}")
+            print(f" PASS:  COMPONENTS: {available_components}")
             
         except ImportError as e:
             pytest.fail(f"SSOT path regression detected: {e}")
@@ -258,12 +258,12 @@ class TestWebSocketSSOTRegressionPrevention(SSotBaseTestCase):
         assert len(critical_broken) == 0, f"Critical Golden Path dependencies broken: {critical_broken}"
         assert len(critical_working) == len(critical_dependencies), "All critical dependencies must work"
         
-        print("✅ GOLDEN PATH MONITORING: Critical dependencies operational")
-        print(f"✅ WORKING DEPENDENCIES: {len(working_dependencies)}")
-        print(f"✅ CRITICAL DEPENDENCIES: {critical_working}")
+        print(" PASS:  GOLDEN PATH MONITORING: Critical dependencies operational")
+        print(f" PASS:  WORKING DEPENDENCIES: {len(working_dependencies)}")
+        print(f" PASS:  CRITICAL DEPENDENCIES: {critical_working}")
         
         if broken_dependencies:
-            print(f"⚠️ NON-CRITICAL BROKEN: {broken_dependencies}")
+            print(f" WARNING: [U+FE0F] NON-CRITICAL BROKEN: {broken_dependencies}")
 
     def test_regression_prevention_business_value_monitoring(self):
         """
@@ -292,13 +292,13 @@ class TestWebSocketSSOTRegressionPrevention(SSotBaseTestCase):
         
         operational_components = [name for name, status in component_status.items() if status == "OPERATIONAL"]
         
-        print("✅ BUSINESS VALUE MONITORING: All revenue-protecting components operational")
-        print(f"✅ OPERATIONAL COMPONENTS: {operational_components}")
-        print("✅ REVENUE PROTECTION: $500K+ ARR components functional")
+        print(" PASS:  BUSINESS VALUE MONITORING: All revenue-protecting components operational")
+        print(f" PASS:  OPERATIONAL COMPONENTS: {operational_components}")
+        print(" PASS:  REVENUE PROTECTION: $500K+ ARR components functional")
         
         # Calculate business value percentage
         operational_percentage = (len(operational_components) / len(business_components)) * 100
-        print(f"✅ BUSINESS VALUE STATUS: {operational_percentage}% operational")
+        print(f" PASS:  BUSINESS VALUE STATUS: {operational_percentage}% operational")
 
 
 class TestWebSocketSSOTArchitecturalCompliance(SSotBaseTestCase):
@@ -327,10 +327,10 @@ class TestWebSocketSSOTArchitecturalCompliance(SSotBaseTestCase):
             module_path = module.__file__
             assert 'services' in module_path, "SSOT module should be in services directory"
             
-            print("✅ FACTORY PATTERN: create_* function follows naming convention")
-            print("✅ CLASS PATTERN: Bridge class properly named and structured")
-            print("✅ MODULE ORGANIZATION: Located in correct services directory")
-            print("✅ ARCHITECTURAL COMPLIANCE: Follows established SSOT patterns")
+            print(" PASS:  FACTORY PATTERN: create_* function follows naming convention")
+            print(" PASS:  CLASS PATTERN: Bridge class properly named and structured")
+            print(" PASS:  MODULE ORGANIZATION: Located in correct services directory")
+            print(" PASS:  ARCHITECTURAL COMPLIANCE: Follows established SSOT patterns")
             
         except (ImportError, AssertionError) as e:
             pytest.fail(f"Architectural compliance validation failed: {e}")
@@ -354,9 +354,9 @@ class TestWebSocketSSOTArchitecturalCompliance(SSotBaseTestCase):
             assert 'auth_service' not in path_components, "Should not cross into auth_service"
             assert 'frontend' not in path_components, "Should not cross into frontend"
             
-            print("✅ SERVICE BOUNDARY: Module respects netra_backend service boundaries")
-            print("✅ DIRECTORY STRUCTURE: Properly located in services directory")
-            print("✅ NO CROSS-SERVICE: Does not violate service isolation")
+            print(" PASS:  SERVICE BOUNDARY: Module respects netra_backend service boundaries")
+            print(" PASS:  DIRECTORY STRUCTURE: Properly located in services directory")
+            print(" PASS:  NO CROSS-SERVICE: Does not violate service isolation")
             
         except ImportError as e:
             pytest.fail(f"Service boundary validation failed: {e}")
@@ -384,10 +384,10 @@ class TestWebSocketSSOTArchitecturalCompliance(SSotBaseTestCase):
             class_sig = inspect.signature(AgentWebSocketBridge.__init__)
             class_params = list(class_sig.parameters.keys())
             
-            print("✅ DEPENDENCY INJECTION: Factory accepts configuration parameters")
-            print(f"✅ FACTORY PARAMETERS: {param_names}")
-            print(f"✅ CLASS PARAMETERS: {class_params}")
-            print("✅ DI READINESS: Components suitable for dependency injection")
+            print(" PASS:  DEPENDENCY INJECTION: Factory accepts configuration parameters")
+            print(f" PASS:  FACTORY PARAMETERS: {param_names}")
+            print(f" PASS:  CLASS PARAMETERS: {class_params}")
+            print(" PASS:  DI READINESS: Components suitable for dependency injection")
             
         except (ImportError, TypeError) as e:
             pytest.fail(f"Dependency injection readiness validation failed: {e}")
@@ -416,10 +416,10 @@ class TestWebSocketSSOTArchitecturalCompliance(SSotBaseTestCase):
             assert hasattr(create_agent_websocket_bridge, '__name__'), "Function should be mockable"
             assert hasattr(AgentWebSocketBridge, '__name__'), "Class should be mockable"
             
-            print("✅ TEST COMPATIBILITY: Components can be imported in test context")
-            print("✅ INSPECTION: Function and class signatures accessible")
-            print("✅ MOCKING: Components have attributes needed for mocking")
-            print("✅ TESTING INFRASTRUCTURE: Fully compatible with test frameworks")
+            print(" PASS:  TEST COMPATIBILITY: Components can be imported in test context")
+            print(" PASS:  INSPECTION: Function and class signatures accessible")
+            print(" PASS:  MOCKING: Components have attributes needed for mocking")
+            print(" PASS:  TESTING INFRASTRUCTURE: Fully compatible with test frameworks")
             
         except (ImportError, AttributeError) as e:
             pytest.fail(f"Testing infrastructure compatibility validation failed: {e}")

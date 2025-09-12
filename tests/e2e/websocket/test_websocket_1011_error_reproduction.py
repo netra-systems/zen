@@ -82,7 +82,7 @@ class TestWebSocket1011ErrorReproduction:
         EXPECTED: This test should FAIL with ConnectionClosedError code 1011
         until environment variables are properly configured in staging.
         """
-        logger.info("🔍 REPRODUCTION TEST: WebSocket 1011 error exact reproduction")
+        logger.info(" SEARCH:  REPRODUCTION TEST: WebSocket 1011 error exact reproduction")
         logger.info(f"Target URL: {staging_config.urls.websocket_url}")
         
         connection_start_time = time.time()
@@ -95,15 +95,15 @@ class TestWebSocket1011ErrorReproduction:
             # Get staging token (may fail due to OAuth simulation issues)
             try:
                 token = await staging_websocket_auth_helper.get_staging_token_async()
-                logger.info(f"✅ Token acquired: {token[:20]}...")
+                logger.info(f" PASS:  Token acquired: {token[:20]}...")
             except Exception as e:
-                logger.warning(f"❌ Token acquisition failed: {e}")
+                logger.warning(f" FAIL:  Token acquisition failed: {e}")
                 token = staging_websocket_auth_helper.create_test_jwt_token()
-                logger.info("🔄 Using fallback test JWT token")
+                logger.info(" CYCLE:  Using fallback test JWT token")
             
             # Get headers with E2E detection (but staging won't detect E2E env vars)
             headers = staging_websocket_auth_helper.get_websocket_headers(token)
-            logger.info(f"📤 Headers sent: {list(headers.keys())}")
+            logger.info(f"[U+1F4E4] Headers sent: {list(headers.keys())}")
             
             # Connect with extended timeout to capture the full failure sequence
             connection_timeout = 15.0  # Extended to capture full auth failure
@@ -116,7 +116,7 @@ class TestWebSocket1011ErrorReproduction:
                 close_timeout=5.0
             ) as websocket:
                 connection_time = time.time() - connection_start_time
-                logger.info(f"⚠️ UNEXPECTED: Connection succeeded in {connection_time:.2f}s")
+                logger.info(f" WARNING: [U+FE0F] UNEXPECTED: Connection succeeded in {connection_time:.2f}s")
                 
                 # If connection succeeds, try sending a message to trigger any delayed failures
                 test_message = {
@@ -126,11 +126,11 @@ class TestWebSocket1011ErrorReproduction:
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                logger.info("📤 Test message sent, waiting for response...")
+                logger.info("[U+1F4E4] Test message sent, waiting for response...")
                 
                 # Wait for response or connection close
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
-                logger.info(f"📥 Response received: {response[:100]}...")
+                logger.info(f"[U+1F4E5] Response received: {response[:100]}...")
                 
                 # If we get here, the bug may be fixed
                 pytest.fail(
@@ -148,11 +148,11 @@ class TestWebSocket1011ErrorReproduction:
                 "error_type": "ConnectionClosedError"
             }
             
-            logger.info(f"❌ CONNECTION CLOSED: Code {e.code}, Reason: {e.reason}")
-            logger.info(f"⏱️ Connection time: {connection_time:.2f}s")
+            logger.info(f" FAIL:  CONNECTION CLOSED: Code {e.code}, Reason: {e.reason}")
+            logger.info(f"[U+23F1][U+FE0F] Connection time: {connection_time:.2f}s")
             
             if e.code == 1011:
-                logger.info("✅ REPRODUCTION SUCCESSFUL: Got expected 1011 internal error")
+                logger.info(" PASS:  REPRODUCTION SUCCESSFUL: Got expected 1011 internal error")
                 
                 # This is the expected failure - document it thoroughly
                 expected_failure_message = (
@@ -175,7 +175,7 @@ class TestWebSocket1011ErrorReproduction:
                 
         except asyncio.TimeoutError:
             connection_time = time.time() - connection_start_time
-            logger.warning(f"❌ CONNECTION TIMEOUT: {connection_time:.2f}s")
+            logger.warning(f" FAIL:  CONNECTION TIMEOUT: {connection_time:.2f}s")
             
             pytest.fail(
                 f"CONNECTION TIMEOUT: WebSocket connection timed out after {connection_time:.2f}s. "
@@ -184,7 +184,7 @@ class TestWebSocket1011ErrorReproduction:
             
         except Exception as e:
             connection_time = time.time() - connection_start_time
-            logger.error(f"❌ UNEXPECTED ERROR: {type(e).__name__}: {e}")
+            logger.error(f" FAIL:  UNEXPECTED ERROR: {type(e).__name__}: {e}")
             
             pytest.fail(
                 f"UNEXPECTED ERROR: {type(e).__name__}: {e} after {connection_time:.2f}s. "
@@ -194,7 +194,7 @@ class TestWebSocket1011ErrorReproduction:
         finally:
             # Log comprehensive error details for analysis
             if error_details:
-                logger.info("🔍 REPRODUCTION TEST RESULTS:")
+                logger.info(" SEARCH:  REPRODUCTION TEST RESULTS:")
                 logger.info(f"   Error Code: {error_details.get('code', 'N/A')}")
                 logger.info(f"   Reason: {error_details.get('reason', 'N/A')}")  
                 logger.info(f"   Connection Time: {error_details.get('connection_time', 0):.2f}s")
@@ -213,7 +213,7 @@ class TestWebSocket1011ErrorReproduction:
         
         EXPECTED: All connections should fail with 1011 errors consistently.
         """
-        logger.info("🔍 REPRODUCTION TEST: Multiple user WebSocket 1011 pattern")
+        logger.info(" SEARCH:  REPRODUCTION TEST: Multiple user WebSocket 1011 pattern")
         
         num_concurrent_users = 3
         connection_results = []
@@ -282,7 +282,7 @@ class TestWebSocket1011ErrorReproduction:
         connection_results = await asyncio.gather(*tasks, return_exceptions=True)
         
         total_time = time.time() - start_time
-        logger.info(f"⏱️ Total test time: {total_time:.2f}s")
+        logger.info(f"[U+23F1][U+FE0F] Total test time: {total_time:.2f}s")
         
         # Analyze results
         failures_1011 = 0
@@ -297,17 +297,17 @@ class TestWebSocket1011ErrorReproduction:
                 
             if result["success"]:
                 successes += 1
-                logger.warning(f"❌ User {result['user_index']} connection succeeded (unexpected)")
+                logger.warning(f" FAIL:  User {result['user_index']} connection succeeded (unexpected)")
             else:
                 error = result["error"]
                 if error and error.get("code") == 1011:
                     failures_1011 += 1
-                    logger.info(f"✅ User {result['user_index']} got expected 1011 error in {result['connection_time']:.2f}s")
+                    logger.info(f" PASS:  User {result['user_index']} got expected 1011 error in {result['connection_time']:.2f}s")
                 else:
                     failures_other += 1
-                    logger.warning(f"⚠️ User {result['user_index']} got unexpected error: {error}")
+                    logger.warning(f" WARNING: [U+FE0F] User {result['user_index']} got unexpected error: {error}")
         
-        logger.info("🔍 MULTIPLE USER TEST RESULTS:")
+        logger.info(" SEARCH:  MULTIPLE USER TEST RESULTS:")
         logger.info(f"   Total users: {num_concurrent_users}")
         logger.info(f"   1011 errors: {failures_1011}")
         logger.info(f"   Other errors: {failures_other}")
@@ -315,7 +315,7 @@ class TestWebSocket1011ErrorReproduction:
         
         # Validate the pattern
         if failures_1011 >= (num_concurrent_users - 1):  # Allow for some variance
-            logger.info("✅ REPRODUCTION SUCCESSFUL: Consistent 1011 error pattern across users")
+            logger.info(" PASS:  REPRODUCTION SUCCESSFUL: Consistent 1011 error pattern across users")
             pytest.xfail(
                 f"EXPECTED FAILURE: {failures_1011}/{num_concurrent_users} users got 1011 errors. "
                 f"This confirms consistent authentication failure pattern in staging environment."
@@ -344,7 +344,7 @@ class TestWebSocket1011ErrorReproduction:
         
         EXPECTED: E2E detection should fail (enabled=false), confirming the root cause.
         """
-        logger.info("🔍 REPRODUCTION TEST: Staging E2E detection failure")
+        logger.info(" SEARCH:  REPRODUCTION TEST: Staging E2E detection failure")
         
         # Test 1: Check staging health endpoint for E2E status
         try:
@@ -358,10 +358,10 @@ class TestWebSocket1011ErrorReproduction:
                     health_data = response.json()
                     e2e_status = health_data.get("e2e_testing", {})
                     
-                    logger.info(f"📊 Health data E2E status: {e2e_status}")
+                    logger.info(f" CHART:  Health data E2E status: {e2e_status}")
                     
                     if e2e_status.get("enabled") is False:
-                        logger.info("✅ REPRODUCTION SUCCESSFUL: E2E testing disabled in staging health check")
+                        logger.info(" PASS:  REPRODUCTION SUCCESSFUL: E2E testing disabled in staging health check")
                         pytest.xfail(
                             "EXPECTED FAILURE: E2E testing shows as disabled in staging environment. "
                             "This confirms the root cause: E2E environment variables not detected."
@@ -372,10 +372,10 @@ class TestWebSocket1011ErrorReproduction:
                             f"This suggests the environment variable issue may be resolved."
                         )
                 else:
-                    logger.warning(f"❌ Health endpoint returned {response.status_code}")
+                    logger.warning(f" FAIL:  Health endpoint returned {response.status_code}")
                     
         except Exception as e:
-            logger.error(f"❌ Health check failed: {e}")
+            logger.error(f" FAIL:  Health check failed: {e}")
         
         # Test 2: Attempt OAuth simulation bypass (should fail due to missing env vars)
         try:
@@ -389,7 +389,7 @@ class TestWebSocket1011ErrorReproduction:
                     decoded = jwt.decode(token, options={"verify_signature": False})
                     
                     if decoded.get("staging") and decoded.get("e2e_test"):
-                        logger.info("✅ REPRODUCTION CONFIRMED: Using fallback JWT (OAuth simulation failed)")
+                        logger.info(" PASS:  REPRODUCTION CONFIRMED: Using fallback JWT (OAuth simulation failed)")
                         pytest.xfail(
                             "EXPECTED FAILURE: OAuth simulation failed, using fallback JWT token. "
                             "This confirms E2E environment variables not properly configured in staging."
@@ -404,7 +404,7 @@ class TestWebSocket1011ErrorReproduction:
                     logger.warning(f"Token decode failed: {decode_error}")
                     
         except Exception as e:
-            logger.info(f"✅ OAuth simulation failed as expected: {e}")
+            logger.info(f" PASS:  OAuth simulation failed as expected: {e}")
 
     async def test_factory_ssot_validation_strict_mode_trigger(
         self,
@@ -419,12 +419,12 @@ class TestWebSocket1011ErrorReproduction:
         
         EXPECTED: Factory validation should run in strict mode, failing and causing 1011.
         """
-        logger.info("🔍 REPRODUCTION TEST: Factory SSOT validation strict mode trigger")
+        logger.info(" SEARCH:  REPRODUCTION TEST: Factory SSOT validation strict mode trigger")
         
         connection_attempts = []
         
         for attempt in range(2):  # Multiple attempts to confirm pattern
-            logger.info(f"🔄 Attempt {attempt + 1}/2")
+            logger.info(f" CYCLE:  Attempt {attempt + 1}/2")
             start_time = time.time()
             
             try:
@@ -467,11 +467,11 @@ class TestWebSocket1011ErrorReproduction:
                 })
                 
                 if e.code == 1011 and "factory" in str(e.reason).lower():
-                    logger.info(f"✅ Attempt {attempt + 1}: Got expected factory validation failure")
+                    logger.info(f" PASS:  Attempt {attempt + 1}: Got expected factory validation failure")
                 elif e.code == 1011:
-                    logger.info(f"✅ Attempt {attempt + 1}: Got 1011 error (likely factory-related)")
+                    logger.info(f" PASS:  Attempt {attempt + 1}: Got 1011 error (likely factory-related)")
                 else:
-                    logger.warning(f"⚠️ Attempt {attempt + 1}: Got unexpected error code {e.code}")
+                    logger.warning(f" WARNING: [U+FE0F] Attempt {attempt + 1}: Got unexpected error code {e.code}")
                     
             except Exception as e:
                 connection_time = time.time() - start_time  
@@ -490,13 +490,13 @@ class TestWebSocket1011ErrorReproduction:
                               if not attempt["success"] and 
                               attempt["error"].get("code") == 1011)
         
-        logger.info("🔍 FACTORY VALIDATION TEST RESULTS:")
+        logger.info(" SEARCH:  FACTORY VALIDATION TEST RESULTS:")
         for attempt in connection_attempts:
             status = "SUCCESS" if attempt["success"] else f"FAIL ({attempt['error']})"
             logger.info(f"   Attempt {attempt['attempt']}: {status} in {attempt['time']:.2f}s")
         
         if factory_failures >= 1:
-            logger.info("✅ REPRODUCTION SUCCESSFUL: Factory SSOT validation failures confirmed")
+            logger.info(" PASS:  REPRODUCTION SUCCESSFUL: Factory SSOT validation failures confirmed")
             pytest.xfail(
                 f"EXPECTED FAILURE: {factory_failures}/2 attempts got factory validation 1011 errors. "
                 f"This confirms strict mode validation running instead of E2E-safe mode."
@@ -521,7 +521,7 @@ def log_reproduction_context():
     from shared.isolated_environment import get_env
     
     env = get_env()
-    logger.info("🔍 REPRODUCTION TEST CONTEXT:")
+    logger.info(" SEARCH:  REPRODUCTION TEST CONTEXT:")
     logger.info(f"   Environment: {env.get('ENVIRONMENT', 'unknown')}")
     logger.info(f"   Test Environment: {env.get('TEST_ENV', 'unknown')}")
     logger.info(f"   Google Cloud Project: {env.get('GOOGLE_CLOUD_PROJECT', 'not-set')}")

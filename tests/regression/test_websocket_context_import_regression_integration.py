@@ -1,7 +1,7 @@
 """
 Regression Test - WebSocket Context Import Failure (Integration)
 
-🚨 CRITICAL REGRESSION TEST 🚨
+ ALERT:  CRITICAL REGRESSION TEST  ALERT: 
 This test MUST FAIL initially to prove the regression exists.
 
 Purpose: Prove WebSocketRequestContext import regression breaks WebSocket manager factory integration
@@ -120,7 +120,7 @@ class TestWebSocketContextIntegrationRegression:
     
     def test_websocket_request_context_alias_creation_EXPECTED_TO_FAIL(self, mock_websocket, user_execution_context):
         """
-        🚨 REGRESSION TEST: This test MUST FAIL to prove the regression.
+         ALERT:  REGRESSION TEST: This test MUST FAIL to prove the regression.
         
         Test that WebSocketRequestContext alias can be used for context creation.
         
@@ -128,7 +128,7 @@ class TestWebSocketContextIntegrationRegression:
         """
         if not WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
             pytest.fail(
-                f"🚨 REGRESSION CONFIRMED: WebSocketRequestContext alias not available. "
+                f" ALERT:  REGRESSION CONFIRMED: WebSocketRequestContext alias not available. "
                 f"Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
                 f"This breaks integration patterns that expect this alias."
             )
@@ -168,7 +168,7 @@ class TestWebSocketContextIntegrationRegression:
     
     def test_context_types_interchangeability_EXPECTED_TO_FAIL(self, mock_websocket, user_execution_context):
         """
-        🚨 REGRESSION TEST: Test that WebSocketContext and WebSocketRequestContext are interchangeable.
+         ALERT:  REGRESSION TEST: Test that WebSocketContext and WebSocketRequestContext are interchangeable.
         
         This test MUST FAIL initially, proving that code expecting interchangeability will break.
         """
@@ -185,7 +185,7 @@ class TestWebSocketContextIntegrationRegression:
         
         if not WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
             pytest.fail(
-                f"🚨 INTERCHANGEABILITY BROKEN: Cannot test WebSocketRequestContext compatibility. "
+                f" ALERT:  INTERCHANGEABILITY BROKEN: Cannot test WebSocketRequestContext compatibility. "
                 f"Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
                 f"Code that expects both types to be available will fail."
             )
@@ -201,7 +201,7 @@ class TestWebSocketContextIntegrationRegression:
     
     def test_agent_websocket_bridge_integration_pattern_EXPECTED_TO_FAIL(self, mock_websocket, user_execution_context):
         """
-        🚨 REGRESSION TEST: Test agent-WebSocket bridge integration pattern.
+         ALERT:  REGRESSION TEST: Test agent-WebSocket bridge integration pattern.
         
         This simulates how agent-WebSocket bridge code would try to use WebSocketRequestContext.
         This test MUST FAIL initially, proving the integration is broken.
@@ -232,14 +232,14 @@ class TestWebSocketContextIntegrationRegression:
         
         # This assertion should FAIL, proving the integration is broken
         assert integration_successful, (
-            f"🚨 AGENT-WEBSOCKET INTEGRATION BROKEN: Agent bridge cannot import WebSocketRequestContext. "
+            f" ALERT:  AGENT-WEBSOCKET INTEGRATION BROKEN: Agent bridge cannot import WebSocketRequestContext. "
             f"Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
             f"This breaks critical agent-WebSocket communication patterns."
         )
     
     def test_legacy_code_compatibility_EXPECTED_TO_FAIL(self, mock_websocket, user_execution_context):
         """
-        🚨 REGRESSION TEST: Test that legacy code patterns still work.
+         ALERT:  REGRESSION TEST: Test that legacy code patterns still work.
         
         This simulates existing codebase patterns that depend on WebSocketRequestContext.
         """
@@ -267,7 +267,7 @@ class TestWebSocketContextIntegrationRegression:
         
         if failed_patterns:
             pytest.fail(
-                f"🚨 LEGACY CODE COMPATIBILITY BROKEN: {len(failed_patterns)} pattern(s) failed:\\n" +
+                f" ALERT:  LEGACY CODE COMPATIBILITY BROKEN: {len(failed_patterns)} pattern(s) failed:\\n" +
                 "\\n".join(f"  - {pattern}" for pattern in failed_patterns) +
                 f"\\n\\nThis regression breaks existing code that depends on WebSocketRequestContext import patterns."
             )
@@ -306,7 +306,7 @@ class TestWebSocketContextIntegrationRegression:
         websocket_request_context_missing = 'WebSocketRequestContext' not in websocket_core.__all__
         
         if websocket_request_context_missing:
-            print(f"\\n🚨 REGRESSION IDENTIFIED: WebSocketRequestContext missing from websocket_core.__all__")
+            print(f"\\n ALERT:  REGRESSION IDENTIFIED: WebSocketRequestContext missing from websocket_core.__all__")
             print(f"Available exports: {sorted(websocket_core.__all__)}")
         
         # This documents the regression but doesn't fail the health check

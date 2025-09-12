@@ -254,8 +254,8 @@ class TestIsolatedEnvironmentValueSanitization:
             },
             {
                 "name": "password_with_unicode",
-                "url": "postgresql://user:пароль123@host:5432/db",
-                "expected_password": "пароль123",
+                "url": "postgresql://user:[U+043F]apo[U+043B][U+044C]123@host:5432/db",
+                "expected_password": "[U+043F]apo[U+043B][U+044C]123",
                 "description": "Unicode characters in password must be preserved"
             }
         ]

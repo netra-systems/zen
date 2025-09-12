@@ -71,7 +71,7 @@ class TestInfrastructureResourceValidation:
         
         Failure Mode: Test MUST fail if memory limits allow exhaustion
         """
-        print("🧠 Testing memory allocation limits (prevent 100% exhaustion)")
+        print("[U+1F9E0] Testing memory allocation limits (prevent 100% exhaustion)")
         
         # Get system memory info
         system_memory = psutil.virtual_memory()
@@ -115,7 +115,7 @@ class TestInfrastructureResourceValidation:
             # ASSERTION: Max usage percent should prevent exhaustion
             assert max_usage_percent <= 85, (
                 f"CRITICAL FAILURE: Max memory usage {max_usage_percent}% too high. "
-                f"Should be ≤85% to prevent system exhaustion!"
+                f"Should be  <= 85% to prevent system exhaustion!"
             )
             
             # ASSERTION: Memory allocation strategy should be conservative
@@ -133,10 +133,10 @@ class TestInfrastructureResourceValidation:
             # ASSERTION: System impact should be reasonable
             assert system_impact_percent <= 70, (
                 f"CRITICAL FAILURE: Memory configuration would use {system_impact_percent:.1f}% "
-                f"of system memory. Should be ≤70% to prevent exhaustion!"
+                f"of system memory. Should be  <= 70% to prevent exhaustion!"
             )
             
-            print("✅ PASS: Memory allocation limits prevent resource exhaustion")
+            print(" PASS:  PASS: Memory allocation limits prevent resource exhaustion")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -154,7 +154,7 @@ class TestInfrastructureResourceValidation:
         - Container CPU limits should prevent system CPU exhaustion
         - CPU allocation should account for system overhead
         """
-        print("🔥 Testing CPU resource limits (prevent 100% exhaustion)")
+        print(" FIRE:  Testing CPU resource limits (prevent 100% exhaustion)")
         
         # Get system CPU info
         cpu_count = psutil.cpu_count()
@@ -188,7 +188,7 @@ class TestInfrastructureResourceValidation:
             # ASSERTION: Max CPU usage should prevent exhaustion
             assert max_cpu_percent <= 90, (
                 f"CRITICAL FAILURE: Max CPU usage {max_cpu_percent}% too high. "
-                f"Should be ≤90% to prevent system exhaustion!"
+                f"Should be  <= 90% to prevent system exhaustion!"
             )
             
             # Calculate effective CPU usage
@@ -200,10 +200,10 @@ class TestInfrastructureResourceValidation:
             # ASSERTION: System CPU impact should be reasonable
             assert system_cpu_percent <= 80, (
                 f"CRITICAL FAILURE: CPU configuration would use {system_cpu_percent:.1f}% "
-                f"of system CPU. Should be ≤80% to prevent exhaustion!"
+                f"of system CPU. Should be  <= 80% to prevent exhaustion!"
             )
             
-            print("✅ PASS: CPU resource limits prevent exhaustion")
+            print(" PASS:  PASS: CPU resource limits prevent exhaustion")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -221,7 +221,7 @@ class TestInfrastructureResourceValidation:
         - Docker build CPU limits should prevent build timeouts
         - Build resource allocation should be environment-appropriate
         """
-        print("🐳 Testing Docker build resource configuration")
+        print("[U+1F433] Testing Docker build resource configuration")
         
         # Test staging Docker build configuration
         with patch.dict(os.environ, {
@@ -256,19 +256,19 @@ class TestInfrastructureResourceValidation:
             # ASSERTION: Build memory should be sufficient
             assert build_memory_gb >= 2.0, (
                 f"CRITICAL FAILURE: Docker build memory {build_memory_gb:.2f}GB too low. "
-                f"Should be ≥2GB to prevent OOM during builds!"
+                f"Should be  >= 2GB to prevent OOM during builds!"
             )
             
             # ASSERTION: Build CPU should be sufficient
             assert build_cpu >= 1.0, (
                 f"CRITICAL FAILURE: Docker build CPU {build_cpu} too low. "
-                f"Should be ≥1.0 core to prevent build timeouts!"
+                f"Should be  >= 1.0 core to prevent build timeouts!"
             )
             
             # ASSERTION: Build timeout should be reasonable
             assert build_timeout >= 1200, (  # 20 minutes minimum
                 f"CRITICAL FAILURE: Docker build timeout {build_timeout}s too short. "
-                f"Should be ≥1200s (20min) to prevent timeout failures!"
+                f"Should be  >= 1200s (20min) to prevent timeout failures!"
             )
             
             assert build_timeout <= 3600, (  # 60 minutes maximum
@@ -282,7 +282,7 @@ class TestInfrastructureResourceValidation:
                 f"for better resource efficiency and smaller images."
             )
             
-            print("✅ PASS: Docker build resource configuration prevents failures")
+            print(" PASS:  PASS: Docker build resource configuration prevents failures")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -295,7 +295,7 @@ class TestInfrastructureResourceValidation:
         This test validates container startup resource configuration
         that prevents the startup failures identified in Issue #131.
         """
-        print("🚀 Testing container startup resource validation")
+        print("[U+1F680] Testing container startup resource validation")
         
         # Test staging container startup configuration
         with patch.dict(os.environ, {
@@ -333,30 +333,30 @@ class TestInfrastructureResourceValidation:
             # ASSERTION: Startup memory should be sufficient
             assert startup_memory_gb >= 0.5, (
                 f"CRITICAL FAILURE: Container startup memory {startup_memory_gb:.2f}GB too low. "
-                f"Should be ≥0.5GB to prevent startup OOM!"
+                f"Should be  >= 0.5GB to prevent startup OOM!"
             )
             
             # ASSERTION: Startup CPU should be sufficient  
             assert startup_cpu >= 0.5, (
                 f"CRITICAL FAILURE: Container startup CPU {startup_cpu} too low. "
-                f"Should be ≥0.5 core to prevent startup delays!"
+                f"Should be  >= 0.5 core to prevent startup delays!"
             )
             
             # ASSERTION: Startup timeout should be reasonable
             assert startup_timeout >= 180, (  # 3 minutes minimum
                 f"CRITICAL FAILURE: Container startup timeout {startup_timeout}s too short. "
-                f"Should be ≥180s (3min) to prevent premature failures!"
+                f"Should be  >= 180s (3min) to prevent premature failures!"
             )
             
             # ASSERTION: Health check timeout should be reasonable
             assert healthcheck_timeout >= 10, (
                 f"CRITICAL FAILURE: Health check timeout {healthcheck_timeout}s too short. "
-                f"Should be ≥10s for reliable health checks!"
+                f"Should be  >= 10s for reliable health checks!"
             )
             
             assert healthcheck_timeout <= 60, (
                 f"WARNING: Health check timeout {healthcheck_timeout}s very long. "
-                f"Should be ≤60s for responsive health monitoring."
+                f"Should be  <= 60s for responsive health monitoring."
             )
             
             # ASSERTION: Startup strategy should be graceful
@@ -365,7 +365,7 @@ class TestInfrastructureResourceValidation:
                 f"for better startup reliability and error handling."
             )
             
-            print("✅ PASS: Container startup resource validation prevents failures")
+            print(" PASS:  PASS: Container startup resource validation prevents failures")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -378,7 +378,7 @@ class TestInfrastructureResourceValidation:
         This test validates that different environments have appropriate
         resource allocation to prevent the exhaustion patterns seen in Issue #131.
         """
-        print("🌍 Testing environment-specific resource allocation")
+        print("[U+1F30D] Testing environment-specific resource allocation")
         
         environment_configs = {
             'test': {
@@ -433,10 +433,10 @@ class TestInfrastructureResourceValidation:
                 if environment == 'test':
                     # Test environment should use minimal resources
                     assert memory_limit_gb <= 1.0, (
-                        f"Test environment memory should be ≤1GB, got {memory_limit_gb:.2f}GB"
+                        f"Test environment memory should be  <= 1GB, got {memory_limit_gb:.2f}GB"
                     )
                     assert cpu_limit <= 1.0, (
-                        f"Test environment CPU should be ≤1.0 core, got {cpu_limit}"
+                        f"Test environment CPU should be  <= 1.0 core, got {cpu_limit}"
                     )
                     
                 elif environment == 'staging':
@@ -451,10 +451,10 @@ class TestInfrastructureResourceValidation:
                 elif environment == 'production':
                     # Production should use sufficient resources
                     assert memory_limit_gb >= 2.0, (
-                        f"Production memory should be ≥2GB, got {memory_limit_gb:.2f}GB"
+                        f"Production memory should be  >= 2GB, got {memory_limit_gb:.2f}GB"
                     )
                     assert cpu_limit >= 2.0, (
-                        f"Production CPU should be ≥2.0 cores, got {cpu_limit}"
+                        f"Production CPU should be  >= 2.0 cores, got {cpu_limit}"
                     )
                 
                 # All environments should have reasonable max usage
@@ -462,9 +462,9 @@ class TestInfrastructureResourceValidation:
                     f"{environment} max usage should be 50-90%, got {max_usage}%"
                 )
                 
-                print(f"    ✅ {environment} resource allocation validated")
+                print(f"     PASS:  {environment} resource allocation validated")
         
-        print("✅ PASS: Environment-specific resource allocation validated")
+        print(" PASS:  PASS: Environment-specific resource allocation validated")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -477,7 +477,7 @@ class TestInfrastructureResourceValidation:
         This test validates resource monitoring configuration that would
         detect and prevent the resource exhaustion patterns in Issue #131.
         """
-        print("📊 Testing resource monitoring configuration")
+        print(" CHART:  Testing resource monitoring configuration")
         
         # Test staging monitoring configuration
         with patch.dict(os.environ, {
@@ -511,19 +511,19 @@ class TestInfrastructureResourceValidation:
             # ASSERTION: Memory alert threshold should be conservative
             assert memory_threshold <= 85, (
                 f"CRITICAL FAILURE: Memory alert threshold {memory_threshold}% too high. "
-                f"Should be ≤85% to detect exhaustion before system failure!"
+                f"Should be  <= 85% to detect exhaustion before system failure!"
             )
             
             # ASSERTION: CPU alert threshold should be conservative
             assert cpu_threshold <= 90, (
                 f"CRITICAL FAILURE: CPU alert threshold {cpu_threshold}% too high. "
-                f"Should be ≤90% to detect exhaustion before system failure!"
+                f"Should be  <= 90% to detect exhaustion before system failure!"
             )
             
             # ASSERTION: Monitoring interval should be frequent enough
             assert monitoring_interval <= 60, (
                 f"CRITICAL FAILURE: Monitoring interval {monitoring_interval}s too long. "
-                f"Should be ≤60s for timely detection of resource issues!"
+                f"Should be  <= 60s for timely detection of resource issues!"
             )
             
             # ASSERTION: Alert cooldown should prevent spam but allow urgent alerts
@@ -532,7 +532,7 @@ class TestInfrastructureResourceValidation:
                 f"Should be 120-600s (2-10 minutes) for balanced alerting."
             )
             
-            print("✅ PASS: Resource monitoring configuration prevents silent exhaustion")
+            print(" PASS:  PASS: Resource monitoring configuration prevents silent exhaustion")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -545,7 +545,7 @@ class TestInfrastructureResourceValidation:
         This test validates error handling configuration for resource
         exhaustion scenarios identified in Issue #131.
         """
-        print("❌ Testing resource exhaustion error handling")
+        print(" FAIL:  Testing resource exhaustion error handling")
         
         # Test resource exhaustion error handling configuration
         with patch.dict(os.environ, {
@@ -597,10 +597,10 @@ class TestInfrastructureResourceValidation:
             # ASSERTION: Circuit breaker should trigger before total exhaustion
             assert circuit_breaker_threshold <= 95, (
                 f"CRITICAL FAILURE: Circuit breaker threshold {circuit_breaker_threshold}% too high. "
-                f"Should be ≤95% to prevent total resource exhaustion!"
+                f"Should be  <= 95% to prevent total resource exhaustion!"
             )
             
-            print("✅ PASS: Resource exhaustion error handling configured properly")
+            print(" PASS:  PASS: Resource exhaustion error handling configured properly")
 
 
 # Test metadata for Issue #131 infrastructure validation

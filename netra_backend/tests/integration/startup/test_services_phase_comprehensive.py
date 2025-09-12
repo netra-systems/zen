@@ -629,9 +629,9 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
             if operation in self.timing_records:
                 actual_time = self.timing_records[operation]
                 assert actual_time <= max_time, f"Operation '{operation}' took {actual_time:.3f}s, exceeds {max_time}s requirement"
-                self.logger.info(f"✅ {operation}: {actual_time:.3f}s (requirement: {max_time}s)")
+                self.logger.info(f" PASS:  {operation}: {actual_time:.3f}s (requirement: {max_time}s)")
             else:
-                self.logger.warning(f"⚠️ No timing recorded for '{operation}'")
+                self.logger.warning(f" WARNING: [U+FE0F] No timing recorded for '{operation}'")
 
     @pytest.mark.integration
     @pytest.mark.startup_services
@@ -698,7 +698,7 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         if missing_components:
             pytest.fail(f"Critical components not validated: {missing_components}")
         
-        self.logger.info("✅ All critical path components validated successfully")
+        self.logger.info(" PASS:  All critical path components validated successfully")
 
     @pytest.mark.integration
     @pytest.mark.startup_services
@@ -755,7 +755,7 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
             actual = validated_requirements.get(requirement, False)
             assert actual == expected, f"Business requirement '{requirement}' not met: expected {expected}, got {actual}"
         
-        self.logger.info("✅ All business logic requirements validated successfully")
+        self.logger.info(" PASS:  All business logic requirements validated successfully")
 
     @pytest.mark.integration
     @pytest.mark.startup_services
@@ -830,7 +830,7 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         
         assert len(missing_config) == 0, f"Missing required configuration: {missing_config}"
         
-        self.logger.info("✅ All agent service configuration validated successfully")
+        self.logger.info(" PASS:  All agent service configuration validated successfully")
 
     @pytest.mark.integration
     @pytest.mark.startup_services
@@ -898,4 +898,4 @@ class TestServicesPhaseComprehensive(BaseIntegrationTest):
         max_services_phase_time = 15.0  # 15 seconds max for all services initialization
         assert total_time <= max_services_phase_time, f"SERVICES phase took {total_time:.3f}s, exceeds {max_services_phase_time}s requirement"
         
-        self.logger.info("✅ SERVICES phase timing requirements met successfully")
+        self.logger.info(" PASS:  SERVICES phase timing requirements met successfully")

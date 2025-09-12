@@ -358,7 +358,7 @@ class TestGCPReadinessValidationStaging:
     """
     CRITICAL TEST: Validates staging-appropriate timeout values and readiness checks.
     
-    FAILURE PATTERN: "🔴 GCP WebSocket readiness validation FAILED (22.01s)"
+    FAILURE PATTERN: "[U+1F534] GCP WebSocket readiness validation FAILED (22.01s)"
     ROOT CAUSE: Production-grade validation inappropriate for staging environment  
     """
     

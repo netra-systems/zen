@@ -577,7 +577,7 @@ class TestOAuthRedisInterfaceMismatchesIssue316:
         print(f"Total protected MRR: ${total_protected_value:,}")
         
         for result in business_value_results:
-            status = "✅ PRESERVED" if result["value_preserved"] else "❌ LOST"
+            status = " PASS:  PRESERVED" if result["value_preserved"] else " FAIL:  LOST"
             print(f"  - {result['scenario']}: {status} (${result['expected_value']:,} MRR)")
         
         return business_value_results

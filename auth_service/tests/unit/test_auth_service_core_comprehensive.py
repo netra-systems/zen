@@ -912,7 +912,7 @@ class TestAuthServiceErrorHandlingAndBoundaryConditions(TestAuthServiceCore):
         """Test operations with special characters handle correctly"""
         special_chars_email = "test+special@example.com"
         special_chars_password = "P@ssw0rd!@#$%^&*()"
-        special_chars_name = "José García-López"
+        special_chars_name = "Jos[U+00E9] Garc[U+00ED]a-L[U+00F3]pez"
         
         user_id = await self.service.create_user(
             special_chars_email, special_chars_password, special_chars_name
@@ -928,9 +928,9 @@ class TestAuthServiceErrorHandlingAndBoundaryConditions(TestAuthServiceCore):
     @pytest.mark.asyncio
     async def test_operations_with_unicode_characters_handle_correctly(self):
         """Test operations with Unicode characters handle correctly"""
-        unicode_email = "тест@пример.com"  # Cyrillic
-        unicode_password = "密码123!"  # Chinese characters
-        unicode_name = "José 山田 Müller"  # Mixed Unicode
+        unicode_email = "tect@[U+043F]p[U+0438]mep.com"  # Cyrillic
+        unicode_password = "[U+5BC6][U+7801]123!"  # Chinese characters
+        unicode_name = "Jos[U+00E9] [U+5C71][U+7530] M[U+00FC]ller"  # Mixed Unicode
         
         # Test email validation with Unicode
         is_valid_email = self.service.validate_email(unicode_email)

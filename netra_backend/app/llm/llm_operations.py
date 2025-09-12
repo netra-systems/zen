@@ -1,7 +1,7 @@
 """LLM core operations module.
 
 Provides main LLM operation functions: ask_llm, ask_llm_full, and stream_llm.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 import time

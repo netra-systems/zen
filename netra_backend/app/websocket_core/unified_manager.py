@@ -89,11 +89,11 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
     Safely serialize message data for WebSocket transmission with comprehensive fallback strategies.
     
     CRITICAL FIX: Handles all serialization edge cases including:
-    - Enum objects (WebSocketState, etc.) → converted to string values
-    - Pydantic models → model_dump(mode='json') for datetime handling  
+    - Enum objects (WebSocketState, etc.)  ->  converted to string values
+    - Pydantic models  ->  model_dump(mode='json') for datetime handling  
     - Complex objects with to_dict() method
-    - Datetime objects → ISO string format
-    - Dataclasses → converted to dict
+    - Datetime objects  ->  ISO string format
+    - Dataclasses  ->  converted to dict
     - Fallback to string representation for unhandled types
     
     Args:
@@ -145,14 +145,14 @@ def _serialize_message_safely(message: Any) -> Dict[str, Any]:
     try:
         from starlette.websockets import WebSocketState as StarletteWebSocketState
         if isinstance(message, StarletteWebSocketState):
-            return message.name.lower()  # CONNECTED → "connected"
+            return message.name.lower()  # CONNECTED  ->  "connected"
     except (ImportError, AttributeError) as e:
         logger.debug(f"Starlette WebSocketState import failed (non-critical): {e}")
     
     try:
         from fastapi.websockets import WebSocketState as FastAPIWebSocketState  
         if isinstance(message, FastAPIWebSocketState):
-            return message.name.lower()  # CONNECTED → "connected"
+            return message.name.lower()  # CONNECTED  ->  "connected"
     except (ImportError, AttributeError) as e:
         logger.debug(f"FastAPI WebSocketState import failed (non-critical): {e}")
     
@@ -281,7 +281,7 @@ class RegistryCompat:
 class UnifiedWebSocketManager:
     """Unified WebSocket connection manager - SSOT with enhanced thread safety.
     
-    🚨 FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
+     ALERT:  FIVE WHYS ROOT CAUSE PREVENTION: This class implements the same interface
     as WebSocketManagerProtocol to ensure consistency with IsolatedWebSocketManager.
     
     While this class predates the protocol, it provides all required methods to
@@ -357,7 +357,7 @@ class UnifiedWebSocketManager:
         self._transaction_coordinator = None  # Will be set by DatabaseManager
         self._coordination_enabled = False
         
-        logger.debug("🔗 WebSocket manager initialized with transaction coordination support")
+        logger.debug("[U+1F517] WebSocket manager initialized with transaction coordination support")
         self._error_recovery_enabled = True
         
         # Background task monitoring system
@@ -473,8 +473,8 @@ class UnifiedWebSocketManager:
             "golden_path_stage": "connection_addition_start"
         }
         
-        logger.info(f"🔗 GOLDEN PATH CONNECTION ADD: Adding connection {connection.connection_id} for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
-        logger.info(f"🔍 CONNECTION ADD CONTEXT: {json.dumps(connection_add_context, indent=2)}")
+        logger.info(f"[U+1F517] GOLDEN PATH CONNECTION ADD: Adding connection {connection.connection_id} for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
+        logger.info(f" SEARCH:  CONNECTION ADD CONTEXT: {json.dumps(connection_add_context, indent=2)}")
         
         # Validate connection before adding
         try:
@@ -482,7 +482,7 @@ class UnifiedWebSocketManager:
                 raise ValueError("Connection must have a valid user_id")
             if not connection.connection_id:
                 raise ValueError("Connection must have a valid connection_id")
-            logger.debug(f"✅ CONNECTION VALIDATION: Connection {connection.connection_id} validated successfully")
+            logger.debug(f" PASS:  CONNECTION VALIDATION: Connection {connection.connection_id} validated successfully")
         except Exception as e:
             # CRITICAL: Log validation failure
             validation_failure_context = {
@@ -494,8 +494,8 @@ class UnifiedWebSocketManager:
                 "golden_path_impact": "CRITICAL - Connection rejected due to validation failure"
             }
             
-            logger.critical(f"🚨 GOLDEN PATH CONNECTION VALIDATION FAILURE: Connection {connection.connection_id} validation failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
-            logger.critical(f"🔍 VALIDATION FAILURE CONTEXT: {json.dumps(validation_failure_context, indent=2)}")
+            logger.critical(f" ALERT:  GOLDEN PATH CONNECTION VALIDATION FAILURE: Connection {connection.connection_id} validation failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
+            logger.critical(f" SEARCH:  VALIDATION FAILURE CONTEXT: {json.dumps(validation_failure_context, indent=2)}")
             raise
             
         # Use user-specific lock for connection operations
@@ -520,7 +520,7 @@ class UnifiedWebSocketManager:
                         if existing_user != connection.user_id and existing_token == isolation_token:
                             # This should never happen with UUID but check anyway
                             logger.error(
-                                f"🚨 CRITICAL ISOLATION VIOLATION: Token collision detected! "
+                                f" ALERT:  CRITICAL ISOLATION VIOLATION: Token collision detected! "
                                 f"User {connection.user_id} vs {existing_user}, "
                                 f"Connection {connection.connection_id} vs {existing_conn_id}"
                             )
@@ -537,7 +537,7 @@ class UnifiedWebSocketManager:
                     self._user_connections[connection.user_id] = set()
                 self._user_connections[connection.user_id].add(connection.connection_id)
                 
-                logger.debug(f"✅ ISSUE #414 FIX: Connection {connection.connection_id} isolated with token {isolation_token[:8]}... for user {connection.user_id[:8]}...")
+                logger.debug(f" PASS:  ISSUE #414 FIX: Connection {connection.connection_id} isolated with token {isolation_token[:8]}... for user {connection.user_id[:8]}...")
                 
                 # Update compatibility mapping for legacy tests
                 if connection.user_id not in self.active_connections:
@@ -565,8 +565,8 @@ class UnifiedWebSocketManager:
                     "golden_path_milestone": "Connection successfully added to manager"
                 }
                 
-                logger.info(f"✅ GOLDEN PATH CONNECTION ADDED: Connection {connection.connection_id} added for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {connection_duration*1000:.2f}ms")
-                logger.info(f"🔍 CONNECTION SUCCESS CONTEXT: {json.dumps(connection_success_context, indent=2)}")
+                logger.info(f" PASS:  GOLDEN PATH CONNECTION ADDED: Connection {connection.connection_id} added for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {connection_duration*1000:.2f}ms")
+                logger.info(f" SEARCH:  CONNECTION SUCCESS CONTEXT: {json.dumps(connection_success_context, indent=2)}")
                 logger.info(f"Added connection {connection.connection_id} for user {connection.user_id} (thread-safe)")
                 
                 # CRITICAL FIX: Process any queued messages for this user after connection established
@@ -590,8 +590,8 @@ class UnifiedWebSocketManager:
                     "golden_path_stage": "message_recovery_processing"
                 }
                 
-                logger.info(f"📤 GOLDEN PATH MESSAGE RECOVERY: Processing {len(queued_messages)} queued messages for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
-                logger.info(f"🔍 MESSAGE RECOVERY CONTEXT: {json.dumps(recovery_context, indent=2)}")
+                logger.info(f"[U+1F4E4] GOLDEN PATH MESSAGE RECOVERY: Processing {len(queued_messages)} queued messages for user {connection.user_id[:8] if connection.user_id else 'unknown'}...")
+                logger.info(f" SEARCH:  MESSAGE RECOVERY CONTEXT: {json.dumps(recovery_context, indent=2)}")
                 
                 # HANG FIX: Await the processing to ensure messages are sent before method returns
                 # This prevents test hanging where the test expects messages but they're still processing
@@ -614,8 +614,8 @@ class UnifiedWebSocketManager:
                         "golden_path_milestone": "Message recovery completed successfully"
                     }
                     
-                    logger.info(f"✅ GOLDEN PATH RECOVERY SUCCESS: Processed {len(queued_messages)} queued messages for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {recovery_duration*1000:.2f}ms")
-                    logger.info(f"🔍 RECOVERY SUCCESS CONTEXT: {json.dumps(recovery_success_context, indent=2)}")
+                    logger.info(f" PASS:  GOLDEN PATH RECOVERY SUCCESS: Processed {len(queued_messages)} queued messages for user {connection.user_id[:8] if connection.user_id else 'unknown'}... in {recovery_duration*1000:.2f}ms")
+                    logger.info(f" SEARCH:  RECOVERY SUCCESS CONTEXT: {json.dumps(recovery_success_context, indent=2)}")
                     
                 except asyncio.TimeoutError:
                     recovery_duration = time.time() - recovery_start
@@ -631,8 +631,8 @@ class UnifiedWebSocketManager:
                         "golden_path_impact": "WARNING - Message recovery timed out, messages may be lost"
                     }
                     
-                    logger.warning(f"⚠️ GOLDEN PATH RECOVERY TIMEOUT: Message recovery timed out for user {connection.user_id[:8] if connection.user_id else 'unknown'}... after {recovery_duration:.3f}s")
-                    logger.warning(f"🔍 RECOVERY TIMEOUT CONTEXT: {json.dumps(timeout_context, indent=2)}")
+                    logger.warning(f" WARNING: [U+FE0F] GOLDEN PATH RECOVERY TIMEOUT: Message recovery timed out for user {connection.user_id[:8] if connection.user_id else 'unknown'}... after {recovery_duration:.3f}s")
+                    logger.warning(f" SEARCH:  RECOVERY TIMEOUT CONTEXT: {json.dumps(timeout_context, indent=2)}")
                     logger.error(f"Timeout processing queued messages for user {connection.user_id}")
                     
                 except Exception as e:
@@ -650,8 +650,8 @@ class UnifiedWebSocketManager:
                         "golden_path_impact": "WARNING - Message recovery failed, messages may be lost"
                     }
                     
-                    logger.warning(f"⚠️ GOLDEN PATH RECOVERY ERROR: Message recovery failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}... after {recovery_duration:.3f}s")
-                    logger.warning(f"🔍 RECOVERY ERROR CONTEXT: {json.dumps(recovery_error_context, indent=2)}")
+                    logger.warning(f" WARNING: [U+FE0F] GOLDEN PATH RECOVERY ERROR: Message recovery failed for user {connection.user_id[:8] if connection.user_id else 'unknown'}... after {recovery_duration:.3f}s")
+                    logger.warning(f" SEARCH:  RECOVERY ERROR CONTEXT: {json.dumps(recovery_error_context, indent=2)}")
                     logger.error(f"Error processing queued messages for user {connection.user_id}: {e}")
     
     async def remove_connection(self, connection_id: Union[str, ConnectionID]) -> None:
@@ -864,7 +864,7 @@ class UnifiedWebSocketManager:
             for key, value in message.items():
                 if key.endswith('_user_id') and value != validated_user_id:
                     logger.error(
-                        f"🚨 CROSS-USER CONTAMINATION DETECTED: Message for user {validated_user_id} "
+                        f" ALERT:  CROSS-USER CONTAMINATION DETECTED: Message for user {validated_user_id} "
                         f"contains foreign user_id in field '{key}': {value}"
                     )
                     self._event_queue_stats['contamination_prevented'] += 1
@@ -873,7 +873,7 @@ class UnifiedWebSocketManager:
                     # Sanitize the message
                     message = message.copy()
                     message[key] = validated_user_id
-                    logger.warning(f"🧹 Sanitized contaminated field '{key}' for user {validated_user_id}")
+                    logger.warning(f"[U+1F9F9] Sanitized contaminated field '{key}' for user {validated_user_id}")
         
         # Track event delivery
         self._event_delivery_tracking[event_id] = {
@@ -1031,7 +1031,7 @@ class UnifiedWebSocketManager:
                 "staging.netrasystems.ai" in backend_url or 
                 "staging.netrasystems.ai" in auth_service_url or
                 "netra-staging" in gcp_project):
-                logger.info("🔍 GCP staging environment auto-detected - adjusting WebSocket retry configuration")
+                logger.info(" SEARCH:  GCP staging environment auto-detected - adjusting WebSocket retry configuration")
                 environment = "staging"
         
         # Retry configuration based on environment
@@ -1773,7 +1773,7 @@ class UnifiedWebSocketManager:
                 # Calculate exponential backoff delay with jitter
                 import random
                 base_backoff = min(base_delay * (2 ** (failure_count - 1)), max_delay)
-                jitter = base_backoff * 0.1 * (0.5 - random.random())  # ±5% jitter
+                jitter = base_backoff * 0.1 * (0.5 - random.random())  #  +/- 5% jitter
                 delay = base_backoff + jitter
                 
                 logger.warning(
@@ -2470,7 +2470,7 @@ class UnifiedWebSocketManager:
                 connection.thread_id = validated_thread_id
                 logger.info(
                     f"Updated thread association for connection {validated_connection_id}: "
-                    f"{old_thread_id} → {validated_thread_id}"
+                    f"{old_thread_id}  ->  {validated_thread_id}"
                 )
                 return True
             else:
@@ -2553,7 +2553,7 @@ class UnifiedWebSocketManager:
         
         # Use existing connect_user method
         connection_id = await self.connect_user(user_id, websocket)
-        logger.info(f"🔗 SSOT INTERFACE: Handled connection for user {user_id[:8]}... → {connection_id}")
+        logger.info(f"[U+1F517] SSOT INTERFACE: Handled connection for user {user_id[:8]}...  ->  {connection_id}")
         return connection_id
     
     # ISSUE #414 FIX: Event contamination monitoring and prevention methods
@@ -2574,17 +2574,17 @@ class UnifiedWebSocketManager:
     async def validate_event_isolation(self, user_id: str, connection_id: str) -> bool:
         """Validate event isolation for user and connection (Issue #414 validation)."""
         if connection_id not in self._event_isolation_tokens:
-            logger.warning(f"⚠️ Connection {connection_id} has no isolation token")
+            logger.warning(f" WARNING: [U+FE0F] Connection {connection_id} has no isolation token")
             return False
         
         if connection_id not in self._connections:
-            logger.warning(f"⚠️ Connection {connection_id} not found in active connections")
+            logger.warning(f" WARNING: [U+FE0F] Connection {connection_id} not found in active connections")
             return False
         
         connection = self._connections[connection_id]
         if connection.user_id != user_id:
             logger.error(
-                f"🚨 ISOLATION VIOLATION: Connection {connection_id} user mismatch. "
+                f" ALERT:  ISOLATION VIOLATION: Connection {connection_id} user mismatch. "
                 f"Expected: {user_id}, Actual: {connection.user_id}"
             )
             self._cross_user_detection[user_id] = self._cross_user_detection.get(user_id, 0) + 1
@@ -2606,7 +2606,7 @@ class UnifiedWebSocketManager:
             del self._event_delivery_tracking[event_id]
         
         if expired_events:
-            logger.info(f"🧹 Cleaned up {len(expired_events)} expired event tracking entries")
+            logger.info(f"[U+1F9F9] Cleaned up {len(expired_events)} expired event tracking entries")
     
     async def force_cleanup_user_events(self, user_id: str):
         """Force cleanup of all event tracking for a specific user (Issue #414 isolation)."""
@@ -2633,7 +2633,7 @@ class UnifiedWebSocketManager:
         for event_id in user_events:
             del self._event_delivery_tracking[event_id]
         
-        logger.info(f"🧹 Force cleaned up all event tracking for user {user_id}")
+        logger.info(f"[U+1F9F9] Force cleaned up all event tracking for user {user_id}")
     
     def detect_queue_overflow(self, user_id: str) -> bool:
         """Detect if user's event queue is approaching overflow (Issue #414 monitoring)."""
@@ -2644,7 +2644,7 @@ class UnifiedWebSocketManager:
         utilization = queue.qsize() / 1000.0  # Max size is 1000
         
         if utilization > 0.9:  # 90% full
-            logger.warning(f"🚨 Event queue near overflow for user {user_id}: {queue.qsize()}/1000")
+            logger.warning(f" ALERT:  Event queue near overflow for user {user_id}: {queue.qsize()}/1000")
             self._event_queue_stats['queue_overflows'] += 1
             return True
         
@@ -2670,7 +2670,7 @@ class UnifiedWebSocketManager:
             for conn_id in connection_ids:
                 await self.remove_connection(conn_id)
         
-        logger.info(f"🔌 SSOT INTERFACE: Handled disconnection for user {user_id[:8]}...")
+        logger.info(f"[U+1F50C] SSOT INTERFACE: Handled disconnection for user {user_id[:8]}...")
     
     async def send_agent_event(self, user_id: Union[str, UserID], event_type: str, data: Dict[str, Any]) -> None:
         """
@@ -2719,7 +2719,7 @@ class UnifiedWebSocketManager:
         for conn_id in connection_ids:
             await self.remove_connection(conn_id)
         
-        logger.info(f"🗑️ SSOT INTERFACE: Removed all connections for user {user_id[:8]}...")
+        logger.info(f"[U+1F5D1][U+FE0F] SSOT INTERFACE: Removed all connections for user {user_id[:8]}...")
     
     def is_user_connected(self, user_id: Union[str, UserID]) -> bool:
         """
@@ -2842,7 +2842,7 @@ class UnifiedWebSocketManager:
         """
         self._transaction_coordinator = coordinator
         self._coordination_enabled = True
-        logger.info("🔗 Transaction coordinator linked to WebSocket manager")
+        logger.info("[U+1F517] Transaction coordinator linked to WebSocket manager")
         
     async def send_event_after_commit(self, transaction_id: str, event_type: str, event_data: Dict[str, Any],
                                      connection_id: Optional[str] = None, user_id: Optional[str] = None,
@@ -2863,7 +2863,7 @@ class UnifiedWebSocketManager:
         """
         if not self._coordination_enabled or not self._transaction_coordinator:
             # Fallback: send immediately if coordination not enabled
-            logger.warning(f"⚠️ Transaction coordination not enabled - sending WebSocket event '{event_type}' immediately")
+            logger.warning(f" WARNING: [U+FE0F] Transaction coordination not enabled - sending WebSocket event '{event_type}' immediately")
             return await self._send_event_immediate(event_type, event_data, connection_id, user_id)
             
         # Queue event for after transaction commit
@@ -2877,7 +2877,7 @@ class UnifiedWebSocketManager:
             priority=priority
         )
         
-        logger.debug(f"📤 Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
+        logger.debug(f"[U+1F4E4] Queued WebSocket event '{event_type}' for transaction {transaction_id[:8]}... "
                     f"(user: {user_id}, priority: {priority})")
         
     async def _send_event_immediate(self, event_type: str, event_data: Dict[str, Any],
@@ -2905,24 +2905,24 @@ class UnifiedWebSocketManager:
                 if connection_id in self._connections:
                     connection = self._connections[connection_id]
                     await connection.websocket.send_json(_serialize_message_safely(message))
-                    logger.debug(f"📤 Sent WebSocket event '{event_type}' to connection {connection_id}")
+                    logger.debug(f"[U+1F4E4] Sent WebSocket event '{event_type}' to connection {connection_id}")
                     return True
                 else:
-                    logger.warning(f"⚠️ Connection {connection_id} not found for event '{event_type}'")
+                    logger.warning(f" WARNING: [U+FE0F] Connection {connection_id} not found for event '{event_type}'")
                     return False
                     
             elif user_id:
                 # Send to all user connections
                 await self.send_to_user(user_id, message)
-                logger.debug(f"📤 Sent WebSocket event '{event_type}' to user {user_id}")
+                logger.debug(f"[U+1F4E4] Sent WebSocket event '{event_type}' to user {user_id}")
                 return True
                 
             else:
-                logger.warning(f"⚠️ No connection_id or user_id specified for event '{event_type}'")
+                logger.warning(f" WARNING: [U+FE0F] No connection_id or user_id specified for event '{event_type}'")
                 return False
                 
         except Exception as e:
-            logger.error(f"❌ Failed to send immediate WebSocket event '{event_type}': {type(e).__name__}: {e}")
+            logger.error(f" FAIL:  Failed to send immediate WebSocket event '{event_type}': {type(e).__name__}: {e}")
             return False
             
     def is_coordination_enabled(self) -> bool:
@@ -3005,12 +3005,12 @@ class UnifiedWebSocketManager:
 
 
 # SECURITY FIX: Replace singleton with factory pattern
-# 🚨 SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
+#  ALERT:  SECURITY FIX: Singleton pattern completely removed to prevent multi-user data leakage
 # Use create_websocket_manager(user_context) or WebSocketBridgeFactory instead
 
 def get_websocket_manager() -> UnifiedWebSocketManager:
     """
-    🚨 CRITICAL SECURITY ERROR: This function has been REMOVED.
+     ALERT:  CRITICAL SECURITY ERROR: This function has been REMOVED.
     
     This function created critical security vulnerabilities in multi-user environments,
     causing user data leakage and authentication bypass.
@@ -3044,7 +3044,7 @@ def get_websocket_manager() -> UnifiedWebSocketManager:
         caller_info = f"{frame.f_back.f_code.co_filename}:{frame.f_back.f_lineno}"
     
     error_message = (
-        f"🚨 CRITICAL SECURITY ERROR: get_websocket_manager() has been REMOVED for security. "
+        f" ALERT:  CRITICAL SECURITY ERROR: get_websocket_manager() has been REMOVED for security. "
         f"Called from: {caller_info}. "
         f"This function caused USER DATA LEAKAGE between different users. "
         f"Migrate to WebSocketBridgeFactory or create_websocket_manager(user_context)."

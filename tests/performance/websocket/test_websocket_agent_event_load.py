@@ -331,7 +331,7 @@ class WebSocketAgentLoadTester:
         
         self.monitor.start_load_session(session_id, load_config)
         
-        logger.info(f"🚀 Starting load test: {concurrent_users} users, {agents_per_user} agents/user")
+        logger.info(f"[U+1F680] Starting load test: {concurrent_users} users, {agents_per_user} agents/user")
         
         # Start resource monitoring
         monitoring_task = asyncio.create_task(self._continuous_resource_monitoring())
@@ -611,7 +611,7 @@ class TestWebSocketAgentEventLoad:
         monitor = WebSocketAgentLoadMonitor()
         tester = WebSocketAgentLoadTester(monitor)
         
-        logger.info(f"🚀 Starting 100-user concurrent WebSocket agent load test")
+        logger.info(f"[U+1F680] Starting 100-user concurrent WebSocket agent load test")
         
         # Force garbage collection before load test
         gc.collect()
@@ -669,7 +669,7 @@ class TestWebSocketAgentEventLoad:
             assert throughput_performance["avg_events_per_second"] >= 50.0, \
                 f"Throughput too low under load: {throughput_performance['avg_events_per_second']:.1f} events/s"
         
-        logger.info("✅ 100-user concurrent WebSocket agent load VALIDATED")
+        logger.info(" PASS:  100-user concurrent WebSocket agent load VALIDATED")
         logger.info(f"  Users: {result['successful_users']}/{concurrent_users}")
         logger.info(f"  Agents: {result['total_successful_agents']}/{result['total_agents_attempted']}")
         logger.info(f"  SLA compliance: {load_compliance['overall_sla_compliance']:.1%}")
@@ -694,7 +694,7 @@ class TestWebSocketAgentEventLoad:
         monitor = WebSocketAgentLoadMonitor()
         tester = WebSocketAgentLoadTester(monitor)
         
-        logger.info("🚀 Starting escalating load WebSocket performance scaling test")
+        logger.info("[U+1F680] Starting escalating load WebSocket performance scaling test")
         
         scaling_results = {}
         
@@ -761,7 +761,7 @@ class TestWebSocketAgentEventLoad:
         assert max_throughput >= min_throughput * 2.0, \
             f"Throughput scaling insufficient: {max_throughput:.1f} vs {min_throughput:.1f} events/s"
         
-        logger.info("✅ Escalating load WebSocket performance scaling VALIDATED")
+        logger.info(" PASS:  Escalating load WebSocket performance scaling VALIDATED")
         for load_level in load_levels:
             result = scaling_results[load_level]
             logger.info(f"  {load_level} users: {result['agent_success_rate']:.1%} success, "
@@ -781,7 +781,7 @@ class TestWebSocketAgentEventLoad:
         monitor = WebSocketAgentLoadMonitor()
         tester = WebSocketAgentLoadTester(monitor)
         
-        logger.info("🚀 Starting sustained load memory stability test")
+        logger.info("[U+1F680] Starting sustained load memory stability test")
         
         # Record initial memory baseline
         initial_memory = psutil.virtual_memory().percent
@@ -835,7 +835,7 @@ class TestWebSocketAgentEventLoad:
                 assert memory_trend <= 5.0, \
                     f"Memory trending upward during sustained load: {memory_trend:.1f}% increase"
         
-        logger.info("✅ Sustained load memory stability VALIDATED")
+        logger.info(" PASS:  Sustained load memory stability VALIDATED")
         logger.info(f"  Duration: {sustained_duration}s")
         logger.info(f"  System memory change: {memory_increase:+.1f}%")
         logger.info(f"  Process memory change: {process_memory_increase:+.1f}MB")
@@ -856,7 +856,7 @@ class TestWebSocketAgentEventLoad:
         monitor = WebSocketAgentLoadMonitor()
         tester = WebSocketAgentLoadTester(monitor)
         
-        logger.info("🚀 Starting high-frequency WebSocket events load test")
+        logger.info("[U+1F680] Starting high-frequency WebSocket events load test")
         
         async def high_frequency_user_simulation(user_index: int) -> Dict[str, Any]:
             """Simulate user generating high-frequency events."""
@@ -951,7 +951,7 @@ class TestWebSocketAgentEventLoad:
             assert overall_max_latency <= 1000.0, \
                 f"Burst caused excessive latency: {overall_max_latency:.1f}ms > 1000ms"
         
-        logger.info("✅ High-frequency WebSocket events load VALIDATED")
+        logger.info(" PASS:  High-frequency WebSocket events load VALIDATED")
         logger.info(f"  Burst users: {len(successful_bursts)}/{burst_users}")
         logger.info(f"  Total events: {total_burst_events}")
         logger.info(f"  Event rate: {burst_event_rate:.1f} events/s")

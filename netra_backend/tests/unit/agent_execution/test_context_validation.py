@@ -2,7 +2,7 @@
 Unit Tests for Agent Execution Context Validation
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) with critical focus on Enterprise security
+- Segment: ALL (Free  ->  Enterprise) with critical focus on Enterprise security
 - Business Goal: Multi-tenant security and data isolation compliance
 - Value Impact: Prevents $500K+ ARR loss from security breaches and ensures enterprise compliance
 - Strategic Impact: Enables secure multi-user platform operation and enterprise customer confidence

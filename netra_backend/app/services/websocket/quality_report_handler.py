@@ -104,7 +104,7 @@ class QualityReportHandler(BaseMessageHandler):
         payload = self._build_report_payload(markdown_report, report_data)
         message = {"type": "quality_report_generated", "payload": payload}
         
-        # ✅ CORRECT - Maintains session continuity
+        #  PASS:  CORRECT - Maintains session continuity
         user_context = get_user_execution_context(
             user_id=user_id,
             thread_id=None,  # Let session manager handle missing IDs
@@ -126,7 +126,7 @@ class QualityReportHandler(BaseMessageHandler):
         logger.error(f"Error generating quality report: {str(error)}")
         error_message = f"Failed to generate report: {str(error)}"
         try:
-            # ✅ CORRECT - Maintains session continuity
+            #  PASS:  CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs

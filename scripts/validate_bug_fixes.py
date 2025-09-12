@@ -6,7 +6,7 @@ Validates the logic of the bug fixes without requiring full environment setup
 
 def validate_websocket_factory_fix():
     """Validate the WebSocket factory validation logic."""
-    print("🔍 Validating WebSocket Factory Fix...")
+    print(" SEARCH:  Validating WebSocket Factory Fix...")
     
     # Simulate the validation logic without actual imports
     class MockLegacyUserExecutionContext:
@@ -45,7 +45,7 @@ def validate_websocket_factory_fix():
                 raise ValueError(f"Missing required attribute: {attr}")
         
         context_type_name = "SSOT" if is_ssot_type else "Legacy"
-        print(f"   ✓ {context_type_name} UserExecutionContext validation passed")
+        print(f"   [U+2713] {context_type_name} UserExecutionContext validation passed")
         return True
     
     # Test cases
@@ -62,22 +62,22 @@ def validate_websocket_factory_fix():
         try:
             invalid_context = MockInvalidContext()
             mock_validate_context(invalid_context)
-            print("   ✗ Invalid context should have failed validation")
+            print("   [U+2717] Invalid context should have failed validation")
             return False
         except ValueError:
-            print("   ✓ Invalid context properly rejected")
+            print("   [U+2713] Invalid context properly rejected")
         
-        print("✅ WebSocket Factory Fix validation: PASSED")
+        print(" PASS:  WebSocket Factory Fix validation: PASSED")
         return True
         
     except Exception as e:
-        print(f"✗ WebSocket Factory Fix validation: FAILED - {e}")
+        print(f"[U+2717] WebSocket Factory Fix validation: FAILED - {e}")
         return False
 
 
 def validate_database_manager_fix():
     """Validate the DatabaseTestManager setup_test_session method."""
-    print("\n🔍 Validating DatabaseTestManager Fix...")
+    print("\n SEARCH:  Validating DatabaseTestManager Fix...")
     
     class MockDatabaseTestUtility:
         def __init__(self):
@@ -86,7 +86,7 @@ def validate_database_manager_fix():
         
         async def initialize(self):
             self.is_initialized = True
-            print("   ✓ Mock utility initialized")
+            print("   [U+2713] Mock utility initialized")
     
     class MockDatabaseTestManager:
         def __init__(self):
@@ -99,7 +99,7 @@ def validate_database_manager_fix():
             await self._utility.initialize()
             self.engine = self._utility.async_engine
             self.is_initialized = True
-            print("   ✓ DatabaseTestManager initialized")
+            print("   [U+2713] DatabaseTestManager initialized")
         
         async def setup_test_session(self):
             """Setup test database session (legacy interface) - THE FIX."""
@@ -111,7 +111,7 @@ def validate_database_manager_fix():
             
             # Store reference for compatibility
             self.engine = self._utility.async_engine
-            print("   ✓ DatabaseTestManager test session setup completed")
+            print("   [U+2713] DatabaseTestManager test session setup completed")
     
     # Test the fixed functionality
     try:
@@ -136,21 +136,21 @@ def validate_database_manager_fix():
         result = asyncio.run(test_setup())
         
         if result:
-            print("✅ DatabaseTestManager Fix validation: PASSED")
+            print(" PASS:  DatabaseTestManager Fix validation: PASSED")
             return True
         else:
-            print("✗ DatabaseTestManager Fix validation: FAILED")
+            print("[U+2717] DatabaseTestManager Fix validation: FAILED")
             return False
             
     except Exception as e:
-        print(f"✗ DatabaseTestManager Fix validation: FAILED - {e}")
+        print(f"[U+2717] DatabaseTestManager Fix validation: FAILED - {e}")
         return False
 
 
 def main():
     """Run all validation checks."""
     print("=" * 60)
-    print("🧪 BUG FIX VALIDATION REPORT")
+    print("[U+1F9EA] BUG FIX VALIDATION REPORT")
     print("=" * 60)
     
     validation_results = []
@@ -165,22 +165,22 @@ def main():
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 VALIDATION SUMMARY")
+    print(" CHART:  VALIDATION SUMMARY")
     print("=" * 60)
     
     all_passed = True
     for fix_name, result in validation_results:
-        status = "✅ PASSED" if result else "❌ FAILED"
+        status = " PASS:  PASSED" if result else " FAIL:  FAILED"
         print(f"{fix_name}: {status}")
         if not result:
             all_passed = False
     
     print("\n" + "=" * 60)
     if all_passed:
-        print("🎉 ALL FIXES VALIDATED SUCCESSFULLY")
+        print(" CELEBRATION:  ALL FIXES VALIDATED SUCCESSFULLY")
         print("The bug fixes should resolve the failing integration tests.")
     else:
-        print("⚠️  SOME FIXES FAILED VALIDATION")
+        print(" WARNING: [U+FE0F]  SOME FIXES FAILED VALIDATION")
         print("Review the failed validations and adjust the implementations.")
     
     print("=" * 60)

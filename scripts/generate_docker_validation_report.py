@@ -357,7 +357,7 @@ def print_validation_summary(report: dict):
         if 'metrics' in details:
             key_metrics = list(details['metrics'].items())[:2]  # Show first 2 metrics
             for metric, value in key_metrics:
-                print(f"   • {metric.replace('_', ' ').title()}: {value}")
+                print(f"   [U+2022] {metric.replace('_', ' ').title()}: {value}")
         print()
     
     # Performance metrics

@@ -1,12 +1,12 @@
 """User and authentication related database models.
 
-🔴 CRITICAL: Auth Service Architecture
+[U+1F534] CRITICAL: Auth Service Architecture
 - The User table stores user PROFILE data only
 - Authentication is handled by the EXTERNAL auth service
 - The hashed_password field is ONLY managed by the auth service
 - Main backend must NEVER directly authenticate users or hash passwords
 
-⚠️ IMPORTANT:
+ WARNING: [U+FE0F] IMPORTANT:
 - User records are created/updated by the auth service
 - Main backend can READ user data for authorization
 - Main backend must NEVER write to authentication fields

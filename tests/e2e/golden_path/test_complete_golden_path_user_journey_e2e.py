@@ -13,9 +13,9 @@ Business Value Justification (BVJ):
 
 GOLDEN PATH FLOW TESTED:
 ```
-User Opens Browser → Authentication → WebSocket Connection → 
-Send Message → Agent Execution → All 5 WebSocket Events → 
-Business Value Delivery (Cost Savings) → Thread Persistence → Success
+User Opens Browser  ->  Authentication  ->  WebSocket Connection  ->  
+Send Message  ->  Agent Execution  ->  All 5 WebSocket Events  ->  
+Business Value Delivery (Cost Savings)  ->  Thread Persistence  ->  Success
 ```
 
 CRITICAL REQUIREMENTS (per CLAUDE.md):
@@ -66,7 +66,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
     CRITICAL: Primary Golden Path validation test.
     
     This test validates the complete user journey that generates business value:
-    Authentication → WebSocket → Message → Agent Execution → Business Value
+    Authentication  ->  WebSocket  ->  Message  ->  Agent Execution  ->  Business Value
     
     BUSINESS IMPACT: $500K+ ARR protection through complete journey validation.
     """
@@ -112,7 +112,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
         # Create WebSocket bridge for the user context
         self.websocket_bridge = create_agent_websocket_bridge(self.base_user_context)
         
-        self.logger.info("✅ Golden Path test environment initialized with real UserExecutionContext")
+        self.logger.info(" PASS:  Golden Path test environment initialized with real UserExecutionContext")
     
     @pytest.mark.timeout(60)  # Maximum 60 seconds per CLAUDE.md
     async def test_complete_golden_path_user_journey_with_business_value(self, websocket_context_scenarios, clean_context_registry):
@@ -129,7 +129,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
         
         BUSINESS VALUE: Cost optimization insights with quantified savings > $0
         """
-        self.logger.info("🚀 CRITICAL: Starting Complete Golden Path User Journey E2E Test")
+        self.logger.info("[U+1F680] CRITICAL: Starting Complete Golden Path User Journey E2E Test")
         
         # Step 1: Use realistic user context with high-frequency WebSocket scenario
         user_context = websocket_context_scenarios["high_frequency"]
@@ -145,7 +145,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
         user_id = str(user_context.user_id)
         thread_id = str(user_context.thread_id)
         
-        self.logger.info(f"✅ Step 1: User authenticated - UserID: {user_id}")
+        self.logger.info(f" PASS:  Step 1: User authenticated - UserID: {user_id}")
         
         # Step 2: Establish WebSocket connection with user context
         websocket_url = "ws://localhost:8000/ws"  # Real backend WebSocket
@@ -157,7 +157,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             "WebSocket-Client-ID": user_context.websocket_client_id
         }
         
-        self.logger.info(f"🔌 Step 2: Connecting to WebSocket with authentication")
+        self.logger.info(f"[U+1F50C] Step 2: Connecting to WebSocket with authentication")
         
         collected_events = []
         business_value_data = {}
@@ -169,7 +169,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             close_timeout=5.0
         ) as websocket:
             
-            self.logger.info("✅ Step 2: WebSocket connection established")
+            self.logger.info(" PASS:  Step 2: WebSocket connection established")
             
             # Step 3: Send business-focused message
             optimization_request = {
@@ -186,7 +186,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             }
             
             await websocket.send(json.dumps(optimization_request))
-            self.logger.info("✅ Step 3: Cost optimization request sent")
+            self.logger.info(" PASS:  Step 3: Cost optimization request sent")
             
             # Step 4: Collect all WebSocket events during agent execution
             timeout = 45.0  # Allow enough time for agent execution
@@ -202,7 +202,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
                     collected_events.append(event_data)
                     event_type = event_data.get("type", "unknown")
                     
-                    self.logger.info(f"📨 Received WebSocket event: {event_type}")
+                    self.logger.info(f"[U+1F4E8] Received WebSocket event: {event_type}")
                     
                     # Track business value data
                     if event_type == "agent_completed":
@@ -214,11 +214,11 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
                         elif "savings" in response_data:
                             business_value_data = response_data
                         
-                        self.logger.info(f"🎯 Agent execution completed with business data")
+                        self.logger.info(f" TARGET:  Agent execution completed with business data")
                     
                     # Log other critical events
                     if event_type in ["agent_started", "agent_thinking", "tool_executing", "tool_completed"]:
-                        self.logger.info(f"✅ Critical event received: {event_type}")
+                        self.logger.info(f" PASS:  Critical event received: {event_type}")
                         
                 except asyncio.TimeoutError:
                     # Continue listening - timeout is for individual messages, not overall
@@ -230,10 +230,10 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
                     self.logger.error(f"WebSocket receive error: {e}")
                     break
             
-            self.logger.info(f"📊 Step 4: Collected {len(collected_events)} WebSocket events")
+            self.logger.info(f" CHART:  Step 4: Collected {len(collected_events)} WebSocket events")
         
         # Step 5: Validate all required WebSocket events were sent
-        self.logger.info("🔍 Step 5: Validating WebSocket events...")
+        self.logger.info(" SEARCH:  Step 5: Validating WebSocket events...")
         
         # CRITICAL: All 5 events MUST be present per CLAUDE.md
         required_events = [
@@ -254,10 +254,10 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             f"Events received: {event_types}"
         )
         
-        self.logger.info("✅ Step 5: All 5 required WebSocket events validated")
+        self.logger.info(" PASS:  Step 5: All 5 required WebSocket events validated")
         
         # Step 6: Validate business value delivery
-        self.logger.info("💰 Step 6: Validating business value delivery...")
+        self.logger.info("[U+1F4B0] Step 6: Validating business value delivery...")
         
         # CRITICAL: Must deliver actual business value (cost optimization)
         assert business_value_data, (
@@ -292,10 +292,10 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             f"Received savings: {savings_amount}. Golden Path MUST provide positive ROI."
         )
         
-        self.logger.info(f"✅ Step 6: Business value validated - Cost savings: ${savings_amount}")
+        self.logger.info(f" PASS:  Step 6: Business value validated - Cost savings: ${savings_amount}")
         
         # Step 7: Verify data persistence (thread continuity)
-        self.logger.info("💾 Step 7: Verifying data persistence...")
+        self.logger.info("[U+1F4BE] Step 7: Verifying data persistence...")
         
         # Make authenticated API call to verify thread persistence
         backend_url = "http://localhost:8000"  # Real backend service
@@ -336,7 +336,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
                 "Golden Path REQUIRES complete conversation persistence."
             )
         
-        self.logger.info("✅ Step 7: Data persistence verified - Thread and messages stored")
+        self.logger.info(" PASS:  Step 7: Data persistence verified - Thread and messages stored")
         
         # FINAL: Record Golden Path success metrics
         golden_path_metrics = {
@@ -349,15 +349,15 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             "arr_protection": "validated"
         }
         
-        self.logger.info("🎉 GOLDEN PATH SUCCESS: Complete user journey validated")
-        self.logger.info(f"📊 Final Metrics: {json.dumps(golden_path_metrics, indent=2)}")
+        self.logger.info(" CELEBRATION:  GOLDEN PATH SUCCESS: Complete user journey validated")
+        self.logger.info(f" CHART:  Final Metrics: {json.dumps(golden_path_metrics, indent=2)}")
         
         # Assert final business value delivery
         assert golden_path_metrics["business_value_delivered"], (
             "CRITICAL FAILURE: Golden Path did not complete with business value delivery"
         )
         
-        self.logger.info("✅ COMPLETE GOLDEN PATH USER JOURNEY E2E TEST PASSED")
+        self.logger.info(" PASS:  COMPLETE GOLDEN PATH USER JOURNEY E2E TEST PASSED")
     
     @pytest.mark.timeout(45)  
     async def test_golden_path_authentication_to_websocket_flow(self, websocket_context_scenarios, clean_context_registry):
@@ -367,7 +367,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
         This validates the critical authentication handshake that enables
         all subsequent business value delivery.
         """
-        self.logger.info("🔐 Testing Golden Path Authentication to WebSocket Flow")
+        self.logger.info("[U+1F510] Testing Golden Path Authentication to WebSocket Flow")
         
         # Use new connection scenario for authentication testing
         user_context = websocket_context_scenarios["new_connection"]
@@ -397,7 +397,7 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             "CRITICAL: JWT token user_id mismatch with user context"
         )
         
-        self.logger.info("✅ JWT token validation passed")
+        self.logger.info(" PASS:  JWT token validation passed")
         
         # Test WebSocket connection with user context authentication
         websocket_url = "ws://localhost:8000/ws"
@@ -433,12 +433,12 @@ class TestCompleteGoldenPathUserJourneyE2E(SSotAsyncTestCase):
             "CRITICAL: WebSocket authentication flow failed"
         )
         
-        self.logger.info("✅ Authentication to WebSocket flow validated")
+        self.logger.info(" PASS:  Authentication to WebSocket flow validated")
     
     async def teardown_method(self, method=None):
         """Clean up test resources."""
         await super().cleanup_resources()
-        self.logger.info("🧹 Golden Path User Journey E2E test cleanup completed")
+        self.logger.info("[U+1F9F9] Golden Path User Journey E2E test cleanup completed")
 
 
 # BUSINESS VALUE VALIDATION HELPERS
@@ -488,7 +488,7 @@ def validate_business_value_response(response_data: Dict[str, Any]) -> Dict[str,
     )
     
     # Count recommendations (rough estimate)
-    recommendation_indicators = ["1.", "2.", "3.", "first", "second", "third", "•", "-"]
+    recommendation_indicators = ["1.", "2.", "3.", "first", "second", "third", "[U+2022]", "-"]
     business_value["recommendations_count"] = sum(
         response_text.count(indicator) for indicator in recommendation_indicators
     )

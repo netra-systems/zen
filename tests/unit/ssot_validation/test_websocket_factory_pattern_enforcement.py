@@ -243,35 +243,35 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
             if "get_websocket_manager()" in v.function_call
         ]
         
-        self.logger.info(f"🔍 Singleton get_websocket_manager() violations: {len(singleton_violations)}")
+        self.logger.info(f" SEARCH:  Singleton get_websocket_manager() violations: {len(singleton_violations)}")
         
         if singleton_violations:
-            self.logger.warning("🚨 SECURITY VIOLATION: Singleton WebSocket manager usage found")
-            self.logger.warning("❌ These patterns create user data leakage risks:")
+            self.logger.warning(" ALERT:  SECURITY VIOLATION: Singleton WebSocket manager usage found")
+            self.logger.warning(" FAIL:  These patterns create user data leakage risks:")
             
             for i, violation in enumerate(singleton_violations[:5], 1):  # Show first 5
                 self.logger.warning(f"   {i}. {violation.file_path}:{violation.line_number}")
-                self.logger.warning(f"      ❌ {violation.function_call}")
-                self.logger.warning(f"      🚨 Risk: {violation.security_risk}")
-                self.logger.warning(f"      ✅ Replace: {violation.factory_replacement}")
+                self.logger.warning(f"       FAIL:  {violation.function_call}")
+                self.logger.warning(f"       ALERT:  Risk: {violation.security_risk}")
+                self.logger.warning(f"       PASS:  Replace: {violation.factory_replacement}")
         
         # ASSERTION: No singleton get_websocket_manager() calls allowed
         assert len(singleton_violations) == 0, (
             f"Found {len(singleton_violations)} singleton get_websocket_manager() calls. "
             f"These create CRITICAL SECURITY VULNERABILITIES.\n\n"
-            f"🚨 SECURITY RISK: Singleton patterns cause user data leakage\n"
-            f"• User A's messages could be sent to User B's WebSocket\n"
-            f"• Shared manager state creates race conditions\n"
-            f"• No proper user isolation or context enforcement\n\n"
-            f"✅ SECURE REPLACEMENT PATTERN:\n"
+            f" ALERT:  SECURITY RISK: Singleton patterns cause user data leakage\n"
+            f"[U+2022] User A's messages could be sent to User B's WebSocket\n"
+            f"[U+2022] Shared manager state creates race conditions\n"
+            f"[U+2022] No proper user isolation or context enforcement\n\n"
+            f" PASS:  SECURE REPLACEMENT PATTERN:\n"
             f"```python\n"
             f"from netra_backend.app.websocket_core.canonical_imports import WebSocketManagerFactory\n"
             f"factory = WebSocketManagerFactory()\n"
             f"manager = await factory.create_isolated_manager(user_id, connection_id)\n"
             f"```\n\n"
-            f"❌ INSECURE PATTERN (DO NOT USE):\n"
+            f" FAIL:  INSECURE PATTERN (DO NOT USE):\n"
             f"```python\n"
-            f"manager = get_websocket_manager()  # 🚨 SECURITY VIOLATION\n"
+            f"manager = get_websocket_manager()  #  ALERT:  SECURITY VIOLATION\n"
             f"```"
         )
 
@@ -328,7 +328,7 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
                         "User data could leak between different users."
                     )
                 
-                self.logger.info("✅ Factory isolation test passed - users properly isolated")
+                self.logger.info(" PASS:  Factory isolation test passed - users properly isolated")
                 return True
                 
             except Exception as e:
@@ -355,9 +355,9 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
         # Check that we have some factory usage (indicating migration progress)
         factory_usage = validation_result.factory_usage_count
         
-        self.logger.info(f"🏭 Factory pattern usage count: {factory_usage}")
-        self.logger.info(f"🚨 Singleton violations: {validation_result.singleton_violations_found}")
-        self.logger.info(f"📊 Security compliance: {validation_result.security_compliance_score:.1f}%")
+        self.logger.info(f"[U+1F3ED] Factory pattern usage count: {factory_usage}")
+        self.logger.info(f" ALERT:  Singleton violations: {validation_result.singleton_violations_found}")
+        self.logger.info(f" CHART:  Security compliance: {validation_result.security_compliance_score:.1f}%")
         
         # If we have factory usage, ensure it includes user context
         if factory_usage > 0:
@@ -384,11 +384,11 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
                     continue
             
             if context_violations:
-                self.logger.warning("⚠️ Factory calls without user context found:")
+                self.logger.warning(" WARNING: [U+FE0F] Factory calls without user context found:")
                 for violation in context_violations[:3]:
-                    self.logger.warning(f"   📁 {violation['file']}:{violation['line']}")
-                    self.logger.warning(f"   ❌ {violation['code']}")
-                    self.logger.warning(f"   ✅ Must include user_id parameter for isolation")
+                    self.logger.warning(f"   [U+1F4C1] {violation['file']}:{violation['line']}")
+                    self.logger.warning(f"    FAIL:  {violation['code']}")
+                    self.logger.warning(f"    PASS:  Must include user_id parameter for isolation")
             
             # This is a warning for now, not a hard failure
             # We want to encourage correct usage without blocking progress
@@ -399,11 +399,11 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
                 )
         
         # Document the requirement regardless of current state
-        self.logger.info("📋 USER CONTEXT REQUIREMENTS:")
-        self.logger.info("   ✅ All WebSocket managers must have user context")
-        self.logger.info("   ✅ Factory calls must include user_id parameter")
-        self.logger.info("   ✅ ConnectionID must be unique per user session")
-        self.logger.info("   ❌ Anonymous or shared managers are not allowed")
+        self.logger.info("[U+1F4CB] USER CONTEXT REQUIREMENTS:")
+        self.logger.info("    PASS:  All WebSocket managers must have user context")
+        self.logger.info("    PASS:  Factory calls must include user_id parameter")
+        self.logger.info("    PASS:  ConnectionID must be unique per user session")
+        self.logger.info("    FAIL:  Anonymous or shared managers are not allowed")
         
         # Pass test - this documents requirements and provides warnings
         assert True, "User context enforcement documented - see warnings above"
@@ -423,46 +423,46 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
         compliance_score = validation_result.security_compliance_score
         
         # Log comprehensive security analysis
-        self.logger.info("🔐 WEBSOCKET SECURITY ANALYSIS:")
+        self.logger.info("[U+1F510] WEBSOCKET SECURITY ANALYSIS:")
         self.logger.info("=" * 50)
-        self.logger.info(f"🚨 Singleton violations: {total_violations}")
-        self.logger.info(f"🏭 Factory pattern usage: {factory_usage}")
-        self.logger.info(f"📊 Security compliance: {compliance_score:.1f}%")
+        self.logger.info(f" ALERT:  Singleton violations: {total_violations}")
+        self.logger.info(f"[U+1F3ED] Factory pattern usage: {factory_usage}")
+        self.logger.info(f" CHART:  Security compliance: {compliance_score:.1f}%")
         
         # Security risk assessment
         if total_violations > 50:
             risk_level = "CRITICAL"
-            risk_color = "🔴"
+            risk_color = "[U+1F534]"
         elif total_violations > 20:
             risk_level = "HIGH"
-            risk_color = "🟠"
+            risk_color = "[U+1F7E0]"
         elif total_violations > 5:
             risk_level = "MEDIUM"
-            risk_color = "🟡"
+            risk_color = "[U+1F7E1]"
         else:
             risk_level = "LOW"
-            risk_color = "🟢"
+            risk_color = "[U+1F7E2]"
             
         self.logger.info(f"{risk_color} Security Risk Level: {risk_level}")
         
         # Provide security roadmap
-        self.logger.info("\n🛡️ SECURITY ROADMAP:")
+        self.logger.info("\n[U+1F6E1][U+FE0F] SECURITY ROADMAP:")
         if total_violations > 0:
             self.logger.info(f"   1. Eliminate remaining {total_violations} singleton violations")
             self.logger.info(f"   2. Replace with factory pattern for user isolation")
             self.logger.info(f"   3. Add user context validation to all factory calls")
             self.logger.info(f"   4. Test multi-user isolation scenarios")
         else:
-            self.logger.info("   ✅ All singleton patterns eliminated!")
-            self.logger.info("   ✅ Factory patterns provide proper user isolation")
-            self.logger.info("   ✅ Security requirements met")
+            self.logger.info("    PASS:  All singleton patterns eliminated!")
+            self.logger.info("    PASS:  Factory patterns provide proper user isolation")
+            self.logger.info("    PASS:  Security requirements met")
         
         # Track improvement milestones
         security_milestones = [
-            (0, "🎉 SECURITY MILESTONE: All singleton violations eliminated!"),
-            (5, "🎯 Near-complete security: <5 violations remaining"),
-            (20, "📈 Good progress: Major security violations reduced"),
-            (50, "🚨 Security attention needed: >50 critical violations"),
+            (0, " CELEBRATION:  SECURITY MILESTONE: All singleton violations eliminated!"),
+            (5, " TARGET:  Near-complete security: <5 violations remaining"),
+            (20, "[U+1F4C8] Good progress: Major security violations reduced"),
+            (50, " ALERT:  Security attention needed: >50 critical violations"),
         ]
         
         for threshold, message in security_milestones:
@@ -492,10 +492,10 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
         """
         validation_result = self._scan_for_singleton_violations()
         
-        self.logger.info("🏭 WEBSOCKET FACTORY PATTERN IMPLEMENTATION GUIDE")
+        self.logger.info("[U+1F3ED] WEBSOCKET FACTORY PATTERN IMPLEMENTATION GUIDE")
         self.logger.info("=" * 60)
         
-        self.logger.info("\n✅ SECURE FACTORY PATTERN (USE THIS):")
+        self.logger.info("\n PASS:  SECURE FACTORY PATTERN (USE THIS):")
         self.logger.info("```python")
         self.logger.info("from netra_backend.app.websocket_core.canonical_imports import (")
         self.logger.info("    WebSocketManagerFactory,")
@@ -516,20 +516,20 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
         self.logger.info(")")
         self.logger.info("```")
         
-        self.logger.info("\n❌ INSECURE SINGLETON PATTERNS (NEVER USE):")
+        self.logger.info("\n FAIL:  INSECURE SINGLETON PATTERNS (NEVER USE):")
         self.logger.info("```python")
-        self.logger.info("# 🚨 SECURITY VIOLATION - Shared across users")
+        self.logger.info("#  ALERT:  SECURITY VIOLATION - Shared across users")
         self.logger.info("manager = get_websocket_manager()")
         self.logger.info("")
-        self.logger.info("# 🚨 SECURITY VIOLATION - No user context")
+        self.logger.info("#  ALERT:  SECURITY VIOLATION - No user context")
         self.logger.info("manager = UnifiedWebSocketManager()")
         self.logger.info("")
-        self.logger.info("# 🚨 SECURITY VIOLATION - Global singleton")
+        self.logger.info("#  ALERT:  SECURITY VIOLATION - Global singleton")
         self.logger.info("manager = WebSocketManager.instance()")
         self.logger.info("```")
         
         if validation_result.violations:
-            self.logger.info(f"\n🔧 IMMEDIATE ACTION REQUIRED:")
+            self.logger.info(f"\n[U+1F527] IMMEDIATE ACTION REQUIRED:")
             self.logger.info(f"   Found {len(validation_result.violations)} singleton violations")
             self.logger.info(f"   Priority files for remediation:")
             
@@ -544,17 +544,17 @@ class TestWebSocketFactoryPatternEnforcement(SSotBaseTestCase):
             for i, (file_path, violations) in enumerate(list(file_violations.items())[:5], 1):
                 self.logger.info(f"   {i}. {file_path} ({len(violations)} violations)")
         else:
-            self.logger.info("\n🎉 EXCELLENT: No singleton violations found!")
+            self.logger.info("\n CELEBRATION:  EXCELLENT: No singleton violations found!")
             self.logger.info("   All WebSocket patterns follow secure factory pattern")
         
         # Security checklist
-        self.logger.info("\n📋 SECURITY IMPLEMENTATION CHECKLIST:")
-        self.logger.info("   ✅ Replace get_websocket_manager() with factory pattern")
-        self.logger.info("   ✅ Include user_id in all manager creation calls")
-        self.logger.info("   ✅ Use unique ConnectionID per user session")
-        self.logger.info("   ✅ Test user isolation (no message cross-contamination)")
-        self.logger.info("   ✅ Validate factory creates unique instances")
-        self.logger.info("   ✅ Remove any singleton decorators or global instances")
+        self.logger.info("\n[U+1F4CB] SECURITY IMPLEMENTATION CHECKLIST:")
+        self.logger.info("    PASS:  Replace get_websocket_manager() with factory pattern")
+        self.logger.info("    PASS:  Include user_id in all manager creation calls")
+        self.logger.info("    PASS:  Use unique ConnectionID per user session")
+        self.logger.info("    PASS:  Test user isolation (no message cross-contamination)")
+        self.logger.info("    PASS:  Validate factory creates unique instances")
+        self.logger.info("    PASS:  Remove any singleton decorators or global instances")
         
         # Always pass - this is educational
         assert True, "Factory pattern implementation guide provided"

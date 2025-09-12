@@ -56,7 +56,7 @@ class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
         
         REPRODUCES: ValueError: SECRET_KEY must be at least 32 characters long
         BUSINESS IMPACT: Blocks $500K+ ARR authentication flows in staging/production
-        ESCALATION PATTERN: 15-30 seconds → 40+ occurrences per day
+        ESCALATION PATTERN: 15-30 seconds  ->  40+ occurrences per day
         """
         # Set up failing scenario: SHORT SECRET_KEY (< 32 characters)
         invalid_secret = "short_key_123"  # Only 13 characters, should fail
@@ -100,7 +100,7 @@ class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
             )
         
         self._track_metric("session_middleware_failures", "invalid_secret_key_error", 1)
-        print(f"✅ REPRODUCED: Invalid SECRET_KEY error - {error_message}")
+        print(f" PASS:  REPRODUCED: Invalid SECRET_KEY error - {error_message}")
 
     def test_sessionmiddleware_installation_with_none_secret_key(self):
         """
@@ -144,7 +144,7 @@ class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
         )
         
         self._track_metric("session_middleware_failures", "none_secret_key_error", 1)
-        print(f"✅ REPRODUCED: None SECRET_KEY error - {error_message}")
+        print(f" PASS:  REPRODUCED: None SECRET_KEY error - {error_message}")
 
     def test_sessionmiddleware_installation_with_default_secret_key(self):
         """
@@ -187,7 +187,7 @@ class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
                     assert False, f"SECURITY FAILURE: Insecure default key accepted: {insecure_key}"
             
             error_message = str(exc_info.value)
-            print(f"✅ REPRODUCED: Insecure default rejected - {insecure_key}: {error_message}")
+            print(f" PASS:  REPRODUCED: Insecure default rejected - {insecure_key}: {error_message}")
             
             self._track_metric("session_middleware_failures", "insecure_default_rejected", 1)
 
@@ -227,7 +227,7 @@ class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
         )
         
         self._track_metric("session_middleware_failures", "middleware_not_installed", 1)
-        print(f"✅ REPRODUCED: SessionMiddleware not installed error - {error_message}")
+        print(f" PASS:  REPRODUCED: SessionMiddleware not installed error - {error_message}")
 
     def test_gcp_staging_middleware_order_causing_session_failure(self):
         """
@@ -286,9 +286,9 @@ class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
         pattern_found = any(pattern.lower() in error_message.lower() for pattern in expected_patterns)
         if pattern_found:
             self._track_metric("session_middleware_failures", "gcp_middleware_order_error", 1)
-            print(f"✅ REPRODUCED: GCP middleware order error - {error_message}")
+            print(f" PASS:  REPRODUCED: GCP middleware order error - {error_message}")
         else:
-            print(f"⚠️  PARTIAL REPRODUCTION: Middleware order issue detected but different error: {error_message}")
+            print(f" WARNING: [U+FE0F]  PARTIAL REPRODUCTION: Middleware order issue detected but different error: {error_message}")
 
     def test_concurrent_session_access_race_condition(self):
         """
@@ -363,7 +363,7 @@ class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
             # Check for race conditions or session conflicts
             if race_condition_detected or errors:
                 self._track_metric("session_middleware_failures", "concurrent_race_condition", 1)
-                print(f"✅ REPRODUCED: Session race condition - Errors: {errors}")
+                print(f" PASS:  REPRODUCED: Session race condition - Errors: {errors}")
                 
                 # This test succeeds if it detects the race condition
                 assert race_condition_detected or errors, (
@@ -371,7 +371,7 @@ class TestSessionMiddlewareInstallationFailureReproduction(SSotBaseTestCase):
                 )
             else:
                 # If no race conditions detected, the test "fails" by not reproducing the issue
-                print("⚠️  RACE CONDITION NOT REPRODUCED: Concurrent access appeared stable")
+                print(" WARNING: [U+FE0F]  RACE CONDITION NOT REPRODUCED: Concurrent access appeared stable")
                 # Let the test pass - might need different concurrency approach to reproduce
 
 

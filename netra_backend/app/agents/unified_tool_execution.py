@@ -112,7 +112,7 @@ async def enhance_tool_dispatcher_with_notifications(
     # Mark as enhanced to prevent double enhancement
     tool_dispatcher._websocket_enhanced = True
     
-    logger.info("✅ Tool dispatcher enhanced with WebSocket notifications and user isolation support")
+    logger.info(" PASS:  Tool dispatcher enhanced with WebSocket notifications and user isolation support")
     return tool_dispatcher
 
 
@@ -166,7 +166,7 @@ class UnifiedToolExecutionEngine:
         # Process monitoring
         self._process = psutil.Process(os.getpid())
         
-        logger.info(f"🔒 Security controls initialized: timeout={self.default_timeout}s, memory={self.max_memory_mb}MB, concurrent={self.max_concurrent_per_user}")
+        logger.info(f"[U+1F512] Security controls initialized: timeout={self.default_timeout}s, memory={self.max_memory_mb}MB, concurrent={self.max_concurrent_per_user}")
     
     # Core execution methods with WebSocket notifications
     
@@ -570,7 +570,7 @@ class UnifiedToolExecutionEngine:
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
             error_msg = f"Tool {tool_name} executing without context - USER WILL NOT SEE PROGRESS"
-            logger.critical(f"🚨 CONTEXT VALIDATION FAILURE: {error_msg}")
+            logger.critical(f" ALERT:  CONTEXT VALIDATION FAILURE: {error_msg}")
             
             # MONITORING: Track failure
             self.notification_monitor.track_silent_failure_detected(
@@ -602,8 +602,8 @@ class UnifiedToolExecutionEngine:
             
         if not self.websocket_bridge:
             error_msg = f"Tool {tool_name} executing for run_id {context.run_id} - EVENTS WILL BE LOST"
-            logger.critical(f"🚨 WEBSOCKET BRIDGE UNAVAILABLE: {error_msg}")
-            logger.critical(f"🚨 Thread {context.thread_id} will not receive any tool progress notifications")
+            logger.critical(f" ALERT:  WEBSOCKET BRIDGE UNAVAILABLE: {error_msg}")
+            logger.critical(f" ALERT:  Thread {context.thread_id} will not receive any tool progress notifications")
             
             # MONITORING: Track failure
             self.notification_monitor.track_silent_failure_detected(
@@ -632,7 +632,7 @@ class UnifiedToolExecutionEngine:
             
             # DEFENSIVE: Validate bridge has required method before calling
             if not hasattr(self.websocket_bridge, 'notify_tool_executing'):
-                logger.critical(f"🚨 BRIDGE MISSING METHOD: notify_tool_executing not found")
+                logger.critical(f" ALERT:  BRIDGE MISSING METHOD: notify_tool_executing not found")
                 
                 # MONITORING: Track method missing failure
                 self.notification_monitor.track_notification_failed(
@@ -651,7 +651,7 @@ class UnifiedToolExecutionEngine:
             
             # DEFENSIVE: Check if notification succeeded
             if result is False:
-                logger.warning(f"⚠️ Tool executing notification failed for {tool_name} (returned False)")
+                logger.warning(f" WARNING: [U+FE0F] Tool executing notification failed for {tool_name} (returned False)")
                 
                 # MONITORING: Track notification failure
                 self.notification_monitor.track_notification_failed(
@@ -662,8 +662,8 @@ class UnifiedToolExecutionEngine:
                 self.notification_monitor.track_notification_delivered(correlation_id, delivery_time_ms)
                 
         except Exception as e:
-            logger.error(f"🚨 EXCEPTION in tool_executing notification for {tool_name}: {e}")
-            logger.error("🚨 User will not see tool execution start - check WebSocket connectivity")
+            logger.error(f" ALERT:  EXCEPTION in tool_executing notification for {tool_name}: {e}")
+            logger.error(" ALERT:  User will not see tool execution start - check WebSocket connectivity")
             
             # MONITORING: Track notification exception
             self.notification_monitor.track_notification_failed(
@@ -683,7 +683,7 @@ class UnifiedToolExecutionEngine:
         # CRITICAL: Always attempt to notify, with fallback
         if not context:
             error_msg = f"Tool {tool_name} completed without context - USER WILL NOT SEE RESULTS"
-            logger.critical(f"🚨 CONTEXT VALIDATION FAILURE: {error_msg}")
+            logger.critical(f" ALERT:  CONTEXT VALIDATION FAILURE: {error_msg}")
             
             # MONITORING: Track failure
             self.notification_monitor.track_silent_failure_detected(
@@ -729,8 +729,8 @@ class UnifiedToolExecutionEngine:
             
         if not self.websocket_bridge:
             error_msg = f"Tool {tool_name} completed for run_id {context.run_id} - RESULTS WILL BE LOST"
-            logger.critical(f"🚨 WEBSOCKET BRIDGE UNAVAILABLE: {error_msg}")
-            logger.critical(f"🚨 Thread {context.thread_id} status: {status}, duration: {duration_ms:.0f}ms")
+            logger.critical(f" ALERT:  WEBSOCKET BRIDGE UNAVAILABLE: {error_msg}")
+            logger.critical(f" ALERT:  Thread {context.thread_id} status: {status}, duration: {duration_ms:.0f}ms")
             
             # MONITORING: Track failure
             self.notification_monitor.track_silent_failure_detected(
@@ -772,7 +772,7 @@ class UnifiedToolExecutionEngine:
             
             # DEFENSIVE: Validate bridge has required method before calling
             if not hasattr(self.websocket_bridge, 'notify_tool_completed'):
-                logger.critical(f"🚨 BRIDGE MISSING METHOD: notify_tool_completed not found")
+                logger.critical(f" ALERT:  BRIDGE MISSING METHOD: notify_tool_completed not found")
                 
                 # MONITORING: Track method missing failure
                 self.notification_monitor.track_notification_failed(
@@ -792,7 +792,7 @@ class UnifiedToolExecutionEngine:
             
             # DEFENSIVE: Check if notification succeeded
             if notification_result is False:
-                logger.warning(f"⚠️ Tool completed notification failed for {tool_name} (returned False)")
+                logger.warning(f" WARNING: [U+FE0F] Tool completed notification failed for {tool_name} (returned False)")
                 
                 # MONITORING: Track notification failure
                 self.notification_monitor.track_notification_failed(
@@ -803,8 +803,8 @@ class UnifiedToolExecutionEngine:
                 self.notification_monitor.track_notification_delivered(correlation_id, notification_time_ms)
                 
         except Exception as e:
-            logger.error(f"🚨 EXCEPTION in tool_completed notification for {tool_name}: {e}")
-            logger.error("🚨 User will not see tool completion - check WebSocket connectivity")
+            logger.error(f" ALERT:  EXCEPTION in tool_completed notification for {tool_name}: {e}")
+            logger.error(" ALERT:  User will not see tool completion - check WebSocket connectivity")
             
             # MONITORING: Track notification exception
             self.notification_monitor.track_notification_failed(
@@ -1063,16 +1063,16 @@ class UnifiedToolExecutionEngine:
         for execution_id in executions_to_remove:
             if execution_id in self._active_executions:
                 del self._active_executions[execution_id]
-                logger.warning(f"🧨 Cleaned up stuck execution: {execution_id}")
+                logger.warning(f"[U+1F9E8] Cleaned up stuck execution: {execution_id}")
         
         # Reset user execution count
         if user_id in self._user_execution_counts:
             old_count = self._user_execution_counts[user_id]
             del self._user_execution_counts[user_id]
-            logger.warning(f"🧨 Reset user execution count for {user_id}: {old_count} -> 0")
+            logger.warning(f"[U+1F9E8] Reset user execution count for {user_id}: {old_count} -> 0")
         
         if cleanup_count > 0:
-            logger.info(f"🧨 Emergency cleanup completed for user {user_id}: {cleanup_count} executions cleaned")
+            logger.info(f"[U+1F9E8] Emergency cleanup completed for user {user_id}: {cleanup_count} executions cleaned")
         
         return cleanup_count
     
@@ -1196,7 +1196,7 @@ class UnifiedToolExecutionEngine:
         Returns:
             Dictionary with shutdown statistics
         """
-        logger.critical("🚨 EMERGENCY SHUTDOWN: Terminating all active executions")
+        logger.critical(" ALERT:  EMERGENCY SHUTDOWN: Terminating all active executions")
         
         shutdown_count = len(self._active_executions)
         user_counts = self._user_execution_counts.copy()
@@ -1209,7 +1209,7 @@ class UnifiedToolExecutionEngine:
         # Reset metrics except for permanent counters
         self._execution_metrics['failed_executions'] += shutdown_count
         
-        logger.critical(f"🚨 Emergency shutdown completed: {shutdown_count} executions terminated")
+        logger.critical(f" ALERT:  Emergency shutdown completed: {shutdown_count} executions terminated")
         
         return {
             "shutdown_executions": shutdown_count,
@@ -1226,5 +1226,5 @@ class UnifiedToolExecutionEngine:
 # See: reports/TOOL_EXECUTION_CONSOLIDATION_REPORT.md - "backward compatibility wrapper"
 EnhancedToolExecutionEngine = UnifiedToolExecutionEngine
 
-logger.debug("✅ EnhancedToolExecutionEngine registered as backward compatibility alias for UnifiedToolExecutionEngine")
+logger.debug(" PASS:  EnhancedToolExecutionEngine registered as backward compatibility alias for UnifiedToolExecutionEngine")
 

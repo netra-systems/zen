@@ -73,7 +73,7 @@ class UserWebSocketContext:
             logger.debug(f"UserWebSocketContext already cleaned for user {self.user_id}")
             return
         
-        logger.info(f"🧹 Cleaning up UserWebSocketContext (SSOT redirect) for user {self.user_id}")
+        logger.info(f"[U+1F9F9] Cleaning up UserWebSocketContext (SSOT redirect) for user {self.user_id}")
         
         try:
             # Run cleanup callbacks
@@ -91,10 +91,10 @@ class UserWebSocketContext:
             self.connection_status = ConnectionStatus.CLOSED
             self._is_cleaned = True
             
-            logger.info(f"✅ UserWebSocketContext cleanup completed for user {self.user_id}")
+            logger.info(f" PASS:  UserWebSocketContext cleanup completed for user {self.user_id}")
             
         except Exception as e:
-            logger.error(f"❌ UserWebSocketContext cleanup failed for user {self.user_id}: {e}")
+            logger.error(f" FAIL:  UserWebSocketContext cleanup failed for user {self.user_id}: {e}")
             self._is_cleaned = True
 
 
@@ -195,7 +195,7 @@ class WebSocketBridgeFactory:
         """Initialize the WebSocket bridge factory (SSOT redirect)."""
         self.config = config or WebSocketFactoryConfig.from_env()
         
-        logger.info("🔄 WebSocketBridgeFactory → SSOT (UnifiedWebSocketManager + UnifiedWebSocketEmitter)")
+        logger.info(" CYCLE:  WebSocketBridgeFactory  ->  SSOT (UnifiedWebSocketManager + UnifiedWebSocketEmitter)")
         
         # Initialize monitoring
         self.notification_monitor = get_websocket_notification_monitor()
@@ -217,7 +217,7 @@ class WebSocketBridgeFactory:
             'ssot_redirect': True
         }
         
-        logger.info("✅ WebSocketBridgeFactory initialized (SSOT redirect mode)")
+        logger.info(" PASS:  WebSocketBridgeFactory initialized (SSOT redirect mode)")
         
     def configure(self, 
                  connection_pool: WebSocketConnectionPool,
@@ -240,7 +240,7 @@ class WebSocketBridgeFactory:
         # Get or create the unified WebSocket manager (SSOT)
         self._unified_manager = UnifiedWebSocketManager()
         
-        logger.info("✅ WebSocketBridgeFactory configured (SSOT redirect mode)")
+        logger.info(" PASS:  WebSocketBridgeFactory configured (SSOT redirect mode)")
         
     async def create_user_emitter(self, 
                                 user_id: str, 
@@ -267,7 +267,7 @@ class WebSocketBridgeFactory:
         start_time = time.time()
         
         try:
-            logger.info(f"🔄 Creating UserWebSocketEmitter → UnifiedWebSocketEmitter for user {user_id}")
+            logger.info(f" CYCLE:  Creating UserWebSocketEmitter  ->  UnifiedWebSocketEmitter for user {user_id}")
             
             # Create SSOT emitter with legacy compatibility
             unified_emitter = UnifiedWebSocketEmitter(
@@ -301,7 +301,7 @@ class WebSocketBridgeFactory:
                 correlation_id, creation_time_ms
             )
             
-            logger.info(f"✅ UserWebSocketEmitter (SSOT) created for user {user_id} in {creation_time_ms:.1f}ms")
+            logger.info(f" PASS:  UserWebSocketEmitter (SSOT) created for user {user_id} in {creation_time_ms:.1f}ms")
             
             return user_emitter
             
@@ -313,7 +313,7 @@ class WebSocketBridgeFactory:
                 correlation_id, str(e), creation_time_ms
             )
             
-            logger.error(f"❌ Failed to create WebSocket emitter (SSOT) for user {user_id}: {e}")
+            logger.error(f" FAIL:  Failed to create WebSocket emitter (SSOT) for user {user_id}: {e}")
             raise RuntimeError(f"WebSocket emitter creation failed: {e}")
     
     async def cleanup_user_context(self, user_id: str, connection_id: str) -> None:
@@ -336,7 +336,7 @@ class WebSocketBridgeFactory:
             },
             'timestamp': datetime.now(timezone.utc).isoformat(),
             'ssot_mode': True,
-            'emitter_type': 'WebSocketBridgeFactory → UnifiedWebSocketEmitter'
+            'emitter_type': 'WebSocketBridgeFactory  ->  UnifiedWebSocketEmitter'
         }
 
 
@@ -369,7 +369,7 @@ class UserWebSocketEmitter:
         self._events_sent = 0
         self._events_failed = 0
         
-        logger.info(f"🔄 UserWebSocketEmitter → UnifiedWebSocketEmitter for user {user_id}")
+        logger.info(f" CYCLE:  UserWebSocketEmitter  ->  UnifiedWebSocketEmitter for user {user_id}")
         
     async def notify_agent_started(self, agent_name: str, run_id: str) -> None:
         """Send agent started notification via SSOT emitter."""
@@ -395,7 +395,7 @@ class UserWebSocketEmitter:
             except Exception as e:
                 self._events_failed += 1
                 self.factory._factory_metrics['events_failed_total'] += 1
-                logger.error(f"🚨 SSOT redirect failed for agent_started: {e}")
+                logger.error(f" ALERT:  SSOT redirect failed for agent_started: {e}")
                 raise
         
     async def notify_agent_thinking(self, agent_name: str, run_id: str, thinking: str) -> None:
@@ -413,7 +413,7 @@ class UserWebSocketEmitter:
         except Exception as e:
             self._events_failed += 1
             self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f"🚨 SSOT redirect failed for agent_thinking: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for agent_thinking: {e}")
             raise
         
     async def notify_tool_executing(self, agent_name: str, run_id: str, tool_name: str, tool_input: Dict[str, Any]) -> None:
@@ -433,7 +433,7 @@ class UserWebSocketEmitter:
         except Exception as e:
             self._events_failed += 1
             self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f"🚨 SSOT redirect failed for tool_executing: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for tool_executing: {e}")
             raise
         
     async def notify_tool_completed(self, agent_name: str, run_id: str, tool_name: str, tool_output: Any) -> None:
@@ -453,7 +453,7 @@ class UserWebSocketEmitter:
         except Exception as e:
             self._events_failed += 1
             self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f"🚨 SSOT redirect failed for tool_completed: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for tool_completed: {e}")
             raise
         
     async def notify_agent_completed(self, agent_name: str, run_id: str, result: Any) -> None:
@@ -472,7 +472,7 @@ class UserWebSocketEmitter:
         except Exception as e:
             self._events_failed += 1
             self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f"🚨 SSOT redirect failed for agent_completed: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for agent_completed: {e}")
             raise
     
     async def notify_agent_error(self, agent_name: str, run_id: str, error: str) -> None:
@@ -491,7 +491,7 @@ class UserWebSocketEmitter:
         except Exception as e:
             self._events_failed += 1
             self.factory._factory_metrics['events_failed_total'] += 1
-            logger.error(f"🚨 SSOT redirect failed for agent_error: {e}")
+            logger.error(f" ALERT:  SSOT redirect failed for agent_error: {e}")
             raise
     
     # Security sanitization methods (preserved for compatibility)
@@ -558,13 +558,13 @@ class UserWebSocketEmitter:
     async def cleanup(self) -> None:
         """Clean up emitter resources (SSOT delegated)."""
         try:
-            logger.info(f"✅ UserWebSocketEmitter (SSOT) cleanup completed for user {self.user_id}")
+            logger.info(f" PASS:  UserWebSocketEmitter (SSOT) cleanup completed for user {self.user_id}")
             
             # Notify factory of cleanup
             await self.factory.cleanup_user_context(self.user_id, self.connection_id)
             
         except Exception as e:
-            logger.error(f"❌ UserWebSocketEmitter (SSOT) cleanup failed for user {self.user_id}: {e}")
+            logger.error(f" FAIL:  UserWebSocketEmitter (SSOT) cleanup failed for user {self.user_id}: {e}")
 
 
 # Compatibility classes for backward compatibility
@@ -668,5 +668,5 @@ def get_websocket_bridge_factory() -> WebSocketBridgeFactory:
     global _websocket_bridge_factory
     if _websocket_bridge_factory is None:
         _websocket_bridge_factory = WebSocketBridgeFactory()
-        logger.info("✅ WebSocketBridgeFactory singleton created (SSOT redirect mode)")
+        logger.info(" PASS:  WebSocketBridgeFactory singleton created (SSOT redirect mode)")
     return _websocket_bridge_factory

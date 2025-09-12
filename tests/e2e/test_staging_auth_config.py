@@ -69,7 +69,7 @@ logger = logging.getLogger(__name__)
         # REMOVED_SYNTAX_ERROR: assert "staging" in config_response.endpoints.callback, \
         # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-        # REMOVED_SYNTAX_ERROR: logger.info(f"✓ Staging auth config correctly configured - no dev login exposed")
+        # REMOVED_SYNTAX_ERROR: logger.info(f"[U+2713] Staging auth config correctly configured - no dev login exposed")
 
         # REMOVED_SYNTAX_ERROR: except Exception as e:
             # Config might fail due to missing OAuth credentials, but that's ok
@@ -112,7 +112,7 @@ logger = logging.getLogger(__name__)
         # REMOVED_SYNTAX_ERROR: assert "strictly forbidden" in str(exc_info.value.detail).lower()
         # REMOVED_SYNTAX_ERROR: assert "staging" in str(exc_info.value.detail).lower()
 
-        # REMOVED_SYNTAX_ERROR: logger.info("✓ Dev login correctly blocked in staging environment")
+        # REMOVED_SYNTAX_ERROR: logger.info("[U+2713] Dev login correctly blocked in staging environment")
 
         # Removed problematic line: @pytest.mark.asyncio
         # Removed problematic line: async def test_production_auth_config_no_dev_login():
@@ -139,7 +139,7 @@ logger = logging.getLogger(__name__)
                 # REMOVED_SYNTAX_ERROR: assert auth_url == "https://auth.netrasystems.ai", "formatted_string"
                 # REMOVED_SYNTAX_ERROR: assert frontend_url == "https://netrasystems.ai", "formatted_string"
 
-                # REMOVED_SYNTAX_ERROR: logger.info("✓ Production environment correctly detected")
+                # REMOVED_SYNTAX_ERROR: logger.info("[U+2713] Production environment correctly detected")
 
                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                     # REMOVED_SYNTAX_ERROR: import asyncio
@@ -149,7 +149,7 @@ logger = logging.getLogger(__name__)
     # REMOVED_SYNTAX_ERROR: await test_dev_login_blocked_in_staging()
     # REMOVED_SYNTAX_ERROR: await test_production_auth_config_no_dev_login()
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: All tests passed ✓")
+    # REMOVED_SYNTAX_ERROR: All tests passed [U+2713]")
 
     # REMOVED_SYNTAX_ERROR: asyncio.run(run_tests())
     # REMOVED_SYNTAX_ERROR: pass

@@ -63,7 +63,7 @@ def test_optional_service_behavior():
             exception_raised = False
         except Exception as e:
             exception_raised = True
-            print(f"❌ ERROR: Optional service raised exception: {e}")
+            print(f" FAIL:  ERROR: Optional service raised exception: {e}")
             return False
             
         log_output = log_capture.getvalue()
@@ -80,17 +80,17 @@ def test_optional_service_behavior():
         
         # Check that no exception was raised (graceful degradation)
         if exception_raised:
-            print("❌ FAIL: Optional service should not raise exception")
+            print(" FAIL:  FAIL: Optional service should not raise exception")
             return False
             
         # Check that no ERROR logs were generated
         if error_logs:
-            print(f"❌ FAIL: Optional service should not log ERROR, found: {error_logs}")
+            print(f" FAIL:  FAIL: Optional service should not log ERROR, found: {error_logs}")
             return False
             
         # Check that WARNING logs were generated
         if not warning_logs:
-            print("❌ FAIL: Optional service should log WARNING for graceful degradation")
+            print(" FAIL:  FAIL: Optional service should log WARNING for graceful degradation")
             return False
             
         # Check for expected warning patterns
@@ -101,11 +101,11 @@ def test_optional_service_behavior():
                 found_patterns.append(pattern)
                 
         if not found_patterns:
-            print(f"❌ FAIL: Expected warning patterns not found: {expected_patterns}")
+            print(f" FAIL:  FAIL: Expected warning patterns not found: {expected_patterns}")
             print(f"Actual warnings: {warning_logs}")
             return False
             
-        print("✅ PASS: Optional service behavior correct")
+        print(" PASS:  PASS: Optional service behavior correct")
         return True
 
 
@@ -141,20 +141,20 @@ def test_required_service_behavior():
         
         # Check that exception was raised (fail fast for required services)
         if not exception_raised:
-            print("❌ FAIL: Required service should raise exception")
+            print(" FAIL:  FAIL: Required service should raise exception")
             return False
             
         # Check that ERROR logs were generated
         if not error_logs:
-            print("❌ FAIL: Required service should log ERROR")
+            print(" FAIL:  FAIL: Required service should log ERROR")
             return False
             
         # Check that degradation warnings were NOT generated
         if warning_logs:
-            print(f"❌ FAIL: Required service should not log graceful degradation warnings: {warning_logs}")
+            print(f" FAIL:  FAIL: Required service should not log graceful degradation warnings: {warning_logs}")
             return False
             
-        print("✅ PASS: Required service behavior correct")
+        print(" PASS:  PASS: Required service behavior correct")
         return True
 
 
@@ -183,17 +183,17 @@ def test_missing_required_flag():
         
         # Should default to optional behavior (CLICKHOUSE_REQUIRED defaults to false)
         if exception_raised:
-            print("❌ FAIL: Should default to optional behavior when CLICKHOUSE_REQUIRED is not set")
+            print(" FAIL:  FAIL: Should default to optional behavior when CLICKHOUSE_REQUIRED is not set")
             return False
             
         lines = log_output.strip().split('\n')
         warning_logs = [line for line in lines if 'WARNING' in line]
         
         if not warning_logs:
-            print("❌ FAIL: Should log WARNING when defaulting to optional behavior")
+            print(" FAIL:  FAIL: Should log WARNING when defaulting to optional behavior")
             return False
             
-        print("✅ PASS: Missing required flag defaults to optional behavior")
+        print(" PASS:  PASS: Missing required flag defaults to optional behavior")
         return True
 
 
@@ -218,19 +218,19 @@ def main():
             else:
                 failed += 1
         except Exception as e:
-            print(f"❌ EXCEPTION in {test.__name__}: {e}")
+            print(f" FAIL:  EXCEPTION in {test.__name__}: {e}")
             failed += 1
     
     print(f"\n=== SUMMARY ===")
-    print(f"✅ Passed: {passed}")
-    print(f"❌ Failed: {failed}")
+    print(f" PASS:  Passed: {passed}")
+    print(f" FAIL:  Failed: {failed}")
     print(f"Total: {passed + failed}")
     
     if failed == 0:
-        print("\n🎉 ALL TESTS PASSED - Fix is working correctly!")
+        print("\n CELEBRATION:  ALL TESTS PASSED - Fix is working correctly!")
         return True
     else:
-        print(f"\n💥 {failed} TESTS FAILED - Fix needs investigation!")
+        print(f"\n[U+1F4A5] {failed} TESTS FAILED - Fix needs investigation!")
         return False
 
 

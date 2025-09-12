@@ -340,40 +340,40 @@ class SSOTComplianceValidator:
         """Run all validation checks and return consolidated violations."""
         all_violations = []
         
-        print("🔍 Running comprehensive SSOT validation...")
+        print(" SEARCH:  Running comprehensive SSOT validation...")
         
         # Validation 1: Import consistency
-        print("  📋 Validating import consistency...")
+        print("  [U+1F4CB] Validating import consistency...")
         import_violations = self.validate_import_consistency()
         all_violations.extend(import_violations)
         print(f"    Found {len(import_violations)} import violations")
         
         # Validation 2: Single implementation
-        print("  🏗️  Validating single implementation...")
+        print("  [U+1F3D7][U+FE0F]  Validating single implementation...")
         impl_violations = self.validate_single_implementation()
         all_violations.extend(impl_violations)
         print(f"    Found {len(impl_violations)} implementation violations")
         
         # Validation 3: Factory pattern usage
-        print("  🏭 Validating factory pattern usage...")
+        print("  [U+1F3ED] Validating factory pattern usage...")
         factory_violations = self.validate_factory_pattern_usage()
         all_violations.extend(factory_violations)
         print(f"    Found {len(factory_violations)} factory pattern violations")
         
         # Validation 4: Interface consistency
-        print("  🔧 Validating interface consistency...")
+        print("  [U+1F527] Validating interface consistency...")
         interface_violations = self.validate_interface_consistency()
         all_violations.extend(interface_violations)
         print(f"    Found {len(interface_violations)} interface violations")
         
         # Validation 5: Golden Path compliance
-        print("  🎯 Validating Golden Path compliance...")
+        print("   TARGET:  Validating Golden Path compliance...")
         golden_path_violations = self.validate_golden_path_compliance()
         all_violations.extend(golden_path_violations)
         print(f"    Found {len(golden_path_violations)} Golden Path violations")
         
         # Validation 6: User isolation
-        print("  👤 Validating user isolation...")
+        print("  [U+1F464] Validating user isolation...")
         isolation_violations = self.validate_user_isolation()
         all_violations.extend(isolation_violations)
         print(f"    Found {len(isolation_violations)} user isolation violations")
@@ -433,9 +433,9 @@ class SSOTComplianceValidator:
         report.append(f"Target Compliance Score: {self.target_compliance_score}%")
         
         if compliance_score >= self.target_compliance_score and within_thresholds:
-            report.append("✅ COMPLIANCE STATUS: PASS")
+            report.append(" PASS:  COMPLIANCE STATUS: PASS")
         else:
-            report.append("❌ COMPLIANCE STATUS: FAIL")
+            report.append(" FAIL:  COMPLIANCE STATUS: FAIL")
         
         report.append(f"Total Violations Found: {len(violations)}")
         report.append("")
@@ -448,8 +448,8 @@ class SSOTComplianceValidator:
         report.append("Violation Breakdown by Severity:")
         for severity in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
             count = violation_counts.get(severity, 0)
-            threshold = self.compliance_thresholds.get(severity, '∞')
-            status = "✅" if count <= threshold else "❌"
+            threshold = self.compliance_thresholds.get(severity, ' infinity ')
+            status = " PASS: " if count <= threshold else " FAIL: "
             report.append(f"  {status} {severity}: {count} (threshold: {threshold})")
         
         report.append("")
@@ -461,7 +461,7 @@ class SSOTComplianceValidator:
         
         report.append("Violation Breakdown by Type:")
         for vtype, count in sorted(violation_types.items()):
-            report.append(f"  📋 {vtype}: {count} violations")
+            report.append(f"  [U+1F4CB] {vtype}: {count} violations")
         
         report.append("")
         
@@ -480,34 +480,34 @@ class SSOTComplianceValidator:
         
         # SSOT status summary
         report.append("SSOT Implementation Status:")
-        report.append(f"  📁 Canonical File: {self.canonical_file}")
-        report.append(f"  📋 Canonical Import: {self.canonical_import}")
+        report.append(f"  [U+1F4C1] Canonical File: {self.canonical_file}")
+        report.append(f"  [U+1F4CB] Canonical Import: {self.canonical_import}")
         
         if os.path.exists(self.canonical_file):
-            report.append("  ✅ Canonical implementation exists")
+            report.append("   PASS:  Canonical implementation exists")
         else:
-            report.append("  ❌ Canonical implementation missing")
+            report.append("   FAIL:  Canonical implementation missing")
         
         # Recommendations
         report.append("")
         report.append("Recommendations:")
         if compliance_score < self.target_compliance_score:
-            report.append("  🔄 Execute remediation phases 1-3 from SSOT plan")
-            report.append("  🧪 Run migration scripts for import consolidation")
-            report.append("  🏭 Implement factory pattern enforcement")
+            report.append("   CYCLE:  Execute remediation phases 1-3 from SSOT plan")
+            report.append("  [U+1F9EA] Run migration scripts for import consolidation")
+            report.append("  [U+1F3ED] Implement factory pattern enforcement")
         
         if violation_counts.get('CRITICAL', 0) > 0:
-            report.append("  🚨 URGENT: Address critical violations immediately")
+            report.append("   ALERT:  URGENT: Address critical violations immediately")
         
         if violation_counts.get('HIGH', 0) > self.compliance_thresholds['HIGH']:
-            report.append("  ⚠️  HIGH PRIORITY: Reduce high-severity violations")
+            report.append("   WARNING: [U+FE0F]  HIGH PRIORITY: Reduce high-severity violations")
         
         return "\n".join(report)
 
 def main():
     """Execute SSOT compliance validation."""
-    print("🔍 Starting WebSocketNotifier SSOT Compliance Validation")
-    print("📋 GitHub Issue #216 - Comprehensive SSOT Validation")
+    print(" SEARCH:  Starting WebSocketNotifier SSOT Compliance Validation")
+    print("[U+1F4CB] GitHub Issue #216 - Comprehensive SSOT Validation")
     print("=" * 60)
     
     validator = SSOTComplianceValidator()
@@ -516,7 +516,7 @@ def main():
     violations = validator.run_comprehensive_validation()
     
     # Generate report
-    print(f"\n📊 Generating compliance report...")
+    print(f"\n CHART:  Generating compliance report...")
     report = validator.generate_compliance_report(violations)
     
     # Display report
@@ -527,23 +527,23 @@ def main():
     report_file = f"websocket_notifier_ssot_compliance_report_{timestamp}.txt"
     with open(report_file, 'w') as f:
         f.write(report)
-    print(f"\n📄 Compliance report saved to: {report_file}")
+    print(f"\n[U+1F4C4] Compliance report saved to: {report_file}")
     
     # Determine exit code
     compliance_score = validator.calculate_compliance_score(violations)
     within_thresholds = validator.check_compliance_thresholds(violations)
     
     if compliance_score >= validator.target_compliance_score and within_thresholds:
-        print(f"\n🎉 SSOT compliance validation PASSED!")
-        print(f"   Compliance score: {compliance_score:.1f}% (≥{validator.target_compliance_score}%)")
+        print(f"\n CELEBRATION:  SSOT compliance validation PASSED!")
+        print(f"   Compliance score: {compliance_score:.1f}% ( >= {validator.target_compliance_score}%)")
         print(f"   All violation thresholds met")
         return 0
     else:
-        print(f"\n❌ SSOT compliance validation FAILED!")
+        print(f"\n FAIL:  SSOT compliance validation FAILED!")
         print(f"   Compliance score: {compliance_score:.1f}% (<{validator.target_compliance_score}%)")
         if not within_thresholds:
             print(f"   Violation thresholds exceeded")
-        print(f"\n📋 Next Steps:")
+        print(f"\n[U+1F4CB] Next Steps:")
         print(f"   1. Execute import migration: python scripts/websocket_notifier_import_migration.py")
         print(f"   2. Execute factory migration: python scripts/websocket_notifier_factory_migration.py")
         print(f"   3. Address critical/high violations manually")

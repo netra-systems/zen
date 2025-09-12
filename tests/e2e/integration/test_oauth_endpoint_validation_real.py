@@ -16,7 +16,7 @@ OAuth Service Endpoint Validation Test - Real Services Integration
 6. Test OAuth callback creates user in auth_users table AND syncs to userbase table
 7. Validate JWT contains correct OAuth claims (user_id, email, permissions)
 
-**ARCHITECTURE:** Real services integration, <300 lines, ≤8 line functions
+**ARCHITECTURE:** Real services integration, <300 lines,  <= 8 line functions
 """
 
 import asyncio

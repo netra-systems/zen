@@ -29,10 +29,10 @@ def backup_legacy_file() -> str:
     
     if legacy_path.exists():
         shutil.copy2(legacy_path, backup_path)
-        print(f"✅ Backed up legacy supervisor to: {backup_path}")
+        print(f" PASS:  Backed up legacy supervisor to: {backup_path}")
         return str(backup_path)
     else:
-        print("⚠️ Legacy supervisor file not found")
+        print(" WARNING: [U+FE0F] Legacy supervisor file not found")
         return ""
 
 def find_supervisor_imports() -> List[Tuple[str, str]]:
@@ -62,7 +62,7 @@ def find_supervisor_imports() -> List[Tuple[str, str]]:
                             import_files.append((str(file_path), content))
                             break
                 except Exception as e:
-                    print(f"⚠️ Error reading {file_path}: {e}")
+                    print(f" WARNING: [U+FE0F] Error reading {file_path}: {e}")
     
     return import_files
 
@@ -93,10 +93,10 @@ def update_import_statements(import_files: List[Tuple[str, str]]) -> int:
             try:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(content)
-                print(f"✅ Updated imports in: {file_path}")
+                print(f" PASS:  Updated imports in: {file_path}")
                 updated_count += 1
             except Exception as e:
-                print(f"❌ Error updating {file_path}: {e}")
+                print(f" FAIL:  Error updating {file_path}: {e}")
     
     return updated_count
 
@@ -105,7 +105,7 @@ def validate_migration() -> bool:
     try:
         # Test import of SSOT supervisor
         from netra_backend.app.agents.supervisor_ssot import SupervisorAgent
-        print("✅ SSOT SupervisorAgent imports successfully")
+        print(" PASS:  SSOT SupervisorAgent imports successfully")
         
         # Test basic instantiation
         from netra_backend.app.llm.llm_manager import LLMManager
@@ -113,20 +113,20 @@ def validate_migration() -> bool:
         
         mock_llm = Mock(spec=LLMManager)
         supervisor = SupervisorAgent(mock_llm)
-        print("✅ SSOT SupervisorAgent instantiates successfully")
+        print(" PASS:  SSOT SupervisorAgent instantiates successfully")
         
         # Test has required methods
         required_methods = ['execute', 'run', 'create']
         for method in required_methods:
             if not hasattr(supervisor, method):
-                print(f"❌ Missing required method: {method}")
+                print(f" FAIL:  Missing required method: {method}")
                 return False
         
-        print("✅ SSOT SupervisorAgent has all required methods")
+        print(" PASS:  SSOT SupervisorAgent has all required methods")
         return True
         
     except Exception as e:
-        print(f"❌ Validation failed: {e}")
+        print(f" FAIL:  Validation failed: {e}")
         return False
 
 def run_basic_tests() -> bool:
@@ -139,14 +139,14 @@ def run_basic_tests() -> bool:
         ], cwd=project_root, capture_output=True, text=True, timeout=30)
         
         if result.returncode == 0:
-            print("✅ Basic import test passed")
+            print(" PASS:  Basic import test passed")
             return True
         else:
-            print(f"❌ Basic import test failed: {result.stderr}")
+            print(f" FAIL:  Basic import test failed: {result.stderr}")
             return False
             
     except Exception as e:
-        print(f"❌ Test execution failed: {e}")
+        print(f" FAIL:  Test execution failed: {e}")
         return False
 
 def generate_migration_report(backup_path: str, updated_files: int) -> None:
@@ -161,7 +161,7 @@ def generate_migration_report(backup_path: str, updated_files: int) -> None:
 ## Migration Summary
 
 **Date:** {current_date}
-**Status:** ✅ Completed Successfully
+**Status:**  PASS:  Completed Successfully
 
 ## Changes Made
 
@@ -171,18 +171,18 @@ def generate_migration_report(backup_path: str, updated_files: int) -> None:
 
 ### 2. Import Updates
 - **Files updated:** {updated_files}
-- **Pattern replaced:** `supervisor_consolidated` → `supervisor_ssot`
+- **Pattern replaced:** `supervisor_consolidated`  ->  `supervisor_ssot`
 
 ### 3. Architecture Improvements
 
-#### ❌ REMOVED (Legacy Wrapper Issues):
+####  FAIL:  REMOVED (Legacy Wrapper Issues):
 - Duplicate execution logic across multiple classes
 - Mixed legacy + modern patterns in same class
 - Wrong import paths (`supervisor.user_execution_context`)
 - Redundant WebSocket event emission logic
 - Wrapper methods doing same work as SSOT components
 
-#### ✅ ADDED (SSOT Compliance):
+####  PASS:  ADDED (SSOT Compliance):
 - Direct use of `UserExecutionEngine` for execution logic
 - Proper use of `AgentInstanceFactory` for agent creation
 - Correct import paths (`services.user_execution_context`)
@@ -190,17 +190,17 @@ def generate_migration_report(backup_path: str, updated_files: int) -> None:
 - Clean factory pattern for supervisor creation
 
 ### 4. Business Value Maintained
-- ✅ All legacy `run()` compatibility maintained
-- ✅ Modern `execute()` method using SSOT patterns
-- ✅ Complete user isolation preserved
-- ✅ WebSocket events still work correctly
-- ✅ Database session management unchanged
+-  PASS:  All legacy `run()` compatibility maintained
+-  PASS:  Modern `execute()` method using SSOT patterns
+-  PASS:  Complete user isolation preserved
+-  PASS:  WebSocket events still work correctly
+-  PASS:  Database session management unchanged
 
 ## Validation Results
-- ✅ SSOT SupervisorAgent imports successfully
-- ✅ All required methods present
-- ✅ Basic instantiation works
-- ✅ Legacy compatibility maintained
+-  PASS:  SSOT SupervisorAgent imports successfully
+-  PASS:  All required methods present
+-  PASS:  Basic instantiation works
+-  PASS:  Legacy compatibility maintained
 
 ## Next Steps
 
@@ -232,10 +232,10 @@ The following files were updated to use the SSOT supervisor:
 4. **Code Quality:** Mixed patterns in one class violated clean architecture
 
 **Impact:**
-- ✅ Reduced code duplication by ~1000 lines
-- ✅ Eliminated architectural violations
-- ✅ Maintained backward compatibility
-- ✅ Improved maintainability and testability
+-  PASS:  Reduced code duplication by ~1000 lines
+-  PASS:  Eliminated architectural violations
+-  PASS:  Maintained backward compatibility
+-  PASS:  Improved maintainability and testability
 
 **Risk Mitigation:**
 - Legacy wrapper backed up to `.legacy` file
@@ -247,9 +247,9 @@ The following files were updated to use the SSOT supervisor:
     try:
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report_content)
-        print(f"✅ Migration report saved to: {report_path}")
+        print(f" PASS:  Migration report saved to: {report_path}")
     except Exception as e:
-        print(f"⚠️ Could not save migration report: {e}")
+        print(f" WARNING: [U+FE0F] Could not save migration report: {e}")
 
 def main():
     """Main migration execution."""
@@ -257,11 +257,11 @@ def main():
     print("=" * 50)
     
     # Step 1: Backup legacy file
-    print("\n📦 Step 1: Backing up legacy supervisor...")
+    print("\n[U+1F4E6] Step 1: Backing up legacy supervisor...")
     backup_path = backup_legacy_file()
     
     # Step 2: Find files to update
-    print("\n🔍 Step 2: Finding files with supervisor imports...")
+    print("\n SEARCH:  Step 2: Finding files with supervisor imports...")
     import_files = find_supervisor_imports()
     print(f"Found {len(import_files)} files with supervisor imports")
     
@@ -273,39 +273,39 @@ def main():
             print(f"  ... and {len(import_files) - 5} more")
     
     # Step 3: Update imports
-    print("\n📝 Step 3: Updating import statements...")
+    print("\n[U+1F4DD] Step 3: Updating import statements...")
     updated_count = update_import_statements(import_files)
     print(f"Updated imports in {updated_count} files")
     
     # Step 4: Validate migration
-    print("\n🧪 Step 4: Validating migration...")
+    print("\n[U+1F9EA] Step 4: Validating migration...")
     validation_success = validate_migration()
     
     # Step 5: Run basic tests
-    print("\n🎯 Step 5: Running basic tests...")
+    print("\n TARGET:  Step 5: Running basic tests...")
     test_success = run_basic_tests()
     
     # Step 6: Generate report
-    print("\n📊 Step 6: Generating migration report...")
+    print("\n CHART:  Step 6: Generating migration report...")
     generate_migration_report(backup_path, updated_count)
     
     # Final status
     print("\n" + "=" * 50)
     if validation_success and test_success:
-        print("✅ MIGRATION COMPLETED SUCCESSFULLY!")
-        print("\n🎉 The legacy supervisor wrapper has been replaced with SSOT implementation.")
-        print("💡 All imports updated and validation passed.")
-        print("\n📝 Next steps:")
+        print(" PASS:  MIGRATION COMPLETED SUCCESSFULLY!")
+        print("\n CELEBRATION:  The legacy supervisor wrapper has been replaced with SSOT implementation.")
+        print(" IDEA:  All imports updated and validation passed.")
+        print("\n[U+1F4DD] Next steps:")
         print("   1. Run full test suite: python tests/unified_test_runner.py")
         print("   2. Test in staging environment")
         print("   3. Remove .legacy backup after validation")
     else:
-        print("❌ MIGRATION FAILED!")
-        print("\n🚨 Issues detected during validation or testing.")
-        print("🔧 Please review errors above and fix before proceeding.")
-        print(f"📦 Legacy backup available at: {backup_path}")
+        print(" FAIL:  MIGRATION FAILED!")
+        print("\n ALERT:  Issues detected during validation or testing.")
+        print("[U+1F527] Please review errors above and fix before proceeding.")
+        print(f"[U+1F4E6] Legacy backup available at: {backup_path}")
     
-    print("\n🔗 Migration report: reports/SUPERVISOR_SSOT_MIGRATION_REPORT.md")
+    print("\n[U+1F517] Migration report: reports/SUPERVISOR_SSOT_MIGRATION_REPORT.md")
 
 if __name__ == "__main__":
     main()

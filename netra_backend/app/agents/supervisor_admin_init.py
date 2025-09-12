@@ -102,11 +102,11 @@ def _create_standard_tool_dispatcher(
     logger.info("Creating supervisor with standard tools only")
     
     if user_context:
-        logger.info("✅ Creating request-scoped standard tool dispatcher")
+        logger.info(" PASS:  Creating request-scoped standard tool dispatcher")
         # Modern request-scoped pattern
         return UnifiedToolDispatcher(user_context=user_context, tools=tools)
     else:
-        logger.warning("⚠️ Creating global tool dispatcher - consider providing UserExecutionContext")
+        logger.warning(" WARNING: [U+FE0F] Creating global tool dispatcher - consider providing UserExecutionContext")
         # Legacy global pattern with warning
         return UnifiedToolDispatcher(user_context=None, tools=tools)
 

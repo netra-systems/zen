@@ -64,7 +64,7 @@ class TestRealAgentPipeline:
     @pytest.mark.asyncio
     @pytest.mark.e2e
     async def test_complete_agent_workflow_message_to_response(self, test_pipeline_test_core, test_supervisor_setup):
-        """Test complete: User message → routing → execution → response flow."""
+        """Test complete: User message  ->  routing  ->  execution  ->  response flow."""
         session_data = await test_pipeline_test_core.establish_conversation_session(PlanTier.ENTERPRISE)
         # TESTS MUST RAISE ERRORS - NO TRY-EXCEPT per CLAUDE.md
         workflow_result = await self._execute_complete_workflow(session_data, test_supervisor_setup)

@@ -56,7 +56,7 @@ class GenerationExecutor:
         if stream_updates:
             await self.send_update_callback(run_id, {
                 "status": "generating",
-                "message": f"🔄 Generating {profile.volume:,} synthetic records...",
+                "message": f" CYCLE:  Generating {profile.volume:,} synthetic records...",
                 "progress": 0
             })
     
@@ -127,7 +127,7 @@ class GenerationExecutor:
     
     def _format_completion_message(self, records_count: int, duration: int) -> str:
         """Format completion message"""
-        return f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms"
+        return f" PASS:  Successfully generated {records_count:,} synthetic records in {duration}ms"
 
 
 class GenerationErrorHandler:
@@ -154,6 +154,6 @@ class GenerationErrorHandler:
         if stream_updates:
             await self.send_update_callback(run_id, {
                 "status": "error",
-                "message": f"❌ Synthetic data generation failed: {str(error)}",
+                "message": f" FAIL:  Synthetic data generation failed: {str(error)}",
                 "error": str(error)
             })

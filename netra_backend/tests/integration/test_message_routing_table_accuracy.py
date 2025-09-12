@@ -2,7 +2,7 @@
 Test WebSocket Message Routing Table Accuracy
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) 
+- Segment: All (Free  ->  Enterprise) 
 - Business Goal: Ensure reliable WebSocket message delivery
 - Value Impact: Prevents lost messages and chat failures in real-time user interactions
 - Strategic Impact: CRITICAL - Inaccurate routing tables destroy user experience
@@ -194,7 +194,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         
         # EXPECTED INCONSISTENCY: Components may have different views of the same connection
         if inconsistencies:
-            print(f"🚨 ROUTING TABLE INCONSISTENCIES DETECTED:")
+            print(f" ALERT:  ROUTING TABLE INCONSISTENCIES DETECTED:")
             for inconsistency in inconsistencies:
                 print(f"   Type: {inconsistency['type']}")
                 print(f"   User: {inconsistency['user_id']}")
@@ -229,7 +229,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         successful_routes = sum(1 for result in routing_results.values() if result == True)
         total_routes = len(routing_results)
         
-        print(f"🚨 ROUTING RESULTS WITH TABLE INCONSISTENCIES:")
+        print(f" ALERT:  ROUTING RESULTS WITH TABLE INCONSISTENCIES:")
         for component, result in routing_results.items():
             print(f"   {component}: {result}")
         
@@ -283,7 +283,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         middle_user_id = f"{user_id}_1"
         middle_conn_id = middle_handler.connection_id
         
-        print(f"🚨 SIMULATING PARTIAL DEREGISTRATION:")
+        print(f" ALERT:  SIMULATING PARTIAL DEREGISTRATION:")
         print(f"   Deregistering connection {middle_conn_id} from handler only")
         
         # Cleanup handler (simulating connection close)
@@ -308,7 +308,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         assert deregistration_inconsistency is not None, \
             f"Should detect deregistration inconsistency for connection {middle_conn_id}"
         
-        print(f"🚨 DEREGISTRATION INCONSISTENCY DETECTED:")
+        print(f" ALERT:  DEREGISTRATION INCONSISTENCY DETECTED:")
         print(f"   Connection: {middle_conn_id}")
         print(f"   Components: {deregistration_inconsistency['components']}")
         print(f"   Active states: {deregistration_inconsistency['active_states']}")
@@ -327,7 +327,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         assert routing_result == False, \
             "Routing to deregistered connection should fail"
         
-        print(f"🚨 STALE ROUTING ENTRY CAUSING FAILURE:")
+        print(f" ALERT:  STALE ROUTING ENTRY CAUSING FAILURE:")
         print(f"   Attempted routing result: {routing_result}")
         print(f"   This demonstrates the stale routing table bug")
         
@@ -345,7 +345,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         
         # Active connections should still work despite stale entries
         active_success_rate = sum(active_routing_results) / len(active_routing_results)
-        print(f"🚨 ACTIVE CONNECTION SUCCESS RATE: {active_success_rate:.1%}")
+        print(f" ALERT:  ACTIVE CONNECTION SUCCESS RATE: {active_success_rate:.1%}")
         
         # Cleanup remaining handlers
         for handler in [handlers[0], handlers[2]]:
@@ -457,7 +457,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         total_operations = len(results)
         success_rate = len(successful_operations) / total_operations
         
-        print(f"🚨 CONCURRENT ROUTING TABLE ACCESS RESULTS:")
+        print(f" ALERT:  CONCURRENT ROUTING TABLE ACCESS RESULTS:")
         print(f"   Total operations: {total_operations}")
         print(f"   Successful operations: {len(successful_operations)}")
         print(f"   Failed operations: {len(failed_operations)}")
@@ -480,7 +480,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         # Check final routing table state for corruption
         final_stats = await router.get_stats()
         
-        print(f"🚨 FINAL ROUTING TABLE STATE:")
+        print(f" ALERT:  FINAL ROUTING TABLE STATE:")
         print(f"   Total users: {final_stats['total_users']}")
         print(f"   Total connections: {final_stats['total_connections']}")
         print(f"   Active connections: {final_stats['active_connections']}")
@@ -488,7 +488,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         # After all operations complete, routing table should be empty or minimal
         # But corruption may leave stale entries
         if final_stats['total_connections'] > 0:
-            print(f"🚨 POTENTIAL TABLE CORRUPTION: {final_stats['total_connections']} connections remain after cleanup")
+            print(f" ALERT:  POTENTIAL TABLE CORRUPTION: {final_stats['total_connections']} connections remain after cleanup")
             
             # This indicates potential corruption from concurrent access
             assert final_stats['total_connections'] > 0, \
@@ -560,7 +560,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         expected_stale_count = sum(1 for conn in created_connections if conn["should_be_stale"])
         actual_stale_count = len(stale_entries)
         
-        print(f"🚨 STALE ROUTING ENTRY ANALYSIS:")
+        print(f" ALERT:  STALE ROUTING ENTRY ANALYSIS:")
         print(f"   Expected stale entries: {expected_stale_count}")
         print(f"   Detected stale entries: {actual_stale_count}")
         
@@ -586,7 +586,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
                         stale_routing_failures.append(conn)
                     else:
                         # Unexpected success to stale connection
-                        print(f"🚨 WARNING: Routing succeeded to stale connection {conn['connection_id']}")
+                        print(f" ALERT:  WARNING: Routing succeeded to stale connection {conn['connection_id']}")
                 else:
                     if routing_result:
                         active_routing_successes.append(conn)
@@ -595,9 +595,9 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
                 if conn["should_be_stale"]:
                     stale_routing_failures.append({**conn, "error": str(e)})
                 else:
-                    print(f"🚨 ERROR: Active connection failed: {e}")
+                    print(f" ALERT:  ERROR: Active connection failed: {e}")
         
-        print(f"🚨 STALE ROUTING TEST RESULTS:")
+        print(f" ALERT:  STALE ROUTING TEST RESULTS:")
         print(f"   Stale routing failures: {len(stale_routing_failures)}")
         print(f"   Active routing successes: {len(active_routing_successes)}")
         
@@ -611,13 +611,13 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         # Test cleanup of stale entries
         cleaned_count = await router.cleanup_stale_connections()
         
-        print(f"🚨 STALE ENTRY CLEANUP:")
+        print(f" ALERT:  STALE ENTRY CLEANUP:")
         print(f"   Cleaned up {cleaned_count} stale connections")
         
         # After cleanup, routing table should have fewer entries
         final_stats = await router.get_stats()
         
-        print(f"🚨 POST-CLEANUP ROUTING TABLE:")
+        print(f" ALERT:  POST-CLEANUP ROUTING TABLE:")
         print(f"   Total users: {final_stats['total_users']}")
         print(f"   Total connections: {final_stats['total_connections']}")
         print(f"   Active connections: {final_stats['active_connections']}")
@@ -683,7 +683,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         router_a_connections = await router_a.get_user_connections(user_id)
         router_b_connections = await router_b.get_user_connections(user_id)
         
-        print(f"🚨 ROUTING TABLE DRIFT DETECTED:")
+        print(f" ALERT:  ROUTING TABLE DRIFT DETECTED:")
         print(f"   Router A connections: {router_a_connections}")
         print(f"   Router B connections: {router_b_connections}")
         
@@ -699,7 +699,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         total_unique_connections = len(connections_a.union(connections_b))
         drift_rate = (len(drift_connections_a) + len(drift_connections_b)) / total_unique_connections if total_unique_connections > 0 else 0
         
-        print(f"🚨 DRIFT ANALYSIS:")
+        print(f" ALERT:  DRIFT ANALYSIS:")
         print(f"   Common connections: {len(common_connections)}")
         print(f"   Router A unique: {len(drift_connections_a)}")
         print(f"   Router B unique: {len(drift_connections_b)}")
@@ -739,7 +739,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
                 "router_b": await router_b.route_event(user_id, conn_id, test_message)
             }
         
-        print(f"🚨 ROUTING WITH DRIFTED TABLES:")
+        print(f" ALERT:  ROUTING WITH DRIFTED TABLES:")
         for conn_key, results in routing_results.items():
             print(f"   {conn_key}:")
             print(f"     Router A: {results['router_a']}")
@@ -756,7 +756,7 @@ class TestMessageRoutingTableAccuracy(BaseIntegrationTest):
         
         inconsistency_rate = inconsistent_routes / total_route_pairs if total_route_pairs > 0 else 0
         
-        print(f"🚨 ROUTING INCONSISTENCY RATE: {inconsistency_rate:.1%}")
+        print(f" ALERT:  ROUTING INCONSISTENCY RATE: {inconsistency_rate:.1%}")
         
         # CRITICAL BUG: High inconsistency rate due to table drift
         if inconsistency_rate > 0:

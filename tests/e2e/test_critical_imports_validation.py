@@ -289,7 +289,7 @@
             # REMOVED_SYNTAX_ERROR: "
 
             # REMOVED_SYNTAX_ERROR: failure_report += "
-            # REMOVED_SYNTAX_ERROR: 🔥 CRITICAL: These import failures will cause cascading test failures!
+            # REMOVED_SYNTAX_ERROR:  FIRE:  CRITICAL: These import failures will cause cascading test failures!
             # REMOVED_SYNTAX_ERROR: "
             # REMOVED_SYNTAX_ERROR: failure_report += "Fix these imports before running any other tests.
             # REMOVED_SYNTAX_ERROR: "

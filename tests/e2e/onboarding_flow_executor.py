@@ -2,7 +2,7 @@
 Onboarding Flow Executor - Main execution logic for user onboarding E2E tests
 
 BVJ (Business Value Justification):
-1. Segment: Free → Paid conversion segment (most critical)
+1. Segment: Free  ->  Paid conversion segment (most critical)
 2. Business Goal: Execute complete user onboarding flow efficiently
 3. Value Impact: Protects $100K+ MRR through comprehensive flow execution
 4. Revenue Impact: Ensures reliable onboarding test execution

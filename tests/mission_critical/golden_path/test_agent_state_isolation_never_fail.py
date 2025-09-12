@@ -273,7 +273,7 @@ class TestAgentStateIsolationNeverFail:
         This test creates 12+ concurrent authenticated users and verifies that each user's
         agent state, conversation history, and sensitive data remains completely isolated.
         """
-        logger.info("🚨 MISSION CRITICAL: Testing user context isolation - Legal compliance requirement")
+        logger.info(" ALERT:  MISSION CRITICAL: Testing user context isolation - Legal compliance requirement")
         
         # Create 15 concurrent authenticated users for comprehensive isolation testing
         authenticated_users: List[AuthenticatedUser] = []
@@ -499,7 +499,7 @@ class TestAgentStateIsolationNeverFail:
                 }
         
         # Execute all user isolation tests concurrently
-        logger.info(f"🔒 Executing concurrent isolation tests for {len(authenticated_users)} users")
+        logger.info(f"[U+1F512] Executing concurrent isolation tests for {len(authenticated_users)} users")
         start_time = time.time()
         
         tasks = [test_user_context_isolation(user) for user in authenticated_users]
@@ -540,7 +540,7 @@ class TestAgentStateIsolationNeverFail:
         
         # CRITICAL ASSERTIONS - Zero tolerance for violations
         assert len(isolation_violations) == 0, (
-            f"🚨 CRITICAL ISOLATION VIOLATIONS DETECTED - LEGAL COMPLIANCE FAILURE!\n"
+            f" ALERT:  CRITICAL ISOLATION VIOLATIONS DETECTED - LEGAL COMPLIANCE FAILURE!\n"
             f"Violations: {len(isolation_violations)}\n"
             f"Details: {json.dumps(isolation_violations, indent=2)}\n"
             f"Compliance Score: {compliance_report['compliance_score']}%\n"
@@ -556,8 +556,8 @@ class TestAgentStateIsolationNeverFail:
             f"Isolation test duration too high: {total_duration}s (performance requirement: < 60s)"
         )
         
-        logger.info(f"✅ LEGAL COMPLIANCE: User context isolation verified for {len(authenticated_users)} users")
-        logger.info(f"🛡️ SECURITY: Zero isolation violations detected - Legal requirements satisfied")
+        logger.info(f" PASS:  LEGAL COMPLIANCE: User context isolation verified for {len(authenticated_users)} users")
+        logger.info(f"[U+1F6E1][U+FE0F] SECURITY: Zero isolation violations detected - Legal requirements satisfied")
 
     @pytest.mark.asyncio
     async def test_factory_isolation_enforcement_per_user(self, redis_client, auth_helper):
@@ -570,7 +570,7 @@ class TestAgentStateIsolationNeverFail:
         This test validates that UserContextFactory creates completely isolated instances
         for each user with no shared state or cross-user memory contamination.
         """
-        logger.info("🏭 MISSION CRITICAL: Testing factory isolation - Enterprise contract requirement")
+        logger.info("[U+1F3ED] MISSION CRITICAL: Testing factory isolation - Enterprise contract requirement")
         
         # Create 12 authenticated users for factory isolation testing
         authenticated_users: List[AuthenticatedUser] = []
@@ -740,7 +740,7 @@ class TestAgentStateIsolationNeverFail:
                 }
         
         # Execute factory isolation tests concurrently
-        logger.info(f"🏭 Testing factory isolation for {len(authenticated_users)} users")
+        logger.info(f"[U+1F3ED] Testing factory isolation for {len(authenticated_users)} users")
         start_time = time.time()
         
         tasks = [test_factory_isolation_for_user(user) for user in authenticated_users]
@@ -775,7 +775,7 @@ class TestAgentStateIsolationNeverFail:
         
         # CRITICAL ASSERTIONS - Enterprise contract compliance
         assert len(factory_violations) == 0, (
-            f"🚨 CRITICAL FACTORY ISOLATION VIOLATIONS - ENTERPRISE CONTRACT BREACH!\n"
+            f" ALERT:  CRITICAL FACTORY ISOLATION VIOLATIONS - ENTERPRISE CONTRACT BREACH!\n"
             f"Violations: {len(factory_violations)}\n" 
             f"Details: {json.dumps(factory_violations, indent=2)}\n"
             f"This violates enterprise isolation requirements!"
@@ -790,8 +790,8 @@ class TestAgentStateIsolationNeverFail:
             f"Factory isolation test duration: {total_duration}s (performance requirement: < 45s)"
         )
         
-        logger.info(f"✅ ENTERPRISE COMPLIANCE: Factory isolation verified for {len(authenticated_users)} users")
-        logger.info(f"🏭 FACTORY: Zero shared instances detected - Enterprise requirements satisfied")
+        logger.info(f" PASS:  ENTERPRISE COMPLIANCE: Factory isolation verified for {len(authenticated_users)} users")
+        logger.info(f"[U+1F3ED] FACTORY: Zero shared instances detected - Enterprise requirements satisfied")
 
     @pytest.mark.asyncio
     async def test_websocket_auth_isolation_never_violated(self, backend_client, auth_helper):
@@ -804,7 +804,7 @@ class TestAgentStateIsolationNeverFail:
         This test creates multiple authenticated WebSocket connections and verifies that
         each user only receives their own events, with zero cross-contamination.
         """
-        logger.info("🔌 MISSION CRITICAL: Testing WebSocket auth isolation - Data breach prevention")
+        logger.info("[U+1F50C] MISSION CRITICAL: Testing WebSocket auth isolation - Data breach prevention")
         
         # Create 10 authenticated users for WebSocket isolation testing
         authenticated_users: List[AuthenticatedUser] = []
@@ -852,7 +852,7 @@ class TestAgentStateIsolationNeverFail:
                 }
         
         # Set up WebSocket connections for all users
-        logger.info(f"🔌 Setting up authenticated WebSocket connections for {len(authenticated_users)} users")
+        logger.info(f"[U+1F50C] Setting up authenticated WebSocket connections for {len(authenticated_users)} users")
         
         connection_tasks = [setup_authenticated_websocket_connection(user) for user in authenticated_users]
         connection_results = await asyncio.gather(*connection_tasks, return_exceptions=True)
@@ -869,7 +869,7 @@ class TestAgentStateIsolationNeverFail:
         if len(connected_contexts) < 3:
             pytest.skip(f"Insufficient WebSocket connections ({len(connected_contexts)}) for isolation testing")
         
-        logger.info(f"🔌 Testing WebSocket isolation with {len(connected_contexts)} authenticated connections")
+        logger.info(f"[U+1F50C] Testing WebSocket isolation with {len(connected_contexts)} authenticated connections")
         
         async def test_websocket_auth_isolation(connection_data: Dict[str, Any]) -> Dict[str, Any]:
             """Test WebSocket authentication isolation for single connection."""
@@ -1022,7 +1022,7 @@ class TestAgentStateIsolationNeverFail:
             
             # CRITICAL ASSERTIONS - Security requirement compliance
             assert len(websocket_violations) == 0, (
-                f"🚨 CRITICAL WEBSOCKET AUTH VIOLATIONS - SECURITY BREACH!\n"
+                f" ALERT:  CRITICAL WEBSOCKET AUTH VIOLATIONS - SECURITY BREACH!\n"
                 f"Violations: {len(websocket_violations)}\n"
                 f"Details: {json.dumps(websocket_violations, indent=2)}\n"
                 f"This represents a critical authentication isolation failure!"
@@ -1033,8 +1033,8 @@ class TestAgentStateIsolationNeverFail:
                 f"WebSocket auth isolation success rate: {success_rate}% (MUST be >= 95% for security)"
             )
             
-            logger.info(f"✅ SECURITY: WebSocket auth isolation verified for {len(connected_contexts)} connections")
-            logger.info(f"🔌 WEBSOCKET: Zero authentication violations - Security requirements satisfied")
+            logger.info(f" PASS:  SECURITY: WebSocket auth isolation verified for {len(connected_contexts)} connections")
+            logger.info(f"[U+1F50C] WEBSOCKET: Zero authentication violations - Security requirements satisfied")
             
         finally:
             # Cleanup all WebSocket connections
@@ -1056,7 +1056,7 @@ class TestAgentStateIsolationNeverFail:
         This test verifies that tool execution results, intermediate states, and cached
         data remain completely isolated per user with no cross-contamination.
         """
-        logger.info("🔧 MISSION CRITICAL: Testing tool execution isolation - Business decision integrity")
+        logger.info("[U+1F527] MISSION CRITICAL: Testing tool execution isolation - Business decision integrity")
         
         # Create 8 authenticated users for tool execution isolation testing
         authenticated_users: List[AuthenticatedUser] = []
@@ -1264,7 +1264,7 @@ class TestAgentStateIsolationNeverFail:
                 }
         
         # Execute tool isolation tests concurrently
-        logger.info(f"🔧 Testing tool execution isolation for {len(authenticated_users)} users")
+        logger.info(f"[U+1F527] Testing tool execution isolation for {len(authenticated_users)} users")
         start_time = time.time()
         
         tasks = [test_tool_execution_isolation(user) for user in authenticated_users]
@@ -1299,7 +1299,7 @@ class TestAgentStateIsolationNeverFail:
         
         # CRITICAL ASSERTIONS - Business integrity requirement
         assert len(tool_violations) == 0, (
-            f"🚨 CRITICAL TOOL EXECUTION VIOLATIONS - BUSINESS INTEGRITY FAILURE!\n"
+            f" ALERT:  CRITICAL TOOL EXECUTION VIOLATIONS - BUSINESS INTEGRITY FAILURE!\n"
             f"Violations: {len(tool_violations)}\n"
             f"Details: {json.dumps(tool_violations, indent=2)}\n"
             f"This could lead to incorrect business decisions and data corruption!"
@@ -1314,8 +1314,8 @@ class TestAgentStateIsolationNeverFail:
             f"Tool isolation test duration: {total_duration}s (performance requirement: < 50s)"
         )
         
-        logger.info(f"✅ BUSINESS INTEGRITY: Tool execution isolation verified for {len(authenticated_users)} users")
-        logger.info(f"🔧 TOOLS: Zero cross-user contamination detected - Business requirements satisfied")
+        logger.info(f" PASS:  BUSINESS INTEGRITY: Tool execution isolation verified for {len(authenticated_users)} users")
+        logger.info(f"[U+1F527] TOOLS: Zero cross-user contamination detected - Business requirements satisfied")
 
 
 if __name__ == "__main__":

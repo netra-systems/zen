@@ -316,7 +316,7 @@ class ExampleMessageHandler:
                     'current_cost': '$450/month',
                     'optimized_cost': '$315/month',
                     'savings': '30%',
-                    'method': 'Model switching: GPT-4 → GPT-3.5-turbo for non-critical requests',
+                    'method': 'Model switching: GPT-4  ->  GPT-3.5-turbo for non-critical requests',
                     'latency_impact': '+50ms (within acceptable 500ms limit)'
                 },
                 {

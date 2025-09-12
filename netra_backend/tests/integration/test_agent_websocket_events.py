@@ -476,7 +476,7 @@ class TestAgentWebSocketEvents(BaseIntegrationTest):
         assert timing["total_duration_seconds"] < 3.0, f"WebSocket event sequence too slow: {timing['total_duration_seconds']}s"
         assert timing["real_time_suitable"] is True, "Events must be suitable for real-time chat"
         
-        logger.info(f"✅ All 5 required WebSocket events test passed - {validation['total_events']} events in {execution_time:.3f}s")
+        logger.info(f" PASS:  All 5 required WebSocket events test passed - {validation['total_events']} events in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -554,7 +554,7 @@ class TestAgentWebSocketEvents(BaseIntegrationTest):
         assert user1_validation["validation_passed"] is True
         assert user2_validation["validation_passed"] is True
         
-        logger.info("✅ WebSocket events user isolation test passed")
+        logger.info(" PASS:  WebSocket events user isolation test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -597,7 +597,7 @@ class TestAgentWebSocketEvents(BaseIntegrationTest):
         assert len(agent_started_events) == 2  # One per execution
         assert len(agent_completed_events) == 2  # One per execution
         
-        logger.info("✅ WebSocket events with Redis state persistence test passed")
+        logger.info(" PASS:  WebSocket events with Redis state persistence test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -635,7 +635,7 @@ class TestAgentWebSocketEvents(BaseIntegrationTest):
         assert "agent_thinking" in event_types
         
         # May have error event depending on error handling implementation
-        logger.info("✅ WebSocket events error handling test passed")
+        logger.info(" PASS:  WebSocket events error handling test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -705,7 +705,7 @@ class TestAgentWebSocketEvents(BaseIntegrationTest):
             unique_users.add(event["user_id"])
         assert len(unique_users) == successful_executions, "WebSocket events not properly isolated between concurrent users"
         
-        logger.info(f"✅ WebSocket events concurrent performance test passed - {successful_executions}/{concurrent_users} users, {total_events} events in {execution_time:.3f}s")
+        logger.info(f" PASS:  WebSocket events concurrent performance test passed - {successful_executions}/{concurrent_users} users, {total_events} events in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -760,7 +760,7 @@ class TestAgentWebSocketEvents(BaseIntegrationTest):
         completion_data = completion_events[-1]["data"]
         assert "result" in completion_data
         
-        logger.info("✅ WebSocket events business value integration test passed")
+        logger.info(" PASS:  WebSocket events business value integration test passed")
 
 
 if __name__ == "__main__":

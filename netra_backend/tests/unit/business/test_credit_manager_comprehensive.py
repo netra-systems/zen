@@ -452,10 +452,10 @@ class TestErrorHandlingAndEdgeCases:
         
         # Test descriptions with special characters
         special_descriptions = [
-            "Credit purchase - €25.00",
+            "Credit purchase - [U+20AC]25.00",
             "Refund: 100% satisfaction guaranteed!",
             "API usage: python_script_#123.py",
-            "Bonus credits (新用户奖励)",
+            "Bonus credits ([U+65B0][U+7528][U+6237][U+5956][U+52B1])",
             ""  # Empty description
         ]
         
@@ -493,7 +493,7 @@ class TestErrorHandlingAndEdgeCases:
             results.append(result)
         
         # Verify all operations completed
-        assert len(results) == 15  # 5 iterations × 3 operations each
+        assert len(results) == 15  # 5 iterations  x  3 operations each
         
         # Check get_user_credits results
         credit_results = results[::3]  # Every 3rd result starting from 0

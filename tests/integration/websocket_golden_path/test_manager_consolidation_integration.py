@@ -7,7 +7,7 @@ After SSOT consolidation, these tests should PASS, proving Golden Path chat work
 Business Value Justification (BVJ):
 - Segment: ALL (Free -> Enterprise)
 - Business Goal: Restore $500K+ ARR chat functionality disrupted by manager fragmentation
-- Value Impact: Ensure complete user login → AI response workflow works reliably
+- Value Impact: Ensure complete user login  ->  AI response workflow works reliably
 - Revenue Impact: Protect primary revenue stream from WebSocket manager inconsistencies
 
 SSOT Violations This Module Proves:

@@ -130,7 +130,7 @@ class TestRealClickHouseDataIngestion:
             assert len(result) == 1, "Should retrieve the inserted record"
             assert result[0]['user_id'] == self.test_user_id
             
-            self.logger.info("✓ Single record insertion successful")
+            self.logger.info("[U+2713] Single record insertion successful")
             
         except Exception as e:
             self.logger.error(f"Single record insertion failed: {e}")
@@ -208,7 +208,7 @@ class TestRealClickHouseDataIngestion:
             
             # Check performance
             records_per_second = batch_size / insertion_time
-            self.logger.info(f"✓ Batch insertion: {batch_size} records in {insertion_time:.2f}s "
+            self.logger.info(f"[U+2713] Batch insertion: {batch_size} records in {insertion_time:.2f}s "
                            f"({records_per_second:.0f} records/sec)")
             
             # Basic performance assertion
@@ -272,7 +272,7 @@ class TestRealClickHouseDataIngestion:
             
             # Check performance metrics
             records_per_second = batch_size / total_time
-            self.logger.info(f"✓ Large batch insertion: {batch_size} records in {total_time:.2f}s "
+            self.logger.info(f"[U+2713] Large batch insertion: {batch_size} records in {total_time:.2f}s "
                            f"({records_per_second:.0f} records/sec)")
             
             # Performance assertion - should handle at least 100 records/sec
@@ -362,7 +362,7 @@ class TestRealClickHouseDataIngestion:
             
             assert len(result) == stream_count, f"Should have {stream_count} streams"
             
-            self.logger.info(f"✓ Streaming ingestion: {total_records} records from {stream_count} streams")
+            self.logger.info(f"[U+2713] Streaming ingestion: {total_records} records from {stream_count} streams")
             
         except Exception as e:
             self.logger.error(f"Streaming ingestion failed: {e}")
@@ -462,7 +462,7 @@ class TestRealClickHouseDataIngestion:
             assert result[0]['total_count'] == 2
             assert result[0]['non_null_count'] == 1  # Only one non-null value
             
-            self.logger.info("✓ Data validation successful - all types and aggregations correct")
+            self.logger.info("[U+2713] Data validation successful - all types and aggregations correct")
             
         except Exception as e:
             self.logger.error(f"Data validation failed: {e}")
@@ -497,7 +497,7 @@ class TestRealClickHouseDataIngestion:
                     INSERT INTO {self.test_table_name} (id, numeric_field)
                     VALUES (1, 100)
                 """)
-            self.logger.info(f"✓ Missing field error caught: {exc_info.type.__name__}")
+            self.logger.info(f"[U+2713] Missing field error caught: {exc_info.type.__name__}")
             
             # Test 2: Type mismatch
             with pytest.raises(Exception) as exc_info:
@@ -505,13 +505,13 @@ class TestRealClickHouseDataIngestion:
                     INSERT INTO {self.test_table_name} (id, required_field, numeric_field)
                     VALUES (2, 'valid', 'not_a_number')
                 """)
-            self.logger.info(f"✓ Type mismatch error caught: {exc_info.type.__name__}")
+            self.logger.info(f"[U+2713] Type mismatch error caught: {exc_info.type.__name__}")
             
             # Verify no partial data was inserted
             result = await client.execute(f"SELECT COUNT(*) as count FROM {self.test_table_name}")
             assert result[0]['count'] == 0, "No data should be inserted on errors"
             
-            self.logger.info("✓ Malformed data error handling working correctly")
+            self.logger.info("[U+2713] Malformed data error handling working correctly")
             
         except pytest.raises:
             raise  # Re-raise pytest.raises exceptions
@@ -580,7 +580,7 @@ class TestRealClickHouseDataIngestion:
             # Memory engine should maintain consistency
             assert final_count <= initial_count + 2, "Partial batch should not be inserted"
             
-            self.logger.info("✓ Transaction rollback simulation completed")
+            self.logger.info("[U+2713] Transaction rollback simulation completed")
             
         except Exception as e:
             self.logger.error(f"Rollback test failed: {e}")
@@ -642,7 +642,7 @@ class TestRealClickHouseDataIngestion:
             if len(id_1_records) == 1:
                 assert id_1_records[0]['version'] == 3, "Should keep latest version"
                 assert id_1_records[0]['data'] == 'version_3'
-                self.logger.info("✓ Deduplication working correctly - latest version retained")
+                self.logger.info("[U+2713] Deduplication working correctly - latest version retained")
             else:
                 # Some ClickHouse configurations might not immediately deduplicate
                 self.logger.info(f"Deduplication test: found {len(id_1_records)} records for ID 1")
@@ -701,7 +701,7 @@ class TestRealClickHouseDataIngestion:
                 metadata=agent_state['metadata']
             )
             
-            self.logger.info("✓ Agent state history ingestion successful")
+            self.logger.info("[U+2713] Agent state history ingestion successful")
             
             # If we can query, verify the data
             if hasattr(client, 'execute'):
@@ -715,7 +715,7 @@ class TestRealClickHouseDataIngestion:
                     if result:
                         assert result[0]['user_id'] == self.test_user_id
                         assert result[0]['agent_name'] == 'cost_optimizer'
-                        self.logger.info("✓ Agent state history verified in database")
+                        self.logger.info("[U+2713] Agent state history verified in database")
                 except:
                     # Table might not exist or have different name
                     pass

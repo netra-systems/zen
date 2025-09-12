@@ -6,7 +6,7 @@ This test suite focuses on specific security violations in the DeepAgentState
 implementation that create user isolation risks and data exposure vulnerabilities.
 
 Business Value Justification:
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Security Compliance & User Data Protection  
 - Value Impact: Prevents regulatory violations and customer data breaches
 - Revenue Impact: Protects enterprise contracts requiring security compliance
@@ -127,7 +127,7 @@ class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
         self.assertFalse(
             mutable_sharing_detected,
-            f"🚨 CRITICAL SECURITY VIOLATION: Mutable default arguments create shared state! "
+            f" ALERT:  CRITICAL SECURITY VIOLATION: Mutable default arguments create shared state! "
             f"Multiple users share the same mutable objects, allowing data leakage. "
             f"Evidence: {sharing_evidence}, Security violations: {self.security_violations}"
         )
@@ -201,7 +201,7 @@ class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists  
         self.assertFalse(
             reference_sharing_detected,
-            f"🚨 CRITICAL SECURITY VIOLATION: AgentMetadata reference sharing detected! "
+            f" ALERT:  CRITICAL SECURITY VIOLATION: AgentMetadata reference sharing detected! "
             f"User metadata objects are shared, allowing cross-user data contamination. "
             f"Sharing details: {sharing_details}, Security violations: {self.security_violations}"
         )
@@ -280,7 +280,7 @@ class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
                 
                 # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
                 self.fail(
-                    f"🚨 CRITICAL SECURITY VIOLATION: merge_from() allows cross-user data leakage! "
+                    f" ALERT:  CRITICAL SECURITY VIOLATION: merge_from() allows cross-user data leakage! "
                     f"User A's sensitive data merged into User B's state. "
                     f"Violations found: {security_violations_found}"
                 )
@@ -372,7 +372,7 @@ class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
         self.assertFalse(
             security_bypass_detected,
-            f"🚨 CRITICAL SECURITY VIOLATION: copy_with_updates() bypasses security validation! "
+            f" ALERT:  CRITICAL SECURITY VIOLATION: copy_with_updates() bypasses security validation! "
             f"Malicious data was accepted without proper validation. "
             f"Evidence: {bypass_evidence}"
         )
@@ -464,7 +464,7 @@ class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
         self.assertFalse(
             injection_vulnerability_detected,
-            f"🚨 CRITICAL SECURITY VIOLATION: agent_input allows arbitrary data injection! "
+            f" ALERT:  CRITICAL SECURITY VIOLATION: agent_input allows arbitrary data injection! "
             f"Malicious payloads are preserved without sanitization. "
             f"Vulnerability details: {vulnerability_details}"
         )
@@ -550,7 +550,7 @@ class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
         # VULNERABILITY ASSERTION: This should FAIL if vulnerability exists
         self.assertFalse(
             information_disclosure_detected,
-            f"🚨 CRITICAL SECURITY VIOLATION: to_dict() exposes sensitive internal data! "
+            f" ALERT:  CRITICAL SECURITY VIOLATION: to_dict() exposes sensitive internal data! "
             f"Serialization reveals secrets that should be protected. "
             f"Exposed secrets: {exposed_secrets}, "
             f"Full serialization preview: {serialized_str[:500]}"
@@ -562,7 +562,7 @@ class TestDeepAgentStateSecurityViolations(SSotBaseTestCase):
         
         if self.security_violations:
             self.test_logger.error(
-                f"🚨 SECURITY VIOLATIONS DETECTED: {len(self.security_violations)} "
+                f" ALERT:  SECURITY VIOLATIONS DETECTED: {len(self.security_violations)} "
                 f"critical security issues found in DeepAgentState implementation. "
                 f"Details: {self.security_violations}"
             )

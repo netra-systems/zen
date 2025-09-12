@@ -16,7 +16,7 @@ REAL SERVICE INTEGRATION POINTS:
 4. Real tool dispatcher and tool execution
 5. Real multi-user isolation and concurrent sessions
 6. Real error handling with actual failure scenarios
-7. Real Golden Path pipeline: Data → Optimization → Report
+7. Real Golden Path pipeline: Data  ->  Optimization  ->  Report
 
 CLAUDE.md COMPLIANCE: ZERO MOCKS - ALL REAL SERVICE INTEGRATION
 """
@@ -208,7 +208,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             expected_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
             for expected_event in expected_events:
                 if expected_event in event_types:
-                    print(f"✅ Received expected WebSocket event: {expected_event}")
+                    print(f" PASS:  Received expected WebSocket event: {expected_event}")
         
         # Record metrics
         self.record_metric("real_agent_execution_test_passed", True)
@@ -281,10 +281,10 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                     "success": True
                 })
                 
-                print(f"✅ Real tool execution successful: {tool.name} in {tool_execution_time:.2f}s")
+                print(f" PASS:  Real tool execution successful: {tool.name} in {tool_execution_time:.2f}s")
                 
             except Exception as e:
-                print(f"⚠️ Real tool execution error for {tool.name}: {e}")
+                print(f" WARNING: [U+FE0F] Real tool execution error for {tool.name}: {e}")
                 # Record the attempt even if it fails (real error handling)
                 tool_execution_results.append({
                     "tool_name": tool.name,
@@ -340,7 +340,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 user_id=str(user_context.user_id)
             )
             
-            print(f"✅ Real WebSocket connection established to {websocket_url}")
+            print(f" PASS:  Real WebSocket connection established to {websocket_url}")
             
             # Monitor real WebSocket events during execution
             async def collect_real_websocket_events():
@@ -353,7 +353,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                             websocket_connection, timeout=3.0
                         )
                         real_websocket_events.append(event)
-                        print(f"📨 Real WebSocket event received: {event.get('type')}")
+                        print(f"[U+1F4E8] Real WebSocket event received: {event.get('type')}")
                         
                         # Stop if we get agent completion
                         if event.get('type') == 'agent_completed':
@@ -378,10 +378,10 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                     user_id=str(user_context.user_id)
                 )
                 
-                print(f"✅ Real agent execution completed")
+                print(f" PASS:  Real agent execution completed")
                 
             except Exception as e:
-                print(f"⚠️ Agent execution error (expected in test): {e}")
+                print(f" WARNING: [U+FE0F] Agent execution error (expected in test): {e}")
             
             # Wait for WebSocket event collection
             try:
@@ -392,7 +392,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             agent_execution_time = time.time() - agent_execution_start
             
         except Exception as e:
-            print(f"⚠️ Real WebSocket connection error: {e}")
+            print(f" WARNING: [U+FE0F] Real WebSocket connection error: {e}")
             # Continue test - some environments may not have WebSocket available
             
         finally:
@@ -402,14 +402,14 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         
         # Validate real WebSocket events (if any were received)
         if real_websocket_events:
-            print(f"📊 Received {len(real_websocket_events)} real WebSocket events")
+            print(f" CHART:  Received {len(real_websocket_events)} real WebSocket events")
             
             # Verify mission-critical WebSocket events for chat business value
             event_types = [event.get('type') for event in real_websocket_events]
             critical_events = ['agent_started', 'agent_thinking', 'tool_executing', 'tool_completed', 'agent_completed']
             
             received_critical_events = [e for e in critical_events if e in event_types]
-            print(f"🎯 Critical events received: {received_critical_events}")
+            print(f" TARGET:  Critical events received: {received_critical_events}")
             
             # Verify event structure
             for event in real_websocket_events:
@@ -419,7 +419,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             self.record_metric("real_websocket_events_received", len(real_websocket_events))
             self.record_metric("critical_websocket_events_received", len(received_critical_events))
         else:
-            print("⚠️ No real WebSocket events received (connection may not be available)")
+            print(" WARNING: [U+FE0F] No real WebSocket events received (connection may not be available)")
             self.record_metric("real_websocket_events_received", 0)
         
         self.record_metric("real_websocket_integration_test_passed", True)
@@ -457,7 +457,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         
         try:
             # Start real agent execution
-            print(f"🚀 Starting real agent execution: {real_agent_name}")
+            print(f"[U+1F680] Starting real agent execution: {real_agent_name}")
             
             # Execute real agent with state monitoring
             agent_result = await self.agent_service.execute_agent(
@@ -467,14 +467,14 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 user_id=str(user_context.user_id)
             )
             
-            print(f"✅ Real agent execution completed")
+            print(f" PASS:  Real agent execution completed")
             
             # Check final state
             final_state = execution_engine.get_agent_state(real_agent_name)
             state_changes.append(('final', final_state))
             
         except Exception as e:
-            print(f"⚠️ Real agent execution error: {e}")
+            print(f" WARNING: [U+FE0F] Real agent execution error: {e}")
             # Record the state even if execution fails
             error_state = execution_engine.get_agent_state(real_agent_name)
             state_changes.append(('error', error_state))
@@ -493,7 +493,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 print(f"Agent {agent} state: {current_state}")
                 
             except Exception as e:
-                print(f"⚠️ Could not get state for agent {agent}: {e}")
+                print(f" WARNING: [U+FE0F] Could not get state for agent {agent}: {e}")
                 agent_states[agent] = "unknown"
         
         # Verify state isolation - each agent should have independent state
@@ -509,7 +509,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 assert len(state_history) >= 1, "Should have state history entries"
                 
         except Exception as e:
-            print(f"⚠️ State history not available: {e}")
+            print(f" WARNING: [U+FE0F] State history not available: {e}")
         
         # Assertions for real agent state management
         assert agent_execution_time < 60.0, f"Real agent execution should complete: {agent_execution_time:.2f}s"
@@ -525,7 +525,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
     @pytest.mark.real_services
     @pytest.mark.asyncio
     async def test_real_golden_path_pipeline_execution(self, real_services_fixture):
-        """Test real Golden Path pipeline: Data → Optimization → Report - NO MOCKS."""
+        """Test real Golden Path pipeline: Data  ->  Optimization  ->  Report - NO MOCKS."""
         # Configure agent instance factory
         await self._configure_factory_task()
         
@@ -541,13 +541,13 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             user_context=user_context
         )
         
-        # Execute REAL Golden Path pipeline: Data → Optimization → Report
+        # Execute REAL Golden Path pipeline: Data  ->  Optimization  ->  Report
         pipeline_start = time.time()
         pipeline_results = {}
         
         # Step 1: Execute REAL Data Agent
         try:
-            print("🔍 Step 1: Executing REAL Data Agent")
+            print(" SEARCH:  Step 1: Executing REAL Data Agent")
             data_agent_start = time.time()
             
             data_agent_result = await self.agent_service.execute_agent(
@@ -569,10 +569,10 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 "success": True
             }
             
-            print(f"✅ Data Agent completed in {data_execution_time:.2f}s")
+            print(f" PASS:  Data Agent completed in {data_execution_time:.2f}s")
             
         except Exception as e:
-            print(f"⚠️ Data Agent execution error: {e}")
+            print(f" WARNING: [U+FE0F] Data Agent execution error: {e}")
             pipeline_results["data"] = {
                 "error": str(e),
                 "execution_time": time.time() - data_agent_start,
@@ -581,7 +581,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         
         # Step 2: Execute REAL Optimization Agent (depends on data results)
         try:
-            print("⚡ Step 2: Executing REAL Optimization Agent")
+            print(" LIGHTNING:  Step 2: Executing REAL Optimization Agent")
             opt_agent_start = time.time()
             
             # Pass data results to optimization agent
@@ -606,10 +606,10 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 "success": True
             }
             
-            print(f"✅ Optimization Agent completed in {opt_execution_time:.2f}s")
+            print(f" PASS:  Optimization Agent completed in {opt_execution_time:.2f}s")
             
         except Exception as e:
-            print(f"⚠️ Optimization Agent execution error: {e}")
+            print(f" WARNING: [U+FE0F] Optimization Agent execution error: {e}")
             pipeline_results["optimization"] = {
                 "error": str(e),
                 "execution_time": time.time() - opt_agent_start,
@@ -618,7 +618,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         
         # Step 3: Execute REAL Reporting Agent (depends on both previous results)
         try:
-            print("📊 Step 3: Executing REAL Reporting Agent")
+            print(" CHART:  Step 3: Executing REAL Reporting Agent")
             report_agent_start = time.time()
             
             # Pass both data and optimization results to reporting agent
@@ -644,10 +644,10 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 "success": True
             }
             
-            print(f"✅ Reporting Agent completed in {report_execution_time:.2f}s")
+            print(f" PASS:  Reporting Agent completed in {report_execution_time:.2f}s")
             
         except Exception as e:
-            print(f"⚠️ Reporting Agent execution error: {e}")
+            print(f" WARNING: [U+FE0F] Reporting Agent execution error: {e}")
             pipeline_results["reporting"] = {
                 "error": str(e),
                 "execution_time": time.time() - report_agent_start,
@@ -660,14 +660,14 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         successful_agents = [name for name, result in pipeline_results.items() if result.get("success")]
         failed_agents = [name for name, result in pipeline_results.items() if not result.get("success")]
         
-        print(f"🎯 Golden Path Pipeline Results:")
-        print(f"   ✅ Successful agents: {successful_agents}")
-        print(f"   ⚠️ Failed agents: {failed_agents}")
-        print(f"   ⏱️ Total pipeline time: {total_pipeline_time:.2f}s")
+        print(f" TARGET:  Golden Path Pipeline Results:")
+        print(f"    PASS:  Successful agents: {successful_agents}")
+        print(f"    WARNING: [U+FE0F] Failed agents: {failed_agents}")
+        print(f"   [U+23F1][U+FE0F] Total pipeline time: {total_pipeline_time:.2f}s")
         
         # Verify real data flow between agents
         if pipeline_results["data"].get("success") and pipeline_results["optimization"].get("success"):
-            print("🔄 Verifying real data flow between agents")
+            print(" CYCLE:  Verifying real data flow between agents")
             # Real data should flow between agents - verify structure exists
             assert pipeline_results["data"]["result"] is not None, "Data agent should produce real results"
             assert pipeline_results["optimization"]["result"] is not None, "Optimization agent should produce real results"
@@ -707,7 +707,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         error_test_results = []
         
         # Scenario 1: Execute agent with invalid input (real error)
-        print("🔥 Testing real error scenario 1: Invalid input")
+        print(" FIRE:  Testing real error scenario 1: Invalid input")
         error_scenario_1_start = time.time()
         
         try:
@@ -736,10 +736,10 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 "error_message": str(e),
                 "details": "Real error handling working as expected"
             })
-            print(f"✅ Real error handled: {type(e).__name__}: {str(e)[:100]}")
+            print(f" PASS:  Real error handled: {type(e).__name__}: {str(e)[:100]}")
         
         # Scenario 2: Execute non-existent agent (real error)
-        print("🔥 Testing real error scenario 2: Non-existent agent")
+        print(" FIRE:  Testing real error scenario 2: Non-existent agent")
         error_scenario_2_start = time.time()
         
         try:
@@ -767,10 +767,10 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 "error_message": str(e),
                 "details": "Real agent registry error handling"
             })
-            print(f"✅ Real agent registry error handled: {type(e).__name__}")
+            print(f" PASS:  Real agent registry error handled: {type(e).__name__}")
         
         # Scenario 3: Test tool execution error handling
-        print("🔥 Testing real error scenario 3: Tool execution failure")
+        print(" FIRE:  Testing real error scenario 3: Tool execution failure")
         error_scenario_3_start = time.time()
         
         try:
@@ -815,14 +815,14 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 "error_message": str(e),
                 "details": "Real tool execution error handling"
             })
-            print(f"✅ Real tool execution error handled: {type(e).__name__}")
+            print(f" PASS:  Real tool execution error handled: {type(e).__name__}")
         
         # Analyze real error handling results
         total_error_scenarios = len(error_test_results)
         error_scenarios_handled = len([r for r in error_test_results if "error" in r["result_type"]])
         graceful_scenarios = len([r for r in error_test_results if "success" in r["result_type"]])
         
-        print(f"📊 Real Error Handling Analysis:")
+        print(f" CHART:  Real Error Handling Analysis:")
         print(f"   Total scenarios tested: {total_error_scenarios}")
         print(f"   Errors properly handled: {error_scenarios_handled}")
         print(f"   Graceful handling: {graceful_scenarios}")
@@ -832,7 +832,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         
         # Test real recovery mechanism if possible
         try:
-            print("🔄 Testing real recovery mechanism")
+            print(" CYCLE:  Testing real recovery mechanism")
             recovery_start = time.time()
             
             # Try to execute a working agent after errors to test recovery
@@ -844,7 +844,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             )
             
             recovery_time = time.time() - recovery_start
-            print(f"✅ System recovery successful in {recovery_time:.2f}s")
+            print(f" PASS:  System recovery successful in {recovery_time:.2f}s")
             
             error_test_results.append({
                 "scenario": "recovery_test",
@@ -854,7 +854,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             })
             
         except Exception as e:
-            print(f"⚠️ Recovery test failed: {e}")
+            print(f" WARNING: [U+FE0F] Recovery test failed: {e}")
         
         # Record real error handling metrics
         self.record_metric("real_error_handling_test_passed", True)
@@ -875,7 +875,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         execution_engines = []
         
         # Create multiple real authenticated user contexts
-        print(f"🔐 Creating {concurrent_users} real authenticated users")
+        print(f"[U+1F510] Creating {concurrent_users} real authenticated users")
         for i in range(concurrent_users):
             context = await create_authenticated_user_context(
                 user_email=f"real_concurrent_user_{i}_{int(time.time())}@example.com",
@@ -894,11 +894,11 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             )
             execution_engines.append(engine)
             
-            print(f"✅ Real user {i} authenticated: {str(context.user_id)[:8]}...")
+            print(f" PASS:  Real user {i} authenticated: {str(context.user_id)[:8]}...")
         
         # Execute real concurrent agent pipelines
         concurrent_start = time.time()
-        print(f"🚀 Starting {concurrent_users} concurrent real agent executions")
+        print(f"[U+1F680] Starting {concurrent_users} concurrent real agent executions")
         
         # Execute concurrent real pipelines
         async def execute_real_user_pipeline(user_index: int, context: StronglyTypedUserExecutionContext, engine: UserExecutionEngine):
@@ -907,7 +907,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
             user_id_short = str(context.user_id)[:8]
             
             try:
-                print(f"👤 User {user_index} ({user_id_short}): Starting real agent execution")
+                print(f"[U+1F464] User {user_index} ({user_id_short}): Starting real agent execution")
                 
                 # Execute real agent with user-specific context
                 agent_result = await self.agent_service.execute_agent(
@@ -924,7 +924,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 )
                 
                 execution_time = time.time() - pipeline_start
-                print(f"✅ User {user_index} ({user_id_short}): Completed in {execution_time:.2f}s")
+                print(f" PASS:  User {user_index} ({user_id_short}): Completed in {execution_time:.2f}s")
                 
                 return {
                     "success": True,
@@ -936,7 +936,7 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 
             except Exception as e:
                 execution_time = time.time() - pipeline_start
-                print(f"⚠️ User {user_index} ({user_id_short}): Error in {execution_time:.2f}s: {e}")
+                print(f" WARNING: [U+FE0F] User {user_index} ({user_id_short}): Error in {execution_time:.2f}s: {e}")
                 
                 return {
                     "success": False,
@@ -962,17 +962,17 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
         
         for i, result in enumerate(pipeline_results):
             if isinstance(result, Exception):
-                print(f"❌ Pipeline {i} failed with exception: {result}")
+                print(f" FAIL:  Pipeline {i} failed with exception: {result}")
                 failed_pipelines += 1
             elif result.get("success"):
-                print(f"✅ Pipeline {i} succeeded in {result['execution_time']:.2f}s")
+                print(f" PASS:  Pipeline {i} succeeded in {result['execution_time']:.2f}s")
                 successful_pipelines += 1
             else:
-                print(f"⚠️ Pipeline {i} failed: {result.get('error', 'Unknown error')}")
+                print(f" WARNING: [U+FE0F] Pipeline {i} failed: {result.get('error', 'Unknown error')}")
                 failed_pipelines += 1
         
         # Verify real user isolation
-        print(f"🔒 Verifying real user isolation")
+        print(f"[U+1F512] Verifying real user isolation")
         isolation_verified = True
         
         for i, (context, engine) in enumerate(zip(user_contexts, execution_engines)):
@@ -982,18 +982,18 @@ class TestAgentPipelineIntegration(SSotAsyncTestCase):
                 engine_context_id = str(engine.user_context.user_id)
                 
                 if user_context_id != engine_context_id:
-                    print(f"❌ User {i} isolation breach: context mismatch")
+                    print(f" FAIL:  User {i} isolation breach: context mismatch")
                     isolation_verified = False
                 else:
-                    print(f"✅ User {i} isolation verified: {user_context_id[:8]}...")
+                    print(f" PASS:  User {i} isolation verified: {user_context_id[:8]}...")
                     
             except Exception as e:
-                print(f"⚠️ User {i} isolation check error: {e}")
+                print(f" WARNING: [U+FE0F] User {i} isolation check error: {e}")
         
         # Performance and isolation assertions
         success_rate = successful_pipelines / concurrent_users
         
-        print(f"📊 Real Concurrent Execution Results:")
+        print(f" CHART:  Real Concurrent Execution Results:")
         print(f"   Total users: {concurrent_users}")
         print(f"   Successful: {successful_pipelines}")
         print(f"   Failed: {failed_pipelines}")

@@ -10,7 +10,7 @@ Business Value Justification:
 - Segment: Platform/Internal - Test Infrastructure
 - Business Goal: Reproduce and validate fix for WebSocket connection failures
 - Value Impact: Enables verification of $120K+ MRR chat functionality fix
-- Revenue Impact: Validates solution for 90% → 100% P1 test success rate
+- Revenue Impact: Validates solution for 90%  ->  100% P1 test success rate
 
 USAGE:
     python test_websocket_1011_reproduction.py
@@ -32,7 +32,7 @@ try:
     import websockets
     from websockets.exceptions import ConnectionClosedError, InvalidURI
 except ImportError:
-    print("❌ ERROR: websockets library not installed")
+    print(" FAIL:  ERROR: websockets library not installed")
     print("Install with: pip install websockets")
     sys.exit(1)
 
@@ -77,7 +77,7 @@ class WebSocket1011ReproductionTest:
             Test result dictionary with status and diagnostic information
         """
         test_name = "websocket_connection_real_reproduction"
-        logger.info(f"🧪 Running {test_name}")
+        logger.info(f"[U+1F9EA] Running {test_name}")
         
         start_time = time.time()
         result = {
@@ -105,7 +105,7 @@ class WebSocket1011ReproductionTest:
                 }
             ) as websocket:
                 result["connection_accepted"] = True
-                logger.info("✅ WebSocket connection accepted")
+                logger.info(" PASS:  WebSocket connection accepted")
                 
                 # Attempt authentication (this should trigger the 1011 error)
                 result["authentication_attempted"] = True
@@ -115,21 +115,21 @@ class WebSocket1011ReproductionTest:
                     # Send a test message to trigger authentication flow
                     test_message = {"type": "ping", "test_id": "reproduction_1", "timestamp": datetime.utcnow().isoformat()}
                     await websocket.send(json.dumps(test_message))
-                    logger.info("📤 Sent test message")
+                    logger.info("[U+1F4E4] Sent test message")
                     
                     # Wait for response (should get 1011 close instead)
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    logger.info(f"📥 Received response: {response}")
+                    logger.info(f"[U+1F4E5] Received response: {response}")
                     
                     # If we get here, the connection is working (fix was successful)
                     result["status"] = "passed"
                     result["reproduction_successful"] = False  # No error reproduced = fix working
-                    logger.info("✅ Test PASSED - No 1011 error (fix appears to be working)")
+                    logger.info(" PASS:  Test PASSED - No 1011 error (fix appears to be working)")
                     
                 except asyncio.TimeoutError:
                     result["status"] = "timeout"
                     result["error_details"] = "No response received within 5 seconds"
-                    logger.warning("⏱️ Test TIMEOUT - No response received")
+                    logger.warning("[U+23F1][U+FE0F] Test TIMEOUT - No response received")
                 
         except ConnectionClosedError as close_error:
             result["websocket_close_code"] = close_error.code
@@ -140,16 +140,16 @@ class WebSocket1011ReproductionTest:
                 result["status"] = "failed_1011"
                 result["reproduction_successful"] = True  # Successfully reproduced the bug
                 result["error_details"] = f"WebSocket 1011 internal error: {close_error.reason}"
-                logger.error(f"❌ REPRODUCED WebSocket 1011 error: {close_error.reason}")
+                logger.error(f" FAIL:  REPRODUCED WebSocket 1011 error: {close_error.reason}")
             else:
                 result["status"] = "failed_other"
                 result["error_details"] = f"WebSocket closed with code {close_error.code}: {close_error.reason}"
-                logger.error(f"❌ WebSocket closed with different code: {close_error.code}")
+                logger.error(f" FAIL:  WebSocket closed with different code: {close_error.code}")
                 
         except Exception as e:
             result["status"] = "error"
             result["error_details"] = str(e)
-            logger.error(f"❌ Connection error: {e}")
+            logger.error(f" FAIL:  Connection error: {e}")
         
         finally:
             result["duration_seconds"] = round(time.time() - start_time, 2)
@@ -167,7 +167,7 @@ class WebSocket1011ReproductionTest:
             Test result dictionary with authentication-specific diagnostics
         """
         test_name = "websocket_authentication_real_reproduction"
-        logger.info(f"🧪 Running {test_name}")
+        logger.info(f"[U+1F9EA] Running {test_name}")
         
         start_time = time.time()
         result = {
@@ -201,7 +201,7 @@ class WebSocket1011ReproductionTest:
                 extra_headers=headers
             ) as websocket:
                 result["connection_accepted"] = True
-                logger.info("✅ WebSocket connection accepted with auth headers")
+                logger.info(" PASS:  WebSocket connection accepted with auth headers")
                 
                 # Send authentication test message
                 auth_test_message = {
@@ -211,12 +211,12 @@ class WebSocket1011ReproductionTest:
                     "timestamp": datetime.utcnow().isoformat()
                 }
                 await websocket.send(json.dumps(auth_test_message))
-                logger.info("📤 Sent authentication test message")
+                logger.info("[U+1F4E4] Sent authentication test message")
                 
                 # Wait for authentication response
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    logger.info(f"📥 Received auth response: {response}")
+                    logger.info(f"[U+1F4E5] Received auth response: {response}")
                     
                     # Parse response to check authentication status
                     try:
@@ -224,11 +224,11 @@ class WebSocket1011ReproductionTest:
                         if response_data.get("type") == "authentication_success":
                             result["status"] = "passed"
                             result["reproduction_successful"] = False  # No error = fix working
-                            logger.info("✅ Authentication PASSED - E2E bypass working")
+                            logger.info(" PASS:  Authentication PASSED - E2E bypass working")
                         elif response_data.get("type") == "authentication_error":
                             result["status"] = "failed_auth"
                             result["error_details"] = response_data.get("error", "Authentication failed")
-                            logger.error(f"❌ Authentication failed: {response_data.get('error')}")
+                            logger.error(f" FAIL:  Authentication failed: {response_data.get('error')}")
                         else:
                             result["status"] = "unexpected_response"
                             result["error_details"] = f"Unexpected response: {response}"
@@ -239,7 +239,7 @@ class WebSocket1011ReproductionTest:
                 except asyncio.TimeoutError:
                     result["status"] = "timeout"
                     result["error_details"] = "No authentication response received within 5 seconds"
-                    logger.warning("⏱️ Authentication test TIMEOUT")
+                    logger.warning("[U+23F1][U+FE0F] Authentication test TIMEOUT")
                 
         except ConnectionClosedError as close_error:
             result["websocket_close_code"] = close_error.code
@@ -250,16 +250,16 @@ class WebSocket1011ReproductionTest:
                 result["status"] = "failed_1011"
                 result["reproduction_successful"] = True  # Successfully reproduced the bug
                 result["error_details"] = f"WebSocket 1011 during authentication: {close_error.reason}"
-                logger.error(f"❌ REPRODUCED WebSocket 1011 during authentication: {close_error.reason}")
+                logger.error(f" FAIL:  REPRODUCED WebSocket 1011 during authentication: {close_error.reason}")
             else:
                 result["status"] = "failed_other"
                 result["error_details"] = f"WebSocket closed during auth with code {close_error.code}: {close_error.reason}"
-                logger.error(f"❌ Authentication failed with WebSocket code: {close_error.code}")
+                logger.error(f" FAIL:  Authentication failed with WebSocket code: {close_error.code}")
                 
         except Exception as e:
             result["status"] = "error"
             result["error_details"] = str(e)
-            logger.error(f"❌ Authentication test error: {e}")
+            logger.error(f" FAIL:  Authentication test error: {e}")
         
         finally:
             result["duration_seconds"] = round(time.time() - start_time, 2)
@@ -277,7 +277,7 @@ class WebSocket1011ReproductionTest:
             Test result dictionary with fix validation results
         """
         test_name = "e2e_bypass_fix_validation"
-        logger.info(f"🧪 Running {test_name}")
+        logger.info(f"[U+1F9EA] Running {test_name}")
         
         start_time = time.time()
         result = {
@@ -309,7 +309,7 @@ class WebSocket1011ReproductionTest:
                 timeout=self.connection_timeout,
                 extra_headers=headers
             ) as websocket:
-                logger.info("✅ WebSocket connection established with E2E bypass headers")
+                logger.info(" PASS:  WebSocket connection established with E2E bypass headers")
                 
                 # Send multiple test messages to validate sustained connection
                 for i in range(3):
@@ -320,12 +320,12 @@ class WebSocket1011ReproductionTest:
                         "timestamp": datetime.utcnow().isoformat()
                     }
                     await websocket.send(json.dumps(test_message))
-                    logger.info(f"📤 Sent validation message {i + 1}/3")
+                    logger.info(f"[U+1F4E4] Sent validation message {i + 1}/3")
                     
                     # Wait for response
                     try:
                         response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
-                        logger.info(f"📥 Received response {i + 1}: {response}")
+                        logger.info(f"[U+1F4E5] Received response {i + 1}: {response}")
                         
                         # Check if response indicates E2E bypass
                         try:
@@ -336,12 +336,12 @@ class WebSocket1011ReproductionTest:
                             pass
                             
                     except asyncio.TimeoutError:
-                        logger.warning(f"⏱️ Timeout waiting for response {i + 1}")
+                        logger.warning(f"[U+23F1][U+FE0F] Timeout waiting for response {i + 1}")
                 
                 result["connection_sustained"] = True
                 result["status"] = "passed"
                 result["fix_validation"] = "working"
-                logger.info("✅ Fix validation PASSED - E2E bypass working correctly")
+                logger.info(" PASS:  Fix validation PASSED - E2E bypass working correctly")
                 
         except ConnectionClosedError as close_error:
             if close_error.code == 1011:
@@ -349,17 +349,17 @@ class WebSocket1011ReproductionTest:
                 result["fix_validation"] = "not_working"
                 result["reproduction_successful"] = True
                 result["error_details"] = f"Fix validation failed: WebSocket 1011: {close_error.reason}"
-                logger.error(f"❌ FIX VALIDATION FAILED: Still getting 1011 errors")
+                logger.error(f" FAIL:  FIX VALIDATION FAILED: Still getting 1011 errors")
             else:
                 result["status"] = "failed_other" 
                 result["error_details"] = f"WebSocket closed with code {close_error.code}: {close_error.reason}"
-                logger.error(f"❌ Fix validation failed with code: {close_error.code}")
+                logger.error(f" FAIL:  Fix validation failed with code: {close_error.code}")
                 
         except Exception as e:
             result["status"] = "error"
             result["fix_validation"] = "error"
             result["error_details"] = str(e)
-            logger.error(f"❌ Fix validation error: {e}")
+            logger.error(f" FAIL:  Fix validation error: {e}")
         
         finally:
             result["duration_seconds"] = round(time.time() - start_time, 2)
@@ -374,7 +374,7 @@ class WebSocket1011ReproductionTest:
         Returns:
             Complete test suite results with summary
         """
-        logger.info("🚀 Starting WebSocket 1011 Reproduction Test Suite")
+        logger.info("[U+1F680] Starting WebSocket 1011 Reproduction Test Suite")
         logger.info("=" * 60)
         
         suite_start = time.time()
@@ -426,31 +426,31 @@ class WebSocket1011ReproductionTest:
     def print_summary_report(self, suite_result: Dict[str, Any]) -> None:
         """Print a detailed summary report of test results."""
         print("\n" + "=" * 80)
-        print("🧪 WEBSOCKET 1011 REPRODUCTION TEST SUITE SUMMARY")
+        print("[U+1F9EA] WEBSOCKET 1011 REPRODUCTION TEST SUITE SUMMARY")
         print("=" * 80)
         
         summary = suite_result["summary"]
-        print(f"📊 Total Tests: {suite_result['total_tests']}")
-        print(f"✅ Passed: {suite_result['passed']}")
-        print(f"❌ Failed (1011): {suite_result['failed_1011']}")
-        print(f"❌ Failed (Other): {suite_result['failed_other']}")
-        print(f"💥 Errors: {suite_result['errors']}")
-        print(f"🔬 Bug Reproduced: {'YES' if summary['bug_reproduced'] else 'NO'}")
-        print(f"🔧 Fix Validated: {'YES' if summary['fix_validated'] else 'NO'}")
-        print(f"⏱️ Total Duration: {suite_result['duration_seconds']}s")
-        print(f"📋 Overall Status: {summary['overall_status']}")
+        print(f" CHART:  Total Tests: {suite_result['total_tests']}")
+        print(f" PASS:  Passed: {suite_result['passed']}")
+        print(f" FAIL:  Failed (1011): {suite_result['failed_1011']}")
+        print(f" FAIL:  Failed (Other): {suite_result['failed_other']}")
+        print(f"[U+1F4A5] Errors: {suite_result['errors']}")
+        print(f"[U+1F52C] Bug Reproduced: {'YES' if summary['bug_reproduced'] else 'NO'}")
+        print(f"[U+1F527] Fix Validated: {'YES' if summary['fix_validated'] else 'NO'}")
+        print(f"[U+23F1][U+FE0F] Total Duration: {suite_result['duration_seconds']}s")
+        print(f"[U+1F4CB] Overall Status: {summary['overall_status']}")
         
-        print("\n📋 DETAILED TEST RESULTS:")
+        print("\n[U+1F4CB] DETAILED TEST RESULTS:")
         print("-" * 80)
         
         for i, result in enumerate(suite_result['test_results'], 1):
             status_icon = {
-                "passed": "✅",
-                "failed_1011": "❌", 
-                "failed_other": "⚠️",
-                "error": "💥",
-                "timeout": "⏱️"
-            }.get(result["status"], "❓")
+                "passed": " PASS: ",
+                "failed_1011": " FAIL: ", 
+                "failed_other": " WARNING: [U+FE0F]",
+                "error": "[U+1F4A5]",
+                "timeout": "[U+23F1][U+FE0F]"
+            }.get(result["status"], "[U+2753]")
             
             print(f"{i}. {result['test_name']}")
             print(f"   Status: {status_icon} {result['status'].upper()}")
@@ -463,23 +463,23 @@ class WebSocket1011ReproductionTest:
                 print(f"   Error: {result['error_details']}")
             
             if result.get("reproduction_successful"):
-                print("   🎯 BUG REPRODUCTION: SUCCESS")
+                print("    TARGET:  BUG REPRODUCTION: SUCCESS")
             
             print()
         
         # Business impact assessment
-        print("💼 BUSINESS IMPACT ASSESSMENT:")
+        print("[U+1F4BC] BUSINESS IMPACT ASSESSMENT:")
         print("-" * 80)
         if summary['bug_reproduced']:
-            print("❌ CRITICAL: WebSocket 1011 errors confirmed - $120K+ MRR chat functionality affected")
-            print("📈 P1 Test Success Rate: 20/22 (90%) - Connection establishment failing")
-            print("🔧 RECOMMENDATION: Apply E2E bypass fix immediately")
+            print(" FAIL:  CRITICAL: WebSocket 1011 errors confirmed - $120K+ MRR chat functionality affected")
+            print("[U+1F4C8] P1 Test Success Rate: 20/22 (90%) - Connection establishment failing")
+            print("[U+1F527] RECOMMENDATION: Apply E2E bypass fix immediately")
         elif summary['fix_validated']:
-            print("✅ SUCCESS: WebSocket connections working - Fix validated")
-            print("📈 P1 Test Success Rate: Expected 22/22 (100%)")
-            print("💰 BUSINESS VALUE: $120K+ MRR chat functionality fully protected")
+            print(" PASS:  SUCCESS: WebSocket connections working - Fix validated")
+            print("[U+1F4C8] P1 Test Success Rate: Expected 22/22 (100%)")
+            print("[U+1F4B0] BUSINESS VALUE: $120K+ MRR chat functionality fully protected")
         else:
-            print("⚠️  MIXED RESULTS: Further investigation needed")
+            print(" WARNING: [U+FE0F]  MIXED RESULTS: Further investigation needed")
         
         print("\n" + "=" * 80)
 

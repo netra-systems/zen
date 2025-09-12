@@ -587,7 +587,7 @@ async def test_complete_agent_pipeline_execution(pipeline_tester):
                 pytest.fail(f"Agent response has no content: {agent_response}")
         
         # Log successful pipeline metrics
-        print(f"✓ Agent pipeline completed:")
+        print(f"[U+2713] Agent pipeline completed:")
         print(f"  Setup: {ws_setup['setup_time']:.3f}s")
         print(f"  Send: {send_result['send_time']:.3f}s") 
         print(f"  Response: {response_result['response_time']:.3f}s")
@@ -626,7 +626,7 @@ async def test_agent_pipeline_performance_requirements(performance_tester):
             assert simple["meets_5s_requirement"], \
                 f"Simple request took {simple['total_time']:.3f}s, required <5s"
             
-            print(f"✓ Simple request: {simple['total_time']:.3f}s")
+            print(f"[U+2713] Simple request: {simple['total_time']:.3f}s")
         
         # Validate complex request performance (more lenient)
         if "complex_request" in performance_results:
@@ -636,7 +636,7 @@ async def test_agent_pipeline_performance_requirements(performance_tester):
                 assert complex["acceptable_for_complex"], \
                     f"Complex request took {complex['total_time']:.3f}s, should be <8s"
                 
-                print(f"✓ Complex request: {complex['total_time']:.3f}s")
+                print(f"[U+2713] Complex request: {complex['total_time']:.3f}s")
     
     finally:
         await websocket.disconnect()
@@ -693,7 +693,7 @@ async def test_concurrent_agent_pipeline_execution(pipeline_tester):
         
         assert successful_responses >= 1, f"Need at least 1 successful response, got {successful_responses}"
         
-        print(f"✓ Concurrent agent pipeline: {successful_sends} sends, {successful_responses} responses")
+        print(f"[U+2713] Concurrent agent pipeline: {successful_sends} sends, {successful_responses} responses")
     
     finally:
         # Cleanup all connections
@@ -729,7 +729,7 @@ async def test_agent_pipeline_error_handling(pipeline_tester):
         # Should get some response or error message
         response = await websocket.receive(timeout=5.0)
         if response:
-            print(f"✓ Invalid message handled: {response.get('type', 'unknown')}")
+            print(f"[U+2713] Invalid message handled: {response.get('type', 'unknown')}")
         
         # Test 2: Complex request that might stress the pipeline
         stress_content = "A" * 1000 + " analyze this and provide detailed recommendations"
@@ -740,11 +740,11 @@ async def test_agent_pipeline_error_handling(pipeline_tester):
             
             # Should either get response or graceful error
             if response_result["response_received"]:
-                print("✓ Stress test handled with response")
+                print("[U+2713] Stress test handled with response")
             elif response_result["all_messages"]:
-                print("✓ Stress test handled with messages")
+                print("[U+2713] Stress test handled with messages")
             else:
-                print("ℹ Stress test - no response (may be expected)")
+                print("[U+2139] Stress test - no response (may be expected)")
     
     finally:
         await websocket.disconnect()
@@ -756,7 +756,7 @@ Real Agent Pipeline Execution Test - Business Impact
 
 Revenue Impact: $120K+ MRR Protection
 - Agent failures = immediate no-value delivery = customer churn
-- Tests complete supervisor → agent selection → execution → response flow
+- Tests complete supervisor  ->  agent selection  ->  execution  ->  response flow
 - Validates real LLM integration with actual agent processing
 - Ensures quality gates work end-to-end for value delivery
 - Performance validation critical for user retention and satisfaction

@@ -377,10 +377,10 @@ def main():
         print(f"- Remaining issues: {stats['remaining_issues']}")
         
         if stats['files_fixed'] > 0:
-            print(f"\n✅ Successfully fixed {stats['files_fixed']} test files!")
+            print(f"\n PASS:  Successfully fixed {stats['files_fixed']} test files!")
         
         if stats['remaining_issues'] > 0:
-            print(f"\n⚠️  {stats['remaining_issues']} files still have issues that require manual attention.")
+            print(f"\n WARNING: [U+FE0F]  {stats['remaining_issues']} files still have issues that require manual attention.")
     
     else:
         print("\nTo apply fixes, run with --fix flag:")

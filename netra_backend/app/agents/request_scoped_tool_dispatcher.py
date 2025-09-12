@@ -122,14 +122,14 @@ class RequestScopedToolDispatcher:
             'context_id': user_context.get_correlation_id()
         }
         
-        logger.info(f"✅ Created RequestScopedToolDispatcher {self.dispatcher_id} for user {user_context.user_id}")
+        logger.info(f" PASS:  Created RequestScopedToolDispatcher {self.dispatcher_id} for user {user_context.user_id}")
         
         # Verify user context isolation
         try:
             user_context.verify_isolation()
-            logger.debug(f"✅ ISOLATION VERIFIED: {self._get_log_prefix()}")
+            logger.debug(f" PASS:  ISOLATION VERIFIED: {self._get_log_prefix()}")
         except Exception as e:
-            logger.error(f"🚨 ISOLATION VIOLATION: {self._get_log_prefix()} - {e}")
+            logger.error(f" ALERT:  ISOLATION VIOLATION: {self._get_log_prefix()} - {e}")
             raise ValueError(f"User context failed isolation verification: {e}")
     
     def _get_log_prefix(self) -> str:
@@ -245,7 +245,7 @@ class RequestScopedToolDispatcher:
             self._metrics['successful_executions'] += 1
             self._metrics['total_execution_time_ms'] += execution_time_ms
             
-            logger.debug(f"✅ Tool {tool_name} executed successfully in {execution_time_ms:.1f}ms {self._get_log_prefix()}")
+            logger.debug(f" PASS:  Tool {tool_name} executed successfully in {execution_time_ms:.1f}ms {self._get_log_prefix()}")
             return result
             
         except Exception as e:
@@ -254,7 +254,7 @@ class RequestScopedToolDispatcher:
             self._metrics['failed_executions'] += 1
             self._metrics['total_execution_time_ms'] += execution_time_ms
             
-            logger.error(f"🚨 Tool {tool_name} failed in {execution_time_ms:.1f}ms {self._get_log_prefix()}: {e}")
+            logger.error(f" ALERT:  Tool {tool_name} failed in {execution_time_ms:.1f}ms {self._get_log_prefix()}: {e}")
             return self._create_error_result(tool_input, f"Tool execution failed: {e}")
     
     async def dispatch_tool(
@@ -269,7 +269,7 @@ class RequestScopedToolDispatcher:
         
         # Validate run_id matches our context for security
         if run_id != self.user_context.run_id:
-            logger.error(f"🚨 RUN_ID MISMATCH: {self._get_log_prefix()} expected {self.user_context.run_id}, got {run_id}")
+            logger.error(f" ALERT:  RUN_ID MISMATCH: {self._get_log_prefix()} expected {self.user_context.run_id}, got {run_id}")
             return self._create_tool_not_found_response(tool_name, run_id)
         
         if not self.has_tool(tool_name):
@@ -295,7 +295,7 @@ class RequestScopedToolDispatcher:
             self._metrics['failed_executions'] += 1
             self._metrics['total_execution_time_ms'] += execution_time_ms
             
-            logger.error(f"🚨 Tool dispatch failed {self._get_log_prefix()}: {e}")
+            logger.error(f" ALERT:  Tool dispatch failed {self._get_log_prefix()}: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -374,7 +374,7 @@ class RequestScopedToolDispatcher:
             # Mark as inactive
             self._is_active = False
             
-            logger.info(f"✅ Cleaned up RequestScopedToolDispatcher {self.dispatcher_id}")
+            logger.info(f" PASS:  Cleaned up RequestScopedToolDispatcher {self.dispatcher_id}")
             
         except Exception as e:
             logger.error(f"Error cleaning up RequestScopedToolDispatcher {self.dispatcher_id}: {e}")
@@ -559,9 +559,9 @@ async def request_scoped_tool_dispatcher_scope(
         dispatcher = await create_request_scoped_tool_dispatcher(
             user_context, tools, websocket_emitter
         )
-        logger.debug(f"📦 SCOPED DISPATCHER: {dispatcher._get_log_prefix()} created with auto-cleanup")
+        logger.debug(f"[U+1F4E6] SCOPED DISPATCHER: {dispatcher._get_log_prefix()} created with auto-cleanup")
         yield dispatcher
     finally:
         if dispatcher:
             await dispatcher.cleanup()
-            logger.debug(f"📦 SCOPED DISPATCHER: {dispatcher._get_log_prefix()} disposed")
+            logger.debug(f"[U+1F4E6] SCOPED DISPATCHER: {dispatcher._get_log_prefix()} disposed")

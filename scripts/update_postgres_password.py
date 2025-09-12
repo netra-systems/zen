@@ -26,14 +26,14 @@ def update_password_secret():
         )
         
         if result.returncode == 0:
-            print(f"✅ Successfully updated {secret_name}")
+            print(f" PASS:  Successfully updated {secret_name}")
             return True
         else:
-            print(f"❌ Failed to update {secret_name}: {result.stderr}")
+            print(f" FAIL:  Failed to update {secret_name}: {result.stderr}")
             return False
             
     except Exception as e:
-        print(f"❌ Error updating secret: {e}")
+        print(f" FAIL:  Error updating secret: {e}")
         return False
 
 if __name__ == "__main__":

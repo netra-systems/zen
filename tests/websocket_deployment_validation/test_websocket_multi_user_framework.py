@@ -134,18 +134,18 @@ class MultiUserWebSocketTester:
                     
                     if welcome_data.get("type") == "connection_established":
                         user.connection_id = welcome_data.get("connection_id")
-                        logger.info(f"✅ User {user.user_id} connected successfully (connection_id: {user.connection_id})")
+                        logger.info(f" PASS:  User {user.user_id} connected successfully (connection_id: {user.connection_id})")
                         return True
                     else:
-                        logger.warning(f"⚠️ User {user.user_id} received unexpected welcome message: {welcome_data}")
+                        logger.warning(f" WARNING: [U+FE0F] User {user.user_id} received unexpected welcome message: {welcome_data}")
                         return True  # Still connected, but unexpected format
                         
                 except asyncio.TimeoutError:
-                    logger.error(f"❌ User {user.user_id} did not receive welcome message within timeout")
+                    logger.error(f" FAIL:  User {user.user_id} did not receive welcome message within timeout")
                     return False
                     
             except Exception as e:
-                logger.error(f"❌ Failed to setup connection for user {user.user_id}: {e}")
+                logger.error(f" FAIL:  Failed to setup connection for user {user.user_id}: {e}")
                 user.errors.append(f"Connection setup failed: {e}")
                 return False
                 
@@ -155,14 +155,14 @@ class MultiUserWebSocketTester:
         if user.websocket:
             try:
                 await user.websocket.close()
-                logger.info(f"🔌 Disconnected user {user.user_id}")
+                logger.info(f"[U+1F50C] Disconnected user {user.user_id}")
             except Exception as e:
                 logger.warning(f"Error disconnecting user {user.user_id}: {e}")
                 
     async def run_multi_user_scenario(self, scenario: MultiUserTestScenario) -> Dict[str, Any]:
         """Run a complete multi-user WebSocket test scenario."""
         
-        logger.info(f"🚀 Starting multi-user scenario: {scenario.name}")
+        logger.info(f"[U+1F680] Starting multi-user scenario: {scenario.name}")
         logger.info(f"   Users: {scenario.user_count}, Pattern: {scenario.message_pattern}, Duration: {scenario.duration_seconds}s")
         
         scenario_results = {
@@ -198,7 +198,7 @@ class MultiUserWebSocketTester:
             if successful_connections == 0:
                 raise Exception("No users could connect - test scenario cannot proceed")
                 
-            logger.info(f"✅ {successful_connections}/{scenario.user_count} users connected successfully")
+            logger.info(f" PASS:  {successful_connections}/{scenario.user_count} users connected successfully")
             
             # Filter to only successfully connected users
             connected_users = [user for user, result in zip(users, connection_results) if result is True]
@@ -254,7 +254,7 @@ class MultiUserWebSocketTester:
             await asyncio.gather(*cleanup_tasks, return_exceptions=True)
             
         except Exception as e:
-            logger.error(f"❌ Multi-user scenario {scenario.name} failed: {e}")
+            logger.error(f" FAIL:  Multi-user scenario {scenario.name} failed: {e}")
             scenario_results["error"] = str(e)
             scenario_results["summary"] = {"overall_success": False}
             
@@ -266,7 +266,7 @@ class MultiUserWebSocketTester:
     async def _run_sequential_messaging(self, users: List[WebSocketUser], scenario: MultiUserTestScenario) -> None:
         """Run sequential messaging pattern - users send messages one after another."""
         
-        logger.info("🔄 Running sequential messaging pattern...")
+        logger.info(" CYCLE:  Running sequential messaging pattern...")
         
         messages_per_user = max(1, scenario.duration_seconds // len(users))
         
@@ -287,7 +287,7 @@ class MultiUserWebSocketTester:
                     user.messages_sent += 1
                     user.last_activity = datetime.utcnow()
                     
-                    logger.debug(f"📤 User {user.user_id} sent message {round_num + 1}")
+                    logger.debug(f"[U+1F4E4] User {user.user_id} sent message {round_num + 1}")
                     
                     # Collect responses for a brief period
                     await self._collect_user_responses(user, duration_seconds=3)
@@ -302,12 +302,12 @@ class MultiUserWebSocketTester:
     async def _run_broadcast_messaging(self, users: List[WebSocketUser], scenario: MultiUserTestScenario) -> None:
         """Run broadcast messaging pattern - all users send messages simultaneously."""
         
-        logger.info("📡 Running broadcast messaging pattern...")
+        logger.info("[U+1F4E1] Running broadcast messaging pattern...")
         
         rounds = max(1, scenario.duration_seconds // 10)  # One round every 10 seconds
         
         for round_num in range(rounds):
-            logger.info(f"🔄 Broadcast round {round_num + 1}/{rounds}")
+            logger.info(f" CYCLE:  Broadcast round {round_num + 1}/{rounds}")
             
             # All users send messages simultaneously
             send_tasks = []
@@ -332,7 +332,7 @@ class MultiUserWebSocketTester:
     async def _run_targeted_messaging(self, users: List[WebSocketUser], scenario: MultiUserTestScenario) -> None:
         """Run targeted messaging pattern - users send messages to specific targets."""
         
-        logger.info("🎯 Running targeted messaging pattern...")
+        logger.info(" TARGET:  Running targeted messaging pattern...")
         
         if len(users) < 2:
             logger.warning("Targeted messaging requires at least 2 users - falling back to sequential")
@@ -342,7 +342,7 @@ class MultiUserWebSocketTester:
         rounds = max(1, scenario.duration_seconds // 15)  # One round every 15 seconds
         
         for round_num in range(rounds):
-            logger.info(f"🎯 Targeted messaging round {round_num + 1}/{rounds}")
+            logger.info(f" TARGET:  Targeted messaging round {round_num + 1}/{rounds}")
             
             # Create user pairs for targeted messaging
             for i, user in enumerate(users):
@@ -364,7 +364,7 @@ class MultiUserWebSocketTester:
                     user.messages_sent += 1
                     user.last_activity = datetime.utcnow()
                     
-                    logger.debug(f"🎯 User {user.user_id} sent targeted message to {target_user.user_id}")
+                    logger.debug(f" TARGET:  User {user.user_id} sent targeted message to {target_user.user_id}")
                     
                 except Exception as e:
                     logger.error(f"Error in targeted messaging for user {user.user_id}: {e}")
@@ -419,7 +419,7 @@ class MultiUserWebSocketTester:
                     # Check for specific event types
                     event_type = response_data.get("type", "unknown")
                     if event_type in ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]:
-                        logger.debug(f"📥 User {user.user_id} received {event_type} event")
+                        logger.debug(f"[U+1F4E5] User {user.user_id} received {event_type} event")
                         
                 except asyncio.TimeoutError:
                     # No message received in timeout period, continue
@@ -436,7 +436,7 @@ class MultiUserWebSocketTester:
     async def _validate_user_isolation(self, users: List[WebSocketUser]) -> bool:
         """Validate that users are properly isolated from each other."""
         
-        logger.info("🔒 Validating user isolation...")
+        logger.info("[U+1F512] Validating user isolation...")
         
         isolation_violations = []
         
@@ -484,19 +484,19 @@ class MultiUserWebSocketTester:
             
         # Log violations
         if isolation_violations:
-            logger.error(f"❌ User isolation violations detected: {len(isolation_violations)}")
+            logger.error(f" FAIL:  User isolation violations detected: {len(isolation_violations)}")
             for violation in isolation_violations:
                 logger.error(f"   - {violation['violation']}: {violation}")
                 
             return False
         else:
-            logger.success("✅ User isolation validation passed - no violations detected")
+            logger.success(" PASS:  User isolation validation passed - no violations detected")
             return True
             
     async def _validate_business_value_delivery(self, users: List[WebSocketUser], scenario: MultiUserTestScenario) -> bool:
         """Validate that business value (chat functionality) is properly delivered to all users."""
         
-        logger.info("💰 Validating business value delivery...")
+        logger.info("[U+1F4B0] Validating business value delivery...")
         
         business_value_issues = []
         
@@ -565,7 +565,7 @@ class MultiUserWebSocketTester:
             total_users = len(users)
             impact_percentage = (affected_users / total_users) * 100
             
-            logger.error(f"❌ Business value delivery issues detected: {affected_users}/{total_users} users affected ({impact_percentage:.1f}%)")
+            logger.error(f" FAIL:  Business value delivery issues detected: {affected_users}/{total_users} users affected ({impact_percentage:.1f}%)")
             for issue in business_value_issues:
                 logger.error(f"   User {issue['user']}: {len(issue['issues'])} issues")
                 for user_issue in issue['issues']:
@@ -574,7 +574,7 @@ class MultiUserWebSocketTester:
             # Business value is acceptable if less than 20% of users are affected
             return impact_percentage < 20
         else:
-            logger.success("✅ Business value delivery validation passed - all users received proper chat functionality")
+            logger.success(" PASS:  Business value delivery validation passed - all users received proper chat functionality")
             return True
             
     def _get_websocket_url(self) -> str:
@@ -637,7 +637,7 @@ class MultiUserWebSocketTestSuite:
     async def run_all_scenarios(self) -> Dict[str, Any]:
         """Run all multi-user WebSocket test scenarios."""
         
-        logger.info(f"🚀 Starting multi-user WebSocket test suite with {len(self.scenarios)} scenarios...")
+        logger.info(f"[U+1F680] Starting multi-user WebSocket test suite with {len(self.scenarios)} scenarios...")
         
         suite_results = {
             "test_suite": "multi_user_websocket",
@@ -651,22 +651,22 @@ class MultiUserWebSocketTestSuite:
         
         for scenario in self.scenarios:
             try:
-                logger.info(f"▶️ Running scenario: {scenario.name}")
+                logger.info(f"[U+25B6][U+FE0F] Running scenario: {scenario.name}")
                 result = await self.tester.run_multi_user_scenario(scenario)
                 scenario_results.append(result)
                 suite_results["scenarios"][scenario.name] = result
                 
                 # Log scenario result
                 if result.get("summary", {}).get("overall_success", False):
-                    logger.success(f"✅ Scenario {scenario.name} PASSED")
+                    logger.success(f" PASS:  Scenario {scenario.name} PASSED")
                 else:
-                    logger.error(f"❌ Scenario {scenario.name} FAILED")
+                    logger.error(f" FAIL:  Scenario {scenario.name} FAILED")
                     
                 # Brief pause between scenarios to avoid overwhelming the system
                 await asyncio.sleep(5)
                 
             except Exception as e:
-                logger.error(f"❌ Scenario {scenario.name} failed with exception: {e}")
+                logger.error(f" FAIL:  Scenario {scenario.name} failed with exception: {e}")
                 error_result = {
                     "scenario": scenario.name,
                     "error": str(e),
@@ -696,11 +696,11 @@ class MultiUserWebSocketTestSuite:
         
         # Log final results
         if suite_results["summary"]["deployment_ready"]:
-            logger.success(f"🎉 Multi-user WebSocket test suite PASSED: {success_rate}% success rate")
-            logger.success("✅ Multi-user WebSocket functionality validated for deployment")
+            logger.success(f" CELEBRATION:  Multi-user WebSocket test suite PASSED: {success_rate}% success rate")
+            logger.success(" PASS:  Multi-user WebSocket functionality validated for deployment")
         else:
-            logger.error(f"❌ Multi-user WebSocket test suite FAILED: {success_rate}% success rate")
-            logger.error("🚫 Multi-user WebSocket functionality NOT ready for deployment")
+            logger.error(f" FAIL:  Multi-user WebSocket test suite FAILED: {success_rate}% success rate")
+            logger.error("[U+1F6AB] Multi-user WebSocket functionality NOT ready for deployment")
             
         return suite_results
 

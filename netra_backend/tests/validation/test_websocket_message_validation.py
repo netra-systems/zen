@@ -174,7 +174,7 @@ class TestWebSocketMessageValidation:
         """Test that special characters are preserved in content."""
         handler = MessageHandlerService(supervisor=None, thread_service=None)
         
-        special_content = "Test with: 'quotes' \"double\" \n newlines \t tabs 😊 emoji"
+        special_content = "Test with: 'quotes' \"double\" \n newlines \t tabs [U+1F60A] emoji"
         payload = {"content": special_content}
         
         text, _, _ = handler._extract_message_data(payload)
@@ -184,7 +184,7 @@ class TestWebSocketMessageValidation:
         """Test Unicode content is handled correctly."""
         handler = MessageHandlerService(supervisor=None, thread_service=None)
         
-        unicode_content = "测试 テスト тест परीक्षण اختبار"
+        unicode_content = "[U+6D4B][U+8BD5] [U+30C6][U+30B9][U+30C8] tect [U+092A][U+0930][U+0940][U+0915][U+094D][U+0937][U+0923] [U+0627][U+062E][U+062A][U+0628][U+0627][U+0631]"
         payload = {"content": unicode_content}
         
         text, _, _ = handler._extract_message_data(payload)

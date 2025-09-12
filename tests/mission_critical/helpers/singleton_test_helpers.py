@@ -188,7 +188,7 @@
 # REMOVED_SYNTAX_ERROR: def get_failure_summary(self) -> str:
     # REMOVED_SYNTAX_ERROR: """Get human-readable failure summary"""
     # REMOVED_SYNTAX_ERROR: if self.is_isolated:
-        # REMOVED_SYNTAX_ERROR: return "✅ Perfect isolation achieved"
+        # REMOVED_SYNTAX_ERROR: return " PASS:  Perfect isolation achieved"
 
         # REMOVED_SYNTAX_ERROR: issues = []
         # REMOVED_SYNTAX_ERROR: if self.data_leakage_incidents:

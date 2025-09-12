@@ -68,7 +68,7 @@ logger = logging.getLogger(__name__)
     # They should be the same
     # REMOVED_SYNTAX_ERROR: assert auth_secret == shared_secret, "JWT secrets are not synchronized!"
 
-    # REMOVED_SYNTAX_ERROR: logger.info("✅ JWT secrets are synchronized")
+    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  JWT secrets are synchronized")
 
 # REMOVED_SYNTAX_ERROR: def test_token_generation(self):
     # REMOVED_SYNTAX_ERROR: """Test token generation"""
@@ -106,7 +106,7 @@ logger = logging.getLogger(__name__)
     # REMOVED_SYNTAX_ERROR: assert user_id == "test_user_456", "formatted_string"
     # REMOVED_SYNTAX_ERROR: assert decoded.get("email") == "validate@pytest.fixture}"
 
-    # REMOVED_SYNTAX_ERROR: logger.info("✅ Token validation successful")
+    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Token validation successful")
 
 # REMOVED_SYNTAX_ERROR: def test_cross_service_validation(self):
     # REMOVED_SYNTAX_ERROR: """Test that backend and auth use same JWT secret"""
@@ -147,7 +147,7 @@ logger = logging.getLogger(__name__)
         # REMOVED_SYNTAX_ERROR: user_id = decoded.get("sub") or decoded.get("user_id")
         # REMOVED_SYNTAX_ERROR: assert user_id == "cross_service_user", "formatted_string"
 
-        # REMOVED_SYNTAX_ERROR: logger.info("✅ Cross-service validation successful - JWT secrets match!")
+        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Cross-service validation successful - JWT secrets match!")
         # REMOVED_SYNTAX_ERROR: except jwt.InvalidTokenError as e:
             # REMOVED_SYNTAX_ERROR: logger.error(f"JWT secrets don"t match between services: {e}")
             # REMOVED_SYNTAX_ERROR: raise
@@ -178,7 +178,7 @@ logger = logging.getLogger(__name__)
                                     # REMOVED_SYNTAX_ERROR: except (httpx.ConnectError, httpx.RequestError) as e:
                                         # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
 
-                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Service health checks completed")
+                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Service health checks completed")
 
                                         # Removed problematic line: @pytest.mark.asyncio
                                         # Removed problematic line: async def test_login_flow(self):
@@ -201,7 +201,7 @@ logger = logging.getLogger(__name__)
                                                     
 
                                                     # REMOVED_SYNTAX_ERROR: if reg_response.status_code == 200:
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ User registration successful")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  User registration successful")
 
                                                         # Login
                                                         # REMOVED_SYNTAX_ERROR: login_data = { )
@@ -218,7 +218,7 @@ logger = logging.getLogger(__name__)
                                                             # REMOVED_SYNTAX_ERROR: result = login_response.json()
                                                             # REMOVED_SYNTAX_ERROR: assert "access_token" in result, "No access token in response"
                                                             # REMOVED_SYNTAX_ERROR: assert "token_type" in result, "No token type in response"
-                                                            # REMOVED_SYNTAX_ERROR: logger.info("✅ Login successful")
+                                                            # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Login successful")
                                                             # REMOVED_SYNTAX_ERROR: else:
                                                                 # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
                                                                 # REMOVED_SYNTAX_ERROR: else:
@@ -227,7 +227,7 @@ logger = logging.getLogger(__name__)
                                                                     # REMOVED_SYNTAX_ERROR: except (httpx.ConnectError, httpx.RequestError) as e:
                                                                         # REMOVED_SYNTAX_ERROR: logger.warning("formatted_string")
 
-                                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Login flow test completed")
+                                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Login flow test completed")
 
 # REMOVED_SYNTAX_ERROR: def main():
     # REMOVED_SYNTAX_ERROR: """Run all tests"""
@@ -246,7 +246,7 @@ logger = logging.getLogger(__name__)
         # REMOVED_SYNTAX_ERROR: test_suite.test_token_validation()
         # REMOVED_SYNTAX_ERROR: test_suite.test_cross_service_validation()
         # REMOVED_SYNTAX_ERROR: logger.info(" )
-        # REMOVED_SYNTAX_ERROR: ✅ All synchronous tests passed!")
+        # REMOVED_SYNTAX_ERROR:  PASS:  All synchronous tests passed!")
         # REMOVED_SYNTAX_ERROR: except Exception as e:
             # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
             # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
@@ -257,7 +257,7 @@ logger = logging.getLogger(__name__)
                 # REMOVED_SYNTAX_ERROR: asyncio.run(test_suite.test_service_health_check())
                 # REMOVED_SYNTAX_ERROR: asyncio.run(test_suite.test_login_flow())
                 # REMOVED_SYNTAX_ERROR: logger.info(" )
-                # REMOVED_SYNTAX_ERROR: ✅ All async tests completed!")
+                # REMOVED_SYNTAX_ERROR:  PASS:  All async tests completed!")
                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                     # REMOVED_SYNTAX_ERROR: logger.error("formatted_string")
                     # REMOVED_SYNTAX_ERROR: return 1

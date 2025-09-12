@@ -376,7 +376,7 @@ def format_cors_test_results(results: List[Dict[str, Any]], format_type: str = "
         if result.get("success"):
             cors_analysis = result.get("cors_analysis", {})
             status = result.get("status_code", "N/A")
-            cors_ok = "✓" if cors_analysis.get("origin_allowed") else "✗"
+            cors_ok = "[U+2713]" if cors_analysis.get("origin_allowed") else "[U+2717]"
             issues = "; ".join(cors_analysis.get("issues", []))[:50]
             
             rows.append([
@@ -391,7 +391,7 @@ def format_cors_test_results(results: List[Dict[str, Any]], format_type: str = "
                 result.get("url", "N/A")[-30:],
                 result.get("request_headers", {}).get("Origin", "N/A")[-25:],
                 "ERROR",
-                "✗",
+                "[U+2717]",
                 result.get("error", "Unknown error")[:50]
             ])
     
@@ -515,7 +515,7 @@ async def main():
             results.append({**preflight_result, "test_type": "preflight"})
             
             if args.verbose:
-                print(f"  Preflight: {'✓' if preflight_result.get('success') else '✗'}")
+                print(f"  Preflight: {'[U+2713]' if preflight_result.get('success') else '[U+2717]'}")
             
             # Test actual request (unless preflight-only)
             if not args.preflight_only:
@@ -523,7 +523,7 @@ async def main():
                 results.append({**actual_result, "test_type": "actual"})
                 
                 if args.verbose:
-                    print(f"  Actual: {'✓' if actual_result.get('success') else '✗'}")
+                    print(f"  Actual: {'[U+2713]' if actual_result.get('success') else '[U+2717]'}")
             
             # Test WebSocket if requested
             if args.test_websocket:
@@ -531,7 +531,7 @@ async def main():
                 results.append({**ws_result, "test_type": "websocket"})
                 
                 if args.verbose:
-                    print(f"  WebSocket: {'✓' if ws_result.get('success') else '✗'}")
+                    print(f"  WebSocket: {'[U+2713]' if ws_result.get('success') else '[U+2717]'}")
         
         # Display results
         print("\nResults:")

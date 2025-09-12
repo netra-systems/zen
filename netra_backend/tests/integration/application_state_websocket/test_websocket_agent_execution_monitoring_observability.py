@@ -309,7 +309,7 @@ class TestWebSocketAgentExecutionMonitoringObservability(BaseIntegrationTest):
         assert enterprise_readiness["comprehensive_observability"] is True
         
         self.logger.info(
-            f"✅ Monitoring and observability test PASSED - "
+            f" PASS:  Monitoring and observability test PASSED - "
             f"Events: {analysis['total_monitoring_events']}, "
             f"Metrics: {analysis['performance_metrics_collected']}, "
             f"Performance score: {monitoring_summary.get('performance_score', 0)}"

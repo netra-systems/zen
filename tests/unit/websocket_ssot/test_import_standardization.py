@@ -86,13 +86,13 @@ class TestWebSocketManagerImportStandardization(unittest.TestCase):
                         'class_module': cls.__module__,
                         'class_qualname': getattr(cls, '__qualname__', 'Unknown')
                     }
-                    import_attempts.append(f"✓ {alias}: {module_path}.{class_name}")
+                    import_attempts.append(f"[U+2713] {alias}: {module_path}.{class_name}")
                 else:
-                    failed_imports.append(f"✗ {alias}: {module_path}.{class_name} (class not found)")
+                    failed_imports.append(f"[U+2717] {alias}: {module_path}.{class_name} (class not found)")
             except ImportError as e:
-                failed_imports.append(f"✗ {alias}: {module_path}.{class_name} (import error: {e})")
+                failed_imports.append(f"[U+2717] {alias}: {module_path}.{class_name} (import error: {e})")
             except Exception as e:
-                failed_imports.append(f"✗ {alias}: {module_path}.{class_name} (error: {e})")
+                failed_imports.append(f"[U+2717] {alias}: {module_path}.{class_name} (error: {e})")
 
         # Log findings for debugging
         logger.info(f"Successful imports: {len(successful_imports)}")

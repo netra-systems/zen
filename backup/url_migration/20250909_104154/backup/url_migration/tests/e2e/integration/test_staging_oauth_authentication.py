@@ -57,7 +57,7 @@ class GCPStagingOAuthTestHelper:
         if not self.auth_helper.bypass_key:
             raise ValueError("E2E_OAUTH_SIMULATION_KEY not available - ensure unified test runner configured it")
             
-        logger.info("✓ GCP staging environment verified")
+        logger.info("[U+2713] GCP staging environment verified")
 
     async def test_oauth_service_health(self):
         """Test OAuth service health on GCP staging."""

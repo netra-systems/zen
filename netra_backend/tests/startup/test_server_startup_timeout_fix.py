@@ -60,7 +60,7 @@ class TestServerStartupTimeouts:
             assert not getattr(app.state, 'database_available', True)
             assert getattr(app.state, 'database_mock_mode', False) == True
             
-            print(f"✅ Database timeout protection working - completed in {elapsed:.1f}s")
+            print(f" PASS:  Database timeout protection working - completed in {elapsed:.1f}s")
     
     @fast_test
     @pytest.mark.asyncio
@@ -92,7 +92,7 @@ class TestServerStartupTimeouts:
             # Should complete in ~20 seconds due to timeout, not hang for 25s
             assert elapsed < 22, f"Health checks took too long: {elapsed}s (should timeout at ~20s)"
             
-            print(f"✅ Health checks timeout protection working - completed in {elapsed:.1f}s")
+            print(f" PASS:  Health checks timeout protection working - completed in {elapsed:.1f}s")
     
     @fast_test
     @pytest.mark.asyncio
@@ -111,7 +111,7 @@ class TestServerStartupTimeouts:
             assert result == mock_session_factory
             mock_init.assert_called_once()
             
-            print("✅ Async postgres wrapper handles successful initialization")
+            print(" PASS:  Async postgres wrapper handles successful initialization")
         
         # Test failed initialization
         with patch('netra_backend.app.startup_module.initialize_postgres') as mock_init:
@@ -122,7 +122,7 @@ class TestServerStartupTimeouts:
             assert result is None
             mock_logger.error.assert_called()
             
-            print("✅ Async postgres wrapper handles failed initialization")
+            print(" PASS:  Async postgres wrapper handles failed initialization")
     
     @fast_test
     @pytest.mark.asyncio
@@ -156,7 +156,7 @@ class TestServerStartupTimeouts:
                         assert not getattr(app.state, 'database_available', True)
                         assert getattr(app.state, 'database_mock_mode', False) == True
                         
-                        print("✅ Graceful degradation working on database timeout")
+                        print(" PASS:  Graceful degradation working on database timeout")
     
     @pytest.mark.asyncio
     @pytest.mark.unit
@@ -194,7 +194,7 @@ class TestServerStartupTimeouts:
                             assert getattr(app.state, 'database_available', False)
                             assert app.state.db_session_factory == mock_session_factory
                             
-                            print(f"✅ Fast database setup working - completed in {elapsed:.1f}s")
+                            print(f" PASS:  Fast database setup working - completed in {elapsed:.1f}s")
     
     @pytest.mark.asyncio
     @pytest.mark.integration
@@ -222,7 +222,7 @@ class TestServerStartupTimeouts:
             assert not getattr(app.state, 'database_available', True)
             assert getattr(app.state, 'database_mock_mode', False)
             
-            print(f"✅ Mock database mode fast path working - completed in {elapsed:.3f}s")
+            print(f" PASS:  Mock database mode fast path working - completed in {elapsed:.3f}s")
 
 
 # Integration test to validate complete startup flow
@@ -261,7 +261,7 @@ async def test_complete_startup_with_timeouts():
         # Complete startup should finish within reasonable time
         assert elapsed < 5, f"Complete startup took too long: {elapsed}s"
         
-        print(f"✅ Complete startup with timeouts working - completed in {elapsed:.1f}s")
+        print(f" PASS:  Complete startup with timeouts working - completed in {elapsed:.1f}s")
 
 
 if __name__ == "__main__":

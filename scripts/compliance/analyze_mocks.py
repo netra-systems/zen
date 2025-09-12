@@ -292,13 +292,13 @@ def main():
     
     # Return exit code based on violations
     if report['mocks_without_justification'] > 0:
-        print(f"\n⚠️  Found {report['mocks_without_justification']} mocks without justification!")
+        print(f"\n WARNING: [U+FE0F]  Found {report['mocks_without_justification']} mocks without justification!")
         print("These need to be either:")
         print("  1. Converted to real implementations")
         print("  2. Justified with @mock_justified decorator or comment")
         return 1
     else:
-        print("\n✅ All mocks have justifications!")
+        print("\n PASS:  All mocks have justifications!")
         return 0
 
 

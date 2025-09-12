@@ -3,11 +3,11 @@ Test Agent Execution Order Business Logic
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Ensure Data → Optimization → Report sequence for coherent AI analysis
+- Business Goal: Ensure Data  ->  Optimization  ->  Report sequence for coherent AI analysis
 - Value Impact: Proper agent orchestration prevents incomplete or contradictory results
 - Strategic Impact: Enforces the critical execution order that delivers complete business value
 
-CRITICAL: This test validates the business logic for the Data → Optimization → Report execution sequence
+CRITICAL: This test validates the business logic for the Data  ->  Optimization  ->  Report execution sequence
 that has been identified as essential for delivering coherent and complete AI analysis to users.
 
 This test focuses on BUSINESS LOGIC validation, not system integration.
@@ -554,7 +554,7 @@ class TestAgentOrchestrationLogic(SSotBaseTestCase):
     
     @pytest.mark.unit
     def test_critical_execution_order_business_rule(self):
-        """Test the critical Data → Optimization → Report execution order business rule."""
+        """Test the critical Data  ->  Optimization  ->  Report execution order business rule."""
         # Test that data agents must come before optimization
         data_plan = self.orchestrator.agent_templates[AgentType.DATA_COLLECTION]
         analysis_plan = self.orchestrator.agent_templates[AgentType.DATA_ANALYSIS]

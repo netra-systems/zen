@@ -119,7 +119,7 @@ class WebSocketEventCapture:
         self.event_timestamps[event_type] = current_time
         self._event_sequence.append(event_type)
         
-        logger.info(f"📡 WebSocket Event Captured: {event_type} at {current_time:.3f}s")
+        logger.info(f"[U+1F4E1] WebSocket Event Captured: {event_type} at {current_time:.3f}s")
         
     def has_all_required_events(self) -> Tuple[bool, List[str]]:
         """Check if ALL 5 required WebSocket events were received."""
@@ -274,7 +274,7 @@ class TestWebSocketAgentEventsCore:
         # Setup event capture system
         event_capture = WebSocketEventCapture(user_id, connection_id)
         
-        logger.info(f"🚀 MISSION CRITICAL TEST: Starting WebSocket event validation for user {user_id}")
+        logger.info(f"[U+1F680] MISSION CRITICAL TEST: Starting WebSocket event validation for user {user_id}")
         
         # Test with real WebSocket if available, otherwise use mock
         if PRODUCTION_COMPONENTS_AVAILABLE:
@@ -287,7 +287,7 @@ class TestWebSocketAgentEventsCore:
         
         if not all_events_present:
             failure_msg = (
-                f"💥 MISSION CRITICAL FAILURE: Missing WebSocket events {missing_events}. "
+                f"[U+1F4A5] MISSION CRITICAL FAILURE: Missing WebSocket events {missing_events}. "
                 f"Chat system has ZERO business value without these events! "
                 f"This is a $500K+ ARR risk. DEPLOYMENT BLOCKED."
             )
@@ -305,8 +305,8 @@ class TestWebSocketAgentEventsCore:
         # Generate business value summary
         summary = event_capture.get_business_value_summary()
         
-        logger.success(f"✅ MISSION CRITICAL TEST PASSED: All WebSocket events delivered")
-        logger.info(f"📊 Business Value Summary: {json.dumps(summary, indent=2)}")
+        logger.success(f" PASS:  MISSION CRITICAL TEST PASSED: All WebSocket events delivered")
+        logger.info(f" CHART:  Business Value Summary: {json.dumps(summary, indent=2)}")
         
         # Final assertion: Business value delivered
         assert summary["business_value_delivered"], (
@@ -333,7 +333,7 @@ class TestWebSocketAgentEventsCore:
             
         event_capture = WebSocketEventCapture(user_id, connection_id)
         
-        logger.info(f"🤖 Testing agent execution with WebSocket events for user {user_id}")
+        logger.info(f"[U+1F916] Testing agent execution with WebSocket events for user {user_id}")
         
         if PRODUCTION_COMPONENTS_AVAILABLE:
             # Test with real agent execution
@@ -355,7 +355,7 @@ class TestWebSocketAgentEventsCore:
         summary = event_capture.get_business_value_summary()
         assert summary["business_value_delivered"], f"Business value validation failed: {summary}"
         
-        logger.success(f"✅ Agent execution WebSocket events validated: {summary['total_events']} events")
+        logger.success(f" PASS:  Agent execution WebSocket events validated: {summary['total_events']} events")
         
     @pytest.mark.asyncio  
     async def test_websocket_event_failure_scenarios(self):
@@ -371,7 +371,7 @@ class TestWebSocketAgentEventsCore:
         
         event_capture = WebSocketEventCapture(user_id, connection_id)
         
-        logger.info(f"🚨 Testing WebSocket event delivery under failure conditions")
+        logger.info(f" ALERT:  Testing WebSocket event delivery under failure conditions")
         
         # Test partial failure scenarios
         await self._test_partial_event_delivery(event_capture)
@@ -389,7 +389,7 @@ class TestWebSocketAgentEventsCore:
             "This completely breaks user experience."
         )
         
-        logger.info(f"✅ Failure scenario test passed: {critical_events_received} critical events received")
+        logger.info(f" PASS:  Failure scenario test passed: {critical_events_received} critical events received")
         
     @pytest.mark.asyncio
     async def test_websocket_authentication_and_events(self):
@@ -412,7 +412,7 @@ class TestWebSocketAgentEventsCore:
         capture1 = WebSocketEventCapture(user1_id, connection1_id)
         capture2 = WebSocketEventCapture(user2_id, connection2_id)
         
-        logger.info(f"🔐 Testing authenticated WebSocket events for users {user1_id} and {user2_id}")
+        logger.info(f"[U+1F510] Testing authenticated WebSocket events for users {user1_id} and {user2_id}")
         
         # Send events to both users
         await self._send_events_to_multiple_users(capture1, capture2)
@@ -428,7 +428,7 @@ class TestWebSocketAgentEventsCore:
         for event in capture2.events:
             assert event.get("user_id") == user2_id, f"User 2 received event for wrong user: {event}"
             
-        logger.success(f"✅ Authentication and isolation validated: User 1: {len(capture1.events)}, User 2: {len(capture2.events)} events")
+        logger.success(f" PASS:  Authentication and isolation validated: User 1: {len(capture1.events)}, User 2: {len(capture2.events)} events")
         
     # Helper methods for test implementation
     
@@ -760,9 +760,9 @@ class TestWebSocketAgentEventsCore:
 if __name__ == "__main__":
     import sys
     
-    logger.info("🚀 Running P0 Mission Critical WebSocket Event Tests")
-    logger.info("💰 Business Impact: $500K+ ARR depends on these tests passing")
-    logger.warning("⚠️  If these tests fail, DEPLOYMENT IS BLOCKED")
+    logger.info("[U+1F680] Running P0 Mission Critical WebSocket Event Tests")
+    logger.info("[U+1F4B0] Business Impact: $500K+ ARR depends on these tests passing")
+    logger.warning(" WARNING: [U+FE0F]  If these tests fail, DEPLOYMENT IS BLOCKED")
     
     # Run with verbose output and fail fast
     exit_code = pytest.main([
@@ -776,9 +776,9 @@ if __name__ == "__main__":
     ])
     
     if exit_code == 0:
-        logger.success("✅ ALL MISSION CRITICAL TESTS PASSED - DEPLOYMENT APPROVED")
+        logger.success(" PASS:  ALL MISSION CRITICAL TESTS PASSED - DEPLOYMENT APPROVED")
     else:
-        logger.error("💥 MISSION CRITICAL TESTS FAILED - DEPLOYMENT BLOCKED")
-        logger.error("🚨 Chat functionality is broken - $500K+ ARR at risk")
+        logger.error("[U+1F4A5] MISSION CRITICAL TESTS FAILED - DEPLOYMENT BLOCKED")
+        logger.error(" ALERT:  Chat functionality is broken - $500K+ ARR at risk")
         
     sys.exit(exit_code)

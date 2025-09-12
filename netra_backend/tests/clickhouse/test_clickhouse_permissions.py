@@ -136,7 +136,7 @@ def get_permission_summary(permissions_result: Dict[str, Tuple[bool, str]]) -> s
     summary_lines = ["ClickHouse Permissions Summary:"]
     
     for permission_type, (success, message) in permissions_result.items():
-        status = "✓ GRANTED" if success else "✗ DENIED"
+        status = "[U+2713] GRANTED" if success else "[U+2717] DENIED"
         summary_lines.append(f"  {permission_type}: {status} - {message}")
     
     return "\n".join(summary_lines)

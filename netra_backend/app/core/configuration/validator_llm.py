@@ -5,7 +5,7 @@
 LLM-specific validation helpers for configuration validation.
 Business Value: Prevents LLM integration failures that impact AI operations.
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 from typing import List

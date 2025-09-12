@@ -1,7 +1,7 @@
 """
 Regression Test - WebSocket Context Import Failure (E2E)
 
-🚨 CRITICAL REGRESSION TEST 🚨
+ ALERT:  CRITICAL REGRESSION TEST  ALERT: 
 This test MUST FAIL initially to prove the regression exists.
 
 Purpose: Prove WebSocketRequestContext import regression breaks end-to-end agent-WebSocket flows
@@ -103,7 +103,7 @@ class TestWebSocketContextE2ERegression:
     
     @pytest.fixture(autouse=True)
     async def setup_authenticated_context(self):
-        """🚨 CRITICAL: All E2E tests MUST use authentication per CLAUDE.md."""
+        """ ALERT:  CRITICAL: All E2E tests MUST use authentication per CLAUDE.md."""
         if not AUTH_HELPER_AVAILABLE:
             pytest.skip(f"E2E auth helper not available: {AUTH_HELPER_ERROR}")
         
@@ -182,13 +182,13 @@ class TestWebSocketContextE2ERegression:
     @pytest.mark.asyncio
     async def test_websocket_request_context_alias_in_e2e_flow_EXPECTED_TO_FAIL(self, websocket_url, user_execution_context):
         """
-        🚨 REGRESSION TEST: Test E2E flow that depends on WebSocketRequestContext alias.
+         ALERT:  REGRESSION TEST: Test E2E flow that depends on WebSocketRequestContext alias.
         
         This test MUST FAIL initially, proving that E2E flows break due to the import regression.
         """
         if not WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
             pytest.fail(
-                f"🚨 E2E REGRESSION CONFIRMED: WebSocketRequestContext alias not available for E2E flows. "
+                f" ALERT:  E2E REGRESSION CONFIRMED: WebSocketRequestContext alias not available for E2E flows. "
                 f"Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}. "
                 f"This breaks end-to-end agent-WebSocket integration and substantive chat value delivery."
             )
@@ -228,7 +228,7 @@ class TestWebSocketContextE2ERegression:
     @pytest.mark.asyncio
     async def test_agent_websocket_integration_with_context_EXPECTED_TO_FAIL(self, websocket_url, user_execution_context):
         """
-        🚨 REGRESSION TEST: Test complete agent-WebSocket integration with context handling.
+         ALERT:  REGRESSION TEST: Test complete agent-WebSocket integration with context handling.
         
         This test validates the mission critical WebSocket agent events (Section 6 of CLAUDE.md).
         This test MUST FAIL initially, proving business value is broken.
@@ -289,7 +289,7 @@ class TestWebSocketContextE2ERegression:
                             error_msg = event_data.get("message", "")
                             if "WebSocketRequestContext" in error_msg or "import" in error_msg:
                                 pytest.fail(
-                                    f"🚨 AGENT-WEBSOCKET INTEGRATION BROKEN: Import error in E2E flow: {error_msg}. "
+                                    f" ALERT:  AGENT-WEBSOCKET INTEGRATION BROKEN: Import error in E2E flow: {error_msg}. "
                                     f"The WebSocketRequestContext regression breaks agent event delivery."
                                 )
                     
@@ -301,7 +301,7 @@ class TestWebSocketContextE2ERegression:
                 
                 if missing_events:
                     pytest.fail(
-                        f"🚨 MISSION CRITICAL EVENTS MISSING: E2E agent-WebSocket integration failed to deliver "
+                        f" ALERT:  MISSION CRITICAL EVENTS MISSING: E2E agent-WebSocket integration failed to deliver "
                         f"critical events: {missing_events}. Received: {received_events}. "
                         f"This regression breaks substantive chat value delivery per Section 6 of CLAUDE.md."
                     )
@@ -312,7 +312,7 @@ class TestWebSocketContextE2ERegression:
             # Check if the error is related to the WebSocketRequestContext regression
             if "WebSocketRequestContext" in str(e) or "import" in str(e).lower():
                 pytest.fail(
-                    f"🚨 CONTEXT IMPORT REGRESSION IN E2E: {e}. "
+                    f" ALERT:  CONTEXT IMPORT REGRESSION IN E2E: {e}. "
                     f"The missing WebSocketRequestContext export breaks agent-WebSocket integration."
                 )
             else:
@@ -321,7 +321,7 @@ class TestWebSocketContextE2ERegression:
     @pytest.mark.asyncio
     async def test_websocket_manager_factory_e2e_with_context_EXPECTED_TO_FAIL(self, user_execution_context):
         """
-        🚨 REGRESSION TEST: Test WebSocket manager factory E2E integration with context.
+         ALERT:  REGRESSION TEST: Test WebSocket manager factory E2E integration with context.
         
         This validates that the factory pattern works end-to-end with proper context handling.
         """
@@ -355,7 +355,7 @@ class TestWebSocketContextE2ERegression:
                 except AttributeError as ae:
                     if "WebSocketRequestContext" in str(ae):
                         pytest.fail(
-                            f"🚨 E2E FACTORY REGRESSION: WebSocket manager factory fails due to missing "
+                            f" ALERT:  E2E FACTORY REGRESSION: WebSocket manager factory fails due to missing "
                             f"WebSocketRequestContext alias: {ae}. This breaks E2E integration flows."
                         )
                     raise  # Re-raise if not related to our regression
@@ -363,7 +363,7 @@ class TestWebSocketContextE2ERegression:
         except Exception as e:
             if "WebSocketRequestContext" in str(e):
                 pytest.fail(
-                    f"🚨 E2E MANAGER FACTORY REGRESSION: {e}. "
+                    f" ALERT:  E2E MANAGER FACTORY REGRESSION: {e}. "
                     f"The missing WebSocketRequestContext export affects factory pattern E2E usage."
                 )
             else:
@@ -387,17 +387,17 @@ class TestWebSocketContextE2ERegression:
         broken_components = [comp for comp, available in impact_summary.items() if not available]
         working_components = [comp for comp, available in impact_summary.items() if available]
         
-        print("\\n🔍 E2E Regression Impact Analysis:")
-        print(f"✅ Working components ({len(working_components)}):")
+        print("\\n SEARCH:  E2E Regression Impact Analysis:")
+        print(f" PASS:  Working components ({len(working_components)}):")
         for comp in working_components:
             print(f"   - {comp}")
         
-        print(f"\\n❌ Broken components ({len(broken_components)}):")
+        print(f"\\n FAIL:  Broken components ({len(broken_components)}):")
         for comp in broken_components:
             print(f"   - {comp}")
         
         if not WEBSOCKET_REQUEST_CONTEXT_AVAILABLE:
-            print(f"\\n🚨 PRIMARY REGRESSION: WebSocketRequestContext alias not exported")
+            print(f"\\n ALERT:  PRIMARY REGRESSION: WebSocketRequestContext alias not exported")
             print(f"   Error: {WEBSOCKET_REQUEST_CONTEXT_ERROR}")
             print(f"   Business Impact:")
             print(f"   - Breaks agent-WebSocket integration patterns")

@@ -26,13 +26,13 @@ class Colors:
 def print_status(status, message):
     """Print colored status message"""
     if status == "success":
-        print(f"{Colors.GREEN}✓{Colors.NC} {message}")
+        print(f"{Colors.GREEN}[U+2713]{Colors.NC} {message}")
     elif status == "error":
-        print(f"{Colors.RED}✗{Colors.NC} {message}")
+        print(f"{Colors.RED}[U+2717]{Colors.NC} {message}")
     elif status == "warning":
-        print(f"{Colors.YELLOW}⚠{Colors.NC} {message}")
+        print(f"{Colors.YELLOW} WARNING: {Colors.NC} {message}")
     elif status == "info":
-        print(f"{Colors.BLUE}ℹ{Colors.NC} {message}")
+        print(f"{Colors.BLUE}[U+2139]{Colors.NC} {message}")
 
 def run_command(cmd, capture=True):
     """Run a command and return output"""
@@ -54,7 +54,7 @@ def check_command_exists(command):
 
 def check_gcloud():
     """Validate gcloud CLI installation and configuration"""
-    print("\n📋 Checking GCloud CLI...")
+    print("\n[U+1F4CB] Checking GCloud CLI...")
     
     # Check if gcloud is installed
     if not check_command_exists("gcloud"):
@@ -85,7 +85,7 @@ def check_gcloud():
     print_status("success", f"Project set to: {project}")
     
     # Check required APIs
-    print("\n📋 Checking required GCP APIs...")
+    print("\n[U+1F4CB] Checking required GCP APIs...")
     required_apis = [
         "sqladmin.googleapis.com",
         "compute.googleapis.com",
@@ -112,7 +112,7 @@ def check_gcloud():
 
 def check_terraform():
     """Validate Terraform installation"""
-    print("\n📋 Checking Terraform...")
+    print("\n[U+1F4CB] Checking Terraform...")
     
     if not check_command_exists("terraform"):
         print_status("error", "Terraform is not installed")
@@ -139,7 +139,7 @@ def check_terraform():
 
 def check_terraform_files():
     """Validate Terraform configuration files"""
-    print("\n📋 Checking Terraform configuration...")
+    print("\n[U+1F4CB] Checking Terraform configuration...")
     
     required_files = [
         "main.tf",
@@ -171,7 +171,7 @@ def check_terraform_files():
     
     # Validate Terraform configuration
     if all_present:
-        print("\n📋 Validating Terraform configuration...")
+        print("\n[U+1F4CB] Validating Terraform configuration...")
         
         # Initialize if needed
         if not Path(".terraform").exists():
@@ -199,7 +199,7 @@ def check_terraform_files():
 
 def check_existing_resources():
     """Check for existing GCP resources"""
-    print("\n📋 Checking existing GCP resources...")
+    print("\n[U+1F4CB] Checking existing GCP resources...")
     
     project = run_command(["gcloud", "config", "get-value", "project"])
     if not project:
@@ -240,7 +240,7 @@ def check_existing_resources():
 
 def check_python():
     """Check Python and required packages"""
-    print("\n📋 Checking Python environment...")
+    print("\n[U+1F4CB] Checking Python environment...")
     
     if not check_command_exists("python3") and not check_command_exists("python"):
         print_status("error", "Python is not installed")
@@ -288,7 +288,7 @@ def main():
     # Summary
     print("\n" + "=" * 60)
     if all_checks_passed:
-        print(f"{Colors.GREEN}✓ All validation checks passed!{Colors.NC}")
+        print(f"{Colors.GREEN}[U+2713] All validation checks passed!{Colors.NC}")
         print(f"\nNext steps:")
         print(f"1. Review and edit terraform.tfvars if needed")
         print(f"2. Run: terraform init")
@@ -296,7 +296,7 @@ def main():
         print(f"4. Run: terraform apply")
         print(f"5. Run: python migrate.py --project netra-staging")
     else:
-        print(f"{Colors.RED}✗ Some validation checks failed{Colors.NC}")
+        print(f"{Colors.RED}[U+2717] Some validation checks failed{Colors.NC}")
         print(f"\nPlease fix the issues above before proceeding")
         sys.exit(1)
 

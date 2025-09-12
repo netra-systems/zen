@@ -141,7 +141,7 @@ Configure your OAuth 2.0 Client ID with the redirect URIs above
     with open("oauth_redirect_uris.json", "w") as f:
         json.dump(export_data, f, indent=2)
     
-    console.print("\n[green]✓[/green] Configuration exported to oauth_redirect_uris.json")
+    console.print("\n[green][U+2713][/green] Configuration exported to oauth_redirect_uris.json")
 
 if __name__ == "__main__":
     main()

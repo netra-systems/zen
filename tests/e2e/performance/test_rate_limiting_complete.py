@@ -797,14 +797,14 @@ async def test_rate_limiting_complete():
     assert results["rate_limit_headers_validated"], "Rate limit headers validation must pass"
     assert results["graceful_degradation_tested"], "Graceful degradation testing must pass"
     
-    print(f"✓ Comprehensive rate limiting test completed successfully in {results['duration']:.2f}s")
-    print(f"✓ API enforcement: {enforcement_data.get('requests_before_limit', 'N/A')} requests before limit")
-    print(f"✓ Rate limit headers: {'Present' if headers_data['headers_present'] else 'Missing'}")
-    print(f"✓ Graceful degradation: {'Active' if degradation_data['service_responsive'] else 'Issues detected'}")
-    print(f"✓ User isolation: {'Working' if user_limits_data['isolation_working'] else 'Failed'}")
-    print(f"✓ Global protection: {'Active' if global_limits_data['global_limits_active'] else 'Inactive'}")
-    print(f"✓ Error quality: {'Good' if error_responses_data['helpful_error_messages'] else 'Poor'}")
-    print(f"✓ Recovery mechanism: {'Working' if recovery_data['recovery_successful'] else 'Failed'}")
+    print(f"[U+2713] Comprehensive rate limiting test completed successfully in {results['duration']:.2f}s")
+    print(f"[U+2713] API enforcement: {enforcement_data.get('requests_before_limit', 'N/A')} requests before limit")
+    print(f"[U+2713] Rate limit headers: {'Present' if headers_data['headers_present'] else 'Missing'}")
+    print(f"[U+2713] Graceful degradation: {'Active' if degradation_data['service_responsive'] else 'Issues detected'}")
+    print(f"[U+2713] User isolation: {'Working' if user_limits_data['isolation_working'] else 'Failed'}")
+    print(f"[U+2713] Global protection: {'Active' if global_limits_data['global_limits_active'] else 'Inactive'}")
+    print(f"[U+2713] Error quality: {'Good' if error_responses_data['helpful_error_messages'] else 'Poor'}")
+    print(f"[U+2713] Recovery mechanism: {'Working' if recovery_data['recovery_successful'] else 'Failed'}")
 
 
 if __name__ == "__main__":

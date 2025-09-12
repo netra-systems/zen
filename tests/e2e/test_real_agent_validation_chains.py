@@ -487,9 +487,9 @@ class RealAgentValidationChainsTester:
             # Check for REQUIRED WebSocket events
             missing_events = self.REQUIRED_EVENTS - val.event_types_seen
             if missing_events:
-                report.append(f"⚠️ MISSING REQUIRED EVENTS: {missing_events}")
+                report.append(f" WARNING: [U+FE0F] MISSING REQUIRED EVENTS: {missing_events}")
             else:
-                report.append("✓ All required WebSocket events received")
+                report.append("[U+2713] All required WebSocket events received")
                 
             # Performance metrics
             report.append("\nPerformance Metrics:")
@@ -510,7 +510,7 @@ class RealAgentValidationChainsTester:
                 
                 # Individual chain details
                 for j, chain in enumerate(val.validation_chains, 1):
-                    status_symbol = "✓" if chain.overall_passed else "✗"
+                    status_symbol = "[U+2713]" if chain.overall_passed else "[U+2717]"
                     report.append(f"    {j}. {status_symbol} {chain.chain_type} (confidence: {chain.confidence_score:.2f}, {len(chain.validation_results)} stages)")
                     
             # Validation coverage
@@ -525,10 +525,10 @@ class RealAgentValidationChainsTester:
                 
             # Business logic validation
             report.append("\nBusiness Logic Validation:")
-            report.append(f"  ✓ Validation chains complete: {val.validation_chains_complete}")
-            report.append(f"  ✓ Data quality assured: {val.data_quality_assured}")
-            report.append(f"  ✓ Compliance verified: {val.compliance_verified}")
-            report.append(f"  ✓ Business rules enforced: {val.business_rules_enforced}")
+            report.append(f"  [U+2713] Validation chains complete: {val.validation_chains_complete}")
+            report.append(f"  [U+2713] Data quality assured: {val.data_quality_assured}")
+            report.append(f"  [U+2713] Compliance verified: {val.compliance_verified}")
+            report.append(f"  [U+2713] Business rules enforced: {val.business_rules_enforced}")
             
         report.append("\n" + "=" * 80)
         return "\n".join(report)

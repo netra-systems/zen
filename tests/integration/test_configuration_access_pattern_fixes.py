@@ -69,7 +69,7 @@
         # REMOVED_SYNTAX_ERROR: capture_output=True, text=True, timeout=60)
 
         # REMOVED_SYNTAX_ERROR: if result.returncode == 0:
-            # REMOVED_SYNTAX_ERROR: print("✅ Docker services started successfully")
+            # REMOVED_SYNTAX_ERROR: print(" PASS:  Docker services started successfully")
             # REMOVED_SYNTAX_ERROR: services_status['postgres'] = True
             # REMOVED_SYNTAX_ERROR: services_status['redis'] = True
             # REMOVED_SYNTAX_ERROR: else:
@@ -78,7 +78,7 @@
                 # REMOVED_SYNTAX_ERROR: services_status = self._check_service_connectivity()
 
                 # REMOVED_SYNTAX_ERROR: except subprocess.TimeoutExpired:
-                    # REMOVED_SYNTAX_ERROR: print("⚠️  Docker startup timed out, checking existing services...")
+                    # REMOVED_SYNTAX_ERROR: print(" WARNING: [U+FE0F]  Docker startup timed out, checking existing services...")
                     # REMOVED_SYNTAX_ERROR: services_status = self._check_service_connectivity()
                     # REMOVED_SYNTAX_ERROR: except Exception as e:
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -109,7 +109,7 @@
         
         # REMOVED_SYNTAX_ERROR: conn.close()
         # REMOVED_SYNTAX_ERROR: services['postgres'] = True
-        # REMOVED_SYNTAX_ERROR: print("✅ PostgreSQL is accessible")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  PostgreSQL is accessible")
         # REMOVED_SYNTAX_ERROR: except Exception as e:
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -119,7 +119,7 @@
                 # REMOVED_SYNTAX_ERROR: r = redis.Redis(host='localhost', port=6380, decode_responses=True)
                 # REMOVED_SYNTAX_ERROR: r.ping()
                 # REMOVED_SYNTAX_ERROR: services['redis'] = True
-                # REMOVED_SYNTAX_ERROR: print("✅ Redis is accessible")
+                # REMOVED_SYNTAX_ERROR: print(" PASS:  Redis is accessible")
                 # REMOVED_SYNTAX_ERROR: except Exception as e:
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -783,7 +783,7 @@
         # REMOVED_SYNTAX_ERROR: print(f" )
         # REMOVED_SYNTAX_ERROR: === SUMMARY BY CATEGORY ===")
         # REMOVED_SYNTAX_ERROR: for category, summary in report['summary'].items():
-            # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if summary['success'] else "❌ FAIL"
+            # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if summary['success'] else " FAIL:  FAIL"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: for issue in summary.get('issues', []):
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -829,7 +829,7 @@
                                 # Overall system health check
                                 # REMOVED_SYNTAX_ERROR: assert report['overall_success'], "formatted_string"
 
-                                # REMOVED_SYNTAX_ERROR: print("🎉 ALL CONFIGURATION ACCESS PATTERNS VALIDATED SUCCESSFULLY!")
+                                # REMOVED_SYNTAX_ERROR: print(" CELEBRATION:  ALL CONFIGURATION ACCESS PATTERNS VALIDATED SUCCESSFULLY!")
 
 
                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

@@ -112,7 +112,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
         assert 'test' in oauth_client_id.lower()
         assert 'test' in oauth_client_secret.lower()
         
-        logger.info("✅ Test environment configuration isolation validated")
+        logger.info(" PASS:  Test environment configuration isolation validated")
     
     @pytest.mark.integration
     async def test_staging_environment_configuration_isolation(self):
@@ -166,7 +166,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
             logger.warning(f"Staging database validation issues: {validation_result['issues']}")
             # Don't fail test for staging credential issues in integration test
         
-        logger.info("✅ Staging environment configuration isolation validated")
+        logger.info(" PASS:  Staging environment configuration isolation validated")
     
     @pytest.mark.integration  
     async def test_oauth_credential_validation_per_environment(self):
@@ -227,7 +227,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
                 assert test_case['environment'] in client_id
                 assert test_case['environment'] in client_secret
         
-        logger.info("✅ OAuth credential validation per environment completed")
+        logger.info(" PASS:  OAuth credential validation per environment completed")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -258,7 +258,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
         assert jwt_secret.isprintable(), "JWT secret must be printable"
         assert ' ' not in jwt_secret, "JWT secret should not contain spaces"
         
-        logger.info("✅ JWT secret synchronization across services validated")
+        logger.info(" PASS:  JWT secret synchronization across services validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -337,11 +337,11 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
                             result = await conn.execute("SELECT 1 as test_connection")
                             row = result.fetchone() 
                             assert row[0] == 1, "Database connectivity test failed"
-                        logger.info(f"✅ Database connectivity validated for {db_config['environment']}")
+                        logger.info(f" PASS:  Database connectivity validated for {db_config['environment']}")
                     except Exception as e:
                         logger.warning(f"Database connectivity test failed for {db_config['environment']}: {e}")
         
-        logger.info("✅ Database URL formation per environment validated")
+        logger.info(" PASS:  Database URL formation per environment validated")
     
     @pytest.mark.integration
     async def test_service_url_alignment_across_microservices(self):
@@ -413,7 +413,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
         assert ws_url.startswith('wss://')
         assert auth_url.startswith('https://')
         
-        logger.info("✅ Service URL alignment across microservices validated")
+        logger.info(" PASS:  Service URL alignment across microservices validated")
     
     @pytest.mark.integration
     async def test_configuration_cascade_failure_prevention(self):
@@ -457,7 +457,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
         # Restore for further tests
         self.env.set('SERVICE_SECRET', critical_backend_vars['SERVICE_SECRET'], source="cascade_prevention_test")
         
-        logger.info("✅ Configuration cascade failure prevention validated")
+        logger.info(" PASS:  Configuration cascade failure prevention validated")
     
     @pytest.mark.integration
     async def test_missing_environment_variable_detection(self):
@@ -498,7 +498,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
             missing_error_found = any(var in error for error in partial_validation.errors)
             assert missing_error_found, f"Remaining missing variable {var} not detected"
         
-        logger.info("✅ Missing environment variable detection validated")
+        logger.info(" PASS:  Missing environment variable detection validated")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -548,7 +548,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
         assert backend_jwt.isprintable(), "JWT secret must be printable ASCII"
         assert backend_service_secret.isprintable(), "Service secret must be printable ASCII"
         
-        logger.info("✅ Cross-service configuration consistency validated")
+        logger.info(" PASS:  Cross-service configuration consistency validated")
     
     @pytest.mark.integration
     async def test_ssot_configuration_loading_patterns(self):
@@ -606,7 +606,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
         assert self.env.get('DEBUG') == 'true'  # Test environment should have debug enabled
         assert self.env.is_test() == True
         
-        logger.info("✅ SSOT configuration loading patterns validated")
+        logger.info(" PASS:  SSOT configuration loading patterns validated")
     
     @pytest.mark.integration
     async def test_environment_variable_precedence_and_inheritance(self):
@@ -674,7 +674,7 @@ class TestConfigurationEnvironmentIsolation(BaseIntegrationTest):
         assert force_override_success, "Force override should work on protected variable"
         assert self.env.get(protected_var) == 'force_override'
         
-        logger.info("✅ Environment variable precedence and inheritance validated")
+        logger.info(" PASS:  Environment variable precedence and inheritance validated")
         
         # Assert business value delivered
         self.assert_business_value_delivered(

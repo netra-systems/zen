@@ -653,7 +653,7 @@ def validate_pre_commit_changes(changed_files: List[str]) -> bool:
     
     # Print results
     if result["status"] == "FAIL":
-        logger.error("❌ Pre-commit validation FAILED")
+        logger.error(" FAIL:  Pre-commit validation FAILED")
         for violation in result["violations"]:
             logger.error(f"  {violation['file']}: {violation['message']}")
         
@@ -663,12 +663,12 @@ def validate_pre_commit_changes(changed_files: List[str]) -> bool:
         return False
     
     elif result["status"] == "WARN":
-        logger.warning("⚠️ Pre-commit validation passed with warnings")
+        logger.warning(" WARNING: [U+FE0F] Pre-commit validation passed with warnings")
         for warning in result["warnings"]:
             logger.warning(f"  {warning['file']}:{warning.get('line', '?')}: {warning['message']}")
     
     else:
-        logger.info("✅ Pre-commit validation PASSED")
+        logger.info(" PASS:  Pre-commit validation PASSED")
     
     return True
 

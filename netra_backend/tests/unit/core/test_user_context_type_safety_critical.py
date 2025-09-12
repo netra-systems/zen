@@ -75,7 +75,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
         - request_id: str (should be RequestID) 
         - thread_id: str (should be ThreadID)
         """
-        print("🚨 TESTING: UserDataContext constructor type safety")
+        print(" ALERT:  TESTING: UserDataContext constructor type safety")
         
         # These should FAIL if type safety is working
         user_id_str = "test-user-123"
@@ -99,7 +99,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 f"thread_id='{thread_id_str}' (type: {type(thread_id_str)})"
             )
             self.violations_detected.append(violation_msg)
-            print(f"❌ {violation_msg}")
+            print(f" FAIL:  {violation_msg}")
             
             # Record metrics about this violation
             self.record_metric("constructor_accepts_string_ids", True)
@@ -114,14 +114,14 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
             
         except TypeError as e:
             # If we get a TypeError, type safety IS working (test passes)
-            print(f"✅ Type safety working: {e}")
+            print(f" PASS:  Type safety working: {e}")
             self.record_metric("constructor_rejects_string_ids", True)
             
         except Exception as e:
             # Unexpected error - still a violation because it should be a TypeError
             violation_msg = f"UNEXPECTED ERROR in UserDataContext constructor: {e}"
             self.violations_detected.append(violation_msg)
-            print(f"⚠️  {violation_msg}")
+            print(f" WARNING: [U+FE0F]  {violation_msg}")
             pytest.fail(f"Unexpected error (should be TypeError for string IDs): {e}")
     
     def test_strongly_typed_ids_are_enforced_in_context_creation(self):
@@ -131,7 +131,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - No enforcement of strongly-typed IDs
         BUSINESS RISK: Mixed ID types cause routing failures in multi-user scenarios
         """
-        print("🚨 TESTING: Strongly-typed ID enforcement")
+        print(" ALERT:  TESTING: Strongly-typed ID enforcement")
         
         # Create strongly-typed IDs (the CORRECT way)
         correct_user_id = UserID("user_12345")
@@ -150,7 +150,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 request_id=correct_request_id,
                 thread_id=correct_thread_id
             )
-            print("✅ Strongly-typed IDs accepted (good)")
+            print(" PASS:  Strongly-typed IDs accepted (good)")
             self.record_metric("strongly_typed_ids_accepted", True)
         except Exception as e:
             pytest.fail(f"Strongly-typed IDs should be accepted but got error: {e}")
@@ -164,12 +164,12 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 thread_id=wrong_thread_id    # VIOLATION: string instead of ThreadID
             )
             string_ids_accepted = True
-            print("❌ String IDs wrongly accepted - TYPE SAFETY VIOLATION!")
+            print(" FAIL:  String IDs wrongly accepted - TYPE SAFETY VIOLATION!")
         except TypeError:
-            print("✅ String IDs correctly rejected")
+            print(" PASS:  String IDs correctly rejected")
             self.record_metric("string_ids_rejected", True)
         except Exception as e:
-            print(f"⚠️ Unexpected error with string IDs: {e}")
+            print(f" WARNING: [U+FE0F] Unexpected error with string IDs: {e}")
         
         # If string IDs were accepted, this is a CRITICAL violation
         if string_ids_accepted:
@@ -192,7 +192,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - No protection against ID collisions
         BUSINESS RISK: Race conditions cause user A to see user B's data
         """
-        print("🚨 TESTING: Concurrent context ID collision detection")
+        print(" ALERT:  TESTING: Concurrent context ID collision detection")
         
         # Create contexts that might collide due to string ID weakness
         collision_results = []
@@ -276,11 +276,11 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 "This allows multiple contexts with same IDs, causing user data mixing."
             )
             self.violations_detected.append(violation_msg)
-            print(f"❌ {violation_msg}")
+            print(f" FAIL:  {violation_msg}")
             
         except Exception as collision_error:
             # If we got an exception, collision detection might be working
-            print(f"✅ Possible collision detection: {collision_error}")
+            print(f" PASS:  Possible collision detection: {collision_error}")
             collision_detection_working = True
         
         # FAIL if no collision detection is working
@@ -300,7 +300,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - No memory isolation between contexts
         BUSINESS RISK: Memory sharing allows user A to access user B's data
         """
-        print("🚨 TESTING: User context memory isolation")
+        print(" ALERT:  TESTING: User context memory isolation")
         
         # Create two contexts with different users
         user1_id = "memory_test_user_1"
@@ -334,7 +334,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 if id(val1) == id(val2) and val1 is not None:
                     violation = f"Shared memory reference in attribute '{attr_name}': {id(val1)}"
                     isolation_violations.append(violation)
-                    print(f"❌ Memory isolation violation: {violation}")
+                    print(f" FAIL:  Memory isolation violation: {violation}")
         
         # Test context data modification isolation
         try:
@@ -349,10 +349,10 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 if hasattr(context1, '_metadata') and context1._metadata.get("test") == "user2_data":
                     violation = "Context modification affected other user's context"
                     isolation_violations.append(violation)
-                    print(f"❌ Data isolation violation: {violation}")
+                    print(f" FAIL:  Data isolation violation: {violation}")
         
         except Exception as e:
-            print(f"⚠️ Unexpected error in memory isolation test: {e}")
+            print(f" WARNING: [U+FE0F] Unexpected error in memory isolation test: {e}")
         
         # Record metrics
         self.record_metric("memory_isolation_violations", len(isolation_violations))
@@ -366,7 +366,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 f"{isolation_violations}"
             )
         
-        print("✅ Memory isolation appears intact (test passed)")
+        print(" PASS:  Memory isolation appears intact (test passed)")
     
     def test_dependencies_function_string_id_acceptance(self):
         """
@@ -377,7 +377,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
         
         Tests the violation at netra_backend/app/dependencies.py:385
         """
-        print("🚨 TESTING: Dependencies function string ID acceptance")
+        print(" ALERT:  TESTING: Dependencies function string ID acceptance")
         
         # Test the problematic function signature from dependencies.py:385
         # async def get_user_scoped_db_session(
@@ -412,20 +412,20 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
             if user_id_param and user_id_param.annotation == str:
                 violation = f"user_id parameter has str annotation (should be UserID): {user_id_param}"
                 dependency_violations.append(violation)
-                print(f"❌ Type annotation violation: {violation}")
+                print(f" FAIL:  Type annotation violation: {violation}")
             
             if request_id_param and str(request_id_param.annotation).find('str') != -1:
                 violation = f"request_id parameter uses str annotation (should be RequestID): {request_id_param}"
                 dependency_violations.append(violation)
-                print(f"❌ Type annotation violation: {violation}")
+                print(f" FAIL:  Type annotation violation: {violation}")
                 
             if thread_id_param and str(thread_id_param.annotation).find('str') != -1:
                 violation = f"thread_id parameter uses str annotation (should be ThreadID): {thread_id_param}"
                 dependency_violations.append(violation)
-                print(f"❌ Type annotation violation: {violation}")
+                print(f" FAIL:  Type annotation violation: {violation}")
             
         except Exception as e:
-            print(f"⚠️ Error inspecting dependencies function: {e}")
+            print(f" WARNING: [U+FE0F] Error inspecting dependencies function: {e}")
             dependency_violations.append(f"Could not inspect function signature: {e}")
         
         # Record metrics
@@ -441,7 +441,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 f"mixing between users: {dependency_violations}"
             )
         
-        print("✅ Dependencies function has proper type annotations")
+        print(" PASS:  Dependencies function has proper type annotations")
     
     def test_context_factory_isolation_enforcement(self):
         """
@@ -450,7 +450,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - Factory allows context mixing
         BUSINESS RISK: Factory creates contexts that can interfere with each other
         """
-        print("🚨 TESTING: Context factory isolation enforcement")
+        print(" ALERT:  TESTING: Context factory isolation enforcement")
         
         factory_violations = []
         
@@ -496,7 +496,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                                 f"Factory contexts {i} and {j} share state in attributes: {shared_attrs}"
                             )
                             factory_violations.append(violation)
-                            print(f"❌ Factory isolation violation: {violation}")
+                            print(f" FAIL:  Factory isolation violation: {violation}")
         
         # Test factory context cleanup and resource management
         context_cleanup_violations = []
@@ -527,7 +527,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
                 f"cross-user interference: {all_factory_violations}"
             )
         
-        print("✅ Factory isolation appears intact")
+        print(" PASS:  Factory isolation appears intact")
     
     def teardown_method(self, method):
         """Enhanced teardown with violation reporting."""
@@ -535,7 +535,7 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
         
         # Report all violations found during test
         if self.violations_detected:
-            print(f"\n🚨 TOTAL VIOLATIONS DETECTED: {len(self.violations_detected)}")
+            print(f"\n ALERT:  TOTAL VIOLATIONS DETECTED: {len(self.violations_detected)}")
             for i, violation in enumerate(self.violations_detected, 1):
                 print(f"  {i}. {violation}")
             
@@ -543,12 +543,12 @@ class TestUserContextTypeSafetyViolations(SSotBaseTestCase):
             self.record_metric("total_violations", len(self.violations_detected))
             self.record_metric("violations_list", self.violations_detected)
         else:
-            print("\n✅ No type safety violations detected (unexpected - tests designed to fail)")
+            print("\n PASS:  No type safety violations detected (unexpected - tests designed to fail)")
             self.record_metric("total_violations", 0)
         
         # Log test completion status
         test_metrics = self.get_all_metrics()
-        print(f"\n📊 Test Metrics: {test_metrics}")
+        print(f"\n CHART:  Test Metrics: {test_metrics}")
 
 
 class TestUserContextTypeSafetyIntegration(SSotBaseTestCase):
@@ -565,11 +565,11 @@ class TestUserContextTypeSafetyIntegration(SSotBaseTestCase):
         EXPECTED RESULT: FAIL - String IDs propagate without type conversion
         BUSINESS RISK: String ID propagation enables system-wide context mixing
         """
-        print("🚨 TESTING: End-to-end string ID propagation")
+        print(" ALERT:  TESTING: End-to-end string ID propagation")
         
         propagation_violations = []
         
-        # Test the full flow: Dependencies → Context → Processing
+        # Test the full flow: Dependencies  ->  Context  ->  Processing
         string_user_id = "e2e_test_user"       # VIOLATION: should be UserID
         string_request_id = "e2e_test_request" # VIOLATION: should be RequestID
         string_thread_id = "e2e_test_thread"   # VIOLATION: should be ThreadID
@@ -588,31 +588,31 @@ class TestUserContextTypeSafetyIntegration(SSotBaseTestCase):
                 "allowing propagation through entire system"
             )
             propagation_violations.append(violation)
-            print(f"❌ {violation}")
+            print(f" FAIL:  {violation}")
             
             # Step 2: Test if string IDs are stored internally without conversion
             if hasattr(context, 'user_id') and isinstance(context.user_id, str):
                 violation = f"Context stores user_id as str internally: {type(context.user_id)}"
                 propagation_violations.append(violation)
-                print(f"❌ {violation}")
+                print(f" FAIL:  {violation}")
             
             if hasattr(context, 'request_id') and isinstance(context.request_id, str):
                 violation = f"Context stores request_id as str internally: {type(context.request_id)}"
                 propagation_violations.append(violation)
-                print(f"❌ {violation}")
+                print(f" FAIL:  {violation}")
                 
             if hasattr(context, 'thread_id') and isinstance(context.thread_id, str):
                 violation = f"Context stores thread_id as str internally: {type(context.thread_id)}"
                 propagation_violations.append(violation)
-                print(f"❌ {violation}")
+                print(f" FAIL:  {violation}")
         
         except TypeError as e:
             # If we get TypeError, type safety is working (good)
-            print(f"✅ Type safety blocked string ID propagation: {e}")
+            print(f" PASS:  Type safety blocked string ID propagation: {e}")
         except Exception as e:
             violation = f"Unexpected error in E2E test: {e}"
             propagation_violations.append(violation)
-            print(f"⚠️ {violation}")
+            print(f" WARNING: [U+FE0F] {violation}")
         
         # Record metrics
         self.record_metric("e2e_propagation_violations", len(propagation_violations))
@@ -626,7 +626,7 @@ class TestUserContextTypeSafetyIntegration(SSotBaseTestCase):
                 f"{propagation_violations}"
             )
         
-        print("✅ E2E type safety appears intact")
+        print(" PASS:  E2E type safety appears intact")
 
 
 # Mark these as critical tests that must be run

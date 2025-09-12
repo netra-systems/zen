@@ -5,7 +5,7 @@ This module provides SSOT import compatibility by aliasing the existing
 UnifiedCircuitBreaker implementation from the core resilience module.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) 
+- Segment: ALL (Free  ->  Enterprise) 
 - Business Goal: Prevent cascade failures and maintain service reliability
 - Value Impact: Ensures system stability during high load or service degradation
 - Strategic Impact: Critical for maintaining SLA commitments and user experience

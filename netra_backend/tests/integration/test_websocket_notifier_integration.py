@@ -2,7 +2,7 @@
 WebSocket Notifier Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) 
+- Segment: All (Free  ->  Enterprise) 
 - Business Goal: Ensure WebSocket notifications work with realistic system components
 - Value Impact: Integration tests validate real-time feedback works in component interactions
 - Strategic Impact: User engagement depends on reliable real-time notifications
@@ -11,7 +11,7 @@ This test suite validates WebSocket Notifier functionality through integration
 testing with realistic components and message flows, focusing on component
 interaction patterns without requiring running services.
 
-⚠️ DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
+ WARNING: [U+FE0F] DEPRECATION NOTE: WebSocketNotifier is deprecated in favor of AgentWebSocketBridge.
 These tests validate integration patterns for backward compatibility.
 
 CRITICAL REQUIREMENTS VALIDATED:

@@ -8,7 +8,7 @@ Business Value Justification:
 
 CRITICAL REQUIREMENTS:
 1. Agents MUST execute tools within proper user context (NO shared tool state)
-2. Tool execution MUST be isolated per user (User A tools ≠ User B tools)
+2. Tool execution MUST be isolated per user (User A tools  !=  User B tools)
 3. Tool dispatcher MUST integrate with agent execution pipeline
 4. Tool results MUST be returned to correct agent/user
 5. Tool execution MUST emit proper WebSocket events

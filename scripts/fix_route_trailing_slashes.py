@@ -94,18 +94,18 @@ def main():
     
     # Summary
     if fixed_files:
-        print(f"\n✅ Fixed {len(fixed_files)} files:")
+        print(f"\n PASS:  Fixed {len(fixed_files)} files:")
         for f in fixed_files:
             print(f"  - {f}")
     else:
-        print("\n✅ No files needed fixing - all routes properly configured!")
+        print("\n PASS:  No files needed fixing - all routes properly configured!")
     
     # Also ensure all routers have redirect_slashes=False
-    print("\n🔍 Checking router configurations...")
+    print("\n SEARCH:  Checking router configurations...")
     for py_file in routes_dir.glob("**/*.py"):
         content = py_file.read_text(encoding='utf-8')
         if 'APIRouter(' in content and 'redirect_slashes' not in content:
-            print(f"  ⚠️  {py_file} - Missing redirect_slashes=False in APIRouter")
+            print(f"   WARNING: [U+FE0F]  {py_file} - Missing redirect_slashes=False in APIRouter")
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 """REAL Authentication Flow E2E Test - NO MOCKS, NO CHEATING
 
 BVJ (Business Value Justification):
-1. Segment: All customer segments (Free → Paid conversion critical)
+1. Segment: All customer segments (Free  ->  Paid conversion critical)
 2. Business Goal: Validate complete authentication infrastructure end-to-end
 3. Value Impact: Protects $200K+ MRR through real auth flow validation
 4. Revenue Impact: Prevents authentication failures that block user conversion
@@ -62,7 +62,7 @@ class TestRealAuthFlowE2E:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start REAL Docker services for auth flow testing."""
-        print("🐳 Starting Docker services for REAL auth flow tests...")
+        print("[U+1F433] Starting Docker services for REAL auth flow tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -74,13 +74,13 @@ class TestRealAuthFlowE2E:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for REAL auth flow tests")
+            print(" PASS:  Docker services ready for REAL auth flow tests")
             yield
             
         except Exception as e:
-            raise Exception(f"❌ HARD FAILURE: Failed to start Docker services for auth flow tests: {e}")
+            raise Exception(f" FAIL:  HARD FAILURE: Failed to start Docker services for auth flow tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after auth flow tests...")
+            print("[U+1F9F9] Cleaning up Docker services after auth flow tests...")
             await docker_manager.cleanup_async()
     
     @pytest.fixture
@@ -100,7 +100,7 @@ class TestRealAuthFlowE2E:
         real_db_session: AsyncSession
     ):
         """Test REAL user registration with actual auth service and database."""
-        print("📝 Testing REAL user registration flow...")
+        print("[U+1F4DD] Testing REAL user registration flow...")
         
         # Generate unique test user
         test_email = f"real_reg_test_{int(time.time())}@netra.ai"
@@ -139,7 +139,7 @@ class TestRealAuthFlowE2E:
             user_data = registration_result["user"]
             access_token = registration_result["access_token"]
             
-        print(f"✅ User registration successful: {test_email}")
+        print(f" PASS:  User registration successful: {test_email}")
         
         # Validate JWT token structure
         try:
@@ -176,7 +176,7 @@ class TestRealAuthFlowE2E:
             if not db_user.is_active:
                 raise Exception(f"HARD FAILURE: User {test_email} is not active in database")
             
-            print(f"✅ User validated in database: {db_user.id}")
+            print(f" PASS:  User validated in database: {db_user.id}")
             
         except Exception as e:
             if "HARD FAILURE" in str(e):
@@ -198,7 +198,7 @@ class TestRealAuthFlowE2E:
         real_db_session: AsyncSession
     ):
         """Test REAL user login with actual auth service validation."""
-        print("🔑 Testing REAL user login flow...")
+        print("[U+1F511] Testing REAL user login flow...")
         
         # Create a real user first for login testing
         test_email = f"real_login_test_{int(time.time())}@netra.ai"
@@ -247,7 +247,7 @@ class TestRealAuthFlowE2E:
             
             access_token = login_result["access_token"]
         
-        print(f"✅ User login successful: {test_email}")
+        print(f" PASS:  User login successful: {test_email}")
         
         # Validate token works for actual API calls
         async with httpx.AsyncClient() as client:
@@ -271,7 +271,7 @@ class TestRealAuthFlowE2E:
                     f"HARD FAILURE: Profile email mismatch. Expected: {test_email}, Got: {profile_data.get('email')}"
                 )
         
-        print(f"✅ Token validation successful on protected endpoint")
+        print(f" PASS:  Token validation successful on protected endpoint")
         
         return {
             "success": True,
@@ -285,7 +285,7 @@ class TestRealAuthFlowE2E:
         auth_helper: E2EAuthHelper
     ):
         """Test REAL WebSocket authentication with actual WebSocket connection."""
-        print("🔌 Testing REAL WebSocket authentication flow...")
+        print("[U+1F50C] Testing REAL WebSocket authentication flow...")
         
         # Create authenticated user
         auth_user = await auth_helper.create_authenticated_user(
@@ -306,7 +306,7 @@ class TestRealAuthFlowE2E:
                 open_timeout=10.0
             ) as websocket:
                 
-                print(f"✅ REAL WebSocket connection established")
+                print(f" PASS:  REAL WebSocket connection established")
                 
                 # Send real test message
                 test_message = {
@@ -316,14 +316,14 @@ class TestRealAuthFlowE2E:
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                print(f"✅ Message sent to REAL WebSocket")
+                print(f" PASS:  Message sent to REAL WebSocket")
                 
                 # Receive real response with timeout
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                     response_data = json.loads(response)
                     
-                    print(f"✅ Received REAL WebSocket response: {response_data.get('type', 'unknown')}")
+                    print(f" PASS:  Received REAL WebSocket response: {response_data.get('type', 'unknown')}")
                     
                     # Validate response structure
                     if "type" not in response_data:
@@ -351,7 +351,7 @@ class TestRealAuthFlowE2E:
         auth_helper: E2EAuthHelper
     ):
         """Test REAL JWT token validation with actual auth service."""
-        print("🎫 Testing REAL JWT token validation flow...")
+        print("[U+1F3AB] Testing REAL JWT token validation flow...")
         
         # Create real JWT token
         auth_user = await auth_helper.create_authenticated_user(
@@ -383,7 +383,7 @@ class TestRealAuthFlowE2E:
             if "user_id" not in validation_result:
                 raise Exception("HARD FAILURE: JWT validation response missing user_id")
             
-        print(f"✅ JWT token validation successful")
+        print(f" PASS:  JWT token validation successful")
         
         # Test invalid token handling
         invalid_token = "invalid.jwt.token"
@@ -400,7 +400,7 @@ class TestRealAuthFlowE2E:
                 if invalid_result.get("valid", False):
                     raise Exception("HARD FAILURE: Auth service accepted invalid JWT token")
         
-        print(f"✅ Invalid token properly rejected")
+        print(f" PASS:  Invalid token properly rejected")
         
         return {
             "success": True,
@@ -415,7 +415,7 @@ class TestRealAuthFlowE2E:
         real_db_session: AsyncSession
     ):
         """Test REAL session management with database persistence."""
-        print("📋 Testing REAL session management flow...")
+        print("[U+1F4CB] Testing REAL session management flow...")
         
         # Create user and get session
         auth_user = await auth_helper.create_authenticated_user(
@@ -450,7 +450,7 @@ class TestRealAuthFlowE2E:
             if session.expires_at <= session.created_at:
                 raise Exception("HARD FAILURE: Session expires_at is not after created_at")
             
-            print(f"✅ Session validation successful: {session.id}")
+            print(f" PASS:  Session validation successful: {session.id}")
             
         except Exception as e:
             if "HARD FAILURE" in str(e):
@@ -472,7 +472,7 @@ class TestRealAuthFlowE2E:
                     f"HARD FAILURE: Logout failed with {logout_response.status_code}: {logout_response.text}"
                 )
         
-        print(f"✅ Session logout successful")
+        print(f" PASS:  Session logout successful")
         
         # Wait for session to be marked inactive
         await asyncio.sleep(1)
@@ -487,7 +487,7 @@ class TestRealAuthFlowE2E:
             if not session.revoked_at:
                 raise Exception("HARD FAILURE: Session missing revoked_at timestamp after logout")
             
-            print(f"✅ Session properly deactivated in database")
+            print(f" PASS:  Session properly deactivated in database")
             
         except Exception as e:
             if "HARD FAILURE" in str(e):
@@ -509,7 +509,7 @@ class TestRealAuthFlowE2E:
         real_db_session: AsyncSession
     ):
         """Test complete authentication flow integration with all components."""
-        print("🔄 Testing complete REAL auth flow integration...")
+        print(" CYCLE:  Testing complete REAL auth flow integration...")
         
         # Step 1: Registration
         test_email = f"complete_auth_test_{int(time.time())}@netra.ai"
@@ -542,7 +542,7 @@ class TestRealAuthFlowE2E:
             if not result.get("success", False):
                 raise Exception(f"HARD FAILURE: Step {i+1} of complete auth flow failed")
         
-        print(f"✅ Complete auth flow integration successful")
+        print(f" PASS:  Complete auth flow integration successful")
         
         return {
             "success": True,

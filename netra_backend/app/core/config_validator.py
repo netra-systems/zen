@@ -275,11 +275,11 @@ class ConfigValidator:
         """Add validation status to report."""
         try:
             self.validate_config(config)
-            report.append("✓ All configuration checks passed")
+            report.append("[U+2713] All configuration checks passed")
         except ConfigurationValidationError as e:
-            report.append(f"✗ Configuration validation failed: {e}")
+            report.append(f"[U+2717] Configuration validation failed: {e}")
         except Exception as e:
-            report.append(f"✗ Unexpected validation error: {e}")
+            report.append(f"[U+2717] Unexpected validation error: {e}")
     
     def _add_informational_items_to_report(self, config: AppConfig, report: List[str]) -> None:
         """Add informational items to validation report."""

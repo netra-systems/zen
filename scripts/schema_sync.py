@@ -78,19 +78,19 @@ def create_synchronizer(backend_modules, frontend_output_path, validation_level)
 
 def print_sync_results(report):
     """Print synchronization results summary."""
-    print(f"✅ Synchronization completed at {report.timestamp}")
-    print(f"📊 Processed {report.schemas_processed} schemas")
-    print(f"🔄 Changes detected: {len(report.changes_detected)}")
-    print(f"📁 Files generated: {len(report.files_generated)}")
+    print(f" PASS:  Synchronization completed at {report.timestamp}")
+    print(f" CHART:  Processed {report.schemas_processed} schemas")
+    print(f" CYCLE:  Changes detected: {len(report.changes_detected)}")
+    print(f"[U+1F4C1] Files generated: {len(report.files_generated)}")
 
 
 def print_changes_detected(changes_detected):
     """Print detected changes details."""
     if not changes_detected:
         return
-    print("\n📋 Changes detected:")
+    print("\n[U+1F4CB] Changes detected:")
     for change in changes_detected:
-        icon = "➕" if change.change_type == "added" else "➖" if change.change_type == "removed" else "🔄"
+        icon = "[U+2795]" if change.change_type == "added" else "[U+2796]" if change.change_type == "removed" else " CYCLE: "
         field_info = f" ({change.field_name})" if change.field_name else ""
         print(f"   {icon} {change.schema_name}{field_info}: {change.description}")
 
@@ -99,18 +99,18 @@ def print_validation_errors(validation_errors):
     """Print validation errors."""
     if not validation_errors:
         return
-    print("\n⚠️ Validation warnings:")
+    print("\n WARNING: [U+FE0F] Validation warnings:")
     for error in validation_errors:
-        print(f"   ⚠️ {error}")
+        print(f"    WARNING: [U+FE0F] {error}")
 
 
 def print_generated_files(files_generated):
     """Print list of generated files."""
     if not files_generated:
         return
-    print("\n📄 Generated files:")
+    print("\n[U+1F4C4] Generated files:")
     for file_path in files_generated:
-        print(f"   📄 {file_path}")
+        print(f"   [U+1F4C4] {file_path}")
 
 
 def validate_typescript_output(frontend_output_path):
@@ -119,24 +119,24 @@ def validate_typescript_output(frontend_output_path):
     if not output_path.exists():
         return
     content = output_path.read_text(encoding='utf-8')
-    print(f"   📏 Generated file size: {len(content)} characters")
-    print(f"   📋 Contains {content.count('export interface')} interfaces")
-    print(f"   📋 Contains {content.count('export type')} type definitions")
+    print(f"   [U+1F4CF] Generated file size: {len(content)} characters")
+    print(f"   [U+1F4CB] Contains {content.count('export interface')} interfaces")
+    print(f"   [U+1F4CB] Contains {content.count('export type')} type definitions")
 
 
 def run_additional_validations(frontend_output_path):
     """Run additional validation checks."""
-    print("\n🔍 Running additional validations...")
+    print("\n SEARCH:  Running additional validations...")
     validate_typescript_output(frontend_output_path)
-    print("✅ All validations passed!")
+    print(" PASS:  All validations passed!")
 
 
 def handle_sync_error(error):
     """Handle synchronization errors."""
     if isinstance(error, ServiceError):
-        print(f"\n❌ Service error: {error}")
+        print(f"\n FAIL:  Service error: {error}")
     else:
-        print(f"\n❌ Unexpected error: {error}")
+        print(f"\n FAIL:  Unexpected error: {error}")
         print("Consider running with --force if schemas have breaking changes")
     return 1
 
@@ -159,7 +159,7 @@ def main():
         print_validation_errors(report.validation_errors)
         print_generated_files(report.files_generated)
         
-        print(f"\n{'✅ Sync succeeded!' if report.success else '❌ Sync failed!'}")
+        print(f"\n{' PASS:  Sync succeeded!' if report.success else ' FAIL:  Sync failed!'}")
         
         if report.success:
             run_additional_validations(frontend_output_path)
@@ -195,8 +195,8 @@ if __name__ == "__main__":
         exit_code = main()
         sys.exit(exit_code)
     except KeyboardInterrupt:
-        print("\n⚠️ Synchronization interrupted by user")
+        print("\n WARNING: [U+FE0F] Synchronization interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Fatal error: {e}")
+        print(f"\n FAIL:  Fatal error: {e}")
         sys.exit(1)

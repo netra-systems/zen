@@ -165,11 +165,11 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
         4. GCP integration with business context
         5. Authentication context preservation throughout
         """
-        print("\n🔐 E2E TEST: Authenticated End-to-End Error Reporting Flow")
+        print("\n[U+1F510] E2E TEST: Authenticated End-to-End Error Reporting Flow")
         print("=" * 65)
         
         # Step 1: Setup authenticated context - CRITICAL per CLAUDE.md
-        print("\n🔑 Step 1: Setup Authenticated Context")
+        print("\n[U+1F511] Step 1: Setup Authenticated Context")
         
         e2e_context = await self.setup_authenticated_e2e_context()
         
@@ -177,12 +177,12 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
         assert e2e_context.user_id.value == self.test_user_id
         assert "jwt_oauth" in e2e_context.agent_context.get("authentication_method", "")
         
-        print(f"✅ Authenticated session created for user: {e2e_context.user_id.value}")
+        print(f" PASS:  Authenticated session created for user: {e2e_context.user_id.value}")
         print(f"   Session ID: {e2e_context.agent_context['test_session_id']}")
         print(f"   Permissions: {e2e_context.agent_context.get('permissions', [])}")
         
         # Step 2: Create authenticated JWT token for API calls
-        print("\n🎫 Step 2: Create Authenticated JWT Token")
+        print("\n[U+1F3AB] Step 2: Create Authenticated JWT Token")
         
         jwt_token = self.auth_helper.create_test_jwt_token(
             user_id=e2e_context.user_id.value,
@@ -191,10 +191,10 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
         )
         auth_headers = self.auth_helper.get_auth_headers(jwt_token)
         
-        print(f"✅ JWT token created and auth headers prepared")
+        print(f" PASS:  JWT token created and auth headers prepared")
         
         # Step 3: Test real service connectivity with authentication
-        print("\n🌐 Step 3: Test Real Service Connectivity")
+        print("\n[U+1F310] Step 3: Test Real Service Connectivity")
         
         service_connectivity_results = await self.test_authenticated_service_connectivity(
             auth_headers, e2e_context
@@ -202,19 +202,19 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
         
         if service_connectivity_results["backend_available"]:
             self.e2e_results["real_service_connectivity"] = True
-            print("✅ Real service connectivity established with authentication")
+            print(" PASS:  Real service connectivity established with authentication")
         else:
-            print("⚠️ Real service not available - continuing with comprehensive E2E patterns")
+            print(" WARNING: [U+FE0F] Real service not available - continuing with comprehensive E2E patterns")
         
         # Step 4: Initialize GCP components with authenticated context
-        print("\n☁️ Step 4: Initialize GCP Components with Authentication")
+        print("\n[U+2601][U+FE0F] Step 4: Initialize GCP Components with Authentication")
         
         gcp_components_initialized = await self.initialize_gcp_components_with_auth(e2e_context)
         
-        print(f"GCP Components Initialization: {'✅' if gcp_components_initialized else '❌'}")
+        print(f"GCP Components Initialization: {' PASS: ' if gcp_components_initialized else ' FAIL: '}")
         
         # Step 5: Execute authenticated error scenarios
-        print("\n🚨 Step 5: Execute Authenticated Error Scenarios")
+        print("\n ALERT:  Step 5: Execute Authenticated Error Scenarios")
         
         error_scenarios = [
             {
@@ -243,7 +243,7 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
         scenario_results = []
         
         for scenario in error_scenarios:
-            print(f"\n   📋 Executing: {scenario['name']}")
+            print(f"\n   [U+1F4CB] Executing: {scenario['name']}")
             
             try:
                 # Execute scenario with authenticated context
@@ -258,12 +258,12 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                 })
                 
                 if scenario_result:
-                    print(f"   ✅ {scenario['name']} completed successfully")
+                    print(f"    PASS:  {scenario['name']} completed successfully")
                 else:
-                    print(f"   ❌ {scenario['name']} failed")
+                    print(f"    FAIL:  {scenario['name']} failed")
                     
             except Exception as e:
-                print(f"   ❌ {scenario['name']} error: {e}")
+                print(f"    FAIL:  {scenario['name']} error: {e}")
                 scenario_results.append({
                     "scenario": scenario["name"],
                     "success": False,
@@ -272,7 +272,7 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                 })
         
         # Step 6: Validate end-to-end flow results
-        print("\n📊 Step 6: Validate End-to-End Flow Results")
+        print("\n CHART:  Step 6: Validate End-to-End Flow Results")
         
         successful_scenarios = len([r for r in scenario_results if r["success"]])
         total_scenarios = len(scenario_results)
@@ -288,14 +288,14 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
             "real_service_connectivity": self.e2e_results["real_service_connectivity"]
         }
         
-        print(f"\n📈 E2E Test Results:")
+        print(f"\n[U+1F4C8] E2E Test Results:")
         print(f"  Authenticated Sessions: {e2e_metrics['authenticated_sessions_created']}")
         print(f"  Service Interactions: {e2e_metrics['service_interactions_completed']}")
         print(f"  Error Reports Generated: {e2e_metrics['error_reports_generated']}")
         print(f"  Successful Scenarios: {e2e_metrics['successful_scenarios']}/{e2e_metrics['total_scenarios']}")
         print(f"  Scenario Success Rate: {e2e_metrics['scenario_success_rate']:.2%}")
-        print(f"  Auth Context Preserved: {'✅' if e2e_metrics['auth_context_preserved'] else '❌'}")
-        print(f"  Real Service Connectivity: {'✅' if e2e_metrics['real_service_connectivity'] else '❌'}")
+        print(f"  Auth Context Preserved: {' PASS: ' if e2e_metrics['auth_context_preserved'] else ' FAIL: '}")
+        print(f"  Real Service Connectivity: {' PASS: ' if e2e_metrics['real_service_connectivity'] else ' FAIL: '}")
         
         # E2E success criteria
         e2e_flow_working = (
@@ -308,7 +308,7 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
         
         if not e2e_flow_working:
             # EXPECTED INITIAL FAILURE - proves E2E integration gaps
-            print("\n🚨 EXPECTED INITIAL FAILURE: E2E GCP Error Reporting integration incomplete")
+            print("\n ALERT:  EXPECTED INITIAL FAILURE: E2E GCP Error Reporting integration incomplete")
             print("This proves end-to-end authenticated error reporting pipeline gaps exist:")
             
             if e2e_metrics["authenticated_sessions_created"] < 1:
@@ -322,7 +322,7 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
             pytest.xfail("EXPECTED: E2E GCP Error Reporting authentication integration gaps detected")
         
         else:
-            print("\n✅ SUCCESS: E2E authenticated GCP Error Reporting flow functional")
+            print("\n PASS:  SUCCESS: E2E authenticated GCP Error Reporting flow functional")
             
             # Validate critical E2E requirements
             assert e2e_metrics["authenticated_sessions_created"] >= 1, \
@@ -360,7 +360,7 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                         })
                         
                 except httpx.ConnectError:
-                    print("   ⚠️ Backend service not available for E2E testing")
+                    print("    WARNING: [U+FE0F] Backend service not available for E2E testing")
             
             # Test auth service connectivity
             try:
@@ -379,7 +379,7 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                         })
                         
             except httpx.ConnectError:
-                print("   ⚠️ Auth service not available for E2E testing")
+                print("    WARNING: [U+FE0F] Auth service not available for E2E testing")
             
             # Test database connectivity
             try:
@@ -399,10 +399,10 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                     })
                     
             except Exception as db_error:
-                print(f"   ⚠️ Database not available for E2E testing: {db_error}")
+                print(f"    WARNING: [U+FE0F] Database not available for E2E testing: {db_error}")
         
         except Exception as e:
-            print(f"   ❌ Service connectivity test error: {e}")
+            print(f"    FAIL:  Service connectivity test error: {e}")
         
         return connectivity_results
     
@@ -446,14 +446,14 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
             return True
             
         except Exception as e:
-            print(f"   ❌ GCP component initialization with auth failed: {e}")
+            print(f"    FAIL:  GCP component initialization with auth failed: {e}")
             return False
     
     async def generate_authenticated_database_error(self, auth_headers: Dict[str, str], context: StronglyTypedUserExecutionContext, scenario: Dict[str, Any]) -> bool:
         """Generate authenticated database error scenario."""
         
         try:
-            print(f"     🗄️ Generating {scenario['description']}")
+            print(f"     [U+1F5C4][U+FE0F] Generating {scenario['description']}")
             
             # Create error with authenticated context
             database_error = SQLAlchemyError("Authenticated user database operation failed")
@@ -487,18 +487,18 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                 "timestamp": time.time()
             })
             
-            print(f"     ✅ Database error reported with authentication")
+            print(f"      PASS:  Database error reported with authentication")
             return True
             
         except Exception as e:
-            print(f"     ❌ Database error scenario failed: {e}")
+            print(f"      FAIL:  Database error scenario failed: {e}")
             return False
     
     async def generate_authenticated_api_error(self, auth_headers: Dict[str, str], context: StronglyTypedUserExecutionContext, scenario: Dict[str, Any]) -> bool:
         """Generate authenticated API error scenario."""
         
         try:
-            print(f"     🌐 Generating {scenario['description']}")
+            print(f"     [U+1F310] Generating {scenario['description']}")
             
             # Try to make authenticated API call that should fail
             api_error = None
@@ -557,18 +557,18 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                 "timestamp": time.time()
             })
             
-            print(f"     ✅ API error reported with authentication")
+            print(f"      PASS:  API error reported with authentication")
             return True
             
         except Exception as e:
-            print(f"     ❌ API error scenario failed: {e}")
+            print(f"      FAIL:  API error scenario failed: {e}")
             return False
     
     async def generate_authenticated_validation_error(self, auth_headers: Dict[str, str], context: StronglyTypedUserExecutionContext, scenario: Dict[str, Any]) -> bool:
         """Generate authenticated validation error scenario."""
         
         try:
-            print(f"     ✅ Generating {scenario['description']}")
+            print(f"      PASS:  Generating {scenario['description']}")
             
             # Create validation error with authenticated context
             validation_error = NetraException(
@@ -607,11 +607,11 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                 "timestamp": time.time()
             })
             
-            print(f"     ✅ Validation error reported with authentication")
+            print(f"      PASS:  Validation error reported with authentication")
             return True
             
         except Exception as e:
-            print(f"     ❌ Validation error scenario failed: {e}")
+            print(f"      FAIL:  Validation error scenario failed: {e}")
             return False
     
     @pytest.mark.e2e
@@ -629,7 +629,7 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
         3. Context preservation per user
         4. No cross-user information leakage
         """
-        print("\n👥 E2E TEST: Authenticated Multi-User Error Isolation")
+        print("\n[U+1F465] E2E TEST: Authenticated Multi-User Error Isolation")
         print("=" * 55)
         
         # Create multiple authenticated users
@@ -654,7 +654,7 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
             
             user_contexts.append(context)
             
-            print(f"✅ Created authenticated user {i+1}: {user_id}")
+            print(f" PASS:  Created authenticated user {i+1}: {user_id}")
         
         # Generate errors for each user
         user_error_reports = []
@@ -690,10 +690,10 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
                     "timestamp": time.time()
                 })
                 
-                print(f"✅ Error reported for authenticated user {i+1}")
+                print(f" PASS:  Error reported for authenticated user {i+1}")
                 
             except Exception as e:
-                print(f"❌ Error reporting failed for user {i+1}: {e}")
+                print(f" FAIL:  Error reporting failed for user {i+1}: {e}")
         
         # Validate isolation
         isolation_results = {
@@ -718,21 +718,21 @@ class TestGCPErrorReportingE2EComprehensive(SSotBaseTestCase):
         if len(user_error_reports) == len(user_contexts):
             isolation_results["per_user_tracking"] = True
         
-        print(f"\n📊 Multi-User Isolation Results:")
+        print(f"\n CHART:  Multi-User Isolation Results:")
         print(f"  Users Created: {len(user_contexts)}")
         print(f"  Error Reports Generated: {len(user_error_reports)}")
-        print(f"  User Contexts Isolated: {'✅' if isolation_results['user_contexts_isolated'] else '❌'}")
-        print(f"  No Context Leakage: {'✅' if isolation_results['no_context_leakage'] else '❌'}")
-        print(f"  Per-User Tracking: {'✅' if isolation_results['per_user_tracking'] else '❌'}")
+        print(f"  User Contexts Isolated: {' PASS: ' if isolation_results['user_contexts_isolated'] else ' FAIL: '}")
+        print(f"  No Context Leakage: {' PASS: ' if isolation_results['no_context_leakage'] else ' FAIL: '}")
+        print(f"  Per-User Tracking: {' PASS: ' if isolation_results['per_user_tracking'] else ' FAIL: '}")
         
         multi_user_isolation_working = all(isolation_results.values())
         
         if not multi_user_isolation_working:
-            print("\n🚨 EXPECTED INITIAL FAILURE: Multi-user error isolation incomplete")
+            print("\n ALERT:  EXPECTED INITIAL FAILURE: Multi-user error isolation incomplete")
             print("This proves multi-user authentication isolation gaps exist")
             pytest.xfail("EXPECTED: Multi-user authentication error isolation gaps detected")
         else:
-            print("\n✅ SUCCESS: Multi-user authenticated error isolation working")
+            print("\n PASS:  SUCCESS: Multi-user authenticated error isolation working")
             
             # Validate critical isolation requirements
             assert isolation_results["no_context_leakage"], \

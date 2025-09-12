@@ -48,7 +48,7 @@ class TestStagingEnvironment:
             
             data = response.json()
             assert data.get("status") == "healthy", f"Unhealthy status: {data}"
-            print(f"✅ Staging health check passed: {data}")
+            print(f" PASS:  Staging health check passed: {data}")
         except httpx.ConnectError:
             pytest.skip("Cannot connect to staging environment")
     
@@ -61,7 +61,7 @@ class TestStagingEnvironment:
             
             data = response.json()
             assert data.get("status") in ["healthy", "ok"], f"Auth unhealthy: {data}"
-            print(f"✅ Auth service health check passed: {data}")
+            print(f" PASS:  Auth service health check passed: {data}")
         except httpx.ConnectError:
             pytest.skip("Cannot connect to auth staging environment")
     
@@ -81,7 +81,7 @@ class TestStagingEnvironment:
                 # We expect 401 without auth, but not 404 or 500
                 assert response.status_code in [200, 401, 403], \
                     f"Endpoint {endpoint} returned unexpected status: {response.status_code}"
-                print(f"✅ Endpoint {endpoint} is available")
+                print(f" PASS:  Endpoint {endpoint} is available")
             except httpx.ConnectError:
                 pytest.skip(f"Cannot connect to endpoint {endpoint}")
     
@@ -107,7 +107,7 @@ class TestStagingEnvironment:
                 assert "token_type" in data, "No token type in response"
                 
                 access_token = data["access_token"]
-                print(f"✅ Authentication successful, token: {access_token[:20]}...")
+                print(f" PASS:  Authentication successful, token: {access_token[:20]}...")
                 
                 # Step 2: Use token to access protected endpoint
                 headers = {"Authorization": f"Bearer {access_token}"}
@@ -118,11 +118,11 @@ class TestStagingEnvironment:
                 
                 if protected_response.status_code == 200:
                     profile = protected_response.json()
-                    print(f"✅ Protected endpoint access successful: {profile}")
+                    print(f" PASS:  Protected endpoint access successful: {profile}")
                 else:
-                    print(f"⚠️ Protected endpoint returned: {protected_response.status_code}")
+                    print(f" WARNING: [U+FE0F] Protected endpoint returned: {protected_response.status_code}")
             else:
-                print(f"⚠️ Login failed with status: {response.status_code}")
+                print(f" WARNING: [U+FE0F] Login failed with status: {response.status_code}")
                 # Try registration if login failed
                 await self._try_registration(http_client)
         except httpx.ConnectError:
@@ -142,9 +142,9 @@ class TestStagingEnvironment:
         )
         
         if response.status_code in [200, 201]:
-            print(f"✅ User registration successful")
+            print(f" PASS:  User registration successful")
         else:
-            print(f"⚠️ Registration returned: {response.status_code}")
+            print(f" WARNING: [U+FE0F] Registration returned: {response.status_code}")
     
     @pytest.mark.asyncio
     async def test_websocket_connectivity(self):
@@ -164,9 +164,9 @@ class TestStagingEnvironment:
                 # Wait for response
                 response = await asyncio.wait_for(websocket.recv(), timeout=5)
                 data = json.loads(response)
-                print(f"✅ WebSocket connection successful: {data}")
+                print(f" PASS:  WebSocket connection successful: {data}")
         except Exception as e:
-            print(f"⚠️ WebSocket connection failed: {e}")
+            print(f" WARNING: [U+FE0F] WebSocket connection failed: {e}")
             pytest.skip("Cannot connect to WebSocket")
     
     @pytest.mark.asyncio
@@ -190,7 +190,7 @@ class TestStagingEnvironment:
         if session_response.status_code in [200, 201]:
             session = session_response.json()
             session_id = session.get("id") or session.get("session_id")
-            print(f"✅ Session created: {session_id}")
+            print(f" PASS:  Session created: {session_id}")
             
             # Send a message to trigger agent
             message_data = {
@@ -207,11 +207,11 @@ class TestStagingEnvironment:
             
             if message_response.status_code in [200, 201]:
                 message = message_response.json()
-                print(f"✅ Agent message sent: {message}")
+                print(f" PASS:  Agent message sent: {message}")
             else:
-                print(f"⚠️ Message send failed: {message_response.status_code}")
+                print(f" WARNING: [U+FE0F] Message send failed: {message_response.status_code}")
         else:
-            print(f"⚠️ Session creation failed: {session_response.status_code}")
+            print(f" WARNING: [U+FE0F] Session creation failed: {session_response.status_code}")
     
     async def _get_auth_token(self, http_client) -> Optional[str]:
         """Helper to get authentication token"""
@@ -255,7 +255,7 @@ class TestStagingEnvironment:
         
         if create_response.status_code in [200, 201, 404]:
             if create_response.status_code == 404:
-                print("⚠️ Test data endpoint not available")
+                print(" WARNING: [U+FE0F] Test data endpoint not available")
             else:
                 # Try to retrieve data
                 get_response = await http_client.get(
@@ -267,11 +267,11 @@ class TestStagingEnvironment:
                     retrieved = get_response.json()
                     assert retrieved.get("data") == test_data["data"], \
                         "Data persistence verification failed"
-                    print(f"✅ Data persistence test passed")
+                    print(f" PASS:  Data persistence test passed")
                 else:
-                    print(f"⚠️ Data retrieval failed: {get_response.status_code}")
+                    print(f" WARNING: [U+FE0F] Data retrieval failed: {get_response.status_code}")
         else:
-            print(f"⚠️ Data creation failed: {create_response.status_code}")
+            print(f" WARNING: [U+FE0F] Data creation failed: {create_response.status_code}")
 
 
 def main():

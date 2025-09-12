@@ -12,7 +12,7 @@ CRITICAL FAILURE SCENARIOS:
 1. User connects via WebSocket (creates IDs with one SSOT system)
 2. Agent execution begins (may use different SSOT system for IDs)  
 3. WebSocket disconnect triggers cleanup using mismatched ID patterns
-4. Cleanup fails to find resources → WebSocket 1011 error
+4. Cleanup fails to find resources  ->  WebSocket 1011 error
 5. User loses connection, chat functionality broken
 
 VALIDATION STRATEGY:
@@ -65,10 +65,10 @@ class TestWebSocket1011ErrorDualSSOTFixValidation(SSotBaseTestCase):
             # (connection_system, execution_system, cleanup_system)
             ("manager", "manager", "manager"),      # Pure UnifiedIDManager 
             ("generator", "generator", "generator"), # Pure UnifiedIdGenerator
-            ("manager", "generator", "manager"),     # Mixed: Mgr → Gen → Mgr
-            ("generator", "manager", "generator"),   # Mixed: Gen → Mgr → Gen
-            ("manager", "generator", "generator"),   # Mixed: Mgr → Gen → Gen
-            ("generator", "manager", "manager"),     # Mixed: Gen → Mgr → Mgr
+            ("manager", "generator", "manager"),     # Mixed: Mgr  ->  Gen  ->  Mgr
+            ("generator", "manager", "generator"),   # Mixed: Gen  ->  Mgr  ->  Gen
+            ("manager", "generator", "generator"),   # Mixed: Mgr  ->  Gen  ->  Gen
+            ("generator", "manager", "manager"),     # Mixed: Gen  ->  Mgr  ->  Mgr
         ]
         
         success_count = 0
@@ -121,10 +121,10 @@ class TestWebSocket1011ErrorDualSSOTFixValidation(SSotBaseTestCase):
             
             if should_match:
                 self.assertTrue(cleanup_result['found'], 
-                              f"Failed to match related IDs: {creation_id} ↔ {cleanup_id}")
+                              f"Failed to match related IDs: {creation_id} [U+2194] {cleanup_id}")
             else:
                 self.assertFalse(cleanup_result['found'],
-                               f"Incorrectly matched unrelated IDs: {creation_id} ↔ {cleanup_id}")
+                               f"Incorrectly matched unrelated IDs: {creation_id} [U+2194] {cleanup_id}")
                                
             # Reset for next test
             self.active_connections.clear()
@@ -353,7 +353,7 @@ class TestWebSocket1011ErrorDualSSOTFixValidation(SSotBaseTestCase):
         
         # Look for meaningful user correlation patterns that indicate same user
         for cleanup_part in cleanup_parts:
-            if len(cleanup_part) >= 4:  # Must be meaningful (≥4 chars)
+            if len(cleanup_part) >= 4:  # Must be meaningful ( >= 4 chars)
                 for connection_part in connection_parts:
                     # CRITICAL: Must be exact match or clean prefix, not just substring
                     if (connection_part == cleanup_part or 

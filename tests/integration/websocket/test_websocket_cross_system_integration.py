@@ -299,7 +299,7 @@ class TestIntegrationScenario1_AgentToWebSocketFlow:
                 if "results" in tool_data:
                     assert tool_data["results"]["tool_chain_state"] == 1  # CONNECTED
         
-        print(f"✅ Executed {len(execution_stages)} agent lifecycle stages with complex serialization")
+        print(f" PASS:  Executed {len(execution_stages)} agent lifecycle stages with complex serialization")
 
 
 class TestIntegrationScenario2_MultiServiceCommunication:
@@ -487,7 +487,7 @@ class TestIntegrationScenario2_MultiServiceCommunication:
                         elif "state" in nested_key and isinstance(nested_value, Enum):
                             assert not isinstance(value[nested_key], Enum), "Nested state should be serialized"
         
-        print(f"✅ Executed {len(service_flow)} cross-service communications with complex serialization")
+        print(f" PASS:  Executed {len(service_flow)} cross-service communications with complex serialization")
     
     async def test_concurrent_service_operations(self, multi_service_setup):
         """Test concurrent operations across services with WebSocket serialization."""
@@ -583,7 +583,7 @@ class TestIntegrationScenario2_MultiServiceCommunication:
             assert all(isinstance(state, int) for state in state_transitions)
             assert state_transitions == [0, 1]  # CONNECTING, CONNECTED
         
-        print(f"✅ Executed {len(successful_operations)} concurrent operations in {execution_time:.3f}s")
+        print(f" PASS:  Executed {len(successful_operations)} concurrent operations in {execution_time:.3f}s")
 
 
 class TestIntegrationScenario3_ErrorHandlingAndRecovery:
@@ -727,7 +727,7 @@ class TestIntegrationScenario3_ErrorHandlingAndRecovery:
                             assert isinstance(fallback["websocket_state"], int)
                             assert all(isinstance(tool_state, int) for tool_state in fallback["tool_states"])
         
-        print("✅ Error handling maintained serialization integrity across failure scenarios")
+        print(" PASS:  Error handling maintained serialization integrity across failure scenarios")
 
 
 class TestIntegrationScenario4_PerformanceUnderLoad:
@@ -861,8 +861,8 @@ class TestIntegrationScenario4_PerformanceUnderLoad:
         assert execution_time < 10.0, f"Performance test took {execution_time:.3f}s, expected < 10.0s"
         assert messages_per_second > 100, f"Message rate {messages_per_second:.1f}/sec, expected > 100/sec"
         
-        print(f"✅ Performance test: {total_messages} messages in {execution_time:.3f}s ({messages_per_second:.1f} msg/sec)")
-        print(f"✅ Verified serialization integrity for {sample_checks} complex messages")
+        print(f" PASS:  Performance test: {total_messages} messages in {execution_time:.3f}s ({messages_per_second:.1f} msg/sec)")
+        print(f" PASS:  Verified serialization integrity for {sample_checks} complex messages")
 
 
 class TestIntegrationScenario5_RealWorldComplexity:
@@ -1123,7 +1123,7 @@ class TestIntegrationScenario5_RealWorldComplexity:
                 for tool_info in tools_summary:
                     assert isinstance(tool_info["status"], int)  # Tool status enum
         
-        print(f"✅ Complete user session flow: {len(session_events)} events with complex real-world serialization")
+        print(f" PASS:  Complete user session flow: {len(session_events)} events with complex real-world serialization")
 
 
 # Run integration tests
@@ -1147,7 +1147,7 @@ if __name__ == "__main__":
         safe_data = _serialize_message_safely(test_data)
         json_output = json.dumps(safe_data)
         
-        print(f"✅ Integration smoke test passed: {len(json_output)} characters")
-        print("✅ All cross-system WebSocket serialization integration tests ready!")
+        print(f" PASS:  Integration smoke test passed: {len(json_output)} characters")
+        print(" PASS:  All cross-system WebSocket serialization integration tests ready!")
     
     asyncio.run(run_integration_tests())

@@ -43,7 +43,7 @@ class WebSocketEventCapture:
         event_type = message.get("type", "unknown")
         self.events.append(message)
         self.event_types.add(event_type)
-        logger.info(f"✅ Captured WebSocket event: {event_type}")
+        logger.info(f" PASS:  Captured WebSocket event: {event_type}")
         return True
 
 class TestWebSocketEventIntegration:
@@ -142,11 +142,11 @@ class TestWebSocketEventIntegration:
         missing_events = self.REQUIRED_EVENTS - event_capture.event_types
         
         if missing_events:
-            logger.error(f"❌ MISSING EVENTS: {missing_events}")
+            logger.error(f" FAIL:  MISSING EVENTS: {missing_events}")
             logger.error(f"   Captured events: {event_capture.event_types}")
             return False
         
-        logger.info(f"✅ All required events captured: {event_capture.event_types}")
+        logger.info(f" PASS:  All required events captured: {event_capture.event_types}")
         return True
     
     async def test_tool_execution_sends_events(self):
@@ -197,10 +197,10 @@ class TestWebSocketEventIntegration:
         tool_events = [e for e in event_capture.event_types if "tool" in e]
         
         if "tool_executing" not in tool_events or "tool_completed" not in tool_events:
-            logger.error(f"❌ Tool events not captured properly: {tool_events}")
+            logger.error(f" FAIL:  Tool events not captured properly: {tool_events}")
             return False
         
-        logger.info(f"✅ Tool execution events captured: {tool_events}")
+        logger.info(f" PASS:  Tool execution events captured: {tool_events}")
         return True
 
 async def main():
@@ -212,11 +212,11 @@ async def main():
     tester = TestWebSocketEventIntegration()
     
     # Test 1: Agent execution sends events
-    logger.info("\n📝 Test 1: Agent Execution WebSocket Events")
+    logger.info("\n[U+1F4DD] Test 1: Agent Execution WebSocket Events")
     test1_passed = await tester.test_agent_execution_sends_events()
     
     # Test 2: Tool execution sends events
-    logger.info("\n📝 Test 2: Tool Execution WebSocket Events")
+    logger.info("\n[U+1F4DD] Test 2: Tool Execution WebSocket Events")
     test2_passed = await tester.test_tool_execution_sends_events()
     
     # Summary
@@ -225,14 +225,14 @@ async def main():
     logger.info("=" * 80)
     
     if test1_passed and test2_passed:
-        logger.info("✅ ALL TESTS PASSED - WebSocket events are working!")
-        logger.info("✅ The fix has been successfully implemented:")
+        logger.info(" PASS:  ALL TESTS PASSED - WebSocket events are working!")
+        logger.info(" PASS:  The fix has been successfully implemented:")
         logger.info("   1. AgentRegistry.set_websocket_manager() enhances tool dispatcher")
         logger.info("   2. UnifiedToolExecutionEngine wraps tool execution with events")
         logger.info("   3. AgentWebSocketBridge sends all required events")
         return 0
     else:
-        logger.error("❌ TESTS FAILED - WebSocket events not working properly")
+        logger.error(" FAIL:  TESTS FAILED - WebSocket events not working properly")
         logger.error("   Check the implementation of:")
         logger.error("   - AgentRegistry.set_websocket_manager()")
         logger.error("   - enhance_tool_dispatcher_with_notifications()")

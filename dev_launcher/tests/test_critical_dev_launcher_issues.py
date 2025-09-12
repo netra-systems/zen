@@ -306,7 +306,7 @@ JWT_SECRET_KEY=super_secret_key_at_least_64_characters_long_for_testing_purposes
                 # CRITICAL TEST: Info messages should not be treated as errors
                 if level == "INFO":
                     # Info messages should not contain error indicators
-                    self.assertNotIn("❌", formatted, "Info messages should not show error emoji")
+                    self.assertNotIn(" FAIL: ", formatted, "Info messages should not show error emoji")
                     self.assertNotIn("ERROR", formatted, "Info messages should not be labeled as ERROR")
                     
                     # This test currently PASSES but demonstrates the issue exists

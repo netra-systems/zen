@@ -611,7 +611,7 @@ class TestMessageRouterConcurrency:
         
         final_count = message_router.routing_stats["messages_routed"]
         
-        # Should have routed exactly 50 messages (5 batches × 10 messages)
+        # Should have routed exactly 50 messages (5 batches  x  10 messages)
         assert final_count - initial_count >= 50, "Statistics must accurately track concurrent messages"
 
 

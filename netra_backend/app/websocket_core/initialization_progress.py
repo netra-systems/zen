@@ -83,7 +83,7 @@ class InitializationProgressCommunicator:
         """Set or update the WebSocket connection."""
         self.websocket = websocket
         self.communication_enabled = True
-        self.logger.info("✓ WebSocket connection set for progress communication")
+        self.logger.info("[U+2713] WebSocket connection set for progress communication")
     
     async def send_initialization_started(
         self, 
@@ -116,7 +116,7 @@ class InitializationProgressCommunicator:
         detail_message = ProgressMessage(
             event="system_message",
             message=(
-                f"🔄 Initializing {len(services_to_initialize)} critical services for AI functionality. "
+                f" CYCLE:  Initializing {len(services_to_initialize)} critical services for AI functionality. "
                 f"This ensures you receive authentic AI responses, not mock data. "
                 f"Expected time: {estimated_time or 10}s"
             ),
@@ -124,7 +124,7 @@ class InitializationProgressCommunicator:
         )
         await self._send_progress_message(detail_message)
         
-        self.logger.info(f"📤 Sent initialization started event for {len(services_to_initialize)} services")
+        self.logger.info(f"[U+1F4E4] Sent initialization started event for {len(services_to_initialize)} services")
     
     async def send_service_initializing(self, service_name: str, step_number: Optional[int] = None) -> None:
         """
@@ -151,7 +151,7 @@ class InitializationProgressCommunicator:
         
         message = ProgressMessage(
             event=InitializationProgressEvent.SERVICE_INITIALIZING.value,
-            message=f"🔄 Initializing {friendly_name}...",
+            message=f" CYCLE:  Initializing {friendly_name}...",
             service_name=service_name,
             progress_percentage=progress_percentage,
             elapsed_time=elapsed_time,
@@ -161,7 +161,7 @@ class InitializationProgressCommunicator:
         )
         
         await self._send_progress_message(message)
-        self.logger.info(f"📤 Sent service initializing event: {service_name} ({progress_percentage}%)")
+        self.logger.info(f"[U+1F4E4] Sent service initializing event: {service_name} ({progress_percentage}%)")
     
     async def send_service_completed(self, service_name: str, initialization_time: Optional[float] = None) -> None:
         """
@@ -189,7 +189,7 @@ class InitializationProgressCommunicator:
         
         message = ProgressMessage(
             event=InitializationProgressEvent.SERVICE_COMPLETED.value,
-            message=f"✅ {friendly_name} initialized successfully" + (f" ({initialization_time:.1f}s)" if initialization_time else ""),
+            message=f" PASS:  {friendly_name} initialized successfully" + (f" ({initialization_time:.1f}s)" if initialization_time else ""),
             service_name=service_name,
             progress_percentage=progress_percentage,
             elapsed_time=elapsed_time,
@@ -199,7 +199,7 @@ class InitializationProgressCommunicator:
         )
         
         await self._send_progress_message(message)
-        self.logger.info(f"📤 Sent service completed event: {service_name} ({progress_percentage}%)")
+        self.logger.info(f"[U+1F4E4] Sent service completed event: {service_name} ({progress_percentage}%)")
     
     async def send_service_failed(
         self, 
@@ -234,7 +234,7 @@ class InitializationProgressCommunicator:
         
         message = ProgressMessage(
             event=InitializationProgressEvent.SERVICE_FAILED.value,
-            message=f"❌ {friendly_name} initialization failed{retry_text}",
+            message=f" FAIL:  {friendly_name} initialization failed{retry_text}",
             service_name=service_name,
             error_message=error_message,
             elapsed_time=elapsed_time,
@@ -244,7 +244,7 @@ class InitializationProgressCommunicator:
         )
         
         await self._send_progress_message(message)
-        self.logger.error(f"📤 Sent service failed event: {service_name} - {error_message}")
+        self.logger.error(f"[U+1F4E4] Sent service failed event: {service_name} - {error_message}")
     
     async def send_initialization_completed(
         self, 
@@ -267,7 +267,7 @@ class InitializationProgressCommunicator:
             # Complete success
             message = ProgressMessage(
                 event=InitializationProgressEvent.INITIALIZATION_COMPLETED.value,
-                message=f"🎉 All services initialized successfully! AI functionality is now fully available.",
+                message=f" CELEBRATION:  All services initialized successfully! AI functionality is now fully available.",
                 progress_percentage=100,
                 elapsed_time=total_time,
                 services_completed=successful_services.copy(),
@@ -277,7 +277,7 @@ class InitializationProgressCommunicator:
             # Partial success
             message = ProgressMessage(
                 event=InitializationProgressEvent.INITIALIZATION_COMPLETED.value,
-                message=f"⚠️ Initialization completed with {success_count}/{total_count} services successful. Some functionality may be limited.",
+                message=f" WARNING: [U+FE0F] Initialization completed with {success_count}/{total_count} services successful. Some functionality may be limited.",
                 progress_percentage=int(success_count / total_count * 100) if total_count > 0 else 0,
                 elapsed_time=total_time,
                 services_completed=successful_services.copy(),
@@ -291,7 +291,7 @@ class InitializationProgressCommunicator:
             status_message = ProgressMessage(
                 event="system_message",
                 message=(
-                    f"✅ Service initialization complete in {total_time:.1f}s. "
+                    f" PASS:  Service initialization complete in {total_time:.1f}s. "
                     f"You can now send messages and receive authentic AI responses."
                 )
             )
@@ -299,7 +299,7 @@ class InitializationProgressCommunicator:
             status_message = ProgressMessage(
                 event="system_message",
                 message=(
-                    f"⚠️ Partial initialization complete in {total_time:.1f}s. "
+                    f" WARNING: [U+FE0F] Partial initialization complete in {total_time:.1f}s. "
                     f"Successfully initialized: {', '.join(successful_services)}. "
                     f"Failed services: {', '.join(failed_services)}."
                 )
@@ -307,7 +307,7 @@ class InitializationProgressCommunicator:
         
         await self._send_progress_message(status_message)
         
-        self.logger.info(f"📤 Sent initialization completed event: {success_count}/{total_count} successful")
+        self.logger.info(f"[U+1F4E4] Sent initialization completed event: {success_count}/{total_count} successful")
     
     async def send_initialization_failed(
         self, 
@@ -325,7 +325,7 @@ class InitializationProgressCommunicator:
         """
         message = ProgressMessage(
             event=InitializationProgressEvent.INITIALIZATION_FAILED.value,
-            message="❌ Service initialization failed - AI functionality unavailable",
+            message=" FAIL:  Service initialization failed - AI functionality unavailable",
             error_message=error_message,
             elapsed_time=total_time,
             services_completed=self.services_completed.copy(),
@@ -338,7 +338,7 @@ class InitializationProgressCommunicator:
         detail_message = ProgressMessage(
             event="system_message",
             message=(
-                f"🚨 Critical service initialization failure after {total_time:.1f}s. "
+                f" ALERT:  Critical service initialization failure after {total_time:.1f}s. "
                 f"Failed services: {', '.join(failed_services)}. "
                 f"Please try reconnecting or contact support if the issue persists. "
                 f"Error: {error_message}"
@@ -346,7 +346,7 @@ class InitializationProgressCommunicator:
         )
         await self._send_progress_message(detail_message)
         
-        self.logger.error(f"📤 Sent initialization failed event: {error_message}")
+        self.logger.error(f"[U+1F4E4] Sent initialization failed event: {error_message}")
     
     async def send_timeout_warning(self, elapsed_time: float, max_time: float) -> None:
         """
@@ -360,7 +360,7 @@ class InitializationProgressCommunicator:
         
         message = ProgressMessage(
             event=InitializationProgressEvent.INITIALIZATION_TIMEOUT.value,
-            message=f"⏱️ Service initialization is taking longer than expected ({elapsed_time:.1f}s/{max_time:.1f}s)",
+            message=f"[U+23F1][U+FE0F] Service initialization is taking longer than expected ({elapsed_time:.1f}s/{max_time:.1f}s)",
             elapsed_time=elapsed_time,
             services_completed=self.services_completed.copy(),
             services_remaining=[s for s in self.services_to_initialize if s not in self.services_completed and s not in self.services_failed],
@@ -373,14 +373,14 @@ class InitializationProgressCommunicator:
         detail_message = ProgressMessage(
             event="system_message",
             message=(
-                f"🔄 Initialization is taking longer than usual. "
+                f" CYCLE:  Initialization is taking longer than usual. "
                 f"This may happen during high system load or when starting services for the first time. "
                 f"We'll continue trying for {remaining_time:.0f} more seconds..."
             )
         )
         await self._send_progress_message(detail_message)
         
-        self.logger.warning(f"📤 Sent timeout warning: {elapsed_time:.1f}s elapsed")
+        self.logger.warning(f"[U+1F4E4] Sent timeout warning: {elapsed_time:.1f}s elapsed")
     
     async def _send_progress_message(self, message: ProgressMessage) -> None:
         """
@@ -406,10 +406,10 @@ class InitializationProgressCommunicator:
             await safe_websocket_send(self.websocket, message_dict)
             self.last_message_time = time.time()
             
-            self.logger.debug(f"📤 Sent progress message: {message.event}")
+            self.logger.debug(f"[U+1F4E4] Sent progress message: {message.event}")
             
         except Exception as e:
-            self.logger.error(f"❌ Failed to send progress message: {e}")
+            self.logger.error(f" FAIL:  Failed to send progress message: {e}")
             # Don't fail the entire initialization due to communication issues
             self.communication_enabled = False
     
@@ -491,4 +491,4 @@ async def send_simple_progress_message(
         
     except Exception as e:
         logger = central_logger.get_logger(__name__)
-        logger.error(f"❌ Failed to send simple progress message: {e}")
+        logger.error(f" FAIL:  Failed to send simple progress message: {e}")

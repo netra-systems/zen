@@ -479,7 +479,7 @@ class TestWebSocketFiveCriticalEventsBusinessValue(BaseIntegrationTest):
         self.assertGreater(metrics.value_perception, 0, "No value perception created")
         self.assertGreater(metrics.completion_satisfaction, 0, "No completion satisfaction delivered")
         
-        logger.info(f"✅ MISSION CRITICAL: All 5 events delivered with {business_value_score:.1f}% business value")
+        logger.info(f" PASS:  MISSION CRITICAL: All 5 events delivered with {business_value_score:.1f}% business value")
         
         await real_websocket.close()
         

@@ -162,17 +162,17 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
                         language_result["contains_localized_content"] = len(response_text) > 50
                     elif locale_code == "es_ES":
                         # Spanish - check for Spanish characteristics
-                        spanish_indicators = ["optimización", "rendimiento", "análisis", "recomendaciones"]
+                        spanish_indicators = ["optimizaci[U+00F3]n", "rendimiento", "an[U+00E1]lisis", "recomendaciones"]
                         spanish_found = any(indicator in response_text.lower() for indicator in spanish_indicators)
                         language_result["contains_localized_content"] = spanish_found or "spanish" in response_text.lower()
                     elif locale_code == "zh_CN":
                         # Chinese - check for Chinese characteristics
-                        chinese_indicators = ["优化", "性能", "分析", "建议"]
+                        chinese_indicators = ["[U+4F18][U+5316]", "[U+6027][U+80FD]", "[U+5206][U+6790]", "[U+5EFA][U+8BAE]"]
                         chinese_found = any(indicator in response_text for indicator in chinese_indicators)
                         language_result["contains_localized_content"] = chinese_found or "chinese" in response_text.lower()
                     elif locale_code == "ar_SA":
                         # Arabic - check for Arabic characteristics or RTL indicators
-                        arabic_indicators = ["تحليل", "أداء", "توصيات"]
+                        arabic_indicators = ["[U+062A][U+062D][U+0644][U+064A][U+0644]", "[U+0623][U+062F][U+0627][U+0621]", "[U+062A][U+0648][U+0635][U+064A][U+0627][U+062A]"]
                         arabic_found = any(indicator in response_text for indicator in arabic_indicators)
                         rtl_indicators = ["rtl", "right-to-left", "arabic"]
                         rtl_found = any(indicator in response_text.lower() for indicator in rtl_indicators)
@@ -422,13 +422,13 @@ class TestAgentResponseInternationalizationLocalization(BaseIntegrationTest):
             {
                 "locale": "ar_SA",
                 "language": "Arabic",
-                "query": "تحليل أداء التحسين الحالي",  # "Analyze current optimization performance"
+                "query": "[U+062A][U+062D][U+0644][U+064A][U+0644] [U+0623][U+062F][U+0627][U+0621] [U+0627][U+0644][U+062A][U+062D][U+0633][U+064A][U+0646] [U+0627][U+0644][U+062D][U+0627][U+0644][U+064A]",  # "Analyze current optimization performance"
                 "expected_direction": "rtl"
             },
             {
                 "locale": "he_IL", 
                 "language": "Hebrew",
-                "query": "נתח ביצועי אופטימיזציה נוכחיים",  # "Analyze current optimization performance"
+                "query": "[U+05E0][U+05EA][U+05D7] [U+05D1][U+05D9][U+05E6][U+05D5][U+05E2][U+05D9] [U+05D0][U+05D5][U+05E4][U+05D8][U+05D9][U+05DE][U+05D9][U+05D6][U+05E6][U+05D9][U+05D4] [U+05E0][U+05D5][U+05DB][U+05D7][U+05D9][U+05D9][U+05DD]",  # "Analyze current optimization performance"
                 "expected_direction": "rtl"
             }
         ]

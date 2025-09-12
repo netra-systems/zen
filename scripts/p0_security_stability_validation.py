@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 P0 Security Issue #407 - System Stability Validation Script
-Validate that DeepAgentState → UserExecutionContext migration maintains system stability.
+Validate that DeepAgentState  ->  UserExecutionContext migration maintains system stability.
 
 Business Impact: Protects $500K+ ARR enterprise customer security and user isolation.
 """
@@ -37,11 +37,11 @@ class P0SecurityStabilityValidator:
             assert context.thread_id == "stability-thread-456"
             assert context.run_id == "stability-run-789"
             
-            self.results['basic_context_creation'] = "✅ PASS"
+            self.results['basic_context_creation'] = " PASS:  PASS"
             return True
             
         except Exception as e:
-            self.results['basic_context_creation'] = f"❌ FAIL: {e}"
+            self.results['basic_context_creation'] = f" FAIL:  FAIL: {e}"
             self.errors.append(f"Basic UserExecutionContext creation failed: {e}")
             return False
     
@@ -67,15 +67,15 @@ class P0SecurityStabilityValidator:
             thread_ids = [ctx.thread_id for ctx in results]
             
             if len(set(user_ids)) == 5 and len(set(thread_ids)) == 5:
-                self.results['concurrent_isolation'] = "✅ PASS - User isolation maintained"
+                self.results['concurrent_isolation'] = " PASS:  PASS - User isolation maintained"
                 return True
             else:
-                self.results['concurrent_isolation'] = "❌ FAIL - User isolation violated"
+                self.results['concurrent_isolation'] = " FAIL:  FAIL - User isolation violated"
                 self.errors.append("Concurrent user isolation violated")
                 return False
                 
         except Exception as e:
-            self.results['concurrent_isolation'] = f"❌ FAIL: {e}"
+            self.results['concurrent_isolation'] = f" FAIL:  FAIL: {e}"
             self.errors.append(f"Concurrent isolation test failed: {e}")
             return False
     
@@ -84,15 +84,15 @@ class P0SecurityStabilityValidator:
         try:
             from netra_backend.app.agents.state import DeepAgentState
             # If import succeeds, check if it's deprecated
-            self.results['deepagentstate_restriction'] = "⚠️  WARNING - DeepAgentState still importable"
+            self.results['deepagentstate_restriction'] = " WARNING: [U+FE0F]  WARNING - DeepAgentState still importable"
             return True  # Not a failure, but should be deprecated
             
         except ImportError:
-            self.results['deepagentstate_restriction'] = "✅ PASS - DeepAgentState import restricted"
+            self.results['deepagentstate_restriction'] = " PASS:  PASS - DeepAgentState import restricted"
             return True
             
         except Exception as e:
-            self.results['deepagentstate_restriction'] = f"❌ FAIL: {e}"
+            self.results['deepagentstate_restriction'] = f" FAIL:  FAIL: {e}"
             self.errors.append(f"DeepAgentState restriction test failed: {e}")
             return False
     
@@ -115,11 +115,11 @@ class P0SecurityStabilityValidator:
             assert hasattr(user_context, 'created_at')
             assert hasattr(user_context, 'request_id')
             
-            self.results['supervisor_security_pattern'] = "✅ PASS - Secure patterns work"
+            self.results['supervisor_security_pattern'] = " PASS:  PASS - Secure patterns work"
             return True
             
         except Exception as e:
-            self.results['supervisor_security_pattern'] = f"❌ FAIL: {e}"
+            self.results['supervisor_security_pattern'] = f" FAIL:  FAIL: {e}"
             self.errors.append(f"Supervisor secure pattern failed: {e}")
             return False
     
@@ -142,16 +142,16 @@ class P0SecurityStabilityValidator:
                 # Verify original ID preserved
                 assert valid_context.user_id == original_user_id
                 
-                self.results['security_validation'] = "✅ PASS - Security boundaries enforced"
+                self.results['security_validation'] = " PASS:  PASS - Security boundaries enforced"
                 return True
                 
             except Exception as security_error:
                 # Security validation working - context protected
-                self.results['security_validation'] = "✅ PASS - Context protection active"
+                self.results['security_validation'] = " PASS:  PASS - Context protection active"
                 return True
             
         except Exception as e:
-            self.results['security_validation'] = f"❌ FAIL: {e}"
+            self.results['security_validation'] = f" FAIL:  FAIL: {e}"
             self.errors.append(f"Security validation failed: {e}")
             return False
     
@@ -173,15 +173,15 @@ class P0SecurityStabilityValidator:
             # Verify tenant isolation
             tenant_ids = [ctx.user_id for ctx in enterprise_contexts]
             if len(set(tenant_ids)) == len(tenant_ids):
-                self.results['enterprise_protection'] = "✅ PASS - Enterprise tenant isolation maintained"
+                self.results['enterprise_protection'] = " PASS:  PASS - Enterprise tenant isolation maintained"
                 return True
             else:
-                self.results['enterprise_protection'] = "❌ FAIL - Enterprise tenant isolation violated"
+                self.results['enterprise_protection'] = " FAIL:  FAIL - Enterprise tenant isolation violated"
                 self.errors.append("Enterprise tenant isolation failed")
                 return False
                 
         except Exception as e:
-            self.results['enterprise_protection'] = f"❌ FAIL: {e}"
+            self.results['enterprise_protection'] = f" FAIL:  FAIL: {e}"
             self.errors.append(f"Enterprise protection test failed: {e}")
             return False
     
@@ -189,7 +189,7 @@ class P0SecurityStabilityValidator:
         """Run comprehensive stability validation."""
         print("=" * 80)
         print("P0 SECURITY ISSUE #407 - SYSTEM STABILITY VALIDATION")
-        print("DeepAgentState → UserExecutionContext Migration Stability Proof")
+        print("DeepAgentState  ->  UserExecutionContext Migration Stability Proof")
         print("=" * 80)
         print()
         
@@ -213,7 +213,7 @@ class P0SecurityStabilityValidator:
                     passed += 1
                 print(f"  Result: {self.results.get(test_name.lower().replace(' ', '_'), 'Unknown')}")
             except Exception as e:
-                print(f"  Result: ❌ EXCEPTION: {e}")
+                print(f"  Result:  FAIL:  EXCEPTION: {e}")
                 self.errors.append(f"{test_name} exception: {e}")
             print()
         
@@ -238,14 +238,14 @@ class P0SecurityStabilityValidator:
         print("=" * 80)
         
         if passed >= total * 0.8:  # 80% pass rate
-            print("✅ SYSTEM STABILITY: PROVEN")
+            print(" PASS:  SYSTEM STABILITY: PROVEN")
             print("   - P0 security migration maintains system stability")
             print("   - User isolation boundaries are enforced")
             print("   - Enterprise customer protection is operational")
             print("   - Safe to deploy with P0 security improvements")
             return True
         else:
-            print("❌ SYSTEM STABILITY: QUESTIONABLE")
+            print(" FAIL:  SYSTEM STABILITY: QUESTIONABLE")
             print("   - Critical stability issues detected")
             print("   - Additional fixes required before deployment")
             print("   - Review errors and implement corrections")

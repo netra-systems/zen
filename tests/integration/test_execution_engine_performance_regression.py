@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 PURPOSE: Validate that ExecutionEngine SSOT consolidation doesn't introduce performance regressions.
 Ensures the unified implementation maintains or improves performance compared to legacy implementations.
 
-GOLDEN PATH PROTECTION: Users login → get AI responses
+GOLDEN PATH PROTECTION: Users login  ->  get AI responses
 The "AI responses" must be delivered within acceptable time limits for good UX.
 
 Test Coverage:
@@ -443,8 +443,8 @@ class TestExecutionEnginePerformanceRegression(SSotAsyncTestCase):
                 'memory_delta_mb': memory_delta
             })
             
-            self.logger.info(f"Memory cycle {cycle}: {initial_memory:.1f}MB → {final_memory:.1f}MB "
-                           f"(Δ{memory_delta:+.1f}MB)")
+            self.logger.info(f"Memory cycle {cycle}: {initial_memory:.1f}MB  ->  {final_memory:.1f}MB "
+                           f"([U+0394]{memory_delta:+.1f}MB)")
         
         # Analyze memory trend
         memory_deltas = [m['memory_delta_mb'] for m in memory_measurements]

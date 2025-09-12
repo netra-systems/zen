@@ -270,11 +270,11 @@ def main():
     print("\n=== Key Findings ===")
     agent_registries = [n for n in registry_classes if 'Agent' in n]
     if len(agent_registries) > 1:
-        print(f"⚠️  Multiple Agent Registry implementations found: {agent_registries}")
+        print(f" WARNING: [U+FE0F]  Multiple Agent Registry implementations found: {agent_registries}")
     
     tool_registries = [n for n in registry_classes if 'Tool' in n]
     if len(tool_registries) > 1:
-        print(f"⚠️  Multiple Tool Registry implementations found: {tool_registries}")
+        print(f" WARNING: [U+FE0F]  Multiple Tool Registry implementations found: {tool_registries}")
 
 
 if __name__ == "__main__":

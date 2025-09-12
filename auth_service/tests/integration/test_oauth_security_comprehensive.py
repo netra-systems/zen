@@ -204,7 +204,7 @@ class TestOAuthSecurityComprehensive(SSotBaseTestCase):
             self.increment_db_query_count(1)  # Configuration lookup
         
         self.record_metric("oauth_configuration_validation", "working")
-        logger.info(f"✅ OAuth provider configuration validation working ({len(oauth_test_config)} providers)")
+        logger.info(f" PASS:  OAuth provider configuration validation working ({len(oauth_test_config)} providers)")
     
     async def _get_oauth_authorization_url(
         self, 
@@ -311,7 +311,7 @@ class TestOAuthSecurityComprehensive(SSotBaseTestCase):
             self.increment_db_query_count(1)
         
         self.record_metric("redirect_uri_security", "working")
-        logger.info(f"✅ OAuth redirect URI security validation working ({len(invalid_redirect_scenarios)} attack scenarios blocked)")
+        logger.info(f" PASS:  OAuth redirect URI security validation working ({len(invalid_redirect_scenarios)} attack scenarios blocked)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -380,7 +380,7 @@ class TestOAuthSecurityComprehensive(SSotBaseTestCase):
         self.record_metric("state_uniqueness", "confirmed")
         self.record_metric("csrf_protection", "working")
         
-        logger.info(f"✅ OAuth state parameter CSRF protection working ({len(state_parameters)} unique states)")
+        logger.info(f" PASS:  OAuth state parameter CSRF protection working ({len(state_parameters)} unique states)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -474,7 +474,7 @@ class TestOAuthSecurityComprehensive(SSotBaseTestCase):
             self.record_metric(f"invalid_callback_{scenario_name}", "correctly_rejected")
         
         self.record_metric("oauth_callback_security", "working")
-        logger.info(f"✅ OAuth callback security validation working ({len(invalid_callback_scenarios)} attack scenarios blocked)")
+        logger.info(f" PASS:  OAuth callback security validation working ({len(invalid_callback_scenarios)} attack scenarios blocked)")
     
     async def _test_oauth_callback(
         self,
@@ -610,7 +610,7 @@ class TestOAuthSecurityComprehensive(SSotBaseTestCase):
                 self.record_metric(f"token_exchange_{scenario_name}", "passed")
         
         self.record_metric("oauth_token_exchange_security", "working")
-        logger.info(f"✅ OAuth token exchange security working ({len(token_exchange_scenarios)} scenarios tested)")
+        logger.info(f" PASS:  OAuth token exchange security working ({len(token_exchange_scenarios)} scenarios tested)")
     
     async def _test_token_exchange(
         self,
@@ -709,7 +709,7 @@ class TestOAuthSecurityComprehensive(SSotBaseTestCase):
                 self.increment_db_query_count(1)
         
         self.record_metric("oauth_user_data_extraction", "working")
-        logger.info("✅ OAuth user data extraction security working (2 providers tested)")
+        logger.info(" PASS:  OAuth user data extraction security working (2 providers tested)")
     
     async def _test_user_data_extraction(
         self,

@@ -220,7 +220,7 @@
 
 # REMOVED_SYNTAX_ERROR: def run_audit(self) -> Dict:
     # REMOVED_SYNTAX_ERROR: """Run complete Docker compliance audit"""
-    # REMOVED_SYNTAX_ERROR: logger.info("🔍 Starting Docker Management Compliance Audit...")
+    # REMOVED_SYNTAX_ERROR: logger.info(" SEARCH:  Starting Docker Management Compliance Audit...")
 
     # Find all relevant files
     # REMOVED_SYNTAX_ERROR: patterns = ['**/*.py', '**/*.sh', '**/*.bat', '**/*.ps1']
@@ -323,7 +323,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_compliance_audit_performance_scalability(self) -> ComplianceMetrics:
     # REMOVED_SYNTAX_ERROR: """Test performance and scalability of compliance auditing."""
-    # REMOVED_SYNTAX_ERROR: self.logger.info("📊 Testing compliance audit performance scalability")
+    # REMOVED_SYNTAX_ERROR: self.logger.info(" CHART:  Testing compliance audit performance scalability")
 
     # REMOVED_SYNTAX_ERROR: initial_memory = psutil.virtual_memory().used / (1024 * 1024)
     # REMOVED_SYNTAX_ERROR: start_time = time.time()
@@ -350,7 +350,7 @@
     # REMOVED_SYNTAX_ERROR: files_per_second = metrics.total_files_scanned / (audit_duration / 1000) if audit_duration > 0 else 0
     # REMOVED_SYNTAX_ERROR: memory_per_file = memory_usage / metrics.total_files_scanned if metrics.total_files_scanned > 0 else 0
 
-    # REMOVED_SYNTAX_ERROR: self.logger.info(f"✅ Compliance audit performance:")
+    # REMOVED_SYNTAX_ERROR: self.logger.info(f" PASS:  Compliance audit performance:")
     # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
     # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
     # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
@@ -368,7 +368,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_compliance_violation_detection_accuracy(self) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Test accuracy of compliance violation detection."""
-    # REMOVED_SYNTAX_ERROR: self.logger.info("🔍 Testing compliance violation detection accuracy")
+    # REMOVED_SYNTAX_ERROR: self.logger.info(" SEARCH:  Testing compliance violation detection accuracy")
 
     # Create test files with known violations and compliant code
     # REMOVED_SYNTAX_ERROR: test_cases = self._create_compliance_test_cases()
@@ -415,7 +415,7 @@
                         # REMOVED_SYNTAX_ERROR: false_positive_rate = (total_false_positives / total_tests) if total_tests > 0 else 0
                         # REMOVED_SYNTAX_ERROR: false_negative_rate = (total_false_negatives / total_tests) if total_tests > 0 else 0
 
-                        # REMOVED_SYNTAX_ERROR: self.logger.info(f"✅ Violation detection accuracy:")
+                        # REMOVED_SYNTAX_ERROR: self.logger.info(f" PASS:  Violation detection accuracy:")
                         # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                         # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                         # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
@@ -435,7 +435,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_automated_remediation_effectiveness(self) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Test effectiveness of automated compliance remediation."""
-    # REMOVED_SYNTAX_ERROR: self.logger.info("🔧 Testing automated remediation effectiveness")
+    # REMOVED_SYNTAX_ERROR: self.logger.info("[U+1F527] Testing automated remediation effectiveness")
 
     # Create files with known violations
     # REMOVED_SYNTAX_ERROR: violations_created = []
@@ -499,7 +499,7 @@
 
                         # REMOVED_SYNTAX_ERROR: effectiveness_rate = (successful_remediations / total_remediations) * 100 if total_remediations > 0 else 0
 
-                        # REMOVED_SYNTAX_ERROR: self.logger.info(f"✅ Automated remediation effectiveness:")
+                        # REMOVED_SYNTAX_ERROR: self.logger.info(f" PASS:  Automated remediation effectiveness:")
                         # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                         # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                         # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
@@ -516,7 +516,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_continuous_monitoring_performance(self) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Test performance of continuous compliance monitoring."""
-    # REMOVED_SYNTAX_ERROR: self.logger.info("📊 Testing continuous compliance monitoring")
+    # REMOVED_SYNTAX_ERROR: self.logger.info(" CHART:  Testing continuous compliance monitoring")
 
     # REMOVED_SYNTAX_ERROR: monitoring_results = []
 
@@ -598,7 +598,7 @@
 
                                             # REMOVED_SYNTAX_ERROR: success_rate = (len(successful_cycles) / len(monitoring_results)) * 100 if monitoring_results else 0
 
-                                            # REMOVED_SYNTAX_ERROR: self.logger.info(f"✅ Continuous monitoring performance:")
+                                            # REMOVED_SYNTAX_ERROR: self.logger.info(f" PASS:  Continuous monitoring performance:")
                                             # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                                             # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                                             # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
@@ -624,7 +624,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_risk_assessment_and_impact_analysis(self) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Test risk assessment and impact analysis for compliance violations."""
-    # REMOVED_SYNTAX_ERROR: self.logger.info("⚠️ Testing risk assessment and impact analysis")
+    # REMOVED_SYNTAX_ERROR: self.logger.info(" WARNING: [U+FE0F] Testing risk assessment and impact analysis")
 
     # Run compliance audit to get current violations
     # REMOVED_SYNTAX_ERROR: auditor = DockerComplianceAuditor()
@@ -709,7 +709,7 @@
                                 # Assume 1 hour per effort unit
                                 # REMOVED_SYNTAX_ERROR: estimated_remediation_hours = total_remediation_effort
 
-                                # REMOVED_SYNTAX_ERROR: self.logger.info(f"✅ Risk assessment and impact analysis:")
+                                # REMOVED_SYNTAX_ERROR: self.logger.info(f" PASS:  Risk assessment and impact analysis:")
                                 # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
@@ -735,7 +735,7 @@
 
 # REMOVED_SYNTAX_ERROR: def test_cross_platform_compliance_validation(self) -> Dict[str, Any]:
     # REMOVED_SYNTAX_ERROR: """Test compliance validation across different platforms."""
-    # REMOVED_SYNTAX_ERROR: self.logger.info("🌐 Testing cross-platform compliance validation")
+    # REMOVED_SYNTAX_ERROR: self.logger.info("[U+1F310] Testing cross-platform compliance validation")
 
     # REMOVED_SYNTAX_ERROR: platform_results = {}
     # REMOVED_SYNTAX_ERROR: current_platform = os.name
@@ -818,7 +818,7 @@
 
                                                 # REMOVED_SYNTAX_ERROR: cross_platform_compliance = ((total_files_checked - total_violations) / total_files_checked * 100) if total_files_checked > 0 else 100
 
-                                                # REMOVED_SYNTAX_ERROR: self.logger.info(f"✅ Cross-platform compliance validation:")
+                                                # REMOVED_SYNTAX_ERROR: self.logger.info(f" PASS:  Cross-platform compliance validation:")
                                                 # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                                                 # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
                                                 # REMOVED_SYNTAX_ERROR: self.logger.info("formatted_string")
@@ -935,14 +935,14 @@
     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
     # REMOVED_SYNTAX_ERROR: print(" )
-    # REMOVED_SYNTAX_ERROR: 📦 Frontend Service Integration Status:")
+    # REMOVED_SYNTAX_ERROR: [U+1F4E6] Frontend Service Integration Status:")
     # REMOVED_SYNTAX_ERROR: for key, value in report['frontend_integration'].items():
-        # REMOVED_SYNTAX_ERROR: status = "✅" if value else "❌"
+        # REMOVED_SYNTAX_ERROR: status = " PASS: " if value else " FAIL: "
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
         # REMOVED_SYNTAX_ERROR: if report['violations']:
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: ⚠️ Violations Found (showing first 10):")
+            # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F] Violations Found (showing first 10):")
             # REMOVED_SYNTAX_ERROR: for v in report['violations'][:10]:
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -963,7 +963,7 @@
                         # REMOVED_SYNTAX_ERROR: assert all(frontend_checks.values()), "formatted_string"
 
                         # REMOVED_SYNTAX_ERROR: print(" )
-                        # REMOVED_SYNTAX_ERROR: ✅ Docker Management Compliance Test PASSED")
+                        # REMOVED_SYNTAX_ERROR:  PASS:  Docker Management Compliance Test PASSED")
                         # REMOVED_SYNTAX_ERROR: return True
 
 

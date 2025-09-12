@@ -216,7 +216,7 @@ class GCPErrorService:
     ) -> bool:
         """Report error with complete enterprise-grade business and user context.
         
-        This method implements the enhanced Service → Reporter → Client Manager → GCP pipeline
+        This method implements the enhanced Service  ->  Reporter  ->  Client Manager  ->  GCP pipeline
         with full enterprise context preservation.
         
         Args:

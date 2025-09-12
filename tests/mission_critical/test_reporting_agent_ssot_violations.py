@@ -409,12 +409,12 @@
     # REMOVED_SYNTAX_ERROR: """Create complex context with edge cases."""
     # REMOVED_SYNTAX_ERROR: context = MagicMock(spec=UserExecutionContext)
     # REMOVED_SYNTAX_ERROR: context.user_id = "user_" + "x" * 100  # Long user ID
-    # REMOVED_SYNTAX_ERROR: context.thread_id = "thread_😀_unicode"  # Unicode in ID
+    # REMOVED_SYNTAX_ERROR: context.thread_id = "thread_[U+1F600]_unicode"  # Unicode in ID
     # REMOVED_SYNTAX_ERROR: context.run_id = "run_" + str(time.time())
     # REMOVED_SYNTAX_ERROR: context.db_session = Magic        context.metadata = { )
     # REMOVED_SYNTAX_ERROR: "action_plan_result": {"plan": "a" * 10000},  # Large data
     # REMOVED_SYNTAX_ERROR: "optimizations_result": {"nested": {"deeply": {"nested": {"data": "test"}}}},
-    # REMOVED_SYNTAX_ERROR: "data_result": {"unicode": "测试数据 🚀"},
+    # REMOVED_SYNTAX_ERROR: "data_result": {"unicode": "[U+6D4B][U+8BD5][U+6570][U+636E] [U+1F680]"},
     # REMOVED_SYNTAX_ERROR: "triage_result": {"special_chars": "";DROP TABLE users;--"},
     # REMOVED_SYNTAX_ERROR: "user_request": None  # Null value
     

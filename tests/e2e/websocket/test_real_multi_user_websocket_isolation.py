@@ -200,7 +200,7 @@ class TestRealMultiUserWebSocketIsolation:
             user_a_client.assert_no_isolation_violations()
             user_b_client.assert_no_isolation_violations()
             
-            logger.info("✅ Two-user event isolation test PASSED")
+            logger.info(" PASS:  Two-user event isolation test PASSED")
     
     @pytest.mark.asyncio 
     @pytest.mark.real_services
@@ -275,7 +275,7 @@ class TestRealMultiUserWebSocketIsolation:
                     f"This indicates private user data is leaking between accounts!"
                 )
             
-            logger.info(f"✅ Concurrent user data isolation test PASSED "
+            logger.info(f" PASS:  Concurrent user data isolation test PASSED "
                        f"({result.events_validated} events validated)")
     
     @pytest.mark.asyncio
@@ -333,7 +333,7 @@ class TestRealMultiUserWebSocketIsolation:
                 # Verify no isolation violations
                 client.assert_no_isolation_violations()
             
-            logger.info("✅ Authentication boundary isolation test PASSED")
+            logger.info(" PASS:  Authentication boundary isolation test PASSED")
             
         except SecurityError as e:
             pytest.fail(
@@ -400,7 +400,7 @@ class TestRealMultiUserWebSocketIsolation:
                 connection_manager.assert_no_violations()
                 
                 logger.info(
-                    f"✅ High concurrency isolation stress test PASSED "
+                    f" PASS:  High concurrency isolation stress test PASSED "
                     f"({CONCURRENT_USERS} users, {result.events_validated} events validated)"
                 )
                 
@@ -509,13 +509,13 @@ class TestRealMultiUserWebSocketIsolation:
                 
             except asyncio.TimeoutError:
                 # This is GOOD - User B should timeout waiting for events
-                logger.info("✅ User B correctly did not receive User A's agent events")
+                logger.info(" PASS:  User B correctly did not receive User A's agent events")
             
             # Verify no isolation violations
             user_a_client.assert_no_isolation_violations()
             user_b_client.assert_no_isolation_violations()
             
-            logger.info("✅ Agent event isolation test PASSED")
+            logger.info(" PASS:  Agent event isolation test PASSED")
     
     @pytest.mark.asyncio
     @pytest.mark.real_services
@@ -584,19 +584,19 @@ class TestRealMultiUserWebSocketIsolation:
                         
             except SecurityError as e:
                 # This is GOOD - the system detected the hijacking attempt
-                logger.info(f"✅ Hijacking attempt correctly detected: {e}")
+                logger.info(f" PASS:  Hijacking attempt correctly detected: {e}")
             except asyncio.TimeoutError:
                 # Also acceptable - no events received
-                logger.info("✅ No hijacking events received (connection secure)")
+                logger.info(" PASS:  No hijacking events received (connection secure)")
             
         except Exception as e:
             # Any exception during hijack attempt is acceptable
-            logger.info(f"✅ Hijacking attempt blocked: {e}")
+            logger.info(f" PASS:  Hijacking attempt blocked: {e}")
         
         finally:
             await client_a.close()
         
-        logger.info("✅ WebSocket connection hijacking prevention test PASSED")
+        logger.info(" PASS:  WebSocket connection hijacking prevention test PASSED")
 
 
 # Additional utility tests for comprehensive validation
@@ -625,17 +625,17 @@ async def test_websocket_manager_isolation_summary(docker_services):
                 try:
                     result = await manager.test_user_isolation(test_type=test_type)
                     assert result.test_passed, f"{test_type.value} test failed"
-                    logger.info(f"✅ {test_type.value} isolation test passed")
+                    logger.info(f" PASS:  {test_type.value} isolation test passed")
                 except SecurityError:
                     all_passed = False
-                    logger.error(f"❌ {test_type.value} isolation test failed")
+                    logger.error(f" FAIL:  {test_type.value} isolation test failed")
             
             # Get isolation summary
             summary = manager.get_isolation_summary()
             assert summary['test_passed'] == all_passed
             assert summary['total_connections'] == 3
             
-            logger.info(f"✅ Isolation summary test completed: {summary['test_passed']}")
+            logger.info(f" PASS:  Isolation summary test completed: {summary['test_passed']}")
     
     finally:
         await manager.cleanup_all_connections()
@@ -677,7 +677,7 @@ async def test_isolation_with_rapid_user_switching(docker_services):
         for client in clients:
             client.assert_no_isolation_violations()
         
-        logger.info("✅ Rapid user switching isolation test PASSED")
+        logger.info(" PASS:  Rapid user switching isolation test PASSED")
     
     finally:
         for client in clients:

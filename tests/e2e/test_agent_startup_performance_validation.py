@@ -10,8 +10,8 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Slow startup causes 20-30% user abandonment - $75K+ ARR protection
 
 ARCHITECTURAL COMPLIANCE:
-- File size: ≤300 lines (enforced through modular design)
-- Function size: ≤8 lines each (enforced through composition)
+- File size:  <= 300 lines (enforced through modular design)
+- Function size:  <= 8 lines each (enforced through composition)
 - Real performance measurements, not mocks
 - Comprehensive baseline validation with statistical accuracy
 """

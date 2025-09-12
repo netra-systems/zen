@@ -409,7 +409,7 @@ class TestDockerRateLimiterInfrastructure:
     
     def test_rate_limiter_throughput_benchmark(self):
         """Benchmark rate limiter throughput under various loads."""
-        logger.info("📈 Benchmarking rate limiter throughput")
+        logger.info("[U+1F4C8] Benchmarking rate limiter throughput")
         
         limiter = get_docker_rate_limiter()
         limiter.reset_statistics()
@@ -450,11 +450,11 @@ class TestDockerRateLimiterInfrastructure:
         assert scaling_efficiency < 15, f"Rate limiting not working properly: {scaling_efficiency:.2f}x scaling"
         
         final_stats = limiter.get_statistics()
-        logger.info(f"✅ Rate limiter handled {final_stats['total_operations']} operations, {final_stats['rate_limited_operations']} rate-limited")
+        logger.info(f" PASS:  Rate limiter handled {final_stats['total_operations']} operations, {final_stats['rate_limited_operations']} rate-limited")
     
     def test_exponential_backoff_behavior(self):
         """Test exponential backoff behavior under high load."""
-        logger.info("📈 Testing exponential backoff behavior")
+        logger.info("[U+1F4C8] Testing exponential backoff behavior")
         
         limiter = get_docker_rate_limiter()
         limiter.reset_statistics()
@@ -489,7 +489,7 @@ class TestDockerRateLimiterInfrastructure:
         avg_backoff_time = statistics.mean(backoff_times)
         max_backoff_time = max(backoff_times)
         
-        logger.info(f"✅ Backoff analysis:")
+        logger.info(f" PASS:  Backoff analysis:")
         logger.info(f"   Average operation time: {avg_operation_time:.3f}s")
         logger.info(f"   Average backoff time: {avg_backoff_time:.3f}s")
         logger.info(f"   Maximum backoff time: {max_backoff_time:.3f}s")
@@ -504,7 +504,7 @@ class TestDockerRateLimiterInfrastructure:
     
     def test_backpressure_handling_extreme_load(self):
         """Test backpressure handling under extreme load conditions."""
-        logger.info("📈 Testing backpressure handling under extreme load")
+        logger.info("[U+1F4C8] Testing backpressure handling under extreme load")
         
         limiter = get_docker_rate_limiter()
         limiter.reset_statistics()
@@ -574,7 +574,7 @@ class TestDockerRateLimiterInfrastructure:
         max_queue_time = max(queue_wait_times) if queue_wait_times else 0
         success_rate = (operations_completed / extreme_load_operations) * 100
         
-        logger.info(f"✅ Extreme load backpressure analysis:")
+        logger.info(f" PASS:  Extreme load backpressure analysis:")
         logger.info(f"   Operations completed: {operations_completed}/{extreme_load_operations} ({success_rate:.1f}%)")
         logger.info(f"   Average queue time: {avg_queue_time:.3f}s")
         logger.info(f"   Maximum queue time: {max_queue_time:.3f}s")
@@ -592,7 +592,7 @@ class TestDockerRateLimiterInfrastructure:
     
     def test_rate_limiter_resource_efficiency(self):
         """Test rate limiter resource efficiency and cleanup."""
-        logger.info("📈 Testing rate limiter resource efficiency")
+        logger.info("[U+1F4C8] Testing rate limiter resource efficiency")
         
         limiter = get_docker_rate_limiter()
         limiter.reset_statistics()
@@ -665,7 +665,7 @@ class TestDockerRateLimiterInfrastructure:
             max_memory = final_memory
             max_threads = final_threads
         
-        logger.info(f"✅ Resource efficiency analysis:")
+        logger.info(f" PASS:  Resource efficiency analysis:")
         logger.info(f"   CPU delta: {cpu_delta:.1f}%")
         logger.info(f"   Memory delta: {memory_delta:.1f}MB")
         logger.info(f"   Thread delta: {thread_delta}")

@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestUserExecutionContextLifecycle(BaseIntegrationTest):
-    """Test user execution context lifecycle: creation → validation → usage → cleanup"""
+    """Test user execution context lifecycle: creation  ->  validation  ->  usage  ->  cleanup"""
     
     def setup_method(self):
         """Setup for each test method."""
@@ -482,7 +482,7 @@ class TestUserExecutionContextChildContexts(BaseIntegrationTest):
 
 
 class TestUserExecutionContextCrossServiceIntegration(BaseIntegrationTest):
-    """Test cross-service user context propagation (agents ↔ tools ↔ WebSocket)"""
+    """Test cross-service user context propagation (agents [U+2194] tools [U+2194] WebSocket)"""
     
     def setup_method(self):
         super().setup_method()

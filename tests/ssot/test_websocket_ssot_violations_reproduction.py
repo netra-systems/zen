@@ -23,7 +23,7 @@ CRITICAL PURPOSE:
 - Prove untested routes (factory + isolated) introduce risk
 - Show SSOT violations prevent reliable chat functionality
 
-🚀 GOLDEN PATH IMPACT:
+[U+1F680] GOLDEN PATH IMPACT:
 Multiple WebSocket routes violate SSOT and can cause the $500K+ ARR 
 chat functionality to fail due to routing confusion and race conditions.
 """

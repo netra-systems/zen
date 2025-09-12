@@ -34,21 +34,21 @@ def print_header(message: str):
 def print_success(message: str):
     """Print success message."""
     try:
-        print(f"{GREEN}✓ {message}{RESET}")
+        print(f"{GREEN}[U+2713] {message}{RESET}")
     except UnicodeEncodeError:
         print(f"{GREEN}[OK] {message}{RESET}")
 
 def print_warning(message: str):
     """Print warning message."""
     try:
-        print(f"{YELLOW}⚠ {message}{RESET}")
+        print(f"{YELLOW} WARNING:  {message}{RESET}")
     except UnicodeEncodeError:
         print(f"{YELLOW}[WARN] {message}{RESET}")
 
 def print_error(message: str):
     """Print error message."""
     try:
-        print(f"{RED}✗ {message}{RESET}")
+        print(f"{RED}[U+2717] {message}{RESET}")
     except UnicodeEncodeError:
         print(f"{RED}[FAIL] {message}{RESET}")
 
@@ -335,7 +335,7 @@ class ConsolidationValidator:
         if self.results['critical_failures']:
             print(f"\n{RED}{BOLD}CRITICAL FAILURES:{RESET}")
             for failure in self.results['critical_failures']:
-                print(f"  {RED}• {failure}{RESET}")
+                print(f"  {RED}[U+2022] {failure}{RESET}")
         
         # Team status
         print(f"\n{BOLD}Team Status:{RESET}")
@@ -343,12 +343,12 @@ class ConsolidationValidator:
             team_name = team.replace('_', ' ').title()
             if isinstance(status, dict) and status.get('consolidation_complete'):
                 try:
-                    print(f"  {GREEN}✓{RESET} {team_name}: Consolidation appears complete")
+                    print(f"  {GREEN}[U+2713]{RESET} {team_name}: Consolidation appears complete")
                 except UnicodeEncodeError:
                     print(f"  {GREEN}[OK]{RESET} {team_name}: Consolidation appears complete")
             else:
                 try:
-                    print(f"  {YELLOW}⚠{RESET} {team_name}: In progress or needs verification")
+                    print(f"  {YELLOW} WARNING: {RESET} {team_name}: In progress or needs verification")
                 except UnicodeEncodeError:
                     print(f"  {YELLOW}[WARN]{RESET} {team_name}: In progress or needs verification")
         
@@ -356,17 +356,17 @@ class ConsolidationValidator:
         print(f"\n{BOLD}Overall Status:{RESET}")
         if failed == 0 and len(self.results['critical_failures']) == 0:
             try:
-                print(f"{GREEN}{BOLD}✓ VALIDATION PASSED - System appears stable{RESET}")
+                print(f"{GREEN}{BOLD}[U+2713] VALIDATION PASSED - System appears stable{RESET}")
             except UnicodeEncodeError:
                 print(f"{GREEN}{BOLD}[OK] VALIDATION PASSED - System appears stable{RESET}")
         elif len(self.results['critical_failures']) > 0:
             try:
-                print(f"{RED}{BOLD}✗ VALIDATION FAILED - Critical issues found{RESET}")
+                print(f"{RED}{BOLD}[U+2717] VALIDATION FAILED - Critical issues found{RESET}")
             except UnicodeEncodeError:
                 print(f"{RED}{BOLD}[FAIL] VALIDATION FAILED - Critical issues found{RESET}")
         else:
             try:
-                print(f"{YELLOW}{BOLD}⚠ VALIDATION PARTIAL - Some issues need attention{RESET}")
+                print(f"{YELLOW}{BOLD} WARNING:  VALIDATION PARTIAL - Some issues need attention{RESET}")
             except UnicodeEncodeError:
                 print(f"{YELLOW}{BOLD}[WARN] VALIDATION PARTIAL - Some issues need attention{RESET}")
         

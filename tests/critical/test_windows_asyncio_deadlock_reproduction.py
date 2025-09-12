@@ -153,10 +153,10 @@ class TestWindowsAsyncioDeadlockReproduction:
         """
         config = get_staging_config()
         
-        print(f"🔍 Starting Windows asyncio deadlock reproduction test")
-        print(f"🔍 Platform: {platform.system()} {platform.version()}")
-        print(f"🔍 Python: {platform.python_version()}")
-        print(f"🔍 Asyncio details: {get_asyncio_event_loop_details()}")
+        print(f" SEARCH:  Starting Windows asyncio deadlock reproduction test")
+        print(f" SEARCH:  Platform: {platform.system()} {platform.version()}")
+        print(f" SEARCH:  Python: {platform.python_version()}")
+        print(f" SEARCH:  Asyncio details: {get_asyncio_event_loop_details()}")
         
         async with AsyncioDeadlockDetector(300) as deadlock_detector:
             deadlock_detector.mark_progress("test_started")
@@ -174,19 +174,19 @@ class TestWindowsAsyncioDeadlockReproduction:
             try:
                 # CRITICAL: Multiple concurrent streaming requests
                 # This pattern triggers Windows IOCP limitations in SESSION5
-                print("🔍 Creating AsyncClient for concurrent streaming requests...")
+                print(" SEARCH:  Creating AsyncClient for concurrent streaming requests...")
                 
                 async with httpx.AsyncClient(timeout=30) as client:
                     deadlock_detector.mark_progress("client_created") 
                     
-                    print("🔍 Starting concurrent streaming requests (this should deadlock on Windows)...")
+                    print(" SEARCH:  Starting concurrent streaming requests (this should deadlock on Windows)...")
                     
                     # Create multiple concurrent streaming tasks
                     # This reproduces the exact pattern that caused SESSION5 deadlock
                     streaming_tasks = []
                     
                     for i, endpoint in enumerate(streaming_endpoints):
-                        print(f"🔍 Creating streaming task {i+1}: {endpoint}")
+                        print(f" SEARCH:  Creating streaming task {i+1}: {endpoint}")
                         
                         # Each task attempts streaming operations
                         task = asyncio.create_task(
@@ -199,7 +199,7 @@ class TestWindowsAsyncioDeadlockReproduction:
                         
                         deadlock_detector.mark_progress(f"task_{i+1}_created")
                     
-                    print("🔍 Waiting for concurrent streaming tasks (deadlock expected here)...")
+                    print(" SEARCH:  Waiting for concurrent streaming tasks (deadlock expected here)...")
                     
                     # This gather operation should deadlock on Windows
                     # Due to IOCP limitations with multiple concurrent async operations  
@@ -208,8 +208,8 @@ class TestWindowsAsyncioDeadlockReproduction:
                     deadlock_detector.mark_progress("tasks_completed")
                     
                     # If we reach here, deadlock was not reproduced
-                    print("❌ DEADLOCK NOT REPRODUCED: All streaming tasks completed")
-                    print(f"❌ Task results: {results}")
+                    print(" FAIL:  DEADLOCK NOT REPRODUCED: All streaming tasks completed")
+                    print(f" FAIL:  Task results: {results}")
                     
                     pytest.fail(
                         "Failed to reproduce Windows asyncio deadlock. "
@@ -219,23 +219,23 @@ class TestWindowsAsyncioDeadlockReproduction:
                     
             except asyncio.TimeoutError:
                 # EXPECTED: This is the deadlock pattern we want to reproduce
-                print("✅ DEADLOCK REPRODUCED: Asyncio timeout occurred")
+                print(" PASS:  DEADLOCK REPRODUCED: Asyncio timeout occurred")
                 
                 if deadlock_detector.is_likely_deadlock():
-                    print("✅ CONFIRMED: Windows asyncio deadlock pattern matches SESSION5")
-                    print(f"✅ Duration: {deadlock_detector.deadlock_details['duration']:.1f}s")
-                    print(f"✅ Progress markers: {deadlock_detector.deadlock_details['progress_markers']}")
-                    print("✅ This reproduces the exact SESSION5 failure pattern")
+                    print(" PASS:  CONFIRMED: Windows asyncio deadlock pattern matches SESSION5")
+                    print(f" PASS:  Duration: {deadlock_detector.deadlock_details['duration']:.1f}s")
+                    print(f" PASS:  Progress markers: {deadlock_detector.deadlock_details['progress_markers']}")
+                    print(" PASS:  This reproduces the exact SESSION5 failure pattern")
                     
                     # For reproduction test, timeout is success
                     assert True, "Windows asyncio deadlock successfully reproduced"
                 else:
-                    print("🔍 Timeout occurred but pattern doesn't match SESSION5 deadlock")
+                    print(" SEARCH:  Timeout occurred but pattern doesn't match SESSION5 deadlock")
                     pytest.fail(f"Timeout pattern differs from SESSION5: {deadlock_detector.deadlock_details}")
                     
             except Exception as e:
-                print(f"🔍 Unexpected error during deadlock reproduction: {e}")
-                print(f"🔍 Traceback: {traceback.format_exc()}")
+                print(f" SEARCH:  Unexpected error during deadlock reproduction: {e}")
+                print(f" SEARCH:  Traceback: {traceback.format_exc()}")
                 pytest.fail(f"Unexpected error instead of deadlock: {e}")
     
     async def _streaming_request_task(
@@ -253,12 +253,12 @@ class TestWindowsAsyncioDeadlockReproduction:
         """
         try:
             deadlock_detector.mark_progress(f"{task_name}_started")
-            print(f"🔍 {task_name}: Starting streaming request to {url}")
+            print(f" SEARCH:  {task_name}: Starting streaming request to {url}")
             
             # Test GET first (might return streaming info)
             response = await client.get(url)
             deadlock_detector.mark_progress(f"{task_name}_get_response")
-            print(f"🔍 {task_name}: GET response {response.status_code}")
+            print(f" SEARCH:  {task_name}: GET response {response.status_code}")
             
             if response.status_code == 405:  # Method not allowed
                 # Try POST with streaming request
@@ -270,7 +270,7 @@ class TestWindowsAsyncioDeadlockReproduction:
                 
                 post_response = await client.post(url, json=stream_request)
                 deadlock_detector.mark_progress(f"{task_name}_post_response")
-                print(f"🔍 {task_name}: POST response {post_response.status_code}")
+                print(f" SEARCH:  {task_name}: POST response {post_response.status_code}")
                 
             deadlock_detector.mark_progress(f"{task_name}_completed")
             return {
@@ -281,7 +281,7 @@ class TestWindowsAsyncioDeadlockReproduction:
             
         except Exception as e:
             deadlock_detector.mark_progress(f"{task_name}_error")
-            print(f"🔍 {task_name}: Error - {e}")
+            print(f" SEARCH:  {task_name}: Error - {e}")
             return {
                 "task": task_name, 
                 "status": "error",
@@ -305,8 +305,8 @@ class TestWindowsAsyncioDeadlockReproduction:
         """
         config = get_staging_config()
         
-        print(f"🔍 Starting Windows WebSocket event delivery deadlock reproduction")
-        print(f"🔍 Platform: {platform.system()} {platform.version()}")
+        print(f" SEARCH:  Starting Windows WebSocket event delivery deadlock reproduction")
+        print(f" SEARCH:  Platform: {platform.system()} {platform.version()}")
         
         async with AsyncioDeadlockDetector(300) as deadlock_detector:
             deadlock_detector.mark_progress("event_test_started")
@@ -323,7 +323,7 @@ class TestWindowsAsyncioDeadlockReproduction:
             deadlock_detector.mark_progress("events_defined")
             
             try:
-                print("🔍 Creating complex async WebSocket event delivery test...")
+                print(" SEARCH:  Creating complex async WebSocket event delivery test...")
                 
                 # This pattern creates circular async dependencies on Windows
                 # Multiple async contexts: WebSocket + event listening + timeout management
@@ -356,15 +356,15 @@ class TestWindowsAsyncioDeadlockReproduction:
                         event_tasks.append(task)
                         deadlock_detector.mark_progress(f"event_task_{event_type}_created")
                     
-                    print("🔍 Starting concurrent event listening (deadlock expected here)...")
+                    print(" SEARCH:  Starting concurrent event listening (deadlock expected here)...")
                     
                     # This should create circular async dependencies on Windows
                     event_results = await asyncio.gather(*event_tasks, return_exceptions=True)
                     deadlock_detector.mark_progress("all_events_completed")
                     
                     # If we reach here, deadlock was not reproduced
-                    print("❌ EVENT DEADLOCK NOT REPRODUCED: All event tasks completed")
-                    print(f"❌ Event results: {event_results}")
+                    print(" FAIL:  EVENT DEADLOCK NOT REPRODUCED: All event tasks completed")
+                    print(f" FAIL:  Event results: {event_results}")
                     
                     pytest.fail(
                         "Failed to reproduce Windows WebSocket event delivery deadlock. "
@@ -375,31 +375,31 @@ class TestWindowsAsyncioDeadlockReproduction:
             except websockets.exceptions.InvalidStatus as e:
                 # Connection might be rejected - not the deadlock we want
                 if e.status_code in [401, 403]:
-                    print(f"🔍 WebSocket connection rejected: {e}")
-                    print("🔍 Cannot test event delivery deadlock without connection")
+                    print(f" SEARCH:  WebSocket connection rejected: {e}")
+                    print(" SEARCH:  Cannot test event delivery deadlock without connection")
                     pytest.skip("WebSocket connection rejected - cannot test event deadlock")
                 else:
                     raise
                     
             except asyncio.TimeoutError:
                 # EXPECTED: This is the event delivery deadlock we want to reproduce
-                print("✅ EVENT DELIVERY DEADLOCK REPRODUCED: Asyncio timeout occurred")
+                print(" PASS:  EVENT DELIVERY DEADLOCK REPRODUCED: Asyncio timeout occurred")
                 
                 if deadlock_detector.is_likely_deadlock():
-                    print("✅ CONFIRMED: Windows event delivery deadlock matches SESSION5")
-                    print(f"✅ Duration: {deadlock_detector.deadlock_details['duration']:.1f}s") 
-                    print(f"✅ Progress markers: {deadlock_detector.deadlock_details['progress_markers']}")
-                    print("✅ This reproduces the exact SESSION5 event delivery failure")
+                    print(" PASS:  CONFIRMED: Windows event delivery deadlock matches SESSION5")
+                    print(f" PASS:  Duration: {deadlock_detector.deadlock_details['duration']:.1f}s") 
+                    print(f" PASS:  Progress markers: {deadlock_detector.deadlock_details['progress_markers']}")
+                    print(" PASS:  This reproduces the exact SESSION5 event delivery failure")
                     
                     # For reproduction test, timeout is success
                     assert True, "Windows WebSocket event delivery deadlock successfully reproduced"
                 else:
-                    print("🔍 Timeout occurred but pattern doesn't match SESSION5 deadlock")
+                    print(" SEARCH:  Timeout occurred but pattern doesn't match SESSION5 deadlock")
                     pytest.fail(f"Event timeout pattern differs from SESSION5: {deadlock_detector.deadlock_details}")
             
             except Exception as e:
-                print(f"🔍 Unexpected error during event deadlock reproduction: {e}")
-                print(f"🔍 Traceback: {traceback.format_exc()}")
+                print(f" SEARCH:  Unexpected error during event deadlock reproduction: {e}")
+                print(f" SEARCH:  Traceback: {traceback.format_exc()}")
                 pytest.fail(f"Unexpected error instead of event deadlock: {e}")
     
     async def _wait_for_specific_event(
@@ -416,7 +416,7 @@ class TestWindowsAsyncioDeadlockReproduction:
         """
         try:
             deadlock_detector.mark_progress(f"waiting_for_{event_type}")
-            print(f"🔍 Waiting for {event_type} event...")
+            print(f" SEARCH:  Waiting for {event_type} event...")
             
             # Listen for events with timeout
             # This contributes to the circular wait condition on Windows
@@ -434,7 +434,7 @@ class TestWindowsAsyncioDeadlockReproduction:
                         
                         if received_event_type == event_type:
                             deadlock_detector.mark_progress(f"found_{event_type}")
-                            print(f"✓ Found {event_type} event")
+                            print(f"[U+2713] Found {event_type} event")
                             return {"event_type": event_type, "found": True}
                             
                     except json.JSONDecodeError:
@@ -448,12 +448,12 @@ class TestWindowsAsyncioDeadlockReproduction:
                     if timeout_count >= max_timeouts:
                         break
             
-            print(f"⚠️ {event_type} event not found after {timeout_count} timeouts")
+            print(f" WARNING: [U+FE0F] {event_type} event not found after {timeout_count} timeouts")
             return {"event_type": event_type, "found": False, "timeouts": timeout_count}
             
         except Exception as e:
             deadlock_detector.mark_progress(f"{event_type}_error")
-            print(f"🔍 Error waiting for {event_type}: {e}")
+            print(f" SEARCH:  Error waiting for {event_type}: {e}")
             return {"event_type": event_type, "error": str(e)}
     
     @pytest.mark.asyncio
@@ -477,7 +477,7 @@ class TestWindowsAsyncioDeadlockReproduction:
             "asyncio_details": get_asyncio_event_loop_details()
         }
         
-        print("🔍 Windows Platform Detection Results:")
+        print(" SEARCH:  Windows Platform Detection Results:")
         for key, value in platform_info.items():
             print(f"  {key}: {value}")
         
@@ -515,11 +515,11 @@ class TestWindowsAsyncioDeadlockReproduction:
                 asyncio_test_results["timeout_handling"] = True
                 
         except Exception as e:
-            print(f"🔍 Asyncio test error: {e}")
+            print(f" SEARCH:  Asyncio test error: {e}")
         
         duration = time.time() - start_time
         
-        print(f"\n🔍 Asyncio Test Results:")
+        print(f"\n SEARCH:  Asyncio Test Results:")
         for test, result in asyncio_test_results.items():
             print(f"  {test}: {result}")
         
@@ -530,20 +530,20 @@ class TestWindowsAsyncioDeadlockReproduction:
         
         # Provide detailed information for deadlock debugging
         if is_windows():
-            print("\n✅ WINDOWS PLATFORM CONFIRMED")
-            print("✅ This test environment can reproduce Windows asyncio deadlocks")
+            print("\n PASS:  WINDOWS PLATFORM CONFIRMED")
+            print(" PASS:  This test environment can reproduce Windows asyncio deadlocks")
             
             # Check for asyncio patterns that contribute to deadlocks
             loop_details = platform_info["asyncio_details"]
             if isinstance(loop_details, dict) and "loop_type" in loop_details:
                 if "Windows" in loop_details.get("loop_type", ""):
-                    print("✅ Windows event loop detected - IOCP limitations apply")
+                    print(" PASS:  Windows event loop detected - IOCP limitations apply")
                 else:
-                    print(f"🔍 Event loop type: {loop_details.get('loop_type')}")
+                    print(f" SEARCH:  Event loop type: {loop_details.get('loop_type')}")
             
         else:
-            print(f"\n🔍 NON-WINDOWS PLATFORM: {platform.system()}")
-            print("🔍 Windows-specific deadlock tests will be skipped")
+            print(f"\n SEARCH:  NON-WINDOWS PLATFORM: {platform.system()}")
+            print(" SEARCH:  Windows-specific deadlock tests will be skipped")
 
 
 def verify_reproduction_timeout_pattern(deadlock_detector: AsyncioDeadlockDetector):
@@ -585,6 +585,6 @@ if __name__ == "__main__":
     print("=" * 70)
     
     if is_windows():
-        print("✅ WINDOWS PLATFORM DETECTED - Deadlock tests will run")
+        print(" PASS:  WINDOWS PLATFORM DETECTED - Deadlock tests will run")
     else:
-        print("🔍 NON-WINDOWS PLATFORM - Deadlock tests will be skipped")
+        print(" SEARCH:  NON-WINDOWS PLATFORM - Deadlock tests will be skipped")

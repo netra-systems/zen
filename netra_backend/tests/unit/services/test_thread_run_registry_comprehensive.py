@@ -924,7 +924,7 @@ class TestThreadRunRegistryEdgeCases:
     async def test_special_character_handling(self, registry):
         """BVJ: Validates handling of IDs with special characters."""
         special_chars_run = "run_with_special_chars!@#$%^&*()_+-=[]{}|;:,.<>?"
-        special_chars_thread = "thread_with_unicode_éñøđẽ_characters"
+        special_chars_thread = "thread_with_unicode_[U+00E9][U+00F1][U+00F8][U+0111][U+1EBD]_characters"
         
         success = await registry.register(special_chars_run, special_chars_thread)
         assert success, "Special characters in IDs should be handled"

@@ -17,7 +17,7 @@ Test Coverage:
 - Enterprise multi-tenant analytics journey  
 - Cross-session data continuity
 - Mobile and web analytics integration
-- User lifecycle tracking (signup → conversion → churn)
+- User lifecycle tracking (signup  ->  conversion  ->  churn)
 """
 
 import asyncio
@@ -736,7 +736,7 @@ class TestUserLifecycleTracking:
         user_id = journey_harness.generate_test_user()
         conversion_journey = journey_harness.start_user_journey(user_id, "successful_conversion")
         
-        # Successful path: Acquisition → Activation → Engagement → Conversion
+        # Successful path: Acquisition  ->  Activation  ->  Engagement  ->  Conversion
         
         # Acquisition
         await journey_harness.record_journey_event(conversion_journey, "user_acquired", {

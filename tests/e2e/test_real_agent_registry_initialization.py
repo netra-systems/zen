@@ -200,7 +200,7 @@ class RealAgentRegistryTester(BaseE2ETest):
             'redis_url': self.env.get('REDIS_URL', 'redis://localhost:6381/0')
         }
         
-        logger.info("✅ Real test environment initialized with REAL services (CLAUDE.md compliant)")
+        logger.info(" PASS:  Real test environment initialized with REAL services (CLAUDE.md compliant)")
         return test_env
         
     async def create_test_user_context(self, user_id: str, test_name: str) -> UserExecutionContext:
@@ -264,11 +264,11 @@ class RealAgentRegistryTester(BaseE2ETest):
             assert health['total_agents'] >= len(self.REQUIRED_AGENTS), \
                 f"Expected at least {len(self.REQUIRED_AGENTS)} agents, got {health['total_agents']}"
             
-            logger.info(f"✅ Registry initialized with {metrics.agents_registered} agents in {metrics.registry_creation_time_ms:.1f}ms")
+            logger.info(f" PASS:  Registry initialized with {metrics.agents_registered} agents in {metrics.registry_creation_time_ms:.1f}ms")
             
         except Exception as e:
             metrics.registration_errors['initialization_error'] = str(e)
-            logger.error(f"❌ Registry initialization failed: {e}")
+            logger.error(f" FAIL:  Registry initialization failed: {e}")
             raise
         
         self.metrics.append(metrics)
@@ -335,13 +335,13 @@ class RealAgentRegistryTester(BaseE2ETest):
                 missing_events = self.REQUIRED_WEBSOCKET_EVENTS - delivered_events
                 if missing_events:
                     metrics.registration_errors['missing_critical_websocket_events'] = list(missing_events)
-                    logger.error(f"❌ CRITICAL: Missing required WebSocket events: {missing_events}")
+                    logger.error(f" FAIL:  CRITICAL: Missing required WebSocket events: {missing_events}")
             
-            logger.info(f"✅ WebSocket integration complete in {websocket_setup_time:.1f}ms")
+            logger.info(f" PASS:  WebSocket integration complete in {websocket_setup_time:.1f}ms")
             
         except Exception as e:
             metrics.registration_errors['websocket_error'] = str(e)
-            logger.error(f"❌ WebSocket integration failed: {e}")
+            logger.error(f" FAIL:  WebSocket integration failed: {e}")
             raise
         
         self.metrics.append(metrics)
@@ -426,11 +426,11 @@ class RealAgentRegistryTester(BaseE2ETest):
             assert len(metrics.isolation_violations) == 0, \
                 f"Isolation violations detected: {metrics.isolation_violations}"
             
-            logger.info(f"✅ Multi-user isolation verified for {len(user_contexts)} users")
+            logger.info(f" PASS:  Multi-user isolation verified for {len(user_contexts)} users")
             
         except Exception as e:
             metrics.registration_errors['isolation_error'] = str(e)
-            logger.error(f"❌ Multi-user isolation test failed: {e}")
+            logger.error(f" FAIL:  Multi-user isolation test failed: {e}")
             raise
         
         self.metrics.append(metrics)
@@ -540,11 +540,11 @@ class RealAgentRegistryTester(BaseE2ETest):
                             "Agent object sharing detected in concurrent operations"
                         )
             
-            logger.info(f"✅ Concurrent operations: {len(successful_results)}/{concurrent_count} succeeded in {concurrent_duration:.2f}s")
+            logger.info(f" PASS:  Concurrent operations: {len(successful_results)}/{concurrent_count} succeeded in {concurrent_duration:.2f}s")
             
         except Exception as e:
             metrics.registration_errors['concurrency_error'] = str(e)
-            logger.error(f"❌ Concurrent operations test failed: {e}")
+            logger.error(f" FAIL:  Concurrent operations test failed: {e}")
             raise
         
         self.metrics.append(metrics)
@@ -579,7 +579,7 @@ class RealAgentRegistryTester(BaseE2ETest):
             except Exception as e:
                 # Expected behavior
                 metrics.error_handling_successes += 1
-                logger.info(f"✅ Invalid agent type correctly rejected: {e}")
+                logger.info(f" PASS:  Invalid agent type correctly rejected: {e}")
             
             # Test 2: Invalid user context
             metrics.error_scenarios_tested += 1
@@ -592,7 +592,7 @@ class RealAgentRegistryTester(BaseE2ETest):
                 metrics.registration_errors['empty_user_id_not_caught'] = "Empty user ID should raise error"
             except Exception as e:
                 metrics.error_handling_successes += 1
-                logger.info(f"✅ Empty user ID correctly rejected: {e}")
+                logger.info(f" PASS:  Empty user ID correctly rejected: {e}")
             
             # Test 3: Missing user context
             metrics.error_scenarios_tested += 1
@@ -601,20 +601,20 @@ class RealAgentRegistryTester(BaseE2ETest):
                 # Should return None or handle gracefully
                 if missing_agent is None:
                     metrics.error_handling_successes += 1
-                    logger.info("✅ Missing user agent handled gracefully")
+                    logger.info(" PASS:  Missing user agent handled gracefully")
                 else:
                     metrics.registration_errors['missing_user_not_handled'] = "Missing user should return None"
             except Exception as e:
                 # Exception handling is also acceptable
                 metrics.error_handling_successes += 1
-                logger.info(f"✅ Missing user agent raised exception: {e}")
+                logger.info(f" PASS:  Missing user agent raised exception: {e}")
             
             # Test 4: Registry health under error conditions
             metrics.error_scenarios_tested += 1
             health = registry.get_registry_health()
             if health['status'] in ['healthy', 'warning', 'critical']:
                 metrics.error_handling_successes += 1
-                logger.info(f"✅ Registry health check functional: {health['status']}")
+                logger.info(f" PASS:  Registry health check functional: {health['status']}")
             else:
                 metrics.registration_errors['health_check_invalid'] = f"Invalid health status: {health['status']}"
             
@@ -624,7 +624,7 @@ class RealAgentRegistryTester(BaseE2ETest):
                 cleanup_result = await registry.cleanup_user_session("nonexistent_user")
                 if cleanup_result['status'] == 'no_session':
                     metrics.error_handling_successes += 1
-                    logger.info("✅ Cleanup of nonexistent session handled gracefully")
+                    logger.info(" PASS:  Cleanup of nonexistent session handled gracefully")
                 else:
                     metrics.registration_errors['cleanup_not_handled'] = "Cleanup should handle nonexistent users"
             except Exception as e:
@@ -634,11 +634,11 @@ class RealAgentRegistryTester(BaseE2ETest):
             assert success_rate >= 0.8, \
                 f"Error handling insufficient: {success_rate:.1%} success rate"
             
-            logger.info(f"✅ Error handling: {metrics.error_handling_successes}/{metrics.error_scenarios_tested} scenarios handled correctly")
+            logger.info(f" PASS:  Error handling: {metrics.error_handling_successes}/{metrics.error_scenarios_tested} scenarios handled correctly")
             
         except Exception as e:
             metrics.registration_errors['error_handling_failure'] = str(e)
-            logger.error(f"❌ Error handling test failed: {e}")
+            logger.error(f" FAIL:  Error handling test failed: {e}")
             raise
         
         self.metrics.append(metrics)
@@ -719,11 +719,11 @@ class RealAgentRegistryTester(BaseE2ETest):
             cleaned_agent = await registry1.get_user_agent(user_context.user_id, "triage")
             assert cleaned_agent is None, "Agent should be cleaned up"
             
-            logger.info(f"✅ Registry persistence validated with {metrics.user_agents_created} agents across {metrics.user_contexts_created} contexts")
+            logger.info(f" PASS:  Registry persistence validated with {metrics.user_agents_created} agents across {metrics.user_contexts_created} contexts")
             
         except Exception as e:
             metrics.registration_errors['persistence_error'] = str(e)
-            logger.error(f"❌ Registry persistence test failed: {e}")
+            logger.error(f" FAIL:  Registry persistence test failed: {e}")
             raise
         
         self.metrics.append(metrics)
@@ -830,12 +830,12 @@ class RealAgentRegistryTester(BaseE2ETest):
         }
         
         for check_name, passed in critical_checks.items():
-            status = "✅ PASS" if passed else "❌ FAIL"
+            status = " PASS:  PASS" if passed else " FAIL:  FAIL"
             report.append(f"{status}: {check_name.replace('_', ' ').title()}")
         
         overall_success = all(critical_checks.values())
         report.append("")
-        report.append(f"OVERALL RESULT: {'✅ ALL CRITICAL VALIDATIONS PASSED' if overall_success else '❌ CRITICAL VALIDATIONS FAILED'}")
+        report.append(f"OVERALL RESULT: {' PASS:  ALL CRITICAL VALIDATIONS PASSED' if overall_success else ' FAIL:  CRITICAL VALIDATIONS FAILED'}")
         
         report.append("\n" + "=" * 80)
         return "\n".join(report)
@@ -1078,9 +1078,9 @@ class TestRealAgentRegistryInitialization(BaseE2ETest):
             assert avg_creation_time < 1000, \
                 f"Registry creation too slow (avg {avg_creation_time:.1f}ms, max 1000ms)"
         
-        logger.info("✅ ALL BUSINESS VALUE VALIDATIONS PASSED")
-        logger.info("✅ ALL CLAUDE.md COMPLIANCE REQUIREMENTS MET")
-        logger.info("🚀 Agent registry ready for multi-user production deployment")
+        logger.info(" PASS:  ALL BUSINESS VALUE VALIDATIONS PASSED")
+        logger.info(" PASS:  ALL CLAUDE.md COMPLIANCE REQUIREMENTS MET")
+        logger.info("[U+1F680] Agent registry ready for multi-user production deployment")
 
 
 if __name__ == "__main__":

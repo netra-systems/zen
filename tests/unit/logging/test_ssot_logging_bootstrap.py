@@ -94,7 +94,7 @@ class TestSSotLoggingBootstrap(SSotBaseTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: Document the circular dependency for remediation
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): SSOT logging bootstrap has circular dependencies
+             ALERT:  EXPECTED FAILURE (Issue #368): SSOT logging bootstrap has circular dependencies
             
             Import Error: {str(e)}
             Import Order: {import_order[-10:] if len(import_order) > 10 else import_order}
@@ -155,7 +155,7 @@ class TestSSotLoggingBootstrap(SSotBaseTestCase):
         if len(successful_attempts) < 5:
             # EXPECTED FAILURE: Bootstrap is unreliable
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Bootstrap initialization is unreliable
+             ALERT:  EXPECTED FAILURE (Issue #368): Bootstrap initialization is unreliable
             
             Successful Attempts: {len(successful_attempts)}/5
             Failed Attempts: {[a for a in initialization_attempts if not a.get('success')]}
@@ -220,7 +220,7 @@ class TestSSotLoggingBootstrap(SSotBaseTestCase):
         if errors:
             # EXPECTED FAILURE: Thread safety issues in bootstrap
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Thread safety issues in logging bootstrap
+             ALERT:  EXPECTED FAILURE (Issue #368): Thread safety issues in logging bootstrap
             
             Errors: {errors}
             Manager IDs: {managers}
@@ -283,7 +283,7 @@ class TestSSotLoggingBootstrap(SSotBaseTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: Document circular references
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Circular references in logging configuration
+             ALERT:  EXPECTED FAILURE (Issue #368): Circular references in logging configuration
             
             Import Error: {str(e)}
             Configuration Modules: {configuration_modules[-20:]}
@@ -379,7 +379,7 @@ class TestLoggingBootstrapDependencyGraph(SSotBaseTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: Document dependency graph issues
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Complex dependency cycles in logging bootstrap
+             ALERT:  EXPECTED FAILURE (Issue #368): Complex dependency cycles in logging bootstrap
             
             Import Error: {str(e)}
             Dependency Graph: {dict(list(dependency_graph.items())[:10])}  # First 10 entries

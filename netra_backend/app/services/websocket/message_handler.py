@@ -152,7 +152,7 @@ class StartAgentHandler(BaseMessageHandler):
     async def _setup_thread_and_run(self, user_id: str, user_request: str) -> tuple[str, str]:
         """Setup thread and run for agent processing with comprehensive service dependency logging"""
         start_time = time.time()
-        logger.info(f"🔍 WEBSOCKET SERVICE DEPENDENCIES: Starting thread setup "
+        logger.info(f" SEARCH:  WEBSOCKET SERVICE DEPENDENCIES: Starting thread setup "
                    f"(user_id: {user_id[:8]}..., "
                    f"required_services: ['database', 'unit_of_work', 'websocket_manager'])")
         
@@ -162,13 +162,13 @@ class StartAgentHandler(BaseMessageHandler):
             
             # Check if database is initialized, if not initialize it
             if async_session_factory is None:
-                logger.warning("🔧 DATABASE SERVICE DEPENDENCY: Database not initialized, initializing PostgreSQL...")
+                logger.warning("[U+1F527] DATABASE SERVICE DEPENDENCY: Database not initialized, initializing PostgreSQL...")
                 initialize_postgres()
                 
             db_init_time = time.time()
             async with get_unit_of_work() as uow:
                 uow_time = (time.time() - db_init_time) * 1000
-                logger.info(f"✅ DATABASE SERVICE SUCCESS: Unit of work created "
+                logger.info(f" PASS:  DATABASE SERVICE SUCCESS: Unit of work created "
                            f"(response_time: {uow_time:.2f}ms, "
                            f"service_status: database_healthy)")
                 
@@ -176,7 +176,7 @@ class StartAgentHandler(BaseMessageHandler):
                 thread_time = (time.time() - db_init_time) * 1000
                 
                 if not thread:
-                    logger.critical(f"🚨 THREAD SERVICE FAILURE: Failed to create or retrieve thread "
+                    logger.critical(f" ALERT:  THREAD SERVICE FAILURE: Failed to create or retrieve thread "
                                    f"(user_id: {user_id[:8]}..., "
                                    f"response_time: {thread_time:.2f}ms, "
                                    f"service_status: thread_service_failed, "
@@ -189,7 +189,7 @@ class StartAgentHandler(BaseMessageHandler):
                     await manager.send_error(user_id, "Failed to create or retrieve thread")
                     return None, None
                 
-                logger.info(f"✅ THREAD SERVICE SUCCESS: Thread ready for user "
+                logger.info(f" PASS:  THREAD SERVICE SUCCESS: Thread ready for user "
                            f"(user_id: {user_id[:8]}..., "
                            f"thread_id: {thread.id[:8]}..., "
                            f"response_time: {thread_time:.2f}ms, "
@@ -199,7 +199,7 @@ class StartAgentHandler(BaseMessageHandler):
                 
         except Exception as db_error:
             total_time = (time.time() - start_time) * 1000
-            logger.critical(f"🚨 DATABASE SERVICE EXCEPTION: Database setup failed in WebSocket handler "
+            logger.critical(f" ALERT:  DATABASE SERVICE EXCEPTION: Database setup failed in WebSocket handler "
                            f"(user_id: {user_id[:8]}..., "
                            f"exception_type: {type(db_error).__name__}, "
                            f"exception_message: {str(db_error)}, "
@@ -215,7 +215,7 @@ class StartAgentHandler(BaseMessageHandler):
                 manager = await create_websocket_manager(context)
                 await manager.send_error(user_id, f"Database initialization failed: {str(db_error)}")
             except Exception as ws_error:
-                logger.critical(f"🚨 WEBSOCKET SERVICE FAILURE: Cannot send error to user after database failure "
+                logger.critical(f" ALERT:  WEBSOCKET SERVICE FAILURE: Cannot send error to user after database failure "
                                f"(user_id: {user_id[:8]}..., "
                                f"websocket_error: {str(ws_error)}, "
                                f"original_db_error: {str(db_error)}, "
@@ -241,7 +241,7 @@ class StartAgentHandler(BaseMessageHandler):
     async def _execute_agent_workflow(self, user_request: str, thread_id: str, user_id: str, run_id: str):
         """Execute agent workflow without holding database session with comprehensive service dependency logging"""
         start_time = time.time()
-        logger.info(f"🔍 SUPERVISOR SERVICE DEPENDENCY: Starting agent workflow execution "
+        logger.info(f" SEARCH:  SUPERVISOR SERVICE DEPENDENCY: Starting agent workflow execution "
                    f"(user_id: {user_id[:8]}..., "
                    f"thread_id: {thread_id[:8]}..., "
                    f"run_id: {run_id[:8]}..., "
@@ -251,18 +251,18 @@ class StartAgentHandler(BaseMessageHandler):
             self._configure_supervisor(thread_id, user_id)
             config_time = (time.time() - start_time) * 1000
             
-            logger.info(f"✅ SUPERVISOR CONFIG SUCCESS: Supervisor configured "
+            logger.info(f" PASS:  SUPERVISOR CONFIG SUCCESS: Supervisor configured "
                        f"(response_time: {config_time:.2f}ms, "
                        f"service_status: supervisor_configured)")
             
             # PHASE 4 FIX: Enhanced WebSocket bridge creation with retry logic for connection storms
             if not hasattr(self.supervisor, 'websocket_bridge') or not self.supervisor.websocket_bridge:
-                logger.info(f"🔧 WEBSOCKET BRIDGE DEPENDENCY: Creating WebSocket bridge for supervisor "
+                logger.info(f"[U+1F527] WEBSOCKET BRIDGE DEPENDENCY: Creating WebSocket bridge for supervisor "
                            f"(user_id: {user_id[:8]}..., "
                            f"required_for: real-time_agent_events)")
                 await self._create_websocket_bridge_with_retry(user_id, thread_id, run_id)
             else:
-                logger.info(f"✅ WEBSOCKET BRIDGE EXISTS: Using existing WebSocket bridge "
+                logger.info(f" PASS:  WEBSOCKET BRIDGE EXISTS: Using existing WebSocket bridge "
                            f"(service_status: websocket_bridge_ready)")
             
             # Execute supervisor with service monitoring
@@ -271,7 +271,7 @@ class StartAgentHandler(BaseMessageHandler):
             execution_time = (time.time() - execution_start) * 1000
             total_time = (time.time() - start_time) * 1000
             
-            logger.info(f"✅ SUPERVISOR SERVICE SUCCESS: Agent workflow completed "
+            logger.info(f" PASS:  SUPERVISOR SERVICE SUCCESS: Agent workflow completed "
                        f"(user_id: {user_id[:8]}..., "
                        f"execution_time: {execution_time:.2f}ms, "
                        f"total_time: {total_time:.2f}ms, "
@@ -282,7 +282,7 @@ class StartAgentHandler(BaseMessageHandler):
             
         except Exception as e:
             total_time = (time.time() - start_time) * 1000
-            logger.critical(f"🚨 SUPERVISOR SERVICE EXCEPTION: Agent workflow execution failed "
+            logger.critical(f" ALERT:  SUPERVISOR SERVICE EXCEPTION: Agent workflow execution failed "
                            f"(user_id: {user_id[:8]}..., "
                            f"thread_id: {thread_id[:8]}..., "
                            f"run_id: {run_id[:8]}..., "
@@ -318,7 +318,7 @@ class StartAgentHandler(BaseMessageHandler):
                 
                 websocket_bridge = create_agent_websocket_bridge(context)
                 self.supervisor.websocket_bridge = websocket_bridge
-                logger.info(f"✅ PHASE 4: Added WebSocket bridge to supervisor for user {user_id} (attempt {attempt + 1})")
+                logger.info(f" PASS:  PHASE 4: Added WebSocket bridge to supervisor for user {user_id} (attempt {attempt + 1})")
                 return
                 
             except Exception as e:

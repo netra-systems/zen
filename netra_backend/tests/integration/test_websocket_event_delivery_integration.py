@@ -133,7 +133,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
             self.critical_events_received[event_type] = True
             self.event_timestamps[event_type] = timestamp
         
-        logger.info(f"📩 Received WebSocket event: {event_type}")
+        logger.info(f"[U+1F4E9] Received WebSocket event: {event_type}")
 
     async def _wait_for_critical_events(self, timeout: float = 30.0) -> Dict[str, bool]:
         """Wait for all 5 critical WebSocket events with timeout."""
@@ -141,13 +141,13 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
         
         while time.time() - start_time < timeout:
             if all(self.critical_events_received.values()):
-                logger.info("✅ All 5 critical WebSocket events received!")
+                logger.info(" PASS:  All 5 critical WebSocket events received!")
                 return self.critical_events_received
             
             await asyncio.sleep(0.1)
         
         missing_events = [event for event, received in self.critical_events_received.items() if not received]
-        logger.error(f"❌ Timeout waiting for critical events. Missing: {missing_events}")
+        logger.error(f" FAIL:  Timeout waiting for critical events. Missing: {missing_events}")
         return self.critical_events_received
 
     async def _simulate_agent_execution_with_events(self) -> None:
@@ -216,7 +216,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
         BVJ: Validates WebSocket events are delivered in correct chronological order.
         Business Impact: Prevents "User Confusion" - events must appear in logical sequence.
         
-        Expected Order: agent_started → agent_thinking → tool_executing → tool_completed → agent_completed
+        Expected Order: agent_started  ->  agent_thinking  ->  tool_executing  ->  tool_completed  ->  agent_completed
         """
         self.websocket_client = WebSocketTestClient(self.websocket_url)
         connected = await self.websocket_client.connect()
@@ -274,7 +274,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
             
             # Log performance metrics
             avg_latency = sum(self.delivery_latencies.values()) / len(self.delivery_latencies) if self.delivery_latencies else 0
-            logger.info(f"📊 Average WebSocket event delivery latency: {avg_latency:.3f}s")
+            logger.info(f" CHART:  Average WebSocket event delivery latency: {avg_latency:.3f}s")
             
         finally:
             event_collection_task.cancel()
@@ -478,7 +478,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
                 critical_events = [e for e in user_events if e.get("type") in self.critical_events_received.keys()]
                 assert len(critical_events) >= 2, f"Concurrent user {i} received insufficient WebSocket events ({len(critical_events)}) - concurrent delivery failed!"
             
-            logger.info(f"✅ Successfully delivered WebSocket events to {num_concurrent} concurrent users")
+            logger.info(f" PASS:  Successfully delivered WebSocket events to {num_concurrent} concurrent users")
             
         finally:
             for client in clients:
@@ -598,7 +598,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
             for i, count in enumerate(critical_events_per_execution):
                 assert count >= 2, f"Rate limiting dropped critical events in execution {i} - only {count} events received!"
             
-            logger.info(f"📊 Critical events per execution under rate limiting: {critical_events_per_execution}")
+            logger.info(f" CHART:  Critical events per execution under rate limiting: {critical_events_per_execution}")
             
         finally:
             pass  # Client cleanup in teardown
@@ -655,7 +655,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
             critical_events = [e for e in events_during_load if e.get("type") in self.critical_events_received.keys()]
             assert len(critical_events) >= 2, f"High load caused critical event loss - only {len(critical_events)} events delivered!"
             
-            logger.info(f"📊 Delivered {len(critical_events)} critical events during high load of {50} rapid messages")
+            logger.info(f" CHART:  Delivered {len(critical_events)} critical events during high load of {50} rapid messages")
             
         finally:
             pass  # Client cleanup in teardown
@@ -676,7 +676,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
         try:
             # Send complex data that tests serialization edge cases
             complex_payload = {
-                "content": "Test with special characters: üñíçödé 📊 💎 🚀",
+                "content": "Test with special characters: [U+00FC][U+00F1][U+00ED][U+00E7][U+00F6]d[U+00E9]  CHART:  [U+1F48E] [U+1F680]",
                 "metadata": {
                     "timestamps": [datetime.now(timezone.utc).isoformat()],
                     "numbers": [1.23456789, -999.999, 0],
@@ -762,7 +762,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
             assert monitoring_metrics["delivery_successes"] >= 2, f"Insufficient successful deliveries for monitoring: {monitoring_metrics['delivery_successes']}"
             assert monitoring_metrics["avg_latency"] < 10.0, f"Average delivery latency too high for monitoring: {monitoring_metrics['avg_latency']:.3f}s"
             
-            logger.info(f"📊 WebSocket monitoring metrics: {monitoring_metrics}")
+            logger.info(f" CHART:  WebSocket monitoring metrics: {monitoring_metrics}")
             
         finally:
             event_collection_task.cancel()
@@ -812,7 +812,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
             assert critical_before >= 1, "No critical events received before error"
             assert critical_after >= 1, "WebSocket error permanently broke event delivery - no recovery!"
             
-            logger.info(f"📊 Error recovery: {critical_before} events before, {critical_after} events after recovery")
+            logger.info(f" CHART:  Error recovery: {critical_before} events before, {critical_after} events after recovery")
             
         finally:
             pass  # Client cleanup in teardown
@@ -853,9 +853,9 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
             for client, connected, index in connection_results:
                 if connected:
                     clients.append(client)
-                    logger.info(f"✅ WebSocket connection {index} established")
+                    logger.info(f" PASS:  WebSocket connection {index} established")
                 else:
-                    logger.error(f"❌ WebSocket connection {index} failed")
+                    logger.error(f" FAIL:  WebSocket connection {index} failed")
             
             # Assert sufficient connections for scalability test
             assert len(clients) >= 10, f"Only {len(clients)}/{target_connections} WebSocket connections established - scalability limit reached!"
@@ -897,7 +897,7 @@ class TestWebSocketEventDeliveryIntegration(WebSocketIntegrationTest):
             successful_deliveries = len([count for count in delivered_events_per_client if count >= 1])
             assert successful_deliveries >= 8, f"Only {successful_deliveries}/10 clients received events - scalability degradation!"
             
-            logger.info(f"📊 Scalability test: {len(clients)} connections, {successful_deliveries}/10 successful event deliveries")
+            logger.info(f" CHART:  Scalability test: {len(clients)} connections, {successful_deliveries}/10 successful event deliveries")
             
         finally:
             # Clean up all clients

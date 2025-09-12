@@ -22,7 +22,7 @@ Per CLAUDE.md: "Real Solutions, Helpful, Timely, Complete Business Value, Data D
 Per CLAUDE.md: "MOCKS = Abomination" - Only real services, real WebSocket, real agents, real LLM
 
 SUCCESS CRITERIA:
-- Complete user message → AI response flow works end-to-end
+- Complete user message  ->  AI response flow works end-to-end
 - All WebSocket agent events delivered in proper sequence
 - AI response contains actionable business insights
 - Response time meets user experience requirements (< 30 seconds)
@@ -173,7 +173,7 @@ class ChatBusinessValueValidator:
         for secret in protected_secrets:
             if secret in response_text:
                 business_ip_protected = False
-                logger.warning(f"🚨 Business IP leak detected: {secret} in response")
+                logger.warning(f" ALERT:  Business IP leak detected: {secret} in response")
         
         # Validate response completeness and readability
         response_complete = len(response_text) > 50 and "error" not in response_text.lower()
@@ -679,7 +679,7 @@ class TestCompleteChatBusinessValueFlow:
         validator = ChatBusinessValueValidator()
         tester = RealChatBusinessValueTester(validator)
         
-        logger.info("🚀 Starting cost optimization complete chat flow test")
+        logger.info("[U+1F680] Starting cost optimization complete chat flow test")
         
         # Test realistic cost optimization user message
         user_message = "Help me optimize my cloud infrastructure costs. I'm spending too much on AWS and need to reduce expenses while maintaining performance."
@@ -713,7 +713,7 @@ class TestCompleteChatBusinessValueFlow:
         assert cost_insights_found >= 3, \
             f"Response lacks cost optimization focus: only {cost_insights_found}/6 keywords found"
         
-        logger.info("✅ Cost optimization complete chat flow VALIDATED")
+        logger.info(" PASS:  Cost optimization complete chat flow VALIDATED")
         logger.info(f"  Response time: {result['chat_duration_s']:.1f}s")
         logger.info(f"  Actionable insights: {len(result['actionable_insights'])}")
         logger.info(f"  WebSocket events: {len(result['event_validation']['events_received'])}")
@@ -729,7 +729,7 @@ class TestCompleteChatBusinessValueFlow:
         validator = ChatBusinessValueValidator()
         tester = RealChatBusinessValueTester(validator)
         
-        logger.info("🚀 Starting data analysis complete chat flow test")
+        logger.info("[U+1F680] Starting data analysis complete chat flow test")
         
         user_message = "Analyze my user engagement data to identify patterns and opportunities for improving retention and conversion rates."
         
@@ -759,7 +759,7 @@ class TestCompleteChatBusinessValueFlow:
         assert analysis_insights_found >= 4, \
             f"Response lacks data analysis focus: only {analysis_insights_found}/6 keywords found"
         
-        logger.info("✅ Data analysis complete chat flow VALIDATED")
+        logger.info(" PASS:  Data analysis complete chat flow VALIDATED")
         logger.info(f"  Response time: {result['chat_duration_s']:.1f}s")
         logger.info(f"  Actionable insights: {len(result['actionable_insights'])}")
 
@@ -775,7 +775,7 @@ class TestCompleteChatBusinessValueFlow:
         validator = ChatBusinessValueValidator()
         tester = RealChatBusinessValueTester(validator)
         
-        logger.info(f"🚀 Starting {concurrent_users}-user concurrent chat isolation test")
+        logger.info(f"[U+1F680] Starting {concurrent_users}-user concurrent chat isolation test")
         
         chat_messages = [
             "Help me optimize costs for my manufacturing business",
@@ -830,7 +830,7 @@ class TestCompleteChatBusinessValueFlow:
         assert valid_websocket_events >= len(successful_chats) * 0.95, \
             f"WebSocket event failures: {valid_websocket_events}/{len(successful_chats)} valid"
         
-        logger.info("✅ Concurrent multi-user chat isolation VALIDATED")
+        logger.info(" PASS:  Concurrent multi-user chat isolation VALIDATED")
         logger.info(f"  Users: {len(successful_chats)}/{concurrent_users} successful")
         logger.info(f"  Business value: {business_value_delivered}/{len(successful_chats)} delivered")
         logger.info(f"  WebSocket events: {valid_websocket_events}/{len(successful_chats)} valid")
@@ -846,7 +846,7 @@ class TestCompleteChatBusinessValueFlow:
         validator = ChatBusinessValueValidator()
         tester = RealChatBusinessValueTester(validator)
         
-        logger.info("🚀 Starting complete business value metrics validation")
+        logger.info("[U+1F680] Starting complete business value metrics validation")
         
         # Test different business value scenarios
         chat_scenarios = [
@@ -887,7 +887,7 @@ class TestCompleteChatBusinessValueFlow:
         assert business_value_report["sessions_with_actionable_insights"] >= len(results) * 0.8, \
             f"Insufficient actionable insights across sessions: {business_value_report['sessions_with_actionable_insights']}/{len(results)}"
         
-        logger.info("✅ Complete business value metrics VALIDATED")
+        logger.info(" PASS:  Complete business value metrics VALIDATED")
         logger.info(f"  Success rate: {business_value_report['business_value_success_rate']:.1%}")
         logger.info(f"  IP protection: {business_value_report['business_ip_protection_rate']:.1%}")
         logger.info(f"  Event compliance: {business_value_report['websocket_event_compliance']['event_compliance_rate']:.1%}")
@@ -907,7 +907,7 @@ if __name__ == "__main__":
     print("=" * 80)
     print()
     print("Testing Requirements:")
-    print("- Complete user message → AI response flow") 
+    print("- Complete user message  ->  AI response flow") 
     print("- All 5 WebSocket agent events delivered in sequence")
     print("- AI responses contain actionable business insights")
     print("- Business IP protection maintained")

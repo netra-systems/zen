@@ -2,7 +2,7 @@
 """
 Configuration Setup Orchestrator for Netra AI Platform installer.
 Orchestrates database setup, environment files, and testing.
-CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
+CRITICAL: All functions MUST be  <= 8 lines, file  <= 300 lines.
 """
 
 import sys

@@ -959,11 +959,11 @@ class TestThreadSwitchingAgentExecutionIntegration(BaseTestCase):
         
         # Verify primary thread received events for both tool executions
         primary_tool_events = [e for e in primary_events if e['type'] in ['tool_executing', 'tool_completed']]
-        assert len(primary_tool_events) == 4  # 2 tools × 2 events each (executing + completed)
+        assert len(primary_tool_events) == 4  # 2 tools  x  2 events each (executing + completed)
         
         # Verify secondary thread received events for its tool execution
         secondary_tool_events = [e for e in secondary_events if e['type'] in ['tool_executing', 'tool_completed']]
-        assert len(secondary_tool_events) == 2  # 1 tool × 2 events (executing + completed)
+        assert len(secondary_tool_events) == 2  # 1 tool  x  2 events (executing + completed)
         
         # Verify event content is thread-specific
         primary_executing_events = [e for e in primary_events if e['type'] == 'tool_executing']
@@ -1072,7 +1072,7 @@ class TestThreadSwitchingAgentExecutionIntegration(BaseTestCase):
         for i, context in enumerate(contexts):
             thread_events = self.mock_websocket_manager.get_events_for_thread(str(context.thread_id))
             
-            # Each thread should have 4 events (2 tools × 2 events each)
+            # Each thread should have 4 events (2 tools  x  2 events each)
             tool_events = [e for e in thread_events if e['type'] in ['tool_executing', 'tool_completed']]
             assert len(tool_events) == 4, f"Thread {i} expected 4 tool events, got {len(tool_events)}"
             
@@ -1088,7 +1088,7 @@ class TestThreadSwitchingAgentExecutionIntegration(BaseTestCase):
         
         # Verify total tool executions
         total_tools = len(self.mock_tool_dispatcher.executed_tools)
-        assert total_tools == 10  # 5 threads × 2 tools each
+        assert total_tools == 10  # 5 threads  x  2 tools each
         
         # Verify tool execution isolation by thread
         for i, context in enumerate(contexts):
@@ -1290,7 +1290,7 @@ class TestThreadSwitchingAgentExecutionIntegration(BaseTestCase):
         assert total_time < 10.0, f"Total execution time should be under 10 seconds: {total_time}"
         
         # Validate all tool executions completed successfully
-        total_expected_tools = 10 * 3  # 10 threads × 3 cycles
+        total_expected_tools = 10 * 3  # 10 threads  x  3 cycles
         actual_tools = len(self.mock_tool_dispatcher.executed_tools)
         assert actual_tools == total_expected_tools, \
             f"Expected {total_expected_tools} tools, got {actual_tools}"
@@ -1310,7 +1310,7 @@ class TestThreadSwitchingAgentExecutionIntegration(BaseTestCase):
             # Each thread should have 3 tool executions (1 per cycle)
             assert len(thread_tools) == 3
             
-            # Each thread should have 6 events minimum (3 tools × 2 events each)
+            # Each thread should have 6 events minimum (3 tools  x  2 events each)
             tool_events = [e for e in thread_events if e['type'] in ['tool_executing', 'tool_completed']]
             assert len(tool_events) >= 6
             
@@ -3192,8 +3192,8 @@ class TestThreadSwitchingAgentExecutionIntegration(BaseTestCase):
         
         # Success criteria summary
         success_rate = stress_metrics['successful_operations'] / stress_metrics['total_operations']
-        assert success_rate >= 0.9, f"Success rate should be ≥90%: {success_rate:.2%}"
+        assert success_rate >= 0.9, f"Success rate should be  >= 90%: {success_rate:.2%}"
         
         # Performance criteria
-        assert operations_per_second >= 10.0, f"Performance should be ≥10 ops/sec: {operations_per_second:.1f}"
-        assert total_time <= 30.0, f"Completion time should be ≤30s: {total_time:.1f}s"
+        assert operations_per_second >= 10.0, f"Performance should be  >= 10 ops/sec: {operations_per_second:.1f}"
+        assert total_time <= 30.0, f"Completion time should be  <= 30s: {total_time:.1f}s"

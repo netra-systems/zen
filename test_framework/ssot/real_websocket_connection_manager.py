@@ -195,7 +195,7 @@ class RealWebSocketConnectionManager:
         if user_id:
             pooled_client = self._get_pooled_connection(user_id)
             if pooled_client:
-                logger.info(f"♻️ Reusing pooled connection for user: {user_id}")
+                logger.info(f"[U+267B][U+FE0F] Reusing pooled connection for user: {user_id}")
                 client = pooled_client
                 authenticated_user = client.authenticated_user
         
@@ -843,7 +843,7 @@ class RealWebSocketConnectionManager:
         import pytest
         
         try:
-            logger.info(f"🧪 Starting {test_name} with real WebSocket services")
+            logger.info(f"[U+1F9EA] Starting {test_name} with real WebSocket services")
             
             # Test basic connectivity first
             await self._verify_service_availability()
@@ -851,12 +851,12 @@ class RealWebSocketConnectionManager:
             # Execute the actual test
             result = await test_function()
             
-            logger.info(f"✅ {test_name} completed successfully with real services")
+            logger.info(f" PASS:  {test_name} completed successfully with real services")
             return result
             
         except (ConnectionRefusedError, OSError) as e:
             # Network-level issues - services likely not running
-            logger.warning(f"⚠️ Network connectivity failed for {test_name}: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Network connectivity failed for {test_name}: {e}")
             pytest.skip(
                 f"Docker services unavailable - {test_name} skipped. "
                 f"Start services with: python tests/unified_test_runner.py --real-services"
@@ -864,7 +864,7 @@ class RealWebSocketConnectionManager:
         
         except DockerUnavailableError as e:
             # Docker-specific unavailability
-            logger.warning(f"⚠️ Docker services unavailable for {test_name}: {e}")
+            logger.warning(f" WARNING: [U+FE0F] Docker services unavailable for {test_name}: {e}")
             pytest.skip(
                 f"Docker services unavailable - {test_name} skipped. "
                 f"Ensure Docker is running and services are started."
@@ -872,7 +872,7 @@ class RealWebSocketConnectionManager:
         
         except Exception as e:
             # Other errors should not be gracefully degraded - they indicate real test failures
-            logger.error(f"❌ {test_name} failed with real services: {e}")
+            logger.error(f" FAIL:  {test_name} failed with real services: {e}")
             raise
     
     async def _verify_service_availability(self) -> None:
@@ -908,7 +908,7 @@ class RealWebSocketConnectionManager:
             finally:
                 sock.close()
             
-            logger.debug(f"✅ Service availability verified: {host}:{port}")
+            logger.debug(f" PASS:  Service availability verified: {host}:{port}")
             
         except socket.gaierror as e:
             raise DockerUnavailableError(f"DNS resolution failed for backend service: {e}")

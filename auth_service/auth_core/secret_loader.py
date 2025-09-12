@@ -104,10 +104,10 @@ class AuthSecretLoader:
                 validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
                 client_id = validator.get_oauth_client_id()
                 env = validator.get_environment().value
-                logger.info(f"✅ Using SSOT OAuth Client ID for {env} environment (length={len(client_id)})")
+                logger.info(f" PASS:  Using SSOT OAuth Client ID for {env} environment (length={len(client_id)})")
                 return client_id
             except Exception as e:
-                logger.error(f"❌ SSOT OAuth Client ID validation failed: {e}")
+                logger.error(f" FAIL:  SSOT OAuth Client ID validation failed: {e}")
                 # Hard fail - no legacy fallback
                 raise ValueError(f"OAuth client ID configuration failed via SSOT: {e}")
         
@@ -133,10 +133,10 @@ class AuthSecretLoader:
                 validator = get_central_validator(lambda key, default=None: get_env().get(key, default))
                 client_secret = validator.get_oauth_client_secret()
                 env = validator.get_environment().value
-                logger.info(f"✅ Using SSOT OAuth Client Secret for {env} environment (length={len(client_secret)})")
+                logger.info(f" PASS:  Using SSOT OAuth Client Secret for {env} environment (length={len(client_secret)})")
                 return client_secret
             except Exception as e:
-                logger.error(f"❌ SSOT OAuth Client Secret validation failed: {e}")
+                logger.error(f" FAIL:  SSOT OAuth Client Secret validation failed: {e}")
                 # Hard fail - no legacy fallback
                 raise ValueError(f"OAuth client secret configuration failed via SSOT: {e}")
         

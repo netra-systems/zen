@@ -111,7 +111,7 @@ class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
             self.assertGreaterEqual(elapsed, base_delay - 0.05,
                                    f"Should apply Cloud Run stabilization delay of at least {base_delay}s")
             
-            logger.info(f"✅ Cloud Run handshake stabilization applied: {elapsed:.3f}s")
+            logger.info(f" PASS:  Cloud Run handshake stabilization applied: {elapsed:.3f}s")
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_protection(self):
@@ -158,7 +158,7 @@ class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
             "Success should reset failure count"
         )
         
-        logger.info("✅ Circuit breaker protection working correctly")
+        logger.info(" PASS:  Circuit breaker protection working correctly")
     
     @pytest.mark.asyncio 
     async def test_progressive_authentication_retry(self):
@@ -198,7 +198,7 @@ class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
             # Should have applied retry delays (at least 0.2s for 2 retries)
             self.assertGreater(elapsed, 0.15, "Should apply progressive retry delays")
             
-            logger.info(f"✅ Progressive retry working: {mock_auth.call_count} attempts in {elapsed:.3f}s")
+            logger.info(f" PASS:  Progressive retry working: {mock_auth.call_count} attempts in {elapsed:.3f}s")
     
     @pytest.mark.asyncio
     async def test_environment_aware_service_discovery(self):
@@ -216,7 +216,7 @@ class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
             from test_framework.fixtures.real_services import real_services_fixture
             
             # This should now work without KeyError: 'backend_port'
-            logger.info("✅ Environment-aware service discovery should work in staging")
+            logger.info(" PASS:  Environment-aware service discovery should work in staging")
     
     @pytest.mark.asyncio
     async def test_concurrent_authentication_caching(self):
@@ -274,7 +274,7 @@ class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
         self.assertIsNotNone(cached_result, "Cache should return stored result")
         self.assertTrue(cached_result.success, "Cached result should be successful")
         
-        logger.info("✅ Concurrent authentication caching working correctly")
+        logger.info(" PASS:  Concurrent authentication caching working correctly")
     
     @pytest.mark.asyncio
     async def test_websocket_auth_stats_monitoring(self):
@@ -300,7 +300,7 @@ class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
         self.assertIn("failed_authentications", auth_stats)
         self.assertIn("success_rate_percent", auth_stats)
         
-        logger.info("✅ WebSocket authentication statistics monitoring working")
+        logger.info(" PASS:  WebSocket authentication statistics monitoring working")
     
     def test_websocket_auth_error_codes(self):
         """
@@ -324,7 +324,7 @@ class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
             self.assertEqual(close_code, expected_close_code, 
                             f"Error code {error_code} should map to close code {expected_close_code}")
         
-        logger.info("✅ WebSocket authentication error code mapping working")
+        logger.info(" PASS:  WebSocket authentication error code mapping working")
     
     @pytest.mark.asyncio
     async def test_full_authentication_flow_race_protection(self):
@@ -366,7 +366,7 @@ class TestWebSocketRaceConditionFixesValidation(SSotAsyncTestCase):
             # Should apply race condition protections (timing)
             self.assertGreater(elapsed, 0.05, "Should apply race condition timing protections")
             
-            logger.info(f"✅ Full authentication flow with race protection: {elapsed:.3f}s")
+            logger.info(f" PASS:  Full authentication flow with race protection: {elapsed:.3f}s")
 
 
 def test_race_condition_fixes_integration():
@@ -380,7 +380,7 @@ def test_race_condition_fixes_integration():
     import os
     sys.path.append(os.path.abspath('.'))
     
-    print("🔍 FIVE-WHYS VALIDATION: Testing integrated race condition fixes")
+    print(" SEARCH:  FIVE-WHYS VALIDATION: Testing integrated race condition fixes")
     
     try:
         # Test 1: Verify authenticator has race condition protections
@@ -391,7 +391,7 @@ def test_race_condition_fixes_integration():
         assert 'cloud_run_backoff' in authenticator._circuit_breaker, "Should have Cloud Run backoff"
         assert 'handshake_stabilization_delay' in authenticator._circuit_breaker, "Should have handshake stabilization"
         
-        print("✅ Test 1 PASSED: Circuit breaker with Cloud Run protection exists")
+        print(" PASS:  Test 1 PASSED: Circuit breaker with Cloud Run protection exists")
         
         # Test 2: Verify enhanced retry mechanism parameters
         # Check that max_retries is increased and retry_delays are progressive
@@ -400,7 +400,7 @@ def test_race_condition_fixes_integration():
         assert circuit_breaker['reset_timeout'] == 15.0, f"Should have fast reset (15s), got {circuit_breaker['reset_timeout']}"
         assert 'cloud_run_backoff' in circuit_breaker, "Should have Cloud Run specific backoff"
         
-        print("✅ Test 2 PASSED: Enhanced retry mechanism configured")
+        print(" PASS:  Test 2 PASSED: Enhanced retry mechanism configured")
         
         # Test 3: Verify environment detection works
         os.environ['K_SERVICE'] = 'test-service'
@@ -409,7 +409,7 @@ def test_race_condition_fixes_integration():
             env = get_env()
             is_cloud_run = bool(env.get("K_SERVICE"))
             assert is_cloud_run, "Should detect Cloud Run environment"
-            print("✅ Test 3 PASSED: Cloud Run environment detection working")
+            print(" PASS:  Test 3 PASSED: Cloud Run environment detection working")
         finally:
             if 'K_SERVICE' in os.environ:
                 del os.environ['K_SERVICE']
@@ -418,15 +418,15 @@ def test_race_condition_fixes_integration():
         try:
             # This should import without errors after our fixes
             from test_framework.fixtures.real_services import real_services_fixture
-            print("✅ Test 4 PASSED: E2E test configuration fixes applied")
+            print(" PASS:  Test 4 PASSED: E2E test configuration fixes applied")
         except ImportError as e:
-            print(f"⚠️  Test 4 INFO: E2E imports not available (expected in limited environment): {e}")
+            print(f" WARNING: [U+FE0F]  Test 4 INFO: E2E imports not available (expected in limited environment): {e}")
         
-        print("✅ FIVE-WHYS VALIDATION: All race condition fixes integrated successfully")
+        print(" PASS:  FIVE-WHYS VALIDATION: All race condition fixes integrated successfully")
         return True
         
     except Exception as e:
-        print(f"❌ FIVE-WHYS VALIDATION FAILED: {e}")
+        print(f" FAIL:  FIVE-WHYS VALIDATION FAILED: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -436,8 +436,8 @@ if __name__ == "__main__":
     # Run the validation test
     success = test_race_condition_fixes_integration()
     if success:
-        print("✅ WebSocket authentication race condition fixes validated successfully!")
+        print(" PASS:  WebSocket authentication race condition fixes validated successfully!")
         exit(0)
     else:
-        print("❌ WebSocket authentication race condition fixes validation failed!")
+        print(" FAIL:  WebSocket authentication race condition fixes validation failed!")
         exit(1)

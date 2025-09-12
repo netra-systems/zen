@@ -348,7 +348,7 @@ class TestUserExecutionContextIsolation(BaseIntegrationTest):
                     assert "tier_restriction" in feature_access_result["error"]
                     assert feature_access_result["required_tier"] in feature_test["allowed_tiers"]
                 
-                self.logger.info(f"Tier isolation for {user_tier} user accessing {feature_test['feature']}: {'✓' if should_have_access else '✗'}")
+                self.logger.info(f"Tier isolation for {user_tier} user accessing {feature_test['feature']}: {'[U+2713]' if should_have_access else '[U+2717]'}")
         
         # Test tier upgrade scenario simulation
         upgrade_test_user = self.test_users[0]  # Free tier user

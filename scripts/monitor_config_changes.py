@@ -69,10 +69,10 @@ def take_snapshot():
     tracker = get_config_tracker()
     current_config = get_current_config()
     
-    print(f"📸 Taking configuration snapshot ({len(current_config)} keys)...")
+    print(f"[U+1F4F8] Taking configuration snapshot ({len(current_config)} keys)...")
     tracker.snapshot_current_config(current_config)
     
-    print("✅ Snapshot completed")
+    print(" PASS:  Snapshot completed")
     print(f"Monitored configs: {', '.join(sorted(current_config.keys()))}")
 
 
@@ -81,7 +81,7 @@ def check_changes():
     tracker = get_config_tracker()
     current_config = get_current_config()
     
-    print("🔍 Checking for configuration changes...")
+    print(" SEARCH:  Checking for configuration changes...")
     
     # Take new snapshot
     tracker.snapshot_current_config(current_config)
@@ -90,19 +90,19 @@ def check_changes():
     changes = tracker.detect_changes()
     
     if not changes:
-        print("✅ No configuration changes detected")
+        print(" PASS:  No configuration changes detected")
         return
     
-    print(f"⚠️  Detected {len(changes)} configuration changes:")
+    print(f" WARNING: [U+FE0F]  Detected {len(changes)} configuration changes:")
     
     for change in changes:
         risk_emoji = {
-            'critical': '🚨',
-            'high': '⚠️',
-            'medium': '🔶',
-            'low': '🟡',
-            'info': 'ℹ️'
-        }.get(change.risk_level.value, '❓')
+            'critical': ' ALERT: ',
+            'high': ' WARNING: [U+FE0F]',
+            'medium': '[U+1F536]',
+            'low': '[U+1F7E1]',
+            'info': '[U+2139][U+FE0F]'
+        }.get(change.risk_level.value, '[U+2753]')
         
         print(f"\n{risk_emoji} {change.key} ({change.change_type.value.upper()})")
         print(f"   Risk: {change.risk_level.value.upper()}")
@@ -112,13 +112,13 @@ def check_changes():
             print(f"   Services: {', '.join(change.affected_services)}")
         
         if change.requires_restart:
-            print("   ⚠️  Requires service restart")
+            print("    WARNING: [U+FE0F]  Requires service restart")
         
         if change.requires_migration:
-            print("   🔄 Requires data migration")
+            print("    CYCLE:  Requires data migration")
         
         if change.old_value and change.new_value:
-            print(f"   Changed: {change.old_value} → {change.new_value}")
+            print(f"   Changed: {change.old_value}  ->  {change.new_value}")
         elif change.old_value:
             print(f"   Deleted: {change.old_value}")
         elif change.new_value:
@@ -127,7 +127,7 @@ def check_changes():
     # Check for critical changes
     critical_changes = [c for c in changes if c.risk_level.value == 'critical']
     if critical_changes:
-        print(f"\n🚨 WARNING: {len(critical_changes)} CRITICAL changes detected!")
+        print(f"\n ALERT:  WARNING: {len(critical_changes)} CRITICAL changes detected!")
         print("These changes could cause system failure. Review immediately!")
 
 
@@ -135,7 +135,7 @@ def generate_report():
     """Generate and display configuration change report."""
     tracker = get_config_tracker()
     
-    print("📋 Generating configuration change report...")
+    print("[U+1F4CB] Generating configuration change report...")
     
     report = tracker.generate_change_report()
     print(report)
@@ -145,16 +145,16 @@ def generate_report():
     is_valid, errors = tracker.validate_config_consistency(current_config)
     
     if is_valid:
-        print("✅ Configuration consistency validation passed")
+        print(" PASS:  Configuration consistency validation passed")
     else:
-        print("\n❌ Configuration consistency validation FAILED:")
+        print("\n FAIL:  Configuration consistency validation FAILED:")
         for error in errors:
             print(f"   - {error}")
     
     # Show recent critical changes
     critical_changes = tracker.get_critical_changes()
     if critical_changes:
-        print(f"\n🚨 Total critical changes in history: {len(critical_changes)}")
+        print(f"\n ALERT:  Total critical changes in history: {len(critical_changes)}")
 
 
 def validate_environment():
@@ -162,14 +162,14 @@ def validate_environment():
     tracker = get_config_tracker()
     current_config = get_current_config()
     
-    print("🔍 Validating environment configuration...")
+    print(" SEARCH:  Validating environment configuration...")
     
     is_valid, errors = tracker.validate_config_consistency(current_config)
     
     if is_valid:
-        print("✅ Environment configuration is valid")
+        print(" PASS:  Environment configuration is valid")
     else:
-        print("❌ Environment configuration validation FAILED:")
+        print(" FAIL:  Environment configuration validation FAILED:")
         for error in errors:
             print(f"   - {error}")
         sys.exit(1)
@@ -214,10 +214,10 @@ def main():
             print("  python scripts/monitor_config_changes.py --report")
     
     except KeyboardInterrupt:
-        print("\n⚠️  Monitoring interrupted")
+        print("\n WARNING: [U+FE0F]  Monitoring interrupted")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" FAIL:  Error: {e}")
         sys.exit(1)
 
 

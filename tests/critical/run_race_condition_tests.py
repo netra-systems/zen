@@ -88,15 +88,15 @@ class RaceConditionTestRunner:
 
     async def run_all_race_condition_tests(self) -> Dict[str, Any]:
         """Run all race condition test suites and analyze results."""
-        logger.info("🏁 STARTING COMPREHENSIVE WEBSOCKET RACE CONDITION TEST SUITE")
+        logger.info("[U+1F3C1] STARTING COMPREHENSIVE WEBSOCKET RACE CONDITION TEST SUITE")
         logger.info("=" * 80)
         
         start_time = time.time()
         
         # Run each test suite
         for suite_info in self.test_suites:
-            logger.info(f"\n🧪 Running {suite_info['name']}")
-            logger.info(f"📄 Description: {suite_info['description']}")
+            logger.info(f"\n[U+1F9EA] Running {suite_info['name']}")
+            logger.info(f"[U+1F4C4] Description: {suite_info['description']}")
             logger.info("-" * 60)
             
             try:
@@ -107,11 +107,11 @@ class RaceConditionTestRunner:
                     self._log_suite_results(result)
                 
                 if self.fail_fast and result.unexpected_passes > 0:
-                    logger.warning(f"⚠️ FAIL FAST: {result.unexpected_passes} unexpected passes detected")
+                    logger.warning(f" WARNING: [U+FE0F] FAIL FAST: {result.unexpected_passes} unexpected passes detected")
                     break
                     
             except Exception as e:
-                logger.error(f"❌ Error running {suite_info['name']}: {e}")
+                logger.error(f" FAIL:  Error running {suite_info['name']}: {e}")
                 continue
         
         end_time = time.time()
@@ -128,7 +128,7 @@ class RaceConditionTestRunner:
         test_file_path = Path(__file__).parent / suite_info["file"]
         
         if not test_file_path.exists():
-            logger.warning(f"⚠️ Test file not found: {test_file_path}")
+            logger.warning(f" WARNING: [U+FE0F] Test file not found: {test_file_path}")
             return TestSuiteResult(
                 suite_name=suite_info["name"],
                 test_file=suite_info["file"],
@@ -174,7 +174,7 @@ class RaceConditionTestRunner:
             )
             
         except subprocess.TimeoutExpired:
-            logger.error(f"⏰ Test suite {suite_info['name']} timed out after 5 minutes")
+            logger.error(f"[U+23F0] Test suite {suite_info['name']} timed out after 5 minutes")
             return TestSuiteResult(
                 suite_name=suite_info["name"],
                 test_file=suite_info["file"],
@@ -217,7 +217,7 @@ class RaceConditionTestRunner:
                 # Check if this was an xfail that unexpectedly passed
                 if "XPASS" in line:
                     unexpected_passes += 1
-                    logger.info(f"🎉 RACE CONDITION FIXED: {line}")
+                    logger.info(f" CELEBRATION:  RACE CONDITION FIXED: {line}")
                     
             elif "FAILED" in line and "::" in line:
                 failed_tests += 1
@@ -226,7 +226,7 @@ class RaceConditionTestRunner:
                 # Check if this was an expected failure (xfail)
                 if "xfail" in line.lower():
                     expected_failures += 1
-                    logger.info(f"✅ Expected race condition reproduced: {line}")
+                    logger.info(f" PASS:  Expected race condition reproduced: {line}")
                 else:
                     error_details.append(line)
                     
@@ -254,7 +254,7 @@ class RaceConditionTestRunner:
 
     def _log_suite_results(self, result: TestSuiteResult):
         """Log detailed results for a single test suite."""
-        logger.info(f"📊 {result.suite_name} Results:")
+        logger.info(f" CHART:  {result.suite_name} Results:")
         logger.info(f"   Total Tests: {result.total_tests}")
         logger.info(f"   Expected Failures (Race Conditions Detected): {result.expected_failures}")
         logger.info(f"   Unexpected Passes (Race Conditions Fixed): {result.unexpected_passes}")
@@ -263,13 +263,13 @@ class RaceConditionTestRunner:
         logger.info(f"   Duration: {result.duration_seconds:.2f}s")
         
         if result.unexpected_passes > 0:
-            logger.info(f"🎉 GOOD NEWS: {result.unexpected_passes} race conditions appear to be FIXED!")
+            logger.info(f" CELEBRATION:  GOOD NEWS: {result.unexpected_passes} race conditions appear to be FIXED!")
             
         if result.race_conditions_detected > 0:
-            logger.info(f"⚠️ RACE CONDITIONS: {result.race_conditions_detected} race conditions successfully reproduced")
+            logger.info(f" WARNING: [U+FE0F] RACE CONDITIONS: {result.race_conditions_detected} race conditions successfully reproduced")
             
         if result.error_details:
-            logger.warning("❌ Unexpected errors:")
+            logger.warning(" FAIL:  Unexpected errors:")
             for error in result.error_details[:3]:  # Show first 3 errors
                 logger.warning(f"   {error}")
             if len(result.error_details) > 3:
@@ -317,37 +317,37 @@ class RaceConditionTestRunner:
         
         if total_fixed > 0:
             recommendations.append(
-                f"🎉 EXCELLENT: {total_fixed} race conditions appear to be FIXED! "
+                f" CELEBRATION:  EXCELLENT: {total_fixed} race conditions appear to be FIXED! "
                 f"Consider updating the corresponding xfail markers to expect success."
             )
             
         if total_detected > 0:
             recommendations.append(
-                f"⚠️ ATTENTION: {total_detected} race conditions are still reproducible. "
+                f" WARNING: [U+FE0F] ATTENTION: {total_detected} race conditions are still reproducible. "
                 f"These need to be addressed to ensure $500K+ ARR chat functionality reliability."
             )
             
         if total_errors > 0:
             recommendations.append(
-                f"❌ INVESTIGATION NEEDED: {total_errors} unexpected test errors occurred. "
+                f" FAIL:  INVESTIGATION NEEDED: {total_errors} unexpected test errors occurred. "
                 f"Review error details to determine if these indicate new issues."
             )
             
         if total_detected == 0 and total_fixed == 0:
             recommendations.append(
-                "🔍 REVIEW REQUIRED: No race conditions detected or fixed. "
+                " SEARCH:  REVIEW REQUIRED: No race conditions detected or fixed. "
                 "This may indicate test conditions need adjustment or all race conditions are resolved."
             )
             
         # Business impact recommendations
         if total_detected > total_fixed:
             recommendations.append(
-                "💼 BUSINESS IMPACT: More race conditions detected than fixed. "
+                "[U+1F4BC] BUSINESS IMPACT: More race conditions detected than fixed. "
                 "Priority should be on implementing Single Coordination State Machine."
             )
         else:
             recommendations.append(
-                "💼 BUSINESS POSITIVE: Race condition fixes appear to be progressing well. "
+                "[U+1F4BC] BUSINESS POSITIVE: Race condition fixes appear to be progressing well. "
                 "Continue validation and monitoring."
             )
             
@@ -356,17 +356,17 @@ class RaceConditionTestRunner:
     def _log_comprehensive_analysis(self, analysis: Dict[str, Any]):
         """Log comprehensive analysis of all test results."""
         logger.info("\n" + "=" * 80)
-        logger.info("🏆 COMPREHENSIVE RACE CONDITION TEST ANALYSIS")
+        logger.info(" TROPHY:  COMPREHENSIVE RACE CONDITION TEST ANALYSIS")
         logger.info("=" * 80)
         
         summary = analysis["summary"]
-        logger.info(f"📈 OVERALL RESULTS:")
+        logger.info(f"[U+1F4C8] OVERALL RESULTS:")
         logger.info(f"   Total Test Suites: {summary['total_test_suites']}")
         logger.info(f"   Total Tests: {summary['total_tests']}")
         logger.info(f"   Total Duration: {summary['total_duration_seconds']:.2f}s")
         
         status = analysis["race_condition_status"]
-        logger.info(f"\n🎯 RACE CONDITION STATUS:")
+        logger.info(f"\n TARGET:  RACE CONDITION STATUS:")
         logger.info(f"   Successfully Reproduced: {status['reproduced_successfully']}")
         logger.info(f"   Appear Fixed: {status['appear_fixed']}")
         logger.info(f"   Total Race Conditions: {status['total_identified']}")
@@ -375,11 +375,11 @@ class RaceConditionTestRunner:
             fix_percentage = (status['appear_fixed'] / status['total_identified']) * 100
             logger.info(f"   Fix Progress: {fix_percentage:.1f}% of race conditions appear resolved")
         
-        logger.info(f"\n📋 RECOMMENDATIONS:")
+        logger.info(f"\n[U+1F4CB] RECOMMENDATIONS:")
         for i, rec in enumerate(analysis["recommendations"], 1):
             logger.info(f"   {i}. {rec}")
         
-        logger.info(f"\n📊 DETAILED SUITE BREAKDOWN:")
+        logger.info(f"\n CHART:  DETAILED SUITE BREAKDOWN:")
         for suite in analysis["suite_results"]:
             logger.info(f"   {suite['name']}:")
             logger.info(f"      Race Conditions Detected: {suite['race_conditions_detected']}")
@@ -388,11 +388,11 @@ class RaceConditionTestRunner:
             logger.info(f"      Duration: {suite['duration']:.2f}s")
         
         # Business impact summary
-        logger.info(f"\n💰 BUSINESS IMPACT SUMMARY:")
+        logger.info(f"\n[U+1F4B0] BUSINESS IMPACT SUMMARY:")
         if status['reproduced_successfully'] > 0:
-            logger.info(f"   🚨 RISK: {status['reproduced_successfully']} race conditions still threaten $500K+ ARR")
+            logger.info(f"    ALERT:  RISK: {status['reproduced_successfully']} race conditions still threaten $500K+ ARR")
         if status['appear_fixed'] > 0:
-            logger.info(f"   ✅ PROTECTED: {status['appear_fixed']} race conditions appear resolved")
+            logger.info(f"    PASS:  PROTECTED: {status['appear_fixed']} race conditions appear resolved")
         
         logger.info("=" * 80)
 
@@ -432,27 +432,27 @@ async def main():
         if args.output_json:
             with open(args.output_json, 'w') as f:
                 json.dump(analysis, f, indent=2)
-            logger.info(f"📄 Detailed analysis saved to {args.output_json}")
+            logger.info(f"[U+1F4C4] Detailed analysis saved to {args.output_json}")
         
         # Exit code based on results
         race_conditions_detected = analysis["race_condition_status"]["reproduced_successfully"]
         unexpected_errors = analysis["summary"]["total_unexpected_errors"]
         
         if unexpected_errors > 0:
-            logger.error(f"❌ Exiting with error code due to {unexpected_errors} unexpected errors")
+            logger.error(f" FAIL:  Exiting with error code due to {unexpected_errors} unexpected errors")
             sys.exit(1)
         elif race_conditions_detected > 0:
-            logger.info(f"⚠️ Exiting with warning code: {race_conditions_detected} race conditions detected")
+            logger.info(f" WARNING: [U+FE0F] Exiting with warning code: {race_conditions_detected} race conditions detected")
             sys.exit(2)  # Warning exit code
         else:
-            logger.info("✅ All race condition tests completed successfully")
+            logger.info(" PASS:  All race condition tests completed successfully")
             sys.exit(0)
             
     except KeyboardInterrupt:
-        logger.warning("🛑 Test execution interrupted by user")
+        logger.warning("[U+1F6D1] Test execution interrupted by user")
         sys.exit(130)
     except Exception as e:
-        logger.error(f"❌ Unexpected error during test execution: {e}")
+        logger.error(f" FAIL:  Unexpected error during test execution: {e}")
         sys.exit(1)
 
 

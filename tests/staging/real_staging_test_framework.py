@@ -965,7 +965,7 @@ class RealStagingTestBase:
                 f"{NetworkValidationConfig.MIN_NETWORK_LATENCY_SECONDS}s. Test did not make real network calls."
             )
         
-        self.logger.info("✓ Real staging test validation PASSED")
+        self.logger.info("[U+2713] Real staging test validation PASSED")
     
     # =====================================================================
     # CONVENIENCE METHODS FOR REAL NETWORK OPERATIONS
@@ -1269,7 +1269,7 @@ def validate_framework_prevents_fake_tests():
         assert False, "Should have rejected localhost URL"
     except ValueError as e:
         assert "forbidden pattern" in str(e)
-        logger.info("✓ Localhost URL properly rejected")
+        logger.info("[U+2713] Localhost URL properly rejected")
     
     # Test 2: Too-short timeout should be rejected
     try:
@@ -1277,7 +1277,7 @@ def validate_framework_prevents_fake_tests():
         assert False, "Should have rejected short timeout"
     except ValueError as e:
         assert "minimum" in str(e)
-        logger.info("✓ Short timeout properly rejected")
+        logger.info("[U+2713] Short timeout properly rejected")
     
     # Test 3: WebSocket URL validation
     try:
@@ -1285,9 +1285,9 @@ def validate_framework_prevents_fake_tests():
         assert False, "Should have rejected localhost WebSocket URL"
     except ValueError as e:
         assert "forbidden pattern" in str(e)
-        logger.info("✓ Localhost WebSocket URL properly rejected")
+        logger.info("[U+2713] Localhost WebSocket URL properly rejected")
     
-    logger.info("✓ Framework validation passed - fake tests are properly prevented")
+    logger.info("[U+2713] Framework validation passed - fake tests are properly prevented")
 
 
 if __name__ == "__main__":
@@ -1318,7 +1318,7 @@ if __name__ == "__main__":
     validate_framework_prevents_fake_tests()
     
     print("""
-    ✓ Framework validation completed successfully!
+    [U+2713] Framework validation completed successfully!
     
     Usage Example:
     

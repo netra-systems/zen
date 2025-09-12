@@ -57,7 +57,7 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
         2. Query to user_sessions table raises ProgrammingError
         3. Authentication flows dependent on user_sessions fail
         """
-        logger.info("🔍 CRITICAL TEST: Validating user_sessions table deployment")
+        logger.info(" SEARCH:  CRITICAL TEST: Validating user_sessions table deployment")
         
         db_session = real_services_fixture["db"]
         
@@ -74,15 +74,15 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
             
             if not table_exists:
                 pytest.fail(
-                    "❌ CRITICAL FAILURE: user_sessions table missing from auth schema. "
+                    " FAIL:  CRITICAL FAILURE: user_sessions table missing from auth schema. "
                     "This reproduces the staging authentication failure. "
                     "Table exists in staging_init.sql but not deployed to database."
                 )
                 
-            logger.info("✅ user_sessions table exists in auth schema")
+            logger.info(" PASS:  user_sessions table exists in auth schema")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Cannot check user_sessions table existence: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Cannot check user_sessions table existence: {e}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -95,7 +95,7 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
         - id, user_id, session_token, refresh_token, expires_at, created_at, 
           last_accessed, ip_address, user_agent, is_active
         """
-        logger.info("🔍 CRITICAL TEST: Validating user_sessions table schema")
+        logger.info(" SEARCH:  CRITICAL TEST: Validating user_sessions table schema")
         
         db_session = real_services_fixture["db"]
         
@@ -113,7 +113,7 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
             
             if not columns:
                 pytest.fail(
-                    "❌ CRITICAL FAILURE: user_sessions table has no columns or doesn't exist. "
+                    " FAIL:  CRITICAL FAILURE: user_sessions table has no columns or doesn't exist. "
                     "This indicates deployment configuration failure."
                 )
             
@@ -129,15 +129,15 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
             missing_columns = expected_columns - actual_columns
             if missing_columns:
                 pytest.fail(
-                    f"❌ CRITICAL FAILURE: user_sessions table missing required columns: {missing_columns}. "
+                    f" FAIL:  CRITICAL FAILURE: user_sessions table missing required columns: {missing_columns}. "
                     f"This indicates incomplete deployment or schema drift."
                 )
             
-            logger.info(f"✅ user_sessions table has correct schema with {len(actual_columns)} columns")
+            logger.info(f" PASS:  user_sessions table has correct schema with {len(actual_columns)} columns")
             
         except ProgrammingError as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Cannot access user_sessions table schema: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Cannot access user_sessions table schema: {e}. "
                 f"This reproduces the staging authentication issue - table not properly deployed."
             )
     
@@ -154,7 +154,7 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
         3. Update session last_accessed
         4. Cleanup expired sessions
         """
-        logger.info("🔍 CRITICAL TEST: Validating user_sessions table operations")
+        logger.info(" SEARCH:  CRITICAL TEST: Validating user_sessions table operations")
         
         db_session = real_services_fixture["db"]
         
@@ -178,9 +178,9 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
             
             session_id = insert_result.scalar()
             if not session_id:
-                pytest.fail("❌ CRITICAL FAILURE: Cannot insert into user_sessions table")
+                pytest.fail(" FAIL:  CRITICAL FAILURE: Cannot insert into user_sessions table")
                 
-            logger.info(f"✅ Successfully inserted session record: {session_id}")
+            logger.info(f" PASS:  Successfully inserted session record: {session_id}")
             
             # Test 2: Query session by token (critical for auth validation)
             query_result = await db_session.execute(text("""
@@ -191,13 +191,13 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
             
             session_data = query_result.fetchone()
             if not session_data:
-                pytest.fail("❌ CRITICAL FAILURE: Cannot query user_sessions by token")
+                pytest.fail(" FAIL:  CRITICAL FAILURE: Cannot query user_sessions by token")
                 
             assert session_data[0] == test_user_id, "Session user_id mismatch"
             assert session_data[1] is True, "Session should be active"
             assert session_data[2] is True, "Session should not be expired"
             
-            logger.info("✅ Successfully queried session by token")
+            logger.info(" PASS:  Successfully queried session by token")
             
             # Test 3: Update last_accessed (critical for session management)
             update_result = await db_session.execute(text("""
@@ -209,9 +209,9 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
             
             updated_time = update_result.scalar()
             if not updated_time:
-                pytest.fail("❌ CRITICAL FAILURE: Cannot update user_sessions last_accessed")
+                pytest.fail(" FAIL:  CRITICAL FAILURE: Cannot update user_sessions last_accessed")
                 
-            logger.info("✅ Successfully updated session last_accessed")
+            logger.info(" PASS:  Successfully updated session last_accessed")
             
             # Cleanup test data
             await db_session.execute(text("""
@@ -223,12 +223,12 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
         except ProgrammingError as e:
             await db_session.rollback()
             pytest.fail(
-                f"❌ CRITICAL FAILURE: user_sessions table operations failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE: user_sessions table operations failed: {e}. "
                 f"This reproduces the staging authentication failure - table not accessible for auth operations."
             )
         except Exception as e:
             await db_session.rollback()
-            pytest.fail(f"❌ CRITICAL FAILURE: Unexpected error in user_sessions operations: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Unexpected error in user_sessions operations: {e}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -242,7 +242,7 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
         - idx_sessions_token  
         - idx_sessions_expires_at
         """
-        logger.info("🔍 CRITICAL TEST: Validating user_sessions table indexes")
+        logger.info(" SEARCH:  CRITICAL TEST: Validating user_sessions table indexes")
         
         db_session = real_services_fixture["db"]
         
@@ -266,14 +266,14 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
             
             missing_indexes = expected_indexes - index_names
             if missing_indexes:
-                logger.warning(f"⚠️ Missing performance indexes on user_sessions: {missing_indexes}")
+                logger.warning(f" WARNING: [U+FE0F] Missing performance indexes on user_sessions: {missing_indexes}")
                 # Note: This is a warning, not a critical failure, but important for performance
             
-            logger.info(f"✅ user_sessions table has {len(index_names)} indexes")
+            logger.info(f" PASS:  user_sessions table has {len(index_names)} indexes")
             
         except ProgrammingError as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Cannot check user_sessions indexes: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Cannot check user_sessions indexes: {e}. "
                 f"This indicates table deployment issues."
             )
     
@@ -290,7 +290,7 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
         3. UPDATE user_sessions
         4. DELETE from user_sessions
         """
-        logger.info("🔍 CRITICAL TEST: Validating auth schema permissions")
+        logger.info(" SEARCH:  CRITICAL TEST: Validating auth schema permissions")
         
         db_session = real_services_fixture["db"]
         
@@ -310,15 +310,15 @@ class TestUserSessionsTableValidation(BaseIntegrationTest):
                 missing_perms = [name for name, has_perm in zip(perm_names, permissions) if not has_perm]
                 
                 pytest.fail(
-                    f"❌ CRITICAL FAILURE: Missing permissions on user_sessions table: {missing_perms}. "
+                    f" FAIL:  CRITICAL FAILURE: Missing permissions on user_sessions table: {missing_perms}. "
                     f"This prevents authentication operations and reproduces the staging failure."
                 )
             
-            logger.info("✅ All required permissions exist on auth.user_sessions")
+            logger.info(" PASS:  All required permissions exist on auth.user_sessions")
             
         except ProgrammingError as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Cannot check auth schema permissions: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Cannot check auth schema permissions: {e}. "
                 f"This indicates deployment configuration issues."
             )
 
@@ -341,7 +341,7 @@ class TestUserSessionsAuthenticationIntegration(BaseIntegrationTest):
         This test will FAIL if user_sessions table is missing because authentication
         operations cannot store/retrieve session data.
         """
-        logger.info("🔍 CRITICAL TEST: Authentication flow requiring user_sessions")
+        logger.info(" SEARCH:  CRITICAL TEST: Authentication flow requiring user_sessions")
         
         # Create authenticated user context that requires user_sessions
         try:
@@ -357,11 +357,11 @@ class TestUserSessionsAuthenticationIntegration(BaseIntegrationTest):
             assert user_context.user_id is not None
             assert user_context.agent_context['jwt_token'] is not None
             
-            logger.info("✅ Authentication context created successfully")
+            logger.info(" PASS:  Authentication context created successfully")
             
         except Exception as e:
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Authentication flow failed: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Authentication flow failed: {e}. "
                 f"This may indicate user_sessions table issues preventing proper auth operations."
             )
     
@@ -375,7 +375,7 @@ class TestUserSessionsAuthenticationIntegration(BaseIntegrationTest):
         Tests the session cleanup functions that are critical for security
         and prevent session accumulation.
         """
-        logger.info("🔍 CRITICAL TEST: Session cleanup operations")
+        logger.info(" SEARCH:  CRITICAL TEST: Session cleanup operations")
         
         db_session = real_services_fixture["db"]
         
@@ -399,14 +399,14 @@ class TestUserSessionsAuthenticationIntegration(BaseIntegrationTest):
             """))
             
             cleaned_sessions = cleanup_update.fetchall()
-            logger.info(f"✅ Session cleanup operation completed: {len(cleaned_sessions)} sessions")
+            logger.info(f" PASS:  Session cleanup operation completed: {len(cleaned_sessions)} sessions")
             
             await db_session.commit()
             
         except ProgrammingError as e:
             await db_session.rollback()
             pytest.fail(
-                f"❌ CRITICAL FAILURE: Session cleanup failed due to user_sessions table issues: {e}. "
+                f" FAIL:  CRITICAL FAILURE: Session cleanup failed due to user_sessions table issues: {e}. "
                 f"This reproduces the staging authentication problem."
             )
 
@@ -429,7 +429,7 @@ class TestUserSessionsDatabaseDeploymentValidation(BaseIntegrationTest):
         Ensures that the deployment process successfully created ALL tables
         defined in staging_init.sql, not just some of them.
         """
-        logger.info("🔍 CRITICAL TEST: Database deployment completeness validation")
+        logger.info(" SEARCH:  CRITICAL TEST: Database deployment completeness validation")
         
         db_session = real_services_fixture["db"]
         
@@ -460,12 +460,12 @@ class TestUserSessionsDatabaseDeploymentValidation(BaseIntegrationTest):
             
             if missing_tables:
                 pytest.fail(
-                    f"❌ CRITICAL DEPLOYMENT FAILURE: Missing tables indicate incomplete deployment: {missing_tables}. "
+                    f" FAIL:  CRITICAL DEPLOYMENT FAILURE: Missing tables indicate incomplete deployment: {missing_tables}. "
                     f"Schema exists in staging_init.sql but tables not created in database. "
                     f"This reproduces the exact staging authentication failure."
                 )
             
-            logger.info(f"✅ All {len(expected_critical_tables)} critical tables exist in database")
+            logger.info(f" PASS:  All {len(expected_critical_tables)} critical tables exist in database")
             
             # Log existing tables for debugging
             logger.info("Existing tables in database:")
@@ -473,7 +473,7 @@ class TestUserSessionsDatabaseDeploymentValidation(BaseIntegrationTest):
                 logger.info(f"  {schema}.{table}")
                 
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Cannot validate database deployment: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Cannot validate database deployment: {e}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -485,7 +485,7 @@ class TestUserSessionsDatabaseDeploymentValidation(BaseIntegrationTest):
         The auth schema is critical for authentication and the user_sessions
         table MUST exist for the Golden Path to work.
         """
-        logger.info("🔍 CRITICAL TEST: Auth schema deployment validation")
+        logger.info(" SEARCH:  CRITICAL TEST: Auth schema deployment validation")
         
         db_session = real_services_fixture["db"]
         
@@ -500,7 +500,7 @@ class TestUserSessionsDatabaseDeploymentValidation(BaseIntegrationTest):
             auth_schema_exists = schema_result.scalar()
             if not auth_schema_exists:
                 pytest.fail(
-                    "❌ CRITICAL FAILURE: auth schema missing from database. "
+                    " FAIL:  CRITICAL FAILURE: auth schema missing from database. "
                     "Complete deployment failure - authentication impossible."
                 )
             
@@ -520,12 +520,12 @@ class TestUserSessionsDatabaseDeploymentValidation(BaseIntegrationTest):
             
             if missing_auth_tables:
                 pytest.fail(
-                    f"❌ CRITICAL FAILURE: Missing auth tables: {missing_auth_tables}. "
+                    f" FAIL:  CRITICAL FAILURE: Missing auth tables: {missing_auth_tables}. "
                     f"user_sessions table missing prevents all authentication. "
                     f"This reproduces the staging authentication failure exactly."
                 )
             
-            logger.info(f"✅ Auth schema complete with tables: {auth_tables}")
+            logger.info(f" PASS:  Auth schema complete with tables: {auth_tables}")
             
         except Exception as e:
-            pytest.fail(f"❌ CRITICAL FAILURE: Auth schema validation failed: {e}")
+            pytest.fail(f" FAIL:  CRITICAL FAILURE: Auth schema validation failed: {e}")

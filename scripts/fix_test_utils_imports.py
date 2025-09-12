@@ -93,7 +93,7 @@ def main():
     logger.info(f"Errors: {error_count}")
     
     if fixed_count > 0:
-        logger.info("\n✅ Successfully fixed test_utils imports!")
+        logger.info("\n PASS:  Successfully fixed test_utils imports!")
     
     return 0 if error_count == 0 else 1
 

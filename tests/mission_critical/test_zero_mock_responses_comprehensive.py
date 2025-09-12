@@ -109,7 +109,7 @@ class MockResponseEliminationTestSuite:
     
     async def test_model_cascade_no_mock_responses(self):
         """Test that ModelCascade never returns mock responses under any failure scenario."""
-        print("\n🧪 Testing ModelCascade mock response elimination...")
+        print("\n[U+1F9EA] Testing ModelCascade mock response elimination...")
         
         # Create test cascade
         llm_manager = MagicMock()
@@ -200,12 +200,12 @@ class MockResponseEliminationTestSuite:
             assert result in ["REAL_RESPONSE", "CORRECT_EXCEPTION", "UNHANDLED_EXCEPTION"], \
                 f"Scenario {scenario} had unexpected result: {result}"
         
-        print(f"  ✅ ModelCascade test passed: {len(results)} scenarios tested")
+        print(f"   PASS:  ModelCascade test passed: {len(results)} scenarios tested")
         return results
     
     async def test_enhanced_execution_agent_no_fallback_templates(self):
         """Test that EnhancedExecutionAgent never returns template responses."""
-        print("\n🧪 Testing EnhancedExecutionAgent mock response elimination...")
+        print("\n[U+1F9EA] Testing EnhancedExecutionAgent mock response elimination...")
         
         # Create test agent
         llm_manager = MagicMock()
@@ -276,12 +276,12 @@ class MockResponseEliminationTestSuite:
         
         self.test_results["enhanced_execution_agent"] = results
         
-        print(f"  ✅ EnhancedExecutionAgent test passed: {len(results)} scenarios tested")
+        print(f"   PASS:  EnhancedExecutionAgent test passed: {len(results)} scenarios tested")
         return results
     
     async def test_unified_data_agent_no_fabricated_data(self):
         """Test that UnifiedDataAgent never returns fabricated data.""" 
-        print("\n🧪 Testing UnifiedDataAgent fabricated data elimination...")
+        print("\n[U+1F9EA] Testing UnifiedDataAgent fabricated data elimination...")
         
         # Create test agent factory and agent
         factory = UnifiedDataAgentFactory()
@@ -345,7 +345,7 @@ class MockResponseEliminationTestSuite:
         
         self.test_results["unified_data_agent"] = results
         
-        print(f"  ✅ UnifiedDataAgent test passed: {len(results)} scenarios tested")
+        print(f"   PASS:  UnifiedDataAgent test passed: {len(results)} scenarios tested")
         return results
     
     def _check_for_random_data_patterns(self, data: List[Dict]) -> bool:
@@ -391,7 +391,7 @@ class MockResponseEliminationTestSuite:
     
     async def test_websocket_events_transparency(self):
         """Test that WebSocket events provide transparent service status."""
-        print("\n🧪 Testing WebSocket event transparency...")
+        print("\n[U+1F9EA] Testing WebSocket event transparency...")
         
         context = self.create_test_context()
         
@@ -429,12 +429,12 @@ class MockResponseEliminationTestSuite:
                 assert event.get("reason") is not None, "Service unavailable reason is None"
                 assert len(event.get("reason", "")) > 0, "Service unavailable reason is empty"
         
-        print(f"  ✅ WebSocket transparency test passed: {len(event_types)} events verified")
+        print(f"   PASS:  WebSocket transparency test passed: {len(event_types)} events verified")
         return {"events_captured": len(self.websocket_events_captured), "event_types": event_types}
     
     async def test_enterprise_vs_free_tier_handling(self):
         """Test that user tiers receive appropriate error handling."""
-        print("\n🧪 Testing user tier-aware error handling...")
+        print("\n[U+1F9EA] Testing user tier-aware error handling...")
         
         handler = UserTierAwareErrorHandler()
         
@@ -481,7 +481,7 @@ class MockResponseEliminationTestSuite:
             assert pattern not in enterprise_msg.lower(), f"Mock pattern in enterprise response: {pattern}"
             assert pattern not in free_msg.lower(), f"Mock pattern in free response: {pattern}"
         
-        print("  ✅ User tier handling test passed")
+        print("   PASS:  User tier handling test passed")
         return {
             "enterprise_features": len(enterprise_response.get("premium_features", {})),
             "free_upgrade_options": len(free_response.get("upgrade_options", {}))
@@ -489,7 +489,7 @@ class MockResponseEliminationTestSuite:
     
     async def test_service_initialization_transparency(self):
         """Test that service initialization provides complete transparency."""
-        print("\n🧪 Testing service initialization transparency...")
+        print("\n[U+1F9EA] Testing service initialization transparency...")
         
         context = self.create_test_context()
         initializer = UnifiedServiceInitializer()
@@ -526,13 +526,13 @@ class MockResponseEliminationTestSuite:
             if event.get("type") == "service_unavailable":
                 assert "reason" in event, "Service unavailable event missing reason"
         
-        print(f"  ✅ Service initialization transparency test passed: {len(initialization_events)} events")
+        print(f"   PASS:  Service initialization transparency test passed: {len(initialization_events)} events")
         return {"initialization_events": len(initialization_events)}
     
     async def run_comprehensive_test_suite(self) -> Dict[str, Any]:
         """Run the complete mock response elimination test suite."""
         print("\n" + "="*70)
-        print("🚨 MISSION CRITICAL: ZERO MOCK RESPONSES COMPREHENSIVE TEST SUITE")
+        print(" ALERT:  MISSION CRITICAL: ZERO MOCK RESPONSES COMPREHENSIVE TEST SUITE")
         print("="*70)
         print("Business Impact: Protecting $4.1M immediate ARR")
         print("Objective: Prove complete elimination of mock responses to users")
@@ -562,21 +562,21 @@ class MockResponseEliminationTestSuite:
                     "status": "FAILED",
                     "error": str(e)
                 }
-                print(f"  ❌ {test_method.__name__} FAILED: {e}")
+                print(f"   FAIL:  {test_method.__name__} FAILED: {e}")
         
         # Final validation
         total_tests = len(test_methods)
         passed_tests = len([r for r in test_results.values() if r["status"] == "PASSED"])
         
         print("\n" + "="*70)
-        print("📊 FINAL RESULTS")
+        print(" CHART:  FINAL RESULTS")
         print("="*70)
         print(f"Tests Passed: {passed_tests}/{total_tests}")
         print(f"Mock Responses Detected: {len(self.mock_responses_detected)}")
         print(f"WebSocket Events Captured: {len(self.websocket_events_captured)}")
         
         if self.mock_responses_detected:
-            print("\n🚨 CRITICAL: Mock responses detected:")
+            print("\n ALERT:  CRITICAL: Mock responses detected:")
             for mock in self.mock_responses_detected:
                 print(f"  - {mock['component']}: {mock['pattern']} in {mock['scenario']}")
         
@@ -587,11 +587,11 @@ class MockResponseEliminationTestSuite:
         )
         
         if business_success:
-            print("\n✅ MISSION SUCCESS: Zero mock responses confirmed")
-            print("💰 Business Impact: $4.1M ARR protected")
+            print("\n PASS:  MISSION SUCCESS: Zero mock responses confirmed")
+            print("[U+1F4B0] Business Impact: $4.1M ARR protected")
         else:
-            print("\n❌ MISSION FAILURE: Mock responses still present")
-            print("💸 Business Risk: $4.1M ARR at continued risk")
+            print("\n FAIL:  MISSION FAILURE: Mock responses still present")
+            print("[U+1F4B8] Business Risk: $4.1M ARR at continued risk")
         
         print("="*70)
         

@@ -66,7 +66,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             
             # This simulates the enhanced logging from database_manager.py lines 461-466
             self.mock_logger.critical(
-                f"💥 CRITICAL: Unexpected error during DatabaseManager initialization after {init_duration:.3f}s: {error}"
+                f"[U+1F4A5] CRITICAL: Unexpected error during DatabaseManager initialization after {init_duration:.3f}s: {error}"
             )
             self.mock_logger.error(
                 f"Unexpected failure details: ConnectionError: {error}"
@@ -81,7 +81,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         # Check critical failure log
         level1, message1, kwargs1 = self.log_capture[0]
         assert level1 == "CRITICAL"
-        assert "💥 CRITICAL" in message1
+        assert "[U+1F4A5] CRITICAL" in message1
         assert "DatabaseManager initialization" in message1
         assert f"{init_duration:.3f}s" in message1
         assert error in message1
@@ -110,7 +110,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             
             # This simulates enhanced logging from database_manager.py lines 498-501
             self.mock_logger.critical(
-                f"💥 Database health check FAILED for {engine_name} after {total_duration:.3f}s"
+                f"[U+1F4A5] Database health check FAILED for {engine_name} after {total_duration:.3f}s"
             )
             self.mock_logger.error(
                 f"Health check error details: OperationalError: {error}"
@@ -125,7 +125,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         # Check critical health check failure
         level1, message1, kwargs1 = self.log_capture[0]
         assert level1 == "CRITICAL"
-        assert "💥 Database health check FAILED" in message1
+        assert "[U+1F4A5] Database health check FAILED" in message1
         assert engine_name in message1
         assert f"{total_duration:.3f}s" in message1
         
@@ -156,16 +156,16 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             
             # This simulates enhanced logging from database_manager.py lines 239-253
             self.mock_logger.critical(
-                f"💥 TRANSACTION FAILURE in session {session_id}"
+                f"[U+1F4A5] TRANSACTION FAILURE in session {session_id}"
             )
             self.mock_logger.error(
                 f"Operation: {operation_type}, User: {user_id or 'system'}, Error: DeadlockError: {error}"
             )
             self.mock_logger.warning(
-                f"🔄 Rollback completed for session {session_id} in {rollback_duration:.3f}s"
+                f" CYCLE:  Rollback completed for session {session_id} in {rollback_duration:.3f}s"
             )
             self.mock_logger.error(
-                f"❌ Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}"
+                f" FAIL:  Session {session_id} failed after {session_duration:.3f}s - Data loss possible for user {user_id or 'system'}"
             )
         
         # Validate logging
@@ -174,7 +174,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         # Check critical transaction failure
         level1, message1, kwargs1 = self.log_capture[0]
         assert level1 == "CRITICAL"
-        assert "💥 TRANSACTION FAILURE" in message1
+        assert "[U+1F4A5] TRANSACTION FAILURE" in message1
         assert session_id in message1
         
         # Check error context
@@ -187,13 +187,13 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         # Check rollback success
         level3, message3, kwargs3 = self.log_capture[2]
         assert level3 == "WARNING"
-        assert "🔄 Rollback completed" in message3
+        assert " CYCLE:  Rollback completed" in message3
         assert f"{rollback_duration:.3f}s" in message3
         
         # Check data loss warning
         level4, message4, kwargs4 = self.log_capture[3]
         assert level4 == "ERROR"
-        assert "❌ Session" in message4
+        assert " FAIL:  Session" in message4
         assert "Data loss possible" in message4
 
     async def test_database_rollback_failure_logging(self):
@@ -208,7 +208,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             
             # This simulates enhanced logging from database_manager.py lines 247-249
             self.mock_logger.critical(
-                f"💥 ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}"
+                f"[U+1F4A5] ROLLBACK FAILED for session {session_id} after {rollback_duration:.3f}s: {rollback_error}"
             )
             self.mock_logger.critical(
                 f"DATABASE INTEGRITY AT RISK - Manual intervention may be required"
@@ -220,7 +220,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         # Check rollback failure
         level1, message1, kwargs1 = self.log_capture[0]
         assert level1 == "CRITICAL"
-        assert "💥 ROLLBACK FAILED" in message1
+        assert "[U+1F4A5] ROLLBACK FAILED" in message1
         assert session_id in message1
         assert f"{rollback_duration:.3f}s" in message1
         assert rollback_error in message1
@@ -241,7 +241,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             
             # This simulates enhanced DatabaseURLBuilder error handling
             self.mock_logger.critical(
-                f"💥 CRITICAL: DatabaseURLBuilder initialization failed: {url_error}"
+                f"[U+1F4A5] CRITICAL: DatabaseURLBuilder initialization failed: {url_error}"
             )
             self.mock_logger.error(
                 f"URL Builder failure details: ValueError: {url_error}"
@@ -259,7 +259,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         # Check critical URL builder failure
         level1, message1, kwargs1 = self.log_capture[0]
         assert level1 == "CRITICAL"
-        assert "💥 CRITICAL: DatabaseURLBuilder initialization failed" in message1
+        assert "[U+1F4A5] CRITICAL: DatabaseURLBuilder initialization failed" in message1
         assert url_error in message1
         
         # Check error details
@@ -290,7 +290,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             
             # This simulates enhanced pool monitoring from database_manager.py lines 191-193
             self.mock_logger.warning(
-                f"🚨 Database pool near exhaustion: {current_active}/{total_capacity} sessions active"
+                f" ALERT:  Database pool near exhaustion: {current_active}/{total_capacity} sessions active"
             )
         
         # Validate logging
@@ -298,7 +298,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         
         level1, message1, kwargs1 = self.log_capture[0]
         assert level1 == "WARNING"
-        assert "🚨 Database pool near exhaustion" in message1
+        assert " ALERT:  Database pool near exhaustion" in message1
         assert f"{current_active}/{total_capacity}" in message1
         assert "sessions active" in message1
 
@@ -316,7 +316,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             
             # This simulates enhanced success logging from database_manager.py lines 232-234
             self.mock_logger.info(
-                f"✅ Session {session_id} committed successfully - Operation: {operation_type}, "
+                f" PASS:  Session {session_id} committed successfully - Operation: {operation_type}, "
                 f"User: {user_id or 'system'}, Duration: {session_duration:.3f}s, Commit: {commit_duration:.3f}s"
             )
         
@@ -325,7 +325,7 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
         
         level1, message1, kwargs1 = self.log_capture[0]
         assert level1 == "INFO"
-        assert "✅ Session" in message1
+        assert " PASS:  Session" in message1
         assert "committed successfully" in message1
         assert session_id in message1
         assert f"Operation: {operation_type}" in message1
@@ -367,14 +367,14 @@ class TestDatabaseConnectionFailureLogging(SSotAsyncTestCase):
             
             # Comprehensive database failure logging
             self.mock_logger.critical(
-                f"💥 GOLDEN PATH DATABASE FAILURE: Database operation failed for session {self.session_id}"
+                f"[U+1F4A5] GOLDEN PATH DATABASE FAILURE: Database operation failed for session {self.session_id}"
             )
             self.mock_logger.error(
-                f"🔍 DATABASE FAILURE CONTEXT: Session: {self.session_id}, User: {self.user_id[:8]}..., "
+                f" SEARCH:  DATABASE FAILURE CONTEXT: Session: {self.session_id}, User: {self.user_id[:8]}..., "
                 f"Operation: user_data_query, Duration: 2.5s, Error: Connection timeout"
             )
             self.mock_logger.error(
-                f"📊 DATABASE POOL STATUS: Active sessions: 45/75, Utilization: 60%"
+                f" CHART:  DATABASE POOL STATUS: Active sessions: 45/75, Utilization: 60%"
             )
         
         # Validate context logging

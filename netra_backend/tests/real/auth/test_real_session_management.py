@@ -65,7 +65,7 @@ class TestRealSessionManagement:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for session management testing."""
-        print("🐳 Starting Docker services for session management tests...")
+        print("[U+1F433] Starting Docker services for session management tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -77,13 +77,13 @@ class TestRealSessionManagement:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for session management tests")
+            print(" PASS:  Docker services ready for session management tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for session tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for session tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after session management tests...")
+            print("[U+1F9F9] Cleaning up Docker services after session management tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -108,12 +108,12 @@ class TestRealSessionManagement:
             
             # Test connection
             await client.ping()
-            print(f"✅ Connected to Redis at {redis_url}")
+            print(f" PASS:  Connected to Redis at {redis_url}")
             
             yield client
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to connect to Redis for session tests: {e}")
+            pytest.fail(f" FAIL:  Failed to connect to Redis for session tests: {e}")
         finally:
             if 'client' in locals():
                 await client.aclose()
@@ -171,7 +171,7 @@ class TestRealSessionManagement:
             assert parsed_data["user_id"] == user_id
             assert parsed_data["is_active"] is True
             
-            print(f"✅ Session {session_id[:8]}... created and stored successfully")
+            print(f" PASS:  Session {session_id[:8]}... created and stored successfully")
             
         finally:
             # Cleanup test session
@@ -212,7 +212,7 @@ class TestRealSessionManagement:
             assert parsed_data["is_active"] is True
             assert "@" in parsed_data["email"]
             
-            print(f"✅ Session {session_id[:8]}... retrieved and validated successfully")
+            print(f" PASS:  Session {session_id[:8]}... retrieved and validated successfully")
             
         finally:
             await redis_client.delete(cache_key)
@@ -243,7 +243,7 @@ class TestRealSessionManagement:
             expired_data = await redis_client.get(cache_key)
             assert expired_data is None, "Session should expire after TTL"
             
-            print(f"✅ Session {session_id[:8]}... expired and cleaned up successfully")
+            print(f" PASS:  Session {session_id[:8]}... expired and cleaned up successfully")
             
         except Exception as e:
             # Cleanup in case of error
@@ -290,7 +290,7 @@ class TestRealSessionManagement:
             assert parsed_data["last_activity"] != session_data["last_activity"]
             assert parsed_data["activity_count"] == 1
             
-            print(f"✅ Session {session_id[:8]}... activity updated successfully")
+            print(f" PASS:  Session {session_id[:8]}... activity updated successfully")
             
         finally:
             await redis_client.delete(cache_key)
@@ -339,7 +339,7 @@ class TestRealSessionManagement:
                     if i != j:
                         assert session_id != other_session_id, "Session IDs must be unique"
             
-            print(f"✅ {session_count} concurrent sessions managed successfully")
+            print(f" PASS:  {session_count} concurrent sessions managed successfully")
             
         finally:
             # Cleanup all sessions
@@ -396,7 +396,7 @@ class TestRealSessionManagement:
                         assert parsed_data["email"] != other_session["email"]
                         assert parsed_data["session_id"] != other_session["session_id"]
             
-            print("✅ Session user isolation validated successfully")
+            print(" PASS:  Session user isolation validated successfully")
             
         finally:
             # Cleanup all sessions
@@ -432,7 +432,7 @@ class TestRealSessionManagement:
             invalidated_data = await redis_client.get(cache_key)
             assert invalidated_data is None, "Session should be deleted after invalidation"
             
-            print(f"✅ Session {session_id[:8]}... invalidated successfully")
+            print(f" PASS:  Session {session_id[:8]}... invalidated successfully")
             
         except Exception as e:
             # Cleanup in case of error
@@ -493,7 +493,7 @@ class TestRealSessionManagement:
             assert admin_parsed["user_id"] != user_parsed["user_id"]
             assert admin_parsed["session_id"] != user_parsed["session_id"]
             
-            print("✅ Session security boundaries validated successfully")
+            print(" PASS:  Session security boundaries validated successfully")
             
         finally:
             await redis_client.delete(admin_cache_key)
@@ -527,7 +527,7 @@ class TestRealSessionManagement:
             for i in range(3):
                 try:
                     response = await async_client.get("/health", headers=headers)
-                    print(f"✅ API request {i+1} with session - Status: {response.status_code}")
+                    print(f" PASS:  API request {i+1} with session - Status: {response.status_code}")
                     
                     # Verify session still exists after request
                     session_check = await redis_client.get(cache_key)
@@ -537,9 +537,9 @@ class TestRealSessionManagement:
                     await asyncio.sleep(0.1)
                     
                 except Exception as e:
-                    print(f"⚠️ API request {i+1} with session encountered: {e}")
+                    print(f" WARNING: [U+FE0F] API request {i+1} with session encountered: {e}")
             
-            print("✅ Session persistence across multiple requests validated")
+            print(" PASS:  Session persistence across multiple requests validated")
             
         finally:
             await redis_client.delete(cache_key)
@@ -584,7 +584,7 @@ class TestRealSessionManagement:
                 cached_data = await redis_client.get(cache_key)
                 assert cached_data is None, "All sessions should be cleaned up"
             
-            print("✅ Session cleanup on service restart simulated successfully")
+            print(" PASS:  Session cleanup on service restart simulated successfully")
             
         except Exception as e:
             # Cleanup any remaining sessions

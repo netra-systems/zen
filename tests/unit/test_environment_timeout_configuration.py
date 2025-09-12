@@ -73,7 +73,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
             else:
                 timeout_analysis[env]["health_check"] = 1.0  # Other environments
         
-        print(f"\n📊 Environment Timeout Analysis:")
+        print(f"\n CHART:  Environment Timeout Analysis:")
         for env, config in timeout_analysis.items():
             print(f"  {env.upper()}:")
             print(f"    Connect: {config['connect']}s")
@@ -145,7 +145,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                 "pool": timeouts.pool
             }
         
-        print(f"\n🔧 Hardcoded Timeout Analysis:")
+        print(f"\n[U+1F527] Hardcoded Timeout Analysis:")
         print(f"Health Check Timeouts:")
         print(f"  Staging: {hardcoded_analysis['staging_health_check']}s (hardcoded)")
         print(f"  Other envs: {hardcoded_analysis['other_health_check']}s (hardcoded)")
@@ -191,7 +191,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                 "recommendation": "Set minimum health check timeout to 1.0s for all environments"
             })
         
-        print(f"\n⚠️  Configuration Issues Found: {len(hardcoded_analysis['configuration_issues'])}")
+        print(f"\n WARNING: [U+FE0F]  Configuration Issues Found: {len(hardcoded_analysis['configuration_issues'])}")
         for issue in hardcoded_analysis["configuration_issues"]:
             print(f"\n  Issue: {issue['issue']}")
             print(f"  Description: {issue['description']}")
@@ -239,7 +239,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
             "validation_missing": []
         }
         
-        print(f"\n🔍 Timeout Bounds Validation Analysis:")
+        print(f"\n SEARCH:  Timeout Bounds Validation Analysis:")
         
         # Test each environment's timeouts against bounds
         for env in self.environments:
@@ -261,9 +261,9 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                 min_safe = bounds_test["minimum_safe_timeouts"][timeout_type]
                 max_reasonable = bounds_test["maximum_reasonable_timeouts"][timeout_type]
                 
-                status = "✅"
+                status = " PASS: "
                 if value < min_safe:
-                    status = "❌ TOO LOW"
+                    status = " FAIL:  TOO LOW"
                     bounds_test["violations"].append({
                         "env": env,
                         "timeout_type": timeout_type,
@@ -272,7 +272,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                         "min_safe": min_safe
                     })
                 elif value > max_reasonable:
-                    status = "⚠️  TOO HIGH" 
+                    status = " WARNING: [U+FE0F]  TOO HIGH" 
                     bounds_test["violations"].append({
                         "env": env,
                         "timeout_type": timeout_type,
@@ -298,7 +298,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
             if not hasattr(client, method):
                 bounds_test["validation_missing"].append(method)
         
-        print(f"\n📊 Bounds Validation Results:")
+        print(f"\n CHART:  Bounds Validation Results:")
         print(f"  Total violations: {len(bounds_test['violations'])}")
         print(f"  Missing validation methods: {len(bounds_test['validation_missing'])}")
         
@@ -367,7 +367,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
             (None, "development")            # None fallback
         ]
         
-        print(f"\n🌍 Environment Detection Impact Analysis:")
+        print(f"\n[U+1F30D] Environment Detection Impact Analysis:")
         
         for env_value, expected_behavior in environment_test_cases:
             with patch('shared.isolated_environment.get_env') as mock_env:
@@ -420,7 +420,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                 timeout_groups[expected] = []
             timeout_groups[expected].append(result)
         
-        print(f"\n📊 Timeout Consistency Analysis:")
+        print(f"\n CHART:  Timeout Consistency Analysis:")
         
         for expected_env, results in timeout_groups.items():
             if len(results) > 1:
@@ -454,7 +454,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                     "description": "Unknown environment gets aggressive timeout settings"
                 })
         
-        print(f"\n📊 Detection Impact Results:")
+        print(f"\n CHART:  Detection Impact Results:")
         print(f"  Environment variations tested: {len(environment_test_cases)}")
         print(f"  Successful detections: {len(detection_test['timeout_variations'])}")
         print(f"  Detection failures: {len(detection_test['detection_failures'])}")
@@ -495,7 +495,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
             "flexibility_issues": []
         }
         
-        print(f"\n🔧 Runtime Timeout Modification Analysis:")
+        print(f"\n[U+1F527] Runtime Timeout Modification Analysis:")
         
         # Test client with staging configuration
         staging_client = self.auth_clients["staging"]
@@ -519,14 +519,14 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
             try:
                 if hasattr(staging_client, method):
                     runtime_test["runtime_adjustment_methods"].append(method)
-                    print(f"  ✅ Found method: {method}")
+                    print(f"   PASS:  Found method: {method}")
                 else:
                     runtime_test["modification_attempts"].append({
                         "method": method,
                         "exists": False,
                         "result": "method_not_found"
                     })
-                    print(f"  ❌ Missing method: {method}")
+                    print(f"   FAIL:  Missing method: {method}")
                     
             except Exception as e:
                 runtime_test["modification_attempts"].append({
@@ -535,7 +535,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                     "result": f"error_{type(e).__name__}",
                     "error": str(e)
                 })
-                print(f"  ⚠️  Method {method} error: {e}")
+                print(f"   WARNING: [U+FE0F]  Method {method} error: {e}")
         
         # Attempt 2: Try to create new client with different timeout settings
         print(f"\n  Testing runtime client reconfiguration...")
@@ -561,10 +561,10 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                         "old_total": original_timeouts.connect + original_timeouts.read + original_timeouts.write + original_timeouts.pool,
                         "new_total": runtime_timeouts.connect + runtime_timeouts.read + runtime_timeouts.write + runtime_timeouts.pool
                     })
-                    print(f"    ✅ Environment override: {original_timeouts.connect + original_timeouts.read + original_timeouts.write + original_timeouts.pool}s -> {runtime_timeouts.connect + runtime_timeouts.read + runtime_timeouts.write + runtime_timeouts.pool}s")
+                    print(f"     PASS:  Environment override: {original_timeouts.connect + original_timeouts.read + original_timeouts.write + original_timeouts.pool}s -> {runtime_timeouts.connect + runtime_timeouts.read + runtime_timeouts.write + runtime_timeouts.pool}s")
                 else:
                     runtime_test["flexibility_issues"].append("environment_override_failed")
-                    print(f"    ❌ Environment override failed - timeouts unchanged")
+                    print(f"     FAIL:  Environment override failed - timeouts unchanged")
                 
                 await runtime_client._client.aclose()
                 
@@ -575,7 +575,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
                 "result": f"error_{type(e).__name__}",
                 "error": str(e)
             })
-            print(f"    ❌ Environment override error: {e}")
+            print(f"     FAIL:  Environment override error: {e}")
         
         # Attempt 3: Check for performance-based adjustment capabilities
         print(f"\n  Testing performance-based timeout adjustment...")
@@ -590,10 +590,10 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
         for method in performance_methods:
             if hasattr(staging_client, method):
                 runtime_test["runtime_adjustment_methods"].append(method)
-                print(f"    ✅ Found performance method: {method}")
+                print(f"     PASS:  Found performance method: {method}")
             else:
                 runtime_test["flexibility_issues"].append(f"missing_{method}")
-                print(f"    ❌ Missing performance method: {method}")
+                print(f"     FAIL:  Missing performance method: {method}")
         
         # Analyze flexibility issues
         missing_methods = len([a for a in runtime_test["modification_attempts"] 
@@ -604,7 +604,7 @@ class TestEnvironmentTimeoutConfiguration(SSotAsyncTestCase):
             missing_methods >= len(modification_methods) - 1
         )
         
-        print(f"\n📊 Runtime Configuration Analysis:")
+        print(f"\n CHART:  Runtime Configuration Analysis:")
         print(f"  Runtime adjustment methods found: {len(runtime_test['runtime_adjustment_methods'])}")
         print(f"  Missing configuration methods: {missing_methods}")
         print(f"  Flexibility issues: {len(runtime_test['flexibility_issues'])}")

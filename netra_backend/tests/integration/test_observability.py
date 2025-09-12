@@ -350,7 +350,7 @@ class TestObservability(BaseIntegrationTest):
         assert summary["performance_summary"]["sla_compliance_rate"] == 1.0
         assert summary["metrics_collector_stats"]["success_rate"] == 1.0
         
-        logger.info(f"✅ Metrics collection test passed - trace ID: {result['trace_id'][:8]}")
+        logger.info(f" PASS:  Metrics collection test passed - trace ID: {result['trace_id'][:8]}")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -390,7 +390,7 @@ class TestObservability(BaseIntegrationTest):
         for expected_op in expected_operations:
             assert expected_op in operation_names, f"Missing traced operation: {expected_op}"
         
-        logger.info(f"✅ Distributed tracing test passed - {len(operations)} operations traced")
+        logger.info(f" PASS:  Distributed tracing test passed - {len(operations)} operations traced")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -444,7 +444,7 @@ class TestObservability(BaseIntegrationTest):
         assert summary["performance_summary"]["sla_compliance_rate"] == 1.0
         assert summary["performance_summary"]["avg_execution_time_ms"] < 200
         
-        logger.info(f"✅ Performance monitoring test passed - {avg_execution_time:.2f}ms avg execution time")
+        logger.info(f" PASS:  Performance monitoring test passed - {avg_execution_time:.2f}ms avg execution time")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -496,7 +496,7 @@ class TestObservability(BaseIntegrationTest):
         error_trace = list(error_agent.metrics_collector.errors.values())[0]
         assert "Simulated error" in error_trace["error_message"]
         
-        logger.info("✅ Error observability and tracking test passed")
+        logger.info(" PASS:  Error observability and tracking test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -555,7 +555,7 @@ class TestObservability(BaseIntegrationTest):
         # Validate concurrent performance
         assert total_time < 1.0  # Should handle concurrent observability efficiently
         
-        logger.info(f"✅ Concurrent observability isolation test passed - 3 agents in {total_time:.3f}s")
+        logger.info(f" PASS:  Concurrent observability isolation test passed - 3 agents in {total_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -597,7 +597,7 @@ class TestObservability(BaseIntegrationTest):
         assert summary["performance_summary"]["sla_compliance_rate"] >= 0.8
         assert summary["total_executions"] == 10
         
-        logger.info(f"✅ SLA monitoring test passed - {sla_compliance_rate:.2f} compliance rate, {avg_execution_time:.2f}ms avg time")
+        logger.info(f" PASS:  SLA monitoring test passed - {sla_compliance_rate:.2f} compliance rate, {avg_execution_time:.2f}ms avg time")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -628,7 +628,7 @@ class TestObservability(BaseIntegrationTest):
                 })
         
         # Validate comprehensive data collection
-        assert len(all_results) == 9  # 3 agents × 3 executions
+        assert len(all_results) == 9  # 3 agents  x  3 executions
         
         # Aggregate analytics across all executions
         execution_times = [r["result"]["performance_metrics"]["execution_time_ms"] for r in all_results]
@@ -675,7 +675,7 @@ class TestObservability(BaseIntegrationTest):
         time_variance = max(agent_avg_times) - min(agent_avg_times)
         assert time_variance < 100  # Agents should have similar performance characteristics
         
-        logger.info(f"✅ Observability analytics test passed - {analytics['total_executions']} executions analyzed")
+        logger.info(f" PASS:  Observability analytics test passed - {analytics['total_executions']} executions analyzed")
 
 
 if __name__ == "__main__":

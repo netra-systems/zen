@@ -60,7 +60,7 @@ class TestRealAuthRateLimiting:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for rate limiting testing."""
-        print("🐳 Starting Docker services for auth rate limiting tests...")
+        print("[U+1F433] Starting Docker services for auth rate limiting tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -72,13 +72,13 @@ class TestRealAuthRateLimiting:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for rate limiting tests")
+            print(" PASS:  Docker services ready for rate limiting tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for rate limiting tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for rate limiting tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after rate limiting tests...")
+            print("[U+1F9F9] Cleaning up Docker services after rate limiting tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -97,7 +97,7 @@ class TestRealAuthRateLimiting:
             await client.ping()
             yield client
         except Exception as e:
-            pytest.fail(f"❌ Failed to connect to Redis for rate limiting tests: {e}")
+            pytest.fail(f" FAIL:  Failed to connect to Redis for rate limiting tests: {e}")
         finally:
             if 'client' in locals():
                 await client.aclose()
@@ -151,7 +151,7 @@ class TestRealAuthRateLimiting:
                         "ip": test_ip
                     })
                     
-                    print(f"✅ Request {i+1} from {test_ip} allowed - Count: {new_count}")
+                    print(f" PASS:  Request {i+1} from {test_ip} allowed - Count: {new_count}")
                     
                 else:
                     # Rate limit exceeded
@@ -163,7 +163,7 @@ class TestRealAuthRateLimiting:
                         "ip": test_ip
                     })
                     
-                    print(f"❌ Request {i+1} from {test_ip} rate limited - Count: {current_count}")
+                    print(f" FAIL:  Request {i+1} from {test_ip} rate limited - Count: {current_count}")
                 
                 # Small delay between requests
                 await asyncio.sleep(0.1)
@@ -181,7 +181,7 @@ class TestRealAuthRateLimiting:
             for blocked in blocked_requests:
                 assert blocked["request_id"] > limit_per_minute
             
-            print(f"✅ IP-based rate limiting validated - {len(allowed_requests)} allowed, {len(blocked_requests)} blocked")
+            print(f" PASS:  IP-based rate limiting validated - {len(allowed_requests)} allowed, {len(blocked_requests)} blocked")
             
         finally:
             await redis_client.delete(rate_key)
@@ -247,9 +247,9 @@ class TestRealAuthRateLimiting:
                 assert len(blocked) == 3, \
                     f"User {user_id} should have 3 blocked requests"
                 
-                print(f"✅ User {user_id} rate limiting - Limit: {user_limit}, Allowed: {len(allowed)}")
+                print(f" PASS:  User {user_id} rate limiting - Limit: {user_limit}, Allowed: {len(allowed)}")
             
-            print("✅ User-based rate limiting validated for all users")
+            print(" PASS:  User-based rate limiting validated for all users")
             
         finally:
             for rate_key in rate_keys:
@@ -289,11 +289,11 @@ class TestRealAuthRateLimiting:
                     request_key = f"sliding_window:{client_id}:{endpoint}:{current_time}"
                     await redis_client.setex(request_key, window_size, "1")
                     
-                    print(f"✅ Sliding window request {i+1} allowed - Recent count: {len(recent_requests)}")
+                    print(f" PASS:  Sliding window request {i+1} allowed - Recent count: {len(recent_requests)}")
                     
                 else:
                     # Rate limit exceeded
-                    print(f"❌ Sliding window request {i+1} blocked - Recent count: {len(recent_requests)}")
+                    print(f" FAIL:  Sliding window request {i+1} blocked - Recent count: {len(recent_requests)}")
                 
                 # Simulate time passing
                 await asyncio.sleep(0.2)  # 200ms between requests
@@ -307,7 +307,7 @@ class TestRealAuthRateLimiting:
             assert len(final_recent_requests) <= limit + 5, \
                 "Sliding window should prevent excessive requests"
             
-            print(f"✅ Sliding window rate limiting validated - Final recent count: {len(final_recent_requests)}")
+            print(f" PASS:  Sliding window rate limiting validated - Final recent count: {len(final_recent_requests)}")
             
         finally:
             # Cleanup sliding window keys
@@ -345,7 +345,7 @@ class TestRealAuthRateLimiting:
                 if lockout_until:
                     lockout_time = float(lockout_until)
                     if time.time() < lockout_time:
-                        print(f"❌ Attempt {attempt+1} blocked - IP locked out until {datetime.fromtimestamp(lockout_time)}")
+                        print(f" FAIL:  Attempt {attempt+1} blocked - IP locked out until {datetime.fromtimestamp(lockout_time)}")
                         continue
                 
                 # Record failed attempt
@@ -360,12 +360,12 @@ class TestRealAuthRateLimiting:
                         lockout_until = time.time() + penalty["lockout"]
                         await redis_client.setex(lockout_key, penalty["lockout"], str(lockout_until))
                         
-                        print(f"🔒 Brute force penalty applied after {failed_attempts} attempts - Lockout: {penalty['lockout']}s")
+                        print(f"[U+1F512] Brute force penalty applied after {failed_attempts} attempts - Lockout: {penalty['lockout']}s")
                         penalty_applied = True
                         break
                 
                 if not penalty_applied:
-                    print(f"⚠️ Failed attempt {attempt+1} recorded - Total: {failed_attempts}")
+                    print(f" WARNING: [U+FE0F] Failed attempt {attempt+1} recorded - Total: {failed_attempts}")
                 
                 await asyncio.sleep(0.1)
             
@@ -379,7 +379,7 @@ class TestRealAuthRateLimiting:
             lockout_time = float(final_lockout)
             assert lockout_time > time.time(), "Lockout should still be active"
             
-            print(f"✅ Brute force protection validated - {final_attempts} attempts, locked until {datetime.fromtimestamp(lockout_time)}")
+            print(f" PASS:  Brute force protection validated - {final_attempts} attempts, locked until {datetime.fromtimestamp(lockout_time)}")
             
         finally:
             await redis_client.delete(attempt_key)
@@ -417,7 +417,7 @@ class TestRealAuthRateLimiting:
         try:
             for scenario in bypass_scenarios:
                 technique = scenario["technique"]
-                print(f"🔍 Testing bypass technique: {technique}")
+                print(f" SEARCH:  Testing bypass technique: {technique}")
                 
                 if technique == "ip_rotation":
                     # Attacker rotates IPs to bypass per-IP limits
@@ -436,7 +436,7 @@ class TestRealAuthRateLimiting:
                         await redis_client.expire(global_key, 60)
                         
                         if global_count > global_limit:
-                            print(f"🛡️ Global rate limit triggered - Blocking IP rotation attack")
+                            print(f"[U+1F6E1][U+FE0F] Global rate limit triggered - Blocking IP rotation attack")
                             break
                         else:
                             print(f"   IP {ip} request {ip_count} allowed (global: {global_count})")
@@ -456,7 +456,7 @@ class TestRealAuthRateLimiting:
                         
                         # User agent rotation doesn't bypass IP-based limits
                         if ip_count > 5:  # IP limit
-                            print(f"🛡️ IP-based limit blocks user agent rotation from {ip}")
+                            print(f"[U+1F6E1][U+FE0F] IP-based limit blocks user agent rotation from {ip}")
                             break
                         else:
                             print(f"   Request with UA '{ua[:10]}...' from {ip} - Count: {ip_count}")
@@ -477,7 +477,7 @@ class TestRealAuthRateLimiting:
                             await redis_client.expire(global_key, 60)
                             
                             if global_count > global_limit:
-                                print(f"🛡️ Global rate limit stops distributed attack at {global_count} requests")
+                                print(f"[U+1F6E1][U+FE0F] Global rate limit stops distributed attack at {global_count} requests")
                                 break
                         else:
                             continue
@@ -489,7 +489,7 @@ class TestRealAuthRateLimiting:
                 assert int(final_global_count) <= global_limit + 5, \
                     "Global limit should prevent bypass techniques"
             
-            print("✅ Rate limiting bypass prevention validated")
+            print(" PASS:  Rate limiting bypass prevention validated")
             
         finally:
             # Cleanup all rate limiting keys
@@ -609,7 +609,7 @@ class TestRealAuthRateLimiting:
             assert len(stored_metrics["blocked_ips"]) >= 2
             assert len(stored_metrics["suspicious_patterns"]) >= 1
             
-            print("✅ Rate limiting metrics and alerts validated")
+            print(" PASS:  Rate limiting metrics and alerts validated")
             print(f"   Total requests: {stored_metrics['total_requests']}")
             print(f"   Block rate: {block_rate:.1f}%")
             print(f"   Suspicious patterns: {len(stored_metrics['suspicious_patterns'])}")

@@ -8,9 +8,9 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core platform functionality - agent orchestration is 90% of business value delivery
 
 CRITICAL BUSINESS REQUIREMENTS:
-1. Complete Agent Execution Pipeline: Message → Router → AgentHandler → ExecutionEngine → SupervisorAgent → Sub-agents
+1. Complete Agent Execution Pipeline: Message  ->  Router  ->  AgentHandler  ->  ExecutionEngine  ->  SupervisorAgent  ->  Sub-agents
 2. 5 Critical WebSocket Events for Chat Business Value: agent_started, agent_thinking, tool_executing, tool_completed, agent_completed
-3. Agent Orchestration Flow: DataAgent → OptimizationAgent → ReportAgent with proper handoffs
+3. Agent Orchestration Flow: DataAgent  ->  OptimizationAgent  ->  ReportAgent with proper handoffs
 4. Factory Pattern User Isolation: Multiple concurrent users with complete isolation
 5. Real Service Integration: PostgreSQL persistence, Redis caching, WebSocket events
 6. Error Handling and Graceful Degradation: System continues to deliver value during partial failures
@@ -203,7 +203,7 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
         # Validate context meets isolation requirements
         validate_user_context(user_context)
         
-        logger.info(f"✅ Created isolated user context for {user_id}")
+        logger.info(f" PASS:  Created isolated user context for {user_id}")
         return user_id, user_context, auth_context
     
     async def _setup_agent_execution_pipeline(self, user_context: UserExecutionContext, 
@@ -237,7 +237,7 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
         assert bridge is not None, "WebSocket bridge creation failed"
         assert user_session is not None, "User session creation failed"
         
-        logger.info(f"✅ Agent execution pipeline setup complete for user {user_context.user_id}")
+        logger.info(f" PASS:  Agent execution pipeline setup complete for user {user_context.user_id}")
         return agent_registry, execution_engine, bridge
     
     async def _capture_websocket_events(self, bridge: AgentWebSocketBridge, 
@@ -297,16 +297,16 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
             # Monitor execution with timeout
             try:
                 result = await asyncio.wait_for(execution_task, timeout=timeout_seconds)
-                logger.info(f"✅ Agent execution completed for user {user_context.user_id} in {time.time() - start_time:.2f}s")
+                logger.info(f" PASS:  Agent execution completed for user {user_context.user_id} in {time.time() - start_time:.2f}s")
                 return result, captured_events
                 
             except asyncio.TimeoutError:
                 execution_task.cancel()
-                logger.error(f"❌ Agent execution timeout after {timeout_seconds}s for user {user_context.user_id}")
+                logger.error(f" FAIL:  Agent execution timeout after {timeout_seconds}s for user {user_context.user_id}")
                 raise
                 
         except Exception as e:
-            logger.error(f"❌ Agent execution failed for user {user_context.user_id}: {e}")
+            logger.error(f" FAIL:  Agent execution failed for user {user_context.user_id}: {e}")
             raise
     
     def _validate_critical_websocket_events(self, events: List[AgentExecutionEvent], 
@@ -321,10 +321,10 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
                 missing_events.append(critical_event)
         
         if missing_events:
-            logger.error(f"❌ Missing critical WebSocket events for user {user_context.user_id}: {missing_events}")
+            logger.error(f" FAIL:  Missing critical WebSocket events for user {user_context.user_id}: {missing_events}")
             return False
         
-        # Validate event ordering (started → thinking → tool_executing → tool_completed → completed)
+        # Validate event ordering (started  ->  thinking  ->  tool_executing  ->  tool_completed  ->  completed)
         required_sequence = [
             CriticalWebSocketEvents.AGENT_STARTED.value,
             CriticalWebSocketEvents.AGENT_THINKING.value,
@@ -343,10 +343,10 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
             
             if (current_event in event_positions and next_event in event_positions and
                 event_positions[current_event] >= event_positions[next_event]):
-                logger.error(f"❌ WebSocket events out of order for user {user_context.user_id}")
+                logger.error(f" FAIL:  WebSocket events out of order for user {user_context.user_id}")
                 return False
         
-        logger.info(f"✅ All critical WebSocket events validated for user {user_context.user_id}")
+        logger.info(f" PASS:  All critical WebSocket events validated for user {user_context.user_id}")
         return True
     
     def _validate_business_value_delivery(self, result: Any, events: List[AgentExecutionEvent],
@@ -355,7 +355,7 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
         metrics = BusinessValueMetrics()
         
         if result is None:
-            logger.warning(f"⚠️ No result returned for user {user_context.user_id}")
+            logger.warning(f" WARNING: [U+FE0F] No result returned for user {user_context.user_id}")
             return metrics
         
         # Extract business value indicators from result
@@ -391,9 +391,9 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
         
         # Validate minimum business value threshold
         if metrics.response_quality_score < 0.5:
-            logger.warning(f"⚠️ Low business value score ({metrics.response_quality_score}) for user {user_context.user_id}")
+            logger.warning(f" WARNING: [U+FE0F] Low business value score ({metrics.response_quality_score}) for user {user_context.user_id}")
         else:
-            logger.info(f"✅ Business value validated for user {user_context.user_id} (score: {metrics.response_quality_score})")
+            logger.info(f" PASS:  Business value validated for user {user_context.user_id} (score: {metrics.response_quality_score})")
         
         return metrics
     
@@ -440,7 +440,7 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
         # Store metrics for analysis
         self.business_value_metrics[user_id] = metrics
         
-        logger.info(f"✅ Complete agent execution pipeline test passed for user {user_id}")
+        logger.info(f" PASS:  Complete agent execution pipeline test passed for user {user_id}")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -481,7 +481,7 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
                 return user_id, events_valid and metrics.response_quality_score >= 0.3, metrics
                 
             except Exception as e:
-                logger.error(f"❌ Concurrent execution failed for user {user_id}: {e}")
+                logger.error(f" FAIL:  Concurrent execution failed for user {user_id}: {e}")
                 return user_id, False, BusinessValueMetrics()
         
         # Execute concurrently for multiple users
@@ -496,18 +496,18 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
                 if success:
                     successful_executions += 1
                     self.business_value_metrics[user_id] = metrics
-                    logger.info(f"✅ Concurrent execution succeeded for user {user_id}")
+                    logger.info(f" PASS:  Concurrent execution succeeded for user {user_id}")
                 else:
-                    logger.error(f"❌ Concurrent execution failed for user {user_id}")
+                    logger.error(f" FAIL:  Concurrent execution failed for user {user_id}")
             else:
-                logger.error(f"❌ Concurrent execution exception: {result}")
+                logger.error(f" FAIL:  Concurrent execution exception: {result}")
         
         # Require at least 80% success rate for concurrent execution
         success_rate = successful_executions / concurrent_users
         assert success_rate >= 0.8, \
             f"Concurrent execution success rate too low: {success_rate:.2f} < 0.8"
         
-        logger.info(f"✅ Multi-user concurrent execution test passed ({successful_executions}/{concurrent_users} successful)")
+        logger.info(f" PASS:  Multi-user concurrent execution test passed ({successful_executions}/{concurrent_users} successful)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -550,17 +550,17 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
                 assert has_started or has_termination, \
                     f"No proper event handling for error scenario: {scenario_name}"
                 
-                logger.info(f"✅ Graceful degradation validated for scenario: {scenario_name}")
+                logger.info(f" PASS:  Graceful degradation validated for scenario: {scenario_name}")
                 
             except asyncio.TimeoutError:
                 # Timeout is acceptable for error scenarios
-                logger.info(f"✅ Timeout handled gracefully for scenario: {scenario_name}")
+                logger.info(f" PASS:  Timeout handled gracefully for scenario: {scenario_name}")
                 
             except Exception as e:
                 # Some exceptions are acceptable as long as they're handled gracefully
-                logger.info(f"✅ Exception handled gracefully for scenario: {scenario_name} - {type(e).__name__}")
+                logger.info(f" PASS:  Exception handled gracefully for scenario: {scenario_name} - {type(e).__name__}")
         
-        logger.info(f"✅ Error handling and graceful degradation test completed for user {user_id}")
+        logger.info(f" PASS:  Error handling and graceful degradation test completed for user {user_id}")
     
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -618,7 +618,7 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
             assert execution_time <= 15.0, \
                 f"Simple query too slow: {execution_time:.2f}s > 15.0s"
         
-        logger.info(f"✅ WebSocket event timing validated for user {user_id} (execution: {execution_time:.2f}s)")
+        logger.info(f" PASS:  WebSocket event timing validated for user {user_id} (execution: {execution_time:.2f}s)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -691,10 +691,10 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
                 assert other_user_count == 0, \
                     f"User isolation violated in database - found {other_user_count} records from other users"
                 
-                logger.info(f"✅ Database persistence validated for user {user_id}")
+                logger.info(f" PASS:  Database persistence validated for user {user_id}")
                 
             except Exception as e:
-                logger.error(f"❌ Database validation failed: {e}")
+                logger.error(f" FAIL:  Database validation failed: {e}")
                 raise
     
     def teardown_method(self):
@@ -707,7 +707,7 @@ class TestAgentExecutionLifecycleComprehensive(BaseIntegrationTest):
             avg_quality_score = sum(m.response_quality_score for m in self.business_value_metrics.values()) / total_users
             avg_execution_time = sum(m.execution_time_seconds for m in self.business_value_metrics.values()) / total_users
             
-            logger.info(f"📊 Test Summary - Users: {total_users}, Avg Quality: {avg_quality_score:.2f}, Avg Time: {avg_execution_time:.2f}s")
+            logger.info(f" CHART:  Test Summary - Users: {total_users}, Avg Quality: {avg_quality_score:.2f}, Avg Time: {avg_execution_time:.2f}s")
         
         # Clean up user sessions
         self.user_sessions.clear()

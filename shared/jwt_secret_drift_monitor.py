@@ -155,7 +155,7 @@ class JWTSecretDriftMonitor:
             logging.ERROR if alert.level == AlertLevel.CRITICAL else
             logging.WARNING if alert.level == AlertLevel.WARNING else
             logging.INFO,
-            f"🚨 JWT DRIFT ALERT [{alert.level.value.upper()}]: {alert.issue}"
+            f" ALERT:  JWT DRIFT ALERT [{alert.level.value.upper()}]: {alert.issue}"
         )
         logger.log(
             logging.ERROR if alert.level in [AlertLevel.CRITICAL, AlertLevel.EMERGENCY] else logging.WARNING,
@@ -299,7 +299,7 @@ class JWTSecretDriftMonitor:
     
     async def _monitoring_loop(self) -> None:
         """Main monitoring loop."""
-        logger.info("🔄 JWT Secret Drift Monitor started")
+        logger.info(" CYCLE:  JWT Secret Drift Monitor started")
         
         while self.is_monitoring:
             try:
@@ -316,11 +316,11 @@ class JWTSecretDriftMonitor:
                 
                 # Log validation summary
                 if report.overall_result == ValidationResult.CONSISTENT:
-                    logger.debug(f"✅ JWT consistency validated across {len(report.services)} services")
+                    logger.debug(f" PASS:  JWT consistency validated across {len(report.services)} services")
                 elif report.overall_result == ValidationResult.INCONSISTENT:
-                    logger.warning(f"⚠️ JWT inconsistency detected: {report.summary}")
+                    logger.warning(f" WARNING: [U+FE0F] JWT inconsistency detected: {report.summary}")
                 else:
-                    logger.error(f"❌ JWT validation error: {report.summary}")
+                    logger.error(f" FAIL:  JWT validation error: {report.summary}")
                     
                 # Wait for next check
                 await asyncio.sleep(self.config.check_interval_seconds)
@@ -344,7 +344,7 @@ class JWTSecretDriftMonitor:
         self.is_monitoring = True
         self.monitor_task = asyncio.create_task(self._monitoring_loop())
         
-        logger.info("🚀 JWT Secret Drift Monitor started")
+        logger.info("[U+1F680] JWT Secret Drift Monitor started")
         
         # Perform immediate validation
         try:
@@ -352,7 +352,7 @@ class JWTSecretDriftMonitor:
             logger.info(f"Initial JWT validation: {report.overall_result.value}")
             
             if report.overall_result == ValidationResult.INCONSISTENT:
-                logger.critical(f"🚨 IMMEDIATE JWT INCONSISTENCY DETECTED: {report.summary}")
+                logger.critical(f" ALERT:  IMMEDIATE JWT INCONSISTENCY DETECTED: {report.summary}")
                 
         except Exception as e:
             logger.error(f"Initial JWT validation failed: {e}")
@@ -472,13 +472,13 @@ def default_alert_handler(alert: JWTDriftAlert) -> None:
     # like Slack, PagerDuty, email, etc.
     
     if alert.level == AlertLevel.EMERGENCY:
-        logger.critical(f"🚨 EMERGENCY JWT DRIFT: {alert.issue}")
+        logger.critical(f" ALERT:  EMERGENCY JWT DRIFT: {alert.issue}")
     elif alert.level == AlertLevel.CRITICAL:
-        logger.error(f"🔥 CRITICAL JWT DRIFT: {alert.issue}")
+        logger.error(f" FIRE:  CRITICAL JWT DRIFT: {alert.issue}")
     elif alert.level == AlertLevel.WARNING:
-        logger.warning(f"⚠️ JWT DRIFT WARNING: {alert.issue}")
+        logger.warning(f" WARNING: [U+FE0F] JWT DRIFT WARNING: {alert.issue}")
     else:
-        logger.info(f"ℹ️ JWT DRIFT INFO: {alert.issue}")
+        logger.info(f"[U+2139][U+FE0F] JWT DRIFT INFO: {alert.issue}")
 
 
 __all__ = [

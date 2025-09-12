@@ -104,11 +104,11 @@ from shared.isolated_environment import IsolatedEnvironment
 
                                                     # Report findings
                                                     # REMOVED_SYNTAX_ERROR: if injection_vulnerabilities:
-                                                        # REMOVED_SYNTAX_ERROR: print("🚨 SECURITY VULNERABILITY - SQL Injection Risks:")
+                                                        # REMOVED_SYNTAX_ERROR: print(" ALERT:  SECURITY VULNERABILITY - SQL Injection Risks:")
                                                         # REMOVED_SYNTAX_ERROR: for vuln in injection_vulnerabilities:
                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                             # REMOVED_SYNTAX_ERROR: else:
-                                                                # REMOVED_SYNTAX_ERROR: print("✅ No SQL injection vulnerabilities detected in tested endpoints")
+                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  No SQL injection vulnerabilities detected in tested endpoints")
 
                                                                 # This test should identify any SQL injection vulnerabilities
                                                                 # REMOVED_SYNTAX_ERROR: assert not injection_vulnerabilities, "formatted_string"
@@ -188,11 +188,11 @@ from shared.isolated_environment import IsolatedEnvironment
 
                                                                                                                         # Report findings
                                                                                                                         # REMOVED_SYNTAX_ERROR: if xss_vulnerabilities:
-                                                                                                                            # REMOVED_SYNTAX_ERROR: print("🚨 SECURITY VULNERABILITY - XSS Risks:")
+                                                                                                                            # REMOVED_SYNTAX_ERROR: print(" ALERT:  SECURITY VULNERABILITY - XSS Risks:")
                                                                                                                             # REMOVED_SYNTAX_ERROR: for vuln in xss_vulnerabilities:
                                                                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                                    # REMOVED_SYNTAX_ERROR: print("✅ No XSS vulnerabilities detected in tested endpoints")
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  No XSS vulnerabilities detected in tested endpoints")
 
                                                                                                                                     # This test should identify any XSS vulnerabilities
                                                                                                                                     # REMOVED_SYNTAX_ERROR: assert not xss_vulnerabilities, "formatted_string"
@@ -273,11 +273,11 @@ from shared.isolated_environment import IsolatedEnvironment
 
                                                                                                                                                                                                         # Report findings
                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: if bypass_vulnerabilities:
-                                                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: print("🚨 SECURITY VULNERABILITY - Authentication Bypass:")
+                                                                                                                                                                                                            # REMOVED_SYNTAX_ERROR: print(" ALERT:  SECURITY VULNERABILITY - Authentication Bypass:")
                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: for vuln in bypass_vulnerabilities:
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: print("✅ No authentication bypass vulnerabilities detected")
+                                                                                                                                                                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  No authentication bypass vulnerabilities detected")
 
                                                                                                                                                                                                                     # This test should identify authentication bypass issues
                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: assert not bypass_vulnerabilities, "formatted_string"
@@ -366,14 +366,14 @@ from shared.isolated_environment import IsolatedEnvironment
 
                                                                                                                                                                                                                                                                                     # Report findings
                                                                                                                                                                                                                                                                                     # REMOVED_SYNTAX_ERROR: if rate_limiting_issues:
-                                                                                                                                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: print("🚨 SECURITY GAP - Rate Limiting Issues:")
+                                                                                                                                                                                                                                                                                        # REMOVED_SYNTAX_ERROR: print(" ALERT:  SECURITY GAP - Rate Limiting Issues:")
                                                                                                                                                                                                                                                                                         # REMOVED_SYNTAX_ERROR: for issue in rate_limiting_issues:
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                                                                                                                                                                                                                                             # For now, skip this test as it identifies coverage gaps
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: pytest.skip("Rate limiting not fully implemented - security gap identified")
                                                                                                                                                                                                                                                                                             # REMOVED_SYNTAX_ERROR: else:
-                                                                                                                                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: print("✅ Rate limiting appears to be properly configured")
+                                                                                                                                                                                                                                                                                                # REMOVED_SYNTAX_ERROR: print(" PASS:  Rate limiting appears to be properly configured")
 
 
                                                                                                                                                                                                                                                                                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":

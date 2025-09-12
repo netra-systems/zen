@@ -39,7 +39,7 @@
         # REMOVED_SYNTAX_ERROR: 5. Cache isolation between users
 
         # REMOVED_SYNTAX_ERROR: Business Value Justification (BVJ):
-            # REMOVED_SYNTAX_ERROR: - Segment: ALL (Free → Enterprise)
+            # REMOVED_SYNTAX_ERROR: - Segment: ALL (Free  ->  Enterprise)
             # REMOVED_SYNTAX_ERROR: - Business Goal: Prevent catastrophic security breaches
             # REMOVED_SYNTAX_ERROR: - Value Impact: Ensures user data privacy and system integrity
             # REMOVED_SYNTAX_ERROR: - Revenue Impact: Prevents trust loss and potential lawsuits from data breaches

@@ -1,7 +1,7 @@
 """Unified Message Flow Testing - Phase 3 Implementation
 
 # Complete message lifecycle testing for core chat functionality that delivers customer value. # Possibly broken comprehension
-Tests the complete flow: User input → Backend routing → Agent processing → Response streaming.
+Tests the complete flow: User input  ->  Backend routing  ->  Agent processing  ->  Response streaming.
 
 Business Value Justification (BVJ):
     - Segment: All customer tiers (Free, Early, Mid, Enterprise) 
@@ -76,7 +76,7 @@ async def interruption_handler():
 @pytest.mark.e2e
 async def test_complete_message_lifecycle(message_flow_config, flow_validator
 ):
-    """Test complete message lifecycle: Send → Process → Stream → Display
+    """Test complete message lifecycle: Send  ->  Process  ->  Stream  ->  Display
     
     BVJ: This is the core chat experience that drives customer value and conversion.
     """

@@ -1025,7 +1025,7 @@ class TestRegressionsAndEdgeCases:
         test_logger._setup_logging()
         
         # Should handle Unicode properly
-        unicode_message = "Test with émojis 🚀 and ünïcödé characters"
+        unicode_message = "Test with [U+00E9]mojis [U+1F680] and [U+00FC]n[U+00EF]c[U+00F6]d[U+00E9] characters"
         test_logger.info(unicode_message)
         
         # Should not crash and should preserve Unicode

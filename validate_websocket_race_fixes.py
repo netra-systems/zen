@@ -19,7 +19,7 @@ import os
 def test_websocket_race_condition_fixes():
     """Test that WebSocket race condition fixes are properly implemented."""
     
-    print("🔍 FIVE-WHYS VALIDATION: Testing WebSocket race condition fixes")
+    print(" SEARCH:  FIVE-WHYS VALIDATION: Testing WebSocket race condition fixes")
     print("="*80)
     
     # Add current directory to Python path
@@ -33,45 +33,45 @@ def test_websocket_race_condition_fixes():
         authenticator = get_websocket_authenticator()
         
         # Check circuit breaker exists with Cloud Run enhancements
-        assert hasattr(authenticator, '_circuit_breaker'), "❌ Missing circuit breaker"
+        assert hasattr(authenticator, '_circuit_breaker'), " FAIL:  Missing circuit breaker"
         circuit_breaker = authenticator._circuit_breaker
         
         # Check Cloud Run specific enhancements
-        assert 'cloud_run_backoff' in circuit_breaker, "❌ Missing Cloud Run backoff"
-        assert 'handshake_stabilization_delay' in circuit_breaker, "❌ Missing handshake stabilization delay"
+        assert 'cloud_run_backoff' in circuit_breaker, " FAIL:  Missing Cloud Run backoff"
+        assert 'handshake_stabilization_delay' in circuit_breaker, " FAIL:  Missing handshake stabilization delay"
         
         # Check enhanced thresholds for Cloud Run
-        assert circuit_breaker['failure_threshold'] == 3, f"❌ Wrong threshold: {circuit_breaker['failure_threshold']} (expected 3)"
-        assert circuit_breaker['reset_timeout'] == 15.0, f"❌ Wrong reset timeout: {circuit_breaker['reset_timeout']} (expected 15.0)"
+        assert circuit_breaker['failure_threshold'] == 3, f" FAIL:  Wrong threshold: {circuit_breaker['failure_threshold']} (expected 3)"
+        assert circuit_breaker['reset_timeout'] == 15.0, f" FAIL:  Wrong reset timeout: {circuit_breaker['reset_timeout']} (expected 15.0)"
         
-        print("✅ Enhanced circuit breaker with Cloud Run protection implemented")
+        print(" PASS:  Enhanced circuit breaker with Cloud Run protection implemented")
         
         # Test 2: Verify retry mechanism enhancements
         print("\n2. Testing enhanced retry mechanism...")
         
         # Check that authenticator has the enhanced retry method
-        assert hasattr(authenticator, '_authenticate_with_retry'), "❌ Missing retry authentication method"
-        assert hasattr(authenticator, '_should_retry_auth_failure'), "❌ Missing retry failure logic"
-        assert hasattr(authenticator, '_should_retry_auth_exception'), "❌ Missing retry exception logic"
+        assert hasattr(authenticator, '_authenticate_with_retry'), " FAIL:  Missing retry authentication method"
+        assert hasattr(authenticator, '_should_retry_auth_failure'), " FAIL:  Missing retry failure logic"
+        assert hasattr(authenticator, '_should_retry_auth_exception'), " FAIL:  Missing retry exception logic"
         
-        print("✅ Enhanced retry mechanism implemented")
+        print(" PASS:  Enhanced retry mechanism implemented")
         
         # Test 3: Verify Cloud Run handshake timing fixes
         print("\n3. Testing Cloud Run handshake timing fixes...")
         
-        assert hasattr(authenticator, '_validate_websocket_handshake_timing'), "❌ Missing handshake validation"
-        assert hasattr(authenticator, '_apply_handshake_timing_fix'), "❌ Missing handshake timing fix"
+        assert hasattr(authenticator, '_validate_websocket_handshake_timing'), " FAIL:  Missing handshake validation"
+        assert hasattr(authenticator, '_apply_handshake_timing_fix'), " FAIL:  Missing handshake timing fix"
         
-        print("✅ Cloud Run handshake timing fixes implemented")
+        print(" PASS:  Cloud Run handshake timing fixes implemented")
         
         # Test 4: Verify concurrent token caching
         print("\n4. Testing concurrent token caching...")
         
-        assert hasattr(authenticator, '_check_concurrent_token_cache'), "❌ Missing concurrent token cache check"
-        assert hasattr(authenticator, '_cache_concurrent_token_result'), "❌ Missing concurrent token cache storage"
-        assert hasattr(authenticator, '_generate_cache_key'), "❌ Missing cache key generation"
+        assert hasattr(authenticator, '_check_concurrent_token_cache'), " FAIL:  Missing concurrent token cache check"
+        assert hasattr(authenticator, '_cache_concurrent_token_result'), " FAIL:  Missing concurrent token cache storage"
+        assert hasattr(authenticator, '_generate_cache_key'), " FAIL:  Missing cache key generation"
         
-        print("✅ Concurrent token caching implemented")
+        print(" PASS:  Concurrent token caching implemented")
         
         # Test 5: Verify E2E test configuration fixes
         print("\n5. Testing E2E test configuration fixes...")
@@ -79,12 +79,12 @@ def test_websocket_race_condition_fixes():
         try:
             # Check if real_services_fixture has environment-aware service discovery
             from test_framework.fixtures.real_services import real_services_fixture
-            print("✅ E2E test configuration imports available")
+            print(" PASS:  E2E test configuration imports available")
             
             # The real test would be that backend_port is included in fixture output
             # and that staging URLs are used when appropriate
         except ImportError as e:
-            print(f"⚠️  E2E test configuration not testable in this environment: {e}")
+            print(f" WARNING: [U+FE0F]  E2E test configuration not testable in this environment: {e}")
         
         # Test 6: Verify environment detection works
         print("\n6. Testing environment detection...")
@@ -108,9 +108,9 @@ def test_websocket_race_condition_fixes():
             
             is_cloud_run = bool(k_service_value)
             if not is_cloud_run:
-                print("⚠️  Cloud Run detection may need environment refresh, but this is expected in test environments")
+                print(" WARNING: [U+FE0F]  Cloud Run detection may need environment refresh, but this is expected in test environments")
             else:
-                print("✅ Cloud Run environment detection working")
+                print(" PASS:  Cloud Run environment detection working")
             
         finally:
             # Restore original environment
@@ -120,20 +120,20 @@ def test_websocket_race_condition_fixes():
                 os.environ['K_SERVICE'] = original_k_service
         
         print("\n" + "="*80)
-        print("✅ ALL TESTS PASSED: WebSocket race condition fixes validated successfully!")
+        print(" PASS:  ALL TESTS PASSED: WebSocket race condition fixes validated successfully!")
         print("\nImplemented Fixes:")
-        print("• Enhanced circuit breaker with Cloud Run sensitivity (3 failure threshold, 15s reset)")
-        print("• Progressive authentication retry with backoff (up to 5 retries)")
-        print("• Cloud Run handshake stabilization with adaptive delays")
-        print("• Concurrent token caching for E2E test performance")
-        print("• Environment-aware service discovery for staging/production")
-        print("• Enhanced error handling and monitoring")
+        print("[U+2022] Enhanced circuit breaker with Cloud Run sensitivity (3 failure threshold, 15s reset)")
+        print("[U+2022] Progressive authentication retry with backoff (up to 5 retries)")
+        print("[U+2022] Cloud Run handshake stabilization with adaptive delays")
+        print("[U+2022] Concurrent token caching for E2E test performance")
+        print("[U+2022] Environment-aware service discovery for staging/production")
+        print("[U+2022] Enhanced error handling and monitoring")
         print("="*80)
         
         return True
         
     except Exception as e:
-        print(f"\n❌ VALIDATION FAILED: {e}")
+        print(f"\n FAIL:  VALIDATION FAILED: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -142,8 +142,8 @@ def test_websocket_race_condition_fixes():
 if __name__ == "__main__":
     success = test_websocket_race_condition_fixes()
     if success:
-        print("\n🎉 WebSocket authentication race condition fixes validation: SUCCESS")
+        print("\n CELEBRATION:  WebSocket authentication race condition fixes validation: SUCCESS")
         exit(0)
     else:
-        print("\n💥 WebSocket authentication race condition fixes validation: FAILED")
+        print("\n[U+1F4A5] WebSocket authentication race condition fixes validation: FAILED")
         exit(1)

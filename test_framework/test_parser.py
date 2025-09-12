@@ -208,7 +208,7 @@ def extract_failing_tests(output: str, component: str) -> List[Dict]:
             
             # Extract test names from the output after the FAIL line
             test_section = output[match.end():match.end() + 2000]
-            test_name_pattern = r"✕\s+(.+?)\s*\(\d+\s*ms\)"
+            test_name_pattern = r"[U+2715]\s+(.+?)\s*\(\d+\s*ms\)"
             for test_match in re.finditer(test_name_pattern, test_section):
                 test_name = test_match.group(1)
                 
@@ -328,7 +328,7 @@ def extract_test_details(output: str, component: str) -> List[Dict]:
     elif component == "frontend":
         # Parse Jest output
         # Pattern for passed tests
-        passed_pattern = r"✓\s+(.+?)\s*\(\d+\s*ms\)"
+        passed_pattern = r"[U+2713]\s+(.+?)\s*\(\d+\s*ms\)"
         current_file = None
         
         # Track current test file being processed
@@ -342,7 +342,7 @@ def extract_test_details(output: str, component: str) -> List[Dict]:
             test_section = output[file_pos:section_end]
             
             # Extract passed tests in this file
-            for test_match in re.finditer(r"✓\s+(.+?)\s*\(\d+\s*ms\)", test_section):
+            for test_match in re.finditer(r"[U+2713]\s+(.+?)\s*\(\d+\s*ms\)", test_section):
                 test_name = test_match.group(1).strip()
                 test_details.append({
                     "name": f"{current_file}::{test_name}",
@@ -351,7 +351,7 @@ def extract_test_details(output: str, component: str) -> List[Dict]:
                 })
             
             # Extract failed tests in this file
-            for test_match in re.finditer(r"✕\s+(.+?)\s*\(\d+\s*ms\)", test_section):
+            for test_match in re.finditer(r"[U+2715]\s+(.+?)\s*\(\d+\s*ms\)", test_section):
                 test_name = test_match.group(1).strip()
                 test_details.append({
                     "name": f"{current_file}::{test_name}",

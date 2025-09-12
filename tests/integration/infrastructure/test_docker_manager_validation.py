@@ -108,7 +108,7 @@ class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
             
             assert len(area_tests) >= 1, f"Coverage area '{area}' should have at least 1 test, found {len(area_tests)}"
         
-        logger.info(f"✅ Integration test coverage validated: {total_test_count} tests across {len(test_classes)} test classes")
+        logger.info(f" PASS:  Integration test coverage validated: {total_test_count} tests across {len(test_classes)} test classes")
 
     def test_business_value_alignment(self):
         """
@@ -158,7 +158,7 @@ class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
         
         assert business_value_mentioned >= 15, f"Should explicitly state business value in at least 15 tests, found {business_value_mentioned}"
         
-        logger.info(f"✅ Business value alignment validated: {business_value_mentioned} tests with explicit business value")
+        logger.info(f" PASS:  Business value alignment validated: {business_value_mentioned} tests with explicit business value")
 
     def test_no_mocks_policy_compliance(self):
         """
@@ -201,7 +201,7 @@ class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
         assert "mode=ServiceMode.DOCKER" in test_content, "Should use real Docker mode"
         assert "NO MOCKS" in test_content, "Should explicitly state NO MOCKS policy"
         
-        logger.info("✅ NO MOCKS policy compliance validated")
+        logger.info(" PASS:  NO MOCKS policy compliance validated")
 
     def test_ssot_import_compliance(self):
         """
@@ -239,7 +239,7 @@ class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
                 # Allow os import but check if IsolatedEnvironment is used
                 assert "get_env()" in test_content, "Should use IsolatedEnvironment instead of direct os access"
         
-        logger.info("✅ SSOT import compliance validated")
+        logger.info(" PASS:  SSOT import compliance validated")
 
     def test_infrastructure_critical_coverage(self):
         """
@@ -274,13 +274,13 @@ class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
         
         coverage_percentage = len(scenarios_covered) / len(critical_scenarios) * 100
         
-        assert coverage_percentage >= 80, f"Critical scenario coverage too low: {coverage_percentage:.1f}% (need ≥80%)"
+        assert coverage_percentage >= 80, f"Critical scenario coverage too low: {coverage_percentage:.1f}% (need  >= 80%)"
         
         # Verify MEGA CLASS testing (UnifiedDockerManager is 5,091 lines)
         assert "MEGA CLASS" in test_content or "INFRASTRUCTURE CRITICAL" in test_content, "Should acknowledge infrastructure criticality"
         assert "5,091" in test_content or "largest" in test_content or "CRITICAL" in test_content, "Should reference scale or criticality"
         
-        logger.info(f"✅ Infrastructure critical coverage validated: {coverage_percentage:.1f}% of critical scenarios covered")
+        logger.info(f" PASS:  Infrastructure critical coverage validated: {coverage_percentage:.1f}% of critical scenarios covered")
 
     def test_real_service_validation_approach(self):
         """
@@ -324,7 +324,7 @@ class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
         assert "@pytest.mark.asyncio" in test_content, "Should support async testing"
         assert "async def test_" in test_content, "Should have async test methods"
         
-        logger.info("✅ Real service validation approach confirmed")
+        logger.info(" PASS:  Real service validation approach confirmed")
 
     def test_performance_and_scalability_coverage(self):
         """
@@ -362,7 +362,7 @@ class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
         assert "time.time()" in test_content, "Should measure execution times"
         assert "< 180" in test_content or "< 120" in test_content or "< 60" in test_content, "Should validate time limits"
         
-        logger.info(f"✅ Performance and scalability coverage validated: {performance_percentage:.1f}%")
+        logger.info(f" PASS:  Performance and scalability coverage validated: {performance_percentage:.1f}%")
 
     def test_error_handling_and_resilience_coverage(self):
         """
@@ -399,7 +399,7 @@ class TestUnifiedDockerManagerValidation(SSotBaseTestCase):
         assert "try:" in test_content and "except Exception" in test_content, "Should handle exceptions"
         assert "logger.warning" in test_content, "Should log warnings for failures"
         
-        logger.info(f"✅ Error handling and resilience coverage validated: {resilience_percentage:.1f}%")
+        logger.info(f" PASS:  Error handling and resilience coverage validated: {resilience_percentage:.1f}%")
 
 
 if __name__ == "__main__":

@@ -448,7 +448,7 @@ class TestConcurrentTokenRefreshRaceConditions:
             f"(expected: 0 or 1 due to token invalidation)"
         
         assert len(failed_results) >= 9, \
-            f"Too few failures: {len(failed_results)} (expected: ≥9)"
+            f"Too few failures: {len(failed_results)} (expected:  >= 9)"
         
         # Verify original refresh token is now invalid
         final_refresh_attempt = await auth_service.refresh_tokens(refresh_token)

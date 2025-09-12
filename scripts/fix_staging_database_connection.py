@@ -225,23 +225,23 @@ class StagingDatabaseFixer:
                 response = requests.get(f"{service_url}/health", timeout=30)
                 
                 if response.status_code == 200:
-                    logger.info("✅ Service health check passed!")
+                    logger.info(" PASS:  Service health check passed!")
                     return True
                 else:
-                    logger.error(f"❌ Health check failed: {response.status_code}")
+                    logger.error(f" FAIL:  Health check failed: {response.status_code}")
                     logger.error(f"Response: {response.text}")
                     return False
                     
             except Exception as e:
-                logger.error(f"❌ Failed to test connectivity: {e}")
+                logger.error(f" FAIL:  Failed to test connectivity: {e}")
                 return False
         else:
-            logger.error("❌ Service is not ready or has no URL")
+            logger.error(" FAIL:  Service is not ready or has no URL")
             return False
     
     def run_diagnosis(self) -> Dict[str, any]:
         """Run complete diagnosis of staging database issues."""
-        logger.info("🔍 Starting staging database diagnosis...")
+        logger.info(" SEARCH:  Starting staging database diagnosis...")
         
         results = {}
         
@@ -261,33 +261,33 @@ class StagingDatabaseFixer:
     
     def run_fix(self) -> bool:
         """Run complete fix process."""
-        logger.info("🔧 Starting staging database fix...")
+        logger.info("[U+1F527] Starting staging database fix...")
         
         # First, run diagnosis
         diagnosis = self.run_diagnosis()
         
         # If Cloud SQL is not ready, we can't proceed
         if not diagnosis["cloud_sql"]["ready"]:
-            logger.error("❌ Cloud SQL instance is not ready - cannot fix")
+            logger.error(" FAIL:  Cloud SQL instance is not ready - cannot fix")
             return False
         
         # If service is not ready, try to fix configuration
         if not diagnosis["cloud_run"]["ready"]:
-            logger.info("🔧 Service is not ready - attempting configuration fix...")
+            logger.info("[U+1F527] Service is not ready - attempting configuration fix...")
             
             if not self.fix_cloud_run_configuration():
-                logger.error("❌ Failed to fix Cloud Run configuration")
+                logger.error(" FAIL:  Failed to fix Cloud Run configuration")
                 return False
             
             # Verify the fix worked
             if self.verify_database_connectivity():
-                logger.info("✅ Database connectivity fix successful!")
+                logger.info(" PASS:  Database connectivity fix successful!")
                 return True
             else:
-                logger.error("❌ Database connectivity still not working after fix")
+                logger.error(" FAIL:  Database connectivity still not working after fix")
                 return False
         else:
-            logger.info("✅ Service appears to be ready already")
+            logger.info(" PASS:  Service appears to be ready already")
             return self.verify_database_connectivity()
 
 def main():
@@ -306,10 +306,10 @@ def main():
         print("STAGING DATABASE DIAGNOSIS SUMMARY")
         print("="*60)
         
-        print(f"Cloud SQL Instance: {'✅ Ready' if diagnosis['cloud_sql']['ready'] else '❌ Not Ready'}")
+        print(f"Cloud SQL Instance: {' PASS:  Ready' if diagnosis['cloud_sql']['ready'] else ' FAIL:  Not Ready'}")
         print(f"  Message: {diagnosis['cloud_sql']['message']}")
         
-        print(f"Cloud Run Service: {'✅ Ready' if diagnosis['cloud_run']['ready'] else '❌ Not Ready'}")
+        print(f"Cloud Run Service: {' PASS:  Ready' if diagnosis['cloud_run']['ready'] else ' FAIL:  Not Ready'}")
         service_info = diagnosis['cloud_run']['info']
         if isinstance(service_info, dict):
             print(f"  URL: {service_info.get('url', 'No URL')}")
@@ -323,17 +323,17 @@ def main():
         
         print(f"Recent Database Logs: {len(diagnosis['logs'])} entries")
         for log in diagnosis['logs'][:5]:  # Show first 5
-            print(f"  • {log}")
+            print(f"  [U+2022] {log}")
         
         print("\n" + "="*60)
         print("RECOMMENDATIONS:")
         
         if not diagnosis['cloud_sql']['ready']:
-            print("❌ Start the Cloud SQL instance first")
+            print(" FAIL:  Start the Cloud SQL instance first")
         elif not diagnosis['cloud_run']['ready']:
-            print("🔧 Run with --fix to update Cloud Run configuration")
+            print("[U+1F527] Run with --fix to update Cloud Run configuration")
         else:
-            print("✅ Both services appear ready - check application logs for specific errors")
+            print(" PASS:  Both services appear ready - check application logs for specific errors")
         
         print("="*60)
         

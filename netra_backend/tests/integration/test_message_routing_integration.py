@@ -370,7 +370,7 @@ class TestMessageRoutingIntegration(BaseIntegrationTest):
             db.select(Message).where(Message.metadata.contains({"test_source": "isolation_test"}))
         )
         all_messages = all_messages_query.scalars().all()
-        assert len(all_messages) == 9, "Expected 9 total messages across all users"  # 3 users × 3 messages each
+        assert len(all_messages) == 9, "Expected 9 total messages across all users"  # 3 users  x  3 messages each
         
         await db.close()
 

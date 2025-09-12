@@ -245,7 +245,7 @@
         # REMOVED_SYNTAX_ERROR: report_lines.append("formatted_string")
         # REMOVED_SYNTAX_ERROR: for event_type in self.CRITICAL_EVENTS:
             # REMOVED_SYNTAX_ERROR: count = counts.get(event_type, 0)
-            # REMOVED_SYNTAX_ERROR: status = "✅" if count > 0 else "❌"
+            # REMOVED_SYNTAX_ERROR: status = " PASS: " if count > 0 else " FAIL: "
             # REMOVED_SYNTAX_ERROR: report_lines.append("formatted_string")
 
             # Performance metrics
@@ -255,7 +255,7 @@
                     # REMOVED_SYNTAX_ERROR: duration_key = "formatted_string"
                     # REMOVED_SYNTAX_ERROR: if duration_key in diagnostics["performance_metrics"]:
                         # REMOVED_SYNTAX_ERROR: duration = diagnostics["performance_metrics"][duration_key]
-                        # REMOVED_SYNTAX_ERROR: target_met = "✅" if duration < 2.0 else "❌"
+                        # REMOVED_SYNTAX_ERROR: target_met = " PASS: " if duration < 2.0 else " FAIL: "
                         # REMOVED_SYNTAX_ERROR: report_lines.append("formatted_string")
 
                         # Errors and warnings

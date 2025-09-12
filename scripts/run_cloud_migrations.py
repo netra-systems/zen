@@ -60,7 +60,7 @@ class MigrationRunner:
     
     def build_migration_image(self) -> bool:
         """Build and push the migrations container."""
-        print(f"🔨 Building migrations container for {self.environment}...")
+        print(f"[U+1F528] Building migrations container for {self.environment}...")
         
         # Build the image
         build_cmd = [
@@ -72,31 +72,31 @@ class MigrationRunner:
         
         result = subprocess.run(build_cmd, capture_output=True, text=True)
         if result.returncode != 0:
-            print(f"❌ Failed to build migration image: {result.stderr}")
+            print(f" FAIL:  Failed to build migration image: {result.stderr}")
             return False
         
-        print("✅ Migration image built successfully")
+        print(" PASS:  Migration image built successfully")
         
         # Configure Docker for GCR
-        print("🔐 Configuring Docker authentication for GCR...")
+        print("[U+1F510] Configuring Docker authentication for GCR...")
         auth_cmd = [self.gcloud_cmd, "auth", "configure-docker", "gcr.io", "--quiet"]
         subprocess.run(auth_cmd, capture_output=True)
         
         # Push the image
-        print(f"📤 Pushing migration image to {self.image_name}...")
+        print(f"[U+1F4E4] Pushing migration image to {self.image_name}...")
         push_cmd = [self.docker_cmd, "push", self.image_name]
         result = subprocess.run(push_cmd, capture_output=True, text=True)
         
         if result.returncode != 0:
-            print(f"❌ Failed to push migration image: {result.stderr}")
+            print(f" FAIL:  Failed to push migration image: {result.stderr}")
             return False
         
-        print("✅ Migration image pushed successfully")
+        print(" PASS:  Migration image pushed successfully")
         return True
     
     def create_or_update_job(self) -> bool:
         """Create or update the Cloud Run Job for migrations."""
-        print(f"🚀 Creating/updating Cloud Run Job: {self.job_name}...")
+        print(f"[U+1F680] Creating/updating Cloud Run Job: {self.job_name}...")
         
         # Build the job configuration
         job_cmd = [
@@ -131,27 +131,27 @@ class MigrationRunner:
         cloud_sql_instance = f"{self.project_id}:us-central1:{self.environment}-shared-postgres"
         job_cmd.extend(["--set-cloudsql-instances", cloud_sql_instance])
         
-        print(f"🔌 Configuring Cloud SQL connection: {cloud_sql_instance}")
+        print(f"[U+1F50C] Configuring Cloud SQL connection: {cloud_sql_instance}")
         
         result = subprocess.run(job_cmd, capture_output=True, text=True)
         
         if result.returncode != 0:
             if "already exists" in result.stderr:
-                print("ℹ️ Job already exists, updating...")
+                print("[U+2139][U+FE0F] Job already exists, updating...")
                 # Try update instead
                 job_cmd[3] = "update"
                 result = subprocess.run(job_cmd, capture_output=True, text=True)
             
             if result.returncode != 0:
-                print(f"❌ Failed to create/update job: {result.stderr}")
+                print(f" FAIL:  Failed to create/update job: {result.stderr}")
                 return False
         
-        print(f"✅ Cloud Run Job {self.job_name} is ready")
+        print(f" PASS:  Cloud Run Job {self.job_name} is ready")
         return True
     
     def run_migration(self) -> bool:
         """Execute the migration job and wait for completion."""
-        print(f"▶️ Executing migration job {self.job_name}...")
+        print(f"[U+25B6][U+FE0F] Executing migration job {self.job_name}...")
         
         # Execute the job
         run_cmd = [
@@ -164,10 +164,10 @@ class MigrationRunner:
         result = subprocess.run(run_cmd, capture_output=True, text=True)
         
         if result.returncode != 0:
-            print(f"❌ Migration job failed: {result.stderr}")
+            print(f" FAIL:  Migration job failed: {result.stderr}")
             
             # Try to get logs
-            print("\n📋 Fetching job logs...")
+            print("\n[U+1F4CB] Fetching job logs...")
             logs_cmd = [
                 self.gcloud_cmd, "logging", "read",
                 f'resource.type="cloud_run_job" AND resource.labels.job_name="{self.job_name}"',
@@ -182,12 +182,12 @@ class MigrationRunner:
             
             return False
         
-        print("✅ Database migrations completed successfully!")
+        print(" PASS:  Database migrations completed successfully!")
         return True
     
     def run(self) -> bool:
         """Run the complete migration process."""
-        print(f"\n🗄️ Running database migrations for {self.environment} environment")
+        print(f"\n[U+1F5C4][U+FE0F] Running database migrations for {self.environment} environment")
         print(f"   Project: {self.project_id}")
         print(f"   Region: {self.region}\n")
         
@@ -203,7 +203,7 @@ class MigrationRunner:
         if not self.run_migration():
             return False
         
-        print(f"\n✨ All migrations completed successfully for {self.environment}!")
+        print(f"\n[U+2728] All migrations completed successfully for {self.environment}!")
         return True
 
 

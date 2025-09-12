@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: $15K MRR - Session reliability drives user retention
 
 This test validates session state synchronization across all services:
-Auth Service → Main Backend → WebSocket Manager → Redis State
+Auth Service  ->  Main Backend  ->  WebSocket Manager  ->  Redis State
 
 CRITICAL: Tests real cross-service communication and state persistence.
 """

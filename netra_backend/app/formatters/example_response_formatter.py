@@ -180,7 +180,7 @@ class ExampleResponseFormatter:
                 steps.extend([f"{week.replace('_', ' ').title()}: {task}" for task in tasks])
                 
         return FormattedResult(
-            title="💰 Cost Optimization Analysis",
+            title="[U+1F4B0] Cost Optimization Analysis",
             summary=f"Identified {len(opportunities)} optimization opportunities with potential savings of {outcomes.get('monthly_savings', '$0')} per month ({outcomes.get('savings_percentage', '0')}% reduction).",
             metrics=metrics,
             recommendations=recommendations,
@@ -248,7 +248,7 @@ class ExampleResponseFormatter:
             ))
             
         return FormattedResult(
-            title="⚡ Latency Optimization Analysis",
+            title=" LIGHTNING:  Latency Optimization Analysis",
             summary=f"Achieve {projected.get('improvement_factor', 'significant')} latency improvement with {len(strategies)} optimization strategies.",
             metrics=metrics,
             recommendations=recommendations,
@@ -324,7 +324,7 @@ class ExampleResponseFormatter:
             ))
             
         return FormattedResult(
-            title="🤖 Model Selection Analysis",
+            title="[U+1F916] Model Selection Analysis",
             summary=f"Analyzed {len(comparison)} models with recommendation for hybrid approach achieving {expected.get('cost_reduction', '0%')} cost reduction and {expected.get('quality_improvement', '0%')} quality improvement.",
             metrics=metrics,
             recommendations=model_recs,
@@ -396,7 +396,7 @@ class ExampleResponseFormatter:
             ))
             
         return FormattedResult(
-            title="📈 Scaling Analysis",
+            title="[U+1F4C8] Scaling Analysis",
             summary=f"Prepared for {projections.get('monthly_requests', '0')} monthly requests with {outcomes.get('cost_efficiency', 'optimized')} cost efficiency.",
             metrics=metrics,
             recommendations=recommendations,
@@ -478,7 +478,7 @@ class ExampleResponseFormatter:
             steps.extend([f"{phase.replace('_', ' ').title()}: {task} ({improvement})" for task in tasks])
             
         return FormattedResult(
-            title="🚀 Advanced Multi-Dimensional Optimization",
+            title="[U+1F680] Advanced Multi-Dimensional Optimization",
             summary=f"Achieved {solution.get('achieved_cost_reduction', '0%')} cost reduction, {solution.get('achieved_latency_improvement', '1x')} latency improvement, and {solution.get('achieved_scaling_capacity', '0%')} scaling capacity through integrated optimization approach.",
             metrics=metrics,
             recommendations=recommendations,
@@ -501,12 +501,12 @@ class ExampleResponseFormatter:
         """Format general/fallback responses"""
         
         return FormattedResult(
-            title="📊 Optimization Analysis",
+            title=" CHART:  Optimization Analysis",
             summary="Analysis completed. This demonstrates the type of detailed insights available in the full Netra platform.",
             metrics=[
                 FormattedMetric(
                     label="Analysis Completed",
-                    value="✓",
+                    value="[U+2713]",
                     color="green"
                 )
             ],
@@ -537,7 +537,7 @@ class ExampleResponseFormatter:
         """Format error responses"""
         
         return FormattedResult(
-            title="⚠️ Analysis Error",
+            title=" WARNING: [U+FE0F] Analysis Error",
             summary=f"An error occurred during analysis: {error_message}",
             metrics=[
                 FormattedMetric(

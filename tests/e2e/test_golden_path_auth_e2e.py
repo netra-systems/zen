@@ -324,7 +324,7 @@ class TestGoldenPathAuthE2E(SSotAsyncTestCase):
                     'error': str(e)
                 }
         
-        # THEN: Should show proper failure → recovery pattern
+        # THEN: Should show proper failure  ->  recovery pattern
         self.assertIn('initial_failure', recovery_results)
         self.assertIn('recovery_success', recovery_results)
         

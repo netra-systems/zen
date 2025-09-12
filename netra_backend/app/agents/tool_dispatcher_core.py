@@ -191,14 +191,14 @@ class ToolDispatcher:
             self.executor.websocket_bridge = bridge
             
             if bridge is not None:
-                logger.info("✅ Updated ToolDispatcher executor WebSocket bridge")
+                logger.info(" PASS:  Updated ToolDispatcher executor WebSocket bridge")
             else:
-                logger.warning("⚠️ Set ToolDispatcher executor WebSocket bridge to None - events will be lost")
+                logger.warning(" WARNING: [U+FE0F] Set ToolDispatcher executor WebSocket bridge to None - events will be lost")
             
             if old_bridge is None and bridge is not None:
-                logger.info("🔧 Fixed missing WebSocket bridge on ToolDispatcher - events now enabled")
+                logger.info("[U+1F527] Fixed missing WebSocket bridge on ToolDispatcher - events now enabled")
         else:
-            logger.error("🚨 CRITICAL: ToolDispatcher executor doesn't support WebSocket bridge pattern")
+            logger.error(" ALERT:  CRITICAL: ToolDispatcher executor doesn't support WebSocket bridge pattern")
     
     def get_websocket_bridge(self) -> Optional['AgentWebSocketBridge']:
         """Get current WebSocket bridge from executor."""
@@ -253,17 +253,17 @@ class ToolDispatcher:
         DEPRECATED: This method redirects to ToolDispatcherFactory for SSOT compliance.
         Use ToolDispatcherFactory.create_for_request() directly instead.
         
-        🟢 RECOMMENDED SECURE PATTERN: Use ToolDispatcherFactory for new code.
+        [U+1F7E2] RECOMMENDED SECURE PATTERN: Use ToolDispatcherFactory for new code.
         This factory method creates proper per-request isolation and eliminates global state risks.
         
-        ✅ SECURITY BENEFITS:
+         PASS:  SECURITY BENEFITS:
         - Complete user context isolation (no data leaks)
         - Request-scoped tool registry (tools not shared between users)
         - Proper WebSocket event routing (events go to correct user)
         - Automatic cleanup on request completion
         - Memory-safe concurrent request handling
         
-        🔒 USER ISOLATION GUARANTEES:
+        [U+1F512] USER ISOLATION GUARANTEES:
         - Each user gets their own tool dispatcher instance
         - No shared state between concurrent requests
         - WebSocket events are user-scoped and secure
@@ -308,15 +308,15 @@ class ToolDispatcher:
         )
         
         logger.warning(
-            f"🔄 DEPRECATED: ToolDispatcher.create_request_scoped_dispatcher() -> ToolDispatcherFactory.create_for_request() "
+            f" CYCLE:  DEPRECATED: ToolDispatcher.create_request_scoped_dispatcher() -> ToolDispatcherFactory.create_for_request() "
             f"for user {user_context.user_id} (Phase 2 factory consolidation)"
         )
         
         # Import here to avoid circular imports - now using SSOT factory
         from netra_backend.app.factories.tool_dispatcher_factory import create_tool_dispatcher
         
-        logger.info(f"🏭✅ Creating SSOT request-scoped dispatcher for user {user_context.user_id}")
-        logger.info("🔒 User context isolation enabled via SSOT factory - no global state risks")
+        logger.info(f"[U+1F3ED] PASS:  Creating SSOT request-scoped dispatcher for user {user_context.user_id}")
+        logger.info("[U+1F512] User context isolation enabled via SSOT factory - no global state risks")
         
         return await create_tool_dispatcher(
             user_context=user_context,
@@ -335,17 +335,17 @@ class ToolDispatcher:
         DEPRECATED: This method redirects to ToolDispatcherFactory for SSOT compliance.
         Use ToolDispatcherFactory.create_scoped() directly instead.
         
-        🟢 RECOMMENDED SECURE PATTERN: Use ToolDispatcherFactory for request handling with guaranteed cleanup.
+        [U+1F7E2] RECOMMENDED SECURE PATTERN: Use ToolDispatcherFactory for request handling with guaranteed cleanup.
         This context manager ensures proper resource cleanup and prevents memory leaks.
         
-        ✅ AUTOMATIC SAFETY FEATURES:
+         PASS:  AUTOMATIC SAFETY FEATURES:
         - Guaranteed resource cleanup on context exit
         - Exception-safe disposal of user-scoped resources
         - WebSocket connection cleanup to prevent event leaks
         - Memory-safe handling of tool state
         - Database session cleanup if applicable
         
-        🔒 SECURITY GUARANTEES:
+        [U+1F512] SECURITY GUARANTEES:
         - User context is automatically disposed after use
         - No lingering references to user data
         - WebSocket events cannot leak to other users
@@ -375,7 +375,7 @@ class ToolDispatcher:
                 result = await dispatcher.dispatch("my_tool", param="value")
                 # Automatic cleanup happens here - no memory leaks
                 
-        ⚠️ IMPORTANT: Always use context managers for request handling to ensure:
+         WARNING: [U+FE0F] IMPORTANT: Always use context managers for request handling to ensure:
         - User data doesn't leak between requests
         - WebSocket events are properly routed
         - Resources are cleaned up even if exceptions occur
@@ -391,15 +391,15 @@ class ToolDispatcher:
         )
         
         logger.warning(
-            f"🔄 DEPRECATED: ToolDispatcher.create_scoped_dispatcher_context() -> ToolDispatcherFactory.create_scoped() "
+            f" CYCLE:  DEPRECATED: ToolDispatcher.create_scoped_dispatcher_context() -> ToolDispatcherFactory.create_scoped() "
             f"for user {user_context.user_id} (Phase 2 factory consolidation)"
         )
         
         # Import here to avoid circular imports - now using SSOT factory
         from netra_backend.app.factories.tool_dispatcher_factory import tool_dispatcher_scope
         
-        logger.info(f"🏭✅ Creating SSOT scoped dispatcher context for user {user_context.user_id}")
-        logger.info("🔒 Automatic cleanup enabled via SSOT factory - memory and security safe")
+        logger.info(f"[U+1F3ED] PASS:  Creating SSOT scoped dispatcher context for user {user_context.user_id}")
+        logger.info("[U+1F512] Automatic cleanup enabled via SSOT factory - memory and security safe")
         
         return tool_dispatcher_scope(
             user_context=user_context,

@@ -61,7 +61,7 @@ class TestRealAuthErrorHandling:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for error handling testing."""
-        print("🐳 Starting Docker services for auth error handling tests...")
+        print("[U+1F433] Starting Docker services for auth error handling tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -73,13 +73,13 @@ class TestRealAuthErrorHandling:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for error handling tests")
+            print(" PASS:  Docker services ready for error handling tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for error handling tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for error handling tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after error handling tests...")
+            print("[U+1F9F9] Cleaning up Docker services after error handling tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -187,7 +187,7 @@ class TestRealAuthErrorHandling:
             invalid_token = scenario["token"]
             expected_status = scenario["expected_status"]
             
-            print(f"🔍 Testing JWT error scenario: {scenario_name}")
+            print(f" SEARCH:  Testing JWT error scenario: {scenario_name}")
             
             # Test with invalid token
             headers = {
@@ -200,24 +200,24 @@ class TestRealAuthErrorHandling:
                 
                 # Should return appropriate error status
                 if response.status_code >= 400:
-                    print(f"✅ {scenario_name} properly rejected with status {response.status_code}")
+                    print(f" PASS:  {scenario_name} properly rejected with status {response.status_code}")
                     
                     # Check for user-friendly error message
                     try:
                         error_data = response.json()
                         if "error" in error_data or "detail" in error_data or "message" in error_data:
-                            print(f"✅ User-friendly error message provided for {scenario_name}")
+                            print(f" PASS:  User-friendly error message provided for {scenario_name}")
                         else:
-                            print(f"⚠️ No user-friendly error message for {scenario_name}")
+                            print(f" WARNING: [U+FE0F] No user-friendly error message for {scenario_name}")
                     except:
-                        print(f"⚠️ Non-JSON error response for {scenario_name}")
+                        print(f" WARNING: [U+FE0F] Non-JSON error response for {scenario_name}")
                 else:
-                    print(f"⚠️ {scenario_name} was not rejected (status: {response.status_code})")
+                    print(f" WARNING: [U+FE0F] {scenario_name} was not rejected (status: {response.status_code})")
                 
             except Exception as e:
-                print(f"⚠️ Error testing {scenario_name}: {e}")
+                print(f" WARNING: [U+FE0F] Error testing {scenario_name}: {e}")
         
-        print("✅ JWT validation error handling tested for all scenarios")
+        print(" PASS:  JWT validation error handling tested for all scenarios")
 
     @pytest.mark.asyncio
     async def test_database_connection_error_handling(self, async_client, real_db_session):
@@ -252,7 +252,7 @@ class TestRealAuthErrorHandling:
             error_type = scenario["error_type"]
             description = scenario["description"]
             
-            print(f"🔍 Testing database error scenario: {description}")
+            print(f" SEARCH:  Testing database error scenario: {description}")
             
             try:
                 # Simulate database error by executing problematic query
@@ -262,26 +262,26 @@ class TestRealAuthErrorHandling:
                         from sqlalchemy import text
                         # This query might timeout in some environments
                         await real_db_session.execute(text("SELECT pg_sleep(0.1)"))
-                        print(f"✅ Database timeout scenario handled gracefully")
+                        print(f" PASS:  Database timeout scenario handled gracefully")
                     except Exception as e:
-                        print(f"✅ Database timeout error handled: {type(e).__name__}")
+                        print(f" PASS:  Database timeout error handled: {type(e).__name__}")
                 
                 elif error_type == "connection_refused":
                     # Test connection error handling
-                    print(f"✅ Connection refused scenario - would be handled by connection pool")
+                    print(f" PASS:  Connection refused scenario - would be handled by connection pool")
                 
                 elif error_type == "query_timeout":
                     # Test query timeout
-                    print(f"✅ Query timeout scenario - would be handled by SQLAlchemy")
+                    print(f" PASS:  Query timeout scenario - would be handled by SQLAlchemy")
                 
                 elif error_type == "deadlock":
                     # Test deadlock detection
-                    print(f"✅ Deadlock scenario - would trigger automatic retry")
+                    print(f" PASS:  Deadlock scenario - would trigger automatic retry")
                 
             except Exception as e:
-                print(f"✅ Database error {scenario_name} handled gracefully: {type(e).__name__}")
+                print(f" PASS:  Database error {scenario_name} handled gracefully: {type(e).__name__}")
         
-        print("✅ Database connection error handling validated")
+        print(" PASS:  Database connection error handling validated")
 
     @pytest.mark.asyncio
     async def test_redis_connection_error_handling(self, async_client):
@@ -316,7 +316,7 @@ class TestRealAuthErrorHandling:
             description = scenario["description"]
             fallback = scenario["fallback"]
             
-            print(f"🔍 Testing Redis error scenario: {description}")
+            print(f" SEARCH:  Testing Redis error scenario: {description}")
             print(f"   Expected fallback: {fallback}")
             
             # In real implementation, these would test actual Redis failures
@@ -326,21 +326,21 @@ class TestRealAuthErrorHandling:
                 # Test that app continues working without Redis
                 response = await async_client.get("/health")
                 if response.status_code == 200:
-                    print("✅ Application continues working without Redis")
+                    print(" PASS:  Application continues working without Redis")
             
             elif "timeout" in scenario_name:
                 # Test timeout handling
-                print("✅ Redis timeout would be handled with fallback to database")
+                print(" PASS:  Redis timeout would be handled with fallback to database")
             
             elif "memory_full" in scenario_name:
                 # Test memory exhaustion handling
-                print("✅ Redis memory exhaustion would trigger cache cleanup")
+                print(" PASS:  Redis memory exhaustion would trigger cache cleanup")
             
             elif "cluster_failover" in scenario_name:
                 # Test cluster failover handling
-                print("✅ Redis cluster failover would trigger reconnection")
+                print(" PASS:  Redis cluster failover would trigger reconnection")
         
-        print("✅ Redis connection error handling validated")
+        print(" PASS:  Redis connection error handling validated")
 
     @pytest.mark.asyncio
     async def test_oauth_service_error_handling(self, async_client):
@@ -380,7 +380,7 @@ class TestRealAuthErrorHandling:
             user_message = scenario["user_message"]
             expected_status = scenario["status_code"]
             
-            print(f"🔍 Testing OAuth error scenario: {scenario_name}")
+            print(f" SEARCH:  Testing OAuth error scenario: {scenario_name}")
             
             # Simulate OAuth error response
             oauth_error_response = {
@@ -405,9 +405,9 @@ class TestRealAuthErrorHandling:
             if error_code == "invalid_credentials":
                 assert oauth_error_response["support_contact"] is not None
             
-            print(f"✅ OAuth error {scenario_name} has user-friendly response")
+            print(f" PASS:  OAuth error {scenario_name} has user-friendly response")
         
-        print("✅ OAuth service error handling validated")
+        print(" PASS:  OAuth service error handling validated")
 
     @pytest.mark.asyncio
     async def test_permission_denied_error_handling(self, async_client):
@@ -452,7 +452,7 @@ class TestRealAuthErrorHandling:
             expected_status = scenario["status_code"]
             security_alert = scenario.get("security_alert", False)
             
-            print(f"🔍 Testing permission error scenario: {scenario_name}")
+            print(f" SEARCH:  Testing permission error scenario: {scenario_name}")
             
             # Create permission error response
             permission_error = {
@@ -474,11 +474,11 @@ class TestRealAuthErrorHandling:
             # Check security logging for escalation attempts
             if security_alert:
                 assert permission_error["security_logged"] is True
-                print(f"🚨 Security alert logged for {scenario_name}")
+                print(f" ALERT:  Security alert logged for {scenario_name}")
             
-            print(f"✅ Permission error {scenario_name} handled appropriately")
+            print(f" PASS:  Permission error {scenario_name} handled appropriately")
         
-        print("✅ Permission denied error handling validated")
+        print(" PASS:  Permission denied error handling validated")
 
     def get_permission_error_message(self, scenario_name: str) -> str:
         """Get user-friendly permission error message."""
@@ -538,7 +538,7 @@ class TestRealAuthErrorHandling:
             retry_after = scenario["retry_after"]
             message = scenario["message"]
             
-            print(f"🔍 Testing rate limit error scenario: {scenario_name}")
+            print(f" SEARCH:  Testing rate limit error scenario: {scenario_name}")
             
             # Create rate limit error response
             rate_limit_error = {
@@ -566,15 +566,15 @@ class TestRealAuthErrorHandling:
             
             # Validate retry guidance
             if retry_after <= 60:
-                print(f"✅ Short retry period ({retry_after}s) appropriate for {limit_type}")
+                print(f" PASS:  Short retry period ({retry_after}s) appropriate for {limit_type}")
             elif retry_after <= 3600:
-                print(f"✅ Medium retry period ({retry_after}s) appropriate for {limit_type}")
+                print(f" PASS:  Medium retry period ({retry_after}s) appropriate for {limit_type}")
             else:
-                print(f"✅ Long retry period ({retry_after}s) appropriate for {limit_type}")
+                print(f" PASS:  Long retry period ({retry_after}s) appropriate for {limit_type}")
             
-            print(f"✅ Rate limit error {scenario_name} provides clear retry guidance")
+            print(f" PASS:  Rate limit error {scenario_name} provides clear retry guidance")
         
-        print("✅ Rate limiting error responses validated")
+        print(" PASS:  Rate limiting error responses validated")
 
     @pytest.mark.asyncio
     async def test_system_wide_error_recovery_patterns(self, async_client):
@@ -619,7 +619,7 @@ class TestRealAuthErrorHandling:
             available_features = scenario["available_features"]
             recovery_action = scenario["recovery_action"]
             
-            print(f"🔧 Testing system recovery scenario: {description}")
+            print(f"[U+1F527] Testing system recovery scenario: {description}")
             
             # Create system recovery response
             recovery_response = {
@@ -644,13 +644,13 @@ class TestRealAuthErrorHandling:
             available_core = [f for f in available_features if f in core_features]
             
             if available_core:
-                print(f"✅ Core auth functionality maintained: {available_core}")
+                print(f" PASS:  Core auth functionality maintained: {available_core}")
             else:
-                print(f"⚠️ Core auth functionality may be impacted")
+                print(f" WARNING: [U+FE0F] Core auth functionality may be impacted")
             
-            print(f"✅ System recovery scenario {scenario_name} provides graceful degradation")
+            print(f" PASS:  System recovery scenario {scenario_name} provides graceful degradation")
         
-        print("✅ System-wide error recovery patterns validated")
+        print(" PASS:  System-wide error recovery patterns validated")
 
     def get_system_recovery_message(self, scenario_name: str) -> str:
         """Get user-friendly system recovery message."""

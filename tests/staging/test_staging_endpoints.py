@@ -51,7 +51,7 @@ def main():
     for base_url, endpoint, expected in tests:
         success, message = test_endpoint(base_url, endpoint, expected)
         results.append((success, message))
-        status = "✅" if success else "❌"
+        status = " PASS: " if success else " FAIL: "
         print(f"{status} {message}")
     
     # Summary
@@ -61,9 +61,9 @@ def main():
     print(f"RESULTS: {passed}/{total} tests passed")
     
     if passed == total:
-        print("✅ All staging endpoints are responding correctly")
+        print(" PASS:  All staging endpoints are responding correctly")
     else:
-        print("⚠️ Some endpoints failed - check logs for details")
+        print(" WARNING: [U+FE0F] Some endpoints failed - check logs for details")
         
     # Check specific known issues
     print("\n" + "=" * 60)

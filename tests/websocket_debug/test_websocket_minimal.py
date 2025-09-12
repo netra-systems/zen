@@ -28,23 +28,23 @@ except ImportError as e:
 async def test_websocket_connection():
     """Test basic WebSocket connection to backend service"""
     try:
-        print("🔌 Testing WebSocket connection to backend...")
+        print("[U+1F50C] Testing WebSocket connection to backend...")
         
         # First test if backend is running
         try:
             response = requests.get("http://localhost:8000/health", timeout=5)
-            print(f"✅ Backend health check: {response.status_code}")
+            print(f" PASS:  Backend health check: {response.status_code}")
         except requests.exceptions.RequestException as e:
-            print(f"❌ Backend not accessible: {e}")
+            print(f" FAIL:  Backend not accessible: {e}")
             return False
             
         # Test WebSocket connection
         try:
             websocket_url = "ws://localhost:8000/websocket"
-            print(f"🔗 Connecting to: {websocket_url}")
+            print(f"[U+1F517] Connecting to: {websocket_url}")
             
             async with websockets.connect(websocket_url, timeout=10) as websocket:
-                print("✅ WebSocket connection established!")
+                print(" PASS:  WebSocket connection established!")
                 
                 # Send a test message
                 test_message = {
@@ -53,47 +53,47 @@ async def test_websocket_connection():
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                print("📤 Test message sent")
+                print("[U+1F4E4] Test message sent")
                 
                 # Wait for response
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=5)
-                    print(f"📥 Response received: {response}")
+                    print(f"[U+1F4E5] Response received: {response}")
                     return True
                 except asyncio.TimeoutError:
-                    print("⚠️ No response within timeout")
+                    print(" WARNING: [U+FE0F] No response within timeout")
                     return True  # Connection worked, just no response
                     
         except Exception as e:
-            print(f"❌ WebSocket connection failed: {e}")
+            print(f" FAIL:  WebSocket connection failed: {e}")
             return False
             
     except Exception as e:
-        print(f"💥 Unexpected error: {e}")
+        print(f"[U+1F4A5] Unexpected error: {e}")
         traceback.print_exc()
         return False
 
 async def test_auth_service():
     """Test auth service accessibility"""
     try:
-        print("🔐 Testing auth service...")
+        print("[U+1F510] Testing auth service...")
         
         response = requests.get("http://localhost:8081/health", timeout=5)
-        print(f"✅ Auth service health: {response.status_code}")
+        print(f" PASS:  Auth service health: {response.status_code}")
         
         # Test auth endpoint
         auth_response = requests.get("http://localhost:8081/api/auth/status", timeout=5)
-        print(f"✅ Auth status endpoint: {auth_response.status_code}")
+        print(f" PASS:  Auth status endpoint: {auth_response.status_code}")
         
         return True
         
     except requests.exceptions.RequestException as e:
-        print(f"❌ Auth service not accessible: {e}")
+        print(f" FAIL:  Auth service not accessible: {e}")
         return False
 
 async def main():
     """Main test execution"""
-    print("🚀 Starting minimal WebSocket authentication tests...")
+    print("[U+1F680] Starting minimal WebSocket authentication tests...")
     print("=" * 60)
     
     # Test 1: Auth service
@@ -103,15 +103,15 @@ async def main():
     websocket_ok = await test_websocket_connection()
     
     print("=" * 60)
-    print("📋 Test Results:")
-    print(f"  Auth Service: {'✅ PASS' if auth_ok else '❌ FAIL'}")
-    print(f"  WebSocket:    {'✅ PASS' if websocket_ok else '❌ FAIL'}")
+    print("[U+1F4CB] Test Results:")
+    print(f"  Auth Service: {' PASS:  PASS' if auth_ok else ' FAIL:  FAIL'}")
+    print(f"  WebSocket:    {' PASS:  PASS' if websocket_ok else ' FAIL:  FAIL'}")
     
     if auth_ok and websocket_ok:
-        print("🎉 All tests passed! WebSocket authentication system is accessible.")
+        print(" CELEBRATION:  All tests passed! WebSocket authentication system is accessible.")
         return True
     else:
-        print("⚠️ Some tests failed. Check service status.")
+        print(" WARNING: [U+FE0F] Some tests failed. Check service status.")
         return False
 
 if __name__ == "__main__":

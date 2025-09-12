@@ -11,14 +11,14 @@ Every service, every test, every configuration depends on IsolatedEnvironment.
 ANY bug in this class cascades to COMPLETE SYSTEM FAILURE.
 
 Testing Coverage Goals:
-✓ 100% line coverage - Every single line must be tested
-✓ 100% branch coverage - Every conditional path must be validated  
-✓ 100% business logic coverage - Every business scenario must pass
-✓ Performance critical paths - Validated with benchmarks
-✓ Thread safety under heavy load - Concurrent access validation
-✓ Error handling - All failure modes tested
-✓ Windows compatibility - UTF-8 encoding support
-✓ Multi-user system support - Service independence verified
+[U+2713] 100% line coverage - Every single line must be tested
+[U+2713] 100% branch coverage - Every conditional path must be validated  
+[U+2713] 100% business logic coverage - Every business scenario must pass
+[U+2713] Performance critical paths - Validated with benchmarks
+[U+2713] Thread safety under heavy load - Concurrent access validation
+[U+2713] Error handling - All failure modes tested
+[U+2713] Windows compatibility - UTF-8 encoding support
+[U+2713] Multi-user system support - Service independence verified
 
 ULTRA CRITICAL IMPORTANCE: 
 - Singleton pattern MUST be thread-safe under ALL conditions
@@ -501,7 +501,7 @@ class TestIsolatedEnvironmentErrorHandlingComprehensive:
         assert env.get("SPECIAL_CHARS_VAR") == special_chars, "Special characters corrupted"
         
         # Test Unicode characters
-        unicode_value = "Hello 世界 🌍 café naïve résumé"
+        unicode_value = "Hello [U+4E16][U+754C] [U+1F30D] caf[U+00E9] na[U+00EF]ve r[U+00E9]sum[U+00E9]"
         env.set("UNICODE_VAR", unicode_value, "extreme_test")
         assert env.get("UNICODE_VAR") == unicode_value, "Unicode characters corrupted"
         
@@ -1153,14 +1153,14 @@ class TestIsolatedEnvironmentWindowsCompatibility:
         # Test various UTF-8 characters that might cause issues on Windows
         utf8_test_cases = [
             ("UTF8_ENGLISH", "Hello World", "Basic English text"),
-            ("UTF8_FRENCH", "Café naïve résumé", "French accented characters"),
-            ("UTF8_GERMAN", "Größe Straße Mädchen", "German umlauts and eszett"),
-            ("UTF8_CHINESE", "你好世界", "Chinese characters"),
-            ("UTF8_JAPANESE", "こんにちは世界", "Japanese hiragana"),
-            ("UTF8_KOREAN", "안녕하세요 세계", "Korean hangul"),
-            ("UTF8_EMOJI", "Hello 🌍 World 🚀", "Emoji characters"),
-            ("UTF8_SYMBOLS", "©®™€£¥§", "Various symbols"),
-            ("UTF8_MIXED", "Testing 测试 тест テスト 🔥", "Mixed scripts and emoji"),
+            ("UTF8_FRENCH", "Caf[U+00E9] na[U+00EF]ve r[U+00E9]sum[U+00E9]", "French accented characters"),
+            ("UTF8_GERMAN", "Gr[U+00F6][U+00DF]e Stra[U+00DF]e M[U+00E4]dchen", "German umlauts and eszett"),
+            ("UTF8_CHINESE", "[U+4F60][U+597D][U+4E16][U+754C]", "Chinese characters"),
+            ("UTF8_JAPANESE", "[U+3053][U+3093][U+306B][U+3061][U+306F][U+4E16][U+754C]", "Japanese hiragana"),
+            ("UTF8_KOREAN", "[U+C548][U+B155][U+D558][U+C138][U+C694] [U+C138][U+ACC4]", "Korean hangul"),
+            ("UTF8_EMOJI", "Hello [U+1F30D] World [U+1F680]", "Emoji characters"),
+            ("UTF8_SYMBOLS", "[U+00A9][U+00AE][U+2122][U+20AC][U+00A3][U+00A5][U+00A7]", "Various symbols"),
+            ("UTF8_MIXED", "Testing [U+6D4B][U+8BD5] tect [U+30C6][U+30B9][U+30C8]  FIRE: ", "Mixed scripts and emoji"),
         ]
         
         for var_name, utf8_value, description in utf8_test_cases:

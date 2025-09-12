@@ -164,12 +164,12 @@ class TestSetupMethodVsSetUpIncompatibility:
         
         # Document the actual behavior
         if not setup_was_called:
-            print("✅ DEMONSTRATION: setUp() was NOT called by pytest")
-            print("✅ This is exactly the problem - setUp() is never called!")
+            print(" PASS:  DEMONSTRATION: setUp() was NOT called by pytest")
+            print(" PASS:  This is exactly the problem - setUp() is never called!")
             
         if not golden_context_exists:
-            print("✅ DEMONSTRATION: golden_user_context does NOT exist")
-            print("✅ This would cause AttributeError: 'golden_user_context'")
+            print(" PASS:  DEMONSTRATION: golden_user_context does NOT exist")
+            print(" PASS:  This would cause AttributeError: 'golden_user_context'")
         
         # This demonstrates the exact issue:
         # - When using SSOT classes, only setup_method() is called
@@ -178,7 +178,7 @@ class TestSetupMethodVsSetUpIncompatibility:
         # - Tests fail with AttributeError
         
         # The fix is to use setup_method() instead of setUp()
-        print("🔧 FIX: Use setup_method() instead of setUp() with SSOT classes")
+        print("[U+1F527] FIX: Use setup_method() instead of setUp() with SSOT classes")
         
         # This assertion demonstrates the problem exists
         assert not setup_was_called, "setUp() should NOT be called by pytest (this proves the issue)"
@@ -287,7 +287,7 @@ class TestCombinedIssueReproduction(SSotAsyncTestCase):
         assert execution_context.user_id == self.golden_user_context.user_id
         assert execution_context.request_id == self.golden_user_context.request_id
         
-        print("✅ Complete workflow orchestrator pattern works with all fixes applied!")
+        print(" PASS:  Complete workflow orchestrator pattern works with all fixes applied!")
 
 
 class TestOldPatternFailureSimulation:

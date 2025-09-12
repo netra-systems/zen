@@ -1,7 +1,7 @@
 """
 Scaling Metrics Validation Tests
 Tests validation of scaling metrics and projections.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 # Add project root to path

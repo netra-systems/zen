@@ -14,7 +14,7 @@ from pathlib import Path
 
 def validate_python_syntax(file_path):
     """Validate Python syntax for a file"""
-    print(f"📁 Validating: {file_path}")
+    print(f"[U+1F4C1] Validating: {file_path}")
     
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -22,14 +22,14 @@ def validate_python_syntax(file_path):
         
         # Parse syntax
         ast.parse(content)
-        print(f"✅ Syntax OK: {file_path.name}")
+        print(f" PASS:  Syntax OK: {file_path.name}")
         return True
         
     except SyntaxError as e:
-        print(f"❌ Syntax Error in {file_path.name}: Line {e.lineno}: {e.msg}")
+        print(f" FAIL:  Syntax Error in {file_path.name}: Line {e.lineno}: {e.msg}")
         return False
     except Exception as e:
-        print(f"❌ Error reading {file_path.name}: {e}")
+        print(f" FAIL:  Error reading {file_path.name}: {e}")
         return False
 
 def count_test_functions(file_path):
@@ -52,12 +52,12 @@ def count_test_functions(file_path):
 
 def validate_test_structure(file_path):
     """Validate test file structure"""
-    print(f"🧪 Analyzing test structure: {file_path.name}")
+    print(f"[U+1F9EA] Analyzing test structure: {file_path.name}")
     
     test_functions = count_test_functions(file_path)
     test_count = len(test_functions)
     
-    print(f"📊 Found {test_count} test functions")
+    print(f" CHART:  Found {test_count} test functions")
     
     # Check for BVJ comments and proper structure
     try:
@@ -73,9 +73,9 @@ def validate_test_structure(file_path):
         # Check for proper imports
         has_proper_imports = 'UserExecutionContext' in content
         
-        print(f"✅ Has BVJ comments: {has_bvj}")
-        print(f"✅ Has integration markers: {has_integration_markers}")
-        print(f"✅ Has proper imports: {has_proper_imports}")
+        print(f" PASS:  Has BVJ comments: {has_bvj}")
+        print(f" PASS:  Has integration markers: {has_integration_markers}")
+        print(f" PASS:  Has proper imports: {has_proper_imports}")
         
         return {
             'test_count': test_count,
@@ -86,12 +86,12 @@ def validate_test_structure(file_path):
         }
         
     except Exception as e:
-        print(f"❌ Error analyzing structure: {e}")
+        print(f" FAIL:  Error analyzing structure: {e}")
         return {'test_count': test_count, 'test_functions': test_functions}
 
 def main():
     """Main validation function"""
-    print("🚀 UVS Test Suite Validation")
+    print("[U+1F680] UVS Test Suite Validation")
     print("=" * 50)
     
     # Test files to validate
@@ -109,10 +109,10 @@ def main():
     for test_file in test_files:
         test_path = Path(test_file)
         if not test_path.exists():
-            print(f"❌ File not found: {test_file}")
+            print(f" FAIL:  File not found: {test_file}")
             continue
         
-        print(f"\n📂 Processing: {test_file}")
+        print(f"\n[U+1F4C2] Processing: {test_file}")
         print("-" * 40)
         
         # Validate syntax
@@ -128,16 +128,16 @@ def main():
     
     # Generate summary report
     print("\n" + "=" * 50)
-    print("📊 VALIDATION SUMMARY REPORT")
+    print(" CHART:  VALIDATION SUMMARY REPORT")
     print("=" * 50)
     
-    print(f"📁 Files validated: {len(validation_results)}")
-    print(f"🧪 Total test functions: {total_tests}")
-    print(f"❌ Syntax errors: {syntax_errors}")
-    print(f"✅ Success rate: {((len(validation_results) - syntax_errors) / len(test_files) * 100):.1f}%")
+    print(f"[U+1F4C1] Files validated: {len(validation_results)}")
+    print(f"[U+1F9EA] Total test functions: {total_tests}")
+    print(f" FAIL:  Syntax errors: {syntax_errors}")
+    print(f" PASS:  Success rate: {((len(validation_results) - syntax_errors) / len(test_files) * 100):.1f}%")
     
     # Detailed breakdown
-    print("\n📈 Test File Breakdown:")
+    print("\n[U+1F4C8] Test File Breakdown:")
     for file_path, results in validation_results.items():
         file_name = Path(file_path).name
         print(f"  {file_name}: {results['test_count']} tests")
@@ -151,7 +151,7 @@ def main():
                 print(f"    ... and {len(results['test_functions']) - 3} more tests")
     
     # Business value validation
-    print(f"\n💼 Business Value Validation:")
+    print(f"\n[U+1F4BC] Business Value Validation:")
     bvj_files = sum(1 for r in validation_results.values() if r.get('has_bvj', False))
     integration_files = sum(1 for r in validation_results.values() if r.get('has_integration_markers', False))
     
@@ -160,15 +160,15 @@ def main():
     
     # Final status
     if syntax_errors == 0 and total_tests >= 100:
-        print("\n🎉 VALIDATION PASSED!")
-        print(f"✅ All {total_tests} tests are syntactically valid and ready for execution")
+        print("\n CELEBRATION:  VALIDATION PASSED!")
+        print(f" PASS:  All {total_tests} tests are syntactically valid and ready for execution")
         return 0
     else:
-        print(f"\n⚠️  VALIDATION ISSUES FOUND")
+        print(f"\n WARNING: [U+FE0F]  VALIDATION ISSUES FOUND")
         if syntax_errors > 0:
-            print(f"❌ {syntax_errors} files have syntax errors")
+            print(f" FAIL:  {syntax_errors} files have syntax errors")
         if total_tests < 100:
-            print(f"❌ Only {total_tests} tests found, expected 100+")
+            print(f" FAIL:  Only {total_tests} tests found, expected 100+")
         return 1
 
 if __name__ == "__main__":

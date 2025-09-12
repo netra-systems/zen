@@ -474,15 +474,15 @@ class WebSocketHealthMonitor:
                 # Log alerts
                 for alert in alerts:
                     if alert.severity == "critical":
-                        logger.error(f"🚨 CRITICAL ALERT: {alert.title}")
+                        logger.error(f" ALERT:  CRITICAL ALERT: {alert.title}")
                         logger.error(f"   Description: {alert.description}")
                     elif alert.severity == "warning":
-                        logger.warning(f"⚠️ WARNING ALERT: {alert.title}")
+                        logger.warning(f" WARNING: [U+FE0F] WARNING ALERT: {alert.title}")
                         logger.warning(f"   Description: {alert.description}")
                         
                 # Log healthy metrics
                 healthy_metrics = [m for m in metrics if m.status == "ok"]
-                logger.info(f"✅ Cycle #{cycle_count}: {len(healthy_metrics)}/{len(metrics)} metrics healthy")
+                logger.info(f" PASS:  Cycle #{cycle_count}: {len(healthy_metrics)}/{len(metrics)} metrics healthy")
                 
                 # Wait before next cycle (2 minute intervals)
                 cycle_duration = time.time() - cycle_start
@@ -528,11 +528,11 @@ class WebSocketAlertManager:
         
         # Log alert
         if alert.severity == "critical":
-            logger.error(f"🚨 CRITICAL: {alert.title}")
+            logger.error(f" ALERT:  CRITICAL: {alert.title}")
         elif alert.severity == "warning":
-            logger.warning(f"⚠️ WARNING: {alert.title}")
+            logger.warning(f" WARNING: [U+FE0F] WARNING: {alert.title}")
         else:
-            logger.info(f"ℹ️ INFO: {alert.title}")
+            logger.info(f"[U+2139][U+FE0F] INFO: {alert.title}")
             
         logger.info(f"   Environment: {alert.environment}")
         logger.info(f"   Description: {alert.description}")
@@ -540,7 +540,7 @@ class WebSocketAlertManager:
         if alert.resolution_suggestions:
             logger.info(f"   Suggested actions:")
             for suggestion in alert.resolution_suggestions:
-                logger.info(f"     • {suggestion}")
+                logger.info(f"     [U+2022] {suggestion}")
                 
     def should_trigger_rollback(self, alerts: List[WebSocketAlert]) -> Tuple[bool, str]:
         """Determine if alerts should trigger deployment rollback."""
@@ -616,7 +616,7 @@ async def main():
     
     # Run monitoring
     try:
-        logger.info(f"🔍 Starting WebSocket monitoring for {args.environment} environment...")
+        logger.info(f" SEARCH:  Starting WebSocket monitoring for {args.environment} environment...")
         results = await monitor.run_monitoring_cycle(args.duration)
         
         # Process alerts
@@ -668,9 +668,9 @@ async def main():
         print(f"Estimated MRR Impact: ${mrr_impact:,}")
         
         if should_rollback:
-            print(f"\n🚨 ROLLBACK RECOMMENDED: {rollback_reason}")
+            print(f"\n ALERT:  ROLLBACK RECOMMENDED: {rollback_reason}")
         else:
-            print(f"\n✅ DEPLOYMENT STABLE: {rollback_reason}")
+            print(f"\n PASS:  DEPLOYMENT STABLE: {rollback_reason}")
         print("="*80)
         
         # Exit with appropriate code

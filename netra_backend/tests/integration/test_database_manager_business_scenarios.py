@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Database layer must support all customer lifecycle operations
 
 BUSINESS SCENARIOS TESTED:
-1. Complete user lifecycle (registration → usage → subscription changes → deactivation)  
+1. Complete user lifecycle (registration  ->  usage  ->  subscription changes  ->  deactivation)  
 2. Multi-tenant data isolation and security boundaries
 3. Session management and authentication workflows
 4. Subscription tier changes and billing operations
@@ -203,7 +203,7 @@ class TestDatabaseManagerBusinessScenarios(BaseIntegrationTest):
         
         self.business_metrics["operations_completed"] += len(usage_operations)
         
-        # Step 4: Subscription Upgrade (Free → Premium)
+        # Step 4: Subscription Upgrade (Free  ->  Premium)
         logger.info("Step 4: Subscription tier upgrade")
         async with db_manager.get_session() as session:
             # Update subscription tier
@@ -890,7 +890,7 @@ class TestDatabaseManagerBusinessScenarios(BaseIntegrationTest):
         
         logger.info("Business Data Consistency Results:")
         for result in consistency_validation_results:
-            status = "✓" if result["consistent"] else "✗"
+            status = "[U+2713]" if result["consistent"] else "[U+2717]"
             logger.info(f"  {status} {result['scenario']}: {result['details']}")
         
         logger.info(f"Overall Consistency Rate: {consistency_rate:.1f}% ({successful_scenarios}/{len(test_scenarios)})")

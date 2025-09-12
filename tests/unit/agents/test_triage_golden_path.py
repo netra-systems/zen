@@ -5,7 +5,7 @@ BUSINESS VALUE JUSTIFICATION (BVJ):
 - Business Goal: Ensure triage agent correctly routes requests to deliver AI value
 - Value Impact: Triage is the entry point that determines how $500K+ ARR user requests are handled
 - Strategic Impact: Critical infrastructure that enables all downstream AI optimization value delivery
-- Revenue Protection: Without proper triage, users get wrong agents → poor experiences → churn
+- Revenue Protection: Without proper triage, users get wrong agents  ->  poor experiences  ->  churn
 
 PURPOSE: This test suite validates the core triage logic that determines agent execution
 workflow for user requests. Triage is the critical first step that must run successfully

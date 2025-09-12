@@ -77,7 +77,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Service should initialize correctly with config
         """
-        print("\n🚀 UNIT TEST: GCP Error Service Initialization")
+        print("\n[U+1F680] UNIT TEST: GCP Error Service Initialization")
         print("=" * 50)
         
         # Create service
@@ -92,7 +92,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert service.error_formatter is not None
         assert service.rate_limiter is not None
         
-        print("✅ GCP Error Service initialized correctly")
+        print(" PASS:  GCP Error Service initialized correctly")
         print(f"   Project ID: {service.config.project_id}")
         print(f"   Rate Limit: {service.config.rate_limit_per_minute}/min")
         print(f"   Batch Size: {service.config.batch_size}")
@@ -105,7 +105,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: INITIALLY FAIL - proves missing GCP client integration
         """
-        print("\n☁️ UNIT TEST: GCP Error Service Client Initialization")
+        print("\n[U+2601][U+FE0F] UNIT TEST: GCP Error Service Client Initialization")
         print("=" * 56)
         
         service = GCPErrorService(self.test_config)
@@ -123,7 +123,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         # Verify client manager was called
         service.client_manager.initialize_client.assert_called_once()
         
-        print("✅ GCP Error Service client initialized successfully")
+        print(" PASS:  GCP Error Service client initialized successfully")
     
     def test_time_range_parsing(self):
         """
@@ -131,7 +131,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Time range parsing should work correctly
         """
-        print("\n⏰ UNIT TEST: Time Range Parsing")
+        print("\n[U+23F0] UNIT TEST: Time Range Parsing")
         print("=" * 32)
         
         service = GCPErrorService(self.test_config)
@@ -143,24 +143,24 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         start_time = service._parse_time_range("24h", end_time)
         expected_start = end_time - timedelta(hours=24)
         assert abs((start_time - expected_start).total_seconds()) < 1
-        print("✅ 24h time range parsed correctly")
+        print(" PASS:  24h time range parsed correctly")
         
         start_time = service._parse_time_range("6h", end_time)
         expected_start = end_time - timedelta(hours=6)
         assert abs((start_time - expected_start).total_seconds()) < 1
-        print("✅ 6h time range parsed correctly")
+        print(" PASS:  6h time range parsed correctly")
         
         # Test days
         start_time = service._parse_time_range("7d", end_time)
         expected_start = end_time - timedelta(days=7)
         assert abs((start_time - expected_start).total_seconds()) < 1
-        print("✅ 7d time range parsed correctly")
+        print(" PASS:  7d time range parsed correctly")
         
         # Test invalid format (should default to 24h)
         start_time = service._parse_time_range("invalid", end_time)
         expected_start = end_time - timedelta(hours=24)
         assert abs((start_time - expected_start).total_seconds()) < 1
-        print("✅ Invalid time range defaults to 24h correctly")
+        print(" PASS:  Invalid time range defaults to 24h correctly")
     
     def test_build_time_range(self):
         """
@@ -168,7 +168,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Time range building should work correctly
         """
-        print("\n📅 UNIT TEST: Build Time Range")
+        print("\n[U+1F4C5] UNIT TEST: Build Time Range")
         print("=" * 30)
         
         service = GCPErrorService(self.test_config)
@@ -187,7 +187,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         time_diff = end_time - start_time
         assert abs(time_diff.total_seconds() - 12 * 3600) < 60  # Within 1 minute
         
-        print("✅ Time range built correctly for GCP API")
+        print(" PASS:  Time range built correctly for GCP API")
     
     def test_build_list_request(self):
         """
@@ -195,7 +195,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Request building should work correctly
         """
-        print("\n📋 UNIT TEST: Build List Request")
+        print("\n[U+1F4CB] UNIT TEST: Build List Request")
         print("=" * 32)
         
         service = GCPErrorService(self.test_config)
@@ -223,7 +223,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert request["page_token"] == "test-token"
         assert request["page_size"] == 25  # Should use query limit
         
-        print("✅ List request built correctly with all filters")
+        print(" PASS:  List request built correctly with all filters")
         
         # Test without optional filters
         query_minimal = ErrorQuery(limit=100)
@@ -233,7 +233,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert "page_token" not in request_minimal
         assert request_minimal["page_size"] == 50  # Should use batch_size limit
         
-        print("✅ Minimal list request built correctly")
+        print(" PASS:  Minimal list request built correctly")
     
     def test_count_by_severity(self):
         """
@@ -241,7 +241,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Severity counting should work correctly
         """
-        print("\n📊 UNIT TEST: Count By Severity")
+        print("\n CHART:  UNIT TEST: Count By Severity")
         print("=" * 31)
         
         service = GCPErrorService(self.test_config)
@@ -290,7 +290,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert counts["warning_errors"] == 0  # Not counted in this method
         assert counts["info_errors"] == 0
         
-        print("✅ Severity counting works correctly")
+        print(" PASS:  Severity counting works correctly")
         print(f"   Critical: {counts['critical_errors']}")
         print(f"   Error: {counts['error_errors']}")
     
@@ -300,7 +300,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Status counting should work correctly
         """
-        print("\n📈 UNIT TEST: Count By Status")
+        print("\n[U+1F4C8] UNIT TEST: Count By Status")
         print("=" * 28)
         
         service = GCPErrorService(self.test_config)
@@ -342,7 +342,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert counts["open_errors"] == 2
         assert counts["resolved_errors"] == 1
         
-        print("✅ Status counting works correctly")
+        print(" PASS:  Status counting works correctly")
         print(f"   Open: {counts['open_errors']}")
         print(f"   Resolved: {counts['resolved_errors']}")
     
@@ -353,7 +353,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Summary creation should work correctly
         """
-        print("\n📋 UNIT TEST: Create Error Summary")
+        print("\n[U+1F4CB] UNIT TEST: Create Error Summary")
         print("=" * 35)
         
         service = GCPErrorService(self.test_config)
@@ -395,7 +395,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert isinstance(summary.time_range_start, datetime)
         assert isinstance(summary.time_range_end, datetime)
         
-        print("✅ Error summary created correctly")
+        print(" PASS:  Error summary created correctly")
         print(f"   Total Errors: {summary.total_errors}")
         print(f"   Affected Services: {summary.affected_services}")
     
@@ -405,7 +405,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Time range extraction should work correctly
         """
-        print("\n🕐 UNIT TEST: Get Query Time Range")
+        print("\n[U+1F550] UNIT TEST: Get Query Time Range")
         print("=" * 35)
         
         service = GCPErrorService(self.test_config)
@@ -424,7 +424,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         time_diff = end - start
         assert abs(time_diff.total_seconds() - 12 * 3600) < 60
         
-        print("✅ Query time range extracted correctly")
+        print(" PASS:  Query time range extracted correctly")
     
     @pytest.mark.asyncio
     async def test_fetch_errors_rate_limiting(self):
@@ -433,7 +433,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Rate limiting should be enforced
         """
-        print("\n⏱️ UNIT TEST: Fetch Errors Rate Limiting")
+        print("\n[U+23F1][U+FE0F] UNIT TEST: Fetch Errors Rate Limiting")
         print("=" * 40)
         
         service = GCPErrorService(self.test_config)
@@ -454,7 +454,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         # Verify rate limiter was called
         service.rate_limiter.enforce_rate_limit.assert_called_once()
         
-        print("✅ Rate limiting enforced correctly in fetch_errors")
+        print(" PASS:  Rate limiting enforced correctly in fetch_errors")
     
     @pytest.mark.asyncio
     async def test_fetch_raw_errors_client_not_initialized(self):
@@ -463,7 +463,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: INITIALLY FAIL - proves missing client initialization
         """
-        print("\n❌ UNIT TEST: Fetch Raw Errors - No Client")
+        print("\n FAIL:  UNIT TEST: Fetch Raw Errors - No Client")
         print("=" * 41)
         
         service = GCPErrorService(self.test_config)
@@ -477,7 +477,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         with pytest.raises(AttributeError):
             await service._fetch_raw_errors(query)
         
-        print("✅ Proper error when client not initialized")
+        print(" PASS:  Proper error when client not initialized")
     
     @pytest.mark.asyncio
     async def test_fetch_raw_errors_with_client(self):
@@ -486,7 +486,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: INITIALLY FAIL - proves missing GCP client integration
         """
-        print("\n☁️ UNIT TEST: Fetch Raw Errors - With Client")
+        print("\n[U+2601][U+FE0F] UNIT TEST: Fetch Raw Errors - With Client")
         print("=" * 43)
         
         service = GCPErrorService(self.test_config)
@@ -512,7 +512,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert "time_range" in call_args
         assert call_args["service_filter"]["service"] == "test-service"
         
-        print("✅ Raw errors fetched correctly with client")
+        print(" PASS:  Raw errors fetched correctly with client")
     
     def test_get_service_status(self):
         """
@@ -520,7 +520,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Service status should be returned correctly
         """
-        print("\n📊 UNIT TEST: Get Service Status")
+        print("\n CHART:  UNIT TEST: Get Service Status")
         print("=" * 31)
         
         service = GCPErrorService(self.test_config)
@@ -544,7 +544,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert status["pii_redaction_enabled"] is True
         assert status["rate_limiter"]["requests"] == 10
         
-        print("✅ Service status returned correctly")
+        print(" PASS:  Service status returned correctly")
         print(f"   Initialized: {status['initialized']}")
         print(f"   Project ID: {status['project_id']}")
         print(f"   PII Redaction: {status['pii_redaction_enabled']}")
@@ -556,7 +556,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Error context should be built correctly
         """
-        print("\n🔧 UNIT TEST: Build Error Context")
+        print("\n[U+1F527] UNIT TEST: Build Error Context")
         print("=" * 33)
         
         service = GCPErrorService(self.test_config)
@@ -586,7 +586,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         assert "rate_limiter_status" in context
         assert context["rate_limiter_status"]["current"] == 5
         
-        print("✅ Error context built correctly")
+        print(" PASS:  Error context built correctly")
     
     @pytest.mark.asyncio
     async def test_mark_error_resolved(self):
@@ -595,7 +595,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         
         EXPECTED RESULT: PASS - Error resolution should work correctly
         """
-        print("\n✅ UNIT TEST: Mark Error Resolved")
+        print("\n PASS:  UNIT TEST: Mark Error Resolved")
         print("=" * 33)
         
         service = GCPErrorService(self.test_config)
@@ -612,7 +612,7 @@ class TestGCPErrorServiceUnit(SSotBaseTestCase):
         # Should return True (current implementation just logs)
         assert result is True
         
-        print("✅ Error marked as resolved successfully")
+        print(" PASS:  Error marked as resolved successfully")
 
 
 if __name__ == "__main__":

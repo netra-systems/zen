@@ -12,7 +12,7 @@ Follows the Factory pattern architecture from USER_CONTEXT_ARCHITECTURE.md:
 - Proper cleanup and resource management
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Data layer isolation for multi-tenant security
 - Value Impact: Prevents cross-user data leakage, enables enterprise compliance
 - Revenue Impact: Unlocks Enterprise tier revenue with proper data governance

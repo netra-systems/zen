@@ -70,12 +70,12 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
         self.target_improvement_percent = 30.0
         self.minimum_improvement_percent = 15.0
         
-        print(f"🔧 Performance optimization test setup completed for environment: {self.test_environment}")
+        print(f"[U+1F527] Performance optimization test setup completed for environment: {self.test_environment}")
     
     async def cleanup_method(self):
         """Clean up test resources."""
-        print("🧹 Cleaning up performance optimization test resources...")
-        print("✅ Cleanup completed")
+        print("[U+1F9F9] Cleaning up performance optimization test resources...")
+        print(" PASS:  Cleanup completed")
     
     async def test_jwt_token_cache_performance(self):
         """
@@ -87,7 +87,7 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
         3. Security tests bypass cache appropriately
         4. Cached tokens maintain proper expiration
         """
-        print("🔄 Testing JWT token cache performance...")
+        print(" CYCLE:  Testing JWT token cache performance...")
         
         try:
             # Initialize token cache
@@ -95,7 +95,7 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
             
             # Test 1: Measure cold cache performance (cache misses)
-            print("❄️ Phase 1: Testing cold cache (all misses)...")
+            print("[U+2744][U+FE0F] Phase 1: Testing cold cache (all misses)...")
             
             cold_requests = [
                 {"user_id": f"cache_user_{i}", "email": f"cache_user_{i}@example.com", "permissions": ["read"]}
@@ -126,10 +126,10 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
                 )
             
             cold_duration = time.time() - cold_start
-            print(f"❄️ Cold cache duration: {cold_duration*1000:.1f}ms ({len(cold_requests)} tokens)")
+            print(f"[U+2744][U+FE0F] Cold cache duration: {cold_duration*1000:.1f}ms ({len(cold_requests)} tokens)")
             
             # Test 2: Measure warm cache performance (cache hits)
-            print("🔥 Phase 2: Testing warm cache (all hits)...")
+            print(" FIRE:  Phase 2: Testing warm cache (all hits)...")
             
             warm_start = time.time()
             warm_tokens = []
@@ -150,18 +150,18 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
                     pytest.fail(f"Token not found in cache for user: {request['user_id']}")
             
             warm_duration = time.time() - warm_start
-            print(f"🔥 Warm cache duration: {warm_duration*1000:.1f}ms ({len(cold_requests)} tokens)")
+            print(f" FIRE:  Warm cache duration: {warm_duration*1000:.1f}ms ({len(cold_requests)} tokens)")
             
             # Calculate cache performance improvement
             cache_improvement = ((cold_duration - warm_duration) / cold_duration) * 100
-            print(f"📈 Cache performance improvement: {cache_improvement:.1f}%")
+            print(f"[U+1F4C8] Cache performance improvement: {cache_improvement:.1f}%")
             
             # Validate cache performance
             if cache_improvement < 50:
                 pytest.fail(f"Cache performance improvement {cache_improvement:.1f}% is below expected 50%")
             
             # Test 3: Validate security test bypass
-            print("🔒 Phase 3: Testing security test bypass...")
+            print("[U+1F512] Phase 3: Testing security test bypass...")
             
             security_token = token_cache.get_cached_token(
                 user_id="security_user",
@@ -174,7 +174,7 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             if security_token is not None:
                 pytest.fail("Security test should bypass cache but got cached token")
             
-            print("✅ Security test bypass validated")
+            print(" PASS:  Security test bypass validated")
             
             # Test 4: Validate cache statistics
             cache_stats = token_cache.cache_stats
@@ -187,10 +187,10 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             if cache_stats["cache_misses"] < expected_misses:
                 pytest.fail(f"Expected at least {expected_misses} cache misses, got {cache_stats['cache_misses']}")
             
-            print(f"📊 Final cache stats: {cache_stats['cache_hits']} hits, {cache_stats['cache_misses']} misses, "
+            print(f" CHART:  Final cache stats: {cache_stats['cache_hits']} hits, {cache_stats['cache_misses']} misses, "
                   f"{cache_stats['hit_rate_percent']}% hit rate")
             
-            print("✅ JWT token cache performance test PASSED")
+            print(" PASS:  JWT token cache performance test PASSED")
         
         except Exception as e:
             pytest.fail(f"JWT token cache performance test failed: {e}")
@@ -205,14 +205,14 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
         3. Security tests bypass pool appropriately
         4. Connection isolation is maintained
         """
-        print("🔗 Testing WebSocket connection pool performance...")
+        print("[U+1F517] Testing WebSocket connection pool performance...")
         
         try:
             # Initialize connection pool
             connection_pool = WebSocketConnectionPool(max_pool_size=5)
             
             # Test 1: Create connections without pool (baseline)
-            print("🐌 Phase 1: Testing without connection pool...")
+            print("[U+1F40C] Phase 1: Testing without connection pool...")
             
             baseline_start = time.time()
             baseline_connections = []
@@ -228,7 +228,7 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
                 baseline_connections.append(client)
             
             baseline_duration = time.time() - baseline_start
-            print(f"🐌 Baseline connection creation: {baseline_duration*1000:.1f}ms")
+            print(f"[U+1F40C] Baseline connection creation: {baseline_duration*1000:.1f}ms")
             
             # Clean up baseline connections
             for conn in baseline_connections:
@@ -238,7 +238,7 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
                     pass
             
             # Test 2: Use connection pool (after priming)
-            print("⚡ Phase 2: Testing with connection pool...")
+            print(" LIGHTNING:  Phase 2: Testing with connection pool...")
             
             # Prime the pool
             primed_connections = []
@@ -277,7 +277,7 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
                     pool_connections.append(conn)
             
             pool_duration = time.time() - pool_start
-            print(f"⚡ Pool connection retrieval: {pool_duration*1000:.1f}ms")
+            print(f" LIGHTNING:  Pool connection retrieval: {pool_duration*1000:.1f}ms")
             
             # Validate pool hits
             pool_stats = connection_pool.pool_stats
@@ -287,7 +287,7 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
                 pytest.fail(f"Expected at least {expected_hits} pool hits, got {pool_stats['pool_hits']}")
             
             # Test 3: Validate security test bypass
-            print("🔒 Phase 3: Testing security test bypass...")
+            print("[U+1F512] Phase 3: Testing security test bypass...")
             
             security_conn = connection_pool.get_connection(
                 self.backend_url,
@@ -298,15 +298,15 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             if security_conn is not None:
                 pytest.fail("Security test should bypass connection pool but got pooled connection")
             
-            print("✅ Security test bypass validated")
+            print(" PASS:  Security test bypass validated")
             
             # Clean up pool
             await connection_pool.cleanup_pool()
             
-            print(f"📊 Final pool stats: {pool_stats['pool_hits']} hits, {pool_stats['pool_misses']} misses, "
+            print(f" CHART:  Final pool stats: {pool_stats['pool_hits']} hits, {pool_stats['pool_misses']} misses, "
                   f"{pool_stats['hit_rate_percent']}% hit rate")
             
-            print("✅ WebSocket connection pool performance test PASSED")
+            print(" PASS:  WebSocket connection pool performance test PASSED")
         
         except Exception as e:
             pytest.fail(f"WebSocket connection pool performance test failed: {e}")
@@ -320,11 +320,11 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
         2. Parallel execution provides measurable time savings
         3. Security isolation is maintained during parallel execution
         """
-        print("⚡ Testing parallel execution performance...")
+        print(" LIGHTNING:  Testing parallel execution performance...")
         
         try:
             # Test 1: Sequential execution baseline
-            print("🐌 Phase 1: Sequential execution baseline...")
+            print("[U+1F40C] Phase 1: Sequential execution baseline...")
             
             async def mock_async_operation(duration_ms: float, operation_id: int):
                 """Mock async operation for testing."""
@@ -339,10 +339,10 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
                 sequential_results.append(result)
             
             sequential_duration = time.time() - sequential_start
-            print(f"🐌 Sequential execution: {sequential_duration*1000:.1f}ms")
+            print(f"[U+1F40C] Sequential execution: {sequential_duration*1000:.1f}ms")
             
             # Test 2: Parallel execution
-            print("⚡ Phase 2: Parallel execution...")
+            print(" LIGHTNING:  Phase 2: Parallel execution...")
             
             parallel_start = time.time()
             parallel_tasks = [
@@ -351,11 +351,11 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             parallel_results = await asyncio.gather(*parallel_tasks)
             parallel_duration = time.time() - parallel_start
             
-            print(f"⚡ Parallel execution: {parallel_duration*1000:.1f}ms")
+            print(f" LIGHTNING:  Parallel execution: {parallel_duration*1000:.1f}ms")
             
             # Calculate parallel performance improvement
             parallel_improvement = ((sequential_duration - parallel_duration) / sequential_duration) * 100
-            print(f"📈 Parallel execution improvement: {parallel_improvement:.1f}%")
+            print(f"[U+1F4C8] Parallel execution improvement: {parallel_improvement:.1f}%")
             
             # Validate results are equivalent
             if len(sequential_results) != len(parallel_results):
@@ -365,7 +365,7 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             if parallel_improvement < 60:  # Should be ~80% for 5 parallel operations
                 pytest.fail(f"Parallel execution improvement {parallel_improvement:.1f}% is below expected 60%")
             
-            print("✅ Parallel execution performance test PASSED")
+            print(" PASS:  Parallel execution performance test PASSED")
         
         except Exception as e:
             pytest.fail(f"Parallel execution performance test failed: {e}")
@@ -377,18 +377,18 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
         This test validates that all optimizations work together to achieve
         the target 30% performance improvement while maintaining security.
         """
-        print("🎯 Running comprehensive performance optimization validation...")
+        print(" TARGET:  Running comprehensive performance optimization validation...")
         
         try:
             # Test with all optimizations enabled vs disabled
             target_improvement = self.target_improvement_percent
             minimum_improvement = self.minimum_improvement_percent
             
-            print(f"🎯 Target performance improvement: {target_improvement}%")
-            print(f"🎯 Minimum acceptable improvement: {minimum_improvement}%")
+            print(f" TARGET:  Target performance improvement: {target_improvement}%")
+            print(f" TARGET:  Minimum acceptable improvement: {minimum_improvement}%")
             
             # Phase 1: Baseline without optimizations
-            print("📊 Phase 1: Running authentication tests WITHOUT optimizations...")
+            print(" CHART:  Phase 1: Running authentication tests WITHOUT optimizations...")
             
             baseline_tester = WebSocketAuthenticationTester(
                 backend_url=self.backend_url,
@@ -405,10 +405,10 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             baseline_duration = time.time() - baseline_start
             await baseline_tester.cleanup()
             
-            print(f"🐌 Baseline duration: {baseline_duration:.3f}s")
+            print(f"[U+1F40C] Baseline duration: {baseline_duration:.3f}s")
             
             # Phase 2: Optimized with all optimizations enabled
-            print("📊 Phase 2: Running authentication tests WITH all optimizations...")
+            print(" CHART:  Phase 2: Running authentication tests WITH all optimizations...")
             
             optimized_tester = WebSocketAuthenticationTester(
                 backend_url=self.backend_url,
@@ -433,17 +433,17 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             
             await optimized_tester.cleanup()
             
-            print(f"⚡ Optimized duration: {optimized_duration:.3f}s")
+            print(f" LIGHTNING:  Optimized duration: {optimized_duration:.3f}s")
             
             # Calculate actual performance improvement
             time_saved = baseline_duration - optimized_duration
             actual_improvement = (time_saved / baseline_duration) * 100
             
-            print(f"💾 Time saved: {time_saved:.3f}s")
-            print(f"📈 Actual performance improvement: {actual_improvement:.1f}%")
+            print(f"[U+1F4BE] Time saved: {time_saved:.3f}s")
+            print(f"[U+1F4C8] Actual performance improvement: {actual_improvement:.1f}%")
             
             # Log detailed metrics
-            print(f"\n🔍 PERFORMANCE OPTIMIZATION DETAILS:")
+            print(f"\n SEARCH:  PERFORMANCE OPTIMIZATION DETAILS:")
             
             if performance_metrics["token_cache_stats"]:
                 cache_stats = performance_metrics["token_cache_stats"]
@@ -467,16 +467,16 @@ class TestPerformanceOptimizationValidation(SSotBaseTestCase):
             
             # Validate performance improvement targets
             if actual_improvement >= target_improvement:
-                print(f"🎉 TARGET ACHIEVED: {actual_improvement:.1f}% improvement (target: {target_improvement}%)")
+                print(f" CELEBRATION:  TARGET ACHIEVED: {actual_improvement:.1f}% improvement (target: {target_improvement}%)")
             elif actual_improvement >= minimum_improvement:
-                print(f"✅ ACCEPTABLE: {actual_improvement:.1f}% improvement (minimum: {minimum_improvement}%)")
+                print(f" PASS:  ACCEPTABLE: {actual_improvement:.1f}% improvement (minimum: {minimum_improvement}%)")
             elif actual_improvement > 0:
-                print(f"⚠️ BELOW TARGET: {actual_improvement:.1f}% improvement (target: {target_improvement}%)")
+                print(f" WARNING: [U+FE0F] BELOW TARGET: {actual_improvement:.1f}% improvement (target: {target_improvement}%)")
                 pytest.fail(f"Performance improvement {actual_improvement:.1f}% is below target {target_improvement}%")
             else:
                 pytest.fail(f"PERFORMANCE REGRESSION: {actual_improvement:.1f}% improvement (negative)")
             
-            print("🎯 Comprehensive performance optimization validation PASSED")
+            print(" TARGET:  Comprehensive performance optimization validation PASSED")
             
             # Store results for potential reporting
             self.performance_results = {

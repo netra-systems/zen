@@ -20,8 +20,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md):
 
 WEBSOCKET 1011 ERROR TEST FLOW:
 ```
-Factory Initialization → SSOT Validation → WebSocket Setup → Error Reproduction →
-Fallback Manager Activation → Emergency Recovery → Success Validation
+Factory Initialization  ->  SSOT Validation  ->  WebSocket Setup  ->  Error Reproduction  -> 
+Fallback Manager Activation  ->  Emergency Recovery  ->  Success Validation
 ```
 
 WebSocket 1011 errors occur when:

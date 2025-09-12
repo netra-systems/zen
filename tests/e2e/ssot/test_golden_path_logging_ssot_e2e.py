@@ -11,8 +11,8 @@ This test suite validates SSOT logging for the complete Golden Path user journey
 Tests MUST FAIL initially to prove Golden Path logging fragmentation exists.
 
 Golden Path E2E Coverage:
-1. User login → WebSocket connection with unified logging
-2. Agent execution → AI response with complete log correlation
+1. User login  ->  WebSocket connection with unified logging
+2. Agent execution  ->  AI response with complete log correlation
 3. Real-time progress updates with consistent log correlation
 4. Error scenarios with unified error logging
 5. Multi-user concurrent sessions with isolated log correlation
@@ -166,7 +166,7 @@ class TestGoldenPathLoggingSSOTE2E(SSotAsyncTestCase):
         
         EXPECTED TO FAIL: Fragmented logging prevents complete Golden Path correlation
         
-        Flow: Login → WebSocket → Agent Execution → Response → Logging Validation
+        Flow: Login  ->  WebSocket  ->  Agent Execution  ->  Response  ->  Logging Validation
         """
         golden_path_start = datetime.utcnow()
         
@@ -231,7 +231,7 @@ SSOT VIOLATIONS DETECTED:
 
 REMEDIATION REQUIRED:
 1. Implement unified SSOT logging across complete Golden Path
-2. Ensure consistent correlation ID propagation from auth → response
+2. Ensure consistent correlation ID propagation from auth  ->  response
 3. Implement unified WebSocket event logging correlation
 4. Create consistent agent execution logging across all phases
 5. Standardize Golden Path performance monitoring logging

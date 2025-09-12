@@ -11,18 +11,18 @@ Business Value Justification (BVJ):
 - Strategic Impact: Tests the differentiating AI capability that drives customer acquisition
 
 CRITICAL SUCCESS METRICS:
-✅ Real LLM integration with authenticated users
-✅ Substantive business problem analysis and recommendations
-✅ Agent events show actual thinking and problem-solving process
-✅ Deliverables contain actionable business insights
-✅ End-to-end workflow delivers measurable business value
+ PASS:  Real LLM integration with authenticated users
+ PASS:  Substantive business problem analysis and recommendations
+ PASS:  Agent events show actual thinking and problem-solving process
+ PASS:  Deliverables contain actionable business insights
+ PASS:  End-to-end workflow delivers measurable business value
 
 BUSINESS PROBLEMS TESTED:
-• Customer retention strategy optimization
-• Revenue growth analysis and recommendations  
-• Market expansion feasibility assessment
-• Operational efficiency improvements
-• Risk analysis and mitigation strategies
+[U+2022] Customer retention strategy optimization
+[U+2022] Revenue growth analysis and recommendations  
+[U+2022] Market expansion feasibility assessment
+[U+2022] Operational efficiency improvements
+[U+2022] Risk analysis and mitigation strategies
 
 COMPLIANCE:
 @compliance CLAUDE.md - E2E AUTH MANDATORY (Section 7.3)
@@ -100,26 +100,26 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
         self.actionable_recommendations = 0
         self.business_value_score = 0.0
         
-        print(f"\n💼 BUSINESS PROBLEM SOLVING E2E TEST - Environment: {self.environment}")
-        print(f"🎯 Target: Real business value delivery with LLM integration")
-        print(f"💰 Revenue Impact: Validates core AI value proposition")
+        print(f"\n[U+1F4BC] BUSINESS PROBLEM SOLVING E2E TEST - Environment: {self.environment}")
+        print(f" TARGET:  Target: Real business value delivery with LLM integration")
+        print(f"[U+1F4B0] Revenue Impact: Validates core AI value proposition")
     
     def teardown_method(self):
         """Clean up and report business value metrics."""
         test_duration = time.time() - self.test_start_time
         
-        print(f"\n📊 Business Value Test Summary:")
-        print(f"⏱️ Duration: {test_duration:.2f}s")
-        print(f"💡 Business Insights Generated: {self.business_insights_generated}")
-        print(f"🎯 Actionable Recommendations: {self.actionable_recommendations}")
-        print(f"📈 Business Value Score: {self.business_value_score:.1f}%")
+        print(f"\n CHART:  Business Value Test Summary:")
+        print(f"[U+23F1][U+FE0F] Duration: {test_duration:.2f}s")
+        print(f" IDEA:  Business Insights Generated: {self.business_insights_generated}")
+        print(f" TARGET:  Actionable Recommendations: {self.actionable_recommendations}")
+        print(f"[U+1F4C8] Business Value Score: {self.business_value_score:.1f}%")
         
         if self.business_value_score >= 75.0:
-            print(f"✅ BUSINESS VALUE VALIDATED - AI delivers measurable value")
+            print(f" PASS:  BUSINESS VALUE VALIDATED - AI delivers measurable value")
         elif self.business_value_score >= 50.0:
-            print(f"⚠️ MODERATE BUSINESS VALUE - Room for improvement")
+            print(f" WARNING: [U+FE0F] MODERATE BUSINESS VALUE - Room for improvement")
         else:
-            print(f"❌ INSUFFICIENT BUSINESS VALUE - Core value proposition at risk")
+            print(f" FAIL:  INSUFFICIENT BUSINESS VALUE - Core value proposition at risk")
         
         super().teardown_method()
     
@@ -194,7 +194,7 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates customer retention value that drives recurring revenue.
         """
-        print("\n🧪 CRITICAL: Testing customer retention strategy optimization...")
+        print("\n[U+1F9EA] CRITICAL: Testing customer retention strategy optimization...")
         
         # STEP 1: Create authenticated business user context
         user_context = await create_authenticated_user_context(
@@ -204,7 +204,7 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
             websocket_enabled=True
         )
         
-        print(f"👤 Enterprise user authenticated: {user_context.user_id}")
+        print(f"[U+1F464] Enterprise user authenticated: {user_context.user_id}")
         
         # STEP 2: Define complex business retention scenario
         retention_scenario = (
@@ -259,7 +259,7 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
                 total_recommendations += recommendations
                 quality_scores.append(quality)
                 
-                print(f"📊 Response analysis: {insights} insights, {recommendations} recommendations, {quality:.1f}% quality")
+                print(f" CHART:  Response analysis: {insights} insights, {recommendations} recommendations, {quality:.1f}% quality")
             
             # STEP 7: Business value validation
             self.business_insights_generated = total_insights
@@ -281,9 +281,9 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
             found_indicators = [indicator for indicator in retention_indicators if indicator in all_content]
             assert len(found_indicators) >= 4, f"Missing retention-specific content: {found_indicators}"
             
-            print("✅ Customer retention strategy analysis successful")
-            print(f"💰 Business value delivered: {self.business_value_score:.1f}%")
-            print(f"🎯 Retention indicators found: {found_indicators}")
+            print(" PASS:  Customer retention strategy analysis successful")
+            print(f"[U+1F4B0] Business value delivered: {self.business_value_score:.1f}%")
+            print(f" TARGET:  Retention indicators found: {found_indicators}")
     
     @pytest.mark.asyncio
     async def test_revenue_growth_analysis_real_llm(self):
@@ -295,7 +295,7 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates revenue growth value that drives business expansion.
         """
-        print("\n🧪 CRITICAL: Testing revenue growth analysis...")
+        print("\n[U+1F9EA] CRITICAL: Testing revenue growth analysis...")
         
         # STEP 1: Create authenticated user context  
         user_context = await create_authenticated_user_context(
@@ -359,9 +359,9 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
         assert len(found_growth_keywords) >= 5, f"Insufficient growth-focused content: {found_growth_keywords}"
         assert quality >= 65.0, f"Revenue growth analysis quality too low: {quality:.1f}%"
         
-        print("✅ Revenue growth analysis successful")
-        print(f"📈 Growth insights: {insights}, Recommendations: {recommendations}")
-        print(f"🎯 Growth keywords: {found_growth_keywords}")
+        print(" PASS:  Revenue growth analysis successful")
+        print(f"[U+1F4C8] Growth insights: {insights}, Recommendations: {recommendations}")
+        print(f" TARGET:  Growth keywords: {found_growth_keywords}")
     
     @pytest.mark.asyncio
     async def test_market_expansion_feasibility_real_llm(self):
@@ -373,7 +373,7 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates strategic planning value for business expansion.
         """
-        print("\n🧪 CRITICAL: Testing market expansion feasibility...")
+        print("\n[U+1F9EA] CRITICAL: Testing market expansion feasibility...")
         
         # STEP 1: Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -441,15 +441,15 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
                     self.actionable_recommendations += recommendations
                     self.business_value_score = max(self.business_value_score, quality)
                     
-                    print("✅ Market expansion feasibility assessment successful")
-                    print(f"🌍 Strategic insights: {insights}, Recommendations: {recommendations}")
+                    print(" PASS:  Market expansion feasibility assessment successful")
+                    print(f"[U+1F30D] Strategic insights: {insights}, Recommendations: {recommendations}")
                 
                 else:
-                    print("⚠️ Limited market expansion content in response")
+                    print(" WARNING: [U+FE0F] Limited market expansion content in response")
                     self.business_value_score = 40.0  # Partial success
             
             else:
-                print("⚠️ Market expansion analysis had execution issues")
+                print(" WARNING: [U+FE0F] Market expansion analysis had execution issues")
                 self.business_value_score = 25.0  # Minimal success
     
     @pytest.mark.asyncio 
@@ -462,7 +462,7 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates comprehensive business value across problem types.
         """
-        print("\n🧪 CRITICAL: Testing comprehensive business problem solving...")
+        print("\n[U+1F9EA] CRITICAL: Testing comprehensive business problem solving...")
         
         # STEP 1: Create authenticated enterprise user
         user_context = await create_authenticated_user_context(
@@ -510,7 +510,7 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
         
         async with self.golden_path_helper.authenticated_websocket_connection(user_context):
             for i, problem in enumerate(business_problems):
-                print(f"🔍 Solving business problem {i+1}: {problem['type']}")
+                print(f" SEARCH:  Solving business problem {i+1}: {problem['type']}")
                 
                 try:
                     result = await self.golden_path_helper.execute_golden_path_flow(
@@ -541,16 +541,16 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
                                 comprehensive_insights += insights
                                 comprehensive_recommendations += recommendations
                                 
-                                print(f"✅ {problem['type']} solved successfully ({len(found_keywords)} keywords)")
+                                print(f" PASS:  {problem['type']} solved successfully ({len(found_keywords)} keywords)")
                             else:
-                                print(f"⚠️ {problem['type']} partial solution (limited keywords)")
+                                print(f" WARNING: [U+FE0F] {problem['type']} partial solution (limited keywords)")
                         else:
-                            print(f"⚠️ {problem['type']} no substantial response")
+                            print(f" WARNING: [U+FE0F] {problem['type']} no substantial response")
                     else:
-                        print(f"❌ {problem['type']} execution failed")
+                        print(f" FAIL:  {problem['type']} execution failed")
                 
                 except Exception as e:
-                    print(f"❌ {problem['type']} exception: {str(e)[:100]}")
+                    print(f" FAIL:  {problem['type']} exception: {str(e)[:100]}")
                 
                 # Brief delay between problems
                 await asyncio.sleep(2.0)
@@ -571,11 +571,11 @@ class TestBusinessProblemSolvingRealLLME2E(SSotBaseTestCase):
         assert comprehensive_insights >= 2, f"Insufficient business insights across problems: {comprehensive_insights}"
         assert self.business_value_score >= 45.0, f"Comprehensive business value too low: {self.business_value_score:.1f}%"
         
-        print("🎉 Comprehensive business problem solving validation complete")
-        print(f"📊 Problems solved: {total_problems_solved}/{len(business_problems)}")
-        print(f"💡 Total insights: {comprehensive_insights}")
-        print(f"🎯 Total recommendations: {comprehensive_recommendations}")
-        print(f"📈 Comprehensive business value: {self.business_value_score:.1f}%")
+        print(" CELEBRATION:  Comprehensive business problem solving validation complete")
+        print(f" CHART:  Problems solved: {total_problems_solved}/{len(business_problems)}")
+        print(f" IDEA:  Total insights: {comprehensive_insights}")
+        print(f" TARGET:  Total recommendations: {comprehensive_recommendations}")
+        print(f"[U+1F4C8] Comprehensive business value: {self.business_value_score:.1f}%")
 
 
 if __name__ == "__main__":

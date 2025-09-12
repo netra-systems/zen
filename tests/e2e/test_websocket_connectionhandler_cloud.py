@@ -157,7 +157,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
         - CURRENT STATE: FAIL - Handler returns True but doesn't send response
         - AFTER FIX: PASS - Handler returns False when connection check fails
         """
-        logger.info("🧪 Testing ConnectionHandler silent failure detection in GCP staging")
+        logger.info("[U+1F9EA] Testing ConnectionHandler silent failure detection in GCP staging")
         
         # Connect with authentication
         websocket = await self._connect_with_auth()
@@ -203,11 +203,11 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
                 )
                 
                 # If we get here, the bug is fixed
-                logger.info("✅ ConnectionHandler correctly returns False for failed connection checks")
+                logger.info(" PASS:  ConnectionHandler correctly returns False for failed connection checks")
                 
             except AssertionError:
                 # This exception means the test caught the bug - which is expected
-                logger.error("❌ CRITICAL BUG DETECTED: ConnectionHandler returns True despite connection failure")
+                logger.error(" FAIL:  CRITICAL BUG DETECTED: ConnectionHandler returns True despite connection failure")
                 logger.error("This causes silent failures where users receive no responses from agents")
                 raise
                 
@@ -221,7 +221,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
             )
         except asyncio.TimeoutError:
             # Expected - no response should be sent
-            logger.info("✅ Confirmed: No response sent when connection check fails")
+            logger.info(" PASS:  Confirmed: No response sent when connection check fails")
             
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -236,7 +236,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
         - CURRENT STATE: FAIL - State detection fails in cloud environment
         - AFTER FIX: PASS - Proper state detection using cloud-specific logic
         """
-        logger.info("🧪 Testing GCP Cloud Run WebSocket state detection")
+        logger.info("[U+1F9EA] Testing GCP Cloud Run WebSocket state detection")
         
         # Connect with authentication in staging environment
         websocket = await self._connect_with_auth()
@@ -282,14 +282,14 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
                 f"Client connectivity: {connection_works_from_client}, "
                 f"State detection: {connection_detected}"
             )
-            logger.info("✅ WebSocket state detection correctly identifies working connection")
+            logger.info(" PASS:  WebSocket state detection correctly identifies working connection")
         else:
             assert not connection_detected, (
                 f"WebSocket state detection inconsistency: Connection doesn't work but detected as connected. "
                 f"Client connectivity: {connection_works_from_client}, "
                 f"State detection: {connection_detected}"
             )
-            logger.info("✅ WebSocket state detection correctly identifies non-working connection")
+            logger.info(" PASS:  WebSocket state detection correctly identifies non-working connection")
             
         # Test 3: Verify state detection works with various WebSocket proxy states
         # Log detailed WebSocket attributes for debugging GCP proxy behavior
@@ -325,7 +325,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
         - CURRENT STATE: FAIL - Resource accumulation causes failures after 20 connections  
         - AFTER FIX: PASS - Proper cleanup prevents resource accumulation
         """
-        logger.info("🧪 Testing connection churning and resource cleanup")
+        logger.info("[U+1F9EA] Testing connection churning and resource cleanup")
         logger.info(f"Simulating rapid connections for user: {GCP_TEST_CONFIG['test_user_id']}")
         
         connection_results = []
@@ -374,7 +374,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
                     'cycle_time': cycle_time
                 })
                 
-                logger.info(f"  ✅ Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: "
+                logger.info(f"   PASS:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: "
                            f"Connection OK, Message: {'OK' if message_success else 'TIMEOUT'}, "
                            f"Time: {cycle_time:.2f}s")
                 
@@ -389,12 +389,12 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
                     'cycle_time': cycle_time
                 })
                 
-                logger.error(f"  ❌ Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: "
+                logger.error(f"   FAIL:  Cycle {cycle + 1}/{GCP_TEST_CONFIG['max_connections_test']}: "
                             f"Failed - {e}, Time: {cycle_time:.2f}s")
                 
                 # CRITICAL: Check if this is the resource limit error
                 if "maximum number of WebSocket managers" in str(e) or "20" in str(e):
-                    logger.error("🚨 CRITICAL BUG DETECTED: WebSocket manager resource limit reached")
+                    logger.error(" ALERT:  CRITICAL BUG DETECTED: WebSocket manager resource limit reached")
                     logger.error("This indicates resource accumulation and improper cleanup")
                     break
                     
@@ -437,7 +437,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
             f"Sample errors: {resource_errors[:3]}"
         )
         
-        logger.info("✅ Connection churning test passed - proper resource management")
+        logger.info(" PASS:  Connection churning test passed - proper resource management")
         
     @pytest.mark.e2e
     @pytest.mark.staging  
@@ -451,7 +451,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
         - CURRENT STATE: FAIL - Error messages truncated to empty string
         - AFTER FIX: PASS - Full exception type, message, and traceback captured
         """
-        logger.info("🧪 Testing exception logging completeness in ConnectionHandler")
+        logger.info("[U+1F9EA] Testing exception logging completeness in ConnectionHandler")
         
         # Connect with authentication
         websocket = await self._connect_with_auth()
@@ -550,12 +550,12 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
                 f"but log is: '{log_str}'"
             )
             
-            logger.info(f"✅ Exception logging test passed for {exception_name}: {log_str[:100]}...")
+            logger.info(f" PASS:  Exception logging test passed for {exception_name}: {log_str[:100]}...")
             
             # Clear captured logs for next test
             captured_logs.clear()
             
-        logger.info("✅ All exception logging tests passed - full error details captured")
+        logger.info(" PASS:  All exception logging tests passed - full error details captured")
         
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -569,7 +569,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
         - CURRENT STATE: FAIL - User gets no responses due to silent failure
         - AFTER FIX: PASS - Complete chat flow works end-to-end
         """
-        logger.info("🧪 Testing complete authenticated chat flow in GCP staging")
+        logger.info("[U+1F9EA] Testing complete authenticated chat flow in GCP staging")
         logger.info(f"User ID: {GCP_TEST_CONFIG['test_user_id']}")
         
         # Connect with full authentication
@@ -618,20 +618,20 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
                         if response_type in ['agent_started', 'agent_thinking', 'tool_executing', 
                                            'tool_completed', 'agent_completed', 'agent_response']:
                             websocket_events_received.append(response_type)
-                            logger.info(f"  📡 Received WebSocket event: {response_type}")
+                            logger.info(f"  [U+1F4E1] Received WebSocket event: {response_type}")
                             
                         # Check if we got the final response
                         if response_type == 'agent_completed' or response_type == 'agent_response':
-                            logger.info("  ✅ Received final agent response")
+                            logger.info("   PASS:  Received final agent response")
                             break
                             
                     except json.JSONDecodeError:
-                        logger.warning(f"  ⚠️ Received non-JSON response: {response_text[:100]}...")
+                        logger.warning(f"   WARNING: [U+FE0F] Received non-JSON response: {response_text[:100]}...")
                         responses_received.append({'raw': response_text})
                         
                 except asyncio.TimeoutError:
                     # No message received in this interval - continue waiting
-                    logger.info("  ⏳ Waiting for more responses...")
+                    logger.info("  [U+23F3] Waiting for more responses...")
                     continue
                     
         except Exception as e:
@@ -683,7 +683,7 @@ class TestWebSocketConnectionHandlerCloud(SSotBaseTestCase):
             f"All responses: {[r.get('type') for r in responses_received]}"
         )
         
-        logger.info("✅ Complete chat flow test passed - golden path working")
+        logger.info(" PASS:  Complete chat flow test passed - golden path working")
         
         # Store results for debugging
         self.connection_logs.append({

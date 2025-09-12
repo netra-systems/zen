@@ -74,14 +74,14 @@ class OAuthLocalTester:
         all_set = True
         for var, value in env_vars.items():
             if value:
-                status = "[green]✓[/green]"
+                status = "[green][U+2713][/green]"
                 # Mask sensitive values
                 if 'SECRET' in var or 'KEY' in var:
                     display_value = value[:10] + '...' if len(value) > 10 else '***'
                 else:
                     display_value = value[:50] if len(value) > 50 else value
             else:
-                status = "[red]✗[/red]"
+                status = "[red][U+2717][/red]"
                 display_value = "Not Set"
                 all_set = False
             
@@ -111,11 +111,11 @@ class OAuthLocalTester:
                 'status_code': response.status_code,
                 'response': response.json() if backend_healthy else None
             }
-            console.print(f"  Backend Service: [green]✓ Healthy[/green]" if backend_healthy 
-                         else f"  Backend Service: [red]✗ Unhealthy ({response.status_code})[/red]")
+            console.print(f"  Backend Service: [green][U+2713] Healthy[/green]" if backend_healthy 
+                         else f"  Backend Service: [red][U+2717] Unhealthy ({response.status_code})[/red]")
         except Exception as e:
             results['backend'] = {'healthy': False, 'error': str(e)}
-            console.print(f"  Backend Service: [red]✗ Not reachable - {e}[/red]")
+            console.print(f"  Backend Service: [red][U+2717] Not reachable - {e}[/red]")
         
         # Check auth service
         try:
@@ -126,11 +126,11 @@ class OAuthLocalTester:
                 'status_code': response.status_code,
                 'response': response.json() if auth_healthy else None
             }
-            console.print(f"  Auth Service: [green]✓ Healthy[/green]" if auth_healthy 
-                         else f"  Auth Service: [red]✗ Unhealthy ({response.status_code})[/red]")
+            console.print(f"  Auth Service: [green][U+2713] Healthy[/green]" if auth_healthy 
+                         else f"  Auth Service: [red][U+2717] Unhealthy ({response.status_code})[/red]")
         except Exception as e:
             results['auth'] = {'healthy': False, 'error': str(e)}
-            console.print(f"  Auth Service: [red]✗ Not reachable - {e}[/red]")
+            console.print(f"  Auth Service: [red][U+2717] Not reachable - {e}[/red]")
         
         self.test_results['auth_service_health'] = results.get('auth')
         self.test_results['backend_health'] = results.get('backend')
@@ -146,7 +146,7 @@ class OAuthLocalTester:
             
             if response.status_code == 200:
                 config = response.json()
-                console.print(f"  [green]✓[/green] Config endpoint returned successfully")
+                console.print(f"  [green][U+2713][/green] Config endpoint returned successfully")
                 
                 # Display config
                 config_info = Panel(
@@ -164,7 +164,7 @@ class OAuthLocalTester:
                     'config': config
                 }
             else:
-                console.print(f"  [red]✗[/red] Config endpoint failed: {response.status_code}")
+                console.print(f"  [red][U+2717][/red] Config endpoint failed: {response.status_code}")
                 console.print(f"  Response: {response.text[:200]}")
                 return {
                     'success': False,
@@ -172,7 +172,7 @@ class OAuthLocalTester:
                     'error': response.text
                 }
         except Exception as e:
-            console.print(f"  [red]✗[/red] Error fetching config: {e}")
+            console.print(f"  [red][U+2717][/red] Error fetching config: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -191,14 +191,14 @@ class OAuthLocalTester:
             
             if response.status_code in [302, 303, 307]:
                 location = response.headers.get('location', '')
-                console.print(f"  [green]✓[/green] Login endpoint redirects correctly")
+                console.print(f"  [green][U+2713][/green] Login endpoint redirects correctly")
                 console.print(f"  Redirect to: [cyan]{location[:100]}...[/cyan]")
                 
                 # Check if it's redirecting to auth service
                 if self.auth_url in location or 'auth.staging' in location:
-                    console.print(f"  [green]✓[/green] Correctly redirecting to auth service")
+                    console.print(f"  [green][U+2713][/green] Correctly redirecting to auth service")
                 else:
-                    console.print(f"  [yellow]⚠[/yellow] Unexpected redirect location")
+                    console.print(f"  [yellow] WARNING: [/yellow] Unexpected redirect location")
                 
                 self.test_results['oauth_initiation'] = {
                     'success': True,
@@ -210,7 +210,7 @@ class OAuthLocalTester:
                     'redirect_url': location
                 }
             else:
-                console.print(f"  [red]✗[/red] Login endpoint didn't redirect: {response.status_code}")
+                console.print(f"  [red][U+2717][/red] Login endpoint didn't redirect: {response.status_code}")
                 console.print(f"  Response: {response.text[:200]}")
                 
                 self.test_results['oauth_initiation'] = {
@@ -224,7 +224,7 @@ class OAuthLocalTester:
                     'response': response.text
                 }
         except Exception as e:
-            console.print(f"  [red]✗[/red] Error testing login flow: {e}")
+            console.print(f"  [red][U+2717][/red] Error testing login flow: {e}")
             self.test_results['oauth_initiation'] = {
                 'success': False,
                 'error': str(e)
@@ -252,7 +252,7 @@ class OAuthLocalTester:
                 if response.status_code == 200:
                     data = response.json()
                     if 'access_token' in data:
-                        console.print(f"  [green]✓[/green] Token generated successfully")
+                        console.print(f"  [green][U+2713][/green] Token generated successfully")
                         console.print(f"  Token (first 20 chars): [cyan]{data['access_token'][:20]}...[/cyan]")
                         
                         self.test_results['token_generation'] = {
@@ -268,10 +268,10 @@ class OAuthLocalTester:
                             'token': data['access_token']
                         }
                     else:
-                        console.print(f"  [red]✗[/red] No token in response")
+                        console.print(f"  [red][U+2717][/red] No token in response")
                         console.print(f"  Response: {data}")
                 else:
-                    console.print(f"  [red]✗[/red] Dev login failed: {response.status_code}")
+                    console.print(f"  [red][U+2717][/red] Dev login failed: {response.status_code}")
                     console.print(f"  Response: {response.text[:200]}")
                 
                 self.test_results['token_generation'] = {
@@ -280,13 +280,13 @@ class OAuthLocalTester:
                 }
                 
             except Exception as e:
-                console.print(f"  [red]✗[/red] Error testing token generation: {e}")
+                console.print(f"  [red][U+2717][/red] Error testing token generation: {e}")
                 self.test_results['token_generation'] = {
                     'success': False,
                     'error': str(e)
                 }
         else:
-            console.print("  [yellow]⚠[/yellow] Dev login not enabled - skipping token generation test")
+            console.print("  [yellow] WARNING: [/yellow] Dev login not enabled - skipping token generation test")
             self.test_results['token_generation'] = {
                 'success': False,
                 'reason': 'Dev login not enabled'
@@ -307,7 +307,7 @@ class OAuthLocalTester:
             
             if response.status_code == 200:
                 user_data = response.json()
-                console.print(f"  [green]✓[/green] Token validated successfully")
+                console.print(f"  [green][U+2713][/green] Token validated successfully")
                 console.print(f"  User: [cyan]{user_data.get('email', 'N/A')}[/cyan]")
                 
                 self.test_results['token_validation'] = {
@@ -320,7 +320,7 @@ class OAuthLocalTester:
                     'user': user_data
                 }
             else:
-                console.print(f"  [red]✗[/red] Token validation failed: {response.status_code}")
+                console.print(f"  [red][U+2717][/red] Token validation failed: {response.status_code}")
                 console.print(f"  Response: {response.text[:200]}")
                 
                 self.test_results['token_validation'] = {
@@ -333,7 +333,7 @@ class OAuthLocalTester:
                     'status_code': response.status_code
                 }
         except Exception as e:
-            console.print(f"  [red]✗[/red] Error validating token: {e}")
+            console.print(f"  [red][U+2717][/red] Error validating token: {e}")
             self.test_results['token_validation'] = {
                 'success': False,
                 'error': str(e)
@@ -345,7 +345,7 @@ class OAuthLocalTester:
     
     def generate_report(self) -> None:
         """Generate test report"""
-        console.print("\n[bold cyan]═══ OAuth Local Test Report ═══[/bold cyan]\n")
+        console.print("\n[bold cyan][U+2550][U+2550][U+2550] OAuth Local Test Report [U+2550][U+2550][U+2550][/bold cyan]\n")
         
         # Create summary table
         summary_table = Table(show_header=True, header_style="bold magenta")
@@ -355,19 +355,19 @@ class OAuthLocalTester:
         
         for test_name, result in self.test_results.items():
             if result is None:
-                status = "[yellow]⊘[/yellow]"
+                status = "[yellow][U+2298][/yellow]"
                 details = "Not tested"
             elif isinstance(result, dict) and result.get('success'):
-                status = "[green]✓[/green]"
+                status = "[green][U+2713][/green]"
                 details = "Passed"
             elif isinstance(result, dict) and result.get('healthy'):
-                status = "[green]✓[/green]"
+                status = "[green][U+2713][/green]"
                 details = "Healthy"
             elif isinstance(result, dict) and result.get('passed'):
-                status = "[green]✓[/green]"
+                status = "[green][U+2713][/green]"
                 details = "All configured"
             else:
-                status = "[red]✗[/red]"
+                status = "[red][U+2717][/red]"
                 if isinstance(result, dict):
                     if 'error' in result:
                         details = f"Error: {result['error'][:50]}"
@@ -390,7 +390,7 @@ class OAuthLocalTester:
     
     def _print_recommendations(self) -> None:
         """Print recommendations based on test results"""
-        console.print("\n[bold green]📋 Recommendations:[/bold green]")
+        console.print("\n[bold green][U+1F4CB] Recommendations:[/bold green]")
         
         recommendations = []
         
@@ -423,9 +423,9 @@ class OAuthLocalTester:
         
         if recommendations:
             for rec in recommendations:
-                console.print(f"  [green]✓[/green] {rec}")
+                console.print(f"  [green][U+2713][/green] {rec}")
         else:
-            console.print("  [green]✓[/green] All tests passed! OAuth is properly configured.")
+            console.print("  [green][U+2713][/green] All tests passed! OAuth is properly configured.")
     
     async def cleanup(self):
         """Clean up resources"""
@@ -461,7 +461,7 @@ async def async_main(backend_url: str, auth_url: str, export: Optional[str]):
                     'auth_url': auth_url,
                     'results': tester.test_results
                 }, f, indent=2)
-            console.print(f"\n[green]✓ Results exported to {export}[/green]")
+            console.print(f"\n[green][U+2713] Results exported to {export}[/green]")
         
     except Exception as e:
         console.print(f"\n[red]Error during testing: {e}[/red]")

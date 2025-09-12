@@ -352,10 +352,10 @@ class RealChatOutputTester:
             
             # Content validation
             report.append("\nContent Validation:")
-            report.append(f"  ✓ Has substantive thinking: {val.has_substantive_thinking}")
-            report.append(f"  ✓ Has logical tool usage: {val.has_logical_tool_usage}")
-            report.append(f"  ✓ Has coherent response: {val.has_coherent_response}")
-            report.append(f"  ✓ Response answers question: {val.response_answers_question}")
+            report.append(f"  [U+2713] Has substantive thinking: {val.has_substantive_thinking}")
+            report.append(f"  [U+2713] Has logical tool usage: {val.has_logical_tool_usage}")
+            report.append(f"  [U+2713] Has coherent response: {val.has_coherent_response}")
+            report.append(f"  [U+2713] Response answers question: {val.response_answers_question}")
             
             # Thinking steps
             if val.thinking_steps:
@@ -377,7 +377,7 @@ class RealChatOutputTester:
             # Required events check
             missing_events = self.REQUIRED_EVENTS - val.event_types_seen
             if missing_events:
-                report.append(f"\n⚠️ MISSING REQUIRED EVENTS: {missing_events}")
+                report.append(f"\n WARNING: [U+FE0F] MISSING REQUIRED EVENTS: {missing_events}")
                 
         report.append("\n" + "=" * 80)
         return "\n".join(report)

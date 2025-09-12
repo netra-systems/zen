@@ -6,7 +6,7 @@ being instantiated after SSOT consolidation, ensuring all usage migrates to
 UserExecutionEngine to maintain Golden Path reliability.
 
 Business Value: Prevents regression to duplicate engines that could break user
-isolation and Golden Path (users login → get AI responses) reliability.
+isolation and Golden Path (users login  ->  get AI responses) reliability.
 
 CRITICAL: This test ensures SSOT consolidation enforcement and migration completion.
 """
@@ -75,7 +75,7 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
                         })
                     else:
                         self.record_metric("execution_engine_deprecation_warning_shown", True)
-                        print(f"✅ ExecutionEngine shows deprecation warning: {deprecation_warnings[0].message}")
+                        print(f" PASS:  ExecutionEngine shows deprecation warning: {deprecation_warnings[0].message}")
                     
                     # Document that instantiation succeeded (may be acceptable during transition)
                     self.allowed_instantiations.append({
@@ -367,7 +367,7 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
             }
     
     def test_golden_path_protection_during_deprecation(self):
-        """GOLDEN PATH: Verify deprecation doesn't break user login → AI response flow."""
+        """GOLDEN PATH: Verify deprecation doesn't break user login  ->  AI response flow."""
         self.record_metric("test_name", "golden_path_deprecation_protection")
         
         # Ensure at least one working execution engine exists for Golden Path
@@ -437,13 +437,13 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
         if not working_engines:
             pytest.fail(
                 "GOLDEN PATH BROKEN: No working execution engines available after deprecation. "
-                "Users cannot login → get AI responses. SSOT consolidation failed."
+                "Users cannot login  ->  get AI responses. SSOT consolidation failed."
             )
         
         self.record_metric("golden_path_working_engines", len(working_engines))
         self.record_metric("golden_path_protected", True)
         
-        print(f"✅ Golden Path Protected: {working_engines} engines functional after deprecation")
+        print(f" PASS:  Golden Path Protected: {working_engines} engines functional after deprecation")
     
     def teardown_method(self, method=None):
         """Report deprecation prevention test results."""
@@ -486,7 +486,7 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
         
         print(f"\nSSQT Consolidation Progress:")
         for indicator, value in success_indicators.items():
-            status = "✅" if value else "⚠️"
+            status = " PASS: " if value else " WARNING: [U+FE0F]"
             print(f"  {status} {indicator}: {value}")
         
         # Overall assessment
@@ -494,9 +494,9 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
         total_engines_checked = len(self.migration_status)
         
         if engines_properly_deprecated == total_engines_checked and not self.deprecation_violations:
-            print("✅ SSOT Consolidation Complete: All deprecated engines prevented")
+            print(" PASS:  SSOT Consolidation Complete: All deprecated engines prevented")
         else:
-            print(f"⚠️ SSOT Consolidation In Progress: {engines_properly_deprecated}/{total_engines_checked} engines deprecated")
+            print(f" WARNING: [U+FE0F] SSOT Consolidation In Progress: {engines_properly_deprecated}/{total_engines_checked} engines deprecated")
             print("NOTE: Violations expected during transition, should be resolved after full consolidation")
         
         print("=" * 60)
@@ -599,13 +599,13 @@ class TestSSotConsolidationReadiness(SSotBaseTestCase):
         
         print(f"\n=== SSOT Consolidation Readiness ===")
         print(f"Score: {consolidation_score}/{max_score} ({readiness_percentage:.1f}%)")
-        print(f"Golden Path Protected: {'✅' if golden_path_working else '⚠️'}")
+        print(f"Golden Path Protected: {' PASS: ' if golden_path_working else ' WARNING: [U+FE0F]'}")
         
         if readiness_percentage >= 80:
-            print("✅ SSOT Consolidation Ready")
+            print(" PASS:  SSOT Consolidation Ready")
         elif readiness_percentage >= 60:
-            print("⚠️ SSOT Consolidation Mostly Ready - Minor Issues")
+            print(" WARNING: [U+FE0F] SSOT Consolidation Mostly Ready - Minor Issues")
         else:
-            print("🚨 SSOT Consolidation Not Ready - Major Issues")
+            print(" ALERT:  SSOT Consolidation Not Ready - Major Issues")
         
         return readiness_percentage

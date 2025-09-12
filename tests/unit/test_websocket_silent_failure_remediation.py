@@ -255,11 +255,11 @@ class TestWebSocketSilentFailureRemediation:
         assert "self.logger.warning(f\"Failed to emit completion:" not in reporting_agent_content
         
         # Verify: Critical logging patterns are present
-        assert "logger.critical(f\"🚨 CRITICAL: WebSocket tool_executing event FAILED" in tool_dispatcher_content
-        assert "logger.critical(f\"🚨 CRITICAL: WebSocket tool_completed event FAILED" in tool_dispatcher_content
-        assert "self.logger.critical(f\"🚨 CRITICAL: WebSocket agent_started event FAILED" in reporting_agent_content
-        assert "self.logger.critical(f\"🚨 CRITICAL: WebSocket agent_thinking event FAILED" in reporting_agent_content
-        assert "self.logger.critical(f\"🚨 CRITICAL: WebSocket agent_completed event FAILED" in reporting_agent_content
+        assert "logger.critical(f\" ALERT:  CRITICAL: WebSocket tool_executing event FAILED" in tool_dispatcher_content
+        assert "logger.critical(f\" ALERT:  CRITICAL: WebSocket tool_completed event FAILED" in tool_dispatcher_content
+        assert "self.logger.critical(f\" ALERT:  CRITICAL: WebSocket agent_started event FAILED" in reporting_agent_content
+        assert "self.logger.critical(f\" ALERT:  CRITICAL: WebSocket agent_thinking event FAILED" in reporting_agent_content
+        assert "self.logger.critical(f\" ALERT:  CRITICAL: WebSocket agent_completed event FAILED" in reporting_agent_content
 
 
 # Integration test to validate end-to-end functionality

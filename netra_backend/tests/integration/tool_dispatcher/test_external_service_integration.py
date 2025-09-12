@@ -113,7 +113,7 @@ class TestToolDispatcherExternalServiceIntegration(BaseIntegrationTest):
         
         # Verify each user got their specific results
         total_executions = sum(len(results) for results in all_results)
-        assert total_executions == 15  # 5 users × 3 tools each
+        assert total_executions == 15  # 5 users  x  3 tools each
         
         # Verify user-specific data in results
         for user_results in all_results:
@@ -985,7 +985,7 @@ class TestToolDispatcherExternalServiceIntegration(BaseIntegrationTest):
             assert len(result["service_responses"]) == 3  # Auth, Backend, Analytics
         
         # Verify service mesh interactions
-        assert len(service_interactions) == 9  # 3 users × 3 services each
+        assert len(service_interactions) == 9  # 3 users  x  3 services each
         
         # Verify routing distribution
         assert "user_validator" in mesh_routing

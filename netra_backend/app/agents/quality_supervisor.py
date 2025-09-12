@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-14T00:00:00.000000+00:00
 # Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: CLAUDE.md compliance - Refactor to ≤300 lines, functions ≤8 lines
+# Context: CLAUDE.md compliance - Refactor to  <= 300 lines, functions  <= 8 lines
 # Git: anthony-aug-13-2 | modified
 # Change: Refactor | Scope: Component | Risk: Low
 # Session: claude-md-compliance | Seq: 9
@@ -13,7 +13,7 @@
 Quality-Enhanced Supervisor Agent
 
 This module wraps the supervisor with quality gates to prevent AI slop
-and ensure high-quality outputs from all agents. All functions ≤8 lines.
+and ensure high-quality outputs from all agents. All functions  <= 8 lines.
 """
 
 import asyncio

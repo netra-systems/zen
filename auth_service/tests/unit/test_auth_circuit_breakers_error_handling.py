@@ -280,10 +280,10 @@ class TestAuthCircuitBreakersCore:
                     
                     if validation_result is None:
                         # Fail-closed approach is acceptable for security
-                        print(f"✓ {description}: System failed closed (secure)")
+                        print(f"[U+2713] {description}: System failed closed (secure)")
                     elif validation_result is not None and validation_result.get("sub") == user_id:
                         # JWT validation succeeded without DB (also acceptable)  
-                        print(f"✓ {description}: JWT validation succeeded without DB")
+                        print(f"[U+2713] {description}: JWT validation succeeded without DB")
                     else:
                         assert False, f"{description}: Unexpected validation result: {validation_result}"
                         
@@ -364,9 +364,9 @@ class TestAuthCircuitBreakersCore:
                     
                     # System should handle gracefully - either succeed or fail cleanly
                     if blacklist_result is True:
-                        print(f"✓ {description}: Blacklisting succeeded despite {failing_operation} failure")
+                        print(f"[U+2713] {description}: Blacklisting succeeded despite {failing_operation} failure")
                     elif blacklist_result is False:
-                        print(f"✓ {description}: Blacklisting failed gracefully due to {failing_operation} failure")
+                        print(f"[U+2713] {description}: Blacklisting failed gracefully due to {failing_operation} failure")
                     else:
                         assert False, f"{description}: Blacklisting must return boolean result"
                     
@@ -413,9 +413,9 @@ class TestAuthCircuitBreakersCore:
                 
                 # Either fail closed (None) or succeed with JWT validation
                 if failure_validation is None:
-                    print("✓ System failed closed during Redis failure (secure)")
+                    print("[U+2713] System failed closed during Redis failure (secure)")
                 elif failure_validation.get("sub") == user_id:
-                    print("✓ System continued with JWT validation during Redis failure")
+                    print("[U+2713] System continued with JWT validation during Redis failure")
                 else:
                     assert False, f"Unexpected validation result during failure: {failure_validation}"
                     
@@ -425,7 +425,7 @@ class TestAuthCircuitBreakersCore:
                 assert isinstance(e, acceptable_exceptions), (
                     f"System failure must be controlled exception, got {type(e).__name__}: {e}"
                 )
-                print(f"✓ System failed with controlled exception: {type(e).__name__}")
+                print(f"[U+2713] System failed with controlled exception: {type(e).__name__}")
             
             # Phase 2: System recovery
             mock_redis_client.get.side_effect = None
@@ -444,4 +444,4 @@ class TestAuthCircuitBreakersCore:
             assert new_token_validation is not None, "New token creation and validation must work after recovery"
             assert new_token_validation["sub"] == f"{user_id}-recovery", "New token must contain correct data after recovery"
             
-            print("✓ Authentication system fully recovered after temporary failure")
+            print("[U+2713] Authentication system fully recovered after temporary failure")

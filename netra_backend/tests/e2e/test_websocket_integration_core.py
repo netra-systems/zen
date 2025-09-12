@@ -1,7 +1,7 @@
 """WebSocket Integration Core E2E Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) 
+- Segment: All (Free  ->  Enterprise) 
 - Business Goal: Validate WebSocket infrastructure delivers real-time AI interactions
 - Value Impact: WebSocket reliability directly affects user engagement and chat functionality
 - Strategic Impact: WebSocket failures cause 90% of delivered value (chat) to fail per CLAUDE.md
@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 CRITICAL MISSION: This test suite validates that WebSocket core infrastructure enables
 the delivery of business value through real-time AI-powered chat interactions.
 
-🚨 CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
+ ALERT:  CRITICAL: ALL E2E TESTS MUST USE AUTHENTICATION
 This ensures proper multi-user isolation and real-world scenario testing.
 """
 

@@ -210,10 +210,10 @@ class TestGoldenPathValidatorDatabaseIntegration(BaseIntegrationTest):
             # Expected failure case - table is missing
             assert "Missing critical user tables" in auth_result["message"]
             assert "user_sessions" in auth_result["message"]
-            print("✅ REPRODUCED ISSUE: user_sessions table is missing, Golden Path validation correctly fails")
+            print(" PASS:  REPRODUCED ISSUE: user_sessions table is missing, Golden Path validation correctly fails")
         else:
             # Success case - table exists
-            print("✅ TABLE EXISTS: user_sessions table found, Golden Path validation passes")
+            print(" PASS:  TABLE EXISTS: user_sessions table found, Golden Path validation passes")
         
         # The assertion depends on current database state
         # In broken staging: should fail (table missing)

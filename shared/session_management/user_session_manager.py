@@ -4,7 +4,7 @@ This module provides comprehensive session management functionality as a Single 
 of Truth (SSOT) for user session lifecycle operations across the entire Netra platform.
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core chat continuity functionality
+- Segment: All (Free  ->  Enterprise) - Core chat continuity functionality
 - Business Goal: Enable proper multi-turn AI conversations and prevent memory leaks
 - Value Impact: Delivers 90% of platform value through reliable chat continuity
 - Strategic Impact: CRITICAL - Prevents session memory leaks and enables true multi-user support

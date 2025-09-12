@@ -131,7 +131,7 @@ async def test_concurrent_expired_token_connections(jwt_generator, audit_logger)
     
     throughput = total_attempts / total_time
     
-    logger.info(f"✓ Concurrent performance: {total_attempts} attempts in {total_time:.2f}s ({throughput:.1f} req/s)")
+    logger.info(f"[U+2713] Concurrent performance: {total_attempts} attempts in {total_time:.2f}s ({throughput:.1f} req/s)")
     logger.info(f"   Response times: avg {avg_response_time:.3f}s, max {max_response_time:.3f}s, variance {response_time_variance:.3f}s")
 
 
@@ -248,7 +248,7 @@ async def test_mixed_token_concurrent_connections(jwt_generator, audit_logger):
     
     mixed_throughput = total_users / mixed_total_time
     
-    logger.info(f"✓ Mixed load: {total_users} connections in {mixed_total_time:.2f}s ({mixed_throughput:.1f} conn/s)")
+    logger.info(f"[U+2713] Mixed load: {total_users} connections in {mixed_total_time:.2f}s ({mixed_throughput:.1f} conn/s)")
     logger.info(f"   Accuracy: {accuracy_rate:.2%}, valid avg: {avg_valid_time:.3f}s, expired avg: {avg_expired_time:.3f}s")
 
 
@@ -364,7 +364,7 @@ async def test_sustained_concurrent_load_stability(jwt_generator, audit_logger):
     
     sustained_throughput = len(sustained_results) / sustained_total_time
     
-    logger.info(f"✓ Sustained load: {len(sustained_results)} attempts over {sustained_total_time:.1f}s ({sustained_throughput:.1f} req/s)")
+    logger.info(f"[U+2713] Sustained load: {len(sustained_results)} attempts over {sustained_total_time:.1f}s ({sustained_throughput:.1f} req/s)")
     logger.info(f"   Performance: avg {avg_response_time:.3f}s, degradation {performance_degradation:.1%}")
     logger.info(f"   Batches: avg {avg_batch_time:.3f}s, max {max_batch_time:.3f}s")
 

@@ -69,7 +69,7 @@ class HealthDashboard:
         
     async def start_dashboard(self) -> None:
         """Start the real-time health dashboard."""
-        self.console.print("[bold blue]🚀 Starting Staging Health Dashboard[/bold blue]")
+        self.console.print("[bold blue][U+1F680] Starting Staging Health Dashboard[/bold blue]")
         self.console.print(f"Backend URL: {self.backend_url}")
         self.console.print(f"Refresh Interval: {self.refresh_interval}s")
         self.console.print()
@@ -150,7 +150,7 @@ class HealthDashboard:
     
     def _create_header_panel(self) -> Panel:
         """Create header panel with title and status."""
-        title_text = Text("🏥 Staging Environment Health Dashboard", style="bold white")
+        title_text = Text("[U+1F3E5] Staging Environment Health Dashboard", style="bold white")
         
         if self.last_update:
             timestamp = datetime.fromtimestamp(self.last_update).strftime("%Y-%m-%d %H:%M:%S")
@@ -170,7 +170,7 @@ class HealthDashboard:
     def _create_overview_panel(self) -> Panel:
         """Create system overview panel."""
         if not self.health_history:
-            content = "⏳ Loading system overview..."
+            content = "[U+23F3] Loading system overview..."
             return Panel(content, title="System Overview", border_style="yellow")
         
         latest_health = self.health_history[-1] if self.health_history else {}
@@ -208,7 +208,7 @@ class HealthDashboard:
     def _create_components_panel(self) -> Panel:
         """Create components health panel."""
         if not self.health_history:
-            content = "⏳ Loading component status..."
+            content = "[U+23F3] Loading component status..."
             return Panel(content, title="Component Health", border_style="yellow")
         
         latest_health = self.health_history[-1] if self.health_history else {}
@@ -236,7 +236,7 @@ class HealthDashboard:
                 display_name = name.replace("staging_", "").replace("database_", "").replace("service_", "")
                 
                 # Status indicator
-                status_icon = "✅" if success else "❌"
+                status_icon = " PASS: " if success else " FAIL: "
                 status_color = "green" if success else "red"
                 
                 # Health score with color coding
@@ -254,7 +254,7 @@ class HealthDashboard:
     def _create_performance_panel(self) -> Panel:
         """Create performance metrics panel."""
         if not self.performance_history:
-            content = "⏳ Loading performance metrics..."
+            content = "[U+23F3] Loading performance metrics..."
             return Panel(content, title="Performance Metrics", border_style="yellow")
         
         latest_perf = self.performance_history[-1] if self.performance_history else {}
@@ -307,13 +307,13 @@ class HealthDashboard:
         performance_table.add_row(
             "CPU Usage",
             f"[{cpu_color}]{cpu_usage:.1f}%[/{cpu_color}]",
-            "📊"
+            " CHART: "
         )
         
         performance_table.add_row(
             "Memory Usage",
             f"[{memory_color}]{memory_usage:.1f}%[/{memory_color}]",
-            "📊"
+            " CHART: "
         )
         
         return Panel(performance_table, title="Performance Metrics", border_style="magenta")
@@ -321,7 +321,7 @@ class HealthDashboard:
     def _create_alerts_panel(self) -> Panel:
         """Create alerts and notifications panel."""
         if not self.active_alerts:
-            content = "[green]✅ No active alerts[/green]"
+            content = "[green] PASS:  No active alerts[/green]"
             return Panel(content, title="Active Alerts", border_style="green")
         
         alerts_table = Table(show_header=True)
@@ -353,7 +353,7 @@ class HealthDashboard:
     def _create_trends_panel(self) -> Panel:
         """Create trends and predictions panel."""
         if len(self.health_history) < 5:
-            content = "⏳ Collecting trend data..."
+            content = "[U+23F3] Collecting trend data..."
             return Panel(content, title="Trends & Predictions", border_style="yellow")
         
         trends_table = Table(show_header=False, box=None)
@@ -398,7 +398,7 @@ class HealthDashboard:
         trends_table.add_row(
             "Stability Score",
             f"[{stability_color}]{stability_score:.2f}[/{stability_color}]",
-            "📈" if stability_score > 0.8 else "⚠️"
+            "[U+1F4C8]" if stability_score > 0.8 else " WARNING: [U+FE0F]"
         )
         
         return Panel(trends_table, title="Trends & Predictions", border_style="cyan")
@@ -679,33 +679,33 @@ class HealthDashboard:
         health_trend = self._calculate_health_trend()
         
         if health_trend == "degrading":
-            return "[red]⚠️ Potential issues[/red]"
+            return "[red] WARNING: [U+FE0F] Potential issues[/red]"
         elif health_trend == "stable":
-            return "[green]✅ Stable[/green]"
+            return "[green] PASS:  Stable[/green]"
         else:
-            return "[cyan]📈 Improving[/cyan]"
+            return "[cyan][U+1F4C8] Improving[/cyan]"
     
     def _predict_component_failures(self) -> str:
         """Predict component failures."""
         failure_trend = self._calculate_failure_trend()
         
         if failure_trend == "increasing":
-            return "[red]⚠️ More failures expected[/red]"
+            return "[red] WARNING: [U+FE0F] More failures expected[/red]"
         elif failure_trend == "stable":
-            return "[yellow]➖ Stable[/yellow]"
+            return "[yellow][U+2796] Stable[/yellow]"
         else:
-            return "[green]✅ Improving[/green]"
+            return "[green] PASS:  Improving[/green]"
     
     def _predict_performance_issues(self) -> str:
         """Predict performance issues."""
         perf_trend = self._calculate_performance_trend()
         
         if perf_trend == "degrading":
-            return "[red]⚠️ Performance declining[/red]"
+            return "[red] WARNING: [U+FE0F] Performance declining[/red]"
         elif perf_trend == "stable":
-            return "[green]✅ Stable performance[/green]"
+            return "[green] PASS:  Stable performance[/green]"
         else:
-            return "[cyan]📈 Performance improving[/cyan]"
+            return "[cyan][U+1F4C8] Performance improving[/cyan]"
     
     def _get_business_impact_summary(self, health_data: Dict[str, Any]) -> str:
         """Get business impact summary."""
@@ -745,20 +745,20 @@ class HealthDashboard:
     def _get_alert_severity_icon(self, severity: str) -> str:
         """Get icon for alert severity."""
         severity_icons = {
-            "info": "ℹ️",
-            "warning": "⚠️",
-            "critical": "🚨"
+            "info": "[U+2139][U+FE0F]",
+            "warning": " WARNING: [U+FE0F]",
+            "critical": " ALERT: "
         }
-        return severity_icons.get(severity.lower(), "•")
+        return severity_icons.get(severity.lower(), "[U+2022]")
     
     def _get_trend_indicator(self, trend: str) -> str:
         """Get visual indicator for trend."""
         trend_indicators = {
-            "improving": "[green]📈[/green]",
-            "stable": "[yellow]➖[/yellow]",
-            "degrading": "[red]📉[/red]",
-            "increasing": "[red]📈[/red]",  # For metrics where increase is bad
-            "decreasing": "[green]📉[/green]"  # For metrics where decrease is good
+            "improving": "[green][U+1F4C8][/green]",
+            "stable": "[yellow][U+2796][/yellow]",
+            "degrading": "[red][U+1F4C9][/red]",
+            "increasing": "[red][U+1F4C8][/red]",  # For metrics where increase is bad
+            "decreasing": "[green][U+1F4C9][/green]"  # For metrics where decrease is good
         }
         return trend_indicators.get(trend.lower(), "[dim]?[/dim]")
 

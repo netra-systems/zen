@@ -95,7 +95,7 @@ class TestUserAuthServiceComprehensive(AsyncBaseTestCase):
         test_cases = [
             ("test@example.com", "password"),
             ("", ""),
-            ("unicode@测试.com", "пароль"),
+            ("unicode@[U+6D4B][U+8BD5].com", "[U+043F]apo[U+043B][U+044C]"),
             ("long" * 1000 + "@example.com", "pass" * 500)
         ]
         

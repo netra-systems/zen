@@ -111,47 +111,47 @@ class WebSocketEventValidator:
         event_type = event.get("type", "").lower()
         event_data = event.get("data", {})
         
-        logger.info(f"📥 WebSocket Event Received: {event_type}")
+        logger.info(f"[U+1F4E5] WebSocket Event Received: {event_type}")
         
         # Validate the 5 critical events for chat functionality
         if "agent_started" in event_type:
             self.agent_started = True
-            logger.success("✅ agent_started - User knows agent began processing")
+            logger.success(" PASS:  agent_started - User knows agent began processing")
             
         elif "agent_thinking" in event_type:
             self.agent_thinking = True
-            logger.success("✅ agent_thinking - User sees real-time reasoning")
+            logger.success(" PASS:  agent_thinking - User sees real-time reasoning")
             
         elif "tool_executing" in event_type:
             self.tool_executing = True
-            logger.success("✅ tool_executing - User sees tool transparency")
+            logger.success(" PASS:  tool_executing - User sees tool transparency")
             
         elif "tool_completed" in event_type:
             self.tool_completed = True
-            logger.success("✅ tool_completed - User sees tool results")
+            logger.success(" PASS:  tool_completed - User sees tool results")
             
         elif "agent_completed" in event_type or "final_result" in event_type:
             self.agent_completed = True
-            logger.success("✅ agent_completed - User knows processing is done")
+            logger.success(" PASS:  agent_completed - User knows processing is done")
             
         else:
-            logger.debug(f"📋 Other event: {event_type}")
+            logger.debug(f"[U+1F4CB] Other event: {event_type}")
     
     def validate_critical_events(self) -> Tuple[bool, List[str]]:
         """Validate that all critical events were received."""
         errors = []
         
         if not self.agent_started:
-            errors.append("❌ CRITICAL: No agent_started event - User won't know processing began")
+            errors.append(" FAIL:  CRITICAL: No agent_started event - User won't know processing began")
         
         if not self.agent_thinking:
-            errors.append("⚠️ WARNING: No agent_thinking events - User won't see reasoning process")
+            errors.append(" WARNING: [U+FE0F] WARNING: No agent_thinking events - User won't see reasoning process")
         
         if not self.agent_completed:
-            errors.append("❌ CRITICAL: No agent_completed event - User won't know when processing is done")
+            errors.append(" FAIL:  CRITICAL: No agent_completed event - User won't know when processing is done")
         
         if len(self.events) == 0:
-            errors.append("❌ CRITICAL: No WebSocket events at all - Chat functionality completely broken")
+            errors.append(" FAIL:  CRITICAL: No WebSocket events at all - Chat functionality completely broken")
         
         return len(errors) == 0, errors
     
@@ -167,20 +167,20 @@ class WebSocketEventValidator:
             f"Test Duration: {time.time() - self.start_time:.2f}s",
             "",
             "Event Coverage Analysis:",
-            f"  🚀 agent_started:   {'✅ YES' if self.agent_started else '❌ MISSING'}",
-            f"  🧠 agent_thinking:  {'✅ YES' if self.agent_thinking else '⚠️ MISSING'}",
-            f"  🔧 tool_executing:  {'✅ YES' if self.tool_executing else '⚠️ MISSING'}",
-            f"  ✅ tool_completed:  {'✅ YES' if self.tool_completed else '⚠️ MISSING'}",
-            f"  🏁 agent_completed: {'✅ YES' if self.agent_completed else '❌ MISSING'}",
+            f"  [U+1F680] agent_started:   {' PASS:  YES' if self.agent_started else ' FAIL:  MISSING'}",
+            f"  [U+1F9E0] agent_thinking:  {' PASS:  YES' if self.agent_thinking else ' WARNING: [U+FE0F] MISSING'}",
+            f"  [U+1F527] tool_executing:  {' PASS:  YES' if self.tool_executing else ' WARNING: [U+FE0F] MISSING'}",
+            f"   PASS:  tool_completed:  {' PASS:  YES' if self.tool_completed else ' WARNING: [U+FE0F] MISSING'}",
+            f"  [U+1F3C1] agent_completed: {' PASS:  YES' if self.agent_completed else ' FAIL:  MISSING'}",
             "",
-            f"Overall Status: {'✅ PASS' if is_valid else '❌ FAIL'}",
+            f"Overall Status: {' PASS:  PASS' if is_valid else ' FAIL:  FAIL'}",
         ]
         
         if errors:
-            report_lines.extend(["", "❌ Issues Found:"] + [f"  {error}" for error in errors])
+            report_lines.extend(["", " FAIL:  Issues Found:"] + [f"  {error}" for error in errors])
         
         if self.events:
-            report_lines.extend(["", "📋 Event Sequence (first 10):"])
+            report_lines.extend(["", "[U+1F4CB] Event Sequence (first 10):"])
             for i, event in enumerate(self.events[:10]):
                 timestamp = event.get('timestamp', 0)
                 event_type = event.get('type', 'unknown')
@@ -237,7 +237,7 @@ class MockWebSocketConnection:
             
             self.sent_messages.append(data)
             self.event_validator.record_event(data)
-            logger.debug(f"📤 WebSocket sent: {data.get('type', 'unknown')}")
+            logger.debug(f"[U+1F4E4] WebSocket sent: {data.get('type', 'unknown')}")
             
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse WebSocket message: {e}")
@@ -275,7 +275,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
         self.event_validator = WebSocketEventValidator()
         self.docker_manager = UnifiedDockerManager()
         
-        logger.info("🚀 Setting up MISSION CRITICAL chat flow test")
+        logger.info("[U+1F680] Setting up MISSION CRITICAL chat flow test")
     
     def teardown_method(self, method=None):
         """Clean up test environment."""
@@ -287,7 +287,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
         # End timing
         self._metrics.end_timing()
         
-        logger.info(f"🏁 Test completed in {self._metrics.execution_time:.2f}s")
+        logger.info(f"[U+1F3C1] Test completed in {self._metrics.execution_time:.2f}s")
         super().teardown_method(method)
     
     @pytest.mark.asyncio
@@ -306,7 +306,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
         
         CRITICAL: This test protects $500K+ ARR by ensuring chat works.
         """
-        logger.info("🎯 STARTING MISSION CRITICAL GOLDEN PATH CHAT FLOW TEST")
+        logger.info(" TARGET:  STARTING MISSION CRITICAL GOLDEN PATH CHAT FLOW TEST")
         logger.info("=" * 80)
         
         test_result = ChatFlowTestResult()
@@ -314,13 +314,13 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
         
         try:
             # Step 1: Verify Docker services are available
-            logger.info("📋 Step 1: Verifying real services availability...")
+            logger.info("[U+1F4CB] Step 1: Verifying real services availability...")
             
             if not self.docker_manager.is_docker_available():
                 pytest.skip("Docker services not available - skipping real service test")
             
             # Step 2: Create test user context
-            logger.info("👤 Step 2: Creating test user context...")
+            logger.info("[U+1F464] Step 2: Creating test user context...")
             
             # Use proper UUID format for user_id (required by ensure_user_id validation)
             user_id = str(uuid.uuid4())
@@ -328,7 +328,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
             connection_id = str(uuid.uuid4())
             
             # Step 3: Create agent execution context
-            logger.info("🤖 Step 3: Setting up agent execution context...")
+            logger.info("[U+1F916] Step 3: Setting up agent execution context...")
             
             user_context = UserExecutionContext(
                 user_id=user_id,
@@ -338,7 +338,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
             )
             
             # Step 4: Create WebSocket manager and connection
-            logger.info("🔌 Step 4: Setting up WebSocket connection...")
+            logger.info("[U+1F50C] Step 4: Setting up WebSocket connection...")
             
             # Use the factory with proper user_context (not just user_id)
             ws_manager = create_websocket_manager(user_context=user_context)
@@ -346,10 +346,10 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
             
             # Connect user to WebSocket
             await ws_manager.connect_user(user_id, mock_websocket, connection_id)
-            logger.success(f"✅ WebSocket connected for user {user_id}")
+            logger.success(f" PASS:  WebSocket connected for user {user_id}")
             
             # Step 5: Send test message through chat flow
-            logger.info("💬 Step 5: Sending test message through chat system...")
+            logger.info("[U+1F4AC] Step 5: Sending test message through chat system...")
             
             test_message = {
                 "type": "chat_message",
@@ -365,11 +365,11 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
             await self._simulate_agent_processing(ws_manager, test_message)
             
             # Step 6: Wait for events to be processed
-            logger.info("⏳ Step 6: Waiting for agent processing and WebSocket events...")
+            logger.info("[U+23F3] Step 6: Waiting for agent processing and WebSocket events...")
             await asyncio.sleep(2.0)  # Allow time for all events to be sent
             
             # Step 7: Validate WebSocket events
-            logger.info("✅ Step 7: Validating WebSocket events...")
+            logger.info(" PASS:  Step 7: Validating WebSocket events...")
             
             events_valid, event_errors = self.event_validator.validate_critical_events()
             test_result.websocket_events_valid = events_valid
@@ -379,7 +379,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
                 test_result.errors.extend(event_errors)
             
             # Step 8: Verify meaningful response
-            logger.info("🧠 Step 8: Verifying agent response quality...")
+            logger.info("[U+1F9E0] Step 8: Verifying agent response quality...")
             
             # Look for response in events
             response_events = [
@@ -394,14 +394,14 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
                 
                 # Validate response quality
                 if len(response_content.strip()) > 10:  # Basic quality check
-                    logger.success(f"✅ Meaningful agent response received: {response_content[:100]}...")
+                    logger.success(f" PASS:  Meaningful agent response received: {response_content[:100]}...")
                 else:
                     test_result.errors.append("Agent response too short or empty")
             else:
                 test_result.errors.append("No agent response found in events")
             
             # Step 9: Cleanup
-            logger.info("🧹 Step 9: Cleaning up test resources...")
+            logger.info("[U+1F9F9] Step 9: Cleaning up test resources...")
             await ws_manager.disconnect_user(user_id, mock_websocket, connection_id)
             
             # Calculate final results
@@ -410,7 +410,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
             test_result.success = len(test_result.errors) == 0
             
         except Exception as e:
-            logger.error(f"❌ CRITICAL ERROR in chat flow test: {e}")
+            logger.error(f" FAIL:  CRITICAL ERROR in chat flow test: {e}")
             test_result.errors.append(f"Test execution failed: {str(e)}")
             test_result.success = False
         
@@ -432,7 +432,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
         connection_id = message["connection_id"]
         request_id = f"req_{uuid.uuid4().hex[:8]}"
         
-        logger.info("🔄 Simulating agent processing with WebSocket events...")
+        logger.info(" CYCLE:  Simulating agent processing with WebSocket events...")
         
         # Send agent_started event
         await ws_manager.send_to_user(user_id, {
@@ -499,7 +499,7 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
             }
         })
         
-        logger.success("✅ Agent processing simulation completed")
+        logger.success(" PASS:  Agent processing simulation completed")
     
     def _assert_chat_functionality_working(self, result: ChatFlowTestResult):
         """
@@ -508,31 +508,31 @@ class TestCriticalAgentChatFlow(SSotBaseTestCase):
         This is the final validation that determines if the chat system
         delivers value to customers.
         """
-        logger.info("🔍 Final validation: Is chat functionality working for users?")
+        logger.info(" SEARCH:  Final validation: Is chat functionality working for users?")
         
         # Critical assertions that must pass
         assert result.events_received > 0, \
-            "❌ CRITICAL FAILURE: No WebSocket events received - Chat is completely broken"
+            " FAIL:  CRITICAL FAILURE: No WebSocket events received - Chat is completely broken"
         
         assert result.websocket_events_valid, \
-            f"❌ CRITICAL FAILURE: Required WebSocket events missing - {result.errors}"
+            f" FAIL:  CRITICAL FAILURE: Required WebSocket events missing - {result.errors}"
         
         assert result.agent_response is not None, \
-            "❌ CRITICAL FAILURE: No agent response - Users get no value from chat"
+            " FAIL:  CRITICAL FAILURE: No agent response - Users get no value from chat"
         
         assert len(result.agent_response.strip()) > 10, \
-            "❌ CRITICAL FAILURE: Agent response too short - No substantive value delivered"
+            " FAIL:  CRITICAL FAILURE: Agent response too short - No substantive value delivered"
         
         assert result.response_time < 30.0, \
-            f"❌ PERFORMANCE FAILURE: Response time {result.response_time:.2f}s too slow - Poor user experience"
+            f" FAIL:  PERFORMANCE FAILURE: Response time {result.response_time:.2f}s too slow - Poor user experience"
         
         # Overall chat functionality check
         assert result.is_chat_functional(), \
-            f"❌ BUSINESS CRITICAL FAILURE: Chat functionality not working - {result.errors}"
+            f" FAIL:  BUSINESS CRITICAL FAILURE: Chat functionality not working - {result.errors}"
         
-        logger.success("✅ CHAT FUNCTIONALITY VALIDATION PASSED")
-        logger.success("🎉 Golden Path user flow is working correctly")
-        logger.success(f"📊 Response time: {result.response_time:.2f}s, Events: {result.events_received}")
+        logger.success(" PASS:  CHAT FUNCTIONALITY VALIDATION PASSED")
+        logger.success(" CELEBRATION:  Golden Path user flow is working correctly")
+        logger.success(f" CHART:  Response time: {result.response_time:.2f}s, Events: {result.events_received}")
 
 
 if __name__ == "__main__":

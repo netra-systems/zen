@@ -187,7 +187,7 @@ class TestAPIIntegrationCompliant:
 
 # ===== ANTI-PATTERNS TO AVOID =====
 
-# ❌ DON'T DO THIS - Function too long (>8 lines)
+#  FAIL:  DON'T DO THIS - Function too long (>8 lines)
 def test_complex_workflow_bad():
     """ANTI-PATTERN: Function exceeds 8 line limit"""
     # Setup
@@ -207,7 +207,7 @@ def test_complex_workflow_bad():
     # More assertions...
     assert service.get_user_status(user.id) == "offline"
 
-# ✅ DO THIS - Split into focused functions
+#  PASS:  DO THIS - Split into focused functions
 class TestComplexWorkflowGood:
     """GOOD: Split complex test into focused functions"""
     

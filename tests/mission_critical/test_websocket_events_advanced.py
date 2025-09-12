@@ -726,9 +726,9 @@
 
     # Test various Unicode and special characters
     # REMOVED_SYNTAX_ERROR: test_strings = [ )
-    # REMOVED_SYNTAX_ERROR: "Hello 世界 🌍", # Emoji and Chinese
-    # REMOVED_SYNTAX_ERROR: "Привет мир",  # Cyrillic
-    # REMOVED_SYNTAX_ERROR: "مرحبا بالعالم",  # Arabic (RTL)
+    # REMOVED_SYNTAX_ERROR: "Hello [U+4E16][U+754C] [U+1F30D]", # Emoji and Chinese
+    # REMOVED_SYNTAX_ERROR: "[U+041F]p[U+0438]vet m[U+0438]p",  # Cyrillic
+    # REMOVED_SYNTAX_ERROR: "[U+0645][U+0631][U+062D][U+0628][U+0627] [U+0628][U+0627][U+0644][U+0639][U+0627][U+0644][U+0645]",  # Arabic (RTL)
     # REMOVED_SYNTAX_ERROR: "
     # REMOVED_SYNTAX_ERROR: \t\r",  # Control characters
     # REMOVED_SYNTAX_ERROR: "null\x00byte",  # Null byte

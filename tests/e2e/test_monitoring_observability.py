@@ -65,7 +65,7 @@ async def test_service_health_metrics_collection():
                         if metric not in content:
                             missing_metrics.append(f"{service_name}: Missing essential metric '{metric}'")
                     
-                    print(f"✅ {service_name} metrics endpoint available with {len(content.split('\
+                    print(f" PASS:  {service_name} metrics endpoint available with {len(content.split('\
 '))} lines of metrics")
                     
             except Exception as e:
@@ -73,12 +73,12 @@ async def test_service_health_metrics_collection():
     
     # Report findings
     if missing_metrics:
-        print("🔍 COVERAGE GAP - Missing Metrics:")
+        print(" SEARCH:  COVERAGE GAP - Missing Metrics:")
         for gap in missing_metrics:
             print(f"  - {gap}")
     
     if metric_failures:
-        print("❌ Metric Collection Failures:")
+        print(" FAIL:  Metric Collection Failures:")
         for failure in metric_failures:
             print(f"  - {failure}")
     
@@ -154,12 +154,12 @@ async def test_log_aggregation_and_correlation():
     
     # Report findings
     if correlation_failures:
-        print("🔍 COVERAGE GAP - Log Correlation Issues:")
+        print(" SEARCH:  COVERAGE GAP - Log Correlation Issues:")
         for issue in correlation_failures:
             print(f"  - {issue}")
     
     if log_format_issues:
-        print("🔍 COVERAGE GAP - Log Format Issues:")
+        print(" SEARCH:  COVERAGE GAP - Log Format Issues:")
         for issue in log_format_issues:
             print(f"  - {issue}")
     
@@ -214,7 +214,7 @@ async def test_error_rate_monitoring():
                                         f"{service_name}: Error endpoint missing fields: {missing_fields}"
                                     )
                                 else:
-                                    print(f"✅ {service_name} has comprehensive error monitoring")
+                                    print(f" PASS:  {service_name} has comprehensive error monitoring")
                                 break
                     except Exception:
                         continue
@@ -226,14 +226,14 @@ async def test_error_rate_monitoring():
                 async with session.get(f"{base_url}/nonexistent-endpoint") as response:
                     # This should result in 404, but we want to see if it's tracked
                     if response.status == 404:
-                        print(f"✅ {service_name} properly returns 404 for non-existent endpoints")
+                        print(f" PASS:  {service_name} properly returns 404 for non-existent endpoints")
                 
             except Exception as e:
                 error_monitoring_gaps.append(f"{service_name}: Failed to test error monitoring - {str(e)}")
     
     # Report findings  
     if error_monitoring_gaps:
-        print("🔍 COVERAGE GAP - Error Monitoring Issues:")
+        print(" SEARCH:  COVERAGE GAP - Error Monitoring Issues:")
         for gap in error_monitoring_gaps:
             print(f"  - {gap}")
     
@@ -288,7 +288,7 @@ async def test_performance_degradation_detection():
                                     f"Performance endpoint missing metrics: {missing_metrics}"
                                 )
                             else:
-                                print("✅ Comprehensive performance monitoring available")
+                                print(" PASS:  Comprehensive performance monitoring available")
                             break
                 except Exception:
                     continue
@@ -310,14 +310,14 @@ async def test_performance_degradation_detection():
                 if not has_timing:
                     performance_gaps.append("Service doesn't include timing information in response headers")
                 else:
-                    print("✅ Service includes timing information in responses")
+                    print(" PASS:  Service includes timing information in responses")
                 
         except Exception as e:
             performance_gaps.append(f"Failed to test performance monitoring: {str(e)}")
     
     # Report findings
     if performance_gaps:
-        print("🔍 COVERAGE GAP - Performance Monitoring Issues:")
+        print(" SEARCH:  COVERAGE GAP - Performance Monitoring Issues:")
         for gap in performance_gaps:
             print(f"  - {gap}")
     

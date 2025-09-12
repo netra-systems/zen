@@ -79,7 +79,7 @@ class TestLowMonitoring:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Metrics endpoint available: {endpoint}")
+                        print(f"[U+2713] Metrics endpoint available: {endpoint}")
                         
                         # Check if it's Prometheus format
                         content_type = response.headers.get("content-type", "")
@@ -117,9 +117,9 @@ class TestLowMonitoring:
                                 pass
                                 
                     elif response.status_code in [401, 403]:
-                        print(f"• Metrics endpoint protected: {endpoint} (expected)")
+                        print(f"[U+2022] Metrics endpoint protected: {endpoint} (expected)")
                     elif response.status_code == 404:
-                        print(f"• Metrics endpoint not exposed: {endpoint}")
+                        print(f"[U+2022] Metrics endpoint not exposed: {endpoint}")
                         
                 except Exception as e:
                     metrics_results[endpoint] = {"error": str(e)[:100]}
@@ -162,7 +162,7 @@ class TestLowMonitoring:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Logging config endpoint available: {endpoint}")
+                        print(f"[U+2713] Logging config endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -181,9 +181,9 @@ class TestLowMonitoring:
                         except:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"• Logging config requires auth: {endpoint}")
+                        print(f"[U+2022] Logging config requires auth: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Logging config not implemented: {endpoint}")
+                        print(f"[U+2022] Logging config not implemented: {endpoint}")
                         
                 except Exception as e:
                     logging_results[endpoint] = {"error": str(e)[:100]}
@@ -205,7 +205,7 @@ class TestLowMonitoring:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Log viewing endpoint available: {endpoint}")
+                        print(f"[U+2713] Log viewing endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             if isinstance(data, list) and len(data) > 0:
@@ -451,7 +451,7 @@ class TestLowOperational:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Feature flags endpoint available: {endpoint}")
+                        print(f"[U+2713] Feature flags endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -478,9 +478,9 @@ class TestLowOperational:
                         except:
                             pass
                     elif response.status_code in [401, 403]:
-                        print(f"• Feature flags require auth: {endpoint}")
+                        print(f"[U+2022] Feature flags require auth: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Feature flags not implemented: {endpoint}")
+                        print(f"[U+2022] Feature flags not implemented: {endpoint}")
                         
                 except Exception as e:
                     flag_results[endpoint] = {"error": str(e)[:100]}
@@ -516,7 +516,7 @@ class TestLowOperational:
                     }
                     
                     if response.status_code in [200, 201]:
-                        print(f"✓ Feature flag evaluation active: {endpoint}")
+                        print(f"[U+2713] Feature flag evaluation active: {endpoint}")
                         try:
                             data = response.json()
                             if isinstance(data, dict) and len(data) > 0:
@@ -683,7 +683,7 @@ class TestLowOperational:
 def verify_test_duration(test_name: str, duration: float, minimum: float = 0.3):
     """Verify test took real time to execute"""
     assert duration >= minimum, \
-        f"🚨 FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
+        f" ALERT:  FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
         f"This test is not making real network calls!"
 
 

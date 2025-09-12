@@ -917,13 +917,13 @@ class TestBasicTriageResponseRevenueProtection(SSotAsyncTestCase):
         # Business impact assessment
         if revenue_protection_rate >= 0.9:
             impact_level = "LOW RISK"
-            print("✅ BUSINESS STATUS: Revenue protection systems working effectively")
+            print(" PASS:  BUSINESS STATUS: Revenue protection systems working effectively")
         elif revenue_protection_rate >= 0.7:
             impact_level = "MEDIUM RISK"
-            print("⚠️  BUSINESS WARNING: Some revenue protection gaps identified")
+            print(" WARNING: [U+FE0F]  BUSINESS WARNING: Some revenue protection gaps identified")
         else:
             impact_level = "HIGH RISK"
-            print("🚨 BUSINESS CRITICAL: Significant revenue protection failures")
+            print(" ALERT:  BUSINESS CRITICAL: Significant revenue protection failures")
         
         print(f"Business Impact Level: {impact_level}")
         
@@ -937,7 +937,7 @@ class TestBasicTriageResponseRevenueProtection(SSotAsyncTestCase):
         print(f"Revenue Protection Tests Failed: {len(failures)}")
         
         if failures:
-            print("🚨 CRITICAL FAILURES AFFECTING REVENUE:")
+            print(" ALERT:  CRITICAL FAILURES AFFECTING REVENUE:")
             for failure in failures[:5]:  # Show top 5 failures
                 print(f"  - {failure}")
         

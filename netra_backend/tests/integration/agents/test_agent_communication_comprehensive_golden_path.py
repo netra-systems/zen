@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Protects $500K+ ARR by ensuring agents work together for optimal results
 
 Critical Golden Path Scenarios Tested:
-1. Agent-to-agent data passing: Triage → Data Helper → Optimization → Reporting
+1. Agent-to-agent data passing: Triage  ->  Data Helper  ->  Optimization  ->  Reporting
 2. Multi-agent workflow coordination: Complex agent sequences with state sharing
 3. WebSocket event coordination: Cross-agent event emission and user isolation
 4. State persistence across agents: Shared state management for workflow continuity
@@ -152,7 +152,7 @@ class TestAgentCommunicationComprehensiveGoldenPath(SSotAsyncTestCase):
         Test the golden path agent-to-agent data passing workflow.
         
         BVJ: Validates core agent collaboration (foundation of complex AI workflows)
-        Critical Path: Triage → Data Helper → Optimization → Reporting (data flows between agents)
+        Critical Path: Triage  ->  Data Helper  ->  Optimization  ->  Reporting (data flows between agents)
         """
         # Arrange: Create realistic agent workflow with data passing
         # Mock different agents that pass data to each other
@@ -371,7 +371,7 @@ class TestAgentCommunicationComprehensiveGoldenPath(SSotAsyncTestCase):
         Test multi-agent workflow coordination using real SSOT components.
         
         BVJ: System integration - ensures agent orchestration components work together
-        Critical Path: SupervisorAgent → WorkflowOrchestrator → ExecutionEngine → Agent results
+        Critical Path: SupervisorAgent  ->  WorkflowOrchestrator  ->  ExecutionEngine  ->  Agent results
         """
         # Arrange: Create real SupervisorAgent with mocked dependencies
         supervisor_agent = SupervisorAgent(
@@ -473,7 +473,7 @@ class TestAgentCommunicationComprehensiveGoldenPath(SSotAsyncTestCase):
         Test WebSocket event coordination across multiple agents in a workflow.
         
         BVJ: User experience - real-time visibility into multi-agent workflows
-        Critical Path: Agent events → WebSocket coordination → User-isolated delivery
+        Critical Path: Agent events  ->  WebSocket coordination  ->  User-isolated delivery
         """
         # Arrange: Create SupervisorAgent with WebSocket event tracking
         supervisor_agent = SupervisorAgent(
@@ -609,7 +609,7 @@ class TestAgentCommunicationComprehensiveGoldenPath(SSotAsyncTestCase):
         Test state persistence and sharing across agent communication.
         
         BVJ: System reliability - enables recovery and resumption of complex workflows
-        Critical Path: Agent state → Shared persistence → Cross-agent access → Workflow continuity
+        Critical Path: Agent state  ->  Shared persistence  ->  Cross-agent access  ->  Workflow continuity
         """
         # Arrange: Create agent workflow with persistent state sharing
         shared_workflow_state = {
@@ -845,7 +845,7 @@ class TestAgentCommunicationComprehensiveGoldenPath(SSotAsyncTestCase):
         Test error handling and recovery in agent communication chains.
         
         BVJ: System reliability - graceful degradation when agents in chains fail
-        Critical Path: Agent failure → Error propagation → Recovery strategy → Workflow continuation
+        Critical Path: Agent failure  ->  Error propagation  ->  Recovery strategy  ->  Workflow continuation
         """
         # Arrange: Create agent chain with planned failure and recovery
         workflow_state = {

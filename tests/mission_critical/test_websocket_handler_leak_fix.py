@@ -199,11 +199,11 @@
                                                                                                             # REMOVED_SYNTAX_ERROR: assert first_agent_handler is second_agent_handler, \
                                                                                                             # REMOVED_SYNTAX_ERROR: "New AgentMessageHandler created instead of reusing existing"
 
-                                                                                                            # REMOVED_SYNTAX_ERROR: print("✓ Handler reuse test passed!")
+                                                                                                            # REMOVED_SYNTAX_ERROR: print("[U+2713] Handler reuse test passed!")
 
 
                                                                                                             # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                                                                                                                 # REMOVED_SYNTAX_ERROR: asyncio.run(test_no_handler_accumulation())
                                                                                                                 # REMOVED_SYNTAX_ERROR: asyncio.run(test_handler_reuse())
                                                                                                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                                                                                                # REMOVED_SYNTAX_ERROR: ✓ All WebSocket handler leak tests passed!")
+                                                                                                                # REMOVED_SYNTAX_ERROR: [U+2713] All WebSocket handler leak tests passed!")

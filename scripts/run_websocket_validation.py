@@ -221,7 +221,7 @@ class WebSocketValidationRunner:
                 if service in required_services and not health.is_healthy:
                     raise RuntimeError(f"Service {service} is not healthy: {health.status}")
             
-            logger.info("✓ All Docker services are healthy and ready")
+            logger.info("[U+2713] All Docker services are healthy and ready")
         
         # Validate environment configuration
         env = IsolatedEnvironment()
@@ -237,7 +237,7 @@ class WebSocketValidationRunner:
         # Wait for WebSocket service to be ready
         await ensure_websocket_service_ready(max_wait_seconds=60)
         
-        logger.info("✓ Environment preparation completed")
+        logger.info("[U+2713] Environment preparation completed")
     
     async def _validate_services(self):
         """Validate that required services are operational."""
@@ -261,7 +261,7 @@ class WebSocketValidationRunner:
             if not backend_healthy:
                 raise RuntimeError("Backend service is not healthy")
             
-            logger.info("✓ All services validated successfully")
+            logger.info("[U+2713] All services validated successfully")
             
         except Exception as e:
             logger.error(f"Service validation failed: {e}")
@@ -321,9 +321,9 @@ class WebSocketValidationRunner:
             
             # Log results summary
             if result.returncode == 0:
-                logger.info(f"✓ Test suite PASSED in {execution_time:.1f} seconds")
+                logger.info(f"[U+2713] Test suite PASSED in {execution_time:.1f} seconds")
             else:
-                logger.error(f"✗ Test suite FAILED with return code {result.returncode}")
+                logger.error(f"[U+2717] Test suite FAILED with return code {result.returncode}")
                 logger.error("STDOUT:", result.stdout[-2000:])  # Last 2000 chars
                 logger.error("STDERR:", result.stderr[-2000:])  # Last 2000 chars
             
@@ -368,7 +368,7 @@ class WebSocketValidationRunner:
         if not self.test_results["passed"]:
             await self._analyze_failures()
         
-        logger.info("✓ Results analysis completed")
+        logger.info("[U+2713] Results analysis completed")
     
     def _parse_pytest_output(self, output: str):
         """Parse pytest output to extract test metrics."""
@@ -490,7 +490,7 @@ class WebSocketValidationRunner:
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2, default=str)
         
-        logger.info(f"✓ Final report generated: {report_path}")
+        logger.info(f"[U+2713] Final report generated: {report_path}")
         
         return report
     
@@ -551,41 +551,41 @@ class WebSocketValidationRunner:
         
         # Check if tests passed
         if not self.test_results.get("passed", False):
-            recommendations.append("🚨 CRITICAL: Fix failing tests before deployment")
+            recommendations.append(" ALERT:  CRITICAL: Fix failing tests before deployment")
             
             # Analyze failure categories
             failure_analysis = self.test_results.get("failure_analysis", {})
             
             if failure_analysis.get("docker_issues"):
-                recommendations.append("🐳 Docker Issues: Verify Docker setup and service health")
+                recommendations.append("[U+1F433] Docker Issues: Verify Docker setup and service health")
             
             if failure_analysis.get("websocket_connection"):
-                recommendations.append("🔌 WebSocket Connection: Check network connectivity and service availability")
+                recommendations.append("[U+1F50C] WebSocket Connection: Check network connectivity and service availability")
             
             if failure_analysis.get("event_validation"):
-                recommendations.append("📨 Event Validation: Review WebSocket event generation and validation logic")
+                recommendations.append("[U+1F4E8] Event Validation: Review WebSocket event generation and validation logic")
             
             if failure_analysis.get("performance_issues"):
-                recommendations.append("⚡ Performance Issues: Optimize system performance and review latency bottlenecks")
+                recommendations.append(" LIGHTNING:  Performance Issues: Optimize system performance and review latency bottlenecks")
             
             if failure_analysis.get("security_violations"):
-                recommendations.append("🛡️ Security Violations: URGENT - Fix user isolation issues immediately")
+                recommendations.append("[U+1F6E1][U+FE0F] Security Violations: URGENT - Fix user isolation issues immediately")
             
             if failure_analysis.get("timeout_issues"):
-                recommendations.append("⏱️ Timeout Issues: Investigate slow operations and increase timeouts if needed")
+                recommendations.append("[U+23F1][U+FE0F] Timeout Issues: Investigate slow operations and increase timeouts if needed")
         
         # Performance recommendations
         monitoring_metrics = self.test_results.get("monitoring_metrics", {})
         avg_latency = monitoring_metrics.get("recent_performance", {}).get("avg_latency_ms", 0)
         
         if avg_latency > 50:
-            recommendations.append("💡 Consider performance optimization - latency above 50ms")
+            recommendations.append(" IDEA:  Consider performance optimization - latency above 50ms")
         
         # General recommendations
         if not recommendations:
-            recommendations.append("✅ All validations passed - system ready for deployment")
-            recommendations.append("💡 Continue monitoring performance in production")
-            recommendations.append("🔄 Schedule regular validation runs for ongoing quality assurance")
+            recommendations.append(" PASS:  All validations passed - system ready for deployment")
+            recommendations.append(" IDEA:  Continue monitoring performance in production")
+            recommendations.append(" CYCLE:  Schedule regular validation runs for ongoing quality assurance")
         
         return recommendations
     
@@ -599,12 +599,12 @@ class WebSocketValidationRunner:
         if overall_passed and self.test_results.get("passed", False):
             self.validation_passed = True
             decision_reason = "All validation checks passed successfully"
-            logger.info("✅ VALIDATION APPROVED - Deployment authorized")
+            logger.info(" PASS:  VALIDATION APPROVED - Deployment authorized")
         else:
             self.validation_passed = False
             violations = compliance.get("violations", [])
             decision_reason = f"Validation failed due to: {'; '.join(violations)}"
-            logger.error("❌ VALIDATION REJECTED - Deployment blocked")
+            logger.error(" FAIL:  VALIDATION REJECTED - Deployment blocked")
         
         # Update report with decision
         report["deployment_decision"]["approved"] = self.validation_passed

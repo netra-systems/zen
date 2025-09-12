@@ -5,7 +5,7 @@ This module is now a compatibility wrapper that imports from the canonical sourc
 All new code should import directly from app.schemas.auth_types.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Eliminate $5K MRR loss from auth inconsistencies 
 - Value Impact: 5-10% conversion improvement
 - Revenue Impact: +$5K MRR recovered

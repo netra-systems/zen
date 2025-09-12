@@ -17,7 +17,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 def test_missing_staging_config_scenario():
     """Test the actual scenario from GitHub issue #259 - missing staging config."""
-    print("🎯 Testing missing staging config scenario (original issue #259)...")
+    print(" TARGET:  Testing missing staging config scenario (original issue #259)...")
     
     # Simulate CI/test environment where staging.env is NOT available
     # This is the exact scenario that was failing before the fix
@@ -62,23 +62,23 @@ def test_missing_staging_config_scenario():
                 }
                 expected_prefix = expected_prefixes.get(var, '')
                 if expected_prefix and not value.startswith(expected_prefix):
-                    print(f"  ⚠️  {var} has value but wrong pattern: {value[:30]}...")
+                    print(f"   WARNING: [U+FE0F]  {var} has value but wrong pattern: {value[:30]}...")
         
         print(f"  Available variables: {len(available_vars)}/{len(required_vars)}")
         for var in available_vars:
-            print(f"    ✅ {var}")
+            print(f"     PASS:  {var}")
         
         if missing_vars:
             print(f"  Missing variables: {missing_vars}")
             return False
         else:
-            print("  ✅ All required staging test defaults are available")
+            print("   PASS:  All required staging test defaults are available")
             return True
 
 
 def test_production_config_scenario():
     """Test production test defaults work in similar scenario."""
-    print("🧪 Testing production config scenario...")
+    print("[U+1F9EA] Testing production config scenario...")
     
     with patch('pathlib.Path.exists') as mock_exists:
         # Mock that no .env files exist
@@ -108,14 +108,14 @@ def test_production_config_scenario():
         
         print(f"  Available production variables: {len(available_vars)}/{len(production_vars)}")
         for var in available_vars:
-            print(f"    ✅ {var}")
+            print(f"     PASS:  {var}")
         
         return len(available_vars) == len(production_vars)
 
 
 def test_non_test_context_security():
     """Test that test defaults don't leak outside test context."""
-    print("🔒 Testing non-test context security...")
+    print("[U+1F512] Testing non-test context security...")
     
     with patch('pathlib.Path.exists') as mock_exists:
         # Mock that no .env files exist
@@ -154,19 +154,19 @@ def test_non_test_context_security():
         
         print(f"  Properly isolated: {len(secure_vars_list)}/{len(secure_vars)}")
         for var in secure_vars_list:
-            print(f"    ✅ {var}")
+            print(f"     PASS:  {var}")
         
         if leaked_vars:
-            print(f"  ⚠️  Security leaks: {leaked_vars}")
+            print(f"   WARNING: [U+FE0F]  Security leaks: {leaked_vars}")
             return False
         else:
-            print("  ✅ All variables properly isolated")
+            print("   PASS:  All variables properly isolated")
             return True
 
 
 def test_backwards_compatibility():
     """Test that the fix doesn't break existing functionality."""
-    print("🔄 Testing backwards compatibility...")
+    print(" CYCLE:  Testing backwards compatibility...")
     
     try:
         env = IsolatedEnvironment()
@@ -179,21 +179,21 @@ def test_backwards_compatibility():
         value = env.get('TEST_VAR')
         
         if value == 'test_value':
-            print("  ✅ Basic set/get functionality works")
-            print("  ✅ New enable_isolation_mode() method works")
+            print("   PASS:  Basic set/get functionality works")
+            print("   PASS:  New enable_isolation_mode() method works")
             return True
         else:
-            print(f"  ❌ Basic functionality broken: expected 'test_value', got '{value}'")
+            print(f"   FAIL:  Basic functionality broken: expected 'test_value', got '{value}'")
             return False
             
     except Exception as e:
-        print(f"  ❌ Exception in compatibility test: {e}")
+        print(f"   FAIL:  Exception in compatibility test: {e}")
         return False
 
 
 def test_no_regression_in_staging_with_config():
     """Test that when staging.env IS available, it still takes precedence."""
-    print("🏗️  Testing no regression when staging.env is available...")
+    print("[U+1F3D7][U+FE0F]  Testing no regression when staging.env is available...")
     
     # Normal scenario - staging.env file exists and should be loaded
     env = IsolatedEnvironment()
@@ -211,14 +211,14 @@ def test_no_regression_in_staging_with_config():
     expected_staging_value = "7SVLKvh7mJNeF6njiRJMoZpUWLya3NfsvJfRHPc0-cYI7Oh80oXOUHuBNuMjUI4ghNTHFH0H7s9vf3S835ET5A"
     
     if jwt_staging == expected_staging_value:
-        print("  ✅ Staging.env value takes precedence over test defaults")
+        print("   PASS:  Staging.env value takes precedence over test defaults")
         return True
     elif jwt_staging and jwt_staging.startswith('test_jwt_secret_staging_'):
-        print("  ⚠️  Test default returned instead of staging.env value")
+        print("   WARNING: [U+FE0F]  Test default returned instead of staging.env value")
         print("      This could indicate a configuration precedence issue")
         return False
     else:
-        print(f"  ❌ Unexpected value: {jwt_staging[:50] if jwt_staging else None}...")
+        print(f"   FAIL:  Unexpected value: {jwt_staging[:50] if jwt_staging else None}...")
         return False
 
 
@@ -248,11 +248,11 @@ def main():
         try:
             if test_func():
                 passed += 1
-                status = "✅ PASS"
+                status = " PASS:  PASS"
             else:
-                status = "❌ FAIL"
+                status = " FAIL:  FAIL"
         except Exception as e:
-            status = f"❌ ERROR: {e}"
+            status = f" FAIL:  ERROR: {e}"
         
         print(f"  Status: {status}")
     
@@ -260,15 +260,15 @@ def main():
     print(f"VALIDATION SUMMARY: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 ALL TESTS PASSED - GitHub issue #259 fix is working correctly!")
-        print("✅ Original issue resolved (staging E2E tests work without config)")
-        print("✅ Security isolation maintained (no test defaults in production)")
-        print("✅ No breaking changes introduced")
-        print("✅ Backwards compatibility preserved")
-        print("✅ Configuration precedence maintained")
+        print(" CELEBRATION:  ALL TESTS PASSED - GitHub issue #259 fix is working correctly!")
+        print(" PASS:  Original issue resolved (staging E2E tests work without config)")
+        print(" PASS:  Security isolation maintained (no test defaults in production)")
+        print(" PASS:  No breaking changes introduced")
+        print(" PASS:  Backwards compatibility preserved")
+        print(" PASS:  Configuration precedence maintained")
         return True
     else:
-        print("⚠️  SOME TESTS FAILED - Review failures above")
+        print(" WARNING: [U+FE0F]  SOME TESTS FAILED - Review failures above")
         return False
 
 

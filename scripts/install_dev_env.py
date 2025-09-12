@@ -2,7 +2,7 @@
 """
 Netra AI Platform - Development Environment Installer
 Orchestrates focused installer modules following 450-line/8-function limits.
-CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
+CRITICAL: All functions MUST be  <= 8 lines, file  <= 300 lines.
 """
 
 import platform
@@ -131,7 +131,7 @@ class DevEnvironmentInstaller:
         if self.all_messages:
             self.print_success("Installation completed with:")
             for message in self.all_messages[-5:]:  # Show last 5 messages
-                self.print_info(f"  • {message}")
+                self.print_info(f"  [U+2022] {message}")
         
         self.show_warnings_and_errors()
 
@@ -140,12 +140,12 @@ class DevEnvironmentInstaller:
         if self.all_warnings:
             print(f"\n{Colors.WARNING}Warnings:{Colors.ENDC}")
             for warning in self.all_warnings[-3:]:  # Show last 3
-                self.print_info(f"  • {warning}")
+                self.print_info(f"  [U+2022] {warning}")
         
         if self.all_errors:
             print(f"\n{Colors.FAIL}Errors:{Colors.ENDC}")
             for error in self.all_errors[-3:]:  # Show last 3
-                self.print_info(f"  • {error}")
+                self.print_info(f"  [U+2022] {error}")
 
     def print_next_steps(self) -> None:
         """Print next steps for user"""
@@ -174,9 +174,9 @@ class DevEnvironmentInstaller:
         print("Please address the errors above and try again.")
         print("For help, consult the README.md or CLAUDE.md files.")
         print("\nAlternative commands:")
-        print("  • Quick test: python test_runner.py --mode quick")
-        print("  • Backend only: python run_server.py")
-        print("  • Frontend only: cd frontend && npm run dev")
+        print("  [U+2022] Quick test: python test_runner.py --mode quick")
+        print("  [U+2022] Backend only: python run_server.py")
+        print("  [U+2022] Frontend only: cd frontend && npm run dev")
 
     def run(self) -> bool:
         """Run complete installation orchestration"""

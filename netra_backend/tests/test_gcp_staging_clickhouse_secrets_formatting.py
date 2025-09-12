@@ -80,7 +80,7 @@ class TestClickHouseSecretFormattingIssues:
                     'url validation failed'
                 ]), f"Expected control character validation error but got: {e}"
                 
-                print(f"✅ Correctly detected ClickHouse host newline character: {e}")
+                print(f" PASS:  Correctly detected ClickHouse host newline character: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -130,7 +130,7 @@ class TestClickHouseSecretFormattingIssues:
                         'connection refused'
                     ]), f"Expected password formatting error for {repr(malformed_password)} but got: {e}"
                     
-                    print(f"✅ Correctly detected password formatting issue for {repr(malformed_password)}: {e}")
+                    print(f" PASS:  Correctly detected password formatting issue for {repr(malformed_password)}: {e}")
     
     @pytest.mark.staging
     def test_clickhouse_url_control_character_validation(self):
@@ -181,7 +181,7 @@ class TestClickHouseSecretFormattingIssues:
                         'url validation'
                     ]), f"Expected control character error for {repr(control_char)} but got: {e}"
                     
-                    print(f"✅ Control character validation detected {repr(control_char)}: {e}")
+                    print(f" PASS:  Control character validation detected {repr(control_char)}: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -222,7 +222,7 @@ class TestClickHouseSecretFormattingIssues:
                     'url validation'
                 ]), f"Expected secret formatting error but got: {e}"
                 
-                print(f"✅ Multiple secret formatting issues correctly detected: {e}")
+                print(f" PASS:  Multiple secret formatting issues correctly detected: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -270,11 +270,11 @@ class TestClickHouseSecretFormattingIssues:
                             # Check for leading/trailing whitespace
                             assert value == value.strip(), f"Config {key} has untrimmed whitespace: {repr(value)}"
                     
-                    print("✅ All ClickHouse config values properly trimmed")
+                    print(" PASS:  All ClickHouse config values properly trimmed")
                     
                 except AssertionError as e:
                     # This is expected - secret formatting is broken
-                    print(f"✅ Correctly detected GCP secret formatting issues: {e}")
+                    print(f" PASS:  Correctly detected GCP secret formatting issues: {e}")
                     
                 except Exception as e:
                     # Other configuration errors are also expected
@@ -286,7 +286,7 @@ class TestClickHouseSecretFormattingIssues:
                         'format'
                     ]), f"Expected ClickHouse configuration error but got: {e}"
                     
-                    print(f"✅ ClickHouse configuration failed due to formatting: {e}")
+                    print(f" PASS:  ClickHouse configuration failed due to formatting: {e}")
     
     @pytest.mark.staging
     def test_clickhouse_database_construction_with_malformed_secrets(self):
@@ -362,7 +362,7 @@ class TestClickHouseSecretFormattingIssues:
                             # Check for proper trimming
                             assert value == value.strip(), f"ClickHouse config not properly trimmed in scenario {scenario['name']}: {repr(value)}"
                     
-                    print(f"✅ ClickHouse construction properly sanitized secrets for scenario: {scenario['name']}")
+                    print(f" PASS:  ClickHouse construction properly sanitized secrets for scenario: {scenario['name']}")
                     
                 except Exception as e:
                     error_msg = str(e).lower()
@@ -374,7 +374,7 @@ class TestClickHouseSecretFormattingIssues:
                         'format'
                     ]), f"Expected formatting validation error for scenario {scenario['name']} but got: {e}"
                     
-                    print(f"✅ ClickHouse construction correctly rejected malformed secrets for scenario {scenario['name']}: {e}")
+                    print(f" PASS:  ClickHouse construction correctly rejected malformed secrets for scenario {scenario['name']}: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -430,7 +430,7 @@ class TestClickHouseSecretFormattingIssues:
                         'invalid'
                     ]), f"Expected staging validation error but got: {e}"
                     
-                    print(f"✅ Staging environment correctly enforced strict ClickHouse validation: {e}")
+                    print(f" PASS:  Staging environment correctly enforced strict ClickHouse validation: {e}")
 
 
 if __name__ == "__main__":

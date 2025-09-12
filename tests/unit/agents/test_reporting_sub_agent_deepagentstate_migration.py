@@ -1,5 +1,5 @@
 """
-Unit Tests for ReportingSubAgent DeepAgentState → UserExecutionContext Migration - Issue #354
+Unit Tests for ReportingSubAgent DeepAgentState  ->  UserExecutionContext Migration - Issue #354
 
 CRITICAL SECURITY VULNERABILITY: P0 vulnerability in ReportingSubAgent.execute_modern()
 using DeepAgentState parameter which enables cross-user data contamination.
@@ -165,7 +165,7 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
             except TypeError as e:
                 if "UserExecutionContext" in str(e):
                     pytest.fail(
-                        f"🚨 MIGRATION INCOMPLETE: execute_modern() should accept UserExecutionContext. "
+                        f" ALERT:  MIGRATION INCOMPLETE: execute_modern() should accept UserExecutionContext. "
                         f"Error: {e}"
                     )
                 else:
@@ -228,7 +228,7 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
         # AFTER migration: This should find no imports (test passes)
         if deepagentstate_imports:
             assert False, (
-                f"🚨 SECURITY RISK: DeepAgentState imports detected in ReportingSubAgent: "
+                f" ALERT:  SECURITY RISK: DeepAgentState imports detected in ReportingSubAgent: "
                 f"{deepagentstate_imports}. These imports create cross-user contamination risks. "
                 f"Migration to UserExecutionContext required."
             )
@@ -264,7 +264,7 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
         # AFTER migration: Should find no violations (test passes)
         if security_violations:
             assert False, (
-                f"🚨 SECURITY VIOLATIONS IN METHOD SIGNATURE: {security_violations}. "
+                f" ALERT:  SECURITY VIOLATIONS IN METHOD SIGNATURE: {security_violations}. "
                 f"execute_modern() should not accept DeepAgentState parameters. "
                 f"Migration to UserExecutionContext required."
             )
@@ -334,7 +334,7 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
                     pass
                 elif "UserExecutionContext" in str(e):
                     pytest.fail(
-                        f"🚨 MIGRATION INCOMPLETE: Should accept UserExecutionContext. Error: {e}"
+                        f" ALERT:  MIGRATION INCOMPLETE: Should accept UserExecutionContext. Error: {e}"
                     )
                 else:
                     raise
@@ -379,6 +379,6 @@ class TestReportingSubAgentDeepAgentStateMigration(SSotAsyncTestCase):
         # AFTER migration: Should find no violations (test passes)
         if ssot_violations:
             assert False, (
-                f"🚨 SSOT VIOLATIONS DETECTED: {ssot_violations}. "
+                f" ALERT:  SSOT VIOLATIONS DETECTED: {ssot_violations}. "
                 f"All methods should use consistent UserExecutionContext parameters only."
             )

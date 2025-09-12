@@ -87,7 +87,7 @@ class BusinessValueTestRunner:
             categories = list(TEST_CATEGORIES.keys())
             
         print(f"\n{'='*80}")
-        print(f"🚀 NETRA BUSINESS VALUE INTEGRATION TEST SUITE")
+        print(f"[U+1F680] NETRA BUSINESS VALUE INTEGRATION TEST SUITE")
         print(f"{'='*80}")
         print(f"Testing Categories: {', '.join(categories)}")
         print(f"Test Environment: Integration (No Docker Required)")
@@ -99,10 +99,10 @@ class BusinessValueTestRunner:
         # Run tests for each category
         for category in categories:
             if category not in TEST_CATEGORIES:
-                print(f"⚠️  Unknown category: {category}")
+                print(f" WARNING: [U+FE0F]  Unknown category: {category}")
                 continue
                 
-            print(f"\n📊 Running {TEST_CATEGORIES[category]['description']}...")
+            print(f"\n CHART:  Running {TEST_CATEGORIES[category]['description']}...")
             category_result = await self._run_category_tests(category)
             self.results["categories"][category] = category_result
             
@@ -222,12 +222,12 @@ class BusinessValueTestRunner:
         """Print comprehensive test results."""
         
         print(f"\n{'='*80}")
-        print(f"📈 BUSINESS VALUE TEST RESULTS")
+        print(f"[U+1F4C8] BUSINESS VALUE TEST RESULTS")
         print(f"{'='*80}")
         
         # Category results
         for category, result in self.results["categories"].items():
-            status_emoji = "✅" if result.get("status") == "passed" else "❌"
+            status_emoji = " PASS: " if result.get("status") == "passed" else " FAIL: "
             description = TEST_CATEGORIES[category]["description"]
             
             print(f"{status_emoji} {description.title()}")
@@ -241,32 +241,32 @@ class BusinessValueTestRunner:
         
         # Summary
         summary = self.results["summary"]
-        status_emoji = "🎉" if summary["overall_status"] == "PASSED" else "💥"
+        status_emoji = " CELEBRATION: " if summary["overall_status"] == "PASSED" else "[U+1F4A5]"
         
         print(f"{status_emoji} OVERALL RESULT: {summary['overall_status']}")
         print(f"")
-        print(f"📊 Test Execution Summary:")
+        print(f" CHART:  Test Execution Summary:")
         print(f"   Categories: {summary['categories_passed']}/{summary['categories_run']} passed")
         print(f"   Tests: {summary['total_passed']}/{summary['total_tests']} passed")
         print(f"   Success Rate: {summary['success_rate']:.1f}%")
         print(f"   Total Time: {summary['total_execution_time']:.2f}s")
         
-        print(f"\n💼 Business Value Metrics:")
+        print(f"\n[U+1F4BC] Business Value Metrics:")
         metrics = self.results["business_metrics"]
         print(f"   Customer Segments Validated: {metrics['customer_segments_validated']}/4")
         print(f"   Business Scenarios Tested: {metrics['business_scenarios_tested']}")
         print(f"   Value Delivery Confidence: {metrics['value_delivery_confidence']:.1f}%")
         print(f"   Platform Reliability Score: {metrics['platform_reliability_score']:.1f}%")
-        print(f"   Revenue Protection: {'✅ VALIDATED' if metrics['revenue_protection_validated'] else '❌ AT RISK'}")
+        print(f"   Revenue Protection: {' PASS:  VALIDATED' if metrics['revenue_protection_validated'] else ' FAIL:  AT RISK'}")
         
         print(f"\n{'='*80}")
         
         if summary["overall_status"] == "PASSED":
-            print(f"🚀 Business value delivery VALIDATED across all customer segments!")
-            print(f"💰 Platform ready for revenue generation and customer success.")
+            print(f"[U+1F680] Business value delivery VALIDATED across all customer segments!")
+            print(f"[U+1F4B0] Platform ready for revenue generation and customer success.")
         else:
-            print(f"⚠️  Business value gaps detected. Address failures before production.")
-            print(f"🔧 Review failed tests and ensure value delivery meets customer expectations.")
+            print(f" WARNING: [U+FE0F]  Business value gaps detected. Address failures before production.")
+            print(f"[U+1F527] Review failed tests and ensure value delivery meets customer expectations.")
             
         print(f"{'='*80}\n")
     
@@ -290,7 +290,7 @@ class BusinessValueTestRunner:
         with open(output_path, 'w') as f:
             json.dump(self.results, f, indent=2)
             
-        print(f"📄 Results saved to: {output_path}")
+        print(f"[U+1F4C4] Results saved to: {output_path}")
 
 
 async def main():

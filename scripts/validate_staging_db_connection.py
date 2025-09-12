@@ -156,14 +156,14 @@ class StagingDatabaseValidator:
             
             # Test the connection
             version = await conn.fetchval('SELECT version()')
-            logger.info(f"✅ Connection successful with asyncpg")
+            logger.info(f" PASS:  Connection successful with asyncpg")
             logger.info(f"   PostgreSQL version: {version[:50]}...")
             
             await conn.close()
             return True
             
         except Exception as e:
-            logger.error(f"❌ asyncpg connection failed: {e}")
+            logger.error(f" FAIL:  asyncpg connection failed: {e}")
             return False
     
     async def test_connection_with_sqlalchemy(self, url: str) -> bool:
@@ -195,7 +195,7 @@ class StagingDatabaseValidator:
             async with engine.begin() as conn:
                 result = await conn.execute(text("SELECT current_user, current_database()"))
                 row = result.fetchone()
-                logger.info(f"✅ Connection successful with SQLAlchemy")
+                logger.info(f" PASS:  Connection successful with SQLAlchemy")
                 logger.info(f"   Current user: {row[0]}")
                 logger.info(f"   Current database: {row[1]}")
             
@@ -203,7 +203,7 @@ class StagingDatabaseValidator:
             return True
             
         except Exception as e:
-            logger.error(f"❌ SQLAlchemy connection failed: {e}")
+            logger.error(f" FAIL:  SQLAlchemy connection failed: {e}")
             return False
     
     def validate_and_fix_secret(self) -> Tuple[bool, Optional[str]]:
@@ -217,7 +217,7 @@ class StagingDatabaseValidator:
         database_url = self.fetch_secret_from_gcp("database-url-staging")
         
         if not database_url:
-            logger.error("   ❌ Failed to fetch database-url-staging secret")
+            logger.error("    FAIL:  Failed to fetch database-url-staging secret")
             logger.info("\n   Creating new secret...")
             
             # Get the password from a different secret or use a known value
@@ -225,13 +225,13 @@ class StagingDatabaseValidator:
             if not password:
                 # Use the password from the debug script (this should be replaced with the actual password)
                 password = "qNdlZRHu(Mlc#)6K8LHm-lYi[7sc}25K"
-                logger.warning("   ⚠️ Using hardcoded password - this should be updated!")
+                logger.warning("    WARNING: [U+FE0F] Using hardcoded password - this should be updated!")
             
             database_url = self.build_correct_database_url("postgres", password)
             logger.info(f"   Generated URL: {database_url[:50]}...")
             
         else:
-            logger.info(f"   ✅ Retrieved database URL from secret")
+            logger.info(f"    PASS:  Retrieved database URL from secret")
             
             # Parse and validate the URL
             parsed = self.parse_database_url(database_url)
@@ -254,7 +254,7 @@ class StagingDatabaseValidator:
                 issues.append(f"Unexpected username: {parsed.get('username')}")
             
             if issues:
-                logger.warning(f"\n   ⚠️ Issues found: {', '.join(issues)}")
+                logger.warning(f"\n    WARNING: [U+FE0F] Issues found: {', '.join(issues)}")
                 
                 # Try to fix the URL
                 logger.info("\n   Attempting to fix the URL...")
@@ -274,7 +274,7 @@ class StagingDatabaseValidator:
         success, database_url = self.validate_and_fix_secret()
         
         if not success or not database_url:
-            logger.error("\n❌ Failed to get valid database URL")
+            logger.error("\n FAIL:  Failed to get valid database URL")
             return False
         
         # Test the connection
@@ -292,11 +292,11 @@ class StagingDatabaseValidator:
         logger.info("\n" + "="*60)
         logger.info("VALIDATION SUMMARY")
         logger.info("="*60)
-        logger.info(f"asyncpg connection: {'✅ SUCCESS' if asyncpg_success else '❌ FAILED'}")
-        logger.info(f"SQLAlchemy connection: {'✅ SUCCESS' if sqlalchemy_success else '❌ FAILED'}")
+        logger.info(f"asyncpg connection: {' PASS:  SUCCESS' if asyncpg_success else ' FAIL:  FAILED'}")
+        logger.info(f"SQLAlchemy connection: {' PASS:  SUCCESS' if sqlalchemy_success else ' FAIL:  FAILED'}")
         
         if asyncpg_success and sqlalchemy_success:
-            logger.info("\n✅ Database connection is working correctly!")
+            logger.info("\n PASS:  Database connection is working correctly!")
             logger.info("\nNext steps:")
             logger.info("1. Update the database-url-staging secret if needed")
             logger.info("2. Redeploy services to use the correct credentials")
@@ -309,7 +309,7 @@ class StagingDatabaseValidator:
             logger.info(f"\necho '{database_url}' | gcloud secrets versions add database-url-staging --data-file=- --project={self.project_id}")
             
         else:
-            logger.error("\n❌ Database connection validation failed!")
+            logger.error("\n FAIL:  Database connection validation failed!")
             logger.error("\nTroubleshooting steps:")
             logger.error("1. Check if the postgres password is correct")
             logger.error("2. Verify Cloud SQL instance is running")

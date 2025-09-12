@@ -129,15 +129,15 @@ def test_business_value_calculation():
         
         # Calculate MRR at risk for P0 issue
         mrr_at_risk = calculator.calculate_mrr_at_risk(IssuePriority.P0, 24.0)
-        print(f"   • P0 Issue MRR at Risk (24h): ${mrr_at_risk:,.0f}")
+        print(f"   [U+2022] P0 Issue MRR at Risk (24h): ${mrr_at_risk:,.0f}")
         
         # Calculate remediation cost
         remediation_cost = calculator.calculate_remediation_cost(IssuePriority.P0, 8.0)
-        print(f"   • Remediation Cost (8h): ${remediation_cost:,.0f}")
+        print(f"   [U+2022] Remediation Cost (8h): ${remediation_cost:,.0f}")
         
         # Calculate ROI
         roi = calculator.calculate_roi(mrr_at_risk, remediation_cost)
-        print(f"   • ROI: {roi['roi_percentage']:.1f}% (${roi['roi_ratio']:.1f} value per $1 spent)")
+        print(f"   [U+2022] ROI: {roi['roi_percentage']:.1f}% (${roi['roi_ratio']:.1f} value per $1 spent)")
         
         print(f"   Business value calculation working")
         

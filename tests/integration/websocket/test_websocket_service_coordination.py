@@ -779,7 +779,7 @@ class TestWebSocketServiceCoordination:
         monitor = WebSocketServiceCoordinationMonitor()
         tester = WebSocketServiceCoordinationTester(monitor)
         
-        logger.info("🚀 Starting WebSocket service discovery coordination test")
+        logger.info("[U+1F680] Starting WebSocket service discovery coordination test")
         
         discovery_config = {
             "services": ["websocket_manager", "websocket_notifier"],
@@ -819,7 +819,7 @@ class TestWebSocketServiceCoordination:
         assert effectiveness["mean_effectiveness"] >= 0.7, \
             f"Service coordination effectiveness too low: {effectiveness['mean_effectiveness']:.1f}"
         
-        logger.info("✅ WebSocket service discovery coordination VALIDATED")
+        logger.info(" PASS:  WebSocket service discovery coordination VALIDATED")
         logger.info(f"  Discovery latency: {result['discovery_latency_ms']:.1f}ms")
         logger.info(f"  Services discovered: {result['services_discovered']}")
         logger.info(f"  Coordination effectiveness: {effectiveness['mean_effectiveness']:.1f}")
@@ -835,7 +835,7 @@ class TestWebSocketServiceCoordination:
         monitor = WebSocketServiceCoordinationMonitor()
         tester = WebSocketServiceCoordinationTester(monitor)
         
-        logger.info("🚀 Starting inter-service WebSocket coordination test")
+        logger.info("[U+1F680] Starting inter-service WebSocket coordination test")
         
         inter_service_config = {
             "coordination_type": "bidirectional",
@@ -874,7 +874,7 @@ class TestWebSocketServiceCoordination:
         assert effectiveness["mean_effectiveness"] >= 0.8, \
             f"Inter-service coordination effectiveness too low: {effectiveness['mean_effectiveness']:.1f}"
         
-        logger.info("✅ Inter-service WebSocket coordination VALIDATED")
+        logger.info(" PASS:  Inter-service WebSocket coordination VALIDATED")
         logger.info(f"  Coordination latency: {result['coordination_latency_ms']:.1f}ms")
         logger.info(f"  Tool dispatcher latency: {result['tool_dispatcher_latency_ms']:.1f}ms")
         logger.info(f"  Communication success: {inter_service_communication.get('communication_success_rate', 0):.1%}")
@@ -890,7 +890,7 @@ class TestWebSocketServiceCoordination:
         monitor = WebSocketServiceCoordinationMonitor()
         tester = WebSocketServiceCoordinationTester(monitor)
         
-        logger.info("🚀 Starting WebSocket load balancing coordination test")
+        logger.info("[U+1F680] Starting WebSocket load balancing coordination test")
         
         load_balancing_config = {
             "instance_count": 5,
@@ -924,7 +924,7 @@ class TestWebSocketServiceCoordination:
         assert effectiveness["mean_effectiveness"] >= 0.7, \
             f"Load balancing coordination effectiveness too low: {effectiveness['mean_effectiveness']:.1f}"
         
-        logger.info("✅ WebSocket load balancing coordination VALIDATED")
+        logger.info(" PASS:  WebSocket load balancing coordination VALIDATED")
         logger.info(f"  Load balancing decisions: {result['load_balancing_decisions']}")
         logger.info(f"  Instance count: {result['instance_count']}")
         logger.info(f"  Avg decision time: {load_balancing.get('avg_decision_time_ms', 0):.1f}ms")
@@ -940,7 +940,7 @@ class TestWebSocketServiceCoordination:
         monitor = WebSocketServiceCoordinationMonitor()
         tester = WebSocketServiceCoordinationTester(monitor)
         
-        logger.info("🚀 Starting WebSocket health monitoring coordination test")
+        logger.info("[U+1F680] Starting WebSocket health monitoring coordination test")
         
         health_config = {
             "services": ["websocket_service", "backend_service", "database_service"],
@@ -977,7 +977,7 @@ class TestWebSocketServiceCoordination:
         assert effectiveness["mean_effectiveness"] >= 0.7, \
             f"Health monitoring coordination effectiveness too low: {effectiveness['mean_effectiveness']:.1f}"
         
-        logger.info("✅ WebSocket health monitoring coordination VALIDATED")
+        logger.info(" PASS:  WebSocket health monitoring coordination VALIDATED")
         logger.info(f"  Services monitored: {result['services_monitored']}")
         logger.info(f"  Health checks: {result['health_checks_performed']}")
         logger.info(f"  Health rate: {health_monitoring.get('service_health_rate', 0):.1%}")
@@ -993,7 +993,7 @@ class TestWebSocketServiceCoordination:
         monitor = WebSocketServiceCoordinationMonitor()
         tester = WebSocketServiceCoordinationTester(monitor)
         
-        logger.info("🚀 Starting multi-tenant WebSocket coordination test")
+        logger.info("[U+1F680] Starting multi-tenant WebSocket coordination test")
         
         tenant_config = {
             "tenant_count": 4,
@@ -1036,7 +1036,7 @@ class TestWebSocketServiceCoordination:
         assert effectiveness["mean_effectiveness"] >= 0.7, \
             f"Multi-tenant coordination effectiveness too low: {effectiveness['mean_effectiveness']:.1f}"
         
-        logger.info("✅ Multi-tenant WebSocket coordination VALIDATED")
+        logger.info(" PASS:  Multi-tenant WebSocket coordination VALIDATED")
         logger.info(f"  Tenant count: {result['tenant_count']}")
         logger.info(f"  Isolation rate: {result['tenant_isolation_rate']:.1%}")
         logger.info(f"  Boundary violations: {tenant_isolation.get('total_boundary_violations', 0)}")

@@ -1,6 +1,6 @@
 """
 Tests for datetime, string, and JSON utilities (Tests 86-88).
-Each function ≤8 lines, using helper functions for setup and assertions.
+Each function  <= 8 lines, using helper functions for setup and assertions.
 """
 
 import sys

@@ -700,7 +700,7 @@ class UnifiedDockerManager:
                 _get_logger().debug(f"Allocated port {port} for {service_name}")
         else:
             # SSOT: NO FALLBACKS - Hard fail if port allocation fails
-            _get_logger().error(f"❌ Port allocation failed: {result.error_message}")
+            _get_logger().error(f" FAIL:  Port allocation failed: {result.error_message}")
             _get_logger().error("SSOT VIOLATION: Port allocation must succeed or system must fail")
             _get_logger().error("Solution: Fix port conflicts before starting containers")
             raise RuntimeError(
@@ -864,13 +864,13 @@ class UnifiedDockerManager:
         # Check cooldown
         if history and now - history[-1] < self.RESTART_COOLDOWN:
             remaining = self.RESTART_COOLDOWN - (now - history[-1])
-            _get_logger().warning(f"⏳ Restart cooldown active for {service_name}. Wait {remaining:.1f}s")
+            _get_logger().warning(f"[U+23F3] Restart cooldown active for {service_name}. Wait {remaining:.1f}s")
             return False
         
         # Check rate limit
         recent_restarts = len([t for t in history if now - t < 300])  # Last 5 minutes
         if recent_restarts >= self.MAX_RESTART_ATTEMPTS:
-            _get_logger().warning(f"⚠️ Too many restarts for {service_name} ({recent_restarts} in last 5 min)")
+            _get_logger().warning(f" WARNING: [U+FE0F] Too many restarts for {service_name} ({recent_restarts} in last 5 min)")
             return False
         
         return True
@@ -904,7 +904,7 @@ class UnifiedDockerManager:
         # First try to detect and use existing netra-dev containers
         existing_containers = self._detect_existing_dev_containers()
         if existing_containers:
-            _get_logger().info(f"🔄 Found existing netra-dev containers: {', '.join(existing_containers.keys())}")
+            _get_logger().info(f" CYCLE:  Found existing netra-dev containers: {', '.join(existing_containers.keys())}")
             ports = self._discover_ports_from_existing_containers(existing_containers)
             self.allocated_ports = ports
             
@@ -922,7 +922,7 @@ class UnifiedDockerManager:
             }
             self._save_state(state)
             
-            _get_logger().info(f"✅ Using existing development containers with {len(ports)} services")
+            _get_logger().info(f" PASS:  Using existing development containers with {len(ports)} services")
             return env_name, ports
         
         # Fall back to creating new environment if no existing containers
@@ -933,7 +933,7 @@ class UnifiedDockerManager:
             
             # Check if environment exists
             if env_name not in state["environments"]:
-                _get_logger().info(f"🔧 Creating new test environment: {env_name}")
+                _get_logger().info(f"[U+1F527] Creating new test environment: {env_name}")
                 self._create_environment(env_name)
                 state["environments"][env_name] = {
                     "created": datetime.now().isoformat(),
@@ -944,7 +944,7 @@ class UnifiedDockerManager:
             else:
                 state["environments"][env_name]["users"] = \
                     state["environments"][env_name].get("users", 0) + 1
-                _get_logger().info(f"♻️ Reusing existing environment: {env_name} (users: {state['environments'][env_name]['users']})")
+                _get_logger().info(f"[U+267B][U+FE0F] Reusing existing environment: {env_name} (users: {state['environments'][env_name]['users']})")
             
             self._save_state(state)
             
@@ -974,7 +974,7 @@ class UnifiedDockerManager:
                 # Clean up if no users and dedicated environment
                 if (state["environments"][env_name]["users"] == 0 and 
                     state["environments"][env_name]["type"] == EnvironmentType.DEDICATED.value):
-                    _get_logger().info(f"🧹 Cleaning up dedicated environment: {env_name}")
+                    _get_logger().info(f"[U+1F9F9] Cleaning up dedicated environment: {env_name}")
                     self._cleanup_environment(env_name)
                     del state["environments"][env_name]
                 
@@ -1001,13 +1001,13 @@ class UnifiedDockerManager:
                 else:
                     services_to_build = ["test-backend", "test-auth"]
                 
-                _get_logger().info(f"🔨 Building backend services: {services_to_build}")
+                _get_logger().info(f"[U+1F528] Building backend services: {services_to_build}")
                 build_cmd = [
                     "docker-compose", "-f", compose_file,
                     "-p", project_name, "build"
                 ] + services_to_build
             else:
-                _get_logger().info("🔨 Building all Docker images...")
+                _get_logger().info("[U+1F528] Building all Docker images...")
                 build_cmd = [
                     "docker-compose", "-f", compose_file,
                     "-p", project_name, "build"
@@ -1018,14 +1018,14 @@ class UnifiedDockerManager:
                     build_cmd, timeout=300
                 )
                 if result.returncode == 0:
-                    _get_logger().info("✅ Successfully built Docker images")
+                    _get_logger().info(" PASS:  Successfully built Docker images")
                 else:
-                    _get_logger().warning(f"⚠️ Failed to build images: {result.stderr}")
+                    _get_logger().warning(f" WARNING: [U+FE0F] Failed to build images: {result.stderr}")
             except Exception as e:
-                _get_logger().warning(f"⚠️ Error building images: {e}")
+                _get_logger().warning(f" WARNING: [U+FE0F] Error building images: {e}")
         
         # SSOT: Clean up any conflicting containers first
-        _get_logger().info(f"🧹 Checking for conflicting containers before creating {env_name}")
+        _get_logger().info(f"[U+1F9F9] Checking for conflicting containers before creating {env_name}")
         self._cleanup_conflicting_containers(env_name)
         
         # Prepare environment variables
@@ -1080,7 +1080,7 @@ class UnifiedDockerManager:
             raise RuntimeError(f"Failed to create environment after {max_retries} attempts: {result.stderr}")
         
         # Wait for containers to be created and healthy
-        _get_logger().info(f"⏳ Waiting for containers to be created...")
+        _get_logger().info(f"[U+23F3] Waiting for containers to be created...")
         max_wait = 30  # seconds
         start_time = time.time()
         containers_found = False
@@ -1089,7 +1089,7 @@ class UnifiedDockerManager:
             # Check if containers exist
             existing_containers = self._detect_existing_containers_by_project(self._get_project_name())
             if existing_containers:
-                _get_logger().info(f"✅ Found {len(existing_containers)} containers")
+                _get_logger().info(f" PASS:  Found {len(existing_containers)} containers")
                 containers_found = True
                 break
             
@@ -1098,7 +1098,7 @@ class UnifiedDockerManager:
         
         if not containers_found:
             # Try to create them again
-            _get_logger().warning("⚠️ Containers not found after waiting, attempting to create again...")
+            _get_logger().warning(" WARNING: [U+FE0F] Containers not found after waiting, attempting to create again...")
             cmd = [
                 "docker-compose",
                 "-f", compose_file,
@@ -1113,7 +1113,7 @@ class UnifiedDockerManager:
             while time.time() - start_time < max_wait:
                 existing_containers = self._detect_existing_containers_by_project(self._get_project_name())
                 if existing_containers:
-                    _get_logger().info(f"✅ Found {len(existing_containers)} containers after recreation")
+                    _get_logger().info(f" PASS:  Found {len(existing_containers)} containers after recreation")
                     containers_found = True
                     break
                 time.sleep(2)
@@ -1267,7 +1267,7 @@ class UnifiedDockerManager:
             )
             
             if recreate_result.returncode == 0:
-                _get_logger().info(f"✅ Recreated {service_name}")
+                _get_logger().info(f" PASS:  Recreated {service_name}")
                 return True
             else:
                 _get_logger().error(f"Failed to recreate {service_name}: {recreate_result.stderr}")
@@ -1291,7 +1291,7 @@ class UnifiedDockerManager:
             )
             
             if create_result.returncode == 0:
-                _get_logger().info(f"✅ Created {service_name}")
+                _get_logger().info(f" PASS:  Created {service_name}")
                 return True
             else:
                 _get_logger().error(f"Failed to create {service_name}: {create_result.stderr}")
@@ -1455,7 +1455,7 @@ class UnifiedDockerManager:
         
         for attempt in range(max_retries):
             try:
-                _get_logger().debug(f"🔍 Container detection attempt {attempt + 1}/{max_retries}")
+                _get_logger().debug(f" SEARCH:  Container detection attempt {attempt + 1}/{max_retries}")
                 
                 # Method 1: Search by patterns
                 for pattern in search_patterns:
@@ -1475,11 +1475,11 @@ class UnifiedDockerManager:
                             service = self._parse_container_name_to_service(container_name)
                             if service and service not in containers:
                                 containers[service] = container_name
-                                _get_logger().debug(f"🔍 Detected existing container: {service} -> {container_name}")
+                                _get_logger().debug(f" SEARCH:  Detected existing container: {service} -> {container_name}")
             
                 # Method 2: If no containers found with patterns, try broad search
                 if not containers:
-                    _get_logger().debug(f"🔍 No containers found with patterns, trying broad search")
+                    _get_logger().debug(f" SEARCH:  No containers found with patterns, trying broad search")
                     cmd = ["docker", "ps", "--format", "{{.Names}}"]
                     docker_result = self.docker_rate_limiter.execute_docker_command(cmd, timeout=10)
                     result = subprocess.CompletedProcess(cmd, docker_result.returncode, docker_result.stdout, docker_result.stderr)
@@ -1496,11 +1496,11 @@ class UnifiedDockerManager:
                                 service = self._parse_container_name_to_service(container_name)
                                 if service and service not in containers:
                                     containers[service] = container_name
-                                    _get_logger().debug(f"🔍 Detected container via broad search: {service} -> {container_name}")
+                                    _get_logger().debug(f" SEARCH:  Detected container via broad search: {service} -> {container_name}")
                 
                 # If we found containers, return immediately
                 if containers:
-                    _get_logger().info(f"🔄 Found {len(containers)} existing containers on attempt {attempt + 1}")
+                    _get_logger().info(f" CYCLE:  Found {len(containers)} existing containers on attempt {attempt + 1}")
                     for service, container_name in containers.items():
                         _get_logger().debug(f"  - {service}: {container_name}")
                     return containers
@@ -1560,7 +1560,7 @@ class UnifiedDockerManager:
                 # Method 3: Fallback - Try alternative docker commands
                 if attempt == max_retries - 1:  # Last attempt
                     try:
-                        _get_logger().debug(f"🔍 Trying alternative docker detection methods")
+                        _get_logger().debug(f" SEARCH:  Trying alternative docker detection methods")
                         for pattern in search_patterns:
                             cmd = ["docker", "container", "ls", "--format", "{{.Names}}", "--filter", f"name={pattern}"]
                             result = _run_subprocess_safe(cmd, timeout=5)
@@ -1572,9 +1572,9 @@ class UnifiedDockerManager:
                                     service = self._parse_container_name_to_service(container_name)
                                     if service and service not in containers:
                                         containers[service] = container_name
-                                        _get_logger().debug(f"🔍 Found via alternative method: {service} -> {container_name}")
+                                        _get_logger().debug(f" SEARCH:  Found via alternative method: {service} -> {container_name}")
                         if containers:
-                            _get_logger().info(f"🔄 Found {len(containers)} containers via alternative method")
+                            _get_logger().info(f" CYCLE:  Found {len(containers)} containers via alternative method")
                             return containers
                     except Exception as alt_e:
                         _get_logger().warning(f"Alternative docker detection also failed: {alt_e}")
@@ -1617,7 +1617,7 @@ class UnifiedDockerManager:
             "legacy_test": "netra_test_{service}_1"
         }
         
-        _get_logger().debug(f"🏷️ Container name patterns for project '{project_dir}': {list(patterns.keys())}")
+        _get_logger().debug(f"[U+1F3F7][U+FE0F] Container name patterns for project '{project_dir}': {list(patterns.keys())}")
         return patterns
     
     def _parse_container_name_to_service(self, container_name: str) -> Optional[str]:
@@ -1676,7 +1676,7 @@ class UnifiedDockerManager:
                 service = service[:-2]
             return service
         
-        _get_logger().debug(f"⚠️ Could not parse service name from container: {container_name}")
+        _get_logger().debug(f" WARNING: [U+FE0F] Could not parse service name from container: {container_name}")
         return None
     
     def _discover_ports_from_docker_ps(self) -> Dict[str, int]:
@@ -1735,7 +1735,7 @@ class UnifiedDockerManager:
                                     container_part = mapping.split('->')[1].strip()
                                     if container_part.startswith(str(internal_port)):
                                         ports[service] = host_port
-                                        _get_logger().debug(f"🔌 {service}: discovered {internal_port} -> {host_port} from docker ps")
+                                        _get_logger().debug(f"[U+1F50C] {service}: discovered {internal_port} -> {host_port} from docker ps")
                                         break
             
         except Exception as e:
@@ -1772,10 +1772,10 @@ class UnifiedDockerManager:
                         if ':' in port_mapping:
                             external_port = int(port_mapping.split(':')[-1])
                             ports[service] = external_port
-                            _get_logger().debug(f"🔌 {service}: {internal_port} -> {external_port}")
+                            _get_logger().debug(f"[U+1F50C] {service}: {internal_port} -> {external_port}")
                         else:
                             # SSOT: No port mapping fallback - this is a configuration error
-                            _get_logger().error(f"❌ SSOT VIOLATION: No external port mapping for {service}")
+                            _get_logger().error(f" FAIL:  SSOT VIOLATION: No external port mapping for {service}")
                             _get_logger().error(f"Container {container_name} has no port mapping configured")
                             raise RuntimeError(
                                 f"SSOT PORT MAPPING FAILURE: Container {container_name} for service {service} "
@@ -1783,9 +1783,9 @@ class UnifiedDockerManager:
                                 f"See docker/DOCKER_SSOT_MATRIX.md"
                             )
                     else:
-                        _get_logger().debug(f"🔌 {service}: no port mapping found for {container_name}")
+                        _get_logger().debug(f"[U+1F50C] {service}: no port mapping found for {container_name}")
                 else:
-                    _get_logger().warning(f"⚠️ Unknown service: {service}")
+                    _get_logger().warning(f" WARNING: [U+FE0F] Unknown service: {service}")
                     
             except Exception as e:
                 _get_logger().debug(f"Error getting port for {service} ({container_name}): {e}")
@@ -1793,7 +1793,7 @@ class UnifiedDockerManager:
         # Second try: Parse docker ps output if we're missing ports
         missing_services = [s for s in containers.keys() if s not in ports]
         if missing_services:
-            _get_logger().info(f"🔍 Trying docker ps parsing for missing services: {missing_services}")
+            _get_logger().info(f" SEARCH:  Trying docker ps parsing for missing services: {missing_services}")
             docker_ps_ports = self._discover_ports_from_docker_ps()
             for service, port in docker_ps_ports.items():
                 if service in missing_services:
@@ -1802,7 +1802,7 @@ class UnifiedDockerManager:
         # Third try: Use environment-specific default ports
         still_missing = [s for s in containers.keys() if s not in ports]
         if still_missing:
-            _get_logger().warning(f"🔄 Using environment-appropriate default ports for: {still_missing}")
+            _get_logger().warning(f" CYCLE:  Using environment-appropriate default ports for: {still_missing}")
             
             # Determine environment type from container names
             sample_container = next(iter(containers.values()))
@@ -1826,13 +1826,13 @@ class UnifiedDockerManager:
             for service in still_missing:
                 if service in default_ports:
                     ports[service] = default_ports[service]
-                    _get_logger().info(f"🔌 {service}: using default port {default_ports[service]}")
+                    _get_logger().info(f"[U+1F50C] {service}: using default port {default_ports[service]}")
                 elif service in self.SERVICES:
                     default_port = self.SERVICES[service].get("default_port", 8000)
                     ports[service] = default_port
-                    _get_logger().info(f"🔌 {service}: using service default port {default_port}")
+                    _get_logger().info(f"[U+1F50C] {service}: using service default port {default_port}")
         
-        _get_logger().info(f"📍 Discovered ports: {ports}")
+        _get_logger().info(f" PIN:  Discovered ports: {ports}")
         return ports
     
     def _get_actual_container_name(self, env_name: str, service_name: str, timeout: int = 5) -> Optional[str]:
@@ -1929,10 +1929,10 @@ class UnifiedDockerManager:
                 is_running = state_status == "running"
                 is_healthy = health_status in ["healthy", "none", "<no"]  # <no value> means no health check
                 
-                _get_logger().debug(f"🩺 Container {container_name}: state={state_status}, health={health_status}")
+                _get_logger().debug(f"[U+1FA7A] Container {container_name}: state={state_status}, health={health_status}")
                 return is_running and is_healthy
             else:
-                _get_logger().debug(f"🩺 Container {container_name} not found or not accessible")
+                _get_logger().debug(f"[U+1FA7A] Container {container_name} not found or not accessible")
                 return False
                 
         except Exception as e:
@@ -2004,7 +2004,7 @@ class UnifiedDockerManager:
             container_name = self._get_actual_container_name(env_name, service_name)
             
             if container_name:
-                _get_logger().info(f"🔄 Restarting {service_name} (container: {container_name})")
+                _get_logger().info(f" CYCLE:  Restarting {service_name} (container: {container_name})")
                 
                 # Try graceful restart with improved recovery logic
                 # First, try a simple restart command
@@ -2060,9 +2060,9 @@ class UnifiedDockerManager:
             self._save_state(state)
             
             if success:
-                _get_logger().info(f"✅ Successfully restarted {service_name}")
+                _get_logger().info(f" PASS:  Successfully restarted {service_name}")
             else:
-                _get_logger().error(f"❌ Failed to restart {service_name} - all restart attempts failed")
+                _get_logger().error(f" FAIL:  Failed to restart {service_name} - all restart attempts failed")
             
             return success
     
@@ -2093,7 +2093,7 @@ class UnifiedDockerManager:
         env_name = self._get_environment_name()
         start_time = time.time()
         
-        _get_logger().info(f"⏳ Waiting for services to become healthy: {', '.join(services)}")
+        _get_logger().info(f"[U+23F3] Waiting for services to become healthy: {', '.join(services)}")
         
         unhealthy_services = {}
         restart_attempts = {}
@@ -2108,7 +2108,7 @@ class UnifiedDockerManager:
             if int(time.time() - start_time) % 10 == 0:  # Every 10 seconds
                 memory_snapshot = self.monitor_memory_during_operations()
                 if memory_snapshot and memory_snapshot.get_max_threshold_level() == ResourceThresholdLevel.EMERGENCY:
-                    _get_logger().error("🚨 Emergency memory condition during health check - may cause failures")
+                    _get_logger().error(" ALERT:  Emergency memory condition during health check - may cause failures")
             
             # Check each service (use shorter timeout per service to respect overall timeout)
             per_service_timeout = min(5, max(1, timeout // len(services)))
@@ -2122,12 +2122,12 @@ class UnifiedDockerManager:
                     # Track unhealthy duration
                     if service not in unhealthy_services:
                         unhealthy_services[service] = time.time()
-                        _get_logger().warning(f"⚠️ Service {service} is unhealthy")
+                        _get_logger().warning(f" WARNING: [U+FE0F] Service {service} is unhealthy")
                 else:
                     # Service recovered
                     if service in unhealthy_services:
                         duration = time.time() - unhealthy_services[service]
-                        _get_logger().info(f"✅ Service {service} recovered after {duration:.1f}s")
+                        _get_logger().info(f" PASS:  Service {service} recovered after {duration:.1f}s")
                         unhealthy_services.pop(service, None)
                         restart_attempts.pop(service, None)
             
@@ -2141,7 +2141,7 @@ class UnifiedDockerManager:
                 # Final memory check when all services are healthy
                 final_snapshot = self.monitor_memory_during_operations()
                 if final_snapshot:
-                    _get_logger().info(f"✅ All services healthy - Memory: {final_snapshot.system_memory.percentage:.1f}% "
+                    _get_logger().info(f" PASS:  All services healthy - Memory: {final_snapshot.system_memory.percentage:.1f}% "
                               f"({int(final_snapshot.docker_containers.current_usage)} containers)")
                 return True
             
@@ -2155,7 +2155,7 @@ class UnifiedDockerManager:
                     if unhealthy_duration > 15 and restart_count < max_restart_attempts:
                         # Only restart every 20 seconds to avoid restart storms
                         if int(unhealthy_duration) % 20 == 15:
-                            _get_logger().warning(f"🔄 Auto-restarting unhealthy {service} (attempt {restart_count + 1}/{max_restart_attempts})")
+                            _get_logger().warning(f" CYCLE:  Auto-restarting unhealthy {service} (attempt {restart_count + 1}/{max_restart_attempts})")
                             
                             if self.restart_service(service, force=True):
                                 restart_attempts[service] = restart_count + 1
@@ -2165,7 +2165,7 @@ class UnifiedDockerManager:
                                 if sleep_time > 0:
                                     time.sleep(sleep_time)
                             else:
-                                _get_logger().error(f"❌ Failed to restart {service}")
+                                _get_logger().error(f" FAIL:  Failed to restart {service}")
             
             # Dynamic sleep to respect timeout
             remaining_time = timeout - (time.time() - start_time)
@@ -2178,11 +2178,11 @@ class UnifiedDockerManager:
         # Health check timeout - perform memory analysis
         timeout_snapshot = self.monitor_memory_during_operations()
         if timeout_snapshot:
-            _get_logger().error(f"⏰ Health check timeout - Memory: {timeout_snapshot.system_memory.percentage:.1f}% "
+            _get_logger().error(f"[U+23F0] Health check timeout - Memory: {timeout_snapshot.system_memory.percentage:.1f}% "
                         f"({int(timeout_snapshot.docker_containers.current_usage)} containers)")
             
             if timeout_snapshot.get_max_threshold_level() in [ResourceThresholdLevel.CRITICAL, ResourceThresholdLevel.EMERGENCY]:
-                _get_logger().error("💥 High memory usage may have caused health check failures")
+                _get_logger().error("[U+1F4A5] High memory usage may have caused health check failures")
         
         return False
     
@@ -2209,12 +2209,12 @@ class UnifiedDockerManager:
     
     def _wait_for_healthy(self, env_name: str, timeout: int = 60):
         """Wait for all services in environment to be healthy"""
-        _get_logger().info(f"⏳ Waiting for services to be healthy in {env_name}...")
+        _get_logger().info(f"[U+23F3] Waiting for services to be healthy in {env_name}...")
         
         if self.wait_for_services(timeout=timeout):
-            _get_logger().info(f"✅ All services healthy in {env_name}")
+            _get_logger().info(f" PASS:  All services healthy in {env_name}")
         else:
-            _get_logger().warning(f"⚠️ Some services failed to become healthy in {env_name}")
+            _get_logger().warning(f" WARNING: [U+FE0F] Some services failed to become healthy in {env_name}")
     
     # ASYNC ORCHESTRATION METHODS
     
@@ -2226,7 +2226,7 @@ class UnifiedDockerManager:
         Returns:
             Tuple of (success, service_health_report)
         """
-        _get_logger().info("🚀 Starting E2E Service Orchestration with Unified Management")
+        _get_logger().info("[U+1F680] Starting E2E Service Orchestration with Unified Management")
         _get_logger().info(f"Environment: {self.environment} ({self.environment_type.value})")
         _get_logger().info(f"Required services: {self.config.required_services}")
         
@@ -2239,7 +2239,7 @@ class UnifiedDockerManager:
             
             # Phase 2: Acquire environment with centralized coordination
             env_name, ports = self.acquire_environment()
-            _get_logger().info(f"✅ Acquired environment: {env_name}")
+            _get_logger().info(f" PASS:  Acquired environment: {env_name}")
             
             # Phase 3: Start missing services with rate limiting
             startup_success = await self._start_missing_services_coordinated()
@@ -2255,13 +2255,13 @@ class UnifiedDockerManager:
             self._configure_service_environment(discovered_ports=ports)
             
             elapsed = time.time() - start_time
-            _get_logger().info(f"✅ E2E Service Orchestration completed successfully in {elapsed:.1f}s")
+            _get_logger().info(f" PASS:  E2E Service Orchestration completed successfully in {elapsed:.1f}s")
             
             return True, self.service_health
             
         except Exception as e:
             elapsed = time.time() - start_time
-            _get_logger().error(f"❌ E2E Service Orchestration failed after {elapsed:.1f}s: {e}")
+            _get_logger().error(f" FAIL:  E2E Service Orchestration failed after {elapsed:.1f}s: {e}")
             return False, self._create_failure_report(f"Orchestration exception: {e}")
 
     async def _check_docker_availability(self) -> bool:
@@ -2269,39 +2269,39 @@ class UnifiedDockerManager:
         # First check if we can use existing dev containers
         existing_containers = self._detect_existing_dev_containers()
         if existing_containers:
-            _get_logger().info(f"✅ Found existing development containers, bypassing Docker daemon check")
+            _get_logger().info(f" PASS:  Found existing development containers, bypassing Docker daemon check")
             try:
                 compose_file = self._get_compose_file()
-                _get_logger().info(f"✅ Using compose file: {compose_file}")
+                _get_logger().info(f" PASS:  Using compose file: {compose_file}")
                 return True
             except RuntimeError as e:
-                _get_logger().warning(f"⚠️ Docker compose file issue, but existing containers available: {e}")
+                _get_logger().warning(f" WARNING: [U+FE0F] Docker compose file issue, but existing containers available: {e}")
                 return True  # Allow using existing containers even if compose files have issues
         
         # Check Docker daemon
         if not self.port_discovery.docker_available:
-            _get_logger().error("❌ Docker daemon not available - E2E tests require Docker")
-            _get_logger().error("💡 Fix: Start Docker Desktop or install Docker")
+            _get_logger().error(" FAIL:  Docker daemon not available - E2E tests require Docker")
+            _get_logger().error(" IDEA:  Fix: Start Docker Desktop or install Docker")
             return False
         
         # Check for docker-compose files
         try:
             compose_file = self._get_compose_file()
-            _get_logger().info(f"✅ Docker available, using compose file: {compose_file}")
+            _get_logger().info(f" PASS:  Docker available, using compose file: {compose_file}")
             return True
         except RuntimeError:
-            _get_logger().error("❌ No docker-compose files found")
-            _get_logger().error("💡 Expected: docker-compose.alpine-test.yml or docker-compose.yml")
+            _get_logger().error(" FAIL:  No docker-compose files found")
+            _get_logger().error(" IDEA:  Expected: docker-compose.alpine-test.yml or docker-compose.yml")
             return False
 
     async def _start_missing_services_coordinated(self) -> bool:
         """Start missing Docker services with centralized coordination."""
-        _get_logger().info("🔄 Checking and starting required services with rate limiting...")
+        _get_logger().info(" CYCLE:  Checking and starting required services with rate limiting...")
         
         # If we're using existing dev containers, verify they're running and healthy
         existing_containers = self._detect_existing_dev_containers()
         if existing_containers:
-            _get_logger().info("🔄 Using existing development containers, checking health...")
+            _get_logger().info(" CYCLE:  Using existing development containers, checking health...")
             
             # Check which required services are available in existing containers
             available_services = []
@@ -2314,24 +2314,24 @@ class UnifiedDockerManager:
                     if self._is_existing_container_healthy(container_name):
                         available_services.append(service)
                     else:
-                        _get_logger().warning(f"⚠️ Existing container {container_name} is not healthy")
+                        _get_logger().warning(f" WARNING: [U+FE0F] Existing container {container_name} is not healthy")
                         missing_services.append(service)
                 else:
                     missing_services.append(service)
             
             if available_services:
-                _get_logger().info(f"✅ Using healthy existing containers: {', '.join(available_services)}")
+                _get_logger().info(f" PASS:  Using healthy existing containers: {', '.join(available_services)}")
             
             if not missing_services:
-                _get_logger().info("✅ All required services are available in existing containers")
+                _get_logger().info(" PASS:  All required services are available in existing containers")
                 return True
             else:
-                _get_logger().warning(f"⚠️ Some services not available in existing containers: {missing_services}")
+                _get_logger().warning(f" WARNING: [U+FE0F] Some services not available in existing containers: {missing_services}")
                 # For now, we'll consider this successful if we have the core services
                 core_services = ["backend", "auth", "postgres", "redis"]
                 available_core = [s for s in available_services if s in core_services]
                 if len(available_core) >= 3:  # Need at least 3 core services
-                    _get_logger().info(f"✅ Sufficient core services available: {available_core}")
+                    _get_logger().info(f" PASS:  Sufficient core services available: {available_core}")
                     return True
         
         # Check current service status using port discovery
@@ -2344,13 +2344,13 @@ class UnifiedDockerManager:
                 if self._check_restart_allowed(service):
                     missing_services.append(service)
                 else:
-                    _get_logger().warning(f"⚠️ Service {service} restart blocked by rate limiting")
+                    _get_logger().warning(f" WARNING: [U+FE0F] Service {service} restart blocked by rate limiting")
         
         if not missing_services:
-            _get_logger().info("✅ All required services are already running")
+            _get_logger().info(" PASS:  All required services are already running")
             return True
         
-        _get_logger().info(f"⚡ Starting missing services: {missing_services}")
+        _get_logger().info(f" LIGHTNING:  Starting missing services: {missing_services}")
         
         # Record restart attempts
         for service in missing_services:
@@ -2401,29 +2401,29 @@ class UnifiedDockerManager:
             if self.no_cache_app_code:
                 # Use --no-cache to ensure fresh Python code is always copied
                 no_cache_flag = ["--no-cache"]
-                _get_logger().info("🔄 Using --no-cache for fresh application code build")
+                _get_logger().info(" CYCLE:  Using --no-cache for fresh application code build")
             
             if self.rebuild_backend_only and any(s in backend_services for s in service_names):
                 # Build backend services
                 services_to_build = [s for s in service_names if s in backend_services]
                 if services_to_build:
                     build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + services_to_build
-                    _get_logger().info(f"🔨 Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
+                    _get_logger().info(f"[U+1F528] Building backend services: {services_to_build} (no-cache={self.no_cache_app_code})")
                     
                     result = _run_subprocess_safe(build_cmd, timeout=300, env=env)
                     if result.returncode != 0:
-                        _get_logger().warning(f"⚠️ Failed to build services: {result.stderr}")
+                        _get_logger().warning(f" WARNING: [U+FE0F] Failed to build services: {result.stderr}")
             elif not self.rebuild_backend_only:
                 # Build all requested services
                 build_cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + no_cache_flag + service_names
-                _get_logger().info(f"🔨 Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
+                _get_logger().info(f"[U+1F528] Building all requested services: {service_names} (no-cache={self.no_cache_app_code})")
                 
                 result = _run_subprocess_safe(build_cmd, timeout=300, env=env)
                 if result.returncode != 0:
-                    _get_logger().warning(f"⚠️ Failed to build services: {result.stderr}")
+                    _get_logger().warning(f" WARNING: [U+FE0F] Failed to build services: {result.stderr}")
         
         cmd = ["docker", "compose", "-f", compose_file, "-p", self._get_project_name(), "up", "-d"] + service_names
-        _get_logger().info(f"🚀 Executing: {' '.join(cmd)}")
+        _get_logger().info(f"[U+1F680] Executing: {' '.join(cmd)}")
         
         try:
             result = await asyncio.create_subprocess_exec(
@@ -2439,28 +2439,28 @@ class UnifiedDockerManager:
             )
             
             if result.returncode == 0:
-                _get_logger().info("✅ Services started successfully")
+                _get_logger().info(" PASS:  Services started successfully")
                 self.started_services.update(missing_services)
                 
                 # Wait a moment for services to initialize
                 await asyncio.sleep(3)
                 return True
             else:
-                _get_logger().error(f"❌ Service startup failed with return code {result.returncode}")
+                _get_logger().error(f" FAIL:  Service startup failed with return code {result.returncode}")
                 _get_logger().error(f"STDOUT: {stdout.decode()}")
                 _get_logger().error(f"STDERR: {stderr.decode()}")
                 return False
                 
         except asyncio.TimeoutError:
-            _get_logger().error(f"❌ Service startup timed out after {self.config.startup_timeout}s")
+            _get_logger().error(f" FAIL:  Service startup timed out after {self.config.startup_timeout}s")
             return False
         except Exception as e:
-            _get_logger().error(f"❌ Service startup failed: {e}")
+            _get_logger().error(f" FAIL:  Service startup failed: {e}")
             return False
 
     async def _wait_for_services_healthy(self) -> bool:
         """Wait for all required services to be healthy using async health checks."""
-        _get_logger().info("🏥 Waiting for services to be healthy...")
+        _get_logger().info("[U+1F3E5] Waiting for services to be healthy...")
         
         # Get current port mappings
         port_mappings = self.port_discovery.discover_all_ports()
@@ -2473,7 +2473,7 @@ class UnifiedDockerManager:
                 health_tasks.append(task)
         
         if not health_tasks:
-            _get_logger().error("❌ No services to check - this shouldn't happen")
+            _get_logger().error(" FAIL:  No services to check - this shouldn't happen")
             return False
         
         # Wait for all health checks to complete
@@ -2486,7 +2486,7 @@ class UnifiedDockerManager:
                 service = self.config.required_services[i]
                 
                 if isinstance(result, Exception):
-                    _get_logger().error(f"❌ Health check failed for {service}: {result}")
+                    _get_logger().error(f" FAIL:  Health check failed for {service}: {result}")
                     all_healthy = False
                     self.service_health[service] = ServiceHealth(
                         service_name=service,
@@ -2498,15 +2498,15 @@ class UnifiedDockerManager:
                 else:
                     self.service_health[service] = result
                     if result.is_healthy:
-                        _get_logger().info(f"✅ {service} healthy on port {result.port} ({result.response_time_ms:.1f}ms)")
+                        _get_logger().info(f" PASS:  {service} healthy on port {result.port} ({result.response_time_ms:.1f}ms)")
                     else:
-                        _get_logger().error(f"❌ {service} unhealthy: {result.error_message}")
+                        _get_logger().error(f" FAIL:  {service} unhealthy: {result.error_message}")
                         all_healthy = False
             
             return all_healthy
             
         except Exception as e:
-            _get_logger().error(f"❌ Health check coordination failed: {e}")
+            _get_logger().error(f" FAIL:  Health check coordination failed: {e}")
             return False
 
     async def _check_service_health_async(self, service: str, mapping: ServicePortMapping) -> ServiceHealth:
@@ -2554,7 +2554,7 @@ class UnifiedDockerManager:
                         
                         if ws_healthy:
                             response_time = (time.time() - start_time) * 1000
-                            _get_logger().debug(f"✅ Backend service fully healthy (HTTP + WebSocket): {mapping.external_port}")
+                            _get_logger().debug(f" PASS:  Backend service fully healthy (HTTP + WebSocket): {mapping.external_port}")
                             return ServiceHealth(
                                 service_name=service,
                                 is_healthy=True,
@@ -2563,7 +2563,7 @@ class UnifiedDockerManager:
                                 last_check=time.time()
                             )
                         else:
-                            _get_logger().warning(f"⚠️ Backend HTTP healthy but WebSocket failed: {mapping.external_port}")
+                            _get_logger().warning(f" WARNING: [U+FE0F] Backend HTTP healthy but WebSocket failed: {mapping.external_port}")
                     
                 elif service in ["auth", "frontend"]:
                     # HTTP services - check health endpoint only
@@ -2621,7 +2621,7 @@ class UnifiedDockerManager:
                         return response.status == 200
             except ImportError:
                 # SSOT: aiohttp is required for health checks - no fallback
-                _get_logger().error("❌ SSOT DEPENDENCY MISSING: aiohttp required for health checks")
+                _get_logger().error(" FAIL:  SSOT DEPENDENCY MISSING: aiohttp required for health checks")
                 raise RuntimeError(
                     "SSOT DEPENDENCY FAILURE: aiohttp package is required for proper health checking. "
                     "Install with: pip install aiohttp. No fallback connectivity checks allowed."
@@ -2643,7 +2643,7 @@ class UnifiedDockerManager:
             True if WebSocket handshake succeeds, False otherwise
         """
         if not WEBSOCKET_AVAILABLE:
-            _get_logger().warning("⚠️ WebSocket health check skipped - websockets package not available")
+            _get_logger().warning(" WARNING: [U+FE0F] WebSocket health check skipped - websockets package not available")
             return False
         
         try:
@@ -2669,7 +2669,7 @@ class UnifiedDockerManager:
                     # No response is acceptable - connection handshake succeeded
                     pass
                 
-                _get_logger().debug(f"✅ WebSocket health check succeeded: {ws_url}")
+                _get_logger().debug(f" PASS:  WebSocket health check succeeded: {ws_url}")
                 return True
                 
         except (websockets.exceptions.ConnectionClosed,
@@ -2677,10 +2677,10 @@ class UnifiedDockerManager:
                 websockets.exceptions.InvalidHandshake,
                 asyncio.TimeoutError,
                 OSError) as e:
-            _get_logger().debug(f"❌ WebSocket health check failed for {ws_url}: {e}")
+            _get_logger().debug(f" FAIL:  WebSocket health check failed for {ws_url}: {e}")
             return False
         except Exception as e:
-            _get_logger().warning(f"⚠️ Unexpected error in WebSocket health check for {ws_url}: {e}")
+            _get_logger().warning(f" WARNING: [U+FE0F] Unexpected error in WebSocket health check for {ws_url}: {e}")
             return False
 
     def _configure_service_environment(self, discovered_ports: Optional[Dict[str, int]] = None) -> None:
@@ -2700,7 +2700,7 @@ class UnifiedDockerManager:
             if service_url:
                 env_var = f"{service.upper()}_SERVICE_URL"
                 env.set(env_var, service_url, source="unified_docker_manager")
-                _get_logger().info(f"🔧 {env_var}={service_url}")
+                _get_logger().info(f"[U+1F527] {env_var}={service_url}")
         
         # Set specific URLs needed by E2E tests
         if "backend" in ports:
@@ -2797,7 +2797,7 @@ class UnifiedDockerManager:
         if not self.started_services:
             return
         
-        _get_logger().info(f"🧹 Cleaning up started services: {list(self.started_services)}")
+        _get_logger().info(f"[U+1F9F9] Cleaning up started services: {list(self.started_services)}")
         
         # Release allocated ports first
         if self.allocated_ports:
@@ -2828,12 +2828,12 @@ class UnifiedDockerManager:
                 await asyncio.wait_for(result.communicate(), timeout=30)
                 
                 if result.returncode == 0:
-                    _get_logger().info("✅ Services stopped successfully")
+                    _get_logger().info(" PASS:  Services stopped successfully")
                 else:
-                    _get_logger().warning("⚠️ Some services may not have stopped cleanly")
+                    _get_logger().warning(" WARNING: [U+FE0F] Some services may not have stopped cleanly")
                     
             except Exception as e:
-                _get_logger().warning(f"⚠️ Service cleanup failed: {e}")
+                _get_logger().warning(f" WARNING: [U+FE0F] Service cleanup failed: {e}")
 
     def get_health_report(self) -> str:
         """Generate comprehensive health report with memory monitoring."""
@@ -2859,11 +2859,11 @@ class UnifiedDockerManager:
             report_lines.extend(memory_status)
             report_lines.append("")
         except Exception as e:
-            report_lines.append(f"⚠️  Memory monitoring error: {e}")
+            report_lines.append(f" WARNING: [U+FE0F]  Memory monitoring error: {e}")
             report_lines.append("")
         
         for service, health in self.service_health.items():
-            status = "✅ HEALTHY" if health.is_healthy else "❌ UNHEALTHY"
+            status = " PASS:  HEALTHY" if health.is_healthy else " FAIL:  UNHEALTHY"
             
             # Get container memory stats if available
             memory_info = self._get_container_memory_info(service)
@@ -2920,26 +2920,26 @@ class UnifiedDockerManager:
         # Overall status and warnings
         max_level = snapshot.get_max_threshold_level()
         if max_level == ResourceThresholdLevel.EMERGENCY:
-            lines.append("🚨 EMERGENCY: Critical resource exhaustion!")
+            lines.append(" ALERT:  EMERGENCY: Critical resource exhaustion!")
             lines.append("   Immediate cleanup required to prevent failures")
         elif max_level == ResourceThresholdLevel.CRITICAL:
-            lines.append("⚠️  CRITICAL: Resource usage very high")
+            lines.append(" WARNING: [U+FE0F]  CRITICAL: Resource usage very high")
             lines.append("   Monitor closely and consider cleanup")
         elif max_level == ResourceThresholdLevel.WARNING:
-            lines.append("⚠️  WARNING: Resource usage elevated")
+            lines.append(" WARNING: [U+FE0F]  WARNING: Resource usage elevated")
         
         return lines
 
     def _get_threshold_indicator(self, level: ResourceThresholdLevel) -> str:
         """Get visual indicator for threshold level."""
         if level == ResourceThresholdLevel.EMERGENCY:
-            return "🚨"
+            return " ALERT: "
         elif level == ResourceThresholdLevel.CRITICAL:
-            return "❌"
+            return " FAIL: "
         elif level == ResourceThresholdLevel.WARNING:
-            return "⚠️ "
+            return " WARNING: [U+FE0F] "
         else:
-            return "✅"
+            return " PASS: "
 
     def _get_container_memory_info(self, service: str) -> Optional[str]:
         """Get memory information for a specific container."""
@@ -2995,7 +2995,7 @@ class UnifiedDockerManager:
                             # Check for high memory usage and add warning
                             try:
                                 mem_val = float(mem_perc.rstrip('%'))
-                                warning = " ⚠️" if mem_val > 80 else ""
+                                warning = "  WARNING: [U+FE0F]" if mem_val > 80 else ""
                             except:
                                 warning = ""
                             
@@ -3007,7 +3007,7 @@ class UnifiedDockerManager:
                         lines.append("")
                         lines.append("MEMORY WARNINGS:")
                         for container, usage in high_memory_containers:
-                            lines.append(f"  ⚠️  {container}: {usage:.1f}% memory usage")
+                            lines.append(f"   WARNING: [U+FE0F]  {container}: {usage:.1f}% memory usage")
                             
         except Exception as e:
             _get_logger().debug(f"Could not generate detailed memory report: {e}")
@@ -3038,7 +3038,7 @@ class UnifiedDockerManager:
                                     
                                     # Issue warning if not already issued
                                     if container not in self.memory_warnings_issued:
-                                        _get_logger().warning(f"🚨 Container {container} using {mem_perc:.1f}% memory")
+                                        _get_logger().warning(f" ALERT:  Container {container} using {mem_perc:.1f}% memory")
                                         self.memory_warnings_issued.add(container)
                                         
                             except ValueError:
@@ -3068,38 +3068,38 @@ class UnifiedDockerManager:
     def perform_memory_pre_flight_check(self) -> bool:
         """Perform memory pre-flight check before starting services."""
         try:
-            _get_logger().info("🔍 Performing memory pre-flight check...")
+            _get_logger().info(" SEARCH:  Performing memory pre-flight check...")
             
             # Use memory guardian for pre-flight check
             can_proceed, details = self.memory_guardian.pre_flight_check()
             
             if not can_proceed:
-                _get_logger().error(f"❌ Memory pre-flight check failed: {details['message']}")
+                _get_logger().error(f" FAIL:  Memory pre-flight check failed: {details['message']}")
                 
                 # Show alternatives if available
                 if details.get('alternatives'):
-                    _get_logger().info("💡 Alternative test profiles that could work:")
+                    _get_logger().info(" IDEA:  Alternative test profiles that could work:")
                     for alt in details['alternatives']:
                         _get_logger().info(f"   - {alt['profile']}: {alt['description']} ({alt['required_mb']}MB)")
                 
                 return False
             
-            _get_logger().info(f"✅ Memory pre-flight check passed: {details['message']}")
+            _get_logger().info(f" PASS:  Memory pre-flight check passed: {details['message']}")
             
             # Also check current Docker resource usage
             snapshot = self.resource_monitor.check_system_resources()
             max_level = snapshot.get_max_threshold_level()
             
             if max_level in [ResourceThresholdLevel.CRITICAL, ResourceThresholdLevel.EMERGENCY]:
-                _get_logger().warning("⚠️  High resource usage detected - performing cleanup before starting services")
+                _get_logger().warning(" WARNING: [U+FE0F]  High resource usage detected - performing cleanup before starting services")
                 cleanup_report = self.resource_monitor.cleanup_if_needed(force_cleanup=True)
-                _get_logger().info(f"🧹 Cleanup completed: {cleanup_report.containers_removed} containers, "
+                _get_logger().info(f"[U+1F9F9] Cleanup completed: {cleanup_report.containers_removed} containers, "
                           f"{cleanup_report.networks_removed} networks removed")
             
             return True
             
         except Exception as e:
-            _get_logger().error(f"❌ Memory pre-flight check error: {e}")
+            _get_logger().error(f" FAIL:  Memory pre-flight check error: {e}")
             return False
 
     def monitor_memory_during_operations(self) -> Optional[DockerResourceSnapshot]:
@@ -3112,18 +3112,18 @@ class UnifiedDockerManager:
             
             # Issue warnings for high resource usage
             if max_level == ResourceThresholdLevel.EMERGENCY:
-                _get_logger().critical("🚨 EMERGENCY: Critical resource exhaustion detected!")
+                _get_logger().critical(" ALERT:  EMERGENCY: Critical resource exhaustion detected!")
                 _get_logger().critical("   Services may fail or become unresponsive")
                 # Perform emergency cleanup
                 cleanup_report = self.resource_monitor.cleanup_if_needed(force_cleanup=True)
-                _get_logger().info(f"🚨 Emergency cleanup: {cleanup_report.containers_removed} containers removed")
+                _get_logger().info(f" ALERT:  Emergency cleanup: {cleanup_report.containers_removed} containers removed")
                 
             elif max_level == ResourceThresholdLevel.CRITICAL:
-                _get_logger().warning("⚠️  CRITICAL: Very high resource usage")
+                _get_logger().warning(" WARNING: [U+FE0F]  CRITICAL: Very high resource usage")
                 _get_logger().warning("   Monitor closely - consider stopping non-essential services")
                 
             elif max_level == ResourceThresholdLevel.WARNING:
-                _get_logger().info("⚠️  Resource usage elevated - monitoring...")
+                _get_logger().info(" WARNING: [U+FE0F]  Resource usage elevated - monitoring...")
             
             return snapshot
             
@@ -3153,7 +3153,7 @@ class UnifiedDockerManager:
             
             # Clean up old environments
             for env_name in environments_to_remove:
-                _get_logger().info(f"🧹 Cleaning up old environment: {env_name}")
+                _get_logger().info(f"[U+1F9F9] Cleaning up old environment: {env_name}")
                 self._cleanup_environment(env_name)
                 del state["environments"][env_name]
             
@@ -3322,7 +3322,7 @@ class UnifiedDockerManager:
         Returns:
             True if cleanup successful
         """
-        _get_logger().info("🧹 Performing pre-test Docker cleanup...")
+        _get_logger().info("[U+1F9F9] Performing pre-test Docker cleanup...")
         
         try:
             # 1. Stop any orphaned containers from previous test runs
@@ -3365,14 +3365,14 @@ class UnifiedDockerManager:
                 _get_logger().error("Docker daemon not responding properly")
                 return False
             
-            _get_logger().info("✅ Pre-test cleanup completed successfully")
+            _get_logger().info(" PASS:  Pre-test cleanup completed successfully")
             return True
             
         except subprocess.TimeoutExpired as e:
-            _get_logger().error(f"⚠️ Pre-test cleanup timeout: {e}")
+            _get_logger().error(f" WARNING: [U+FE0F] Pre-test cleanup timeout: {e}")
             return False
         except Exception as e:
-            _get_logger().error(f"⚠️ Pre-test cleanup error: {e}")
+            _get_logger().error(f" WARNING: [U+FE0F] Pre-test cleanup error: {e}")
             return False
     
     async def start_services_smart(self, services: List[str], wait_healthy: bool = True) -> bool:
@@ -3388,7 +3388,7 @@ class UnifiedDockerManager:
         """
         # Perform memory pre-flight check before starting services
         if not self.perform_memory_pre_flight_check():
-            _get_logger().error("❌ Memory pre-flight check failed - cannot start services safely")
+            _get_logger().error(" FAIL:  Memory pre-flight check failed - cannot start services safely")
             return False
         
         # Run pre-test cleanup before starting services
@@ -3442,7 +3442,7 @@ class UnifiedDockerManager:
                 
                 # Check for missing base images before building
                 if not self._check_base_images():
-                    _get_logger().warning("⚠️ Missing base images detected. Build may fail if Docker Hub is rate limited.")
+                    _get_logger().warning(" WARNING: [U+FE0F] Missing base images detected. Build may fail if Docker Hub is rate limited.")
                     _get_logger().warning("   Consider pulling base images manually or using --pull never")
                 
                 # Add pull policy to build commands
@@ -3457,21 +3457,21 @@ class UnifiedDockerManager:
                     services_to_build = [s for s in services_to_start if s in backend_services]
                     if services_to_build:
                         build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + pull_flag + services_to_build
-                        _get_logger().info(f"🔨 Building backend services with pull_policy={self.pull_policy}: {services_to_build}")
+                        _get_logger().info(f"[U+1F528] Building backend services with pull_policy={self.pull_policy}: {services_to_build}")
                         result = _run_subprocess_safe(build_cmd, timeout=300, env=env)
                         if result.returncode != 0:
                             if "429 Too Many Requests" in result.stderr or "toomanyrequests" in result.stderr.lower():
-                                _get_logger().error("❌ Docker Hub rate limit hit! Cannot pull base images.")
+                                _get_logger().error(" FAIL:  Docker Hub rate limit hit! Cannot pull base images.")
                                 _get_logger().error("   Solution: Use pull_policy='never' or wait for rate limit reset")
                                 return False
                             _get_logger().error(f"Build failed: {result.stderr}")
                 else:
                     build_cmd = ["docker-compose", "-f", compose_file, "-p", self._get_project_name(), "build"] + pull_flag + services_to_start
-                    _get_logger().info(f"🔨 Building all services with pull_policy={self.pull_policy}: {services_to_start}")
+                    _get_logger().info(f"[U+1F528] Building all services with pull_policy={self.pull_policy}: {services_to_start}")
                     result = _run_subprocess_safe(build_cmd, timeout=300, env=env)
                     if result.returncode != 0:
                         if "429 Too Many Requests" in result.stderr or "toomanyrequests" in result.stderr.lower():
-                            _get_logger().error("❌ Docker Hub rate limit hit! Cannot pull base images.")
+                            _get_logger().error(" FAIL:  Docker Hub rate limit hit! Cannot pull base images.")
                             _get_logger().error("   Solution: Use pull_policy='never' or wait for rate limit reset")
                             return False
                         _get_logger().error(f"Build failed: {result.stderr}")
@@ -3486,10 +3486,10 @@ class UnifiedDockerManager:
                 # Monitor memory during service startup
                 pre_start_snapshot = self.monitor_memory_during_operations()
                 if pre_start_snapshot and pre_start_snapshot.get_max_threshold_level() == ResourceThresholdLevel.EMERGENCY:
-                    _get_logger().error("❌ Emergency memory condition detected - aborting service start")
+                    _get_logger().error(" FAIL:  Emergency memory condition detected - aborting service start")
                     return False
                 
-                _get_logger().info(f"🚀 Starting services: {', '.join(mapped_services)}")
+                _get_logger().info(f"[U+1F680] Starting services: {', '.join(mapped_services)}")
                 result = _run_subprocess_safe(cmd, timeout=120, env=env)
                 
                 if result.returncode != 0:
@@ -3499,7 +3499,7 @@ class UnifiedDockerManager:
                 # Monitor memory after service startup
                 post_start_snapshot = self.monitor_memory_during_operations()
                 if post_start_snapshot:
-                    _get_logger().info(f"📊 Post-startup memory: {post_start_snapshot.system_memory.percentage:.1f}% "
+                    _get_logger().info(f" CHART:  Post-startup memory: {post_start_snapshot.system_memory.percentage:.1f}% "
                               f"({int(post_start_snapshot.docker_containers.current_usage)} containers)")
                     
             except subprocess.TimeoutExpired:
@@ -3531,11 +3531,11 @@ class UnifiedDockerManager:
             _get_logger().warning("No services specified to ensure running")
             return True
             
-        _get_logger().info(f"🔍 Ensuring services are running: {', '.join(services)}")
+        _get_logger().info(f" SEARCH:  Ensuring services are running: {', '.join(services)}")
         
         # Perform memory pre-flight check
         if not self.perform_memory_pre_flight_check():
-            _get_logger().error("❌ Memory pre-flight check failed - cannot ensure services safely")
+            _get_logger().error(" FAIL:  Memory pre-flight check failed - cannot ensure services safely")
             return False
         
         # Check which services are already running and healthy
@@ -3544,32 +3544,32 @@ class UnifiedDockerManager:
         
         for service in services:
             if service not in self.SERVICES:
-                _get_logger().error(f"❌ Unknown service: {service}")
+                _get_logger().error(f" FAIL:  Unknown service: {service}")
                 return False
                 
             if await self.check_container_reusable(service):
                 running_services.append(service)
-                _get_logger().info(f"✅ Service {service} is already running and healthy")
+                _get_logger().info(f" PASS:  Service {service} is already running and healthy")
             else:
                 services_to_start.append(service)
-                _get_logger().info(f"⚠️ Service {service} needs to be started")
+                _get_logger().info(f" WARNING: [U+FE0F] Service {service} needs to be started")
         
         # Start services that are not running
         if services_to_start:
-            _get_logger().info(f"🚀 Starting {len(services_to_start)} services: {', '.join(services_to_start)}")
+            _get_logger().info(f"[U+1F680] Starting {len(services_to_start)} services: {', '.join(services_to_start)}")
             start_success = await self.start_services_smart(services_to_start, wait_healthy=True)
             if not start_success:
-                _get_logger().error(f"❌ Failed to start required services: {', '.join(services_to_start)}")
+                _get_logger().error(f" FAIL:  Failed to start required services: {', '.join(services_to_start)}")
                 return False
         
         # Final health check for all requested services
-        _get_logger().info(f"🏥 Final health check for all services: {', '.join(services)}")
+        _get_logger().info(f"[U+1F3E5] Final health check for all services: {', '.join(services)}")
         health_check_success = self.wait_for_services(services, timeout=timeout)
         
         if health_check_success:
-            _get_logger().info(f"✅ All services are running and healthy: {', '.join(services)}")
+            _get_logger().info(f" PASS:  All services are running and healthy: {', '.join(services)}")
         else:
-            _get_logger().error(f"❌ Health check failed for services: {', '.join(services)}")
+            _get_logger().error(f" FAIL:  Health check failed for services: {', '.join(services)}")
             
         return health_check_success
     
@@ -3608,19 +3608,19 @@ class UnifiedDockerManager:
                 missing_images.append(image)
         
         if missing_images:
-            _get_logger().warning(f"⚠️ Missing {len(missing_images)} base images:")
+            _get_logger().warning(f" WARNING: [U+FE0F] Missing {len(missing_images)} base images:")
             for img in missing_images:
                 _get_logger().warning(f"   - {img}")
             
             if self.pull_policy == "never":
-                _get_logger().error("❌ pull_policy='never' but base images are missing!")
+                _get_logger().error(" FAIL:  pull_policy='never' but base images are missing!")
                 _get_logger().error("   Build will fail without these images.")
             elif self.pull_policy == "missing":
-                _get_logger().info("ℹ️ Docker will try to pull missing images (may hit rate limits)")
+                _get_logger().info("[U+2139][U+FE0F] Docker will try to pull missing images (may hit rate limits)")
             
             return False
         
-        _get_logger().debug(f"✅ All {len(available_images)} base images available locally")
+        _get_logger().debug(f" PASS:  All {len(available_images)} base images available locally")
         return True
     
     async def graceful_shutdown(self, services: Optional[List[str]] = None, timeout: int = 30) -> bool:
@@ -4086,7 +4086,7 @@ class UnifiedDockerManager:
             return self._cleanup_scheduler.trigger_manual_cleanup(cleanup_types, force=True)
         else:
             # SSOT: Cleanup scheduler should always be available - no fallback
-            _get_logger().error("❌ SSOT SYSTEM ERROR: Cleanup scheduler not initialized")
+            _get_logger().error(" FAIL:  SSOT SYSTEM ERROR: Cleanup scheduler not initialized")
             raise RuntimeError(
                 "SSOT CLEANUP FAILURE: Cleanup scheduler is required for proper cleanup operations. "
                 "This indicates a system initialization problem. No fallback cleanup allowed."
@@ -4167,7 +4167,7 @@ class UnifiedDockerManager:
         3. Value Impact: Reduces debugging time from hours to minutes
         4. Revenue Impact: Prevents developer downtime worth $500K+ annually
         """
-        _get_logger().info(f"🔍 Analyzing Docker crash for: {container_name or 'all containers'}")
+        _get_logger().info(f" SEARCH:  Analyzing Docker crash for: {container_name or 'all containers'}")
         
         analysis = {
             "timestamp": datetime.now().isoformat(),
@@ -4221,7 +4221,7 @@ class UnifiedDockerManager:
         if save_report:
             report_path = self._save_crash_report(analysis)
             analysis["report_path"] = str(report_path)
-            _get_logger().info(f"📄 Crash report saved to: {report_path}")
+            _get_logger().info(f"[U+1F4C4] Crash report saved to: {report_path}")
         
         return analysis
     
@@ -4377,7 +4377,7 @@ class UnifiedDockerManager:
         3. Value Impact: Saves 5-10 minutes per refresh, prevents environment drift
         4. Revenue Impact: Saves 2-4 hours/week per developer, prevents deployment issues
         """
-        _get_logger().info("🔄 Refreshing development environment via UnifiedDockerManager...")
+        _get_logger().info(" CYCLE:  Refreshing development environment via UnifiedDockerManager...")
         
         try:
             # Step 1: Gracefully stop existing containers
@@ -4391,16 +4391,16 @@ class UnifiedDockerManager:
             if not self._start_dev_services(services):
                 return False
             
-            _get_logger().info("✨ Development environment refreshed successfully!")
+            _get_logger().info("[U+2728] Development environment refreshed successfully!")
             return True
             
         except Exception as e:
-            _get_logger().error(f"❌ Refresh failed: {e}")
+            _get_logger().error(f" FAIL:  Refresh failed: {e}")
             return False
     
     def _stop_dev_containers(self, services: Optional[List[str]] = None):
         """Stop development containers gracefully."""
-        _get_logger().info("📦 Stopping existing development containers...")
+        _get_logger().info("[U+1F4E6] Stopping existing development containers...")
         
         try:
             # Check for existing netra-dev containers
@@ -4432,32 +4432,32 @@ class UnifiedDockerManager:
                         "docker", "rm", "-f"
                     ] + containers, check=False)
                     
-                    _get_logger().info("   ✅ Development containers stopped")
+                    _get_logger().info("    PASS:  Development containers stopped")
                 else:
-                    _get_logger().info("   ℹ️ No matching development containers found")
+                    _get_logger().info("   [U+2139][U+FE0F] No matching development containers found")
             else:
-                _get_logger().info("   ℹ️ No development containers found")
+                _get_logger().info("   [U+2139][U+FE0F] No development containers found")
                 
         except Exception as e:
-            _get_logger().warning(f"   ⚠️ Warning during container stop: {e}")
+            _get_logger().warning(f"    WARNING: [U+FE0F] Warning during container stop: {e}")
     
     def _build_dev_images(self, services: Optional[List[str]] = None, clean: bool = False) -> bool:
         """Build development images using docker-compose."""
-        _get_logger().info("🔨 Building development images...")
+        _get_logger().info("[U+1F528] Building development images...")
         
         cmd = ["docker-compose", "-f", "docker-compose.yml", "build", "--parallel"]
         
         if clean:
             cmd.append("--no-cache")
-            _get_logger().info("   🧹 Clean build enabled (slower but guaranteed fresh)")
+            _get_logger().info("   [U+1F9F9] Clean build enabled (slower but guaranteed fresh)")
         else:
-            _get_logger().info("   ⚡ Smart build enabled (fresh code, cached dependencies)")
+            _get_logger().info("    LIGHTNING:  Smart build enabled (fresh code, cached dependencies)")
         
         if services:
             # Map service names to docker-compose service names
             compose_services = [f"dev-{svc}" for svc in services]
             cmd.extend(compose_services)
-            _get_logger().info(f"   🎯 Building services: {', '.join(services)}")
+            _get_logger().info(f"    TARGET:  Building services: {', '.join(services)}")
         
         try:
             project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
@@ -4468,19 +4468,19 @@ class UnifiedDockerManager:
                 capture_output=False,  # Show build output
                 timeout=600  # 10 minute timeout for builds
             )
-            _get_logger().info("   ✅ Images built successfully")
+            _get_logger().info("    PASS:  Images built successfully")
             return True
             
         except subprocess.CalledProcessError as e:
-            _get_logger().error(f"   ❌ Build failed with exit code {e.returncode}")
+            _get_logger().error(f"    FAIL:  Build failed with exit code {e.returncode}")
             return False
         except subprocess.TimeoutExpired:
-            _get_logger().error("   ❌ Build timed out after 10 minutes")
+            _get_logger().error("    FAIL:  Build timed out after 10 minutes")
             return False
     
     def _start_dev_services(self, services: Optional[List[str]] = None) -> bool:
         """Start development services with health monitoring."""
-        _get_logger().info("🚀 Starting development services...")
+        _get_logger().info("[U+1F680] Starting development services...")
         
         cmd = ["docker-compose", "-f", "docker-compose.yml", "up", "-d"]
         
@@ -4488,7 +4488,7 @@ class UnifiedDockerManager:
             # Map service names to docker-compose service names
             compose_services = [f"dev-{svc}" for svc in services]
             cmd.extend(compose_services)
-            _get_logger().info(f"   🎯 Starting services: {', '.join(services)}")
+            _get_logger().info(f"    TARGET:  Starting services: {', '.join(services)}")
         
         try:
             # Start services
@@ -4499,21 +4499,21 @@ class UnifiedDockerManager:
                 check=True, timeout=120
             )
             
-            _get_logger().info("   ✅ Services started, checking health...")
+            _get_logger().info("    PASS:  Services started, checking health...")
             
             # Wait for services to be healthy
             return self._wait_for_dev_health(timeout=60)
             
         except subprocess.CalledProcessError as e:
-            _get_logger().error(f"   ❌ Failed to start services: {e.stderr}")
+            _get_logger().error(f"    FAIL:  Failed to start services: {e.stderr}")
             return False
         except subprocess.TimeoutExpired:
-            _get_logger().error("   ❌ Service start timed out")
+            _get_logger().error("    FAIL:  Service start timed out")
             return False
     
     def _wait_for_dev_health(self, timeout: int = 60) -> bool:
         """Wait for development services to be healthy."""
-        _get_logger().info(f"   ⏱️ Waiting up to {timeout}s for services to be ready...")
+        _get_logger().info(f"   [U+23F1][U+FE0F] Waiting up to {timeout}s for services to be ready...")
         
         start_time = time.time()
         healthy_services = set()
@@ -4540,13 +4540,13 @@ class UnifiedDockerManager:
                     
                     # Check if all required services are healthy
                     if current_healthy.issuperset(required_services):
-                        _get_logger().info("   ✅ All development services are healthy")
+                        _get_logger().info("    PASS:  All development services are healthy")
                         return True
                     
                     # Show progress
                     newly_healthy = current_healthy - healthy_services
                     if newly_healthy:
-                        _get_logger().info(f"   🟢 Healthy: {', '.join(newly_healthy)}")
+                        _get_logger().info(f"   [U+1F7E2] Healthy: {', '.join(newly_healthy)}")
                         healthy_services.update(newly_healthy)
                 
                 time.sleep(2)
@@ -4556,14 +4556,14 @@ class UnifiedDockerManager:
                 time.sleep(2)
         
         # Timeout reached
-        _get_logger().error("   ❌ Services failed to become healthy within timeout")
+        _get_logger().error("    FAIL:  Services failed to become healthy within timeout")
         self._show_dev_health_report()
         return False
     
     def _show_dev_health_report(self):
         """Show development container health for debugging."""
         try:
-            _get_logger().info("🔍 Development container status:")
+            _get_logger().info(" SEARCH:  Development container status:")
             
             result = _run_subprocess_safe([
                 "docker", "ps", "-a",
@@ -4594,7 +4594,7 @@ class UnifiedDockerManager:
         Returns:
             True if environment started successfully, False otherwise
         """
-        _get_logger().info("🚀 Starting development environment...")
+        _get_logger().info("[U+1F680] Starting development environment...")
         
         try:
             # Check Docker availability first
@@ -4604,21 +4604,21 @@ class UnifiedDockerManager:
             
             # Rebuild if requested
             if rebuild:
-                _get_logger().info("🔨 Rebuilding development images...")
+                _get_logger().info("[U+1F528] Rebuilding development images...")
                 project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
                 rebuild_result = _run_subprocess_safe([
                     "docker-compose", "-f", "docker-compose.yml", "build"
                 ], cwd=project_root, timeout=600)  # 10 minute timeout for builds
                 
                 if rebuild_result.returncode != 0:
-                    _get_logger().error("❌ Failed to rebuild development images")
+                    _get_logger().error(" FAIL:  Failed to rebuild development images")
                     return False
             
             # Start the development services
             return self._start_dev_services()
             
         except Exception as e:
-            _get_logger().error(f"❌ Failed to start development environment: {e}")
+            _get_logger().error(f" FAIL:  Failed to start development environment: {e}")
             return False
 
     def start_test_environment(self, use_alpine: bool = True, rebuild: bool = False, minimal_only: bool = False) -> bool:
@@ -4633,7 +4633,7 @@ class UnifiedDockerManager:
         Returns:
             True if test environment started successfully, False otherwise
         """
-        _get_logger().info("🧪 Starting test environment...")
+        _get_logger().info("[U+1F9EA] Starting test environment...")
         
         try:
             # Check Docker availability first  
@@ -4644,7 +4644,7 @@ class UnifiedDockerManager:
             # Select compose file based on configuration
             if minimal_only:
                 compose_file = "docker-compose.minimal-test.yml"
-                _get_logger().info("🚀 Using minimal test environment (infrastructure only)")
+                _get_logger().info("[U+1F680] Using minimal test environment (infrastructure only)")
             else:
                 compose_file = "docker-compose.alpine-test.yml" if use_alpine else "docker-compose.test.yml"
             
@@ -4655,13 +4655,13 @@ class UnifiedDockerManager:
                 # CRITICAL FIX: Always build images first, then start with --build flag for safety
                 # This ensures images are built locally instead of trying to pull from non-existent registries
                 # Use --pull=never to avoid Docker Hub rate limits for base images
-                _get_logger().info("🔨 Building test images (required for local development)...")
+                _get_logger().info("[U+1F528] Building test images (required for local development)...")
                 build_result = _run_subprocess_safe([
                     "docker-compose", "-f", compose_file, "build", "--pull=never"
                 ], cwd=project_root, timeout=600)  # 10 minute timeout for builds
                 
                 if build_result.returncode != 0:
-                    _get_logger().error(f"❌ Failed to build test images: {build_result.stderr}")
+                    _get_logger().error(f" FAIL:  Failed to build test images: {build_result.stderr}")
                     _get_logger().error("This usually means:")
                     _get_logger().error("  1. Docker daemon is not running")
                     _get_logger().error("  2. Dockerfile syntax error")
@@ -4671,13 +4671,13 @@ class UnifiedDockerManager:
             
             # Start the test services with --build flag as fallback
             # The --build flag ensures any missing images are built automatically
-            _get_logger().info("🚀 Starting test services...")
+            _get_logger().info("[U+1F680] Starting test services...")
             start_result = _run_subprocess_safe([
                 "docker-compose", "-f", compose_file, "up", "-d", "--build"
             ], cwd=project_root, timeout=180)
             
             if start_result.returncode != 0:
-                _get_logger().error(f"❌ Failed to start test services: {start_result.stderr}")
+                _get_logger().error(f" FAIL:  Failed to start test services: {start_result.stderr}")
                 _get_logger().error("Attempting to diagnose the issue...")
                 
                 # Diagnostic: Check if any containers are actually running
@@ -4691,16 +4691,16 @@ class UnifiedDockerManager:
                 return False
             
             # Wait for test services to be ready
-            _get_logger().info("⏱️ Waiting for test services to be ready...")
+            _get_logger().info("[U+23F1][U+FE0F] Waiting for test services to be ready...")
             return self._wait_for_test_health(compose_file, timeout=120)
             
         except Exception as e:
-            _get_logger().error(f"❌ Failed to start test environment: {e}")
+            _get_logger().error(f" FAIL:  Failed to start test environment: {e}")
             return False
 
     def _wait_for_test_health(self, compose_file: str, timeout: int = 120) -> bool:
         """Wait for test services to be healthy."""
-        _get_logger().info(f"⏱️ Waiting up to {timeout}s for test services to be ready...")
+        _get_logger().info(f"[U+23F1][U+FE0F] Waiting up to {timeout}s for test services to be ready...")
         
         start_time = time.time()
         project_root = Path(env.get("PROJECT_ROOT", Path(__file__).parent.parent))
@@ -4725,7 +4725,7 @@ class UnifiedDockerManager:
                         total_services = len(services_data)
                         
                         if total_services > 0 and len(running_services) == total_services:
-                            _get_logger().info("✅ All test services are running")
+                            _get_logger().info(" PASS:  All test services are running")
                             return True
                         else:
                             _get_logger().debug(f"Services status: {len(running_services)}/{total_services} running")
@@ -4740,7 +4740,7 @@ class UnifiedDockerManager:
                 time.sleep(3)
         
         # Timeout reached
-        _get_logger().warning(f"⏰ Test services did not become ready within {timeout}s")
+        _get_logger().warning(f"[U+23F0] Test services did not become ready within {timeout}s")
         return False
 
     async def ensure_e2e_environment(self, force_alpine: bool = True, timeout: int = 180) -> bool:
@@ -4758,7 +4758,7 @@ class UnifiedDockerManager:
         Raises:
             RuntimeError: If Docker is not available or fails to start
         """
-        _get_logger().info("🚀 Setting up E2E environment for reliable testing")
+        _get_logger().info("[U+1F680] Setting up E2E environment for reliable testing")
         
         # CRITICAL: Validate Docker is running or FAIL
         if not self._check_docker_availability():
@@ -4770,7 +4770,7 @@ class UnifiedDockerManager:
         # Force Alpine test configuration
         if force_alpine:
             self.use_alpine = True
-            _get_logger().info("   📦 Using Alpine test containers for speed and isolation")
+            _get_logger().info("   [U+1F4E6] Using Alpine test containers for speed and isolation")
         
         # Use dedicated test ports to avoid conflicts
         test_ports = {
@@ -4798,7 +4798,7 @@ class UnifiedDockerManager:
             if not compose_file.exists():
                 raise RuntimeError(f"Required E2E compose file not found: {compose_file}")
             
-            _get_logger().info(f"   🐳 Using compose file: {compose_file}")
+            _get_logger().info(f"   [U+1F433] Using compose file: {compose_file}")
             
             # 3. Start services with health checks
             cmd = [
@@ -4807,20 +4807,20 @@ class UnifiedDockerManager:
                 "up", "-d", "--build"
             ]
             
-            _get_logger().info("   🔨 Building and starting E2E services...")
+            _get_logger().info("   [U+1F528] Building and starting E2E services...")
             result = _run_subprocess_safe(cmd, timeout=timeout, env=test_env)
             
             if result.returncode != 0:
-                _get_logger().error(f"❌ Failed to start E2E services: {result.stderr}")
+                _get_logger().error(f" FAIL:  Failed to start E2E services: {result.stderr}")
                 return False
             
             # 4. Wait for all services to be healthy
             services = ["alpine-test-postgres", "alpine-test-redis", "alpine-test-clickhouse", 
                        "alpine-test-backend", "alpine-test-auth", "alpine-test-frontend"]
             
-            _get_logger().info("   ⏳ Waiting for services to become healthy...")
+            _get_logger().info("   [U+23F3] Waiting for services to become healthy...")
             if not await self._wait_for_e2e_services_healthy(services, compose_file, test_env, timeout):
-                _get_logger().error("❌ E2E services failed to become healthy")
+                _get_logger().error(" FAIL:  E2E services failed to become healthy")
                 await self._collect_e2e_failure_logs(compose_file, test_env)
                 return False
             
@@ -4839,7 +4839,7 @@ class UnifiedDockerManager:
             self._e2e_compose_file = compose_file
             self._e2e_service_urls = service_urls
             
-            _get_logger().info("✅ E2E environment is ready!")
+            _get_logger().info(" PASS:  E2E environment is ready!")
             _get_logger().info(f"   Backend: {service_urls['backend']}")
             _get_logger().info(f"   Auth: {service_urls['auth']}")
             _get_logger().info(f"   WebSocket: {service_urls['websocket']}")
@@ -4847,10 +4847,10 @@ class UnifiedDockerManager:
             return True
             
         except subprocess.TimeoutExpired:
-            _get_logger().error(f"❌ E2E environment setup timed out after {timeout}s")
+            _get_logger().error(f" FAIL:  E2E environment setup timed out after {timeout}s")
             return False
         except Exception as e:
-            _get_logger().error(f"❌ E2E environment setup failed: {e}")
+            _get_logger().error(f" FAIL:  E2E environment setup failed: {e}")
             return False
 
     async def _cleanup_stale_test_environment(self, test_env: Dict[str, str]):
@@ -4869,7 +4869,7 @@ class UnifiedDockerManager:
                 "--filter", "label=com.docker.compose.project=netra-e2e-test"
             ], timeout=30)
             
-            _get_logger().info("   🧹 Cleaned up stale test environment")
+            _get_logger().info("   [U+1F9F9] Cleaned up stale test environment")
             
         except Exception as e:
             _get_logger().warning(f"Warning: Could not clean stale environment: {e}")
@@ -4906,13 +4906,13 @@ class UnifiedDockerManager:
                     
                     # Check if all required services are healthy
                     if current_healthy.issuperset(services):
-                        _get_logger().info("   ✅ All E2E services are healthy")
+                        _get_logger().info("    PASS:  All E2E services are healthy")
                         return True
                     
                     # Show progress
                     newly_healthy = current_healthy - healthy_services
                     if newly_healthy:
-                        _get_logger().info(f"   🟢 Healthy: {', '.join(newly_healthy)}")
+                        _get_logger().info(f"   [U+1F7E2] Healthy: {', '.join(newly_healthy)}")
                         healthy_services.update(newly_healthy)
                 
                 await asyncio.sleep(2)
@@ -4926,7 +4926,7 @@ class UnifiedDockerManager:
     async def _collect_e2e_failure_logs(self, compose_file: Path, test_env: Dict[str, str]):
         """Collect logs from failed E2E services for debugging."""
         try:
-            _get_logger().info("🔍 Collecting failure logs...")
+            _get_logger().info(" SEARCH:  Collecting failure logs...")
             
             result = _run_subprocess_safe([
                 "docker-compose", "-f", str(compose_file),
@@ -4948,7 +4948,7 @@ class UnifiedDockerManager:
             return
         
         try:
-            _get_logger().info("🧹 Tearing down E2E environment...")
+            _get_logger().info("[U+1F9F9] Tearing down E2E environment...")
             
             test_env = os.environ.copy()
             test_env["COMPOSE_PROJECT_NAME"] = self._e2e_project_name
@@ -4960,7 +4960,7 @@ class UnifiedDockerManager:
                 "down", "-v", "--remove-orphans"
             ], timeout=60, env=test_env)
             
-            _get_logger().info("✅ E2E environment cleaned up")
+            _get_logger().info(" PASS:  E2E environment cleaned up")
             
         except Exception as e:
             _get_logger().warning(f"Warning during E2E teardown: {e}")

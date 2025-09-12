@@ -314,8 +314,8 @@ class ValidationReporter:
 """
         
         for result in report.results:
-            status_icon = {"passed": "✅", "warning": "⚠️", "failed": "❌", "skipped": "⏭️"}
-            icon = status_icon.get(result.status, "❓")
+            status_icon = {"passed": " PASS: ", "warning": " WARNING: [U+FE0F]", "failed": " FAIL: ", "skipped": "[U+23ED][U+FE0F]"}
+            icon = status_icon.get(result.status, "[U+2753]")
             
             md += f"""### {icon} {result.validator_name} - {result.check_name}
 

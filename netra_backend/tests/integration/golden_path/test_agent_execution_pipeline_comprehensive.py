@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core business functionality - agents must transition from started to completed states
 
 CRITICAL REQUIREMENTS:
-1. Test agent state transitions: started → thinking → tool_executing → tool_completed → completed
+1. Test agent state transitions: started  ->  thinking  ->  tool_executing  ->  tool_completed  ->  completed
 2. Validate WebSocket events are sent for each state transition
 3. Test real database persistence at each stage
 4. Test error recovery and graceful degradation
@@ -117,7 +117,7 @@ class TestAgentExecutionPipelineComprehensive(BaseIntegrationTest):
         Test 1: Complete agent execution progresses through all required states.
         
         Validates that an agent execution moves through:
-        started → thinking → tool_executing → tool_completed → completed
+        started  ->  thinking  ->  tool_executing  ->  tool_completed  ->  completed
         """
         assert real_services_fixture["database_available"], "Real database required"
         

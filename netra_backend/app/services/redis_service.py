@@ -1,7 +1,7 @@
 """Redis service wrapper - delegates to unified redis_manager.
 
 Provides backward compatibility interface while consolidating Redis functionality.
-All functions ≤8 lines (MANDATORY). File ≤300 lines (MANDATORY).
+All functions  <= 8 lines (MANDATORY). File  <= 300 lines (MANDATORY).
 
 Business Value Justification (BVJ):
 1. Segment: All customer segments (Free through Enterprise)

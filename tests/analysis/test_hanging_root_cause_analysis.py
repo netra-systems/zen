@@ -73,9 +73,9 @@ class TestHangingRootCauseAnalysis:
             
             # ISSUE: This will likely take much longer than 2 seconds
             if elapsed_time > endpoint.timeout + 1.0:
-                print(f"❌ CONFIRMED: Endpoint timeout not respected. Expected ~{endpoint.timeout}s, got {elapsed_time:.2f}s")
+                print(f" FAIL:  CONFIRMED: Endpoint timeout not respected. Expected ~{endpoint.timeout}s, got {elapsed_time:.2f}s")
             else:
-                print(f"✅ Endpoint timeout properly respected")
+                print(f" PASS:  Endpoint timeout properly respected")
                 
         except Exception as e:
             elapsed_time = time.time() - start_time
@@ -124,9 +124,9 @@ class TestHangingRootCauseAnalysis:
         print(f"Improvement ratio: {improvement_ratio:.2f}x faster")
         
         if sequential_time > parallel_time * 2:
-            print(f"❌ CONFIRMED: Sequential checks are significantly slower ({sequential_time:.2f}s vs {parallel_time:.2f}s)")
+            print(f" FAIL:  CONFIRMED: Sequential checks are significantly slower ({sequential_time:.2f}s vs {parallel_time:.2f}s)")
         else:
-            print(f"✅ Sequential vs parallel timing acceptable")
+            print(f" PASS:  Sequential vs parallel timing acceptable")
     
     async def test_root_cause_3_local_service_availability(self):
         """ROOT CAUSE 3: Local services not running causing long timeouts"""
@@ -150,19 +150,19 @@ class TestHangingRootCauseAnalysis:
                     response = await client.get(f"{endpoint.url}{endpoint.health_path}")
                     elapsed_time = time.time() - start_time
                     
-                    print(f"✅ {endpoint.name} is running: {response.status_code} in {elapsed_time:.2f}s")
+                    print(f" PASS:  {endpoint.name} is running: {response.status_code} in {elapsed_time:.2f}s")
                     
             except httpx.ConnectError:
                 elapsed_time = time.time() - start_time
-                print(f"❌ {endpoint.name} not running: Connection refused in {elapsed_time:.2f}s")
+                print(f" FAIL:  {endpoint.name} not running: Connection refused in {elapsed_time:.2f}s")
                 
             except httpx.TimeoutException:
                 elapsed_time = time.time() - start_time  
-                print(f"❌ {endpoint.name} timeout: {elapsed_time:.2f}s")
+                print(f" FAIL:  {endpoint.name} timeout: {elapsed_time:.2f}s")
                 
             except Exception as e:
                 elapsed_time = time.time() - start_time
-                print(f"❌ {endpoint.name} error: {e} in {elapsed_time:.2f}s")
+                print(f" FAIL:  {endpoint.name} error: {e} in {elapsed_time:.2f}s")
     
     def test_root_cause_4_event_loop_issues(self):
         """ROOT CAUSE 4: Event loop management in synchronous wrapper"""
@@ -183,8 +183,8 @@ class TestHangingRootCauseAnalysis:
             
             # This method returns immediately but may leave tasks running
             if elapsed_time < 1.0 and result.get("success"):
-                print("⚠️  Method returns immediately - tasks may still be running in background")
-                print("⚠️  This can cause resource leaks and hanging background operations")
+                print(" WARNING: [U+FE0F]  Method returns immediately - tasks may still be running in background")
+                print(" WARNING: [U+FE0F]  This can cause resource leaks and hanging background operations")
             
         except Exception as e:
             elapsed_time = time.time() - start_time
@@ -219,7 +219,7 @@ class TestHangingRootCauseAnalysis:
             timing_results["all_services_health"] = time.time() - start_time
         except asyncio.TimeoutError:
             timing_results["all_services_health"] = 45.0  # Timed out
-            print("⚠️  All services health check timed out at 45s")
+            print(" WARNING: [U+FE0F]  All services health check timed out at 45s")
         
         # 4. Start missing services timing
         start_time = time.time()
@@ -231,7 +231,7 @@ class TestHangingRootCauseAnalysis:
             timing_results["start_missing_services"] = time.time() - start_time
         except asyncio.TimeoutError:
             timing_results["start_missing_services"] = 30.0
-            print("⚠️  Start missing services timed out at 30s")
+            print(" WARNING: [U+FE0F]  Start missing services timed out at 30s")
         
         # Print comprehensive timing analysis
         print("\n=== TIMING ANALYSIS RESULTS ===")
@@ -244,11 +244,11 @@ class TestHangingRootCauseAnalysis:
         print(f"\nTotal sequential time: {total_time:.2f}s")
         
         if total_time > 60.0:
-            print("❌ CONFIRMED: Total startup time exceeds 1 minute - will cause test timeouts")
+            print(" FAIL:  CONFIRMED: Total startup time exceeds 1 minute - will cause test timeouts")
         elif total_time > 30.0:
-            print("⚠️  Total startup time exceeds 30 seconds - may cause test delays")
+            print(" WARNING: [U+FE0F]  Total startup time exceeds 30 seconds - may cause test delays")
         else:
-            print("✅ Total startup time acceptable")
+            print(" PASS:  Total startup time acceptable")
 
 
 class TestHangingFixRecommendations:

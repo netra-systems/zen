@@ -51,7 +51,7 @@ try:
         TestDockerHealthChecks
     )
 except ImportError as e:
-    print(f"❌ Failed to import Docker stability tests: {e}")
+    print(f" FAIL:  Failed to import Docker stability tests: {e}")
     print("Make sure you're running from the project root directory")
     sys.exit(1)
 
@@ -68,7 +68,7 @@ logger = logging.getLogger(__name__)
 
 def run_test_suite(suite_name: str, test_class, framework: DockerStabilityTestFramework) -> dict:
     """Run a single test suite and return results."""
-    logger.info(f"🚀 Running {suite_name} Tests")
+    logger.info(f"[U+1F680] Running {suite_name} Tests")
     logger.info("-" * 60)
     
     suite_results = {}
@@ -79,7 +79,7 @@ def run_test_suite(suite_name: str, test_class, framework: DockerStabilityTestFr
     
     for method_name in test_methods:
         try:
-            logger.info(f"▶️ Executing {method_name}...")
+            logger.info(f"[U+25B6][U+FE0F] Executing {method_name}...")
             method = getattr(suite_instance, method_name)
             
             start_time = time.time()
@@ -91,7 +91,7 @@ def run_test_suite(suite_name: str, test_class, framework: DockerStabilityTestFr
                 'execution_time': execution_time,
                 'error': None
             }
-            logger.info(f"✅ {method_name} completed in {execution_time:.2f}s")
+            logger.info(f" PASS:  {method_name} completed in {execution_time:.2f}s")
             
         except Exception as e:
             execution_time = time.time() - start_time if 'start_time' in locals() else 0
@@ -100,7 +100,7 @@ def run_test_suite(suite_name: str, test_class, framework: DockerStabilityTestFr
                 'execution_time': execution_time,
                 'error': str(e)
             }
-            logger.error(f"❌ {method_name} failed after {execution_time:.2f}s: {e}")
+            logger.error(f" FAIL:  {method_name} failed after {execution_time:.2f}s: {e}")
     
     return suite_results
 
@@ -150,7 +150,7 @@ Examples:
     # Setup logging
     setup_logging(args.verbose)
     
-    logger.info("🚀 COMPREHENSIVE Docker Stability Test Suite")
+    logger.info("[U+1F680] COMPREHENSIVE Docker Stability Test Suite")
     logger.info("=" * 80)
     logger.info("MISSION CRITICAL: Validating Docker stability improvements")
     logger.info("BUSINESS IMPACT: Prevents Docker crashes that cost 4-8 hours/week downtime")
@@ -179,11 +179,11 @@ Examples:
             if name in all_test_suites:
                 suites_to_run[name] = all_test_suites[name]
             else:
-                logger.error(f"❌ Unknown test suite: {name}")
+                logger.error(f" FAIL:  Unknown test suite: {name}")
                 logger.info(f"Available suites: {', '.join(all_test_suites.keys())}")
                 return 1
     
-    logger.info(f"📋 Running {len(suites_to_run)} test suite(s): {', '.join(suites_to_run.keys())}")
+    logger.info(f"[U+1F4CB] Running {len(suites_to_run)} test suite(s): {', '.join(suites_to_run.keys())}")
     logger.info("")
     
     # Initialize test framework
@@ -207,7 +207,7 @@ Examples:
             total_tests += suite_total
             passed_tests += suite_passed
             
-            logger.info(f"📊 {suite_name} Results: {suite_passed}/{suite_total} passed")
+            logger.info(f" CHART:  {suite_name} Results: {suite_passed}/{suite_total} passed")
             logger.info("")
         
         # Calculate overall results
@@ -216,19 +216,19 @@ Examples:
         
         # Generate comprehensive report
         logger.info("=" * 80)
-        logger.info("🏆 FINAL DOCKER STABILITY TEST RESULTS")
+        logger.info(" TROPHY:  FINAL DOCKER STABILITY TEST RESULTS")
         logger.info("=" * 80)
         
-        logger.info(f"📊 OVERALL SUMMARY:")
-        logger.info(f"   🧪 Total Tests Executed: {total_tests}")
-        logger.info(f"   ✅ Tests Passed: {passed_tests}")
-        logger.info(f"   ❌ Tests Failed: {total_tests - passed_tests}")
-        logger.info(f"   📈 Success Rate: {success_rate:.1f}%")
-        logger.info(f"   ⏱️ Total Execution Time: {overall_execution_time:.2f} seconds")
+        logger.info(f" CHART:  OVERALL SUMMARY:")
+        logger.info(f"   [U+1F9EA] Total Tests Executed: {total_tests}")
+        logger.info(f"    PASS:  Tests Passed: {passed_tests}")
+        logger.info(f"    FAIL:  Tests Failed: {total_tests - passed_tests}")
+        logger.info(f"   [U+1F4C8] Success Rate: {success_rate:.1f}%")
+        logger.info(f"   [U+23F1][U+FE0F] Total Execution Time: {overall_execution_time:.2f} seconds")
         logger.info("")
         
         # Detailed results by suite
-        logger.info("📋 DETAILED RESULTS BY TEST SUITE:")
+        logger.info("[U+1F4CB] DETAILED RESULTS BY TEST SUITE:")
         logger.info("")
         for suite_name, suite_results in all_results.items():
             suite_passed = sum(1 for r in suite_results.values() if r['status'] == 'PASSED')
@@ -236,39 +236,39 @@ Examples:
             suite_rate = suite_passed / suite_total * 100 if suite_total > 0 else 0
             suite_time = sum(r['execution_time'] for r in suite_results.values())
             
-            logger.info(f"🔍 {suite_name} ({suite_rate:.1f}% passed, {suite_time:.2f}s):")
+            logger.info(f" SEARCH:  {suite_name} ({suite_rate:.1f}% passed, {suite_time:.2f}s):")
             
             for test_name, result in suite_results.items():
-                status_icon = "✅" if result['status'] == 'PASSED' else "❌"
+                status_icon = " PASS: " if result['status'] == 'PASSED' else " FAIL: "
                 logger.info(f"   {status_icon} {test_name}: {result['status']} ({result['execution_time']:.2f}s)")
                 if result['error']:
                     logger.info(f"      Error: {result['error']}")
             logger.info("")
         
         # Framework metrics
-        logger.info("📈 DOCKER STABILITY FRAMEWORK METRICS:")
+        logger.info("[U+1F4C8] DOCKER STABILITY FRAMEWORK METRICS:")
         for metric, value in framework.metrics.items():
             logger.info(f"   - {metric.replace('_', ' ').title()}: {value}")
         logger.info("")
         
         # Final assessment
         if success_rate >= 95:
-            logger.info("🎉 EXCELLENT: Docker stability is OUTSTANDING! All systems stable.")
+            logger.info(" CELEBRATION:  EXCELLENT: Docker stability is OUTSTANDING! All systems stable.")
             return_code = 0
         elif success_rate >= 90:
-            logger.info("✅ GOOD: Docker stability is strong with minor issues.")
+            logger.info(" PASS:  GOOD: Docker stability is strong with minor issues.")
             return_code = 0
         elif success_rate >= 80:
-            logger.warning("⚠️ WARNING: Docker stability has concerning issues that need attention.")
+            logger.warning(" WARNING: [U+FE0F] WARNING: Docker stability has concerning issues that need attention.")
             return_code = 1
         else:
-            logger.error("🚨 CRITICAL: Docker stability FAILURES detected! Immediate action required.")
+            logger.error(" ALERT:  CRITICAL: Docker stability FAILURES detected! Immediate action required.")
             return_code = 2
         
         # Recommendations based on results
         if success_rate < 100:
             logger.info("")
-            logger.info("🔧 RECOMMENDED ACTIONS:")
+            logger.info("[U+1F527] RECOMMENDED ACTIONS:")
             
             if success_rate < 90:
                 logger.info("   1. Review failed tests immediately")
@@ -290,19 +290,19 @@ Examples:
         return return_code
         
     except KeyboardInterrupt:
-        logger.warning("🛑 Test execution interrupted by user")
+        logger.warning("[U+1F6D1] Test execution interrupted by user")
         return 130
     except Exception as e:
-        logger.error(f"❌ Critical test framework failure: {e}")
+        logger.error(f" FAIL:  Critical test framework failure: {e}")
         return 1
     finally:
         # Comprehensive cleanup
-        logger.info("🧹 Performing comprehensive cleanup...")
+        logger.info("[U+1F9F9] Performing comprehensive cleanup...")
         try:
             framework.cleanup()
-            logger.info("✅ Cleanup completed successfully")
+            logger.info(" PASS:  Cleanup completed successfully")
         except Exception as e:
-            logger.error(f"⚠️ Cleanup had issues: {e}")
+            logger.error(f" WARNING: [U+FE0F] Cleanup had issues: {e}")
 
 if __name__ == '__main__':
     sys.exit(main())

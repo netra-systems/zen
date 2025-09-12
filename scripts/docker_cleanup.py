@@ -98,7 +98,7 @@ class DockerCleaner:
             SecurityError: If force flags detected (CRITICAL PROTECTION)
         """
         try:
-            # 🚨 CRITICAL SECURITY: Validate command for force flags using centralized guardian
+            #  ALERT:  CRITICAL SECURITY: Validate command for force flags using centralized guardian
             cmd_str = ' '.join(cmd)
             if FORCE_FLAG_GUARDIAN_AVAILABLE:
                 try:
@@ -164,7 +164,7 @@ class DockerCleaner:
             if not self.dry_run:
                 self.centralized_manager.cleanup_old_environments(max_age_hours=4)
                 self.stats['test_environments_cleaned'] += 1
-                print("✅ Cleaned up old test environments")
+                print(" PASS:  Cleaned up old test environments")
             else:
                 print("[DRY RUN] Would clean up old test environments")
         except Exception as e:

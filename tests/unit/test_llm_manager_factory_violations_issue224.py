@@ -378,7 +378,7 @@ class TestLLMManagerFactoryViolationsIssue224(SSotBaseTestCase):
                 with open(file_path, 'r', encoding='utf-8') as f:
                     lines = f.readlines()
                 
-                # Check specific line number area (±5 lines for flexibility)
+                # Check specific line number area ( +/- 5 lines for flexibility)
                 target_line = target['expected_line']
                 search_range = range(max(1, target_line - 5), min(len(lines) + 1, target_line + 6))
                 

@@ -415,9 +415,9 @@ class TestOAuthFlows:
         execution_time = time.time() - start_time
         OAuthIntegrationTestValidator.validate_performance_requirements(execution_time)
         
-        logger.info(f"✅ Google OAuth integration test PASSED in {execution_time:.2f}s")
-        logger.info(f"✅ Enterprise SSO capability VALIDATED")
-        logger.info(f"✅ $100K+ MRR Enterprise deals PROTECTED")
+        logger.info(f" PASS:  Google OAuth integration test PASSED in {execution_time:.2f}s")
+        logger.info(f" PASS:  Enterprise SSO capability VALIDATED")
+        logger.info(f" PASS:  $100K+ MRR Enterprise deals PROTECTED")
     
     @pytest.mark.e2e
     async def test_complete_github_oauth_flow(self, oauth_flow_runner):
@@ -440,9 +440,9 @@ class TestOAuthFlows:
         execution_time = time.time() - start_time
         OAuthIntegrationTestValidator.validate_performance_requirements(execution_time)
         
-        logger.info(f"✅ GitHub OAuth integration test PASSED in {execution_time:.2f}s")
-        logger.info(f"✅ Developer Enterprise SSO capability VALIDATED")
-        logger.info(f"✅ $75K+ MRR Developer Enterprise deals PROTECTED")
+        logger.info(f" PASS:  GitHub OAuth integration test PASSED in {execution_time:.2f}s")
+        logger.info(f" PASS:  Developer Enterprise SSO capability VALIDATED")
+        logger.info(f" PASS:  $75K+ MRR Developer Enterprise deals PROTECTED")
     
     @pytest.mark.e2e
     async def test_oauth_state_security_validation(self, oauth_flow_runner):
@@ -462,9 +462,9 @@ class TestOAuthFlows:
         github_state_result = await runner.test_oauth_state_validation("github")
         OAuthIntegrationTestValidator.validate_state_security(github_state_result)
         
-        logger.info("✅ OAuth state security validation PASSED")
-        logger.info("✅ OAuth security compliance VALIDATED")
-        logger.info("✅ $50K+ MRR security compliance PROTECTED")
+        logger.info(" PASS:  OAuth state security validation PASSED")
+        logger.info(" PASS:  OAuth security compliance VALIDATED")
+        logger.info(" PASS:  $50K+ MRR security compliance PROTECTED")
     
     @pytest.mark.e2e
     async def test_oauth_flow_step_validation(self, oauth_flow_runner):
@@ -505,9 +505,9 @@ class TestOAuthFlows:
         assert token_data.get("refresh_token"), "Refresh token should be generated"
         assert token_data.get("user_id"), "User ID should be created"
         
-        logger.info("✅ OAuth flow step validation PASSED")
-        logger.info("✅ OAuth reliability VALIDATED")
-        logger.info("✅ $60K+ MRR OAuth reliability PROTECTED")
+        logger.info(" PASS:  OAuth flow step validation PASSED")
+        logger.info(" PASS:  OAuth reliability VALIDATED")
+        logger.info(" PASS:  $60K+ MRR OAuth reliability PROTECTED")
     
     @pytest.mark.e2e
     async def test_oauth_provider_flexibility(self, oauth_flow_runner):
@@ -554,9 +554,9 @@ class TestOAuthFlows:
             assert result["tokens_generated"], f"{provider} should generate tokens"
             assert result["user_created"], f"{provider} should create user data"
         
-        logger.info(f"✅ OAuth provider flexibility PASSED: {successful_providers}")
-        logger.info(f"✅ Multi-provider Enterprise support VALIDATED")
-        logger.info(f"✅ $40K+ MRR provider flexibility PROTECTED")
+        logger.info(f" PASS:  OAuth provider flexibility PASSED: {successful_providers}")
+        logger.info(f" PASS:  Multi-provider Enterprise support VALIDATED")
+        logger.info(f" PASS:  $40K+ MRR provider flexibility PROTECTED")
 
 
 # Business Impact Summary for OAuth Flow Tests
@@ -569,7 +569,7 @@ Revenue Impact: $100K+ MRR Enterprise SSO Foundation
 - Ensures Enterprise SSO capability for high-value contracts
 
 Technical Excellence:
-- Complete OAuth flow validation: initiation → authorization → token exchange → validation
+- Complete OAuth flow validation: initiation  ->  authorization  ->  token exchange  ->  validation
 - Multi-provider support: Google, GitHub, and extensible architecture
 - Security validation: OAuth state parameter validation and CSRF protection
 - Performance requirements: <10 seconds for Enterprise user experience

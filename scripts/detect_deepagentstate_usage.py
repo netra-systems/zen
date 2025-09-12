@@ -207,7 +207,7 @@ def generate_markdown_report(analysis_results: Dict[str, Any]) -> str:
 **Generated:** {json.dumps({"timestamp": "auto"}, indent=2)}  
 **Status:** ACTIVE MIGRATION REQUIRED
 
-## 🚨 Executive Summary
+##  ALERT:  Executive Summary
 
 - **Total Files Analyzed:** {summary['total_files_analyzed']:,}
 - **Files with DeepAgentState Usage:** {summary['files_with_usage']:,}
@@ -219,13 +219,13 @@ def generate_markdown_report(analysis_results: Dict[str, Any]) -> str:
     for usage_type, count in summary['usage_by_type'].items():
         report += f"- **{usage_type}:** {count:,} occurrences\n"
     
-    report += "\n## 🎯 Migration Priority Classification\n\n"
+    report += "\n##  TARGET:  Migration Priority Classification\n\n"
     
     priority_labels = {
-        'ultra_critical': '🔴 ULTRA CRITICAL',
-        'high_critical': '🟠 HIGH CRITICAL', 
-        'medium_critical': '🟡 MEDIUM CRITICAL',
-        'low_critical': '🔵 LOW CRITICAL'
+        'ultra_critical': '[U+1F534] ULTRA CRITICAL',
+        'high_critical': '[U+1F7E0] HIGH CRITICAL', 
+        'medium_critical': '[U+1F7E1] MEDIUM CRITICAL',
+        'low_critical': '[U+1F535] LOW CRITICAL'
     }
     
     for priority, files in priorities.items():
@@ -238,11 +238,11 @@ def generate_markdown_report(analysis_results: Dict[str, Any]) -> str:
                 report += f"- ... and {len(files) - 10} more files\n"
             report += "\n"
     
-    report += "## 📊 Most Used Files\n\n"
+    report += "##  CHART:  Most Used Files\n\n"
     for file_path, count in summary['most_used_files']:
         report += f"- `{file_path}` ({count} patterns)\n"
     
-    report += "\n## 📋 Detailed Usage Patterns\n\n"
+    report += "\n## [U+1F4CB] Detailed Usage Patterns\n\n"
     
     # Group patterns by file
     patterns_by_file = {}
@@ -261,14 +261,14 @@ def generate_markdown_report(analysis_results: Dict[str, Any]) -> str:
     if len(patterns_by_file) > 20:
         report += f"... and {len(patterns_by_file) - 20} more files with usage patterns.\n\n"
     
-    report += """## ⚡ Recommended Actions
+    report += """##  LIGHTNING:  Recommended Actions
 
 1. **START WITH ULTRA CRITICAL**: Begin migration with user-facing and core execution components
 2. **VALIDATE ISOLATION**: Ensure each migrated component maintains proper user isolation  
 3. **TEST THOROUGHLY**: Run comprehensive test suites after each migration
 4. **MONITOR PROGRESS**: Use this report to track migration completion
 
-**🚨 CRITICAL**: Every day DeepAgentState remains in production increases user data leakage risk.
+** ALERT:  CRITICAL**: Every day DeepAgentState remains in production increases user data leakage risk.
 """
     
     return report
@@ -335,7 +335,7 @@ def main():
             
     except Exception as e:
         logger.error(f"Script failed: {e}", exc_info=True)
-        print(f"❌ Error: {e}", file=sys.stderr)
+        print(f" FAIL:  Error: {e}", file=sys.stderr)
         sys.exit(2)
 
 

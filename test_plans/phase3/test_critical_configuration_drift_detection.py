@@ -239,7 +239,7 @@ class TestCriticalConfigurationDriftDetection:
                         f"{key} expected={expected_value}, actual={actual_value}"
                 else:
                     # Log missing configuration (may be acceptable if defaults are used)
-                    print(f"⚠️ WebSocket config {key} not found in {config.source}")
+                    print(f" WARNING: [U+FE0F] WebSocket config {key} not found in {config.source}")
 
     def test_auth_configuration_consistency_across_deployment_methods(self, expected_auth_config):
         """CRITICAL: Test authentication configuration consistency across all deployment methods."""
@@ -419,7 +419,7 @@ class TestCriticalConfigurationDriftDetection:
                 matches = re.findall(pattern, content, re.IGNORECASE)
                 for match in matches:
                     if "10.107.0" in match:  # GCP internal IP pattern
-                        print(f"✅ Found Redis configuration: {match}")
+                        print(f" PASS:  Found Redis configuration: {match}")
                         # Verify it matches expected host
                         assert expected_redis_host in match, \
                             f"Redis host mismatch: expected {expected_redis_host} in {match}"
@@ -459,7 +459,7 @@ class TestCriticalConfigurationDriftDetection:
         assert not missing_vars, \
             f"CRITICAL: Missing required frontend environment variables: {missing_vars}"
         
-        print(f"✅ All {len(required_frontend_vars)} required frontend variables found")
+        print(f" PASS:  All {len(required_frontend_vars)} required frontend variables found")
 
     def test_configuration_drift_summary_report(self):
         """Generate comprehensive configuration drift summary report."""
@@ -516,7 +516,7 @@ class TestCriticalConfigurationDriftDetection:
         with open(report_file, 'w') as f:
             f.write(report_json)
         
-        print(f"📊 Report saved to: {report_file}")
+        print(f" CHART:  Report saved to: {report_file}")
 
 
 if __name__ == "__main__":

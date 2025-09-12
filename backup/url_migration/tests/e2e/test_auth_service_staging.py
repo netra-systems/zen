@@ -248,7 +248,7 @@ async def test_gcp_staging_auth_complete_flow():
         # Verify reasonable response times (allowing for GCP startup)
         assert results["total_execution_time"] < 60.0, "Total flow too slow"
         
-        logger.info(f"🎉 GCP staging authentication test PASSED in {results['total_execution_time']:.2f}s")
+        logger.info(f" CELEBRATION:  GCP staging authentication test PASSED in {results['total_execution_time']:.2f}s")
         
     except ValueError as e:
         if "E2E_OAUTH_SIMULATION_KEY" in str(e):

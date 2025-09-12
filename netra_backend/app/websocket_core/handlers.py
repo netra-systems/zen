@@ -8,7 +8,7 @@ Business Value Justification:
 - Strategic Impact: Single responsibility pattern, pluggable handlers
 
 Consolidated message handling logic from multiple scattered files.
-All functions ≤25 lines as per CLAUDE.md requirements.
+All functions  <= 25 lines as per CLAUDE.md requirements.
 """
 
 import asyncio
@@ -97,14 +97,14 @@ class ConnectionHandler(BaseMessageHandler):
                            message: WebSocketMessage) -> bool:
         """Handle connection lifecycle messages with comprehensive service dependency logging."""
         start_time = time.time()
-        logger.info(f"🔍 WEBSOCKET CONNECTION HANDLER: Processing {message.type} "
+        logger.info(f" SEARCH:  WEBSOCKET CONNECTION HANDLER: Processing {message.type} "
                    f"(user_id: {user_id[:8]}..., "
                    f"websocket_state: {websocket.client_state if hasattr(websocket, 'client_state') else 'unknown'}, "
                    f"required_services: ['websocket_manager', 'message_routing'])")
         
         try:
             if message.type == MessageType.CONNECT:
-                logger.info(f"✅ CONNECTION SERVICE: Connection established for user {user_id[:8]}... "
+                logger.info(f" PASS:  CONNECTION SERVICE: Connection established for user {user_id[:8]}... "
                            f"(service_status: websocket_connected, "
                            f"golden_path_status: user_ready_for_chat)")
                 # Connection already established, just acknowledge
@@ -113,7 +113,7 @@ class ConnectionHandler(BaseMessageHandler):
                     {"status": "connected", "user_id": user_id, "timestamp": time.time()}
                 )
             elif message.type == MessageType.DISCONNECT:
-                logger.info(f"🔌 DISCONNECT SERVICE: Disconnect message received from user {user_id[:8]}... "
+                logger.info(f"[U+1F50C] DISCONNECT SERVICE: Disconnect message received from user {user_id[:8]}... "
                            f"(service_status: disconnect_acknowledged, "
                            f"golden_path_status: user_leaving_chat)")
                 # Acknowledge disconnect - the actual disconnect will be handled by WebSocket infrastructure
@@ -122,7 +122,7 @@ class ConnectionHandler(BaseMessageHandler):
                     {"status": "disconnect_acknowledged", "user_id": user_id, "timestamp": time.time()}
                 )
             else:
-                logger.warning(f"🚨 CONNECTION HANDLER ERROR: Unexpected connection message type "
+                logger.warning(f" ALERT:  CONNECTION HANDLER ERROR: Unexpected connection message type "
                               f"(message_type: {message.type}, "
                               f"user_id: {user_id[:8]}..., "
                               f"service_status: invalid_message_type)")
@@ -140,7 +140,7 @@ class ConnectionHandler(BaseMessageHandler):
                     total_time = (time.time() - start_time) * 1000
                     
                     if not send_success:
-                        logger.critical(f"🚨 WEBSOCKET SEND FAILURE: Failed to send connection response "
+                        logger.critical(f" ALERT:  WEBSOCKET SEND FAILURE: Failed to send connection response "
                                        f"(user_id: {user_id[:8]}..., "
                                        f"send_time: {send_time:.2f}ms, "
                                        f"total_time: {total_time:.2f}ms, "
@@ -149,7 +149,7 @@ class ConnectionHandler(BaseMessageHandler):
                                        f"recovery_action: Check WebSocket connection state and message serialization)")
                         return False
                     
-                    logger.info(f"✅ WEBSOCKET SEND SUCCESS: Connection response sent successfully "
+                    logger.info(f" PASS:  WEBSOCKET SEND SUCCESS: Connection response sent successfully "
                                f"(user_id: {user_id[:8]}..., "
                                f"send_time: {send_time:.2f}ms, "
                                f"total_time: {total_time:.2f}ms, "
@@ -159,7 +159,7 @@ class ConnectionHandler(BaseMessageHandler):
                 except Exception as send_error:
                     send_time = (time.time() - send_start if 'send_start' in locals() else start_time) * 1000
                     total_time = (time.time() - start_time) * 1000
-                    logger.critical(f"🚨 WEBSOCKET SEND EXCEPTION: Exception during WebSocket send "
+                    logger.critical(f" ALERT:  WEBSOCKET SEND EXCEPTION: Exception during WebSocket send "
                                    f"(user_id: {user_id[:8]}..., "
                                    f"exception_type: {type(send_error).__name__}, "
                                    f"exception_message: {str(send_error)}, "
@@ -171,7 +171,7 @@ class ConnectionHandler(BaseMessageHandler):
                     return False
             else:
                 total_time = (time.time() - start_time) * 1000
-                logger.critical(f"🚨 WEBSOCKET CONNECTION FAILURE: Cannot send connection response "
+                logger.critical(f" ALERT:  WEBSOCKET CONNECTION FAILURE: Cannot send connection response "
                                f"(user_id: {user_id[:8]}..., "
                                f"websocket_state: not_connected, "
                                f"total_time: {total_time:.2f}ms, "
@@ -211,7 +211,7 @@ class ConnectionHandler(BaseMessageHandler):
             
             # Environment-specific logging
             if environment in ["staging", "production"]:
-                logger.error(f"🚨 CRITICAL ConnectionHandler failure in {environment} for user {user_id}")
+                logger.error(f" ALERT:  CRITICAL ConnectionHandler failure in {environment} for user {user_id}")
                 logger.error(f"Error type: {error_context['error_type']}")
                 logger.error(f"WebSocket state: {error_context['websocket_state']}")
                 logger.error(f"Message type: {error_context['message_type']}")
@@ -344,8 +344,8 @@ class AgentRequestHandler(BaseMessageHandler):
                 "golden_path_stage": "websocket_event_sequence_start"
             }
             
-            logger.info(f"📡 GOLDEN PATH EVENTS: Starting WebSocket event sequence for user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
-            logger.info(f"🔍 EVENT SEQUENCE CONTEXT: {json.dumps(event_sequence_context, indent=2)}")
+            logger.info(f"[U+1F4E1] GOLDEN PATH EVENTS: Starting WebSocket event sequence for user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+            logger.info(f" SEARCH:  EVENT SEQUENCE CONTEXT: {json.dumps(event_sequence_context, indent=2)}")
             
             # 1. Send agent_started event
             agent_started_event = create_server_message(
@@ -362,9 +362,9 @@ class AgentRequestHandler(BaseMessageHandler):
             
             try:
                 await websocket.send_text(json.dumps(agent_started_event.model_dump()))
-                logger.info(f"✅ GOLDEN PATH EVENT: agent_started sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+                logger.info(f" PASS:  GOLDEN PATH EVENT: agent_started sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
             except Exception as e:
-                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send agent_started to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                logger.critical(f" ALERT:  GOLDEN PATH EVENT FAILURE: Failed to send agent_started to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
                 raise
             
             # Small delay to simulate processing
@@ -385,9 +385,9 @@ class AgentRequestHandler(BaseMessageHandler):
             
             try:
                 await websocket.send_text(json.dumps(agent_thinking_event.model_dump()))
-                logger.info(f"✅ GOLDEN PATH EVENT: agent_thinking sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+                logger.info(f" PASS:  GOLDEN PATH EVENT: agent_thinking sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
             except Exception as e:
-                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send agent_thinking to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                logger.critical(f" ALERT:  GOLDEN PATH EVENT FAILURE: Failed to send agent_thinking to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
                 raise
             
             await asyncio.sleep(0.1)
@@ -408,9 +408,9 @@ class AgentRequestHandler(BaseMessageHandler):
             
             try:
                 await websocket.send_text(json.dumps(tool_executing_event.model_dump()))
-                logger.info(f"✅ GOLDEN PATH EVENT: tool_executing sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+                logger.info(f" PASS:  GOLDEN PATH EVENT: tool_executing sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
             except Exception as e:
-                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send tool_executing to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                logger.critical(f" ALERT:  GOLDEN PATH EVENT FAILURE: Failed to send tool_executing to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
                 raise
             
             await asyncio.sleep(0.1)
@@ -432,9 +432,9 @@ class AgentRequestHandler(BaseMessageHandler):
             
             try:
                 await websocket.send_text(json.dumps(tool_completed_event.model_dump()))
-                logger.info(f"✅ GOLDEN PATH EVENT: tool_completed sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+                logger.info(f" PASS:  GOLDEN PATH EVENT: tool_completed sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
             except Exception as e:
-                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send tool_completed to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                logger.critical(f" ALERT:  GOLDEN PATH EVENT FAILURE: Failed to send tool_completed to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
                 raise
             
             await asyncio.sleep(0.1)
@@ -470,7 +470,7 @@ class AgentRequestHandler(BaseMessageHandler):
             
             try:
                 await websocket.send_text(json.dumps(agent_completed_event.model_dump()))
-                logger.info(f"✅ GOLDEN PATH EVENT: agent_completed sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+                logger.info(f" PASS:  GOLDEN PATH EVENT: agent_completed sent to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
                 
                 # CRITICAL: Log successful completion of all 5 critical events
                 completion_summary = {
@@ -485,11 +485,11 @@ class AgentRequestHandler(BaseMessageHandler):
                     "golden_path_milestone": "All 5 critical WebSocket events delivered successfully"
                 }
                 
-                logger.info(f"🎉 GOLDEN PATH COMPLETE: All 5 critical events delivered to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
-                logger.info(f"🔍 COMPLETION SUMMARY: {json.dumps(completion_summary, indent=2)}")
+                logger.info(f" CELEBRATION:  GOLDEN PATH COMPLETE: All 5 critical events delivered to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}")
+                logger.info(f" SEARCH:  COMPLETION SUMMARY: {json.dumps(completion_summary, indent=2)}")
                 
             except Exception as e:
-                logger.critical(f"🚨 GOLDEN PATH EVENT FAILURE: Failed to send agent_completed to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
+                logger.critical(f" ALERT:  GOLDEN PATH EVENT FAILURE: Failed to send agent_completed to user {user_id[:8] if user_id else 'unknown'}... turn {turn_id}: {e}")
                 
                 # CRITICAL: Log final event failure context
                 final_failure_context = {
@@ -504,7 +504,7 @@ class AgentRequestHandler(BaseMessageHandler):
                     "golden_path_impact": "CRITICAL - Final event failed, user may not know agent processing is complete"
                 }
                 
-                logger.critical(f"🔍 FINAL EVENT FAILURE: {json.dumps(final_failure_context, indent=2)}")
+                logger.critical(f" SEARCH:  FINAL EVENT FAILURE: {json.dumps(final_failure_context, indent=2)}")
                 raise
                 
             return True
@@ -1387,7 +1387,7 @@ class MessageRouter:
         
         # After grace period - warn if zero handlers
         if handler_count == 0:
-            logger.warning(f"⚠️ ZERO WebSocket message handlers after {self.startup_grace_period_seconds}s grace period")
+            logger.warning(f" WARNING: [U+FE0F] ZERO WebSocket message handlers after {self.startup_grace_period_seconds}s grace period")
             return {
                 "status": "error",
                 "message": f"No handlers registered after {self.startup_grace_period_seconds}s grace period",

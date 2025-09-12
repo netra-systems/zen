@@ -75,16 +75,16 @@ class TestWebSocketCloudRunRaceConditions:
     def setup_method(self):
         """Setup for each test method."""
         self.race_conditions: List[CloudRunRaceCondition] = []
-        logger.info("🌥️ CLOUD RUN RACE CONDITION TEST SETUP")
+        logger.info("[U+1F325][U+FE0F] CLOUD RUN RACE CONDITION TEST SETUP")
 
     def teardown_method(self):
         """Cleanup and analysis after each test."""
         if self.race_conditions:
-            logger.info(f"☁️ CLOUD RUN ANALYSIS: {len(self.race_conditions)} race conditions tested")
+            logger.info(f"[U+2601][U+FE0F] CLOUD RUN ANALYSIS: {len(self.race_conditions)} race conditions tested")
             for rc in self.race_conditions:
                 if rc.infrastructure_delays:
                     avg_delay = sum(rc.infrastructure_delays) / len(rc.infrastructure_delays)
-                    logger.info(f"⏱️ {rc.test_name}: Avg delay {avg_delay:.3f}s, Max delay {max(rc.infrastructure_delays):.3f}s")
+                    logger.info(f"[U+23F1][U+FE0F] {rc.test_name}: Avg delay {avg_delay:.3f}s, Max delay {max(rc.infrastructure_delays):.3f}s")
 
     @pytest.mark.race_condition
     @pytest.mark.cloud_run
@@ -106,7 +106,7 @@ class TestWebSocketCloudRunRaceConditions:
             start_time=time.time()
         )
         
-        logger.info("🌥️ REPRODUCING: GCP Load Balancer routing delay race condition")
+        logger.info("[U+1F325][U+FE0F] REPRODUCING: GCP Load Balancer routing delay race condition")
         
         try:
             # Simulate GCP Load Balancer behavior
@@ -121,7 +121,7 @@ class TestWebSocketCloudRunRaceConditions:
             load_balancer_delay = random.uniform(0.1, 0.5)  # 100-500ms typical Cloud Run delay
             race_condition.infrastructure_delays.append(load_balancer_delay)
             
-            logger.info(f"🔄 Simulating {load_balancer_delay:.3f}s load balancer delay")
+            logger.info(f" CYCLE:  Simulating {load_balancer_delay:.3f}s load balancer delay")
             await asyncio.sleep(load_balancer_delay)
             
             # Now complete handshake (after application already tried to process)
@@ -142,7 +142,7 @@ class TestWebSocketCloudRunRaceConditions:
                 # Expected - application processing failed due to race condition
                 race_condition.success = False
                 race_condition.error_details = f"App processing failed: {str(app_result)}"
-                logger.info(f"✅ Expected race condition: {app_result}")
+                logger.info(f" PASS:  Expected race condition: {app_result}")
             else:
                 # Unexpected - no race condition detected
                 race_condition.success = True  
@@ -151,7 +151,7 @@ class TestWebSocketCloudRunRaceConditions:
         except Exception as e:
             race_condition.success = False
             race_condition.error_details = f"Unexpected error: {str(e)}"
-            logger.info(f"✅ Race condition caused unexpected error: {e}")
+            logger.info(f" PASS:  Race condition caused unexpected error: {e}")
             
         finally:
             race_condition.end_time = time.time()
@@ -184,7 +184,7 @@ class TestWebSocketCloudRunRaceConditions:
             start_time=time.time()
         )
         
-        logger.info("🌥️ REPRODUCING: Container startup service discovery race")
+        logger.info("[U+1F325][U+FE0F] REPRODUCING: Container startup service discovery race")
         
         try:
             # Simulate container startup scenario
@@ -195,7 +195,7 @@ class TestWebSocketCloudRunRaceConditions:
             state_machine = ConnectionStateMachine(connection_id, user_id)
             
             # Simulate rapid WebSocket connection establishment
-            logger.info("🔄 Attempting WebSocket connection during container startup")
+            logger.info(" CYCLE:  Attempting WebSocket connection during container startup")
             
             # Try to transition through states while services are starting
             startup_sequence = [
@@ -211,7 +211,7 @@ class TestWebSocketCloudRunRaceConditions:
                     service_discovery_delay = random.uniform(0.2, 1.0)  # 200ms-1s startup delay
                     race_condition.infrastructure_delays.append(service_discovery_delay)
                     
-                    logger.info(f"🔄 Service discovery delay: {service_discovery_delay:.3f}s")
+                    logger.info(f" CYCLE:  Service discovery delay: {service_discovery_delay:.3f}s")
                     
                     # During this delay, services aren't ready yet
                     services_ready = await self._check_services_availability_during_startup(
@@ -236,12 +236,12 @@ class TestWebSocketCloudRunRaceConditions:
             # Expected - race condition detected
             race_condition.success = False
             race_condition.error_details = str(e)
-            logger.info(f"✅ Expected startup race condition: {e}")
+            logger.info(f" PASS:  Expected startup race condition: {e}")
             
         except Exception as e:
             race_condition.success = False  
             race_condition.error_details = f"Unexpected error: {str(e)}"
-            logger.info(f"✅ Race condition caused unexpected error: {e}")
+            logger.info(f" PASS:  Race condition caused unexpected error: {e}")
             
         finally:
             race_condition.end_time = time.time()
@@ -276,14 +276,14 @@ class TestWebSocketCloudRunRaceConditions:
             concurrent_operations=4  # Simulate 4 containers starting
         )
         
-        logger.info("🌥️ REPRODUCING: Auto-scaling concurrent connection race")
+        logger.info("[U+1F325][U+FE0F] REPRODUCING: Auto-scaling concurrent connection race")
         
         try:
             num_containers = 4
             connections_per_container = 3
             total_connections = num_containers * connections_per_container
             
-            logger.info(f"🔄 Simulating {num_containers} containers with {connections_per_container} connections each")
+            logger.info(f" CYCLE:  Simulating {num_containers} containers with {connections_per_container} connections each")
             
             # Simulate concurrent container startup with WebSocket connections
             container_tasks = []
@@ -314,7 +314,7 @@ class TestWebSocketCloudRunRaceConditions:
             for idx, result in enumerate(results):
                 if isinstance(result, Exception):
                     failed_containers.append((idx, result))
-                    logger.info(f"✅ Container {idx} failed with expected race condition: {result}")
+                    logger.info(f" PASS:  Container {idx} failed with expected race condition: {result}")
                 else:
                     successful_containers.append((idx, result))
             
@@ -329,7 +329,7 @@ class TestWebSocketCloudRunRaceConditions:
                         if conn_id:
                             if conn_id in connection_ids:
                                 state_conflicts += 1
-                                logger.info(f"✅ State conflict detected: Duplicate connection ID {conn_id}")
+                                logger.info(f" PASS:  State conflict detected: Duplicate connection ID {conn_id}")
                             connection_ids.add(conn_id)
             
             # Evaluate race condition detection
@@ -339,7 +339,7 @@ class TestWebSocketCloudRunRaceConditions:
                     f"Race conditions detected: {len(failed_containers)} failed containers, "
                     f"{state_conflicts} state conflicts"
                 )
-                logger.info(f"✅ Auto-scaling race conditions detected: {race_condition.error_details}")
+                logger.info(f" PASS:  Auto-scaling race conditions detected: {race_condition.error_details}")
             else:
                 race_condition.success = True
                 race_condition.error_details = (
@@ -349,7 +349,7 @@ class TestWebSocketCloudRunRaceConditions:
         except Exception as e:
             race_condition.success = False
             race_condition.error_details = f"Unexpected error during auto-scaling test: {str(e)}"
-            logger.info(f"✅ Auto-scaling race condition caused unexpected error: {e}")
+            logger.info(f" PASS:  Auto-scaling race condition caused unexpected error: {e}")
             
         finally:
             race_condition.end_time = time.time()  
@@ -382,7 +382,7 @@ class TestWebSocketCloudRunRaceConditions:
             start_time=time.time()
         )
         
-        logger.info("🌥️ REPRODUCING: Network partition message ordering race")
+        logger.info("[U+1F325][U+FE0F] REPRODUCING: Network partition message ordering race")
         
         try:
             connection_id = "network-partition-test"
@@ -418,7 +418,7 @@ class TestWebSocketCloudRunRaceConditions:
                 race_condition.error_details = (
                     f"Transition: {transition_result}, Messages: {message_result}"
                 )
-                logger.info(f"✅ Network partition race condition detected")
+                logger.info(f" PASS:  Network partition race condition detected")
             else:
                 race_condition.success = True
                 race_condition.error_details = "NO RACE CONDITION: All operations completed successfully"
@@ -426,7 +426,7 @@ class TestWebSocketCloudRunRaceConditions:
         except Exception as e:
             race_condition.success = False
             race_condition.error_details = f"Network partition error: {str(e)}"
-            logger.info(f"✅ Network partition caused race condition: {e}")
+            logger.info(f" PASS:  Network partition caused race condition: {e}")
             
         finally:
             race_condition.end_time = time.time()
@@ -454,7 +454,7 @@ class TestWebSocketCloudRunRaceConditions:
     async def _simulate_immediate_application_processing(self, websocket_mock, race_condition: CloudRunRaceCondition):
         """Simulate application trying to process immediately (Cloud Run behavior)."""
         try:
-            logger.info("🔄 Application attempting immediate processing")
+            logger.info(" CYCLE:  Application attempting immediate processing")
             
             # Try to use WebSocket before handshake is complete
             if websocket_mock.client_state != "CONNECTED":
@@ -470,7 +470,7 @@ class TestWebSocketCloudRunRaceConditions:
     async def _simulate_delayed_websocket_handshake(self, websocket_mock, race_condition: CloudRunRaceCondition):
         """Simulate delayed WebSocket handshake completion."""
         try:
-            logger.info("🔄 Completing delayed WebSocket handshake")
+            logger.info(" CYCLE:  Completing delayed WebSocket handshake")
             
             # Simulate handshake completion
             await websocket_mock.accept()
@@ -493,7 +493,7 @@ class TestWebSocketCloudRunRaceConditions:
         
         services_ready = supervisor_available and thread_service_available
         
-        logger.info(f"🔍 Service availability check: Supervisor={supervisor_available}, Threads={thread_service_available}")
+        logger.info(f" SEARCH:  Service availability check: Supervisor={supervisor_available}, Threads={thread_service_available}")
         
         return services_ready
 
@@ -501,7 +501,7 @@ class TestWebSocketCloudRunRaceConditions:
                                                             race_condition: CloudRunRaceCondition) -> Dict[str, Any]:
         """Simulate a container handling multiple concurrent connections."""
         try:
-            logger.info(f"🏭 Container {container_idx} starting with {num_connections} connections")
+            logger.info(f"[U+1F3ED] Container {container_idx} starting with {num_connections} connections")
             
             # Create connections concurrently within this container
             connection_tasks = []
@@ -536,12 +536,12 @@ class TestWebSocketCloudRunRaceConditions:
             }
             
             if failed_connections:
-                logger.info(f"✅ Container {container_idx} had expected failures: {len(failed_connections)}")
+                logger.info(f" PASS:  Container {container_idx} had expected failures: {len(failed_connections)}")
             
             return container_result
             
         except Exception as e:
-            logger.info(f"✅ Container {container_idx} failed with race condition: {e}")
+            logger.info(f" PASS:  Container {container_idx} failed with race condition: {e}")
             raise
 
     async def _create_connection_in_container(self, connection_id: str, user_id: str, container_idx: int) -> Dict[str, Any]:
@@ -594,7 +594,7 @@ class TestWebSocketCloudRunRaceConditions:
                 network_delay = random.uniform(0.1, 0.3)
                 race_condition.infrastructure_delays.append(network_delay)
                 
-                logger.info(f"🔄 State transition to {state.value} with {network_delay:.3f}s network delay")
+                logger.info(f" CYCLE:  State transition to {state.value} with {network_delay:.3f}s network delay")
                 await asyncio.sleep(network_delay)
                 
                 if not state_machine.transition_to(state, reason):
@@ -617,7 +617,7 @@ class TestWebSocketCloudRunRaceConditions:
                 partition_delay = random.uniform(0.05, 0.25)
                 race_condition.infrastructure_delays.append(partition_delay)
                 
-                logger.info(f"📨 Processing message {message['sequence']} with {partition_delay:.3f}s partition delay")
+                logger.info(f"[U+1F4E8] Processing message {message['sequence']} with {partition_delay:.3f}s partition delay")
                 await asyncio.sleep(partition_delay)
                 
                 # Try to process message (may fail if state is not ready)

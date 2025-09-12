@@ -156,12 +156,12 @@ def main():
     print("Creating index.xml...")
     create_index(category_info, output_dir)
     
-    print(f"\n✅ Successfully created {len(category_info)} category files:")
+    print(f"\n PASS:  Successfully created {len(category_info)} category files:")
     for cat in sorted(category_info.keys()):
         filename = f"{sanitize_filename(cat)}.xml"
         print(f"  - {cat}: {filename} ({len(category_info[cat])} learnings)")
     
-    print(f"\n📋 Index created at: SPEC/learnings/index.xml")
+    print(f"\n[U+1F4CB] Index created at: SPEC/learnings/index.xml")
 
 if __name__ == '__main__':
     main()

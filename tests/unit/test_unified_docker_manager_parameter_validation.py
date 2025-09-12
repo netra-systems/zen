@@ -52,14 +52,14 @@ class TestUnifiedDockerManagerParameterValidation:
         DOCUMENTATION TEST: Verify the correct parameter name.
         
         This test serves as documentation for developers:
-        - ✅ CORRECT: environment_type=EnvironmentType.TEST
-        - ❌ WRONG: environment="test"
+        -  PASS:  CORRECT: environment_type=EnvironmentType.TEST
+        -  FAIL:  WRONG: environment="test"
         """
-        # ✅ This should work
+        #  PASS:  This should work
         manager = UnifiedDockerManager(environment_type=EnvironmentType.TEST)
         assert manager.environment_type == EnvironmentType.TEST
         
-        # ❌ This should fail (already tested above, but included for clarity)
+        #  FAIL:  This should fail (already tested above, but included for clarity)
         with pytest.raises(TypeError):
             UnifiedDockerManager(environment="test")
 

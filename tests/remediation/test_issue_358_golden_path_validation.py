@@ -4,7 +4,7 @@ Issue #358 Golden Path Validation Suite
 CRITICAL: Post-deployment validation for complete Golden Path failure remediation
 
 This test suite validates that the massive deployment gap has been resolved
-and the Golden Path (login → AI response) flow is fully functional.
+and the Golden Path (login  ->  AI response) flow is fully functional.
 
 BUSINESS IMPACT: $500K+ ARR protection
 SUCCESS CRITERIA: All tests must pass for remediation to be considered successful
@@ -330,7 +330,7 @@ class TestIssue358GoldenPathValidation(SSotAsyncTestCase):
         print(f"\nGOLDEN PATH READINESS ASSESSMENT:")
         print(f"Overall Score: {readiness_percentage:.1f}% ({passed_checks}/{total_checks})")
         for check, result in validation_results.items():
-            status = "✅ PASS" if result else "❌ FAIL"
+            status = " PASS:  PASS" if result else " FAIL:  FAIL"
             print(f"  {check}: {status}")
             
         # Success criteria: All critical components must be ready

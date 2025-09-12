@@ -3,7 +3,7 @@ Test Golden Path Issue Cluster Validation - Complete User Journey E2E
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Ensure complete user authentication → agent execution flow works
+- Business Goal: Ensure complete user authentication  ->  agent execution flow works
 - Value Impact: Golden Path represents 90% of platform value through chat functionality
 - Revenue Impact: $500K+ ARR protection through end-to-end user journey validation
 
@@ -499,7 +499,7 @@ class TestGoldenPathClusterValidation(SSotAsyncTestCase):
                     "Regression detected: No business value in agent result"
         
         # Log successful regression test
-        print(f"✅ Golden Path regression test passed - {len(events)} events received")
+        print(f" PASS:  Golden Path regression test passed - {len(events)} events received")
     
     async def tearDown(self):
         """Clean up E2E test resources."""

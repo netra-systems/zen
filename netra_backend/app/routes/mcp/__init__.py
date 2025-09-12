@@ -35,12 +35,12 @@ try:
     from netra_backend.app.routes.mcp.service_factory import get_mcp_service
     
     MCP_AVAILABLE = True
-    logger.info("✅ MCP dependencies available - Full MCP integration enabled")
+    logger.info(" PASS:  MCP dependencies available - Full MCP integration enabled")
     
 except ImportError as e:
     MCP_ERROR = str(e)
-    logger.warning(f"⚠️ MCP dependencies not available: {e}")
-    logger.info("🔄 Running in MCP-disabled mode - Core functionality preserved")
+    logger.warning(f" WARNING: [U+FE0F] MCP dependencies not available: {e}")
+    logger.info(" CYCLE:  Running in MCP-disabled mode - Core functionality preserved")
     
     # Provide fallback exports to prevent import errors
     router = None
@@ -55,8 +55,8 @@ except ImportError as e:
 
 except Exception as e:
     MCP_ERROR = str(e)
-    logger.error(f"❌ MCP dependency check failed: {e}")
-    logger.info("🔄 Running in MCP-disabled mode - Core functionality preserved")
+    logger.error(f" FAIL:  MCP dependency check failed: {e}")
+    logger.info(" CYCLE:  Running in MCP-disabled mode - Core functionality preserved")
     
     # Provide fallback exports to prevent import errors
     router = None

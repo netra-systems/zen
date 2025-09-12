@@ -21,7 +21,7 @@ KEY COVERAGE:
 
 GOLDEN PATH UNIT VALIDATION:
 These tests validate the core message processing components that enable:
-User Message → Message Parse → Triage Logic → Response Generation → WebSocket Events
+User Message  ->  Message Parse  ->  Triage Logic  ->  Response Generation  ->  WebSocket Events
 
 These tests MUST initially FAIL to demonstrate current issues, then guide remediation.
 """
@@ -529,7 +529,7 @@ class TestBasicTriageResponseUnit(SSotAsyncTestCase):
         Business Impact: Validates the core message processing pipeline that
         enables the $500K+ ARR user journey without external dependencies.
         
-        Flow: User Message → Parse → Route → Triage → Events → Response
+        Flow: User Message  ->  Parse  ->  Route  ->  Triage  ->  Events  ->  Response
         
         EXPECTED OUTCOME: Should initially FAIL demonstrating current issues.
         """

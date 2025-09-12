@@ -290,7 +290,7 @@ class RealAgentExecutionValidator:
         
         # Validate critical events
         if event_type in REQUIRED_AGENT_EVENTS:
-            logger.info(f"✅ Received critical event: {event_type}")
+            logger.info(f" PASS:  Received critical event: {event_type}")
             
             # Check for substantive content
             if event_type == "tool_completed":
@@ -507,7 +507,7 @@ class TestRealAgentExecutionStaging:
             has_content = validator.metrics.substantive_content_detected or quality_score > 0.1
             assert has_content, "Agent should provide some content or analysis (staging may use mock responses)"
             
-        logger.info("✅ UnifiedDataAgent execution test completed")
+        logger.info(" PASS:  UnifiedDataAgent execution test completed")
     
     async def test_002_optimization_agent_real_execution(self, validator: RealAgentExecutionValidator):
         """Test #2: CRITICAL - Real OptimizationAgent execution with WebSocket events"""
@@ -549,7 +549,7 @@ class TestRealAgentExecutionStaging:
             assert quality_score > min_quality, \
                 f"Optimization quality too low: {quality_score:.2f} (staging threshold: {min_quality})"
             
-            logger.info(f"✅ OptimizationAgent test completed with quality score: {quality_score:.2f}")
+            logger.info(f" PASS:  OptimizationAgent test completed with quality score: {quality_score:.2f}")
     
     async def test_003_multi_agent_coordination_real(self, validator: RealAgentExecutionValidator):
         """Test #3: CRITICAL - Real multi-agent coordination and handoffs"""
@@ -592,7 +592,7 @@ class TestRealAgentExecutionStaging:
             min_quality = 0.2  # Lower threshold for staging with potential mock responses
             assert quality_score >= min_quality, f"Multi-agent coordination quality insufficient: {quality_score:.2f} (staging threshold: {min_quality})"
             
-            logger.info("✅ Multi-agent coordination test completed")
+            logger.info(" PASS:  Multi-agent coordination test completed")
     
     async def test_004_concurrent_user_isolation(self, config: StagingConfig):
         """Test #4: CRITICAL - Concurrent user isolation and performance"""
@@ -647,7 +647,7 @@ class TestRealAgentExecutionStaging:
         assert successful_users >= PERFORMANCE_THRESHOLDS["concurrent_users"] * 0.8, \
             f"Insufficient concurrent users succeeded: {successful_users}/{PERFORMANCE_THRESHOLDS['concurrent_users']}"
         
-        logger.info(f"✅ Concurrent test: {successful_users}/{len(validators)} users successful in {concurrent_duration:.2f}s")
+        logger.info(f" PASS:  Concurrent test: {successful_users}/{len(validators)} users successful in {concurrent_duration:.2f}s")
         logger.info(f"Total events received: {total_events}")
         
         if all_errors:
@@ -679,12 +679,12 @@ class TestRealAgentExecutionStaging:
                 # In staging with enhanced mock, expect error events for invalid requests
                 assert len(error_events) > 0, \
                     f"MockWebSocket should return error events for invalid requests. Got events: {[e.get('type') for e in events]}"
-                logger.info(f"✅ Error handling test passed with {len(error_events)} error events in mock mode")
+                logger.info(f" PASS:  Error handling test passed with {len(error_events)} error events in mock mode")
             else:
                 # In real environment, expect error events OR graceful rejection (no events)
                 assert len(error_events) > 0 or len(events) == 0, \
                     "Should handle invalid requests gracefully with error events or no events"
-                logger.info(f"✅ Error handling test passed in real mode: {len(error_events)} errors, {len(events)} total events")
+                logger.info(f" PASS:  Error handling test passed in real mode: {len(error_events)} errors, {len(events)} total events")
         
         # Test 2: Connection resilience
         connection_tests = 0
@@ -717,7 +717,7 @@ class TestRealAgentExecutionStaging:
         assert resilience_rate >= 0.6, f"Poor connection resilience: {resilience_rate:.2f}"
         
         validator.metrics.recovery_successful = resilience_rate >= 0.6
-        logger.info(f"✅ Resilience test: {successful_reconnections}/{connection_tests} connections successful")
+        logger.info(f" PASS:  Resilience test: {successful_reconnections}/{connection_tests} connections successful")
     
     async def test_006_performance_benchmarks(self, validator: RealAgentExecutionValidator):
         """Test #6: CRITICAL - Performance benchmarks and SLA validation"""
@@ -781,7 +781,7 @@ class TestRealAgentExecutionStaging:
         assert avg_quality >= PERFORMANCE_THRESHOLDS["min_response_quality_score"], \
             f"Quality SLA violation: {avg_quality:.2f} < {PERFORMANCE_THRESHOLDS['min_response_quality_score']}"
         
-        logger.info("✅ Performance benchmarks passed")
+        logger.info(" PASS:  Performance benchmarks passed")
     
     async def test_007_business_value_validation(self, validator: RealAgentExecutionValidator):
         """Test #7: CRITICAL - Business value delivery validation"""
@@ -875,7 +875,7 @@ class TestRealAgentExecutionStaging:
         assert avg_value_score >= PERFORMANCE_THRESHOLDS["min_response_quality_score"], \
             f"Business value score too low: {avg_value_score:.2f}"
         
-        logger.info(f"✅ Business value validation passed: {avg_value_score:.2f} average quality")
+        logger.info(f" PASS:  Business value validation passed: {avg_value_score:.2f} average quality")
 
 
 # ============================================================================
@@ -926,11 +926,11 @@ if __name__ == "__main__":
     print("=" * 70)
     
     if verify_staging_connectivity(config):
-        print("✅ Staging environment accessible")
+        print(" PASS:  Staging environment accessible")
         print(f"Backend: {config.backend_url}")
         print(f"WebSocket: {config.websocket_url}")
     else:
-        print("❌ Staging environment not accessible")
+        print(" FAIL:  Staging environment not accessible")
         print("Tests may fail or be skipped")
     
     print("=" * 70)

@@ -221,7 +221,7 @@ class WebSocketAlertSystem:
         # Initialize default alert rules
         self._initialize_default_alert_rules()
         
-        logger.info("🚨 WebSocket Alert System initialized")
+        logger.info(" ALERT:  WebSocket Alert System initialized")
     
     def _initialize_default_alert_rules(self) -> None:
         """Initialize default alert rules for critical WebSocket monitoring."""
@@ -363,17 +363,17 @@ class WebSocketAlertSystem:
             escalation_tier=EscalationTier.ENGINEERING
         ))
         
-        logger.info(f"🚨 Initialized {len(self.alert_rules)} default alert rules")
+        logger.info(f" ALERT:  Initialized {len(self.alert_rules)} default alert rules")
     
     async def start_alerting(self) -> None:
         """Start automated alerting system."""
         if not self.evaluation_task:
             self.evaluation_task = asyncio.create_task(self._alert_evaluation_loop())
-            logger.info("🚨 Alert evaluation started")
+            logger.info(" ALERT:  Alert evaluation started")
         
         if not self.escalation_task:
             self.escalation_task = asyncio.create_task(self._escalation_loop())
-            logger.info("🚨 Alert escalation started")
+            logger.info(" ALERT:  Alert escalation started")
     
     async def stop_alerting(self) -> None:
         """Stop automated alerting system."""
@@ -393,7 +393,7 @@ class WebSocketAlertSystem:
                 pass
             self.escalation_task = None
         
-        logger.info("🚨 Alert system stopped")
+        logger.info(" ALERT:  Alert system stopped")
     
     async def _alert_evaluation_loop(self) -> None:
         """Main alert evaluation loop."""
@@ -403,10 +403,10 @@ class WebSocketAlertSystem:
                 await asyncio.sleep(self.evaluation_interval)
                 
         except asyncio.CancelledError:
-            logger.info("🚨 Alert evaluation loop cancelled")
+            logger.info(" ALERT:  Alert evaluation loop cancelled")
             raise
         except Exception as e:
-            logger.error(f"🚨 Alert evaluation loop error: {e}", exc_info=True)
+            logger.error(f" ALERT:  Alert evaluation loop error: {e}", exc_info=True)
             await asyncio.sleep(5)
     
     async def _escalation_loop(self) -> None:
@@ -418,10 +418,10 @@ class WebSocketAlertSystem:
                 await asyncio.sleep(self.escalation_check_interval)
                 
         except asyncio.CancelledError:
-            logger.info("🚨 Escalation loop cancelled")
+            logger.info(" ALERT:  Escalation loop cancelled")
             raise
         except Exception as e:
-            logger.error(f"🚨 Escalation loop error: {e}", exc_info=True)
+            logger.error(f" ALERT:  Escalation loop error: {e}", exc_info=True)
             await asyncio.sleep(5)
     
     async def _evaluate_all_alert_rules(self) -> None:
@@ -436,7 +436,7 @@ class WebSocketAlertSystem:
             try:
                 await self._evaluate_alert_rule(rule, system_metrics, health_summary)
             except Exception as e:
-                logger.error(f"🚨 Error evaluating alert rule {rule.rule_id}: {e}")
+                logger.error(f" ALERT:  Error evaluating alert rule {rule.rule_id}: {e}")
     
     async def _evaluate_alert_rule(self, rule: AlertRule, system_metrics: Any, health_summary: Dict[str, Any]) -> None:
         """Evaluate a single alert rule."""
@@ -500,7 +500,7 @@ class WebSocketAlertSystem:
             return False
             
         except Exception as e:
-            logger.error(f"🚨 Error evaluating condition '{condition}': {e}")
+            logger.error(f" ALERT:  Error evaluating condition '{condition}': {e}")
             return False
     
     async def _trigger_alert(self, rule: AlertRule, system_metrics: Any, health_summary: Dict[str, Any]) -> None:
@@ -537,7 +537,7 @@ class WebSocketAlertSystem:
         # Update rate limiting
         self._update_rule_rate_limit(rule)
         
-        logger.critical(f"🚨 ALERT TRIGGERED: {rule.name} (ID: {alert_id})")
+        logger.critical(f" ALERT:  ALERT TRIGGERED: {rule.name} (ID: {alert_id})")
     
     def _format_alert_message(self, rule: AlertRule, system_metrics: Any, health_summary: Dict[str, Any]) -> str:
         """Format alert message with context."""
@@ -619,9 +619,9 @@ class WebSocketAlertSystem:
         channels = self._get_notification_channels_for_tier(active_alert.current_tier)
         try:
             await self.notification_manager.deliver_notifications(alert, channels, {})
-            logger.info(f"🚨 Alert notification sent: {active_alert.alert_id}")
+            logger.info(f" ALERT:  Alert notification sent: {active_alert.alert_id}")
         except Exception as e:
-            logger.error(f"🚨 Failed to send alert notification: {e}")
+            logger.error(f" ALERT:  Failed to send alert notification: {e}")
     
     def _get_notification_channels_for_tier(self, tier: EscalationTier) -> List[NotificationChannel]:
         """Get notification channels for escalation tier."""
@@ -714,7 +714,7 @@ class WebSocketAlertSystem:
         # Send escalation notification
         await self._send_alert_notification(escalated_alert, rule)
         
-        logger.critical(f"🚨 ALERT ESCALATED: {alert.alert_id} -> {next_tier.value.upper()}")
+        logger.critical(f" ALERT:  ALERT ESCALATED: {alert.alert_id} -> {next_tier.value.upper()}")
     
     async def _check_alert_resolutions(self) -> None:
         """Check for automatic alert resolutions."""
@@ -759,7 +759,7 @@ class WebSocketAlertSystem:
         # Send resolution notification
         await self._send_resolution_notification(alert)
         
-        logger.info(f"🚨 ALERT RESOLVED: {alert_id} - {reason}")
+        logger.info(f" ALERT:  ALERT RESOLVED: {alert_id} - {reason}")
     
     async def _send_resolution_notification(self, alert: ActiveAlert) -> None:
         """Send alert resolution notification."""
@@ -829,13 +829,13 @@ class WebSocketAlertSystem:
     def add_alert_rule(self, rule: AlertRule) -> None:
         """Add new alert rule."""
         self.alert_rules[rule.rule_id] = rule
-        logger.info(f"🚨 Added alert rule: {rule.name} ({rule.rule_id})")
+        logger.info(f" ALERT:  Added alert rule: {rule.name} ({rule.rule_id})")
     
     def remove_alert_rule(self, rule_id: str) -> bool:
         """Remove alert rule."""
         if rule_id in self.alert_rules:
             del self.alert_rules[rule_id]
-            logger.info(f"🚨 Removed alert rule: {rule_id}")
+            logger.info(f" ALERT:  Removed alert rule: {rule_id}")
             return True
         return False
     
@@ -843,7 +843,7 @@ class WebSocketAlertSystem:
         """Update existing alert rule."""
         if rule_id in self.alert_rules:
             self.alert_rules[rule_id] = updated_rule
-            logger.info(f"🚨 Updated alert rule: {rule_id}")
+            logger.info(f" ALERT:  Updated alert rule: {rule_id}")
             return True
         return False
     
@@ -852,7 +852,7 @@ class WebSocketAlertSystem:
         rule = self.alert_rules.get(rule_id)
         if rule:
             rule.enabled = True
-            logger.info(f"🚨 Enabled alert rule: {rule_id}")
+            logger.info(f" ALERT:  Enabled alert rule: {rule_id}")
             return True
         return False
     
@@ -861,7 +861,7 @@ class WebSocketAlertSystem:
         rule = self.alert_rules.get(rule_id)
         if rule:
             rule.enabled = False
-            logger.info(f"🚨 Disabled alert rule: {rule_id}")
+            logger.info(f" ALERT:  Disabled alert rule: {rule_id}")
             return True
         return False
     
@@ -876,7 +876,7 @@ class WebSocketAlertSystem:
         alert.acknowledged_at = datetime.now(timezone.utc)
         alert.acknowledged_by = acknowledged_by
         
-        logger.info(f"🚨 Alert acknowledged: {alert_id} by {acknowledged_by}")
+        logger.info(f" ALERT:  Alert acknowledged: {alert_id} by {acknowledged_by}")
         return True
     
     async def resolve_alert_manually(self, alert_id: str, resolved_by: str, reason: str) -> bool:
@@ -988,7 +988,7 @@ async def start_websocket_alerting() -> None:
     """Start global WebSocket alerting system."""
     alert_system = get_websocket_alert_system()
     await alert_system.start_alerting()
-    logger.info("🚨 Global WebSocket alerting started")
+    logger.info(" ALERT:  Global WebSocket alerting started")
 
 
 async def stop_websocket_alerting() -> None:
@@ -996,7 +996,7 @@ async def stop_websocket_alerting() -> None:
     global _websocket_alert_system
     if _websocket_alert_system:
         await _websocket_alert_system.stop_alerting()
-        logger.info("🚨 Global WebSocket alerting stopped")
+        logger.info(" ALERT:  Global WebSocket alerting stopped")
 
 
 async def trigger_emergency_alert(title: str, message: str, severity: AlertSeverity = AlertSeverity.CRITICAL) -> None:
@@ -1019,4 +1019,4 @@ async def trigger_emergency_alert(title: str, message: str, severity: AlertSever
     # Trigger immediately
     await alert_system._trigger_alert(emergency_rule, alert_system.monitor.system_metrics, {})
     
-    logger.critical(f"🚨 EMERGENCY ALERT TRIGGERED: {title}")
+    logger.critical(f" ALERT:  EMERGENCY ALERT TRIGGERED: {title}")

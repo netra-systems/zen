@@ -362,7 +362,7 @@
                                                     
 
                                                     # Test complex data structures in events
-                                                    # REMOVED_SYNTAX_ERROR: complex_thought = "Analyzing performance data with special chars: 特殊字符, émojis 🚀, numbers 123"
+                                                    # REMOVED_SYNTAX_ERROR: complex_thought = "Analyzing performance data with special chars: [U+7279][U+6B8A][U+5B57][U+7B26], [U+00E9]mojis [U+1F680], numbers 123"
                                                     # REMOVED_SYNTAX_ERROR: await data_agent.emit_thinking(complex_thought, step_number=42)
 
                                                     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)
@@ -373,7 +373,7 @@
                                                     # REMOVED_SYNTAX_ERROR: assert 'thought' in latest_thinking, "Event should contain thought data"
 
                                                     # Test tool event with complex parameters
-                                                    # REMOVED_SYNTAX_ERROR: complex_params = {"nested": {"data": [1, 2, 3]}, "unicode": "测试", "boolean": True}
+                                                    # REMOVED_SYNTAX_ERROR: complex_params = {"nested": {"data": [1, 2, 3]}, "unicode": "[U+6D4B][U+8BD5]", "boolean": True}
                                                     # REMOVED_SYNTAX_ERROR: await data_agent.emit_tool_executing("complex_analyzer", complex_params)
 
                                                     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)
@@ -1109,7 +1109,7 @@
                             # REMOVED_SYNTAX_ERROR: final_health = data_agent.get_health_status()
                             # REMOVED_SYNTAX_ERROR: assert isinstance(final_health, dict), "Health status should be available after complete workflow"
 
-                            # REMOVED_SYNTAX_ERROR: print("✅ DataSubAgent Comprehensive Golden Pattern SSOT Implementation - All 25+ Tests Complete!")
+                            # REMOVED_SYNTAX_ERROR: print(" PASS:  DataSubAgent Comprehensive Golden Pattern SSOT Implementation - All 25+ Tests Complete!")
 
 
 # REMOVED_SYNTAX_ERROR: def run_comprehensive_test_suite():
@@ -1117,14 +1117,14 @@
     # REMOVED_SYNTAX_ERROR: pass
     # REMOVED_SYNTAX_ERROR: import sys
 
-    # REMOVED_SYNTAX_ERROR: print("🚀 Starting DataSubAgent Golden Pattern Comprehensive Test Suite")
+    # REMOVED_SYNTAX_ERROR: print("[U+1F680] Starting DataSubAgent Golden Pattern Comprehensive Test Suite")
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
     # REMOVED_SYNTAX_ERROR: print("Testing 25+ scenarios across 5 categories:")
-    # REMOVED_SYNTAX_ERROR: print("• Initialization Scenarios (5 tests)")
-    # REMOVED_SYNTAX_ERROR: print("• WebSocket Event Emission (5 tests)")
-    # REMOVED_SYNTAX_ERROR: print("• Execution Patterns (5 tests)")
-    # REMOVED_SYNTAX_ERROR: print("• Error Handling (5 tests)")
-    # REMOVED_SYNTAX_ERROR: print("• Resource Cleanup (7 tests)")
+    # REMOVED_SYNTAX_ERROR: print("[U+2022] Initialization Scenarios (5 tests)")
+    # REMOVED_SYNTAX_ERROR: print("[U+2022] WebSocket Event Emission (5 tests)")
+    # REMOVED_SYNTAX_ERROR: print("[U+2022] Execution Patterns (5 tests)")
+    # REMOVED_SYNTAX_ERROR: print("[U+2022] Error Handling (5 tests)")
+    # REMOVED_SYNTAX_ERROR: print("[U+2022] Resource Cleanup (7 tests)")
     # REMOVED_SYNTAX_ERROR: print("=" * 80)
 
     # Run pytest with verbose output
@@ -1132,11 +1132,11 @@
 
     # REMOVED_SYNTAX_ERROR: if result == 0:
         # REMOVED_SYNTAX_ERROR: print(" )
-        # REMOVED_SYNTAX_ERROR: 🎉 DataSubAgent Golden Pattern Compliance: FULLY COMPLIANT")
-        # REMOVED_SYNTAX_ERROR: print("✅ All 25+ test cases passed successfully")
+        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  DataSubAgent Golden Pattern Compliance: FULLY COMPLIANT")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  All 25+ test cases passed successfully")
         # REMOVED_SYNTAX_ERROR: else:
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: 💥 DataSubAgent Golden Pattern Compliance: NEEDS WORK")
+            # REMOVED_SYNTAX_ERROR: [U+1F4A5] DataSubAgent Golden Pattern Compliance: NEEDS WORK")
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
             # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)

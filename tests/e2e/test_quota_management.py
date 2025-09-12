@@ -6,7 +6,7 @@ BUSINESS VALUE JUSTIFICATION:
 3. Value Impact: Prevents revenue loss from service abuse and ensures fair usage
 4. Revenue Impact: Maintains sustainable platform growth and conversion funnel
 
-CRITICAL PATH: Request → Quota Check → Execution → Usage Tracking → Limit Enforcement
+CRITICAL PATH: Request  ->  Quota Check  ->  Execution  ->  Usage Tracking  ->  Limit Enforcement
 """
 
 import pytest

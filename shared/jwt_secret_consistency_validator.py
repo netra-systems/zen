@@ -204,7 +204,7 @@ class JWTSecretConsistencyValidator:
         Returns:
             ConsistencyValidationReport with detailed results
         """
-        logger.info("🔍 Starting cross-service JWT secret consistency validation...")
+        logger.info(" SEARCH:  Starting cross-service JWT secret consistency validation...")
         
         # Services to validate
         services_to_check = [
@@ -223,9 +223,9 @@ class JWTSecretConsistencyValidator:
             service_infos.append(service_info)
             
             if service_info.reachable:
-                logger.info(f"   ✅ {service_name}: Secret hash {service_info.jwt_secret_hash[:8]}... (source: {service_info.secret_source})")
+                logger.info(f"    PASS:  {service_name}: Secret hash {service_info.jwt_secret_hash[:8]}... (source: {service_info.secret_source})")
             else:
-                logger.warning(f"   ⚠️ {service_name}: Not reachable - {service_info.error}")
+                logger.warning(f"    WARNING: [U+FE0F] {service_name}: Not reachable - {service_info.error}")
         
         # Analyze consistency
         reachable_services = [s for s in service_infos if s.reachable]
@@ -295,7 +295,7 @@ class JWTSecretConsistencyValidator:
         Returns:
             Dict with validation results across services
         """
-        logger.info("🔧 Testing JWT token cross-service validation...")
+        logger.info("[U+1F527] Testing JWT token cross-service validation...")
         
         results = {
             "test_timestamp": datetime.now(timezone.utc).isoformat(),
@@ -331,7 +331,7 @@ class JWTSecretConsistencyValidator:
                 "algorithm": algorithm
             }
             
-            logger.info(f"   ✅ Created test JWT token using unified manager (length: {len(test_token)})")
+            logger.info(f"    PASS:  Created test JWT token using unified manager (length: {len(test_token)})")
             
             # Try to validate token with auth service
             try:
@@ -346,9 +346,9 @@ class JWTSecretConsistencyValidator:
                 }
                 
                 if auth_validation:
-                    logger.info("   ✅ Auth service successfully validated token")
+                    logger.info("    PASS:  Auth service successfully validated token")
                 else:
-                    logger.error("   ❌ Auth service rejected token")
+                    logger.error("    FAIL:  Auth service rejected token")
                     results["errors"].append("Auth service rejected token created by unified manager")
                     
             except Exception as e:
@@ -357,7 +357,7 @@ class JWTSecretConsistencyValidator:
                     "error": str(e)
                 }
                 results["errors"].append(f"Auth service validation error: {e}")
-                logger.error(f"   ❌ Auth service validation error: {e}")
+                logger.error(f"    FAIL:  Auth service validation error: {e}")
             
             # Try to validate token with test framework
             try:
@@ -370,7 +370,7 @@ class JWTSecretConsistencyValidator:
                     "error": None
                 }
                 
-                logger.info("   ✅ Test framework successfully validated token")
+                logger.info("    PASS:  Test framework successfully validated token")
                 
             except Exception as e:
                 results["token_validation"]["test_framework"] = {
@@ -378,7 +378,7 @@ class JWTSecretConsistencyValidator:
                     "error": str(e)  
                 }
                 results["errors"].append(f"Test framework validation error: {e}")
-                logger.error(f"   ❌ Test framework validation error: {e}")
+                logger.error(f"    FAIL:  Test framework validation error: {e}")
             
             # Determine overall cross-service success
             validation_results = results["token_validation"]
@@ -389,9 +389,9 @@ class JWTSecretConsistencyValidator:
             results["success_rate"] = successful_validations / max(total_validations, 1)
             
             if results["cross_service_success"]:
-                logger.info(f"   ✅ Cross-service JWT validation SUCCESS ({successful_validations}/{total_validations})")
+                logger.info(f"    PASS:  Cross-service JWT validation SUCCESS ({successful_validations}/{total_validations})")
             else:
-                logger.error(f"   ❌ Cross-service JWT validation FAILED ({successful_validations}/{total_validations})")
+                logger.error(f"    FAIL:  Cross-service JWT validation FAILED ({successful_validations}/{total_validations})")
                 
         except Exception as e:
             results["token_creation"] = {
@@ -399,7 +399,7 @@ class JWTSecretConsistencyValidator:
                 "error": str(e)
             }
             results["errors"].append(f"Token creation error: {e}")
-            logger.error(f"   ❌ Token creation error: {e}")
+            logger.error(f"    FAIL:  Token creation error: {e}")
         
         return results
     
@@ -415,7 +415,7 @@ class JWTSecretConsistencyValidator:
         
         logger.info("SERVICE DETAILS:")
         for service in report.services:
-            status = "✅ REACHABLE" if service.reachable else "❌ UNREACHABLE"
+            status = " PASS:  REACHABLE" if service.reachable else " FAIL:  UNREACHABLE"
             logger.info(f"  {service.service_name}: {status}")
             if service.reachable:
                 logger.info(f"    Secret Hash: {service.jwt_secret_hash[:12]}...")
@@ -428,13 +428,13 @@ class JWTSecretConsistencyValidator:
             logger.warning("")
             logger.warning("INCONSISTENCIES DETECTED:")
             for inconsistency in report.inconsistencies:
-                logger.warning(f"  ❌ {inconsistency}")
+                logger.warning(f"   FAIL:  {inconsistency}")
         
         if report.recommendations:
             logger.info("")
             logger.info("RECOMMENDATIONS:")
             for recommendation in report.recommendations:
-                logger.info(f"  💡 {recommendation}")
+                logger.info(f"   IDEA:  {recommendation}")
                 
         logger.info("=" * 60)
 

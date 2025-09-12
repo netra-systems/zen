@@ -853,7 +853,7 @@ class TestViolationAnalyzer:
         report_lines.append("# Test Size Violations Report")
         report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         report_lines.append("")
-        report_lines.append("## ⚠️ WARNING")
+        report_lines.append("##  WARNING: [U+FE0F] WARNING")
         report_lines.append("This report identifies test files that violate size constraints.")
         report_lines.append("**IMPORTANT:** Manual refactoring is strongly recommended over automatic fixes.")
         report_lines.append("")
@@ -880,7 +880,7 @@ class TestViolationAnalyzer:
             max_violation = max(violations, key=lambda v: v.current_size)
             test_status = ""
             if file_path in self.validation_results:
-                test_status = " ✅" if self.validation_results[file_path] else " ❌ (FAILING)"
+                test_status = "  PASS: " if self.validation_results[file_path] else "  FAIL:  (FAILING)"
             
             report_lines.append(f"{i+1}. `{file_path}`{test_status}")
             report_lines.append(f"   - Max violation: {max_violation.current_size} {max_violation.violation_type.replace('_', ' ')}")
@@ -903,7 +903,7 @@ class TestViolationAnalyzer:
             report_lines.append(f"- Failing: {total - passing}")
             if total - passing > 0:
                 report_lines.append("")
-                report_lines.append("**⚠️ WARNING:** Some tests are already failing. Fix these before refactoring!")
+                report_lines.append("** WARNING: [U+FE0F] WARNING:** Some tests are already failing. Fix these before refactoring!")
             report_lines.append("")
         
         return '\n'.join(report_lines)

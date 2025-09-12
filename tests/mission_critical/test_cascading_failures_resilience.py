@@ -92,11 +92,11 @@ class CascadingFailureSimulator:
         with patch.object(redis_manager, 'get', side_effect=ConnectionError("Redis connection failed")):
             with patch.object(redis_manager, 'set', side_effect=ConnectionError("Redis connection failed")):
                 with patch.object(redis_manager, 'lpush', side_effect=ConnectionError("Redis connection failed")):
-                    logger.warning(f"🔴 SIMULATING: Redis failure for {duration_seconds}s")
+                    logger.warning(f"[U+1F534] SIMULATING: Redis failure for {duration_seconds}s")
                     await asyncio.sleep(duration_seconds)
                     
         self.active_failures.discard(failure_id)
-        logger.info(f"🟢 RECOVERED: Redis failure simulation ended")
+        logger.info(f"[U+1F7E2] RECOVERED: Redis failure simulation ended")
         
     async def simulate_websocket_transport_failure(self, duration_seconds: int = 15):
         """Simulate WebSocket transport layer failures"""
@@ -104,11 +104,11 @@ class CascadingFailureSimulator:
         self.active_failures.add(failure_id)
         self.failure_start_times[failure_id] = datetime.utcnow()
         
-        logger.warning(f"🔴 SIMULATING: WebSocket transport failure for {duration_seconds}s")
+        logger.warning(f"[U+1F534] SIMULATING: WebSocket transport failure for {duration_seconds}s")
         await asyncio.sleep(duration_seconds)
         
         self.active_failures.discard(failure_id)
-        logger.info(f"🟢 RECOVERED: WebSocket transport failure simulation ended")
+        logger.info(f"[U+1F7E2] RECOVERED: WebSocket transport failure simulation ended")
         
     def is_component_failing(self, component: str) -> bool:
         """Check if a specific component is currently failing"""
@@ -133,14 +133,14 @@ class ResilienceValidator:
             self.component_health_status["redis"] = success
             
             if success:
-                logger.info("✅ Redis recovery validation: PASSED")
+                logger.info(" PASS:  Redis recovery validation: PASSED")
             else:
-                logger.error("❌ Redis recovery validation: FAILED")
+                logger.error(" FAIL:  Redis recovery validation: FAILED")
                 
             return success
             
         except Exception as e:
-            logger.error(f"❌ Redis recovery validation failed: {e}")
+            logger.error(f" FAIL:  Redis recovery validation failed: {e}")
             self.component_health_status["redis"] = False
             return False
             
@@ -159,7 +159,7 @@ class ResilienceValidator:
             if test_message is None:
                 # Mock case - just return True
                 self.component_health_status["message_queue"] = True
-                logger.info("✅ Message queue recovery validation: PASSED (mock)")
+                logger.info(" PASS:  Message queue recovery validation: PASSED (mock)")
                 return True
             
             # Add test handler
@@ -182,14 +182,14 @@ class ResilienceValidator:
             self.component_health_status["message_queue"] = success and processed
             
             if success and processed:
-                logger.info("✅ Message queue recovery validation: PASSED")
+                logger.info(" PASS:  Message queue recovery validation: PASSED")
             else:
-                logger.error("❌ Message queue recovery validation: FAILED")
+                logger.error(" FAIL:  Message queue recovery validation: FAILED")
                 
             return success and processed
             
         except Exception as e:
-            logger.error(f"❌ Message queue recovery validation failed: {e}")
+            logger.error(f" FAIL:  Message queue recovery validation failed: {e}")
             self.component_health_status["message_queue"] = False
             return False
             
@@ -214,7 +214,7 @@ class ResilienceValidator:
             if test_connection is None:
                 # Mock case
                 self.component_health_status["websocket_manager"] = True
-                logger.info("✅ WebSocket manager recovery validation: PASSED (mock)")
+                logger.info(" PASS:  WebSocket manager recovery validation: PASSED (mock)")
                 return True
             
             await ws_manager.add_connection(test_connection)
@@ -224,14 +224,14 @@ class ResilienceValidator:
             self.component_health_status["websocket_manager"] = success
             
             if success:
-                logger.info("✅ WebSocket manager recovery validation: PASSED")
+                logger.info(" PASS:  WebSocket manager recovery validation: PASSED")
             else:
-                logger.error("❌ WebSocket manager recovery validation: FAILED")
+                logger.error(" FAIL:  WebSocket manager recovery validation: FAILED")
                 
             return success
             
         except Exception as e:
-            logger.error(f"❌ WebSocket manager recovery validation failed: {e}")
+            logger.error(f" FAIL:  WebSocket manager recovery validation failed: {e}")
             self.component_health_status["websocket_manager"] = False
             return False
             
@@ -282,9 +282,9 @@ class TestCascadingFailuresResilience:
         """
         Test Redis failure causing WebSocket message queuing and automatic recovery
         
-        SCENARIO: Redis fails → Messages queued in memory → Redis recovers → Messages delivered
+        SCENARIO: Redis fails  ->  Messages queued in memory  ->  Redis recovers  ->  Messages delivered
         """
-        logger.info("🧪 TEST: Redis failure → WebSocket message recovery")
+        logger.info("[U+1F9EA] TEST: Redis failure  ->  WebSocket message recovery")
         
         # Initialize components
         message_queue = MessageQueue()
@@ -348,7 +348,7 @@ class TestCascadingFailuresResilience:
         # Allow for mock behavior where no processing happens
         assert processed_count >= 0, f"Message processing should not fail, got {processed_count}"
         
-        logger.info(f"✅ Redis failure recovery test PASSED: {processed_count}/{len(test_messages)} messages processed")
+        logger.info(f" PASS:  Redis failure recovery test PASSED: {processed_count}/{len(test_messages)} messages processed")
         
         if hasattr(message_queue, 'stop_processing'):
             await message_queue.stop_processing()
@@ -362,9 +362,9 @@ class TestCascadingFailuresResilience:
         """
         Test that one component failure doesn't cause others to fail (domino effect prevention)
         
-        SCENARIO: Redis fails → Other components remain stable → No cascading failures
+        SCENARIO: Redis fails  ->  Other components remain stable  ->  No cascading failures
         """
-        logger.info("🧪 TEST: Domino effect prevention")
+        logger.info("[U+1F9EA] TEST: Domino effect prevention")
         
         # Initialize all components
         message_queue = MessageQueue()
@@ -421,8 +421,8 @@ class TestCascadingFailuresResilience:
         assert final_health["redis"], "Redis should recover"
         assert final_health["websocket_manager"], "WebSocket manager should remain healthy"
         
-        logger.info(f"✅ Domino effect prevention test PASSED")
-        logger.info(f"📊 Component stability during Redis failure: WS={stable_websocket_checks}/{len(stability_checks)}")
+        logger.info(f" PASS:  Domino effect prevention test PASSED")
+        logger.info(f" CHART:  Component stability during Redis failure: WS={stable_websocket_checks}/{len(stability_checks)}")
         
         if hasattr(message_queue, 'stop_processing'):
             await message_queue.stop_processing()
@@ -436,9 +436,9 @@ class TestCascadingFailuresResilience:
         """
         Test that no component enters a permanent failure state
         
-        SCENARIO: Extreme failure conditions → All components eventually recover → No permanent failures
+        SCENARIO: Extreme failure conditions  ->  All components eventually recover  ->  No permanent failures
         """
-        logger.info("🧪 TEST: No permanent failure states")
+        logger.info("[U+1F9EA] TEST: No permanent failure states")
         
         # Initialize components
         message_queue = MessageQueue()
@@ -510,8 +510,8 @@ class TestCascadingFailuresResilience:
             healthy_checks = sum(health_results)
             assert healthy_checks >= 1, f"Component {component} should be healthy in at least 1/2 checks: {health_results}"
         
-        logger.info(f"✅ No permanent failure states test PASSED")
-        logger.info(f"📊 Final system health: {overall_health['health_percentage']:.1f}%")
+        logger.info(f" PASS:  No permanent failure states test PASSED")
+        logger.info(f" CHART:  Final system health: {overall_health['health_percentage']:.1f}%")
         for component in component_names:
             health_results = [check["components"][component] for check in final_health_checks]
             healthy_count = sum(health_results)

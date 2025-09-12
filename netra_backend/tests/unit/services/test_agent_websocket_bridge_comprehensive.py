@@ -16,7 +16,7 @@ This test suite covers the most critical agent event functionality:
 7. Integration with UnifiedWebSocketManager
 
 CRITICAL: This file is ~2,439 lines - focuses on most critical business value paths.
-Priority: Agent lifecycle events → WebSocket integration → Error handling → Performance
+Priority: Agent lifecycle events  ->  WebSocket integration  ->  Error handling  ->  Performance
 """
 
 import asyncio
@@ -797,7 +797,7 @@ if __name__ == '__main__':
     Run comprehensive AgentWebSocketBridge test suite.
     
     This test suite validates the most critical business value:
-    - Agent lifecycle event streaming (agent_started → agent_completed flow)  
+    - Agent lifecycle event streaming (agent_started  ->  agent_completed flow)  
     - Per-user event isolation (security critical)
     - Error handling (operational stability)
     - WebSocket integration (infrastructure dependency)

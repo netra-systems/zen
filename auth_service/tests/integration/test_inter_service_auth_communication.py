@@ -177,7 +177,7 @@ class TestInterServiceAuthCommunication(SSotBaseTestCase):
             self.record_metric(f"auth_failure_{scenario_name}", "correctly_rejected")
         
         self.record_metric("inter_service_authentication", "working")
-        logger.info(f"✅ Inter-service authentication working ({len(failure_scenarios)} failure scenarios tested)")
+        logger.info(f" PASS:  Inter-service authentication working ({len(failure_scenarios)} failure scenarios tested)")
     
     async def _test_inter_service_authentication(
         self,
@@ -307,7 +307,7 @@ class TestInterServiceAuthCommunication(SSotBaseTestCase):
             self.record_metric(f"token_validation_{scenario_name}", "passed")
         
         self.record_metric("token_validation_communication", "working")
-        logger.info(f"✅ Token validation service communication working ({len(invalid_token_scenarios)} scenarios tested)")
+        logger.info(f" PASS:  Token validation service communication working ({len(invalid_token_scenarios)} scenarios tested)")
     
     async def _test_token_validation_communication(
         self,
@@ -439,7 +439,7 @@ class TestInterServiceAuthCommunication(SSotBaseTestCase):
         self.record_metric("interservice_performance", "acceptable")
         
         logger.info(
-            f"✅ Inter-service communication performance acceptable "
+            f" PASS:  Inter-service communication performance acceptable "
             f"(avg: {avg_response_time:.3f}s, p95: {p95_response_time:.3f}s, max: {max_response_time:.3f}s)"
         )
     
@@ -503,7 +503,7 @@ class TestInterServiceAuthCommunication(SSotBaseTestCase):
             self.record_metric(f"retry_test_{scenario_name}", "passed")
         
         self.record_metric("service_communication_retry", "working")
-        logger.info(f"✅ Service communication retry mechanisms working ({len(retry_scenarios)} scenarios tested)")
+        logger.info(f" PASS:  Service communication retry mechanisms working ({len(retry_scenarios)} scenarios tested)")
     
     async def _test_retry_mechanism(
         self,
@@ -618,7 +618,7 @@ class TestInterServiceAuthCommunication(SSotBaseTestCase):
         self.record_metric("service_health_monitoring", "working")
         
         logger.info(
-            f"✅ Service health check communication working "
+            f" PASS:  Service health check communication working "
             f"(avg: {avg_health_check_time:.3f}s, max: {max_health_check_time:.3f}s)"
         )
     

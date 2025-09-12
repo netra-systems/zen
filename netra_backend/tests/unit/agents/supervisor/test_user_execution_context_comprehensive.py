@@ -1269,9 +1269,9 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         
         # Edge Case 2: Unicode and special characters
         unicode_context = UserExecutionContext(
-            user_id="用户_тест_🔥_user",
-            thread_id="线程_нить_⚡_thread", 
-            run_id="运行_бег_🚀_run"
+            user_id="[U+7528][U+6237]_tect_ FIRE: _user",
+            thread_id="[U+7EBF][U+7A0B]_n[U+0438]t[U+044C]_ LIGHTNING: _thread", 
+            run_id="[U+8FD0][U+884C]_[U+0431]e[U+0433]_[U+1F680]_run"
         )
         
         assert unicode_context.verify_isolation() is True
@@ -1469,9 +1469,9 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
             isolation_result = ctx.verify_isolation()
             assert isolation_result is True, f"CRITICAL FAILURE: Context {ctx.get_correlation_id()} failed isolation verification"
         
-        print("✅ MISSION CRITICAL TEST PASSED: UserExecutionContext maintains absolute user isolation")
-        print(f"✅ Validated {len(all_contexts)} contexts with zero data leakage")
-        print("✅ Business value CONFIRMED: Platform is safe for multi-user enterprise use")
+        print(" PASS:  MISSION CRITICAL TEST PASSED: UserExecutionContext maintains absolute user isolation")
+        print(f" PASS:  Validated {len(all_contexts)} contexts with zero data leakage")
+        print(" PASS:  Business value CONFIRMED: Platform is safe for multi-user enterprise use")
 
     # =========================================================================
     # ENHANCED MEMORY EFFICIENCY AND FACTORY PATTERN TESTS
@@ -1522,7 +1522,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         peak_memory_mb = process.memory_info().rss / 1024 / 1024
         memory_used_mb = peak_memory_mb - baseline_memory_mb
         
-        print(f"🔍 Memory Usage Analysis:")
+        print(f" SEARCH:  Memory Usage Analysis:")
         print(f"   Baseline: {baseline_memory_mb:.2f} MB")
         print(f"   Peak: {peak_memory_mb:.2f} MB") 
         print(f"   Used: {memory_used_mb:.2f} MB")
@@ -1711,7 +1711,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         
         # Some contexts should be garbage collected (depends on Python GC)
         # We can't guarantee 100% collection due to GC timing, but significant reduction expected
-        print(f"🗑️  Garbage Collection Analysis:")
+        print(f"[U+1F5D1][U+FE0F]  Garbage Collection Analysis:")
         print(f"   Created: {len(context_refs)} contexts")
         print(f"   Alive after GC: {len(alive_after_gc)}")
         print(f"   Collection rate: {((len(context_refs) - len(alive_after_gc)) / len(context_refs) * 100):.1f}%")
@@ -1781,7 +1781,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         # Get final object count
         final_objects = len(gc.get_objects())
         
-        print(f"🧹 Resource Cleanup Analysis:")
+        print(f"[U+1F9F9] Resource Cleanup Analysis:")
         print(f"   Initial objects: {initial_objects}")
         print(f"   Peak objects: {peak_objects}")
         print(f"   Final objects: {final_objects}")
@@ -1836,7 +1836,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
         
         # Validate isolation within groups (same user/thread, different runs)
         for (user_id, thread_id), group_contexts in groups.items():
-            print(f"🔍 Testing group {user_id}/{thread_id}: {len(group_contexts)} contexts")
+            print(f" SEARCH:  Testing group {user_id}/{thread_id}: {len(group_contexts)} contexts")
             
             for i, ctx1 in enumerate(group_contexts):
                 for j, ctx2 in enumerate(group_contexts):
@@ -1859,7 +1859,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
                         assert ctx1.verify_isolation()
                         assert ctx2.verify_isolation()
         
-        print(f"✅ Stress test completed: {len(all_contexts)} contexts in {len(groups)} groups")
+        print(f" PASS:  Stress test completed: {len(all_contexts)} contexts in {len(groups)} groups")
         
     def test_multi_user_session_lifecycle_comprehensive(self):
         """Test 52: Complete multi-user session lifecycle with factory pattern."""
@@ -1948,7 +1948,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
             operation_contexts[user_id] = user_operations
         
         # Phase 3: Comprehensive isolation validation
-        print(f"🏢 Multi-user validation: {len(all_user_sessions)} users, multiple tiers")
+        print(f"[U+1F3E2] Multi-user validation: {len(all_user_sessions)} users, multiple tiers")
         
         # Validate user-level isolation
         for user1_id, user1_sessions in all_user_sessions.items():
@@ -2016,7 +2016,7 @@ class TestUserExecutionContextComprehensive(BaseTestCase):
                 assert session_ctx.verify_isolation()
                 assert session_ctx.user_id == user_id
         
-        print(f"✅ Multi-user lifecycle test completed successfully")
+        print(f" PASS:  Multi-user lifecycle test completed successfully")
         print(f"   - {len(user_profiles)} user tiers tested")
         print(f"   - {sum(p['users'] for p in user_profiles)} total users")
         print(f"   - Multiple sessions per user")

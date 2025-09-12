@@ -55,7 +55,7 @@ class ToolExecutionUserExperienceE2ETest:
         cls.test_user_email = cls.env.get("STAGING_TEST_USER_EMAIL", "test@netra.ai")
         cls.test_user_password = cls.env.get("STAGING_TEST_USER_PASSWORD", "test123")
         
-        logger.info(f"🌐 E2E Testing against staging: {cls.backend_url}")
+        logger.info(f"[U+1F310] E2E Testing against staging: {cls.backend_url}")
 
     def setup_method(self):
         """Set up test environment with real staging authentication."""
@@ -81,7 +81,7 @@ class ToolExecutionUserExperienceE2ETest:
                 
                 result = await response.json()
                 token = result.get("access_token", "mock_token_for_staging_test")
-                logger.info("✅ Authenticated with staging environment")
+                logger.info(" PASS:  Authenticated with staging environment")
                 return token
                 
         except Exception as e:
@@ -97,10 +97,10 @@ class ToolExecutionUserExperienceE2ETest:
                 extra_headers=headers,
                 timeout=10
             )
-            logger.info("✅ Connected to staging WebSocket")
+            logger.info(" PASS:  Connected to staging WebSocket")
             return websocket
         except Exception as e:
-            logger.error(f"❌ Staging WebSocket connection failed: {e}")
+            logger.error(f" FAIL:  Staging WebSocket connection failed: {e}")
             return None
 
     @pytest.mark.asyncio
@@ -175,7 +175,7 @@ class ToolExecutionUserExperienceE2ETest:
             
             for expected_event in expected_events:
                 if expected_event not in actual_event_types:
-                    logger.info(f"✅ EXPECTED FAILURE: Missing {expected_event} event")
+                    logger.info(f" PASS:  EXPECTED FAILURE: Missing {expected_event} event")
             
             # Should have event confirmation metadata but doesn't
             try:
@@ -185,7 +185,7 @@ class ToolExecutionUserExperienceE2ETest:
                 
                 assert False, "EXPECTED TO FAIL: No event confirmation in staging, but test passed"
             except KeyError:
-                logger.info("✅ EXPECTED FAILURE: Event confirmation metadata missing in staging response")
+                logger.info(" PASS:  EXPECTED FAILURE: Event confirmation metadata missing in staging response")
         
         finally:
             listener_task.cancel()

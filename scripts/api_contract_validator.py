@@ -436,10 +436,10 @@ class ContractReporter:
     def generate_console_report(violations: List[ContractViolation], contracts_processed: int = 0) -> str:
         """Generate human-readable console report"""
         if not violations:
-            return f"✅ All {contracts_processed} API contracts are compatible"
+            return f" PASS:  All {contracts_processed} API contracts are compatible"
         
         report_lines = []
-        report_lines.append("🔴 API CONTRACT VIOLATIONS DETECTED")
+        report_lines.append("[U+1F534] API CONTRACT VIOLATIONS DETECTED")
         report_lines.append("=" * 60)
         
         # Group by severity
@@ -457,7 +457,7 @@ class ContractReporter:
             if violations_list:
                 report_lines.append(f"\n{severity_name} ({len(violations_list)}):")
                 for violation in violations_list:
-                    report_lines.append(f"  📁 {violation.file_path}:{violation.line_number}")
+                    report_lines.append(f"  [U+1F4C1] {violation.file_path}:{violation.line_number}")
                     report_lines.append(f"     Function: {violation.function_name}")
                     report_lines.append(f"     Issue: {violation.message}")
                     report_lines.append(f"     Fix: {violation.fix_suggestion}")
@@ -467,7 +467,7 @@ class ContractReporter:
         report_lines.append(f"Summary: {len(violations)} total violations ({total_breaking} breaking changes)")
         
         if critical:
-            report_lines.append("\n🚨 BREAKING CHANGES DETECTED: These changes will break existing code")
+            report_lines.append("\n ALERT:  BREAKING CHANGES DETECTED: These changes will break existing code")
         
         return "\n".join(report_lines)
     
@@ -570,7 +570,7 @@ def main() -> int:
             db_path.unlink()
         elif Path('.api_contracts.json').exists():
             Path('.api_contracts.json').unlink()
-        print("✅ Contract database reset")
+        print(" PASS:  Contract database reset")
     
     # Initialize validator
     validator = APIContractValidator(db_path)
@@ -579,7 +579,7 @@ def main() -> int:
     if args.generate_contracts:
         print("Generating API contracts for codebase...")
         contracts = validator.generate_contracts_for_codebase()
-        print(f"✅ Generated {len(contracts)} contracts from {validator.total_files_processed} files")
+        print(f" PASS:  Generated {len(contracts)} contracts from {validator.total_files_processed} files")
         return 0
     
     elif args.validate_all:

@@ -2,7 +2,7 @@
 Session Security Manager - SSOT for Session Security Management
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Prevent session hijacking and unauthorized access
 - Value Impact: Protects user sessions and prevents account takeover attacks
 - Strategic Impact: Critical for maintaining user trust and regulatory compliance

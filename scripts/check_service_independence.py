@@ -90,22 +90,22 @@ def main():
     passed, violations = check_service_independence()
     
     if passed:
-        print("✅ SUCCESS: No service independence violations found!")
+        print(" PASS:  SUCCESS: No service independence violations found!")
         print("\nAll microservices are properly independent.")
         return 0
     else:
-        print("❌ CRITICAL VIOLATIONS FOUND!\n")
+        print(" FAIL:  CRITICAL VIOLATIONS FOUND!\n")
         print("The following cross-service imports will cause CATASTROPHIC FAILURES in production:")
         print("-" * 80)
         
         for violation in violations:
-            print(f"  • {violation}")
+            print(f"  [U+2022] {violation}")
         
         print("-" * 80)
         print(f"\nTotal violations: {len(violations)}")
-        print("\n⚠️  These violations MUST be fixed before deployment!")
-        print("⚠️  Services run in isolated containers in production.")
-        print("⚠️  Cross-service imports will cause complete service failure.")
+        print("\n WARNING: [U+FE0F]  These violations MUST be fixed before deployment!")
+        print(" WARNING: [U+FE0F]  Services run in isolated containers in production.")
+        print(" WARNING: [U+FE0F]  Cross-service imports will cause complete service failure.")
         
         print("\nTo fix:")
         print("1. Remove all cross-service imports")

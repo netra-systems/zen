@@ -111,7 +111,7 @@ async def test_redis_connection_works_with_python312():
         # Import successful - the fix is working
                                             import sys
                                             python_version = sys.version_info
-                                            print(f"✅ redis.asyncio works with Python {python_version.major}.{python_version.minor}")
+                                            print(f" PASS:  redis.asyncio works with Python {python_version.major}.{python_version.minor}")
 
                                         except ImportError:
                                             pytest.fail("redis.asyncio not available - need redis>=4.3.0")

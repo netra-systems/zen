@@ -148,7 +148,7 @@ def generate_report():
     if supervisor_analysis['overridden_methods']:
         report.append("\n### Overridden Methods:")
         for method, info in supervisor_analysis['overridden_methods'].items():
-            report.append(f"- `{method}`: {info['original']} → {info['overridden_in']}")
+            report.append(f"- `{method}`: {info['original']}  ->  {info['overridden_in']}")
     
     # Critical Methods
     report.append("\n### Critical Method Locations:")
@@ -163,8 +163,8 @@ def generate_report():
     report.append("\n## 3. WebSocket Event Pattern Analysis\n")
     ws_patterns = analyze_websocket_patterns(SupervisorAgent)
     
-    report.append(f"**Uses BaseAgent emit methods:** {'✅ Yes' if ws_patterns['uses_emit_methods'] else '❌ No'}")
-    report.append(f"**Uses direct bridge calls:** {'❌ Yes (VIOLATION)' if ws_patterns['uses_direct_bridge'] else '✅ No'}")
+    report.append(f"**Uses BaseAgent emit methods:** {' PASS:  Yes' if ws_patterns['uses_emit_methods'] else ' FAIL:  No'}")
+    report.append(f"**Uses direct bridge calls:** {' FAIL:  Yes (VIOLATION)' if ws_patterns['uses_direct_bridge'] else ' PASS:  No'}")
     
     if ws_patterns['emit_calls']:
         report.append("\n### Emit Methods Used:")
@@ -174,18 +174,18 @@ def generate_report():
     if ws_patterns['bridge_calls']:
         report.append("\n### Direct Bridge Calls (VIOLATIONS):")
         for call in ws_patterns['bridge_calls']:
-            report.append(f"- `{call}` ⚠️")
+            report.append(f"- `{call}`  WARNING: [U+FE0F]")
     
     # Method Shadowing Check
     report.append("\n## 4. Method Shadowing Analysis\n")
     shadowing_issues = check_method_shadowing(SupervisorAgent)
     
     if shadowing_issues:
-        report.append("### ⚠️ Potential Shadowing Issues:")
+        report.append("###  WARNING: [U+FE0F] Potential Shadowing Issues:")
         for issue in shadowing_issues:
             report.append(f"- {issue}")
     else:
-        report.append("✅ No method shadowing issues detected")
+        report.append(" PASS:  No method shadowing issues detected")
     
     # Private Method Analysis
     report.append("\n## 5. Important Private Methods\n")
@@ -209,7 +209,7 @@ def generate_report():
     report.append(f"\n**Overall Compliance Score: {compliance_score:.1f}%**\n")
     
     for check, passed in compliance_checks.items():
-        status = "✅" if passed else "❌"
+        status = " PASS: " if passed else " FAIL: "
         report.append(f"- {status} {check}")
     
     # Recommendations

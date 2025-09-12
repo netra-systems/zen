@@ -77,23 +77,23 @@ def main():
     print(f"\n=== WORKING FILES ({success_count}) ===")
     working_files = [f for f in tested_files if f not in failed_files]
     for file in working_files:
-        print(f"  ✓ {file}")
+        print(f"  [U+2713] {file}")
     
     if failed_files:
         print(f"\n=== STILL FAILING ({len(failed_files)}) ===")
         for file in failed_files:
-            print(f"  ✗ {file}")
+            print(f"  [U+2717] {file}")
     
     print(f"\n=== IMPROVEMENTS MADE ===")
     improvements = [
-        "✓ Created FirstTimeUserFixtures class with comprehensive test environment setup",
-        "✓ Created background_jobs modules (JobManager, RedisQueue, JobWorker) for testing",
-        "✓ Created message flow test fixtures and WebSocket utilities", 
-        "✓ Fixed circular import issues in models package",
-        "✓ Created missing HTTP client and circuit breaker shims",
-        "✓ Added JWT token test helpers for authentication testing",
-        "✓ Created WebSocket mock utilities and connection helpers",
-        "✓ Fixed Message and Thread model imports from canonical sources"
+        "[U+2713] Created FirstTimeUserFixtures class with comprehensive test environment setup",
+        "[U+2713] Created background_jobs modules (JobManager, RedisQueue, JobWorker) for testing",
+        "[U+2713] Created message flow test fixtures and WebSocket utilities", 
+        "[U+2713] Fixed circular import issues in models package",
+        "[U+2713] Created missing HTTP client and circuit breaker shims",
+        "[U+2713] Added JWT token test helpers for authentication testing",
+        "[U+2713] Created WebSocket mock utilities and connection helpers",
+        "[U+2713] Fixed Message and Thread model imports from canonical sources"
     ]
     
     for improvement in improvements:
@@ -101,11 +101,11 @@ def main():
     
     print(f"\n=== OVERALL STATUS ===")
     if success_rate >= 60:
-        print(f"✓ Major import issues have been systematically resolved!")
-        print(f"✓ The integration test suite is now significantly more stable")
+        print(f"[U+2713] Major import issues have been systematically resolved!")
+        print(f"[U+2713] The integration test suite is now significantly more stable")
         return 0
     else:
-        print(f"⚠ More work needed, but substantial progress has been made")
+        print(f" WARNING:  More work needed, but substantial progress has been made")
         return 1
 
 

@@ -239,7 +239,7 @@ class ToolEventBus:
         self._cleanup_task: Optional[asyncio.Task] = None
         self._running = False
         
-        logger.info(f"✅ Created ToolEventBus {self.bus_id}")
+        logger.info(f" PASS:  Created ToolEventBus {self.bus_id}")
     
     # ===================== LIFECYCLE MANAGEMENT =====================
     
@@ -256,7 +256,7 @@ class ToolEventBus:
         
         self._cleanup_task = asyncio.create_task(self._cleanup_history_loop())
         
-        logger.info(f"🚀 Started ToolEventBus {self.bus_id}")
+        logger.info(f"[U+1F680] Started ToolEventBus {self.bus_id}")
     
     async def stop(self) -> None:
         """Stop the event bus and cleanup resources."""
@@ -285,7 +285,7 @@ class ToolEventBus:
         self._websocket_bridges.clear()
         self._websocket_emitters.clear()
         
-        logger.info(f"🛑 Stopped ToolEventBus {self.bus_id}")
+        logger.info(f"[U+1F6D1] Stopped ToolEventBus {self.bus_id}")
     
     @asynccontextmanager
     async def managed_lifecycle(self):
@@ -507,11 +507,11 @@ class ToolEventBus:
             # Update metrics
             if success_count == total_deliveries:
                 self._metrics['events_delivered'] += 1
-                logger.debug(f"✅ Event {event.event_id} delivered to {success_count}/{total_deliveries} handlers")
+                logger.debug(f" PASS:  Event {event.event_id} delivered to {success_count}/{total_deliveries} handlers")
                 return True
             else:
                 self._metrics['events_failed'] += 1
-                logger.warning(f"⚠️ Event {event.event_id} partially delivered: {success_count}/{total_deliveries}")
+                logger.warning(f" WARNING: [U+FE0F] Event {event.event_id} partially delivered: {success_count}/{total_deliveries}")
                 
                 # Add to failed events for retry
                 if event.retry_count < event.max_retries:
@@ -524,7 +524,7 @@ class ToolEventBus:
             
         except Exception as e:
             self._metrics['events_failed'] += 1
-            logger.error(f"🚨 Event publication failed for {event.event_id}: {e}")
+            logger.error(f" ALERT:  Event publication failed for {event.event_id}: {e}")
             return False
     
     # ===================== DELIVERY MECHANISMS =====================
@@ -643,7 +643,7 @@ class ToolEventBus:
         self._subscriptions[subscription_id] = subscription
         self._metrics['subscriptions_active'] += 1
         
-        logger.info(f"✅ Added subscription {subscription_id} for events: {[e.value for e in event_types]}")
+        logger.info(f" PASS:  Added subscription {subscription_id} for events: {[e.value for e in event_types]}")
         return True
     
     def unsubscribe(self, subscription_id: str) -> bool:
@@ -654,7 +654,7 @@ class ToolEventBus:
         del self._subscriptions[subscription_id]
         self._metrics['subscriptions_active'] -= 1
         
-        logger.info(f"🗑️ Removed subscription {subscription_id}")
+        logger.info(f"[U+1F5D1][U+FE0F] Removed subscription {subscription_id}")
         return True
     
     def add_websocket_bridge(self, bridge: 'AgentWebSocketBridge') -> None:

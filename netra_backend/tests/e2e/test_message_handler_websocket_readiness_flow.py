@@ -38,7 +38,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
     @pytest.fixture(autouse=True)
     async def setup_authenticated_user(self):
         """Setup authenticated user context for E2E tests."""
-        logger.info("🔐 Setting up authenticated user context for E2E tests")
+        logger.info("[U+1F510] Setting up authenticated user context for E2E tests")
         
         # Create authenticated user context using SSOT patterns
         self.user_context = await create_authenticated_user_context(
@@ -55,7 +55,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
         self.jwt_token = self.user_context.agent_context['jwt_token']
         self.user_id = str(self.user_context.user_id)
         
-        logger.info(f"✅ Authenticated user context created: {self.user_id}")
+        logger.info(f" PASS:  Authenticated user context created: {self.user_id}")
         
         yield
         
@@ -80,7 +80,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
         CRITICAL: Uses SSOT authentication as mandated by CLAUDE.md.
         EXPECTED TO FAIL: Service readiness validation gaps.
         """
-        logger.info("🔬 Testing WebSocket connection with unready message handler services")
+        logger.info("[U+1F52C] Testing WebSocket connection with unready message handler services")
         
         try:
             # REPRODUCE: Connect to WebSocket before all services are ready
@@ -88,7 +88,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
             websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=15.0)
             
             # Connection might succeed even when services aren't ready
-            logger.info("✅ WebSocket connection established")
+            logger.info(" PASS:  WebSocket connection established")
             
             # REPRODUCE: Send message that requires message handler services
             test_message = {
@@ -102,33 +102,33 @@ class TestMessageHandlerWebSocketReadinessE2E:
             
             # Send message
             await websocket.send(json.dumps(test_message))
-            logger.info(f"📤 Sent test message: {test_message['type']}")
+            logger.info(f"[U+1F4E4] Sent test message: {test_message['type']}")
             
             # Wait for response - this should fail if services aren't ready
             try:
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                 response_data = json.loads(response)
-                logger.info(f"📥 Received response: {response_data.get('type', 'unknown')}")
+                logger.info(f"[U+1F4E5] Received response: {response_data.get('type', 'unknown')}")
                 
                 # Check if response indicates service readiness issues
                 if response_data.get("type") == "error":
                     error_msg = response_data.get("payload", {}).get("error", "")
                     if "not ready" in error_msg.lower() or "unavailable" in error_msg.lower():
-                        logger.error(f"❌ Service readiness error detected: {error_msg}")
+                        logger.error(f" FAIL:  Service readiness error detected: {error_msg}")
                     else:
-                        logger.warning(f"⚠️ Unexpected error response: {error_msg}")
+                        logger.warning(f" WARNING: [U+FE0F] Unexpected error response: {error_msg}")
                 
             except asyncio.TimeoutError:
-                logger.error("❌ Message processing timeout - services likely not ready")
+                logger.error(" FAIL:  Message processing timeout - services likely not ready")
             
             # Close connection
             await websocket.close()
             
         except Exception as e:
-            logger.error(f"❌ WebSocket connection/processing failed: {e}")
+            logger.error(f" FAIL:  WebSocket connection/processing failed: {e}")
         
         # FAILURE EXPECTED: Service readiness validation missing
-        logger.error("❌ WebSocket allows connections before message handler services ready")
+        logger.error(" FAIL:  WebSocket allows connections before message handler services ready")
         assert False, "WEBSOCKET READINESS ISSUE: Connection succeeds but message processing fails due to unready services"
     
     @pytest.mark.asyncio
@@ -141,7 +141,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
         CRITICAL: Uses SSOT authentication for all connections.
         EXPECTED TO FAIL: Race conditions in concurrent validation.
         """
-        logger.info("🔬 Testing message handler validation race conditions E2E")
+        logger.info("[U+1F52C] Testing message handler validation race conditions E2E")
         
         # REPRODUCE: Multiple concurrent authenticated WebSocket connections
         connection_count = 5
@@ -164,9 +164,9 @@ class TestMessageHandlerWebSocketReadinessE2E:
             successful_connections = [ws for ws in websockets_list if not isinstance(ws, Exception)]
             
             if connection_failures:
-                logger.error(f"❌ {len(connection_failures)} WebSocket connections failed during concurrent setup")
+                logger.error(f" FAIL:  {len(connection_failures)} WebSocket connections failed during concurrent setup")
             
-            logger.info(f"📡 Established {len(successful_connections)} concurrent WebSocket connections")
+            logger.info(f"[U+1F4E1] Established {len(successful_connections)} concurrent WebSocket connections")
             
             # REPRODUCE: Send messages simultaneously from all connections
             message_tasks = []
@@ -183,7 +183,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
             
             # Send all messages simultaneously
             await asyncio.gather(*message_tasks, return_exceptions=True)
-            logger.info(f"📤 Sent {len(message_tasks)} concurrent messages")
+            logger.info(f"[U+1F4E4] Sent {len(message_tasks)} concurrent messages")
             
             # Wait for responses
             response_tasks = []
@@ -210,10 +210,10 @@ class TestMessageHandlerWebSocketReadinessE2E:
                     except json.JSONDecodeError:
                         pass
             
-            logger.info(f"📊 Results: {len(timeout_errors)} timeouts, {len(validation_errors)} validation errors")
+            logger.info(f" CHART:  Results: {len(timeout_errors)} timeouts, {len(validation_errors)} validation errors")
             
             if timeout_errors or validation_errors:
-                logger.error(f"❌ Concurrent validation issues detected")
+                logger.error(f" FAIL:  Concurrent validation issues detected")
             
             # Close all connections
             for websocket in successful_connections:
@@ -221,10 +221,10 @@ class TestMessageHandlerWebSocketReadinessE2E:
                     await websocket.close()
         
         except Exception as e:
-            logger.error(f"❌ Concurrent validation test failed: {e}")
+            logger.error(f" FAIL:  Concurrent validation test failed: {e}")
         
         # FAILURE EXPECTED: Concurrent validation race conditions
-        logger.error("❌ Concurrent message validation race conditions detected")
+        logger.error(" FAIL:  Concurrent message validation race conditions detected")
         assert False, "CONCURRENT VALIDATION RACE: Race conditions in validation logic under concurrent load"
     
     @pytest.mark.asyncio
@@ -237,7 +237,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
         CRITICAL: Uses SSOT authentication patterns.
         EXPECTED TO FAIL: Authentication/service startup timing issues.
         """
-        logger.info("🔬 Testing WebSocket authentication timing during service startup")
+        logger.info("[U+1F52C] Testing WebSocket authentication timing during service startup")
         
         try:
             # REPRODUCE: Authenticate quickly after service startup
@@ -245,7 +245,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
             websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=8.0)
             connection_time = time.time() - start_time
             
-            logger.info(f"⏱️ WebSocket authentication completed in {connection_time:.2f}s")
+            logger.info(f"[U+23F1][U+FE0F] WebSocket authentication completed in {connection_time:.2f}s")
             
             # REPRODUCE: Immediately send message requiring full service stack
             complex_message = {
@@ -269,19 +269,19 @@ class TestMessageHandlerWebSocketReadinessE2E:
                 if response_data.get("type") == "error":
                     error_msg = response_data.get("payload", {}).get("error", "")
                     if any(keyword in error_msg.lower() for keyword in ["startup", "not ready", "initializing"]):
-                        logger.error(f"❌ Service startup timing issue detected: {error_msg}")
+                        logger.error(f" FAIL:  Service startup timing issue detected: {error_msg}")
                     
             except asyncio.TimeoutError:
-                logger.error("❌ Message processing timeout - likely startup timing issue")
+                logger.error(" FAIL:  Message processing timeout - likely startup timing issue")
             
             # Close connection
             await websocket.close()
             
         except Exception as e:
-            logger.error(f"❌ Authentication/startup timing test failed: {e}")
+            logger.error(f" FAIL:  Authentication/startup timing test failed: {e}")
         
         # FAILURE EXPECTED: Authentication/service startup timing mismatch
-        logger.error("❌ Authentication timing vs service startup timing mismatch")
+        logger.error(" FAIL:  Authentication timing vs service startup timing mismatch")
         assert False, "AUTH/STARTUP TIMING ISSUE: Authentication succeeds before all services ready"
     
     @pytest.mark.asyncio
@@ -294,7 +294,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
         CRITICAL: Full E2E flow with authentication.
         EXPECTED TO FAIL: Database session race conditions.
         """
-        logger.info("🔬 Testing message handler database session race conditions E2E")
+        logger.info("[U+1F52C] Testing message handler database session race conditions E2E")
         
         try:
             # Connect with authentication
@@ -310,7 +310,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
             }
             
             await websocket.send(json.dumps(db_dependent_message))
-            logger.info("📤 Sent database-dependent message")
+            logger.info("[U+1F4E4] Sent database-dependent message")
             
             # Wait for response - should fail if database sessions aren't ready
             try:
@@ -321,18 +321,18 @@ class TestMessageHandlerWebSocketReadinessE2E:
                 if response_data.get("type") == "error":
                     error_msg = response_data.get("payload", {}).get("error", "")
                     if any(keyword in error_msg.lower() for keyword in ["database", "session", "connection pool"]):
-                        logger.error(f"❌ Database session race condition detected: {error_msg}")
+                        logger.error(f" FAIL:  Database session race condition detected: {error_msg}")
                         
             except asyncio.TimeoutError:
-                logger.error("❌ Database operation timeout - session race condition likely")
+                logger.error(" FAIL:  Database operation timeout - session race condition likely")
             
             await websocket.close()
             
         except Exception as e:
-            logger.error(f"❌ Database session race test failed: {e}")
+            logger.error(f" FAIL:  Database session race test failed: {e}")
         
         # FAILURE EXPECTED: Database session race conditions
-        logger.error("❌ Database session race conditions in message handlers")
+        logger.error(" FAIL:  Database session race conditions in message handlers")
         assert False, "DATABASE SESSION RACE: Message handlers access database before sessions ready"
     
     @pytest.mark.asyncio
@@ -345,7 +345,7 @@ class TestMessageHandlerWebSocketReadinessE2E:
         CRITICAL: Tests the actual GCP readiness middleware in E2E context.
         EXPECTED TO FAIL: Middleware bypass scenarios.
         """
-        logger.info("🔬 Testing WebSocket readiness middleware bypass scenarios E2E")
+        logger.info("[U+1F52C] Testing WebSocket readiness middleware bypass scenarios E2E")
         
         env = get_env()
         environment = env.get("ENVIRONMENT", "test")
@@ -356,13 +356,13 @@ class TestMessageHandlerWebSocketReadinessE2E:
             
             if environment in ["staging", "production"]:
                 # In GCP environments, test actual middleware behavior
-                logger.info(f"🌐 Testing in {environment} environment - checking middleware behavior")
+                logger.info(f"[U+1F310] Testing in {environment} environment - checking middleware behavior")
                 
                 # Try connection that might bypass middleware checks
                 websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=12.0)
                 
                 # If connection succeeds, middleware might have bypassed readiness checks
-                logger.warning("⚠️ WebSocket connection succeeded - middleware may have bypassed readiness")
+                logger.warning(" WARNING: [U+FE0F] WebSocket connection succeeded - middleware may have bypassed readiness")
                 
                 # Test actual message processing to validate readiness
                 test_message = {
@@ -383,16 +383,16 @@ class TestMessageHandlerWebSocketReadinessE2E:
                     
                     if response_data.get("type") == "error":
                         error_msg = response_data.get("payload", {}).get("error", "")
-                        logger.error(f"❌ Middleware allowed connection but services not ready: {error_msg}")
+                        logger.error(f" FAIL:  Middleware allowed connection but services not ready: {error_msg}")
                         
                 except asyncio.TimeoutError:
-                    logger.error("❌ Middleware bypass - connection allowed but processing failed")
+                    logger.error(" FAIL:  Middleware bypass - connection allowed but processing failed")
                 
                 await websocket.close()
                 
             else:
                 # In test environment, simulate middleware bypass scenarios
-                logger.info("🧪 Testing environment - simulating middleware bypass scenarios")
+                logger.info("[U+1F9EA] Testing environment - simulating middleware bypass scenarios")
                 
                 websocket = await self.ws_auth_helper.connect_authenticated_websocket(timeout=8.0)
                 
@@ -412,8 +412,8 @@ class TestMessageHandlerWebSocketReadinessE2E:
                 await websocket.close()
         
         except Exception as e:
-            logger.error(f"❌ Middleware bypass test failed: {e}")
+            logger.error(f" FAIL:  Middleware bypass test failed: {e}")
         
         # FAILURE EXPECTED: Middleware bypass scenarios
-        logger.error("❌ WebSocket readiness middleware bypass scenarios detected")
+        logger.error(" FAIL:  WebSocket readiness middleware bypass scenarios detected")
         assert False, "MIDDLEWARE BYPASS ISSUE: Connections allowed when services not fully ready"

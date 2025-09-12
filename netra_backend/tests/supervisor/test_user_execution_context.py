@@ -445,7 +445,7 @@ class TestEdgeCases:
     
     def test_unicode_ids(self):
         """Test context with Unicode IDs."""
-        unicode_id = "用户_123_🔥"
+        unicode_id = "[U+7528][U+6237]_123_ FIRE: "
         
         context = UserExecutionContext(
             user_id=unicode_id,

@@ -111,7 +111,7 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
         - CURRENT STATE: FAIL - Error messages truncated to empty string
         - AFTER FIX: PASS - Full exception type, message, and traceback captured
         """
-        logger.info("🧪 Testing exception logging captures full details")
+        logger.info("[U+1F9EA] Testing exception logging captures full details")
         
         # Test different exception types that cause truncated logging
         exception_test_cases = [
@@ -204,13 +204,13 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
                     f"but log is: '{latest_log}'"
                 )
                 
-            logger.info(f"  ✅ Exception logging test passed for {case['name']}")
+            logger.info(f"   PASS:  Exception logging test passed for {case['name']}")
             logger.info(f"     Log: {latest_log[:100]}...")
             
             # Reset mock for next test
             self.mock_websocket.send_json.side_effect = None
             
-        logger.info("✅ All exception logging completeness tests passed")
+        logger.info(" PASS:  All exception logging completeness tests passed")
         
     @pytest.mark.unit
     async def test_connectionhandler_return_values_match_operation_success(self):
@@ -221,12 +221,12 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
         even when operations fail silently.
         
         Expected Behavior:
-        - Connection valid, message sent successfully → return True
-        - Connection invalid, message not sent → return False
-        - Exception during send → return False
-        - Silent failure (current bug) → return False (not True)
+        - Connection valid, message sent successfully  ->  return True
+        - Connection invalid, message not sent  ->  return False
+        - Exception during send  ->  return False
+        - Silent failure (current bug)  ->  return False (not True)
         """
-        logger.info("🧪 Testing ConnectionHandler return value accuracy")
+        logger.info("[U+1F9EA] Testing ConnectionHandler return value accuracy")
         
         handler = self.ConnectionHandler()
         test_message = self._create_test_message()
@@ -316,13 +316,13 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
                     # Should not have attempted to send
                     self.mock_websocket.send_json.assert_not_called()
                     
-                logger.info(f"  ✅ Passed")
+                logger.info(f"   PASS:  Passed")
                 
                 # Reset mock for next test
                 self.mock_websocket.send_json.reset_mock()
                 self.mock_websocket.send_json.side_effect = None
                 
-        logger.info("✅ All ConnectionHandler return value tests passed")
+        logger.info(" PASS:  All ConnectionHandler return value tests passed")
         
     @pytest.mark.unit
     async def test_error_logging_includes_traceback_information(self):
@@ -332,7 +332,7 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
         This is critical for debugging issues in production environments
         where the error source may not be obvious from the message alone.
         """
-        logger.info("🧪 Testing error logging includes traceback information")
+        logger.info("[U+1F9EA] Testing error logging includes traceback information")
         
         handler = self.ConnectionHandler()
         test_message = self._create_test_message()
@@ -401,7 +401,7 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
             f"Error log appears truncated: {latest_log}"
         )
         
-        logger.info(f"✅ Traceback logging test passed")
+        logger.info(f" PASS:  Traceback logging test passed")
         logger.info(f"   Log captured: {latest_log[:150]}...")
         
     @pytest.mark.unit
@@ -411,7 +411,7 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
         
         This prevents logging failures that could mask the original exception.
         """
-        logger.info("🧪 Testing error logging handles unicode and special characters")
+        logger.info("[U+1F9EA] Testing error logging handles unicode and special characters")
         
         handler = self.ConnectionHandler()
         test_message = self._create_test_message()
@@ -420,7 +420,7 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
         special_char_tests = [
             {
                 'name': 'unicode_message',
-                'exception': ValueError("Error with unicode: 测试 🔥 ñoño"),
+                'exception': ValueError("Error with unicode: [U+6D4B][U+8BD5]  FIRE:  [U+00F1]o[U+00F1]o"),
                 'description': 'Unicode characters in exception message'
             },
             {
@@ -491,12 +491,12 @@ class TestConnectionHandlerErrorHandling(SSotBaseTestCase):
                 f"Exception type {exception_type} not found in log for {test_case['name']}: {latest_log}"
             )
             
-            logger.info(f"  ✅ Passed for {test_case['name']}")
+            logger.info(f"   PASS:  Passed for {test_case['name']}")
             
             # Reset for next test
             self.mock_websocket.send_json.side_effect = None
             
-        logger.info("✅ All unicode and special character logging tests passed")
+        logger.info(" PASS:  All unicode and special character logging tests passed")
 
 
 if __name__ == "__main__":

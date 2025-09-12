@@ -77,11 +77,11 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
         # Initialize auth helper
         self.auth_helper = E2EWebSocketAuthHelper(environment=self.test_environment)
         
-        print(f"🔧 Session security test setup completed for environment: {self.test_environment}")
+        print(f"[U+1F527] Session security test setup completed for environment: {self.test_environment}")
     
     async def cleanup_method(self):
         """Clean up test resources."""
-        print("🧹 Cleaning up WebSocket session security test resources...")
+        print("[U+1F9F9] Cleaning up WebSocket session security test resources...")
         
         # Close all test clients
         for client in self.test_clients:
@@ -95,7 +95,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
         self.session_violations.clear()
         self.isolation_violations.clear()
         
-        print("✅ Session security cleanup completed")
+        print(" PASS:  Session security cleanup completed")
     
     async def test_session_hijacking_prevention_hard_failure(self):
         """
@@ -109,7 +109,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
         3. Session impersonation is prevented  
         4. Cross-user authentication violations are detected
         """
-        print("🛡️ Testing session hijacking prevention with hard failure validation...")
+        print("[U+1F6E1][U+FE0F] Testing session hijacking prevention with hard failure validation...")
         
         try:
             # Step 1: Create legitimate user with sensitive permissions
@@ -120,7 +120,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             )
             self.authenticated_users.append(legitimate_user)
             
-            print(f"✅ Created legitimate user: {legitimate_user.user_id} with sensitive permissions")
+            print(f" PASS:  Created legitimate user: {legitimate_user.user_id} with sensitive permissions")
             
             # Step 2: Create attacker user with limited permissions
             attacker_email = f"attacker_{uuid.uuid4().hex[:8]}@example.com"
@@ -130,7 +130,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             )
             self.authenticated_users.append(attacker_user)
             
-            print(f"✅ Created attacker user: {attacker_user.user_id} with limited permissions")
+            print(f" PASS:  Created attacker user: {attacker_user.user_id} with limited permissions")
             
             # Step 3: Establish legitimate user's WebSocket session
             legitimate_client = await create_authenticated_websocket_client(
@@ -143,7 +143,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             self.test_clients.append(legitimate_client)
             
             await legitimate_client.connect()
-            print("✅ Legitimate user WebSocket session established")
+            print(" PASS:  Legitimate user WebSocket session established")
             
             # Step 4: Test legitimate user can access sensitive data
             sensitive_test_data = {
@@ -154,10 +154,10 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             }
             
             await legitimate_client.send_event("sensitive_operation", sensitive_test_data)
-            print("✅ Legitimate user successfully accessed sensitive data")
+            print(" PASS:  Legitimate user successfully accessed sensitive data")
             
             # Step 5: CRITICAL TEST - Attacker attempts session hijacking
-            print("🎯 CRITICAL TEST: Attempting session hijacking attack...")
+            print(" TARGET:  CRITICAL TEST: Attempting session hijacking attack...")
             
             # Create hijacker client that attempts to use legitimate user's token
             hijacker_client = RealWebSocketTestClient(
@@ -187,7 +187,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                 await hijacker_client.connect()
                 hijacking_blocked = False  # Connection should have been blocked
                 
-                print("❌ WARNING: Hijacker connection succeeded - testing further...")
+                print(" FAIL:  WARNING: Hijacker connection succeeded - testing further...")
                 
                 # If connection succeeded, test if proper isolation is maintained
                 hijack_test_data = {
@@ -221,15 +221,15 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                         pytest.fail(violation)
                 
                 except asyncio.TimeoutError:
-                    print("✅ Hijacker could not access sensitive data (good)")
+                    print(" PASS:  Hijacker could not access sensitive data (good)")
                 
             except Exception as e:
                 hijacking_blocked = True
                 hijacking_error = str(e)
-                print(f"✅ Session hijacking attempt properly blocked: {e}")
+                print(f" PASS:  Session hijacking attempt properly blocked: {e}")
             
             # Step 7: Validate session isolation between users
-            print("🔒 Testing session isolation validation...")
+            print("[U+1F512] Testing session isolation validation...")
             
             # Send session-specific data to legitimate user
             session_data = {
@@ -262,7 +262,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                         pytest.fail(violation)
                 
                 except asyncio.TimeoutError:
-                    print("✅ Session data properly isolated - no interception")
+                    print(" PASS:  Session data properly isolated - no interception")
             
             # Step 8: Test legitimate user maintains proper access
             try:
@@ -270,9 +270,9 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "user_id": legitimate_user.user_id,
                     "test": "post_hijack_attempt"
                 })
-                print("✅ Legitimate user maintains proper session access")
+                print(" PASS:  Legitimate user maintains proper session access")
             except Exception as e:
-                print(f"⚠️ Legitimate user access affected: {e}")
+                print(f" WARNING: [U+FE0F] Legitimate user access affected: {e}")
             
             # Step 9: Final validation - no violations should have occurred
             if self.session_violations:
@@ -281,7 +281,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "\n".join(self.session_violations)
                 )
             
-            print("✅ Session hijacking prevention test PASSED - all attacks properly blocked")
+            print(" PASS:  Session hijacking prevention test PASSED - all attacks properly blocked")
             
         except SecurityError as e:
             pytest.fail(f"Session hijacking prevention test FAILED: {e}")
@@ -300,7 +300,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
         3. Concurrent sessions maintain isolation
         4. No data bleeding between connections
         """
-        print("🚫 Testing cross-session data leakage prevention...")
+        print("[U+1F6AB] Testing cross-session data leakage prevention...")
         
         try:
             # Step 1: Create multiple users for isolation testing
@@ -331,15 +331,15 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "private_data": f"confidential_data_for_user_{i}_{uuid.uuid4().hex[:8]}"
                 })
                 
-                print(f"✅ Created isolated user {i}: {user.user_id}")
+                print(f" PASS:  Created isolated user {i}: {user.user_id}")
             
             # Step 2: Connect all clients
             for i, user_data in enumerate(users_data):
                 await user_data["client"].connect()
-                print(f"✅ Connected user {i}: {user_data['user'].user_id}")
+                print(f" PASS:  Connected user {i}: {user_data['user'].user_id}")
             
             # Step 3: Send private data for each user
-            print("🔐 Sending private data for each user...")
+            print("[U+1F510] Sending private data for each user...")
             
             for i, user_data in enumerate(users_data):
                 private_event = {
@@ -352,10 +352,10 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                 }
                 
                 await user_data["client"].send_event("private_user_data", private_event)
-                print(f"✅ Sent private data for user {i}")
+                print(f" PASS:  Sent private data for user {i}")
             
             # Step 4: CRITICAL TEST - Verify no cross-user data leakage
-            print("🔍 CRITICAL TEST: Checking for cross-user data leakage...")
+            print(" SEARCH:  CRITICAL TEST: Checking for cross-user data leakage...")
             
             leakage_violations = []
             
@@ -394,12 +394,12 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                                     self.isolation_violations.append(violation)
                 
                 except asyncio.TimeoutError:
-                    print(f"✅ User {i} received no cross-user data (expected)")
+                    print(f" PASS:  User {i} received no cross-user data (expected)")
                 except Exception as e:
-                    print(f"ℹ️ User {i} event check error: {e}")
+                    print(f"[U+2139][U+FE0F] User {i} event check error: {e}")
             
             # Step 5: Test concurrent session operations
-            print("⚡ Testing concurrent session operations...")
+            print(" LIGHTNING:  Testing concurrent session operations...")
             
             # All users perform operations simultaneously
             concurrent_tasks = []
@@ -413,7 +413,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             
             # Execute all concurrent operations
             await asyncio.gather(*concurrent_tasks)
-            print("✅ Concurrent operations completed")
+            print(" PASS:  Concurrent operations completed")
             
             # Step 6: Validate session isolation after concurrent operations
             await asyncio.sleep(2)  # Allow time for any potential cross-contamination
@@ -435,7 +435,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     f"\n\nTotal violations: {len(leakage_violations)}"
                 )
             
-            print("✅ Cross-session data leakage prevention test PASSED - perfect isolation maintained")
+            print(" PASS:  Cross-session data leakage prevention test PASSED - perfect isolation maintained")
             
         except Exception as e:
             pytest.fail(f"Cross-session data leakage prevention test failed: {e}")
@@ -450,14 +450,14 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
         3. User context is maintained correctly
         4. No session confusion or mixing occurs
         """
-        print("⚡ Testing concurrent user session management...")
+        print(" LIGHTNING:  Testing concurrent user session management...")
         
         try:
             # Step 1: Create many concurrent users (stress test)
             concurrent_user_count = 5
             user_sessions = []
             
-            print(f"👥 Creating {concurrent_user_count} concurrent user sessions...")
+            print(f"[U+1F465] Creating {concurrent_user_count} concurrent user sessions...")
             
             for i in range(concurrent_user_count):
                 user_email = f"concurrent_user_{i}_{uuid.uuid4().hex[:8]}@example.com"
@@ -482,20 +482,20 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "session_data": f"session_data_{i}_{uuid.uuid4().hex[:8]}"
                 })
                 
-                print(f"✅ Created session {i+1}/{concurrent_user_count}: {user.user_id}")
+                print(f" PASS:  Created session {i+1}/{concurrent_user_count}: {user.user_id}")
             
             # Step 2: Connect all sessions concurrently
-            print("🔗 Establishing concurrent WebSocket connections...")
+            print("[U+1F517] Establishing concurrent WebSocket connections...")
             
             connection_tasks = []
             for session in user_sessions:
                 connection_tasks.append(session["client"].connect())
             
             await asyncio.gather(*connection_tasks)
-            print(f"✅ All {concurrent_user_count} concurrent connections established")
+            print(f" PASS:  All {concurrent_user_count} concurrent connections established")
             
             # Step 3: Test concurrent session operations
-            print("🚀 Testing concurrent session operations...")
+            print("[U+1F680] Testing concurrent session operations...")
             
             operation_tasks = []
             for i, session in enumerate(user_sessions):
@@ -512,10 +512,10 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             
             # Execute all operations concurrently
             await asyncio.gather(*operation_tasks)
-            print(f"✅ {len(operation_tasks)} concurrent operations completed")
+            print(f" PASS:  {len(operation_tasks)} concurrent operations completed")
             
             # Step 4: Validate session isolation under concurrent load
-            print("🔍 Validating session isolation under concurrent load...")
+            print(" SEARCH:  Validating session isolation under concurrent load...")
             
             isolation_violations = []
             
@@ -537,13 +537,13 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     isolation_violations.append(violation)
             
             # Step 5: Test session cleanup and reconnection
-            print("🔄 Testing session cleanup and reconnection...")
+            print(" CYCLE:  Testing session cleanup and reconnection...")
             
             # Disconnect half the sessions
             disconnect_count = concurrent_user_count // 2
             for i in range(disconnect_count):
                 await user_sessions[i]["client"].close()
-                print(f"✅ Disconnected session {i}")
+                print(f" PASS:  Disconnected session {i}")
             
             # Remaining sessions should still work
             remaining_sessions = user_sessions[disconnect_count:]
@@ -553,9 +553,9 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                         "user_id": session["user"].user_id,
                         "test": "session_still_active"
                     })
-                    print(f"✅ Remaining session {i} still functional")
+                    print(f" PASS:  Remaining session {i} still functional")
                 except Exception as e:
-                    print(f"⚠️ Remaining session {i} error: {e}")
+                    print(f" WARNING: [U+FE0F] Remaining session {i} error: {e}")
             
             # Reconnect disconnected sessions
             for i in range(disconnect_count):
@@ -571,7 +571,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                 user_sessions[i]["client"] = new_client
                 self.test_clients.append(new_client)
                 
-                print(f"✅ Reconnected session {i}")
+                print(f" PASS:  Reconnected session {i}")
             
             # Step 6: Final isolation validation
             for session in user_sessions:
@@ -588,7 +588,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "\n".join(isolation_violations)
                 )
             
-            print("✅ Concurrent user session management test PASSED")
+            print(" PASS:  Concurrent user session management test PASSED")
             
         except Exception as e:
             pytest.fail(f"Concurrent user session management test failed: {e}")
@@ -603,7 +603,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
         3. Session data integrity is maintained
         4. No state confusion between sessions
         """
-        print("🔒 Testing session state integrity validation...")
+        print("[U+1F512] Testing session state integrity validation...")
         
         try:
             # Step 1: Create user with complex session state
@@ -624,7 +624,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             self.test_clients.append(client)
             
             await client.connect()
-            print(f"✅ Connected user for state integrity testing: {user.user_id}")
+            print(f" PASS:  Connected user for state integrity testing: {user.user_id}")
             
             # Step 2: Establish complex session state
             session_state = {
@@ -645,7 +645,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             }
             
             await client.send_event("establish_session_state", session_state)
-            print("✅ Complex session state established")
+            print(" PASS:  Complex session state established")
             
             # Step 3: Test state mutations and integrity
             state_mutations = [
@@ -666,7 +666,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                 }
             ]
             
-            print("🔄 Testing state mutations and integrity...")
+            print(" CYCLE:  Testing state mutations and integrity...")
             
             for i, mutation in enumerate(state_mutations):
                 await client.send_event("mutate_session_state", {
@@ -676,7 +676,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 })
                 
-                print(f"✅ Applied state mutation {i+1}: {mutation['action']}")
+                print(f" PASS:  Applied state mutation {i+1}: {mutation['action']}")
             
             # Step 4: Validate session state integrity
             await client.send_event("validate_session_state", {
@@ -685,7 +685,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                 "request_full_state": True
             })
             
-            print("✅ Session state validation requested")
+            print(" PASS:  Session state validation requested")
             
             # Step 5: Test state consistency across operations
             consistency_tests = [
@@ -701,7 +701,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 })
             
-            print("✅ State consistency tests completed")
+            print(" PASS:  State consistency tests completed")
             
             # Step 6: Test state isolation (create second session for same user)
             second_client = await create_authenticated_websocket_client(
@@ -714,7 +714,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
             self.test_clients.append(second_client)
             
             await second_client.connect()
-            print("✅ Second session established for same user")
+            print(" PASS:  Second session established for same user")
             
             # Each session should have independent state
             await second_client.send_event("establish_session_state", {
@@ -727,7 +727,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                 }
             })
             
-            print("✅ Independent state established in second session")
+            print(" PASS:  Independent state established in second session")
             
             # Step 7: Validate state isolation between sessions
             isolation_violations = []
@@ -755,7 +755,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "\n".join(isolation_violations)
                 )
             
-            print("✅ Session state integrity validation test PASSED")
+            print(" PASS:  Session state integrity validation test PASSED")
             
         except Exception as e:
             pytest.fail(f"Session state integrity validation test failed: {e}")
@@ -767,7 +767,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
         This is the main integration test that runs all session security scenarios.
         CRITICAL: This test FAILS HARD for any session security violations.
         """
-        print("🔒 Running comprehensive session security test suite...")
+        print("[U+1F512] Running comprehensive session security test suite...")
         
         try:
             # Initialize authentication tester
@@ -785,7 +785,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     f"Security violations: {hijacking_result.security_violations}"
                 )
             
-            print("✅ Session hijacking prevention test passed")
+            print(" PASS:  Session hijacking prevention test passed")
             
             # Cleanup authentication tester
             await auth_tester.cleanup()
@@ -803,7 +803,7 @@ class TestWebSocketSessionSecurity(SSotBaseTestCase):
                     "\n".join(self.isolation_violations)
                 )
             
-            print("✅ Comprehensive session security test suite PASSED")
+            print(" PASS:  Comprehensive session security test suite PASSED")
             
         except SecurityError as e:
             pytest.fail(f"CRITICAL SESSION SECURITY FAILURE: {e}")
@@ -842,7 +842,7 @@ async def test_session_security_edge_cases():
     
     This validates edge cases that could be exploited for session attacks.
     """
-    print("🔍 Testing session security edge cases...")
+    print(" SEARCH:  Testing session security edge cases...")
     
     auth_helper = E2EWebSocketAuthHelper(environment="test")
     
@@ -862,11 +862,11 @@ async def test_session_security_edge_cases():
             await client.connect()
             await client.send_event("rapid_test", {"iteration": i})
             await client.close()
-            print(f"✅ Rapid session {i} completed")
+            print(f" PASS:  Rapid session {i} completed")
         except Exception as e:
-            print(f"ℹ️ Rapid session {i} error (may be expected): {e}")
+            print(f"[U+2139][U+FE0F] Rapid session {i} error (may be expected): {e}")
     
-    print("✅ Session security edge cases test PASSED")
+    print(" PASS:  Session security edge cases test PASSED")
 
 
 if __name__ == "__main__":

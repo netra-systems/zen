@@ -136,21 +136,21 @@ class TestVariableScopingBug:
                 
                 # If we get here without UnboundLocalError, check if bug is already fixed
                 if e2e_context is not None:
-                    print("✅ BUG APPEARS TO BE FIXED: E2E context created successfully")
+                    print(" PASS:  BUG APPEARS TO BE FIXED: E2E context created successfully")
                     assert e2e_context.get("is_e2e_testing") is True
                     assert e2e_context.get("environment") == "staging"
                 else:
                     # If no E2E context but no error, document the behavior
-                    print("ℹ️ NO E2E CONTEXT: Staging environment did not create E2E context")
+                    print("[U+2139][U+FE0F] NO E2E CONTEXT: Staging environment did not create E2E context")
                 
             except UnboundLocalError as e:
                 # This is the expected error before the fix
                 assert "is_production" in str(e), f"Expected UnboundLocalError for is_production, got: {e}"
-                pytest.fail(f"🚨 CRITICAL BUG REPRODUCED: {e} - is_production used before declaration on line 119")
+                pytest.fail(f" ALERT:  CRITICAL BUG REPRODUCED: {e} - is_production used before declaration on line 119")
             except NameError as e:
                 # Also catch NameError which is another form of the same bug
                 if "is_production" in str(e):
-                    pytest.fail(f"🚨 CRITICAL BUG REPRODUCED: {e} - is_production variable scoping error")
+                    pytest.fail(f" ALERT:  CRITICAL BUG REPRODUCED: {e} - is_production variable scoping error")
                 else:
                     raise
     

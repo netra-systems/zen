@@ -1,7 +1,7 @@
 """
 Example Usage of the E2E Validation Framework
 Demonstrates integration with existing StateIntegrityChecker.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import asyncio

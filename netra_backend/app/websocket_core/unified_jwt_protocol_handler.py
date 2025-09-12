@@ -51,16 +51,16 @@ class UnifiedJWTProtocolHandler:
         # Method 1: Standard Authorization header
         jwt_token = UnifiedJWTProtocolHandler._extract_from_authorization_header(websocket)
         if jwt_token:
-            logger.debug("✅ JWT extracted from Authorization header")
+            logger.debug(" PASS:  JWT extracted from Authorization header")
             return jwt_token
             
         # Method 2: WebSocket subprotocol (frontend format: jwt.${token})
         jwt_token = UnifiedJWTProtocolHandler._extract_from_subprotocol(websocket)
         if jwt_token:
-            logger.debug("✅ JWT extracted from Sec-WebSocket-Protocol")
+            logger.debug(" PASS:  JWT extracted from Sec-WebSocket-Protocol")
             return jwt_token
             
-        logger.warning("⚠️ No JWT token found in Authorization header or subprotocol")
+        logger.warning(" WARNING: [U+FE0F] No JWT token found in Authorization header or subprotocol")
         return None
     
     @staticmethod

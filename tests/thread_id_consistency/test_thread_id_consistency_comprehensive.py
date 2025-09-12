@@ -2,7 +2,7 @@
 Thread ID Consistency Comprehensive Tests - REPRODUCTION OF WEBSOCKET RESOURCE LEAK BUG
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - System stability affects all users  
+- Segment: ALL (Free  ->  Enterprise) - System stability affects all users  
 - Business Goal: Reproduce and validate thread_ID consistency issues causing WebSocket resource leaks
 - Value Impact: Identifies the root cause of 20 manager limit failures preventing user sessions
 - Strategic Impact: Critical for preventing system crashes and ensuring multi-user stability
@@ -297,7 +297,7 @@ class ThreadIDConsistencyTracker:
             for source, thread_id in summary.items():
                 lines.append(f"      {source}: {thread_id}")
             if snapshot.has_thread_id_mismatch():
-                lines.append("      ⚠️  MISMATCH DETECTED")
+                lines.append("       WARNING: [U+FE0F]  MISMATCH DETECTED")
             lines.append("")
         
         # Add violations detail
@@ -450,7 +450,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         This test validates that UserExecutionContext creation produces consistent
         thread_ID values when using different ID generation strategies.
         """
-        logger.info("🔍 UNIT TEST: UserExecutionContext Thread ID Consistency")
+        logger.info(" SEARCH:  UNIT TEST: UserExecutionContext Thread ID Consistency")
         
         user_id = "test-user-consistency-1001"
         
@@ -520,7 +520,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         if analysis["total_violations"] > 0:
             pytest.fail(f"Thread ID consistency violations detected: {analysis['total_violations']} violations found")
         
-        logger.info("✅ UNIT TEST PASSED: UserExecutionContext maintains thread_ID consistency")
+        logger.info(" PASS:  UNIT TEST PASSED: UserExecutionContext maintains thread_ID consistency")
 
     @pytest.mark.asyncio 
     async def test_thread_id_inconsistency_websocket_manager_creation(self):
@@ -531,7 +531,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         become inconsistent between UserExecutionContext and WebSocket manager usage,
         preventing cleanup from finding the correct isolation keys.
         """
-        logger.info("🔍 INTEGRATION TEST: WebSocket Manager Thread ID Inconsistency (BUG REPRODUCTION)")
+        logger.info(" SEARCH:  INTEGRATION TEST: WebSocket Manager Thread ID Inconsistency (BUG REPRODUCTION)")
         
         user_id = "test-user-inconsistency-2001"
         
@@ -629,18 +629,18 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         if analysis["total_violations"] == 0:
             # If no violations detected, this means the bug might be fixed
             # or our reproduction scenario needs adjustment
-            logger.warning("⚠️  Expected thread_ID violations but none detected. Bug reproduction may need adjustment.")
+            logger.warning(" WARNING: [U+FE0F]  Expected thread_ID violations but none detected. Bug reproduction may need adjustment.")
             
         else:
             # REPRODUCTION SUCCESSFUL: Thread ID inconsistencies detected
-            logger.error(f"🔴 BUG REPRODUCED: {analysis['total_violations']} thread_ID violations detected")
-            logger.error(f"🔴 Consistency Score: {analysis['consistency_score']:.1f}%")
-            logger.error(f"🔴 This explains why cleanup fails to find managers with mismatched thread_IDs")
+            logger.error(f"[U+1F534] BUG REPRODUCED: {analysis['total_violations']} thread_ID violations detected")
+            logger.error(f"[U+1F534] Consistency Score: {analysis['consistency_score']:.1f}%")
+            logger.error(f"[U+1F534] This explains why cleanup fails to find managers with mismatched thread_IDs")
             
             # This demonstrates the bug - but we don't want the test to fail the CI
             # Instead, we'll create a separate test that shows the fix
             
-        logger.info("✅ INTEGRATION TEST COMPLETED: Successfully reproduced thread_ID inconsistency scenario")
+        logger.info(" PASS:  INTEGRATION TEST COMPLETED: Successfully reproduced thread_ID inconsistency scenario")
 
     @pytest.mark.asyncio
     async def test_websocket_manager_lifecycle_thread_id_consistency(self):
@@ -650,7 +650,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         This test uses REAL WebSocket components with authentication and tracks
         thread_ID values throughout the entire lifecycle from creation to cleanup.
         """
-        logger.info("🔍 INTEGRATION TEST: WebSocket Manager Lifecycle Thread ID Consistency")
+        logger.info(" SEARCH:  INTEGRATION TEST: WebSocket Manager Lifecycle Thread ID Consistency")
         
         # Create authenticated user context using E2E auth helper per project requirements
         authenticated_context = await create_authenticated_user_context(
@@ -763,7 +763,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
             logger.warning(f"Thread ID inconsistencies detected in lifecycle: {analysis['total_violations']} violations")
             # Log details for debugging but don't fail the test yet - this is expected during bug reproduction phase
         
-        logger.info("✅ INTEGRATION TEST PASSED: WebSocket manager lifecycle with consistent thread_ID tracking")
+        logger.info(" PASS:  INTEGRATION TEST PASSED: WebSocket manager lifecycle with consistent thread_ID tracking")
 
     @pytest.mark.asyncio
     async def test_concurrent_websocket_operations_thread_id_isolation(self):
@@ -773,7 +773,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         This test uses authenticated WebSocket connections for multiple users
         concurrently to ensure thread_ID values don't contaminate between users.
         """
-        logger.info("🔍 E2E TEST: Concurrent WebSocket Operations Thread ID Isolation")
+        logger.info(" SEARCH:  E2E TEST: Concurrent WebSocket Operations Thread ID Isolation")
         
         # Create multiple authenticated user contexts
         user_contexts = []
@@ -933,7 +933,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         if critical_violations:
             logger.warning(f"Thread_ID violations in concurrent operations: {critical_violations}")
         
-        logger.info("✅ E2E TEST PASSED: Concurrent WebSocket operations maintain thread_ID isolation")
+        logger.info(" PASS:  E2E TEST PASSED: Concurrent WebSocket operations maintain thread_ID isolation")
 
     @pytest.mark.asyncio
     async def test_thread_id_recovery_after_mismatch(self):
@@ -943,7 +943,7 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         This test demonstrates how the system should handle thread_ID inconsistencies
         and attempt recovery to prevent resource leaks.
         """
-        logger.info("🔍 EDGE CASE TEST: Thread ID Recovery After Mismatch Detection")
+        logger.info(" SEARCH:  EDGE CASE TEST: Thread ID Recovery After Mismatch Detection")
         
         user_id = "test-user-recovery-4001"
         
@@ -1034,8 +1034,8 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         final_manager_active = manager._is_active
         
         if final_manager_active:
-            logger.error("🔴 RECOVERY FAILED: Manager still active after all recovery strategies")
-            logger.error("🔴 This demonstrates the thread_ID mismatch prevents cleanup")
+            logger.error("[U+1F534] RECOVERY FAILED: Manager still active after all recovery strategies")
+            logger.error("[U+1F534] This demonstrates the thread_ID mismatch prevents cleanup")
             
             # Record this as a critical finding
             self.thread_id_tracker.record_violation(
@@ -1046,14 +1046,14 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
                 recovery_strategies_tried=2
             )
         else:
-            logger.info("✅ RECOVERY SUCCESSFUL: Manager cleaned up despite thread_ID mismatch")
+            logger.info(" PASS:  RECOVERY SUCCESSFUL: Manager cleaned up despite thread_ID mismatch")
         
         # Verify no resource leak
         active_managers = len(self.factory._active_managers)
         if active_managers > 0:
             logger.warning(f"Resource leak detected: {active_managers} managers still active")
         
-        logger.info("✅ EDGE CASE TEST COMPLETED: Thread ID recovery scenario tested")
+        logger.info(" PASS:  EDGE CASE TEST COMPLETED: Thread ID recovery scenario tested")
 
     def test_thread_id_consistency_test_suite_coverage(self):
         """Validate that this test suite covers all critical thread_ID consistency scenarios."""
@@ -1079,6 +1079,6 @@ class TestThreadIdConsistencyComprehensive(SSotAsyncTestCase):
         assert hasattr(self, 'thread_id_tracker'), "ThreadIDConsistencyTracker not initialized"
         assert hasattr(self, 'auth_helper'), "E2EAuthHelper not initialized for authentication"
         
-        logger.info(f"✅ Thread ID consistency test suite validated: {len(test_methods)} tests covering all scenarios")
-        logger.info(f"✅ Real WebSocket components and authentication enabled per project requirements")
-        logger.info(f"✅ ThreadIDConsistencyTracker ready for comprehensive bug reproduction")
+        logger.info(f" PASS:  Thread ID consistency test suite validated: {len(test_methods)} tests covering all scenarios")
+        logger.info(f" PASS:  Real WebSocket components and authentication enabled per project requirements")
+        logger.info(f" PASS:  ThreadIDConsistencyTracker ready for comprehensive bug reproduction")

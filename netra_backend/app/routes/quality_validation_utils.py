@@ -1,7 +1,7 @@
 """Quality Validation Utilities
 
 This module provides utility functions for data building and formatting.
-Each function is ≤8 lines as per architectural requirements.
+Each function is  <= 8 lines as per architectural requirements.
 """
 
 from datetime import UTC, datetime

@@ -68,7 +68,7 @@ from shared.isolated_environment import IsolatedEnvironment, get_env
 
 class TestWhyOne_ErrorHandlingImprovements(SSotBaseTestCase):
     """
-    🔴 WHY #1 - SYMPTOM: Test error handling improvements for parameter mismatches
+    [U+1F534] WHY #1 - SYMPTOM: Test error handling improvements for parameter mismatches
     
     This test class validates that the symptom-level fix prevents cryptic error messages
     and provides clear, actionable error information when parameter mismatches occur.
@@ -159,7 +159,7 @@ class TestWhyOne_ErrorHandlingImprovements(SSotBaseTestCase):
                         # Should preserve the actual error information
                         assert "TypeError" in error_str or "unexpected keyword" in error_str
                         
-                        print(f"✅ Improved error message: {error_str}")
+                        print(f" PASS:  Improved error message: {error_str}")
         
         finally:
             if websocket and not websocket.closed:
@@ -188,7 +188,7 @@ class TestWhyOne_ErrorHandlingImprovements(SSotBaseTestCase):
                 assert supervisor is not None
                 assert hasattr(supervisor, 'user_id') or hasattr(supervisor, '_user_context')
                 
-                print(f"✅ Supervisor created successfully with corrected parameters")
+                print(f" PASS:  Supervisor created successfully with corrected parameters")
         
         finally:
             if websocket and not websocket.closed:
@@ -228,7 +228,7 @@ class TestWhyOne_ErrorHandlingImprovements(SSotBaseTestCase):
                         
                         # Context information should be preserved in debug logs or error details
                         # The function should log context information before failing
-                        print(f"✅ Error with preserved context: {error_str}")
+                        print(f" PASS:  Error with preserved context: {error_str}")
                         
                         # Verify it's wrapped in HTTPException, not raw exception
                         assert "Component retrieval failed" in error_str
@@ -240,7 +240,7 @@ class TestWhyOne_ErrorHandlingImprovements(SSotBaseTestCase):
 
 class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
     """
-    🟠 WHY #2 - IMMEDIATE CAUSE: Test parameter standardization validation
+    [U+1F7E0] WHY #2 - IMMEDIATE CAUSE: Test parameter standardization validation
     
     This test class validates that all factory methods use consistent parameter names
     and that parameter mapping works correctly between different factory implementations.
@@ -311,8 +311,8 @@ class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
                     # Validate parameter value is correct
                     assert captured_kwargs['websocket_client_id'] == context.connection_id
                     
-                    print(f"✅ WebSocket factory uses correct parameter: websocket_client_id")
-                    print(f"✅ Parameter value correctly passed: {captured_kwargs['websocket_client_id']}")
+                    print(f" PASS:  WebSocket factory uses correct parameter: websocket_client_id")
+                    print(f" PASS:  Parameter value correctly passed: {captured_kwargs['websocket_client_id']}")
         
         finally:
             if websocket and not websocket.closed:
@@ -375,7 +375,7 @@ class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
                             assert 'websocket_connection_id' not in captured_kwargs, \
                                 "Deprecated websocket_connection_id should not be used in core factory"
                         
-                        print(f"✅ Core factory uses standardized parameter: websocket_client_id")
+                        print(f" PASS:  Core factory uses standardized parameter: websocket_client_id")
                 
                 except ImportError:
                     # If create_user_execution_context doesn't exist, test direct creation
@@ -392,7 +392,7 @@ class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
                     
                     # Validation that core factory accepts standardized parameter
                     assert supervisor is not None
-                    print(f"✅ Core factory accepts websocket_client_id parameter")
+                    print(f" PASS:  Core factory accepts websocket_client_id parameter")
         
         finally:
             if websocket and not websocket.closed:
@@ -428,7 +428,7 @@ class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
                 assert user_context.thread_id == thread_id
                 assert user_context.websocket_client_id == websocket_client_id
                 
-                print(f"✅ UserExecutionContext accepts websocket_client_id parameter")
+                print(f" PASS:  UserExecutionContext accepts websocket_client_id parameter")
                 
             except Exception as e:
                 pytest.fail(f"UserExecutionContext should accept websocket_client_id: {e}")
@@ -442,7 +442,7 @@ class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
                     db_session=db_session
                 )
                 
-            print(f"✅ UserExecutionContext properly rejects deprecated websocket_connection_id")
+            print(f" PASS:  UserExecutionContext properly rejects deprecated websocket_connection_id")
     
     @pytest.mark.asyncio
     async def test_cross_factory_parameter_mapping(
@@ -486,8 +486,8 @@ class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
                 assert core_supervisor is not None
                 
                 # Both supervisors should be successfully created with same parameter interface
-                print(f"✅ Both factories work with standardized websocket_client_id parameter")
-                print(f"✅ Parameter mapping consistency validated across factories")
+                print(f" PASS:  Both factories work with standardized websocket_client_id parameter")
+                print(f" PASS:  Parameter mapping consistency validated across factories")
         
         finally:
             if websocket and not websocket.closed:
@@ -496,7 +496,7 @@ class TestWhyTwo_ParameterStandardizationValidation(SSotBaseTestCase):
 
 class TestWhyThree_FactoryPatternConsistency(SSotBaseTestCase):
     """
-    🟡 WHY #3 - SYSTEM FAILURE: Test factory pattern consistency checking
+    [U+1F7E1] WHY #3 - SYSTEM FAILURE: Test factory pattern consistency checking
     
     This test class validates that interface contract validation framework
     prevents factory pattern inconsistencies from occurring.
@@ -546,8 +546,8 @@ class TestWhyThree_FactoryPatternConsistency(SSotBaseTestCase):
         assert 'websocket_connection_id' not in user_params, \
             "UserExecutionContext should not have deprecated websocket_connection_id parameter"
         
-        print(f"✅ Factory interface contracts validated successfully")
-        print(f"✅ Standardized parameter websocket_client_id found in UserExecutionContext")
+        print(f" PASS:  Factory interface contracts validated successfully")
+        print(f" PASS:  Standardized parameter websocket_client_id found in UserExecutionContext")
     
     def test_factory_parameter_mapping_consistency(self):
         """
@@ -603,7 +603,7 @@ class TestWhyThree_FactoryPatternConsistency(SSotBaseTestCase):
         if inconsistencies:
             pytest.fail(f"Factory parameter inconsistencies found: {inconsistencies}")
         
-        print(f"✅ Factory parameter mapping consistency validated")
+        print(f" PASS:  Factory parameter mapping consistency validated")
     
     @pytest.mark.asyncio
     async def test_factory_integration_validation(
@@ -636,8 +636,8 @@ class TestWhyThree_FactoryPatternConsistency(SSotBaseTestCase):
                 assert hasattr(supervisor, 'user_id') or hasattr(supervisor, '_user_context')
                 
                 # Test that supervisor creation was consistent with context
-                print(f"✅ Factory integration chain validated successfully")
-                print(f"✅ Supervisor created with consistent parameter interface")
+                print(f" PASS:  Factory integration chain validated successfully")
+                print(f" PASS:  Supervisor created with consistent parameter interface")
         
         finally:
             if websocket and not websocket.closed:
@@ -682,7 +682,7 @@ class TestWhyThree_FactoryPatternConsistency(SSotBaseTestCase):
                         # Should contain useful error information
                         assert "Failed to create WebSocket supervisor" in error_str or "Component" in error_str
                         
-                        print(f"✅ Factory error handling consistency validated")
+                        print(f" PASS:  Factory error handling consistency validated")
         
         finally:
             if websocket and not websocket.closed:
@@ -691,7 +691,7 @@ class TestWhyThree_FactoryPatternConsistency(SSotBaseTestCase):
 
 class TestWhyFour_ProcessImprovementValidation(SSotBaseTestCase):
     """
-    🟢 WHY #4 - PROCESS GAP: Test development process improvement validation
+    [U+1F7E2] WHY #4 - PROCESS GAP: Test development process improvement validation
     
     This test class validates that the development process improvements prevent
     interface evolution issues from occurring in the future.
@@ -733,12 +733,12 @@ class TestWhyFour_ProcessImprovementValidation(SSotBaseTestCase):
                         validation_scripts.append(os.path.join(scripts_dir, file))
             
             if validation_scripts:
-                print(f"✅ Found validation scripts: {validation_scripts}")
+                print(f" PASS:  Found validation scripts: {validation_scripts}")
             else:
                 # This is acceptable if interface validation is built into other tools
-                print(f"⚠️  Pre-commit interface validation not found - should be implemented")
+                print(f" WARNING: [U+FE0F]  Pre-commit interface validation not found - should be implemented")
         else:
-            print(f"✅ Pre-commit configuration found: {found_configs}")
+            print(f" PASS:  Pre-commit configuration found: {found_configs}")
     
     def test_interface_consistency_checking_tools(self):
         """
@@ -757,7 +757,7 @@ class TestWhyFour_ProcessImprovementValidation(SSotBaseTestCase):
         available_tools = [tool for tool in potential_tools if os.path.exists(tool)]
         
         if available_tools:
-            print(f"✅ Interface checking tools available: {available_tools}")
+            print(f" PASS:  Interface checking tools available: {available_tools}")
         else:
             # Check for any relevant checking scripts
             scripts_dir = "/Users/rindhujajohnson/Netra/GitHub/netra-apex/scripts"
@@ -769,11 +769,11 @@ class TestWhyFour_ProcessImprovementValidation(SSotBaseTestCase):
                             checking_scripts.append(file)
                 
                 if checking_scripts:
-                    print(f"✅ Found relevant checking scripts: {checking_scripts}")
+                    print(f" PASS:  Found relevant checking scripts: {checking_scripts}")
                 else:
-                    print(f"⚠️  Interface consistency checking tools should be implemented")
+                    print(f" WARNING: [U+FE0F]  Interface consistency checking tools should be implemented")
             else:
-                print(f"⚠️  Scripts directory not found")
+                print(f" WARNING: [U+FE0F]  Scripts directory not found")
     
     def test_change_impact_analysis_framework(self):
         """
@@ -799,11 +799,11 @@ class TestWhyFour_ProcessImprovementValidation(SSotBaseTestCase):
                     dependency_tools.append(file)
         
         if available_analysis:
-            print(f"✅ Impact analysis framework available: {available_analysis}")
+            print(f" PASS:  Impact analysis framework available: {available_analysis}")
         elif dependency_tools:
-            print(f"✅ Dependency analysis tools available: {dependency_tools}")
+            print(f" PASS:  Dependency analysis tools available: {dependency_tools}")
         else:
-            print(f"⚠️  Change impact analysis framework should be implemented")
+            print(f" WARNING: [U+FE0F]  Change impact analysis framework should be implemented")
     
     def test_code_review_process_documentation(self):
         """
@@ -831,16 +831,16 @@ class TestWhyFour_ProcessImprovementValidation(SSotBaseTestCase):
                     review_specs.append(file)
         
         if available_docs:
-            print(f"✅ Code review documentation available: {available_docs}")
+            print(f" PASS:  Code review documentation available: {available_docs}")
         elif review_specs:
-            print(f"✅ Review process specs available: {review_specs}")
+            print(f" PASS:  Review process specs available: {review_specs}")
         else:
-            print(f"⚠️  Code review process documentation for interface changes should be implemented")
+            print(f" WARNING: [U+FE0F]  Code review process documentation for interface changes should be implemented")
 
 
 class TestWhyFive_InterfaceEvolutionGovernance(SSotBaseTestCase):
     """
-    🔵 WHY #5 - ROOT CAUSE: Test interface evolution governance validation
+    [U+1F535] WHY #5 - ROOT CAUSE: Test interface evolution governance validation
     
     This test class validates that the systematic interface evolution governance
     prevents the root cause of parameter contract violations from occurring.
@@ -878,11 +878,11 @@ class TestWhyFive_InterfaceEvolutionGovernance(SSotBaseTestCase):
         adr_available = [loc for loc in adr_locations if os.path.exists(loc)]
         
         if available_governance:
-            print(f"✅ Interface evolution governance documentation: {available_governance}")
+            print(f" PASS:  Interface evolution governance documentation: {available_governance}")
         elif adr_available:
-            print(f"✅ Architecture decision process available: {adr_available}")
+            print(f" PASS:  Architecture decision process available: {adr_available}")
         else:
-            print(f"⚠️  Interface evolution governance framework should be documented")
+            print(f" WARNING: [U+FE0F]  Interface evolution governance framework should be documented")
     
     def test_interface_change_approval_process(self):
         """
@@ -909,11 +909,11 @@ class TestWhyFive_InterfaceEvolutionGovernance(SSotBaseTestCase):
                     approval_workflows.append(file)
         
         if available_processes:
-            print(f"✅ Interface change approval process documented: {available_processes}")
+            print(f" PASS:  Interface change approval process documented: {available_processes}")
         elif approval_workflows:
-            print(f"✅ Approval workflows available: {approval_workflows}")
+            print(f" PASS:  Approval workflows available: {approval_workflows}")
         else:
-            print(f"⚠️  Interface change approval process should be documented")
+            print(f" WARNING: [U+FE0F]  Interface change approval process should be documented")
     
     def test_audit_trail_capabilities(self):
         """
@@ -938,18 +938,18 @@ class TestWhyFive_InterfaceEvolutionGovernance(SSotBaseTestCase):
             
             if result.returncode == 0 and result.stdout.strip():
                 commit_lines = result.stdout.strip().split('\n')
-                print(f"✅ Found {len(commit_lines)} interface-related commits in audit trail")
+                print(f" PASS:  Found {len(commit_lines)} interface-related commits in audit trail")
                 
                 # Check if recent commits show the parameter fix
                 for line in commit_lines:
                     if 'websocket_client_id' in line.lower() or 'parameter' in line.lower():
-                        print(f"✅ Found parameter standardization commit: {line[:80]}...")
+                        print(f" PASS:  Found parameter standardization commit: {line[:80]}...")
                         break
             else:
-                print(f"⚠️  No interface-related commits found in recent history")
+                print(f" WARNING: [U+FE0F]  No interface-related commits found in recent history")
                 
         except Exception as e:
-            print(f"⚠️  Could not check git audit trail: {e}")
+            print(f" WARNING: [U+FE0F]  Could not check git audit trail: {e}")
     
     def test_rollback_capabilities(self):
         """
@@ -976,11 +976,11 @@ class TestWhyFive_InterfaceEvolutionGovernance(SSotBaseTestCase):
                     rollback_scripts.append(file)
         
         if available_rollback:
-            print(f"✅ Rollback capabilities documented: {available_rollback}")
+            print(f" PASS:  Rollback capabilities documented: {available_rollback}")
         elif rollback_scripts:
-            print(f"✅ Rollback scripts available: {rollback_scripts}")
+            print(f" PASS:  Rollback scripts available: {rollback_scripts}")
         else:
-            print(f"⚠️  Rollback capabilities for interface changes should be documented")
+            print(f" WARNING: [U+FE0F]  Rollback capabilities for interface changes should be documented")
     
     def test_systematic_governance_prevention(self):
         """
@@ -1014,21 +1014,21 @@ class TestWhyFive_InterfaceEvolutionGovernance(SSotBaseTestCase):
                 continue
         
         if parameter_documented:
-            print(f"✅ Parameter naming standards documented in: {available_standards}")
+            print(f" PASS:  Parameter naming standards documented in: {available_standards}")
         elif available_standards:
-            print(f"✅ Interface standards framework available: {available_standards}")
-            print(f"⚠️  Specific websocket parameter naming should be documented")
+            print(f" PASS:  Interface standards framework available: {available_standards}")
+            print(f" WARNING: [U+FE0F]  Specific websocket parameter naming should be documented")
         else:
-            print(f"⚠️  Interface standards documentation should be created")
+            print(f" WARNING: [U+FE0F]  Interface standards documentation should be created")
         
         # The test passes if governance framework exists (even if incomplete)
         # The goal is to ensure systematic thinking about interface evolution
-        print(f"✅ Systematic governance framework validation completed")
+        print(f" PASS:  Systematic governance framework validation completed")
 
 
 class TestEndToEndIntegrationValidation(SSotBaseTestCase):
     """
-    🎯 END-TO-END INTEGRATION: Test complete message routing success after fixes
+     TARGET:  END-TO-END INTEGRATION: Test complete message routing success after fixes
     
     This test class validates that the complete end-to-end flow works correctly
     after all FIVE WHY level fixes are applied.
@@ -1090,10 +1090,10 @@ class TestEndToEndIntegrationValidation(SSotBaseTestCase):
                 assert supervisor is not None
                 assert hasattr(supervisor, 'user_id') or hasattr(supervisor, '_user_context')
                 
-                print(f"✅ Complete WebSocket supervisor creation flow successful")
-                print(f"✅ User: {user_id}")
-                print(f"✅ Thread: {thread_id}")
-                print(f"✅ Connection ID: {context.connection_id}")
+                print(f" PASS:  Complete WebSocket supervisor creation flow successful")
+                print(f" PASS:  User: {user_id}")
+                print(f" PASS:  Thread: {thread_id}")
+                print(f" PASS:  Connection ID: {context.connection_id}")
         
         finally:
             if websocket and not websocket.closed:
@@ -1158,8 +1158,8 @@ class TestEndToEndIntegrationValidation(SSotBaseTestCase):
                 assert successful_supervisors == num_users
                 assert creation_time < 30.0  # Should complete within reasonable time
                 
-                print(f"✅ Created {successful_supervisors} supervisors concurrently")
-                print(f"✅ Total creation time: {creation_time:.2f}s")
+                print(f" PASS:  Created {successful_supervisors} supervisors concurrently")
+                print(f" PASS:  Total creation time: {creation_time:.2f}s")
         
         finally:
             # Clean up all WebSocket connections
@@ -1216,8 +1216,8 @@ class TestEndToEndIntegrationValidation(SSotBaseTestCase):
                 assert context.user_id == user_id
                 assert context.thread_id == thread_id
                 
-                print(f"✅ Message routing validation successful")
-                print(f"✅ Supervisor handles messages for user: {user_id}")
+                print(f" PASS:  Message routing validation successful")
+                print(f" PASS:  Supervisor handles messages for user: {user_id}")
         
         finally:
             if websocket and not websocket.closed:
@@ -1275,8 +1275,8 @@ class TestEndToEndIntegrationValidation(SSotBaseTestCase):
                 supervisor2 = await get_websocket_scoped_supervisor(context, db_session)
                 assert supervisor2 is not None
                 
-                print(f"✅ Error recovery validation successful")
-                print(f"✅ System recovers gracefully from non-parameter errors")
+                print(f" PASS:  Error recovery validation successful")
+                print(f" PASS:  System recovers gracefully from non-parameter errors")
         
         finally:
             if websocket and not websocket.closed:

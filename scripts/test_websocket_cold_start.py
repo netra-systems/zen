@@ -26,10 +26,10 @@ class WebSocketColdStartTester:
             response = requests.get(f"{self.http_url}/health", timeout=2)
             return True
         except requests.exceptions.Timeout:
-            print("   ⏱️  Request timed out (expected during cold start)")
+            print("   [U+23F1][U+FE0F]  Request timed out (expected during cold start)")
             return True
         except Exception as e:
-            print(f"   ⚠️  Error triggering cold start: {e}")
+            print(f"    WARNING: [U+FE0F]  Error triggering cold start: {e}")
             return False
     
     async def test_websocket_during_startup(self, attempt_id: int, delay_after_trigger: float) -> Dict[str, Any]:
@@ -78,28 +78,28 @@ class WebSocketColdStartTester:
                     response = await asyncio.wait_for(websocket.recv(), timeout=3.0)
                     result['response_received'] = True
                     result['success'] = True
-                    print(f"      📥 Received response: {response[:100]}...")
+                    print(f"      [U+1F4E5] Received response: {response[:100]}...")
                 except asyncio.TimeoutError:
                     result['error'] = "Response timeout"
-                    print(f"      ⏱️  No response within 3s")
+                    print(f"      [U+23F1][U+FE0F]  No response within 3s")
                     
         except websockets.exceptions.ConnectionClosed as e:
             result['error'] = f"Connection closed: {e.code}"
             result['error_code'] = e.code
             if e.code == 1011:  # The specific error we're testing for
-                print(f"      🚨 1011 ERROR DETECTED! - {e}")
+                print(f"       ALERT:  1011 ERROR DETECTED! - {e}")
             else:
-                print(f"      ❌ Connection closed: {e.code} - {e}")
+                print(f"       FAIL:  Connection closed: {e.code} - {e}")
                 
         except Exception as e:
             result['error'] = str(e)
-            print(f"      ❌ Connection failed: {e}")
+            print(f"       FAIL:  Connection failed: {e}")
             
         return result
     
     async def run_cold_start_test_sequence(self) -> List[Dict[str, Any]]:
         """Run complete cold start test sequence"""
-        print("\n🧪 === COLD START WEBSOCKET TEST SEQUENCE ===")
+        print("\n[U+1F9EA] === COLD START WEBSOCKET TEST SEQUENCE ===")
         
         # Trigger cold start
         if not self.trigger_cold_start():
@@ -136,40 +136,40 @@ class WebSocketColdStartTester:
                 valid_results.append(result)
                 self.results.append(result)
             else:
-                print(f"   ⚠️  Task failed with exception: {result}")
+                print(f"    WARNING: [U+FE0F]  Task failed with exception: {result}")
                 
         return valid_results
     
     def print_summary(self):
         """Print test results summary"""
-        print("\n📊 === COLD START TEST RESULTS ===")
+        print("\n CHART:  === COLD START TEST RESULTS ===")
         
         if not self.results:
-            print("❌ No test results available")
+            print(" FAIL:  No test results available")
             return
             
         success_count = sum(1 for r in self.results if r['success'])
         total_count = len(self.results)
         
-        print(f"✅ Successful connections: {success_count}/{total_count}")
+        print(f" PASS:  Successful connections: {success_count}/{total_count}")
         
         # Check for 1011 errors specifically
         error_1011_count = sum(1 for r in self.results if r.get('error_code') == 1011)
         if error_1011_count > 0:
-            print(f"🚨 ISSUE #437 ERRORS DETECTED: {error_1011_count} connections failed with 1011")
+            print(f" ALERT:  ISSUE #437 ERRORS DETECTED: {error_1011_count} connections failed with 1011")
         else:
-            print("✅ NO 1011 ERRORS DETECTED - Race condition fix working!")
+            print(" PASS:  NO 1011 ERRORS DETECTED - Race condition fix working!")
             
         # Detailed results
-        print("\n📋 Detailed Results:")
+        print("\n[U+1F4CB] Detailed Results:")
         for result in self.results:
-            status = "✅" if result['success'] else "❌"
+            status = " PASS: " if result['success'] else " FAIL: "
             delay = result['delay_after_trigger']
             conn_time = result.get('connection_time', 'N/A')
             error = result.get('error', 'None')
             
             if result.get('error_code') == 1011:
-                status = "🚨"
+                status = " ALERT: "
                 
             print(f"   {status} Delay: {delay}s, Connection: {conn_time}, Error: {error}")
 
@@ -194,11 +194,11 @@ async def main():
     error_1011_found = any(r.get('error_code') == 1011 for r in results)
     
     if error_1011_found:
-        print("\n🚨 PHASE 2 RESULT: RACE CONDITION STILL EXISTS")
+        print("\n ALERT:  PHASE 2 RESULT: RACE CONDITION STILL EXISTS")
         print("   1011 errors detected during cold start window")
         print("   Additional fixes required for complete resolution")
     else:
-        print("\n✅ PHASE 2 RESULT: RACE CONDITION FIXES WORKING")
+        print("\n PASS:  PHASE 2 RESULT: RACE CONDITION FIXES WORKING")
         print("   No 1011 errors detected during cold start scenarios")
         print("   Issue #437 appears to be resolved in GCP environment")
 

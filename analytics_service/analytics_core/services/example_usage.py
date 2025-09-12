@@ -208,7 +208,7 @@ async def main():
         for error in setup_results["errors"]:
             print(f"  - {error}")
     else:
-        print("\n✅ All setup completed successfully!")
+        print("\n PASS:  All setup completed successfully!")
     
     print("\n" + "=" * 60)
     print("You can now access your dashboards in Grafana:")

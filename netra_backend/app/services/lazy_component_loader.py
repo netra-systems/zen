@@ -152,7 +152,7 @@ class LazyComponentLoader:
         self._components[name] = component
         self._metrics.total_components += 1
         
-        logger.debug(f"📋 Registered lazy component {name} "
+        logger.debug(f"[U+1F4CB] Registered lazy component {name} "
                     f"(priority: {priority.value}, strategy: {strategy.value}, "
                     f"cost: {memory_cost_mb}MB)")
     
@@ -161,7 +161,7 @@ class LazyComponentLoader:
         if self._is_initialized:
             return
         
-        logger.info("🚀 Initializing LazyComponentLoader...")
+        logger.info("[U+1F680] Initializing LazyComponentLoader...")
         
         # Load critical components immediately
         critical_components = [
@@ -170,7 +170,7 @@ class LazyComponentLoader:
         ]
         
         if critical_components:
-            logger.info(f"⚡ Loading {len(critical_components)} critical components...")
+            logger.info(f" LIGHTNING:  Loading {len(critical_components)} critical components...")
             for component_name in critical_components:
                 await self.load_component(component_name)
         
@@ -178,7 +178,7 @@ class LazyComponentLoader:
         self._preload_task = asyncio.create_task(self._preload_components())
         
         self._is_initialized = True
-        logger.info("✅ LazyComponentLoader initialized")
+        logger.info(" PASS:  LazyComponentLoader initialized")
     
     async def load_component(self, name: str) -> Any:
         """Load component on-demand with dependency resolution.
@@ -231,7 +231,7 @@ class LazyComponentLoader:
         if (component.memory_cost_mb > 50 and 
             memory_stats.pressure_level in [MemoryPressureLevel.HIGH, MemoryPressureLevel.CRITICAL]):
             
-            logger.warning(f"⚠️ Deferring load of {name} due to memory pressure "
+            logger.warning(f" WARNING: [U+FE0F] Deferring load of {name} due to memory pressure "
                           f"({memory_stats.percentage_used:.1f}%)")
             
             # For critical components, load anyway but warn
@@ -259,7 +259,7 @@ class LazyComponentLoader:
         start_time = time.time()
         
         try:
-            logger.info(f"🔧 Loading component {component.name} "
+            logger.info(f"[U+1F527] Loading component {component.name} "
                        f"(priority: {component.priority.value}, cost: {component.memory_cost_mb}MB)")
             
             # Create instance
@@ -287,13 +287,13 @@ class LazyComponentLoader:
             # Track for cleanup
             self._loaded_instances.add(instance)
             
-            logger.info(f"✅ Loaded component {component.name} in {load_time_ms:.1f}ms")
+            logger.info(f" PASS:  Loaded component {component.name} in {load_time_ms:.1f}ms")
             
             return instance
             
         except Exception as e:
             self._metrics.failed_components += 1
-            logger.error(f"❌ Failed to load component {component.name}: {e}")
+            logger.error(f" FAIL:  Failed to load component {component.name}: {e}")
             raise RuntimeError(f"Component loading failed for {component.name}: {e}")
         
         finally:
@@ -304,7 +304,7 @@ class LazyComponentLoader:
         # Wait a bit after startup to avoid interfering with critical operations
         await asyncio.sleep(5)
         
-        logger.info("🔄 Starting component preloading...")
+        logger.info(" CYCLE:  Starting component preloading...")
         
         # Get components that should be preloaded
         preload_components = [
@@ -329,7 +329,7 @@ class LazyComponentLoader:
                 # Check memory pressure before each load
                 memory_stats = self.memory_service.get_memory_stats()
                 if memory_stats.pressure_level in [MemoryPressureLevel.HIGH, MemoryPressureLevel.CRITICAL]:
-                    logger.warning(f"⚠️ Stopping preload due to memory pressure ({memory_stats.percentage_used:.1f}%)")
+                    logger.warning(f" WARNING: [U+FE0F] Stopping preload due to memory pressure ({memory_stats.percentage_used:.1f}%)")
                     break
                 
                 # Skip expensive components if memory is getting tight
@@ -347,7 +347,7 @@ class LazyComponentLoader:
             except Exception as e:
                 logger.warning(f"Failed to preload component {component_name}: {e}")
         
-        logger.info(f"✅ Preloading complete - loaded {loaded_count}/{len(preload_components)} components")
+        logger.info(f" PASS:  Preloading complete - loaded {loaded_count}/{len(preload_components)} components")
     
     async def unload_component(self, name: str) -> bool:
         """Unload component to free memory.
@@ -366,7 +366,7 @@ class LazyComponentLoader:
             return False
         
         try:
-            logger.info(f"🗑️ Unloading component {name} (freeing {component.memory_cost_mb}MB)")
+            logger.info(f"[U+1F5D1][U+FE0F] Unloading component {name} (freeing {component.memory_cost_mb}MB)")
             
             instance = component.instance
             
@@ -397,7 +397,7 @@ class LazyComponentLoader:
             self._metrics.loaded_components -= 1
             self._metrics.total_memory_mb -= component.memory_cost_mb
             
-            logger.info(f"✅ Unloaded component {name}")
+            logger.info(f" PASS:  Unloaded component {name}")
             return True
             
         except Exception as e:
@@ -420,7 +420,7 @@ class LazyComponentLoader:
             if await self.unload_component(component_name):
                 unloaded_count += 1
         
-        logger.info(f"🗑️ Unloaded {unloaded_count} optional components")
+        logger.info(f"[U+1F5D1][U+FE0F] Unloaded {unloaded_count} optional components")
         return unloaded_count
     
     async def unload_low_priority_components(self) -> int:
@@ -439,7 +439,7 @@ class LazyComponentLoader:
             if await self.unload_component(component_name):
                 unloaded_count += 1
         
-        logger.info(f"🗑️ Unloaded {unloaded_count} low priority components")
+        logger.info(f"[U+1F5D1][U+FE0F] Unloaded {unloaded_count} low priority components")
         return unloaded_count
     
     def is_loaded(self, name: str) -> bool:
@@ -519,7 +519,7 @@ class LazyComponentLoader:
     
     async def shutdown(self) -> None:
         """Shutdown loader and cleanup all components."""
-        logger.info("🛑 Shutting down LazyComponentLoader...")
+        logger.info("[U+1F6D1] Shutting down LazyComponentLoader...")
         
         if self._preload_task:
             self._preload_task.cancel()
@@ -532,7 +532,7 @@ class LazyComponentLoader:
         for component_name in loaded_components:
             await self.unload_component(component_name)
         
-        logger.info("✅ LazyComponentLoader shutdown complete")
+        logger.info(" PASS:  LazyComponentLoader shutdown complete")
 
 
 # Global loader instance

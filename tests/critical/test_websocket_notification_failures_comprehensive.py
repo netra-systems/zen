@@ -587,7 +587,7 @@
                         
 
                         # Verify multiple violations detected
-                        # REMOVED_SYNTAX_ERROR: assert len(notification_capture.cross_user_violations) >= 6  # 3 users × 2 wrong recipients each
+                        # REMOVED_SYNTAX_ERROR: assert len(notification_capture.cross_user_violations) >= 6  # 3 users  x  2 wrong recipients each
 
                         # Check that sensitive data was leaked
                         # REMOVED_SYNTAX_ERROR: for user in users:

@@ -88,7 +88,7 @@
 
     # Test that methods don't crash with invalid input
     # REMOVED_SYNTAX_ERROR: try:
-        # REMOVED_SYNTAX_ERROR: launcher._print("🔍", "TEST", "Testing error handling")
+        # REMOVED_SYNTAX_ERROR: launcher._print(" SEARCH: ", "TEST", "Testing error handling")
         # Should not raise exception
         # REMOVED_SYNTAX_ERROR: assert True
         # REMOVED_SYNTAX_ERROR: except Exception:

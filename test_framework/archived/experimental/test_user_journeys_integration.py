@@ -10,7 +10,7 @@ AGENT 17: User Journey Integration Tests - Complete Test Suite Integration
 Integrates user journey tests with the existing test framework, providing
 comprehensive validation of the entire user experience across all services.
 
-ARCHITECTURE COMPLIANCE: ≤300 lines, functions ≤8 lines, modular design
+ARCHITECTURE COMPLIANCE:  <= 300 lines, functions  <= 8 lines, modular design
 """
 
 import asyncio
@@ -278,12 +278,12 @@ class UserJourneyTestReporter:
 ## Executive Summary
 - **Total Journeys Tested**: {summary.get('total_journeys_tested', 0)}
 - **Success Rate**: {summary.get('overall_success_rate', 0):.1%}
-- **Revenue Pipeline Status**: {"✅ PROTECTED" if results.get('success') else "❌ AT RISK"}
+- **Revenue Pipeline Status**: {" PASS:  PROTECTED" if results.get('success') else " FAIL:  AT RISK"}
 
 ## Business Impact
-- **Customer Experience**: {"✅ Validated" if results.get('success') else "❌ Issues Found"}
-- **Critical Paths**: {"✅ Verified" if summary.get('all_integrations_healthy') else "❌ Integration Issues"}
-- **Performance**: {"✅ Acceptable" if summary.get('performance_acceptable') else "⚠️ Needs Optimization"}
+- **Customer Experience**: {" PASS:  Validated" if results.get('success') else " FAIL:  Issues Found"}
+- **Critical Paths**: {" PASS:  Verified" if summary.get('all_integrations_healthy') else " FAIL:  Integration Issues"}
+- **Performance**: {" PASS:  Acceptable" if summary.get('performance_acceptable') else " WARNING: [U+FE0F] Needs Optimization"}
 
 ## Recommendations
 """
@@ -344,10 +344,10 @@ if __name__ == "__main__":
         print(f"Revenue Pipeline: {'PROTECTED' if results.get('success') else 'AT RISK'}")
         
         if not results.get('success'):
-            print("\n❌ CRITICAL: User journey failures detected!")
+            print("\n FAIL:  CRITICAL: User journey failures detected!")
             print("Immediate action required to protect revenue.")
         else:
-            print("\n✅ SUCCESS: All user journeys validated!")
+            print("\n PASS:  SUCCESS: All user journeys validated!")
             
         print("="*60)
     

@@ -119,7 +119,7 @@ class TestCloudRunURLCompliance:
                 pytest.fail(f"Error reading {file_path}: {e}")
         
         if violations:
-            error_msg = "\n🚨 DIRECT CLOUD RUN URLs DETECTED IN E2E TESTS!\n\n"
+            error_msg = "\n ALERT:  DIRECT CLOUD RUN URLs DETECTED IN E2E TESTS!\n\n"
             error_msg += "E2E tests MUST use load balancer endpoints, not direct Cloud Run URLs.\n"
             error_msg += "This creates infrastructure mismatch between tests and user experience.\n\n"
             
@@ -164,7 +164,7 @@ class TestCloudRunURLCompliance:
                 pytest.fail(f"Error reading {file_path}: {e}")
         
         if violations:
-            error_msg = "\n🚨 DIRECT CLOUD RUN URLs IN CORE CONFIGURATION!\n\n"
+            error_msg = "\n ALERT:  DIRECT CLOUD RUN URLs IN CORE CONFIGURATION!\n\n"
             error_msg += "Core configuration files MUST use load balancer endpoints.\n"
             error_msg += "These are SSOT files that affect ALL tests and services.\n\n"
             
@@ -215,7 +215,7 @@ class TestCloudRunURLCompliance:
                 pytest.fail(f"Error reading {file_path}: {e}")
         
         if staging_files_without_proper_domains:
-            error_msg = "\n⚠️  STAGING TESTS NOT USING LOAD BALANCER DOMAINS:\n\n"
+            error_msg = "\n WARNING: [U+FE0F]  STAGING TESTS NOT USING LOAD BALANCER DOMAINS:\n\n"
             for file_path in staging_files_without_proper_domains:
                 error_msg += f"- {file_path}\n"
             

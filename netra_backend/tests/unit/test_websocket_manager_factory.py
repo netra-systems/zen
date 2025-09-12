@@ -2,7 +2,7 @@
 Unit Tests for WebSocketManagerFactory - SECURITY CRITICAL Multi-User Isolation
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) 
+- Segment: ALL (Free  ->  Enterprise) 
 - Business Goal: Eliminate critical security vulnerabilities in WebSocket communication
 - Value Impact: Ensures safe multi-user AI interactions without data leakage
 - Strategic Impact: Prevents catastrophic security breaches that could destroy business

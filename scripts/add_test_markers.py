@@ -221,7 +221,7 @@ class TestMarkerAdder:
                         print(f"Would add to {file_path}: {', '.join(markers)}")
                 else:
                     if self.process_file(file_path, test_details):
-                        print(f"✓ Updated: {file_path}")
+                        print(f"[U+2713] Updated: {file_path}")
         
         print(f"\nSummary:")
         print(f"  Files processed: {self.files_processed}")

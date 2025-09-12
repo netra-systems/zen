@@ -221,7 +221,7 @@ class TypeDeduplicator:
         """Preview all changes without applying them."""
         replacements = self.find_all_replacements()
         
-        print(f"\n🔍 DEDUPLICATION PREVIEW - {len(replacements)} changes found\n")
+        print(f"\n SEARCH:  DEDUPLICATION PREVIEW - {len(replacements)} changes found\n")
         
         # Group by file
         by_file = {}
@@ -232,7 +232,7 @@ class TypeDeduplicator:
         
         for file_path, repls in by_file.items():
             rel_path = Path(file_path).relative_to(self.project_root)
-            print(f"📄 {rel_path}")
+            print(f"[U+1F4C4] {rel_path}")
             for repl in repls:
                 print(f"  Line {repl.line_number}: {repl.type_name}")
                 print(f"    - {repl.old_import}")
@@ -240,11 +240,11 @@ class TypeDeduplicator:
             print()
         
         # Show files to be deleted
-        print("🗑️  FILES TO BE DELETED AFTER MIGRATION:")
+        print("[U+1F5D1][U+FE0F]  FILES TO BE DELETED AFTER MIGRATION:")
         for file_path in self.duplicate_files:
             full_path = self.project_root / file_path
             if full_path.exists():
-                print(f"  ❌ {file_path}")
+                print(f"   FAIL:  {file_path}")
         print()
     
     def apply_replacements(self) -> bool:
@@ -278,22 +278,22 @@ class TypeDeduplicator:
                     
                     files_modified += 1
                     rel_path = Path(file_path).relative_to(self.project_root)
-                    print(f"✅ Updated {rel_path}")
+                    print(f" PASS:  Updated {rel_path}")
                     
                 except (IOError, UnicodeDecodeError) as e:
-                    print(f"❌ Failed to update {file_path}: {e}")
+                    print(f" FAIL:  Failed to update {file_path}: {e}")
                     return False
             
-            print(f"\n🎉 Successfully updated {files_modified} files with unified type imports!")
+            print(f"\n CELEBRATION:  Successfully updated {files_modified} files with unified type imports!")
             return True
             
         except Exception as e:
-            print(f"❌ Migration failed: {e}")
+            print(f" FAIL:  Migration failed: {e}")
             return False
     
     def run_tests(self) -> bool:
         """Run tests to validate the migration."""
-        print("\n🧪 Running tests to validate migration...")
+        print("\n[U+1F9EA] Running tests to validate migration...")
         
         try:
             # Run Python tests
@@ -302,12 +302,12 @@ class TypeDeduplicator:
             ], cwd=self.project_root, capture_output=True, text=True)
             
             if result.returncode != 0:
-                print("❌ Python tests failed:")
+                print(" FAIL:  Python tests failed:")
                 print(result.stdout)
                 print(result.stderr)
                 return False
             
-            print("✅ Python tests passed")
+            print(" PASS:  Python tests passed")
             
             # Check TypeScript compilation
             if (self.frontend_dir / "package.json").exists():
@@ -316,22 +316,22 @@ class TypeDeduplicator:
                 ], cwd=self.frontend_dir, capture_output=True, text=True)
                 
                 if result.returncode != 0:
-                    print("❌ TypeScript compilation failed:")
+                    print(" FAIL:  TypeScript compilation failed:")
                     print(result.stdout) 
                     print(result.stderr)
                     return False
                 
-                print("✅ TypeScript compilation passed")
+                print(" PASS:  TypeScript compilation passed")
             
             return True
             
         except Exception as e:
-            print(f"❌ Test validation failed: {e}")
+            print(f" FAIL:  Test validation failed: {e}")
             return False
     
     def delete_duplicate_files(self) -> bool:
         """Delete duplicate type definition files."""
-        print("\n🗑️  Deleting duplicate type files...")
+        print("\n[U+1F5D1][U+FE0F]  Deleting duplicate type files...")
         
         deleted_count = 0
         
@@ -345,13 +345,13 @@ class TypeDeduplicator:
                     full_path.rename(backup_path)
                     
                     deleted_count += 1
-                    print(f"✅ Moved {file_path} to backup")
+                    print(f" PASS:  Moved {file_path} to backup")
                     
                 except OSError as e:
-                    print(f"❌ Failed to delete {file_path}: {e}")
+                    print(f" FAIL:  Failed to delete {file_path}: {e}")
                     return False
         
-        print(f"\n🎉 Successfully moved {deleted_count} duplicate files to backup!")
+        print(f"\n CELEBRATION:  Successfully moved {deleted_count} duplicate files to backup!")
         return True
     
     def generate_report(self) -> Dict:
@@ -393,20 +393,20 @@ def main():
         deduplicator.preview_changes()
         
     elif command == "--migrate":
-        print("🚀 Starting type deduplication migration...")
+        print("[U+1F680] Starting type deduplication migration...")
         
         # Step 1: Preview changes
         deduplicator.preview_changes()
         
         # Step 2: Apply import replacements
         if not deduplicator.apply_replacements():
-            print("❌ Migration failed at import replacement step")
+            print(" FAIL:  Migration failed at import replacement step")
             sys.exit(1)
         
         # Step 3: Validate with tests
         if not deduplicator.run_tests():
-            print("❌ Migration failed validation - imports may be incorrect")
-            print("💡 Please check the registry imports and fix manually")
+            print(" FAIL:  Migration failed validation - imports may be incorrect")
+            print(" IDEA:  Please check the registry imports and fix manually")
             sys.exit(1)
         
         # Step 4: Generate report
@@ -414,28 +414,28 @@ def main():
         with open(PROJECT_ROOT / "type_deduplication_report.json", "w") as f:
             json.dump(report, f, indent=2)
         
-        print(f"\n🎉 Type deduplication completed successfully!")
-        print(f"📊 Report saved to type_deduplication_report.json")
-        print(f"📈 {report['total_replacements']} imports updated across {report['files_affected']} files")
-        print(f"🎯 {report['types_unified']} types unified into single sources of truth")
+        print(f"\n CELEBRATION:  Type deduplication completed successfully!")
+        print(f" CHART:  Report saved to type_deduplication_report.json")
+        print(f"[U+1F4C8] {report['total_replacements']} imports updated across {report['files_affected']} files")
+        print(f" TARGET:  {report['types_unified']} types unified into single sources of truth")
         
     elif command == "--clean":
-        print("🧹 Cleaning duplicate files after successful migration...")
+        print("[U+1F9F9] Cleaning duplicate files after successful migration...")
         if deduplicator.delete_duplicate_files():
-            print("✅ Duplicate files cleaned up successfully!")
+            print(" PASS:  Duplicate files cleaned up successfully!")
         else:
-            print("❌ Failed to clean duplicate files")
+            print(" FAIL:  Failed to clean duplicate files")
             sys.exit(1)
             
     elif command == "--validate":
         if deduplicator.run_tests():
-            print("✅ Type deduplication validation passed!")
+            print(" PASS:  Type deduplication validation passed!")
         else:
-            print("❌ Type deduplication validation failed!")
+            print(" FAIL:  Type deduplication validation failed!")
             sys.exit(1)
             
     else:
-        print(f"❌ Unknown command: {command}")
+        print(f" FAIL:  Unknown command: {command}")
         print("Usage: python scripts/deduplicate_types.py [--dry-run|--migrate|--validate|--clean]")
         sys.exit(1)
 

@@ -126,7 +126,7 @@ from shared.isolated_environment import get_env
 
                         # REMOVED_SYNTAX_ERROR: try:
                             # REMOVED_SYNTAX_ERROR: test.test_staging_should_not_use_dev_database_name()
-                            # REMOVED_SYNTAX_ERROR: print("❌ Test unexpectedly passed - staging configuration may have been fixed")
+                            # REMOVED_SYNTAX_ERROR: print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed")
                             # REMOVED_SYNTAX_ERROR: except AssertionError as e:
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -134,6 +134,6 @@ from shared.isolated_environment import get_env
 
                                 # REMOVED_SYNTAX_ERROR: try:
                                     # REMOVED_SYNTAX_ERROR: test.test_staging_database_url_should_not_contain_netra_dev()
-                                    # REMOVED_SYNTAX_ERROR: print("❌ Test unexpectedly passed - staging configuration may have been fixed")
+                                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  Test unexpectedly passed - staging configuration may have been fixed")
                                     # REMOVED_SYNTAX_ERROR: except AssertionError as e:
                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")

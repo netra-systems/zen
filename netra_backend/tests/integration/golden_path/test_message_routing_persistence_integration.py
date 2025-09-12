@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: CRITICAL for $500K+ ARR - message routing failures = no chat = no business value delivered
 
 CRITICAL: This module provides 15 comprehensive integration tests for message routing and persistence patterns.
-Tests cover the complete WebSocket → MessageRouter → AgentHandler → Database → Response flow.
+Tests cover the complete WebSocket  ->  MessageRouter  ->  AgentHandler  ->  Database  ->  Response flow.
 
 Requirements:
 1. Real PostgreSQL and Redis connections (NO MOCKS)
@@ -101,7 +101,7 @@ class TestMessageRoutingPersistenceIntegration(BaseIntegrationTest):
     @pytest.mark.integration
     @pytest.mark.real_services
     async def test_01_websocket_to_database_message_flow(self, real_services_fixture):
-        """BVJ: Test complete WebSocket → Router → Database flow for basic message routing."""
+        """BVJ: Test complete WebSocket  ->  Router  ->  Database flow for basic message routing."""
         user_context = await create_authenticated_user_context(
             user_email=f"websocket_flow_{uuid.uuid4().hex[:8]}@example.com"
         )
@@ -367,7 +367,7 @@ class TestMessageRoutingPersistenceIntegration(BaseIntegrationTest):
         
         # Verify total isolation - no cross-contamination
         total_messages = sum(len(results) for results in concurrent_results)
-        assert total_messages == 15  # 3 users × 5 messages each
+        assert total_messages == 15  # 3 users  x  5 messages each
 
     @pytest.mark.integration
     @pytest.mark.real_services

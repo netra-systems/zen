@@ -73,7 +73,7 @@ class SignalHandler:
         # Register atexit handler as last resort
         atexit.register(self._atexit_cleanup)
         
-        emoji = "🛡️" if self.use_emoji else ""
+        emoji = "[U+1F6E1][U+FE0F]" if self.use_emoji else ""
         logger.info(f"{emoji} Signal handler initialized for {sys.platform}")
     
     def register_cleanup_handler(
@@ -98,7 +98,7 @@ class SignalHandler:
             # Keep handlers sorted by priority
             self.cleanup_handlers.sort(key=lambda x: x.priority)
             
-            emoji = "📝" if self.use_emoji else ""
+            emoji = "[U+1F4DD]" if self.use_emoji else ""
             logger.debug(f"{emoji} Registered cleanup handler: {name} (priority: {priority})")
             return True
     
@@ -112,7 +112,7 @@ class SignalHandler:
             self.shutdown_initiated = True
             self.shutdown_start_time = time.time()
             
-            emoji = "🛑" if self.use_emoji else ""
+            emoji = "[U+1F6D1]" if self.use_emoji else ""
             logger.info(f"{emoji} SHUTDOWN INITIATED by {signal_name}")
             print(f"\\n{emoji} Graceful shutdown initiated...")
         
@@ -148,7 +148,7 @@ class SignalHandler:
         """Execute all cleanup handlers asynchronously."""
         self.shutdown_phase = ShutdownPhase.STOPPING_SERVICES
         
-        emoji = "🧹" if self.use_emoji else ""
+        emoji = "[U+1F9F9]" if self.use_emoji else ""
         logger.info(f"{emoji} Executing {len(self.cleanup_handlers)} cleanup handlers...")
         
         for handler in self.cleanup_handlers:
@@ -172,17 +172,17 @@ class SignalHandler:
                     )
                 
                 duration = time.time() - start_time
-                logger.debug(f"✓ Cleanup handler '{handler.name}' completed in {duration:.2f}s")
+                logger.debug(f"[U+2713] Cleanup handler '{handler.name}' completed in {duration:.2f}s")
                 
             except asyncio.TimeoutError:
-                logger.error(f"✗ Cleanup handler '{handler.name}' timed out after {handler.timeout}s")
+                logger.error(f"[U+2717] Cleanup handler '{handler.name}' timed out after {handler.timeout}s")
                 if handler.critical:
                     logger.error("Critical handler failed, initiating emergency cleanup")
                     self._emergency_cleanup("CRITICAL_HANDLER_TIMEOUT")
                     return
                     
             except Exception as e:
-                logger.error(f"✗ Cleanup handler '{handler.name}' failed: {e}")
+                logger.error(f"[U+2717] Cleanup handler '{handler.name}' failed: {e}")
                 if handler.critical:
                     logger.error("Critical handler failed, initiating emergency cleanup")  
                     self._emergency_cleanup("CRITICAL_HANDLER_ERROR")
@@ -192,7 +192,7 @@ class SignalHandler:
         """Execute all cleanup handlers synchronously."""
         self.shutdown_phase = ShutdownPhase.STOPPING_SERVICES
         
-        emoji = "🧹" if self.use_emoji else ""
+        emoji = "[U+1F9F9]" if self.use_emoji else ""
         logger.info(f"{emoji} Executing {len(self.cleanup_handlers)} cleanup handlers (sync)...")
         
         for handler in self.cleanup_handlers:
@@ -212,10 +212,10 @@ class SignalHandler:
                     continue
                 
                 duration = time.time() - start_time
-                logger.debug(f"✓ Cleanup handler '{handler.name}' completed in {duration:.2f}s")
+                logger.debug(f"[U+2713] Cleanup handler '{handler.name}' completed in {duration:.2f}s")
                 
             except Exception as e:
-                logger.error(f"✗ Cleanup handler '{handler.name}' failed: {e}")
+                logger.error(f"[U+2717] Cleanup handler '{handler.name}' failed: {e}")
                 if handler.critical:
                     logger.error("Critical handler failed, initiating emergency cleanup")
                     self._emergency_cleanup("CRITICAL_HANDLER_ERROR")
@@ -227,7 +227,7 @@ class SignalHandler:
         
         duration = time.time() - self.shutdown_start_time if self.shutdown_start_time else 0
         
-        emoji = "✅" if self.use_emoji else ""
+        emoji = " PASS: " if self.use_emoji else ""
         logger.info(f"{emoji} Graceful shutdown completed in {duration:.2f}s (signal: {signal_name})")
         print(f"{emoji} Shutdown completed successfully.")
         
@@ -244,7 +244,7 @@ class SignalHandler:
         self._emergency_cleanup_running = True
         self.shutdown_phase = ShutdownPhase.EMERGENCY_CLEANUP
         
-        emoji = "🚨" if self.use_emoji else ""
+        emoji = " ALERT: " if self.use_emoji else ""
         logger.critical(f"{emoji} EMERGENCY CLEANUP initiated: {reason}")
         print(f"{emoji} Emergency cleanup in progress...")
         
@@ -315,7 +315,7 @@ class SignalHandler:
             
             win32api.SetConsoleCtrlHandler(console_ctrl_handler, True)
             
-            emoji = "🪟" if self.use_emoji else ""
+            emoji = "[U+1FA9F]" if self.use_emoji else ""
             logger.info(f"{emoji} Windows console event handlers registered")
             
         except ImportError:
@@ -332,7 +332,7 @@ class SignalHandler:
         if hasattr(signal, 'SIGUSR1'):
             signal.signal(signal.SIGUSR1, self._signal_handler)
         
-        emoji = "🐧" if self.use_emoji else ""
+        emoji = "[U+1F427]" if self.use_emoji else ""
         logger.info(f"{emoji} Unix signal handlers registered")
     
     def _signal_handler(self, signum: int, frame) -> None:

@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch, MagicMock
 
 """Integration Test: Thread Auto-Creation on First Message
 BVJ: $10K MRR - Complex thread management causes 25% user drop-off
-Components: ThreadService → Database → Message Association → State Persistence
+Components: ThreadService  ->  Database  ->  Message Association  ->  State Persistence
 Critical: Seamless thread creation for new users without friction
 """""
 

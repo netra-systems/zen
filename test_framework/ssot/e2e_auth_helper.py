@@ -142,10 +142,10 @@ class E2EAuthHelper:
             from shared.jwt_secret_manager import get_unified_jwt_secret
             unified_jwt_secret = get_unified_jwt_secret()
             self.config.jwt_secret = unified_jwt_secret
-            logger.info("✅ E2EAuthHelper using UNIFIED JWT secret manager - ensures consistency with auth service")
+            logger.info(" PASS:  E2EAuthHelper using UNIFIED JWT secret manager - ensures consistency with auth service")
         except Exception as e:
-            logger.error(f"❌ Failed to use unified JWT secret manager in E2EAuthHelper: {e}")
-            logger.warning("🔄 Falling back to environment-based JWT secret resolution (less secure)")
+            logger.error(f" FAIL:  Failed to use unified JWT secret manager in E2EAuthHelper: {e}")
+            logger.warning(" CYCLE:  Falling back to environment-based JWT secret resolution (less secure)")
             # Override JWT secret from environment if available
             env_jwt_secret = self.env.get("JWT_SECRET_KEY")
             if env_jwt_secret:
@@ -712,10 +712,10 @@ class E2EAuthHelper:
         try:
             from shared.jwt_secret_manager import get_unified_jwt_secret
             staging_jwt_secret = get_unified_jwt_secret()
-            logger.info("✅ Using UNIFIED JWT secret manager for E2E token creation - ensures consistency with auth service")
+            logger.info(" PASS:  Using UNIFIED JWT secret manager for E2E token creation - ensures consistency with auth service")
         except Exception as e:
-            logger.error(f"❌ Failed to use unified JWT secret manager: {e}")
-            logger.warning("🔄 Falling back to direct environment resolution (less secure)")
+            logger.error(f" FAIL:  Failed to use unified JWT secret manager: {e}")
+            logger.warning(" CYCLE:  Falling back to direct environment resolution (less secure)")
             # Fallback to direct resolution if unified manager fails
             staging_jwt_secret = (
                 self.env.get("JWT_SECRET_STAGING") or 
@@ -1061,10 +1061,10 @@ class E2EWebSocketAuthHelper(E2EAuthHelper):
         headers = self.get_websocket_headers(token)
         
         # Log connection attempt with headers for debugging
-        print(f"🔌 {logger_msg}")
-        print(f"🔑 Headers sent: {list(headers.keys())}")
+        print(f"[U+1F50C] {logger_msg}")
+        print(f"[U+1F511] Headers sent: {list(headers.keys())}")
         if self.environment == "staging":
-            print(f"✅ E2E detection headers included: X-Test-Type, X-Test-Environment, X-E2E-Test")
+            print(f" PASS:  E2E detection headers included: X-Test-Type, X-Test-Environment, X-E2E-Test")
         
         # Add explicit timeout and connection optimizations
         try:
@@ -1088,7 +1088,7 @@ class E2EWebSocketAuthHelper(E2EAuthHelper):
                 timeout=staging_timeout
             )
             
-            print(f"✅ WebSocket connection successful in {self.environment}")
+            print(f" PASS:  WebSocket connection successful in {self.environment}")
             return websocket
             
         except asyncio.TimeoutError:

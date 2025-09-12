@@ -26,7 +26,7 @@ class StagingSecretsCreator:
         
     def create_all_secrets(self) -> bool:
         """Create all required staging secrets."""
-        print("🔐 CREATING STAGING SECRETS")
+        print("[U+1F510] CREATING STAGING SECRETS")
         print("=" * 50)
         
         # Generate secure values
@@ -34,17 +34,17 @@ class StagingSecretsCreator:
         
         success = True
         for secret_name, secret_value in secrets.items():
-            print(f"\n📝 Creating secret: {secret_name}")
+            print(f"\n[U+1F4DD] Creating secret: {secret_name}")
             
             if not self._create_secret(secret_name, secret_value):
                 success = False
                 
         if success:
-            print("\n✅ ALL SECRETS CREATED SUCCESSFULLY")
-            print("\n🚀 Ready for deployment:")
+            print("\n PASS:  ALL SECRETS CREATED SUCCESSFULLY")
+            print("\n[U+1F680] Ready for deployment:")
             print(f"python scripts/deploy_to_gcp.py --project {self.project_id} --build-local --run-checks")
         else:
-            print("\n❌ SOME SECRETS FAILED TO CREATE")
+            print("\n FAIL:  SOME SECRETS FAILED TO CREATE")
             print("Check the errors above and retry")
             
         return success
@@ -91,7 +91,7 @@ class StagingSecretsCreator:
         # Validate configuration
         is_valid, error_msg = builder.validate()
         if not is_valid:
-            print(f"⚠️ Database configuration error: {error_msg}")
+            print(f" WARNING: [U+FE0F] Database configuration error: {error_msg}")
             print("Using placeholder URL - MUST BE REPLACED WITH REAL VALUES")
             return "postgresql://netra_user:REPLACE_WITH_REAL_DB_PASSWORD@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres"
         
@@ -99,7 +99,7 @@ class StagingSecretsCreator:
         database_url = builder.get_url_for_environment(sync=True)
         
         if not database_url:
-            print("⚠️ Failed to generate database URL")
+            print(" WARNING: [U+FE0F] Failed to generate database URL")
             print("Using placeholder URL - MUST BE REPLACED WITH REAL VALUES")
             return "postgresql://netra_user:REPLACE_WITH_REAL_DB_PASSWORD@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres"
         
@@ -116,13 +116,13 @@ class StagingSecretsCreator:
             )
             password = result.stdout.strip()
             if password:
-                print("  ✅ Found existing PostgreSQL password in secret manager")
+                print("   PASS:  Found existing PostgreSQL password in secret manager")
                 return password
         except subprocess.CalledProcessError:
             pass
         
-        print("  ⚠️ PostgreSQL password not found in secret manager")
-        print("  ⚠️ Using placeholder - MUST BE REPLACED WITH REAL PASSWORD")
+        print("   WARNING: [U+FE0F] PostgreSQL password not found in secret manager")
+        print("   WARNING: [U+FE0F] Using placeholder - MUST BE REPLACED WITH REAL PASSWORD")
         return "REPLACE_WITH_REAL_DB_PASSWORD"
         
     def _generate_secure_key(self, length: int = 32) -> str:
@@ -143,7 +143,7 @@ class StagingSecretsCreator:
             from cryptography.fernet import Fernet
             return Fernet.generate_key().decode()
         except ImportError:
-            print("⚠️ cryptography not installed, using base64 key")
+            print(" WARNING: [U+FE0F] cryptography not installed, using base64 key")
             import base64
             return base64.urlsafe_b64encode(os.urandom(32)).decode()
             
@@ -157,13 +157,13 @@ class StagingSecretsCreator:
             )
             
             if result.returncode == 0:
-                print(f"  ⚠️ Secret {secret_name} already exists, adding new version...")
+                print(f"   WARNING: [U+FE0F] Secret {secret_name} already exists, adding new version...")
                 cmd = [
                     "gcloud", "secrets", "versions", "add", secret_name,
                     "--data-file=-", "--project", self.project_id
                 ]
             else:
-                print(f"  🆕 Creating new secret {secret_name}...")
+                print(f"  [U+1F195] Creating new secret {secret_name}...")
                 # Create the secret first
                 create_result = subprocess.run(
                     ["gcloud", "secrets", "create", secret_name, "--project", self.project_id],
@@ -171,7 +171,7 @@ class StagingSecretsCreator:
                 )
                 
                 if create_result.returncode != 0:
-                    print(f"  ❌ Failed to create secret: {create_result.stderr}")
+                    print(f"   FAIL:  Failed to create secret: {create_result.stderr}")
                     return False
                     
                 cmd = [
@@ -185,19 +185,19 @@ class StagingSecretsCreator:
             )
             
             if result.returncode == 0:
-                print(f"  ✅ Secret {secret_name} created/updated successfully")
+                print(f"   PASS:  Secret {secret_name} created/updated successfully")
                 return True
             else:
-                print(f"  ❌ Failed to add secret value: {result.stderr}")
+                print(f"   FAIL:  Failed to add secret value: {result.stderr}")
                 return False
                 
         except Exception as e:
-            print(f"  ❌ Error creating secret {secret_name}: {e}")
+            print(f"   FAIL:  Error creating secret {secret_name}: {e}")
             return False
             
     def validate_secrets(self) -> bool:
         """Validate that all secrets were created successfully."""
-        print("\n🔍 VALIDATING CREATED SECRETS")
+        print("\n SEARCH:  VALIDATING CREATED SECRETS")
         print("=" * 30)
         
         required_secrets = [
@@ -218,20 +218,20 @@ class StagingSecretsCreator:
                 )
                 
                 if result.returncode == 0:
-                    print(f"✅ {secret}")
+                    print(f" PASS:  {secret}")
                 else:
-                    print(f"❌ {secret} (missing)")
+                    print(f" FAIL:  {secret} (missing)")
                     all_exist = False
                     
             except Exception as e:
-                print(f"❌ {secret} (error: {e})")
+                print(f" FAIL:  {secret} (error: {e})")
                 all_exist = False
                 
         return all_exist
         
     def print_manual_fixes_needed(self):
         """Print what needs to be manually fixed."""
-        print("\n🔧 MANUAL FIXES REQUIRED")
+        print("\n[U+1F527] MANUAL FIXES REQUIRED")
         print("=" * 30)
         print("1. Replace database password:")
         print("   gcloud secrets versions add database-url-staging --data-file=- --project=netra-staging")

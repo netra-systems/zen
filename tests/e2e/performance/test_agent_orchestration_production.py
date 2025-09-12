@@ -258,7 +258,7 @@ class TestAgentOrchestrationProduction:
         avg_time = sum(execution_times) / len(execution_times)
         assert avg_time < 5.0, f"Average execution time too high: {avg_time:.2f}s"
     
-    # Helper methods (≤8 lines each per CLAUDE.md)
+    # Helper methods ( <= 8 lines each per CLAUDE.md)
     
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""

@@ -1,6 +1,6 @@
 """Agent recovery strategy interfaces and implementations.
 
-Single source of truth for agent recovery strategies with ≤8 line functions.
+Single source of truth for agent recovery strategies with  <= 8 line functions.
 Centralizes recovery strategy implementations to avoid duplicates.
 """
 

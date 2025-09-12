@@ -4,7 +4,7 @@ This test suite provides 100% method coverage of the IsolatedWebSocketManager cl
 with focus on security, user isolation, and strongly typed ID integration.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure WebSocket communication security and prevent user data leakage
 - Value Impact: Validates complete user isolation in multi-user AI chat sessions
 - Strategic Impact: Prevents security breaches that could destroy business trust

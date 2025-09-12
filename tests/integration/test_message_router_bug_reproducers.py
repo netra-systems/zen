@@ -59,7 +59,7 @@ class TestMessageRouterBugReproducers:
         is_chat_message_unknown = router._is_unknown_message_type("chat_message")
         
         # OLD EXPECTATION (what failing tests assert):
-        # assert is_chat_message_unknown == True  # ❌ This fails now
+        # assert is_chat_message_unknown == True  #  FAIL:  This fails now
         
         # ACTUAL CURRENT BEHAVIOR (what should be tested):
         assert is_chat_message_unknown == False, (
@@ -77,7 +77,7 @@ class TestMessageRouterBugReproducers:
             "chat_message correctly maps to USER_MESSAGE for proper handling"
         )
         
-        print("✅ BUG 1 REPRODUCED: Test expectation vs reality mismatch identified")
+        print(" PASS:  BUG 1 REPRODUCED: Test expectation vs reality mismatch identified")
         print(f"   - chat_message unknown: {is_chat_message_unknown} (should be False)")
         print(f"   - Mapping exists: {'chat_message' in LEGACY_MESSAGE_TYPE_MAP}")
         print(f"   - Maps to: {LEGACY_MESSAGE_TYPE_MAP['chat_message']}")
@@ -115,7 +115,7 @@ class TestMessageRouterBugReproducers:
                 f"Edge case '{case}' should be recognized, not unknown"
             )
         
-        print("✅ BUG 2 REPRODUCED: Edge case obsolete expectations identified")
+        print(" PASS:  BUG 2 REPRODUCED: Edge case obsolete expectations identified")
         print("   - All chat-related message types are now properly mapped:")
         for case, is_unknown in results.items():
             print(f"     {case}: unknown={is_unknown} (all should be False)")
@@ -134,10 +134,10 @@ class TestMessageRouterBugReproducers:
         try:
             # This is what causes SSOT validation failure
             manual_user_id = "test-user-123"
-            # context = UserExecutionContext.from_request(user_id=manual_user_id)  # ❌ Wrong
-            print("❌ INCORRECT: Manual user ID without proper authentication context")
+            # context = UserExecutionContext.from_request(user_id=manual_user_id)  #  FAIL:  Wrong
+            print(" FAIL:  INCORRECT: Manual user ID without proper authentication context")
         except Exception as e:
-            print(f"❌ SSOT VALIDATION FAILURE: {e}")
+            print(f" FAIL:  SSOT VALIDATION FAILURE: {e}")
         
         # CORRECT SSOT PATTERN (what tests should use):
         try:
@@ -152,7 +152,7 @@ class TestMessageRouterBugReproducers:
             assert auth_context.thread_id is not None, "Thread ID should be properly set"
             assert auth_context.websocket_client_id is not None, "WebSocket client ID should be set"
             
-            print("✅ CORRECT: Proper SSOT authentication context created")
+            print(" PASS:  CORRECT: Proper SSOT authentication context created")
             print(f"   - User ID: {auth_context.user_id}")
             print(f"   - Thread ID: {auth_context.thread_id}")
             print(f"   - WebSocket Client ID: {auth_context.websocket_client_id}")
@@ -160,7 +160,7 @@ class TestMessageRouterBugReproducers:
         except Exception as e:
             pytest.skip(f"Authentication context creation failed: {e}")
         
-        print("✅ BUG 3 REPRODUCED: SSOT authentication pattern issue identified")
+        print(" PASS:  BUG 3 REPRODUCED: SSOT authentication pattern issue identified")
 
     @pytest.mark.asyncio 
     async def test_reproduce_bug_4_missing_database_setup(self):
@@ -178,28 +178,28 @@ class TestMessageRouterBugReproducers:
         try:
             # Attempting database operations without setup
             # This would fail because test session is not initialized
-            print("❌ INCORRECT: Attempting database operations without setup_test_session")
+            print(" FAIL:  INCORRECT: Attempting database operations without setup_test_session")
         except Exception as e:
-            print(f"❌ DATABASE SETUP FAILURE: {e}")
+            print(f" FAIL:  DATABASE SETUP FAILURE: {e}")
         
         # CORRECT PATTERN (what tests should do):
         try:
             # Proper database setup for integration tests
             await db_manager.setup_test_session()
-            print("✅ CORRECT: setup_test_session() called successfully")
+            print(" PASS:  CORRECT: setup_test_session() called successfully")
             
             # Now database operations would work
             # ... database test operations here ...
             
             # Proper cleanup
             await db_manager.cleanup_test_session()
-            print("✅ CORRECT: cleanup_test_session() called successfully")
+            print(" PASS:  CORRECT: cleanup_test_session() called successfully")
             
         except Exception as e:
             print(f"Database test setup issue: {e}")
             # Still validate that the pattern is correct even if setup fails
             
-        print("✅ BUG 4 REPRODUCED: Missing database setup step identified")
+        print(" PASS:  BUG 4 REPRODUCED: Missing database setup step identified")
 
     @pytest.mark.asyncio
     async def test_validate_correct_chat_message_behavior(self):
@@ -257,12 +257,12 @@ class TestMessageRouterBugReproducers:
         # The result should indicate successful processing, not unknown type acknowledgment
         assert result is not None, "Should return processing result"
         
-        print("✅ CORRECT BEHAVIOR VALIDATED:")
+        print(" PASS:  CORRECT BEHAVIOR VALIDATED:")
         print(f"   - chat_message unknown: {is_unknown} (False = correct)")
         print(f"   - Normalizes to: {normalized_type}")
         print(f"   - Messages routed: {stats['messages_routed']}")
         print(f"   - Processing result: {result}")
-        print("✅ This is what integration tests should validate going forward")
+        print(" PASS:  This is what integration tests should validate going forward")
 
 
 class TestChatMessageIntegrationCorrectBehavior:
@@ -344,7 +344,7 @@ class TestChatMessageIntegrationCorrectBehavior:
             "Should send handler response, not unknown type acknowledgment"
         )
         
-        print("✅ CORRECTED BEHAVIOR VALIDATED:")
+        print(" PASS:  CORRECTED BEHAVIOR VALIDATED:")
         print(f"   - chat_message recognized: {not is_unknown}")
         print(f"   - Normalized to: {normalized}")  
         print(f"   - UserMessageHandler processed: {final_processed > initial_processed}")
@@ -407,7 +407,7 @@ class TestChatMessageIntegrationCorrectBehavior:
             # Note: We don't assert unhandled_messages == 0 because other factors may cause unhandled messages
             # Instead, we validate that THIS message was handled properly
             
-            print("✅ DATABASE INTEGRATION CORRECTED:")
+            print(" PASS:  DATABASE INTEGRATION CORRECTED:")
             print(f"   - Database setup completed: True")
             print(f"   - chat_message recognized: {not is_unknown}")
             print(f"   - Integration result: {result}")
@@ -426,7 +426,7 @@ class TestChatMessageIntegrationCorrectBehavior:
 
 if __name__ == "__main__":
     # Run bug reproducers to validate issue identification and fixes
-    print("🔧 Running Bug Reproducer Tests")
-    print("🔧 These tests reproduce exact failure patterns and validate fixes")
+    print("[U+1F527] Running Bug Reproducer Tests")
+    print("[U+1F527] These tests reproduce exact failure patterns and validate fixes")
     
     pytest.main([__file__, "-v", "--tb=short"])

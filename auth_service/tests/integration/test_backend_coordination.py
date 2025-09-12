@@ -1,5 +1,5 @@
 """
-🔧 INTEGRATION TEST SUITE: Auth Service Backend Coordination
+[U+1F527] INTEGRATION TEST SUITE: Auth Service Backend Coordination
 
 Tests coordination from auth service perspective with backend service.
 This validates that auth service maintains proper synchronization with backend operations.
@@ -132,7 +132,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         
         BUSINESS VALUE: Ensures auth tokens work immediately across all services.
         """
-        logger.info("🔐 Integration: Testing token generation-validation coordination")
+        logger.info("[U+1F510] Integration: Testing token generation-validation coordination")
         
         # STEP 1: Generate token via auth service (simulated)
         user_id = f"coordination-{uuid.uuid4().hex[:8]}"
@@ -209,7 +209,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         assert backend_validation_result["user_id"] == user_id, "User ID must match between services"
         assert backend_validation_result["email"] == user_email, "Email must match between services"
         
-        logger.info("✅ Token generation-validation coordination confirmed")
+        logger.info(" PASS:  Token generation-validation coordination confirmed")
         
     async def test_user_registration_backend_access_coordination(self):
         """
@@ -217,7 +217,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         
         BUSINESS VALUE: New users get immediate access after registration.
         """
-        logger.info("👤 Integration: Testing registration-access coordination")
+        logger.info("[U+1F464] Integration: Testing registration-access coordination")
         
         timestamp = int(time.time())
         user_email = f"reg-coord-{timestamp}@netra.test"
@@ -296,7 +296,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         elif backend_access_result.get("status_code") in [401, 403]:
             pytest.fail("COORDINATION FAILURE: Auth service token rejected by backend")
         
-        logger.info("✅ Registration-access coordination tested")
+        logger.info(" PASS:  Registration-access coordination tested")
         
     async def test_session_state_coordination(self):
         """
@@ -304,7 +304,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         
         BUSINESS VALUE: Users maintain consistent session across all service interactions.
         """
-        logger.info("🔄 Integration: Testing session state coordination")
+        logger.info(" CYCLE:  Integration: Testing session state coordination")
         
         user_id = f"session-coord-{uuid.uuid4().hex[:8]}"
         session_token = self.auth_helper.create_test_jwt_token(
@@ -365,7 +365,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         assert backend_session_result["session_recognized"], "Backend must recognize auth service sessions"
         assert backend_session_result["user_id"] == user_id, "Session user context must match"
         
-        logger.info("✅ Session state coordination confirmed")
+        logger.info(" PASS:  Session state coordination confirmed")
         
     async def test_configuration_sync_coordination(self):
         """
@@ -373,7 +373,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         
         BUSINESS VALUE: Configuration changes propagate correctly to maintain service compatibility.
         """
-        logger.info("⚙️ Integration: Testing configuration synchronization")
+        logger.info("[U+2699][U+FE0F] Integration: Testing configuration synchronization")
         
         # Test JWT secret synchronization (most critical configuration)
         auth_config_result = {
@@ -431,7 +431,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         assert auth_config_result.get("config_synchronized", False), "Configurations must be synchronized"
         assert auth_config_result.get("jwt_secret_length", 0) >= 32, "JWT secret must be sufficiently long"
         
-        logger.info("✅ Configuration synchronization confirmed")
+        logger.info(" PASS:  Configuration synchronization confirmed")
         
     async def test_load_balancing_coordination(self):
         """
@@ -439,7 +439,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
         
         BUSINESS VALUE: Services maintain coordination even under realistic user load.
         """
-        logger.info("⚡ Integration: Testing coordination under load")
+        logger.info(" LIGHTNING:  Integration: Testing coordination under load")
         
         concurrent_operations = 10
         coordination_tasks = []
@@ -494,7 +494,7 @@ class TestAuthBackendCoordination(BaseIntegrationTest):
             failure_details = [f"Op {r['operation_id']}: {r.get('error')}" for r in failed_coords[:3]]
             logger.warning(f"Load coordination failures: {failure_details}")
         
-        logger.info(f"✅ Load coordination tested - {success_rate:.1%} success, {consistency_rate:.1%} consistent")
+        logger.info(f" PASS:  Load coordination tested - {success_rate:.1%} success, {consistency_rate:.1%} consistent")
 
 
 @pytest.mark.integration
@@ -508,7 +508,7 @@ class TestAuthServiceHealthCoordination(BaseIntegrationTest):
         
         BUSINESS VALUE: Health monitoring reflects true service coordination status.
         """
-        logger.info("💚 Integration: Testing service health coordination")
+        logger.info("[U+1F49A] Integration: Testing service health coordination")
         
         auth_helper = E2EAuthHelper()
         
@@ -590,7 +590,7 @@ class TestAuthServiceHealthCoordination(BaseIntegrationTest):
         # Validate that functional coordination works even if health endpoints vary
         assert functional_coordination, "Core auth-backend coordination must work"
         
-        logger.info(f"✅ Service health coordination tested")
+        logger.info(f" PASS:  Service health coordination tested")
         logger.info(f"   Healthy services: {len(healthy_services)}/{len(health_tests)}")
         logger.info(f"   Functional coordination: {functional_coordination}")
 

@@ -564,7 +564,7 @@
     # REMOVED_SYNTAX_ERROR: ("user_\x00null", "thread_123", "run_456"),  # Null bytes
     # REMOVED_SYNTAX_ERROR: ("user_ )
     # REMOVED_SYNTAX_ERROR: \r\twhitespace", "thread_123", "run_456"),  # Control chars
-    # REMOVED_SYNTAX_ERROR: ("user_🚀emoji", "thread_123", "run_456"),  # Unicode emoji
+    # REMOVED_SYNTAX_ERROR: ("user_[U+1F680]emoji", "thread_123", "run_456"),  # Unicode emoji
     # REMOVED_SYNTAX_ERROR: ("user_" + "a" * 1000, "thread_123", "run_456"),  # Very long input
 
     # String manipulation edge cases

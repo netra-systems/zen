@@ -267,7 +267,7 @@ class TestConcurrencyAndThreadSafety:
         
         # Verify no errors and correct results
         assert len(errors) == 0
-        assert len(results) == 50  # 5 workers × 10 items each
+        assert len(results) == 50  # 5 workers  x  10 items each
         assert all("value_" in result for result in results)
     
     def test_concurrent_user_isolation(self):

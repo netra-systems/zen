@@ -76,7 +76,7 @@ class WebSocketCircuitBreaker:
             if time.time() - self.last_failure_time >= self.config.recovery_timeout:
                 self.state = CircuitState.HALF_OPEN
                 self.success_count = 0
-                logger.info("🔄 Circuit breaker moving to HALF_OPEN state for recovery attempt")
+                logger.info(" CYCLE:  Circuit breaker moving to HALF_OPEN state for recovery attempt")
                 return True
             return False
         elif self.state == CircuitState.HALF_OPEN:
@@ -90,7 +90,7 @@ class WebSocketCircuitBreaker:
             if self.success_count >= self.config.success_threshold:
                 self.state = CircuitState.CLOSED
                 self.failure_count = 0
-                logger.info("✅ Circuit breaker CLOSED - service recovered")
+                logger.info(" PASS:  Circuit breaker CLOSED - service recovered")
         elif self.state == CircuitState.CLOSED:
             # Reset failure count on success in closed state
             self.failure_count = max(0, self.failure_count - 1)
@@ -105,10 +105,10 @@ class WebSocketCircuitBreaker:
         
         if self.state == CircuitState.CLOSED and self.failure_count >= self.config.failure_threshold:
             self.state = CircuitState.OPEN
-            logger.warning(f"⚡ Circuit breaker OPENED - {self.failure_count} failures detected for {connection_type}")
+            logger.warning(f" LIGHTNING:  Circuit breaker OPENED - {self.failure_count} failures detected for {connection_type}")
         elif self.state == CircuitState.HALF_OPEN:
             self.state = CircuitState.OPEN
-            logger.warning("⚡ Circuit breaker back to OPEN - recovery attempt failed")
+            logger.warning(" LIGHTNING:  Circuit breaker back to OPEN - recovery attempt failed")
     
     async def call_with_circuit_breaker(self, 
                                       operation: Callable,
@@ -146,26 +146,26 @@ class WebSocketCircuitBreaker:
                 
                 self.record_success()
                 if attempt > 0:
-                    logger.info(f"✅ Operation succeeded on attempt {attempt + 1} for {connection_type}")
+                    logger.info(f" PASS:  Operation succeeded on attempt {attempt + 1} for {connection_type}")
                 return result
                 
             except asyncio.TimeoutError as e:
                 last_exception = e
-                logger.warning(f"⏰ Timeout on attempt {attempt + 1}/{self.config.max_retry_attempts} for {connection_type}")
+                logger.warning(f"[U+23F0] Timeout on attempt {attempt + 1}/{self.config.max_retry_attempts} for {connection_type}")
                 
             except Exception as e:
                 last_exception = e
-                logger.warning(f"❌ Attempt {attempt + 1}/{self.config.max_retry_attempts} failed for {connection_type}: {e}")
+                logger.warning(f" FAIL:  Attempt {attempt + 1}/{self.config.max_retry_attempts} failed for {connection_type}: {e}")
             
             # Don't delay after the last attempt
             if attempt < self.config.max_retry_attempts - 1:
-                logger.info(f"🔄 Retrying in {delay:.1f}s (exponential backoff)")
+                logger.info(f" CYCLE:  Retrying in {delay:.1f}s (exponential backoff)")
                 await asyncio.sleep(delay)
                 delay = min(delay * 2, self.config.max_delay)  # Exponential backoff with cap
         
         # All attempts failed
         self.record_failure(connection_type)
-        logger.error(f"🚨 All {self.config.max_retry_attempts} attempts failed for {connection_type}")
+        logger.error(f" ALERT:  All {self.config.max_retry_attempts} attempts failed for {connection_type}")
         
         if last_exception:
             raise last_exception
@@ -246,7 +246,7 @@ def get_websocket_circuit_breaker() -> WebSocketCircuitBreaker:
     if _websocket_circuit_breaker is None:
         config = get_websocket_circuit_breaker_config()
         _websocket_circuit_breaker = WebSocketCircuitBreaker(config)
-        logger.info(f"🔌 Initialized WebSocket circuit breaker with config: {config}")
+        logger.info(f"[U+1F50C] Initialized WebSocket circuit breaker with config: {config}")
     
     return _websocket_circuit_breaker
 

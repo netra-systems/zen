@@ -80,10 +80,10 @@ class TestCompleteSystemHealthValidation:
                 health_data = response.json()
                 assert health_data.get('status') in ['healthy', 'ok'], f"Backend status unhealthy: {health_data}"
                 health_checks.append(('backend_health', True))
-                logger.info("✓ Backend health check passed with real service")
+                logger.info("[U+2713] Backend health check passed with real service")
         except Exception as e:
             health_checks.append(('backend_health', False, str(e)))
-            logger.error(f"❌ Backend health check failed: {e}")
+            logger.error(f" FAIL:  Backend health check failed: {e}")
 
         # Test 2: Auth Service Health Check with REAL service
         try:
@@ -91,10 +91,10 @@ class TestCompleteSystemHealthValidation:
                 response = await client.get(f"{system_config['auth_url']}/health")
                 assert response.status_code == 200, f"Auth service health check failed: {response.status_code}"
                 health_checks.append(('auth_health', True))
-                logger.info("✓ Auth service health check passed with real service")
+                logger.info("[U+2713] Auth service health check passed with real service")
         except Exception as e:
             health_checks.append(('auth_health', False, str(e)))
-            logger.error(f"❌ Auth service health check failed: {e}")
+            logger.error(f" FAIL:  Auth service health check failed: {e}")
 
         # Test 3: REAL Database Connectivity - PostgreSQL on port 5434
         if system_config['database_enabled']:
@@ -116,11 +116,11 @@ class TestCompleteSystemHealthValidation:
                     conn.execute(text("SELECT NOW()"))
                     
                 health_checks.append(('database_connectivity', True))
-                logger.info("✓ Real PostgreSQL database connectivity check passed")
+                logger.info("[U+2713] Real PostgreSQL database connectivity check passed")
                 
             except Exception as e:
                 health_checks.append(('database_connectivity', False, str(e)))
-                logger.error(f"❌ Real database connectivity check failed: {e}")
+                logger.error(f" FAIL:  Real database connectivity check failed: {e}")
 
         # Test 4: REAL Redis Connectivity
         if system_config['redis_enabled']:
@@ -139,11 +139,11 @@ class TestCompleteSystemHealthValidation:
                 redis_client.delete(test_key)
                 
                 health_checks.append(('redis_connectivity', True))
-                logger.info("✓ Real Redis connectivity check passed")
+                logger.info("[U+2713] Real Redis connectivity check passed")
                 
             except Exception as e:
                 health_checks.append(('redis_connectivity', False, str(e)))
-                logger.error(f"❌ Real Redis connectivity check failed: {e}")
+                logger.error(f" FAIL:  Real Redis connectivity check failed: {e}")
 
         # Test 5: Configuration Validation with REAL environment
         try:
@@ -156,10 +156,10 @@ class TestCompleteSystemHealthValidation:
             assert config.ENVIRONMENT in ['testing', 'development'], f"Invalid environment for testing: {config.ENVIRONMENT}"
             
             health_checks.append(('configuration_validation', True))
-            logger.info("✓ Configuration validation passed")
+            logger.info("[U+2713] Configuration validation passed")
         except Exception as e:
             health_checks.append(('configuration_validation', False, str(e)))
-            logger.error(f"❌ Configuration validation failed: {e}")
+            logger.error(f" FAIL:  Configuration validation failed: {e}")
 
         # Test 6: REAL Authentication Flow
         try:
@@ -176,11 +176,11 @@ class TestCompleteSystemHealthValidation:
                 assert response.status_code in [200, 401, 403], f"Backend auth validation failed: {response.status_code}"
                 
             health_checks.append(('authentication_flow', True))
-            logger.info("✓ Real authentication flow validation passed")
+            logger.info("[U+2713] Real authentication flow validation passed")
             
         except Exception as e:
             health_checks.append(('authentication_flow', False, str(e)))
-            logger.error(f"❌ Real authentication flow validation failed: {e}")
+            logger.error(f" FAIL:  Real authentication flow validation failed: {e}")
 
         # Test 7: REAL WebSocket Connectivity
         try:
@@ -202,11 +202,11 @@ class TestCompleteSystemHealthValidation:
                     logger.info("WebSocket connected but no response (acceptable for health check)")
                 
             health_checks.append(('websocket_connectivity', True))
-            logger.info("✓ Real WebSocket connectivity check passed")
+            logger.info("[U+2713] Real WebSocket connectivity check passed")
             
         except Exception as e:
             health_checks.append(('websocket_connectivity', False, str(e)))
-            logger.error(f"❌ Real WebSocket connectivity check failed: {e}")
+            logger.error(f" FAIL:  Real WebSocket connectivity check failed: {e}")
 
         # Evaluate overall health
         failed_checks = [item for item in health_checks if len(item) > 2 or not item[1]]
@@ -222,7 +222,7 @@ class TestCompleteSystemHealthValidation:
             ])
             pytest.fail(f"System health validation failed:\n{failure_summary}")
 
-        logger.info(f"✅ Complete system health validation passed - all {len(health_checks)} checks successful in {execution_time:.2f}s")
+        logger.info(f" PASS:  Complete system health validation passed - all {len(health_checks)} checks successful in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     async def test_critical_endpoints_availability(self, system_config, auth_helper):
@@ -248,13 +248,13 @@ class TestCompleteSystemHealthValidation:
                     endpoint_results.append((name, success, response.status_code))
 
                     if success:
-                        logger.info(f"✓ {name} endpoint available: {response.status_code}")
+                        logger.info(f"[U+2713] {name} endpoint available: {response.status_code}")
                     else:
-                        logger.error(f"❌ {name} endpoint failed: {response.status_code}")
+                        logger.error(f" FAIL:  {name} endpoint failed: {response.status_code}")
 
                 except Exception as e:
                     endpoint_results.append((name, False, str(e)))
-                    logger.error(f"❌ {name} endpoint error: {e}")
+                    logger.error(f" FAIL:  {name} endpoint error: {e}")
 
         # Verify all critical endpoints are available
         failed_endpoints = [item for item in endpoint_results if not item[1]]
@@ -270,7 +270,7 @@ class TestCompleteSystemHealthValidation:
             ])
             pytest.fail(f"Critical endpoints failed:\n{failure_summary}")
 
-        logger.info(f"✅ All {len(critical_endpoints)} critical endpoints available in {execution_time:.2f}s")
+        logger.info(f" PASS:  All {len(critical_endpoints)} critical endpoints available in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     async def test_system_configuration_consistency(self, system_config):
@@ -286,10 +286,10 @@ class TestCompleteSystemHealthValidation:
             env_value = config.ENVIRONMENT
             assert env_value in ['testing', 'development', 'staging', 'production'], f"Invalid environment: {env_value}"
             consistency_checks.append(('environment_valid', True))
-            logger.info(f"✓ Environment valid: {env_value}")
+            logger.info(f"[U+2713] Environment valid: {env_value}")
         except Exception as e:
             consistency_checks.append(('environment_valid', False, str(e)))
-            logger.error(f"❌ Environment validation failed: {e}")
+            logger.error(f" FAIL:  Environment validation failed: {e}")
 
         # Check 2: REAL Database URL validation
         try:
@@ -303,20 +303,20 @@ class TestCompleteSystemHealthValidation:
                 conn.execute("SELECT 1")  # Test real connection
             
             consistency_checks.append(('database_url_valid', True))
-            logger.info("✓ Database URL is valid and connectable")
+            logger.info("[U+2713] Database URL is valid and connectable")
         except Exception as e:
             consistency_checks.append(('database_url_valid', False, str(e)))
-            logger.error(f"❌ Database URL validation failed: {e}")
+            logger.error(f" FAIL:  Database URL validation failed: {e}")
 
         # Check 3: Security configuration
         try:
             jwt_secret = config.JWT_SECRET_KEY
             assert jwt_secret is not None and len(jwt_secret) >= 32, f"JWT secret too short: {len(jwt_secret) if jwt_secret else 0}"
             consistency_checks.append(('jwt_secret_valid', True))
-            logger.info("✓ JWT secret key is properly configured")
+            logger.info("[U+2713] JWT secret key is properly configured")
         except Exception as e:
             consistency_checks.append(('jwt_secret_valid', False, str(e)))
-            logger.error(f"❌ JWT secret validation failed: {e}")
+            logger.error(f" FAIL:  JWT secret validation failed: {e}")
 
         # Check 4: Service endpoints consistency with REAL validation
         try:
@@ -329,10 +329,10 @@ class TestCompleteSystemHealthValidation:
                 assert backend_response.status_code == 200, "Backend service not accessible"
                 
             consistency_checks.append(('service_endpoints_valid', True))
-            logger.info("✓ Service endpoints are accessible")
+            logger.info("[U+2713] Service endpoints are accessible")
         except Exception as e:
             consistency_checks.append(('service_endpoints_valid', False, str(e)))
-            logger.error(f"❌ Service endpoints validation failed: {e}")
+            logger.error(f" FAIL:  Service endpoints validation failed: {e}")
 
         # Evaluate consistency
         failed_checks = [item for item in consistency_checks if len(item) > 2 or not item[1]]
@@ -348,7 +348,7 @@ class TestCompleteSystemHealthValidation:
             ])
             pytest.fail(f"System configuration consistency failed:\n{failure_summary}")
 
-        logger.info(f"✅ System configuration consistency validated in {execution_time:.2f}s")
+        logger.info(f" PASS:  System configuration consistency validated in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     async def test_multi_user_isolation_validation(self, auth_helper):
@@ -381,7 +381,7 @@ class TestCompleteSystemHealthValidation:
         execution_time = time.time() - start_time
         assert execution_time > 0.5, f"Multi-user test executed too quickly ({execution_time:.3f}s) - likely mocked"
 
-        logger.info(f"✅ Multi-user isolation validation passed in {execution_time:.2f}s")
+        logger.info(f" PASS:  Multi-user isolation validation passed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     def test_system_resource_availability(self):
@@ -400,14 +400,14 @@ class TestCompleteSystemHealthValidation:
             # Require at least 1GB available memory
             assert available_gb >= 1.0, f"Insufficient memory: {available_gb:.1f}GB available"
             resource_checks.append(('memory_availability', True, f"{available_gb:.1f}GB available"))
-            logger.info(f"✓ Memory available: {available_gb:.1f}GB")
+            logger.info(f"[U+2713] Memory available: {available_gb:.1f}GB")
         except ImportError:
             # psutil not available, skip this check
             resource_checks.append(('memory_availability', True, 'skipped - psutil not available'))
-            logger.info("⚠ Memory check skipped (psutil not available)")
+            logger.info(" WARNING:  Memory check skipped (psutil not available)")
         except Exception as e:
             resource_checks.append(('memory_availability', False, str(e)))
-            logger.error(f"❌ Memory check failed: {e}")
+            logger.error(f" FAIL:  Memory check failed: {e}")
 
         # Check 2: Disk space availability
         try:
@@ -418,10 +418,10 @@ class TestCompleteSystemHealthValidation:
             # Require at least 1GB free disk space
             assert free_gb >= 1.0, f"Insufficient disk space: {free_gb:.1f}GB free"
             resource_checks.append(('disk_space', True, f"{free_gb:.1f}GB free"))
-            logger.info(f"✓ Disk space available: {free_gb:.1f}GB")
+            logger.info(f"[U+2713] Disk space available: {free_gb:.1f}GB")
         except Exception as e:
             resource_checks.append(('disk_space', False, str(e)))
-            logger.error(f"❌ Disk space check failed: {e}")
+            logger.error(f" FAIL:  Disk space check failed: {e}")
 
         # Check 3: Network connectivity (basic)
         try:
@@ -429,10 +429,10 @@ class TestCompleteSystemHealthValidation:
             sock = socket.create_connection(("8.8.8.8", 53), timeout=5)
             sock.close()
             resource_checks.append(('network_connectivity', True))
-            logger.info("✓ Network connectivity available")
+            logger.info("[U+2713] Network connectivity available")
         except Exception as e:
             resource_checks.append(('network_connectivity', False, str(e)))
-            logger.error(f"❌ Network connectivity failed: {e}")
+            logger.error(f" FAIL:  Network connectivity failed: {e}")
 
         # Evaluate resource availability (allow some checks to fail gracefully)
         critical_failures = [
@@ -452,7 +452,7 @@ class TestCompleteSystemHealthValidation:
         # Report all checks
         total_checks = len(resource_checks)
         passed_checks = len([check for check in resource_checks if len(check) <= 2 or check[1]])
-        logger.info(f"✅ Resource availability: {passed_checks}/{total_checks} checks passed in {execution_time:.2f}s")
+        logger.info(f" PASS:  Resource availability: {passed_checks}/{total_checks} checks passed in {execution_time:.2f}s")
 
 
 # Mark all tests as requiring real services

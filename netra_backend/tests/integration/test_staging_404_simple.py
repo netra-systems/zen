@@ -71,7 +71,7 @@ class TestStaging404Simple:
         # Sanity check - should not take more than 1 second for this simple test
         assert execution_time < 1.0, f"Test executed too slowly: {execution_time:.6f}s"
         
-        logger.info(f"✅ System user context validated: {user_id}, {request_id} (took {execution_time:.6f}s)")
+        logger.info(f" PASS:  System user context validated: {user_id}, {request_id} (took {execution_time:.6f}s)")
 
     @pytest.mark.asyncio
     async def test_authenticated_user_context_creation(self):
@@ -90,7 +90,7 @@ class TestStaging404Simple:
             assert auth_context is not None, "Authentication context should be created"
             assert "system" in str(auth_context), "Context should contain system reference"
             
-            logger.info("✅ E2E authentication helper compliance validated")
+            logger.info(" PASS:  E2E authentication helper compliance validated")
             
         except Exception as e:
             # Log the error but don't fail the test if auth helper is not fully configured
@@ -98,7 +98,7 @@ class TestStaging404Simple:
             # Still create a system context for testing
             user_id = "system"
             request_id = UnifiedIdGenerator.generate_base_id("req_auth_test")
-            logger.info(f"✅ Fallback system context created: {user_id}, {request_id}")
+            logger.info(f" PASS:  Fallback system context created: {user_id}, {request_id}")
 
     @pytest.mark.asyncio
     async def test_session_factory_direct(self):
@@ -106,7 +106,7 @@ class TestStaging404Simple:
         user_id = "system"
         request_id = UnifiedIdGenerator.generate_base_id("req_factory_test")
         
-        logger.info(f"🧪 Testing session factory directly for user: {user_id}")
+        logger.info(f"[U+1F9EA] Testing session factory directly for user: {user_id}")
         
         try:
             factory = await get_session_factory()
@@ -123,26 +123,26 @@ class TestStaging404Simple:
                 assert session_info.get('user_id') == user_id
                 
                 logger.info(
-                    f"✅ Session factory SUCCESS: Created session for system user. "
+                    f" PASS:  Session factory SUCCESS: Created session for system user. "
                     f"Session info: {session_info}"
                 )
                 
         except Exception as e:
             if "404" in str(e) and "Thread not found" in str(e):
                 logger.error(
-                    f"🎯 ERROR REPRODUCED: Session factory failed with 404 'Thread not found' "
+                    f" TARGET:  ERROR REPRODUCED: Session factory failed with 404 'Thread not found' "
                     f"for system user! Error: {e}"
                 )
                 # For this test, reproducing the error is actually success
                 assert "Thread not found" in str(e)
             else:
-                logger.error(f"❌ Unexpected error: {e}")
+                logger.error(f" FAIL:  Unexpected error: {e}")
                 raise
 
     @pytest.mark.asyncio
     async def test_dependency_injection_simple(self):
         """Test the dependency injection path that causes staging errors."""
-        logger.info("🔧 Testing dependency injection path for system user")
+        logger.info("[U+1F527] Testing dependency injection path for system user")
         
         try:
             # This follows the path from dependencies.py that uses hardcoded "system" user
@@ -154,7 +154,7 @@ class TestStaging404Simple:
             if session:
                 session_info = getattr(session, 'info', {})
                 logger.info(
-                    f"✅ Dependency injection SUCCESS: System user session created. "
+                    f" PASS:  Dependency injection SUCCESS: System user session created. "
                     f"User: {session_info.get('user_id', 'unknown')}"
                 )
                 
@@ -169,16 +169,16 @@ class TestStaging404Simple:
         except HTTPException as e:
             if e.status_code == 404 and "Thread not found" in str(e.detail):
                 logger.error(
-                    f"🎯 STAGING ERROR REPRODUCED: Dependency injection path caused "
+                    f" TARGET:  STAGING ERROR REPRODUCED: Dependency injection path caused "
                     f"404 'Thread not found' error! Error: {e.detail}"
                 )
                 # For this test, reproducing the staging error is success
                 assert "Thread not found" in str(e.detail)
             else:
-                logger.error(f"❌ Unexpected HTTP error: {e}")
+                logger.error(f" FAIL:  Unexpected HTTP error: {e}")
                 raise
         except Exception as e:
-            logger.error(f"❌ Unexpected exception: {e}")
+            logger.error(f" FAIL:  Unexpected exception: {e}")
             raise
 
     @pytest.mark.asyncio
@@ -196,11 +196,11 @@ class TestStaging404Simple:
             ) as session:
                 assert session is not None
                 system_success = True
-                logger.info("✅ System user: SUCCESS")
+                logger.info(" PASS:  System user: SUCCESS")
         except Exception as e:
-            logger.error(f"❌ System user failed: {e}")
+            logger.error(f" FAIL:  System user failed: {e}")
             if "404" in str(e) and "Thread not found" in str(e):
-                logger.info("🎯 System user 404 error reproduced (expected for bug test)")
+                logger.info(" TARGET:  System user 404 error reproduced (expected for bug test)")
                 system_success = "404_reproduced"
 
         # Test regular user behavior  
@@ -215,17 +215,17 @@ class TestStaging404Simple:
             ) as session:
                 assert session is not None
                 regular_success = True
-                logger.info("✅ Regular user: SUCCESS")
+                logger.info(" PASS:  Regular user: SUCCESS")
         except Exception as e:
-            logger.error(f"❌ Regular user failed: {e}")
+            logger.error(f" FAIL:  Regular user failed: {e}")
 
         logger.info(
-            f"📊 RESULTS: System user: {system_success}, Regular user: {regular_success}"
+            f" CHART:  RESULTS: System user: {system_success}, Regular user: {regular_success}"
         )
         
         # At least one should work, or system should reproduce the 404 error
         if system_success == "404_reproduced":
-            logger.info("✅ Successfully reproduced the staging 404 error for system user")
+            logger.info(" PASS:  Successfully reproduced the staging 404 error for system user")
         else:
             assert system_success or regular_success, "At least one user type should work"
 
@@ -261,7 +261,7 @@ class TestStaging404Simple:
                     "user_type": "system"
                 })
                 
-                logger.info("✅ Auth tracing SUCCESS for system user")
+                logger.info(" PASS:  Auth tracing SUCCESS for system user")
                 
         except Exception as e:
             auth_tracer.log_failure(auth_context, e, {
@@ -270,7 +270,7 @@ class TestStaging404Simple:
             })
             
             if "404" in str(e) and "Thread not found" in str(e):
-                logger.info("🎯 Auth tracing captured 404 error (expected for bug test)")
+                logger.info(" TARGET:  Auth tracing captured 404 error (expected for bug test)")
             else:
                 raise
 

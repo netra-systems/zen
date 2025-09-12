@@ -250,7 +250,7 @@ class TestLoggingImportCompliance(SSotBaseTestCase):
         formatted = []
         for violation in violations:
             formatted.append(
-                f"  • {violation.file_path}:{violation.line_number}\n"
+                f"  [U+2022] {violation.file_path}:{violation.line_number}\n"
                 f"    Type: {violation.violation_type} (Severity: {violation.severity})\n"
                 f"    Content: {violation.content.strip()}\n"
                 f"    Expected: {violation.expected_usage}"
@@ -265,7 +265,7 @@ class TestLoggingImportCompliance(SSotBaseTestCase):
         
         formatted = []
         for pattern, count in sorted(pattern_counts.items()):
-            formatted.append(f"  • {pattern}: {count} violations")
+            formatted.append(f"  [U+2022] {pattern}: {count} violations")
         
         return "\n".join(formatted)
     

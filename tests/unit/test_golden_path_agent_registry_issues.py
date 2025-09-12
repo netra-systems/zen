@@ -89,7 +89,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         
         # Verify we get the exact error that's blocking Golden Path tests
         assert "No agent registry configured" in error_message
-        logger.info(f"✅ Successfully reproduced Golden Path error: {error_message}")
+        logger.info(f" PASS:  Successfully reproduced Golden Path error: {error_message}")
 
     async def test_agent_instance_factory_empty_registry_error(self):
         """FAILING TEST: Reproduce empty agent registry error from Golden Path tests.
@@ -121,7 +121,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         
         # Verify we get an agent not found error
         assert "not found" in error_message.lower()
-        logger.info(f"✅ Successfully reproduced empty registry error: {error_message}")
+        logger.info(f" PASS:  Successfully reproduced empty registry error: {error_message}")
 
     async def test_configure_agent_instance_factory_fixes_registry(self):
         """PASSING TEST: Verify factory configuration resolves registry issues.
@@ -176,7 +176,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         # Verify agent creation succeeded
         assert agent is not None
         assert isinstance(agent, TestSupervisorAgent)
-        logger.info("✅ Agent creation succeeded after proper factory configuration")
+        logger.info(" PASS:  Agent creation succeeded after proper factory configuration")
 
     async def test_global_configure_agent_instance_factory_integration(self):
         """INTEGRATION TEST: Test global factory configuration pattern used in Golden Path.
@@ -219,7 +219,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         
         agent = await global_factory.create_agent_instance("test_agent", user_context)
         assert agent is not None
-        logger.info("✅ Global factory configuration pattern validated")
+        logger.info(" PASS:  Global factory configuration pattern validated")
 
     async def test_agent_class_registry_population_patterns(self):
         """UNIT TEST: Validate agent class registry population patterns from Golden Path.
@@ -254,7 +254,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         with self.assertRaises(Exception):
             registry.register("another_agent", TestAgent, "Another agent")
         
-        logger.info("✅ Agent class registry population patterns validated")
+        logger.info(" PASS:  Agent class registry population patterns validated")
 
     async def test_websocket_bridge_configuration_requirements(self):
         """UNIT TEST: Validate WebSocket bridge configuration requirements.
@@ -303,7 +303,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         agent = await factory.create_agent_instance("test_agent", user_context)
         self.assertIsNotNone(agent)
         
-        logger.info("✅ WebSocket bridge configuration patterns validated")
+        logger.info(" PASS:  WebSocket bridge configuration patterns validated")
 
     async def test_llm_manager_dependency_validation(self):
         """UNIT TEST: Validate LLM manager dependency handling.
@@ -355,7 +355,7 @@ class TestAgentRegistryConfiguration(SSotAsyncTestCase):
         agent = await factory.create_agent_instance("llm_agent", user_context)
         self.assertIsNotNone(agent)
         
-        logger.info("✅ LLM manager dependency validation completed")
+        logger.info(" PASS:  LLM manager dependency validation completed")
 
     def teardown_method(self, method):
         """Clean up test environment."""

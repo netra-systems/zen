@@ -29,11 +29,11 @@ async def test_registry_functionality():
     
     # Create registry
     registry = UnifiedToolRegistry()
-    print("✓ Registry created")
+    print("[U+2713] Registry created")
     
     # Test empty registry
     assert registry.get_tool_categories() == []
-    print("✓ Empty registry returns empty categories")
+    print("[U+2713] Empty registry returns empty categories")
     
     # Create test tools
     tool1 = UnifiedTool(
@@ -64,27 +64,27 @@ async def test_registry_functionality():
     registry.register_tool(tool1)
     registry.register_tool(tool2)
     registry.register_tool(tool3)
-    print("✓ Tools registered successfully")
+    print("[U+2713] Tools registered successfully")
     
     # Test get_tool
     retrieved = registry.get_tool("analyzer")
     assert retrieved == tool1
-    print("✓ Tool retrieval works")
+    print("[U+2713] Tool retrieval works")
     
     # Test list_tools
     all_tools = registry.list_tools()
     assert len(all_tools) == 3
-    print(f"✓ List tools returns {len(all_tools)} tools")
+    print(f"[U+2713] List tools returns {len(all_tools)} tools")
     
     # Test category filter
     analysis_tools = registry.list_tools(category="analysis")
     assert len(analysis_tools) == 2
-    print(f"✓ Category filter works (found {len(analysis_tools)} analysis tools)")
+    print(f"[U+2713] Category filter works (found {len(analysis_tools)} analysis tools)")
     
     # Test get_tool_categories
     categories = registry.get_tool_categories()
     assert len(categories) == 2
-    print(f"✓ get_tool_categories returns {len(categories)} categories")
+    print(f"[U+2713] get_tool_categories returns {len(categories)} categories")
     
     # Verify category counts
     for cat in categories:
@@ -99,7 +99,7 @@ async def test_registry_functionality():
     result = await registry.execute_tool("analyzer", {}, {})
     assert result.success is False
     assert "No handler" in result.error
-    print("✓ Tool execution without handler fails gracefully")
+    print("[U+2713] Tool execution without handler fails gracefully")
     
     # Test with handler
     async def test_handler(params, context):
@@ -114,19 +114,19 @@ async def test_registry_functionality():
     )
     assert result.success is True
     assert result.result["status"] == "success"
-    print("✓ Tool execution with handler succeeds")
+    print("[U+2713] Tool execution with handler succeeds")
     
     # Test permissions
     has_perm = registry.check_permission("analyzer", "user123", "execute")
     assert has_perm is True
-    print("✓ Permission checking works")
+    print("[U+2713] Permission checking works")
     
     # Test clear
     registry.clear()
     assert len(registry._tools) == 0
     assert len(registry._tool_handlers) == 0
     assert registry.get_tool_categories() == []
-    print("✓ Registry clear works")
+    print("[U+2713] Registry clear works")
     
     print("\n=== All tests passed! ===\n")
 
@@ -150,13 +150,13 @@ async def test_error_scenarios():
     categories = registry.get_tool_categories()
     assert len(categories) == 1
     assert categories[0]["name"] == "default"
-    print("✓ Tools without category default to 'default' category")
+    print("[U+2713] Tools without category default to 'default' category")
     
     # Test non-existent tool execution
     result = await registry.execute_tool("non_existent", {}, {})
     assert result.success is False
     assert "not found" in result.error
-    print("✓ Non-existent tool execution fails with proper error")
+    print("[U+2713] Non-existent tool execution fails with proper error")
     
     # Test handler exception
     async def failing_handler(params, context):
@@ -174,7 +174,7 @@ async def test_error_scenarios():
     result = await registry.execute_tool("failing", {}, {})
     assert result.success is False
     assert "Intentional error" in result.error
-    print("✓ Handler exceptions are caught and returned as errors")
+    print("[U+2713] Handler exceptions are caught and returned as errors")
     
     print("\n=== Error handling tests passed! ===\n")
 
@@ -186,7 +186,7 @@ async def main():
         await test_error_scenarios()
         
         print("\n" + "="*50)
-        print("✅ ALL TESTS PASSED SUCCESSFULLY!")
+        print(" PASS:  ALL TESTS PASSED SUCCESSFULLY!")
         print("="*50 + "\n")
         
         print("Summary:")
@@ -197,7 +197,7 @@ async def main():
         print("- The fix for the missing method has been successful")
         
     except Exception as e:
-        print(f"\n❌ Test failed: {e}")
+        print(f"\n FAIL:  Test failed: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

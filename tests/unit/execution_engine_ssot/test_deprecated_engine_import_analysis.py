@@ -204,17 +204,17 @@ RISK ASSESSMENT:
 """
         
         if categories['high_risk']:
-            report += f"\n🚨 HIGH RISK IMPORTS ({len(categories['high_risk'])}):\n"
+            report += f"\n ALERT:  HIGH RISK IMPORTS ({len(categories['high_risk'])}):\n"
             for imp in categories['high_risk']:
                 report += f"  - {imp.file_path}:{imp.line_number} -> {imp.raw_statement}\n"
                 
         if categories['production_imports']:
-            report += f"\n⚠️  PRODUCTION IMPORTS ({len(categories['production_imports'])}):\n"
+            report += f"\n WARNING: [U+FE0F]  PRODUCTION IMPORTS ({len(categories['production_imports'])}):\n"
             for imp in categories['production_imports']:
                 if imp not in categories['high_risk']:  # Don't double-list
                     report += f"  - {imp.file_path}:{imp.line_number} -> {imp.raw_statement}\n"
         
-        report += f"\n✅ TEST IMPORTS ({len(categories['test_imports'])}):\n"
+        report += f"\n PASS:  TEST IMPORTS ({len(categories['test_imports'])}):\n"
         for imp in categories['test_imports']:
             report += f"  - {imp.file_path}:{imp.line_number} -> {imp.raw_statement}\n"
             
@@ -239,7 +239,7 @@ class TestDeprecatedEngineImportAnalysis(unittest.TestCase):
         
     def test_scan_finds_deprecated_imports(self):
         """Test that scanning finds deprecated execution engine imports"""
-        print("\n🔍 Scanning codebase for deprecated execution engine imports...")
+        print("\n SEARCH:  Scanning codebase for deprecated execution engine imports...")
         
         imports = self.analyzer.scan_codebase()
         
@@ -274,7 +274,7 @@ class TestDeprecatedEngineImportAnalysis(unittest.TestCase):
         self.assertLessEqual(len(categories['high_risk']), len(imports))
         
         # Print details for manual validation
-        print(f"\n📊 Import Categorization:")
+        print(f"\n CHART:  Import Categorization:")
         for category, items in categories.items():
             if items:
                 print(f"  {category}: {len(items)} imports")
@@ -290,7 +290,7 @@ class TestDeprecatedEngineImportAnalysis(unittest.TestCase):
         self.assertIn("DEPRECATED EXECUTION ENGINE IMPORT ANALYSIS REPORT", report)
         self.assertIn(f"Total Deprecated Imports Found: {len(imports)}", report)
         
-        print(f"\n📋 FULL ANALYSIS REPORT:")
+        print(f"\n[U+1F4CB] FULL ANALYSIS REPORT:")
         print("=" * 80)
         print(report)
         print("=" * 80)
@@ -305,16 +305,16 @@ class TestDeprecatedEngineImportAnalysis(unittest.TestCase):
         # Allow for some variance but flag if dramatically different
         expected_range = (50, 200)  # Reasonable range around 131
         
-        print(f"\n📈 Import Count Validation:")
+        print(f"\n[U+1F4C8] Import Count Validation:")
         print(f"  Expected range: {expected_range[0]}-{expected_range[1]} imports")
         print(f"  Actual found: {len(imports)} imports")
         
         if len(imports) < expected_range[0]:
-            print(f"  ⚠️  WARNING: Found fewer imports than expected. May indicate scan issues.")
+            print(f"   WARNING: [U+FE0F]  WARNING: Found fewer imports than expected. May indicate scan issues.")
         elif len(imports) > expected_range[1]:
-            print(f"  ⚠️  WARNING: Found more imports than expected. May indicate false positives.")
+            print(f"   WARNING: [U+FE0F]  WARNING: Found more imports than expected. May indicate false positives.")
         else:
-            print(f"  ✅ Import count within expected range.")
+            print(f"   PASS:  Import count within expected range.")
             
         # Don't fail the test, but provide visibility
         self.assertGreater(len(imports), 0, "Should find at least some imports")

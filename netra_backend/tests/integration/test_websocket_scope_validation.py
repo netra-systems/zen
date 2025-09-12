@@ -89,8 +89,8 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         self.backend_url = self.env.get("BACKEND_URL", "https://api-staging.netra.ai")  
         self.websocket_url = self.backend_url.replace("https://", "wss://").replace("http://", "ws://") + "/ws"
         
-        logger.info(f"🔧 INTEGRATION SETUP: Testing against {self.backend_url}")
-        logger.info(f"🔧 WebSocket URL: {self.websocket_url}")
+        logger.info(f"[U+1F527] INTEGRATION SETUP: Testing against {self.backend_url}")
+        logger.info(f"[U+1F527] WebSocket URL: {self.websocket_url}")
         
     @pytest.mark.integration
     @pytest.mark.no_docker  
@@ -105,8 +105,8 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         
         Expected Behavior: FAIL with real connection errors due to scope violations
         """
-        logger.info("🚨 INTEGRATION TEST: Real WebSocket handshake with scope bug")
-        logger.info(f"📡 Connecting to: {self.websocket_url}")
+        logger.info(" ALERT:  INTEGRATION TEST: Real WebSocket handshake with scope bug")
+        logger.info(f"[U+1F4E1] Connecting to: {self.websocket_url}")
         
         if not WEBSOCKETS_AVAILABLE:
             pytest.skip("websockets library not available for real connection testing")
@@ -117,7 +117,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         total_failures = 0
         
         for attempt in range(connection_attempts):
-            logger.info(f"🔄 Connection attempt {attempt + 1}/{connection_attempts}")
+            logger.info(f" CYCLE:  Connection attempt {attempt + 1}/{connection_attempts}")
             
             try:
                 # Attempt real WebSocket connection with authentication
@@ -136,7 +136,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                     
                     # If we get here, the connection was successful
                     successful_connections += 1
-                    logger.info(f"✅ Connection {attempt + 1}: Successful handshake")
+                    logger.info(f" PASS:  Connection {attempt + 1}: Successful handshake")
                     
                     # Send test message to trigger agent execution paths
                     test_message = {
@@ -151,9 +151,9 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                     # Wait for response or timeout
                     try:
                         response = await asyncio.wait_for(websocket.recv(), timeout=5)
-                        logger.info(f"✅ Connection {attempt + 1}: Received response")
+                        logger.info(f" PASS:  Connection {attempt + 1}: Received response")
                     except asyncio.TimeoutError:
-                        logger.warning(f"⚠️ Connection {attempt + 1}: Response timeout")
+                        logger.warning(f" WARNING: [U+FE0F] Connection {attempt + 1}: Response timeout")
                         
             except websockets.exceptions.ConnectionClosedError as e:
                 total_failures += 1
@@ -161,27 +161,27 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                 # Check if the failure is related to server-side scope issues
                 if e.code == 1011:  # Internal server error code
                     scope_related_failures += 1
-                    logger.error(f"❌ Connection {attempt + 1}: Server error 1011 (likely scope bug)")
+                    logger.error(f" FAIL:  Connection {attempt + 1}: Server error 1011 (likely scope bug)")
                     logger.error(f"   Error: {e}")
                 else:
-                    logger.error(f"❌ Connection {attempt + 1}: Connection closed - {e}")
+                    logger.error(f" FAIL:  Connection {attempt + 1}: Connection closed - {e}")
                     
             except websockets.exceptions.InvalidStatusCode as e:
                 total_failures += 1
                 if e.status_code >= 500:
                     scope_related_failures += 1
-                    logger.error(f"❌ Connection {attempt + 1}: Server error {e.status_code} (likely scope bug)")
+                    logger.error(f" FAIL:  Connection {attempt + 1}: Server error {e.status_code} (likely scope bug)")
                 else:
-                    logger.error(f"❌ Connection {attempt + 1}: Client error {e.status_code}")
+                    logger.error(f" FAIL:  Connection {attempt + 1}: Client error {e.status_code}")
                     
             except Exception as e:
                 total_failures += 1
                 error_msg = str(e).lower()
                 if "internal server error" in error_msg or "state_registry" in error_msg:
                     scope_related_failures += 1
-                    logger.error(f"❌ Connection {attempt + 1}: Scope-related error - {e}")
+                    logger.error(f" FAIL:  Connection {attempt + 1}: Scope-related error - {e}")
                 else:
-                    logger.error(f"❌ Connection {attempt + 1}: Other error - {e}")
+                    logger.error(f" FAIL:  Connection {attempt + 1}: Other error - {e}")
                     
             # Brief delay between attempts
             await asyncio.sleep(1)
@@ -191,12 +191,12 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         scope_failure_rate = (scope_related_failures / connection_attempts) * 100
         success_rate = (successful_connections / connection_attempts) * 100
         
-        logger.error("📊 INTEGRATION TEST RESULTS:")
-        logger.error(f"   • Total attempts: {connection_attempts}")
-        logger.error(f"   • Successful connections: {successful_connections} ({success_rate:.1f}%)")
-        logger.error(f"   • Total failures: {total_failures} ({failure_rate:.1f}%)")
-        logger.error(f"   • Scope-related failures: {scope_related_failures} ({scope_failure_rate:.1f}%)")
-        logger.error(f"   • Business impact: {failure_rate:.1f}% connection failure rate")
+        logger.error(" CHART:  INTEGRATION TEST RESULTS:")
+        logger.error(f"   [U+2022] Total attempts: {connection_attempts}")
+        logger.error(f"   [U+2022] Successful connections: {successful_connections} ({success_rate:.1f}%)")
+        logger.error(f"   [U+2022] Total failures: {total_failures} ({failure_rate:.1f}%)")
+        logger.error(f"   [U+2022] Scope-related failures: {scope_related_failures} ({scope_failure_rate:.1f}%)")
+        logger.error(f"   [U+2022] Business impact: {failure_rate:.1f}% connection failure rate")
         
         # This test should FAIL if scope bug is causing real infrastructure failures
         if total_failures > 0:
@@ -206,7 +206,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                 f"{failure_rate:.1f}% connection failure rate affecting real users and $500K+ ARR."
             )
             
-        logger.warning("⚠️ UNEXPECTED: All connections succeeded - scope bug may be environment-specific")
+        logger.warning(" WARNING: [U+FE0F] UNEXPECTED: All connections succeeded - scope bug may be environment-specific")
         
     @pytest.mark.integration
     @pytest.mark.no_docker
@@ -221,7 +221,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         
         Expected Behavior: FAIL due to scope violations in service lifecycle
         """
-        logger.info("🚨 INTEGRATION TEST: State registry lifecycle with real services")
+        logger.info(" ALERT:  INTEGRATION TEST: State registry lifecycle with real services")
         
         # Test state registry initialization and access across service boundaries
         test_scenarios = [
@@ -242,7 +242,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         failures_detected = []
         
         for scenario in test_scenarios:
-            logger.info(f"🔍 Testing scenario: {scenario['name']}")
+            logger.info(f" SEARCH:  Testing scenario: {scenario['name']}")
             
             try:
                 # Mock WebSocket for controlled testing
@@ -288,7 +288,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                     # This should trigger scope violations in the tested scenario
                     try:
                         await websocket_endpoint(mock_websocket)
-                        logger.warning(f"⚠️ {scenario['name']}: No failure detected - may be environment specific")
+                        logger.warning(f" WARNING: [U+FE0F] {scenario['name']}: No failure detected - may be environment specific")
                         
                     except NameError as e:
                         if "state_registry" in str(e):
@@ -297,9 +297,9 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                                 "error": str(e),
                                 "type": "scope_violation"
                             })
-                            logger.error(f"❌ {scenario['name']}: Scope violation detected - {e}")
+                            logger.error(f" FAIL:  {scenario['name']}: Scope violation detected - {e}")
                         else:
-                            logger.error(f"❌ {scenario['name']}: Other NameError - {e}")
+                            logger.error(f" FAIL:  {scenario['name']}: Other NameError - {e}")
                             
                     except Exception as e:
                         # Other exceptions may also indicate scope-related issues
@@ -309,20 +309,20 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                                 "error": str(e), 
                                 "type": "scope_related"
                             })
-                            logger.error(f"❌ {scenario['name']}: Scope-related error - {e}")
+                            logger.error(f" FAIL:  {scenario['name']}: Scope-related error - {e}")
                         else:
-                            logger.debug(f"🔍 {scenario['name']}: Other error - {e}")
+                            logger.debug(f" SEARCH:  {scenario['name']}: Other error - {e}")
                             
             except Exception as setup_error:
-                logger.error(f"❌ {scenario['name']}: Test setup failed - {setup_error}")
+                logger.error(f" FAIL:  {scenario['name']}: Test setup failed - {setup_error}")
                 
         # Analyze results
-        logger.error("📊 STATE REGISTRY LIFECYCLE ANALYSIS:")
-        logger.error(f"   • Scenarios tested: {len(test_scenarios)}")
-        logger.error(f"   • Scope violations detected: {len(failures_detected)}")
+        logger.error(" CHART:  STATE REGISTRY LIFECYCLE ANALYSIS:")
+        logger.error(f"   [U+2022] Scenarios tested: {len(test_scenarios)}")
+        logger.error(f"   [U+2022] Scope violations detected: {len(failures_detected)}")
         
         for failure in failures_detected:
-            logger.error(f"   • {failure['scenario']}: {failure['type']} - {failure['error']}")
+            logger.error(f"   [U+2022] {failure['scenario']}: {failure['type']} - {failure['error']}")
             
         # This test should FAIL if scope violations are detected in service lifecycle
         if failures_detected:
@@ -332,7 +332,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                 f"actual service lifecycle management and represents critical infrastructure failures."
             )
             
-        logger.info("✅ INTEGRATION SUCCESS: No scope violations detected in tested scenarios")
+        logger.info(" PASS:  INTEGRATION SUCCESS: No scope violations detected in tested scenarios")
         
     @pytest.mark.integration
     @pytest.mark.no_docker
@@ -347,7 +347,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         
         Expected Behavior: FAIL due to scope violations during error cleanup
         """
-        logger.info("🚨 INTEGRATION TEST: Connection state cleanup with scope violations")
+        logger.info(" ALERT:  INTEGRATION TEST: Connection state cleanup with scope violations")
         
         # Test different error scenarios that require cleanup
         cleanup_scenarios = [
@@ -381,7 +381,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         scope_violations = []
         
         for scenario in cleanup_scenarios:
-            logger.info(f"🔍 Testing cleanup scenario: {scenario['name']}")
+            logger.info(f" SEARCH:  Testing cleanup scenario: {scenario['name']}")
             
             try:
                 # Create mock WebSocket with real-like behavior
@@ -437,7 +437,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                         # This should trigger error handling and cleanup paths
                         await websocket_endpoint(mock_websocket)
                         
-                        logger.warning(f"⚠️ {scenario['name']}: No error triggered - test setup may need adjustment")
+                        logger.warning(f" WARNING: [U+FE0F] {scenario['name']}: No error triggered - test setup may need adjustment")
                         
                     except NameError as e:
                         if "state_registry" in str(e):
@@ -446,9 +446,9 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                                 "error": str(e),
                                 "during_cleanup": True
                             })
-                            logger.error(f"❌ {scenario['name']}: SCOPE VIOLATION during cleanup - {e}")
+                            logger.error(f" FAIL:  {scenario['name']}: SCOPE VIOLATION during cleanup - {e}")
                         else:
-                            logger.error(f"❌ {scenario['name']}: Other NameError during cleanup - {e}")
+                            logger.error(f" FAIL:  {scenario['name']}: Other NameError during cleanup - {e}")
                             
                     except Exception as e:
                         cleanup_failures.append({
@@ -464,9 +464,9 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                                 "error": str(e),
                                 "during_cleanup": True
                             })
-                            logger.error(f"❌ {scenario['name']}: Scope violation in cleanup - {e}")
+                            logger.error(f" FAIL:  {scenario['name']}: Scope violation in cleanup - {e}")
                         else:
-                            logger.debug(f"🔍 {scenario['name']}: Expected cleanup error - {e}")
+                            logger.debug(f" SEARCH:  {scenario['name']}: Expected cleanup error - {e}")
                             
                     finally:
                         # Clean up error patches
@@ -474,16 +474,16 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
                             patch_obj.stop()
                             
             except Exception as test_error:
-                logger.error(f"❌ {scenario['name']}: Test execution failed - {test_error}")
+                logger.error(f" FAIL:  {scenario['name']}: Test execution failed - {test_error}")
                 
         # Analyze cleanup test results
-        logger.error("📊 CONNECTION CLEANUP ANALYSIS:")
-        logger.error(f"   • Cleanup scenarios tested: {len(cleanup_scenarios)}")
-        logger.error(f"   • Total cleanup failures: {len(cleanup_failures)}")
-        logger.error(f"   • Scope violations in cleanup: {len(scope_violations)}")
+        logger.error(" CHART:  CONNECTION CLEANUP ANALYSIS:")
+        logger.error(f"   [U+2022] Cleanup scenarios tested: {len(cleanup_scenarios)}")
+        logger.error(f"   [U+2022] Total cleanup failures: {len(cleanup_failures)}")
+        logger.error(f"   [U+2022] Scope violations in cleanup: {len(scope_violations)}")
         
         for violation in scope_violations:
-            logger.error(f"   • SCOPE VIOLATION in {violation['scenario']}: {violation['error']}")
+            logger.error(f"   [U+2022] SCOPE VIOLATION in {violation['scenario']}: {violation['error']}")
             
         # This test should FAIL if scope violations occur during cleanup
         if scope_violations:
@@ -494,9 +494,9 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
             )
             
         if cleanup_failures and not scope_violations:
-            logger.info(f"✅ CLEANUP HANDLED: {len(cleanup_failures)} expected cleanup failures occurred without scope violations")
+            logger.info(f" PASS:  CLEANUP HANDLED: {len(cleanup_failures)} expected cleanup failures occurred without scope violations")
         elif not cleanup_failures and not scope_violations:
-            logger.warning("⚠️ UNEXPECTED: No cleanup failures detected - test conditions may need adjustment")
+            logger.warning(" WARNING: [U+FE0F] UNEXPECTED: No cleanup failures detected - test conditions may need adjustment")
 
     @pytest.mark.integration 
     @pytest.mark.no_docker
@@ -511,7 +511,7 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
         
         Expected Behavior: FAIL - Document measurable business impact
         """
-        logger.info("🚨 INTEGRATION ANALYSIS: Real service impact of scope bug")
+        logger.info(" ALERT:  INTEGRATION ANALYSIS: Real service impact of scope bug")
         
         # Service impact metrics
         impact_metrics = {
@@ -563,29 +563,29 @@ class TestWebSocketScopeValidationIntegration(BaseIntegrationTest):
             "testing_required": "HIGH - must validate all error recovery paths"
         }
         
-        logger.error("📊 REAL SERVICE IMPACT ANALYSIS:")
-        logger.error("💰 BUSINESS IMPACT:")
+        logger.error(" CHART:  REAL SERVICE IMPACT ANALYSIS:")
+        logger.error("[U+1F4B0] BUSINESS IMPACT:")
         for tier in business_impact["affected_user_tiers"]:
-            logger.error(f"   • {tier} tier: 100% WebSocket connection failure")
-        logger.error(f"   • Revenue at risk: ${business_impact['revenue_at_risk']:,}")
-        logger.error(f"   • Customer experience: {business_impact['customer_experience_impact']}")
+            logger.error(f"   [U+2022] {tier} tier: 100% WebSocket connection failure")
+        logger.error(f"   [U+2022] Revenue at risk: ${business_impact['revenue_at_risk']:,}")
+        logger.error(f"   [U+2022] Customer experience: {business_impact['customer_experience_impact']}")
         
-        logger.error("🚫 FEATURE AVAILABILITY IMPACT:")
+        logger.error("[U+1F6AB] FEATURE AVAILABILITY IMPACT:")
         for feature, status in business_impact["feature_availability"].items():
-            logger.error(f"   • {feature}: {status}")
+            logger.error(f"   [U+2022] {feature}: {status}")
             
-        logger.error("🔧 SCOPE BUG CODE PATHS:")
+        logger.error("[U+1F527] SCOPE BUG CODE PATHS:")
         for path in scope_bug_paths:
-            logger.error(f"   • {path['location']}: {path['context']}")
+            logger.error(f"   [U+2022] {path['location']}: {path['context']}")
             logger.error(f"     Frequency: {path['frequency']}")
             logger.error(f"     Impact: {path['business_impact']}")
             
-        logger.error("⚙️ TECHNICAL DEBT ANALYSIS:")
-        logger.error(f"   • Root cause: {technical_debt['root_cause']}")
-        logger.error(f"   • Architectural flaw: {technical_debt['architectural_flaw']}")
-        logger.error(f"   • Fix complexity: {technical_debt['fix_complexity']}")
-        logger.error(f"   • Fix risk: {technical_debt['fix_risk']}")
-        logger.error(f"   • Testing required: {technical_debt['testing_required']}")
+        logger.error("[U+2699][U+FE0F] TECHNICAL DEBT ANALYSIS:")
+        logger.error(f"   [U+2022] Root cause: {technical_debt['root_cause']}")
+        logger.error(f"   [U+2022] Architectural flaw: {technical_debt['architectural_flaw']}")
+        logger.error(f"   [U+2022] Fix complexity: {technical_debt['fix_complexity']}")
+        logger.error(f"   [U+2022] Fix risk: {technical_debt['fix_risk']}")
+        logger.error(f"   [U+2022] Testing required: {technical_debt['testing_required']}")
         
         # Force test failure to highlight the critical business impact
         pytest.fail(
@@ -603,10 +603,10 @@ if __name__ == "__main__":
     Direct execution for debugging scope bug integration testing.
     Run: python netra_backend/tests/integration/test_websocket_scope_validation.py
     """
-    logger.info("🚨 DIRECT EXECUTION: WebSocket Scope Validation Integration Tests")
-    logger.info("📡 REAL SERVICES: Testing against staging GCP infrastructure") 
-    logger.info("💰 BUSINESS IMPACT: Validating $500K+ ARR connection failure impact")
-    logger.info("🔧 PURPOSE: Prove scope bug affects real service infrastructure")
+    logger.info(" ALERT:  DIRECT EXECUTION: WebSocket Scope Validation Integration Tests")
+    logger.info("[U+1F4E1] REAL SERVICES: Testing against staging GCP infrastructure") 
+    logger.info("[U+1F4B0] BUSINESS IMPACT: Validating $500K+ ARR connection failure impact")
+    logger.info("[U+1F527] PURPOSE: Prove scope bug affects real service infrastructure")
     
     pytest.main([
         __file__,

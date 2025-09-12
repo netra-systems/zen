@@ -47,7 +47,7 @@ class TestDashboard:
         print("-"*40)
         
         for category, stats in sorted(category_summary.items()):
-            default_marker = "✓" if stats['is_default'] else " "
+            default_marker = "[U+2713]" if stats['is_default'] else " "
             print(f"{category:<15} {stats['total_tests']:<10} {default_marker:<10} "
                   f"{stats['avg_failure_rate']:.1f}%{'':>8} {stats['avg_duration']:.2f}s")
         
@@ -71,7 +71,7 @@ class TestDashboard:
             if len(recent_stats) >= 2:
                 yesterday = recent_stats[-2]['failure_rate'] if len(recent_stats) > 1 else 0
                 today = recent_stats[-1]['failure_rate']
-                trend = "↑" if today > yesterday else "↓" if today < yesterday else "→"
+                trend = " up " if today > yesterday else " down " if today < yesterday else " -> "
                 print(f"Trend Direction: {trend} ({today:.1f}% today vs {yesterday:.1f}% yesterday)")
         
         # Flaky tests
@@ -135,17 +135,17 @@ class TestDashboard:
             
             for i, rec in enumerate(recommendations, 1):
                 priority_marker = {
-                    'HIGH': '🔴',
-                    'MEDIUM': '🟡',
-                    'LOW': '🟢'
-                }.get(rec['priority'], '⚪')
+                    'HIGH': '[U+1F534]',
+                    'MEDIUM': '[U+1F7E1]',
+                    'LOW': '[U+1F7E2]'
+                }.get(rec['priority'], '[U+26AA]')
                 
                 print(f"\n{i}. [{rec['priority']}] {rec['category']}")
                 print(f"   {rec['message']}")
                 if rec.get('action'):
                     print(f"   Action: {rec['action']}")
         else:
-            print("\n✅ No critical issues detected. Test system is healthy!")
+            print("\n PASS:  No critical issues detected. Test system is healthy!")
     
     def show_category_details(self, category: str):
         """Show detailed information for a specific category"""
@@ -313,7 +313,7 @@ class TestDashboard:
 """
         
         for category, stats in sorted(category_summary.items()):
-            default_marker = "✓" if stats['is_default'] else ""
+            default_marker = "[U+2713]" if stats['is_default'] else ""
             failure_class = "status-fail" if stats['avg_failure_rate'] > 20 else ""
             html_content += f"""
             <tr>
@@ -406,7 +406,7 @@ class TestDashboard:
                 html_content += f"<li>{rec}</li>"
             html_content += "</ul>"
         else:
-            html_content += "<p>✅ Test system is healthy!</p>"
+            html_content += "<p> PASS:  Test system is healthy!</p>"
         
         html_content += """
     </div>

@@ -322,20 +322,20 @@ def main():
     if report['fixed_files']:
         print(f"\nSample of fixed files:")
         for f in report['fixed_files'][:10]:
-            print(f"  ✓ {f}")
+            print(f"  [U+2713] {f}")
     
     # Validate
     success = migrator.validate_migration()
     
     if success:
-        print("\n✅ Migration completed successfully!")
+        print("\n PASS:  Migration completed successfully!")
         print("\nNext steps:")
         print("1. Run tests to ensure everything still works")
         print("2. Update environment variables to use GOOGLE_API_KEY instead of OPENAI_API_KEY")
         print("3. Run: python scripts/validate_llm_test_models.py")
         return 0
     else:
-        print("\n⚠️ Migration completed but validation found remaining issues")
+        print("\n WARNING: [U+FE0F] Migration completed but validation found remaining issues")
         print("Please review the remaining violations and fix manually if needed")
         return 1
 

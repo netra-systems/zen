@@ -99,13 +99,13 @@ class TestGoldenPathAPICompatibility(SSotAsyncTestCase):
             assert result["status"] == "completed"  # Line 305: This FAILS
             pytest.fail("Expected Golden Path assertions to fail with current API format")
         except (AssertionError, KeyError) as e:
-            print(f"✅ CONFIRMED: Golden Path assertions fail as expected: {e}")
+            print(f" PASS:  CONFIRMED: Golden Path assertions fail as expected: {e}")
         
         # Verify WebSocket events were sent (this should work)
         websocket_bridge.notify_agent_started.assert_called()
         websocket_bridge.notify_agent_completed.assert_called()
         
-        print("✅ Golden Path failure reproduction complete")
+        print(" PASS:  Golden Path failure reproduction complete")
 
     async def test_golden_path_success_after_api_fix(self):
         """Simulate Golden Path test success after API fix is implemented.
@@ -154,7 +154,7 @@ class TestGoldenPathAPICompatibility(SSotAsyncTestCase):
         assert "orchestration_successful" in fixed_result["data"]
         assert "user_isolation_verified" in fixed_result["data"]
         
-        print("✅ Golden Path success simulation complete - all assertions PASS")
+        print(" PASS:  Golden Path success simulation complete - all assertions PASS")
 
     async def test_all_golden_path_tests_compatibility(self):
         """Test compatibility with multiple Golden Path test scenarios."""
@@ -211,9 +211,9 @@ class TestGoldenPathAPICompatibility(SSotAsyncTestCase):
             assert "request_id" in fixed_result
             assert fixed_result["status"] == scenario["expected_status"]
             
-            print(f"✅ Scenario {scenario['name']} compatible with SSOT format")
+            print(f" PASS:  Scenario {scenario['name']} compatible with SSOT format")
         
-        print("✅ All Golden Path test scenarios validated for SSOT compatibility")
+        print(" PASS:  All Golden Path test scenarios validated for SSOT compatibility")
 
     async def test_error_scenarios_ssot_format(self):
         """Test that error scenarios also follow SSOT ExecutionResult format."""
@@ -261,9 +261,9 @@ class TestGoldenPathAPICompatibility(SSotAsyncTestCase):
             assert error_result["status"] == scenario["expected_status"]
             assert "error" in error_result["data"]
             
-            print(f"✅ Error scenario {scenario['name']} follows SSOT format")
+            print(f" PASS:  Error scenario {scenario['name']} follows SSOT format")
         
-        print("✅ All error scenarios validated for SSOT format compliance")
+        print(" PASS:  All error scenarios validated for SSOT format compliance")
 
     async def test_websocket_event_integration_compatibility(self):
         """Test WebSocket event integration remains compatible after API fix."""
@@ -319,7 +319,7 @@ class TestGoldenPathAPICompatibility(SSotAsyncTestCase):
         assert "agent_completed" in event_types
         
         print(f"WebSocket events sent: {event_types}")
-        print("✅ WebSocket event integration remains compatible")
+        print(" PASS:  WebSocket event integration remains compatible")
 
     async def test_performance_impact_of_api_fix(self):
         """Validate that API fix doesn't negatively impact performance."""
@@ -380,7 +380,7 @@ class TestGoldenPathAPICompatibility(SSotAsyncTestCase):
         performance_ratio = avg_fixed_time / avg_current_time
         assert performance_ratio < 1.1, f"API fix should not slow down execution by >10% (ratio: {performance_ratio})"
         
-        print("✅ API fix has minimal performance impact")
+        print(" PASS:  API fix has minimal performance impact")
 
 
 if __name__ == "__main__":

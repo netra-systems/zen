@@ -403,7 +403,7 @@ class TestWebSocketChatSessionsE2E(SSotBaseTestCase):
         # Assert - Most error scenarios should be handled well
         recovery_rate = successful_recoveries / len(error_scenarios)
         assert recovery_rate >= 0.6, \
-            f"Poor error recovery rate: {recovery_rate:.1%} (should be ≥60%)"
+            f"Poor error recovery rate: {recovery_rate:.1%} (should be  >= 60%)"
 
     @pytest.mark.e2e
     @pytest.mark.requires_auth
@@ -499,13 +499,13 @@ class TestWebSocketChatSessionsE2E(SSotBaseTestCase):
             avg_latency = sum(total_latencies) / len(total_latencies) if total_latencies else max_avg_latency
             
             assert success_rate >= min_success_rate, \
-                f"Poor success rate under load: {success_rate:.1%} (should be ≥{min_success_rate:.1%})"
+                f"Poor success rate under load: {success_rate:.1%} (should be  >= {min_success_rate:.1%})"
             
             assert avg_duration <= max_chat_duration, \
-                f"Chat sessions too slow: {avg_duration:.1f}s (should be ≤{max_chat_duration}s)"
+                f"Chat sessions too slow: {avg_duration:.1f}s (should be  <= {max_chat_duration}s)"
             
             assert avg_latency <= max_avg_latency, \
-                f"Response latency too high: {avg_latency:.1f}s (should be ≤{max_avg_latency}s)"
+                f"Response latency too high: {avg_latency:.1f}s (should be  <= {max_avg_latency}s)"
                 
         finally:
             # Clean up all sessions

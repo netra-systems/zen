@@ -31,34 +31,34 @@ class P0FixValidator:
     
     def validate_fix_1_websocket_gcp_detection(self) -> Dict[str, Any]:
         """Validate WebSocket GCP staging auto-detection fix."""
-        print("🔍 Validating Fix #1: WebSocket GCP Staging Auto-Detection")
+        print(" SEARCH:  Validating Fix #1: WebSocket GCP Staging Auto-Detection")
         
         try:
             # Test 1: Import the updated unified manager
             from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
-            print("  ✅ UnifiedWebSocketManager imports successfully")
+            print("   PASS:  UnifiedWebSocketManager imports successfully")
             
             # Test 2: Check if the auto-detection code exists
             import inspect
             source = inspect.getsource(UnifiedWebSocketManager.emit_critical_event)
             
             if "GCP staging auto-detection" in source:
-                print("  ✅ GCP staging auto-detection code present")
+                print("   PASS:  GCP staging auto-detection code present")
             else:
-                print("  ❌ GCP staging auto-detection code NOT found")
+                print("   FAIL:  GCP staging auto-detection code NOT found")
                 return {"status": "FAILED", "error": "Auto-detection code missing"}
             
             if "netra-staging" in source and "staging.netrasystems.ai" in source:
-                print("  ✅ Staging environment detection patterns present")
+                print("   PASS:  Staging environment detection patterns present")
             else:
-                print("  ❌ Staging detection patterns missing")
+                print("   FAIL:  Staging detection patterns missing")
                 return {"status": "FAILED", "error": "Detection patterns missing"}
             
             # Test 3: Validate retry configuration logic
             if "max_retries = 3" in source and "retry_delay = 1.0" in source:
-                print("  ✅ Cloud environment retry configuration present")
+                print("   PASS:  Cloud environment retry configuration present")
             else:
-                print("  ❌ Cloud retry configuration missing")
+                print("   FAIL:  Cloud retry configuration missing")
                 return {"status": "FAILED", "error": "Retry config missing"}
             
             return {
@@ -67,31 +67,31 @@ class P0FixValidator:
             }
             
         except Exception as e:
-            print(f"  ❌ Validation failed: {e}")
+            print(f"   FAIL:  Validation failed: {e}")
             return {"status": "FAILED", "error": str(e)}
     
     def validate_fix_2_agent_registry_initialization(self) -> Dict[str, Any]:
         """Validate Agent Registry initialization fix."""
-        print("🔍 Validating Fix #2: Agent Registry Initialization")
+        print(" SEARCH:  Validating Fix #2: Agent Registry Initialization")
         
         try:
             # Test 1: Import the updated agent registry
             from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-            print("  ✅ AgentRegistry imports successfully")
+            print("   PASS:  AgentRegistry imports successfully")
             
             # Test 2: Validate llm_manager requirement is enforced
             try:
                 registry = AgentRegistry(None)  # Should fail
-                print("  ❌ AgentRegistry accepts None llm_manager (should be rejected)")
+                print("   FAIL:  AgentRegistry accepts None llm_manager (should be rejected)")
                 return {"status": "FAILED", "error": "llm_manager validation not enforced"}
             except ValueError as e:
                 if "llm_manager is required" in str(e):
-                    print("  ✅ llm_manager validation properly enforced")
+                    print("   PASS:  llm_manager validation properly enforced")
                 else:
-                    print(f"  ❌ Unexpected validation error: {e}")
+                    print(f"   FAIL:  Unexpected validation error: {e}")
                     return {"status": "FAILED", "error": f"Unexpected error: {e}"}
             except Exception as e:
-                print(f"  ❌ Unexpected exception: {e}")
+                print(f"   FAIL:  Unexpected exception: {e}")
                 return {"status": "FAILED", "error": f"Unexpected exception: {e}"}
             
             # Test 3: Check initialization validation code exists  
@@ -99,9 +99,9 @@ class P0FixValidator:
             source = inspect.getsource(AgentRegistry.__init__)
             
             if "llm_manager is None" in source and "ValueError" in source:
-                print("  ✅ Initialization validation code present")
+                print("   PASS:  Initialization validation code present")
             else:
-                print("  ❌ Initialization validation code missing")
+                print("   FAIL:  Initialization validation code missing")
                 return {"status": "FAILED", "error": "Validation code missing"}
             
             return {
@@ -110,36 +110,36 @@ class P0FixValidator:
             }
             
         except Exception as e:
-            print(f"  ❌ Validation failed: {e}")
+            print(f"   FAIL:  Validation failed: {e}")
             return {"status": "FAILED", "error": str(e)}
     
     def validate_fix_3_e2e_oauth_key(self) -> Dict[str, Any]:
         """Validate E2E OAuth simulation key deployment."""
-        print("🔍 Validating Fix #3: E2E OAuth Simulation Key Deployment")
+        print(" SEARCH:  Validating Fix #3: E2E OAuth Simulation Key Deployment")
         
         try:
             # Test 1: Check if deployment script exists
             script_path = Path(__file__).parent / "deploy_e2e_oauth_key.py"
             if script_path.exists():
-                print("  ✅ E2E OAuth deployment script created")
+                print("   PASS:  E2E OAuth deployment script created")
             else:
-                print("  ❌ E2E OAuth deployment script missing")
+                print("   FAIL:  E2E OAuth deployment script missing")
                 return {"status": "FAILED", "error": "Deployment script missing"}
             
             # Test 2: Check if deployment commands exist
             commands_path = Path(__file__).parent / "E2E_OAUTH_DEPLOYMENT_COMMANDS.md"
             if commands_path.exists():
-                print("  ✅ Deployment commands documentation created")
+                print("   PASS:  Deployment commands documentation created")
                 
                 # Validate command content
                 content = commands_path.read_text()
                 if "E2E_OAUTH_SIMULATION_KEY" in content and "netra-staging" in content:
-                    print("  ✅ Deployment commands contain correct secret name and project")
+                    print("   PASS:  Deployment commands contain correct secret name and project")
                 else:
-                    print("  ❌ Deployment commands missing required content")
+                    print("   FAIL:  Deployment commands missing required content")
                     return {"status": "FAILED", "error": "Commands missing required content"}
             else:
-                print("  ❌ Deployment commands documentation missing")
+                print("   FAIL:  Deployment commands documentation missing")
                 return {"status": "FAILED", "error": "Commands documentation missing"}
             
             # Test 3: Validate secret key format
@@ -147,9 +147,9 @@ class P0FixValidator:
                 script_content = f.read()
             
             if "e0e9c5d29e7aea3942f47855b4870d3e0272e061c2de22827e71b893071d777e" in script_content:
-                print("  ✅ 256-bit hex secret key present in deployment script")
+                print("   PASS:  256-bit hex secret key present in deployment script")
             else:
-                print("  ❌ Secret key missing from deployment script")
+                print("   FAIL:  Secret key missing from deployment script")
                 return {"status": "FAILED", "error": "Secret key missing"}
             
             return {
@@ -158,12 +158,12 @@ class P0FixValidator:
             }
             
         except Exception as e:
-            print(f"  ❌ Validation failed: {e}")
+            print(f"   FAIL:  Validation failed: {e}")
             return {"status": "FAILED", "error": str(e)}
     
     def run_comprehensive_validation(self) -> Dict[str, Any]:
         """Run comprehensive validation of all P0 fixes."""
-        print("🚀 P0 Critical Infrastructure Fixes Validation")
+        print("[U+1F680] P0 Critical Infrastructure Fixes Validation")
         print("=" * 60)
         print("Protecting $1.5M+ ARR at risk from Data Helper Agent functionality gaps")
         print()
@@ -187,31 +187,31 @@ class P0FixValidator:
             
             if result["status"] == "PASSED":
                 passed_count += 1
-                print(f"  🎉 {fix_name}: PASSED")
+                print(f"   CELEBRATION:  {fix_name}: PASSED")
                 if "details" in result:
                     print(f"     Details: {result['details']}")
             else:
                 self.overall_status = False
-                print(f"  💥 {fix_name}: FAILED")
+                print(f"  [U+1F4A5] {fix_name}: FAILED")
                 print(f"     Error: {result['error']}")
         
         # Overall summary
         print("\n" + "=" * 60)
-        print("📋 VALIDATION SUMMARY")
+        print("[U+1F4CB] VALIDATION SUMMARY")
         print("=" * 60)
         
-        print(f"✅ Passed: {passed_count}/3 fixes")
-        print(f"❌ Failed: {3 - passed_count}/3 fixes")
+        print(f" PASS:  Passed: {passed_count}/3 fixes")
+        print(f" FAIL:  Failed: {3 - passed_count}/3 fixes")
         
         if self.overall_status:
-            print("\n🎉 ALL P0 CRITICAL FIXES VALIDATED SUCCESSFULLY!")
-            print("✅ Ready for deployment to staging environment")
-            print("✅ Data Helper Agent functionality protection implemented")
-            print("✅ $1.5M+ ARR risk mitigation complete")
+            print("\n CELEBRATION:  ALL P0 CRITICAL FIXES VALIDATED SUCCESSFULLY!")
+            print(" PASS:  Ready for deployment to staging environment")
+            print(" PASS:  Data Helper Agent functionality protection implemented")
+            print(" PASS:  $1.5M+ ARR risk mitigation complete")
         else:
-            print("\n💥 VALIDATION FAILURES DETECTED!")
-            print("❌ Review and fix failed validations before deployment")
-            print("❌ Data Helper Agent functionality still at risk")
+            print("\n[U+1F4A5] VALIDATION FAILURES DETECTED!")
+            print(" FAIL:  Review and fix failed validations before deployment")
+            print(" FAIL:  Data Helper Agent functionality still at risk")
         
         return {
             "overall_status": self.overall_status,

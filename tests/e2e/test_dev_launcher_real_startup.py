@@ -3,14 +3,14 @@ from shared.isolated_environment import IsolatedEnvironment
 # REMOVED_SYNTAX_ERROR: '''
 # REMOVED_SYNTAX_ERROR: Dev Launcher Real Startup Test - NO MOCKS
 
-# REMOVED_SYNTAX_ERROR: 🔴 CRITICAL BUSINESS PROTECTION: This test protects $150K MRR by validating real system startup
+# REMOVED_SYNTAX_ERROR: [U+1F534] CRITICAL BUSINESS PROTECTION: This test protects $150K MRR by validating real system startup
 # REMOVED_SYNTAX_ERROR: - Tests REAL dev_launcher.py startup with NO MOCKS
 # REMOVED_SYNTAX_ERROR: - Validates all 3 microservices (Auth 8001, Backend 8000, Frontend 3000) actually start
 # REMOVED_SYNTAX_ERROR: - Confirms health endpoints respond with real HTTP requests
 # REMOVED_SYNTAX_ERROR: - Essential for deployment pipeline - prevents system-wide outages
 
 # REMOVED_SYNTAX_ERROR: BUSINESS VALUE JUSTIFICATION (BVJ):
-    # REMOVED_SYNTAX_ERROR: - Segment: All tiers (Free → Enterprise) - 100% customer impact if startup fails
+    # REMOVED_SYNTAX_ERROR: - Segment: All tiers (Free  ->  Enterprise) - 100% customer impact if startup fails
     # REMOVED_SYNTAX_ERROR: - Business Goal: Platform Availability & Customer Retention
     # REMOVED_SYNTAX_ERROR: - Value Impact: Prevents catastrophic $150K MRR loss from startup failures
     # REMOVED_SYNTAX_ERROR: - Strategic Impact: Core platform reliability is fundamental competitive advantage
@@ -482,7 +482,7 @@ from shared.isolated_environment import IsolatedEnvironment
                 # For this test, we accept partial success as the main goal is testing the launcher sequence
                 # The launcher should at least successfully go through its startup process
                 # REMOVED_SYNTAX_ERROR: if bound_ports == 0:
-                    # REMOVED_SYNTAX_ERROR: print("❌ No services bound to ports - launcher startup failed")
+                    # REMOVED_SYNTAX_ERROR: print(" FAIL:  No services bound to ports - launcher startup failed")
                     # REMOVED_SYNTAX_ERROR: return False
                     # REMOVED_SYNTAX_ERROR: elif bound_ports >= 1:
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -578,7 +578,7 @@ from shared.isolated_environment import IsolatedEnvironment
                         # REMOVED_SYNTAX_ERROR: first_service = services_by_time[0][0]
                         # REMOVED_SYNTAX_ERROR: assert first_service in ["auth", "backend"], "formatted_string"
 
-                        # REMOVED_SYNTAX_ERROR: print("✅ Service startup order validation passed")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Service startup order validation passed")
 
                         # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
                         # Removed problematic line: async def test_health_endpoint_response_validation(self, launcher_tester, launcher_config):
@@ -617,13 +617,13 @@ from shared.isolated_environment import IsolatedEnvironment
 
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
-                                # REMOVED_SYNTAX_ERROR: print("✅ Health endpoint response validation passed")
+                                # REMOVED_SYNTAX_ERROR: print(" PASS:  Health endpoint response validation passed")
 
 
                                 # Test execution and reporting
                                 # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
                                     # REMOVED_SYNTAX_ERROR: print("=" * 60)
-                                    # REMOVED_SYNTAX_ERROR: print("🔴 CRITICAL: Dev Launcher Real Startup Test")
+                                    # REMOVED_SYNTAX_ERROR: print("[U+1F534] CRITICAL: Dev Launcher Real Startup Test")
                                     # REMOVED_SYNTAX_ERROR: print("Business Protection: $150K MRR")
                                     # REMOVED_SYNTAX_ERROR: print("=" * 60)
 

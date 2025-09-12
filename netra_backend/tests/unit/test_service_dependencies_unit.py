@@ -12,9 +12,9 @@ Business Value Justification (BVJ):
 
 Service Dependencies Tested:
 1. Service initialization and configuration validation
-2. Backend ↔ Auth Service dependency patterns
-3. Backend ↔ PostgreSQL database dependency patterns
-4. Backend ↔ Redis cache dependency patterns
+2. Backend [U+2194] Auth Service dependency patterns
+3. Backend [U+2194] PostgreSQL database dependency patterns
+4. Backend [U+2194] Redis cache dependency patterns
 5. Cross-service error propagation and containment
 6. Service startup/shutdown sequence management
 
@@ -157,7 +157,7 @@ class TestServiceInitialization:
 
 class TestAuthServiceDependency:
     """
-    Unit tests for Backend ↔ Auth Service dependency patterns.
+    Unit tests for Backend [U+2194] Auth Service dependency patterns.
     
     These tests validate authentication service communication patterns
     and error handling using mocked auth service responses.
@@ -248,7 +248,7 @@ class TestAuthServiceDependency:
 
 class TestDatabaseDependency:
     """
-    Unit tests for Backend ↔ PostgreSQL database dependency patterns.
+    Unit tests for Backend [U+2194] PostgreSQL database dependency patterns.
     
     These tests validate database connection management and query patterns
     using mocked database connections.
@@ -321,7 +321,7 @@ class TestDatabaseDependency:
 
 class TestRedisDependency:
     """
-    Unit tests for Backend ↔ Redis cache dependency patterns.
+    Unit tests for Backend [U+2194] Redis cache dependency patterns.
     
     These tests validate Redis cache interactions and fallback patterns
     using mocked Redis connections.

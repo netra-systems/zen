@@ -1,7 +1,7 @@
 """LLM Cache Metrics Module.
 
 Handles comprehensive cache metrics collection and reporting.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 import json

@@ -163,7 +163,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
             # Validate aggregation completeness
             if aggregation_failures:
                 self.fail(f"""
-                🚨 PRODUCTION LOG AGGREGATION FAILURE: Log aggregation fails in staging
+                 ALERT:  PRODUCTION LOG AGGREGATION FAILURE: Log aggregation fails in staging
                 
                 Aggregation Failures: {len(aggregation_failures)}
                 Successful Sources: {len(aggregation_sources)}
@@ -189,7 +189,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
             
             if correlation_consistency:
                 self.fail(f"""
-                🚨 CORRELATION ID CONSISTENCY FAILURE: Aggregated logs have inconsistent correlation
+                 ALERT:  CORRELATION ID CONSISTENCY FAILURE: Aggregated logs have inconsistent correlation
                 
                 Correlation Inconsistencies: {len(correlation_consistency)}
                 Expected Correlation ID: {self.correlation_id}
@@ -207,7 +207,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
             
             if total_logs < expected_logs:
                 self.fail(f"""
-                🚨 LOG AGGREGATION INCOMPLETE: Missing logs in aggregation
+                 ALERT:  LOG AGGREGATION INCOMPLETE: Missing logs in aggregation
                 
                 Expected Logs: {expected_logs}
                 Aggregated Logs: {total_logs}
@@ -222,7 +222,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: Production aggregator may not be implemented
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Production log aggregator not available
+             ALERT:  EXPECTED FAILURE (Issue #368): Production log aggregator not available
             
             Import Error: {str(e)}
             Log Sources: {len(log_sources) if 'log_sources' in locals() else 'unknown'}
@@ -361,7 +361,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
             
             if critical_violations:
                 self.fail(f"""
-                🚨 ENTERPRISE COMPLIANCE FAILURE: Critical compliance violations detected
+                 ALERT:  ENTERPRISE COMPLIANCE FAILURE: Critical compliance violations detected
                 
                 Critical Violations: {len(critical_violations)}
                 Total Violations: {len(compliance_violations)}
@@ -388,7 +388,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
             
             if compliance_performance_issues:
                 self.fail(f"""
-                🚨 COMPLIANCE LOGGING PERFORMANCE ISSUES: Compliance logging too slow
+                 ALERT:  COMPLIANCE LOGGING PERFORMANCE ISSUES: Compliance logging too slow
                 
                 Performance Issues: {len(compliance_performance_issues)}
                 Issues Detail: {compliance_performance_issues}
@@ -402,7 +402,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: Enterprise compliance logger may not be implemented
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Enterprise compliance logging not available
+             ALERT:  EXPECTED FAILURE (Issue #368): Enterprise compliance logging not available
             
             Import Error: {str(e)}
             Compliance Requirements: {len(compliance_requirements)}
@@ -531,7 +531,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
             
             if failed_tracking:
                 self.fail(f"""
-                🚨 ERROR TRACKING FAILURE: Some errors not tracked properly
+                 ALERT:  ERROR TRACKING FAILURE: Some errors not tracked properly
                 
                 Failed Tracking: {failed_tracking}
                 Tracking Results: {tracking_results}
@@ -546,7 +546,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
             # Analyze alerting effectiveness
             if alerting_failures:
                 self.fail(f"""
-                🚨 PRODUCTION ALERTING FAILURE: Error alerting not working correctly
+                 ALERT:  PRODUCTION ALERTING FAILURE: Error alerting not working correctly
                 
                 Alerting Failures: {len(alerting_failures)}
                 Alerting Failures Detail: {alerting_failures}
@@ -572,7 +572,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
             
             if correlation_gaps:
                 self.fail(f"""
-                🚨 ERROR CORRELATION GAPS: Error tracking missing correlation context
+                 ALERT:  ERROR CORRELATION GAPS: Error tracking missing correlation context
                 
                 Correlation Gaps: {len(correlation_gaps)}
                 Gaps Detail: {correlation_gaps}
@@ -586,7 +586,7 @@ class TestProductionSSotLogging(SSotAsyncTestCase):
         except ImportError as e:
             # EXPECTED FAILURE: Production error tracker may not be implemented
             self.fail(f"""
-            🚨 EXPECTED FAILURE (Issue #368): Production error tracking not available
+             ALERT:  EXPECTED FAILURE (Issue #368): Production error tracking not available
             
             Import Error: {str(e)}
             Error Scenarios: {len(error_scenarios) if 'error_scenarios' in locals() else 'unknown'}
@@ -758,7 +758,7 @@ class TestProductionLoggingPerformanceAndScalability(SSotAsyncTestCase):
             
             if failed_scenarios:
                 self.fail(f"""
-                🚨 HIGH THROUGHPUT LOGGING FAILURE: Logging fails under production load
+                 ALERT:  HIGH THROUGHPUT LOGGING FAILURE: Logging fails under production load
                 
                 Failed Scenarios: {len(failed_scenarios)}
                 Total Scenarios: {len(throughput_scenarios)}
@@ -777,7 +777,7 @@ class TestProductionLoggingPerformanceAndScalability(SSotAsyncTestCase):
                 
                 if critical_bottlenecks:
                     self.fail(f"""
-                    🚨 CRITICAL PERFORMANCE BOTTLENECKS: Logging latency exceeds acceptable limits
+                     ALERT:  CRITICAL PERFORMANCE BOTTLENECKS: Logging latency exceeds acceptable limits
                     
                     Critical Bottlenecks: {len(critical_bottlenecks)}
                     Total Performance Issues: {len(performance_bottlenecks)}
@@ -792,7 +792,7 @@ class TestProductionLoggingPerformanceAndScalability(SSotAsyncTestCase):
             # Analyze scalability limits
             if scalability_limits:
                 self.fail(f"""
-                🚨 SCALABILITY LIMITS REACHED: Logging performance degrades at scale
+                 ALERT:  SCALABILITY LIMITS REACHED: Logging performance degrades at scale
                 
                 Scalability Issues: {len(scalability_limits)}
                 Scalability Limits: {scalability_limits}
@@ -820,7 +820,7 @@ class TestProductionLoggingPerformanceAndScalability(SSotAsyncTestCase):
             
         except Exception as e:
             self.fail(f"""
-            🚨 THROUGHPUT TESTING FAILED: Unable to validate production logging throughput
+             ALERT:  THROUGHPUT TESTING FAILED: Unable to validate production logging throughput
             
             Error: {str(e)}
             Throughput Tests: {len(throughput_tests)}

@@ -378,35 +378,35 @@ if __name__ == "__main__":
         
         try:
             await test_instance.test_all_staging_domains_resolve_dns()
-            print("✅ All staging domains resolve correctly via DNS")
+            print(" PASS:  All staging domains resolve correctly via DNS")
         except AssertionError as e:
-            print(f"❌ DNS resolution failures:\n{e}")
+            print(f" FAIL:  DNS resolution failures:\n{e}")
             return False
         
         try:
             await test_instance.test_all_staging_domains_accessible_https()
-            print("✅ All staging domains accessible via HTTPS")
+            print(" PASS:  All staging domains accessible via HTTPS")
         except AssertionError as e:
-            print(f"❌ HTTPS accessibility failures:\n{e}")
+            print(f" FAIL:  HTTPS accessibility failures:\n{e}")
             return False
         
         try:
             await test_instance.test_staging_domains_ssl_certificates_valid()
-            print("✅ All staging domain SSL certificates valid")
+            print(" PASS:  All staging domain SSL certificates valid")
         except AssertionError as e:
-            print(f"❌ SSL certificate failures:\n{e}")
+            print(f" FAIL:  SSL certificate failures:\n{e}")
             return False
         
         try:
             test_instance.test_staging_domains_match_expected_patterns()
-            print("✅ All staging domains follow expected patterns")
+            print(" PASS:  All staging domains follow expected patterns")
         except AssertionError as e:
-            print(f"❌ Domain pattern violations:\n{e}")
+            print(f" FAIL:  Domain pattern violations:\n{e}")
             return False
         
         return True
     
     if asyncio.run(run_tests()):
-        print("✅ All staging domain resolution tests passed!")
+        print(" PASS:  All staging domain resolution tests passed!")
     else:
         exit(1)

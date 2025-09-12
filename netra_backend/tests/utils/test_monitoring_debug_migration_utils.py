@@ -1,6 +1,6 @@
 """
 Tests for monitoring, debug, and migration utilities (Tests 98-100).
-Each function ≤8 lines, using helper functions for setup and assertions.
+Each function  <= 8 lines, using helper functions for setup and assertions.
 """
 
 import sys

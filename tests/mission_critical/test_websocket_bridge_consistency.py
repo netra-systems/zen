@@ -509,7 +509,7 @@
 
                 # REMOVED_SYNTAX_ERROR: if files_to_migrate:
                     # REMOVED_SYNTAX_ERROR: print(" )
-                    # REMOVED_SYNTAX_ERROR: 📋 Files Needing Migration to Bridge Pattern:")
+                    # REMOVED_SYNTAX_ERROR: [U+1F4CB] Files Needing Migration to Bridge Pattern:")
                     # REMOVED_SYNTAX_ERROR: for f in files_to_migrate:
                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 

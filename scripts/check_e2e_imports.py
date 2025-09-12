@@ -199,11 +199,11 @@ from pathlib import Path
             
             if success:
                 self.results['successful'].append(str(rel_path))
-                logger.info(f"  ✓ {rel_path}")
+                logger.info(f"  [U+2713] {rel_path}")
             else:
                 self.results['failed'].append(str(rel_path))
                 self.results['import_errors'][str(rel_path)] = error
-                logger.warning(f"  ✗ {rel_path}: {error}")
+                logger.warning(f"  [U+2717] {rel_path}: {error}")
                 
                 if fix:
                     if self.fix_common_import_issues(file_path):

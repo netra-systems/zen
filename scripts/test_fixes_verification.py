@@ -26,7 +26,7 @@ async def test_websocket_manager_none_handling():
     assert session._websocket_manager is None
     assert session._websocket_bridge is None
     
-    print("✅ UserAgentSession handles None websocket manager correctly")
+    print(" PASS:  UserAgentSession handles None websocket manager correctly")
 
 def test_lifecycle_manager_no_registry():
     """Test that AgentLifecycleManager works without registry."""
@@ -38,7 +38,7 @@ def test_lifecycle_manager_no_registry():
     assert manager._registry is None
     assert isinstance(manager._memory_thresholds, dict)
     
-    print("✅ AgentLifecycleManager initializes correctly without registry")
+    print(" PASS:  AgentLifecycleManager initializes correctly without registry")
 
 async def test_lifecycle_manager_monitor_no_registry():
     """Test that monitoring returns 'no_registry' when no registry is set."""
@@ -52,7 +52,7 @@ async def test_lifecycle_manager_monitor_no_registry():
     assert result['status'] == 'no_registry'
     assert result['user_id'] == "test_user"
     
-    print("✅ AgentLifecycleManager monitoring returns 'no_registry' correctly")
+    print(" PASS:  AgentLifecycleManager monitoring returns 'no_registry' correctly")
 
 async def test_lifecycle_manager_with_registry():
     """Test that AgentLifecycleManager works with a registry."""
@@ -73,11 +73,11 @@ async def test_lifecycle_manager_with_registry():
     # Should be able to cleanup resources
     await manager.cleanup_agent_resources("test_user", "test_agent")
     
-    print("✅ AgentLifecycleManager works correctly with registry")
+    print(" PASS:  AgentLifecycleManager works correctly with registry")
 
 async def main():
     """Run all verification tests."""
-    print("🚀 Running agent registry test fixes verification...\n")
+    print("[U+1F680] Running agent registry test fixes verification...\n")
     
     try:
         # Test UserAgentSession fixes
@@ -88,11 +88,11 @@ async def main():
         await test_lifecycle_manager_monitor_no_registry()
         await test_lifecycle_manager_with_registry()
         
-        print("\n✅ All verification tests passed! The fixes are working correctly.")
+        print("\n PASS:  All verification tests passed! The fixes are working correctly.")
         return True
         
     except Exception as e:
-        print(f"\n❌ Verification failed: {e}")
+        print(f"\n FAIL:  Verification failed: {e}")
         import traceback
         traceback.print_exc()
         return False

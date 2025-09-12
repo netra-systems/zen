@@ -88,7 +88,7 @@
     # REMOVED_SYNTAX_ERROR: assert hasattr(tool_dispatcher, '_websocket_enhanced'), \
     # REMOVED_SYNTAX_ERROR: "CRITICAL REGRESSION: Enhancement marker missing!"
 
-    # REMOVED_SYNTAX_ERROR: logger.success("✅ AgentRegistry properly enhances tool dispatcher")
+    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  AgentRegistry properly enhances tool dispatcher")
 
     # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
     # REMOVED_SYNTAX_ERROR: @pytest.mark.mission_critical
@@ -112,7 +112,7 @@
     # REMOVED_SYNTAX_ERROR: assert tool_dispatcher.executor.websocket_manager is ws_manager, \
     # REMOVED_SYNTAX_ERROR: "WebSocket manager not properly set"
 
-    # REMOVED_SYNTAX_ERROR: logger.success("✅ Enhanced tool dispatcher has WebSocket manager")
+    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  Enhanced tool dispatcher has WebSocket manager")
 
     # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
     # REMOVED_SYNTAX_ERROR: @pytest.mark.mission_critical
@@ -138,7 +138,7 @@
         # REMOVED_SYNTAX_ERROR: assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
         # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-        # REMOVED_SYNTAX_ERROR: logger.success("✅ All registry instances properly enhance tool dispatcher")
+        # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  All registry instances properly enhance tool dispatcher")
 
         # Removed problematic line: @pytest.mark.asyncio
         # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
@@ -174,7 +174,7 @@
     # REMOVED_SYNTAX_ERROR: assert isinstance(tool_dispatcher.executor, UnifiedToolExecutionEngine), \
     # REMOVED_SYNTAX_ERROR: "Tool dispatcher not enhanced in integration test"
 
-    # REMOVED_SYNTAX_ERROR: logger.success("✅ Complete integration flow validated")
+    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  Complete integration flow validated")
 
     # REMOVED_SYNTAX_ERROR: @pytest.mark.critical
     # REMOVED_SYNTAX_ERROR: @pytest.mark.mission_critical
@@ -204,7 +204,7 @@
     # REMOVED_SYNTAX_ERROR: assert executor2.websocket_manager is ws_manager2, \
     # REMOVED_SYNTAX_ERROR: "WebSocket manager not updated"
 
-    # REMOVED_SYNTAX_ERROR: logger.success("✅ Enhancement is idempotent and safe")
+    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  Enhancement is idempotent and safe")
 
 
 # REMOVED_SYNTAX_ERROR: def run_final_validation():
@@ -226,7 +226,7 @@
     # REMOVED_SYNTAX_ERROR: asyncio.run(test.test_complete_integration_flow())
 
     # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)
-    # REMOVED_SYNTAX_ERROR: logger.success("✅ ALL FINAL VALIDATIONS PASSED")
+    # REMOVED_SYNTAX_ERROR: logger.success(" PASS:  ALL FINAL VALIDATIONS PASSED")
     # REMOVED_SYNTAX_ERROR: logger.info("WebSocket agent events integration is WORKING")
     # REMOVED_SYNTAX_ERROR: logger.info("Basic chat functionality is OPERATIONAL")
     # REMOVED_SYNTAX_ERROR: logger.info("=" * 60)

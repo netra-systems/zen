@@ -2,7 +2,7 @@
 Agent Execution Core Realistic Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Validate agent execution works with real system components
 - Value Impact: Integration tests ensure agents can actually deliver insights in realistic scenarios
 - Strategic Impact: Confidence in system reliability when components interact together

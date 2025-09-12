@@ -9,11 +9,11 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core security and privacy for multi-user Chat platform
 
 CRITICAL REQUIREMENTS:
-- ✅ Real authentication via e2e_auth_helper.py (NO MOCKS = ABOMINATION)
-- ✅ Full Docker stack + Real LLM + Authentication
-- ✅ Tests designed to FAIL initially (find system isolation gaps)
-- ✅ All 5 WebSocket agent events validated (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
-- ✅ Multi-user concurrent scenarios with proper user context isolation
+-  PASS:  Real authentication via e2e_auth_helper.py (NO MOCKS = ABOMINATION)
+-  PASS:  Full Docker stack + Real LLM + Authentication
+-  PASS:  Tests designed to FAIL initially (find system isolation gaps)
+-  PASS:  All 5 WebSocket agent events validated (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
+-  PASS:  Multi-user concurrent scenarios with proper user context isolation
 
 This test validates that thread routing maintains perfect isolation between users
 in concurrent scenarios. Expected initial failures due to isolation gaps in current system.
@@ -91,7 +91,7 @@ class MultiUserThreadIsolationFramework:
         user_id = str(user_context.user_id)
         self.user_contexts[user_id] = user_context
         self.user_thread_mapping[user_id] = set()
-        logger.info(f"✅ Registered user context: {user_id}")
+        logger.info(f" PASS:  Registered user context: {user_id}")
     
     def log_thread_access(self, user_id: str, thread_id: str, action: str, success: bool, details: Dict = None):
         """Log thread access attempt with isolation validation."""
@@ -119,14 +119,14 @@ class MultiUserThreadIsolationFramework:
                 "violation_type": "cross_user_thread_access"
             }
             self.isolation_violations.append(violation)
-            logger.error(f"🚨 ISOLATION VIOLATION: User {user_id} accessed thread {thread_id} owned by {thread_owner}")
+            logger.error(f" ALERT:  ISOLATION VIOLATION: User {user_id} accessed thread {thread_id} owned by {thread_owner}")
     
     def register_user_thread(self, user_id: str, thread_id: str):
         """Register that a thread belongs to a specific user."""
         if user_id not in self.user_thread_mapping:
             self.user_thread_mapping[user_id] = set()
         self.user_thread_mapping[user_id].add(thread_id)
-        logger.debug(f"📝 Registered thread {thread_id} for user {user_id}")
+        logger.debug(f"[U+1F4DD] Registered thread {thread_id} for user {user_id}")
     
     def _find_thread_owner(self, thread_id: str) -> Optional[str]:
         """Find which user owns a specific thread."""
@@ -160,7 +160,7 @@ class MultiUserThreadIsolationFramework:
                 "violation_type": "cross_user_event_routing"
             }
             self.isolation_violations.append(violation)
-            logger.error(f"🚨 EVENT ROUTING VIOLATION: User {user_id} received event for thread owned by {thread_owner}")
+            logger.error(f" ALERT:  EVENT ROUTING VIOLATION: User {user_id} received event for thread owned by {thread_owner}")
     
     def detect_cross_user_message_leakage(self, received_events: List[Dict], expected_user_id: str) -> List[Dict]:
         """Detect if user received messages meant for other users."""
@@ -235,7 +235,7 @@ class IsolatedUserWebSocketClient:
             self.websocket = await self.auth_helper.connect_authenticated_websocket(timeout=timeout)
             self.is_connected = True
             
-            logger.info(f"🔌 User {self.user_id} connected via WebSocket")
+            logger.info(f"[U+1F50C] User {self.user_id} connected via WebSocket")
             
             # Start message monitoring
             monitor_task = asyncio.create_task(self._monitor_messages())
@@ -253,10 +253,10 @@ class IsolatedUserWebSocketClient:
                     await self.websocket.close()
                     self.is_connected = False
                 
-                logger.info(f"🔌 User {self.user_id} disconnected from WebSocket")
+                logger.info(f"[U+1F50C] User {self.user_id} disconnected from WebSocket")
         
         except Exception as e:
-            logger.error(f"❌ User {self.user_id} WebSocket connection failed: {e}")
+            logger.error(f" FAIL:  User {self.user_id} WebSocket connection failed: {e}")
             raise
     
     async def _monitor_messages(self):
@@ -282,7 +282,7 @@ class IsolatedUserWebSocketClient:
                             event_data
                         )
                         
-                        logger.debug(f"📨 User {self.user_id} received {event_type} for thread {thread_id}")
+                        logger.debug(f"[U+1F4E8] User {self.user_id} received {event_type} for thread {thread_id}")
                         
                     except json.JSONDecodeError:
                         # Non-JSON messages are okay
@@ -314,7 +314,7 @@ class IsolatedUserWebSocketClient:
             {"title": thread_title}
         )
         
-        logger.info(f"📝 User {self.user_id} created thread {thread_id}: {thread_title}")
+        logger.info(f"[U+1F4DD] User {self.user_id} created thread {thread_id}: {thread_title}")
         return thread_id
     
     async def send_agent_request(self, thread_id: str, message: str, agent_type: str = "triage_agent") -> str:
@@ -348,7 +348,7 @@ class IsolatedUserWebSocketClient:
             {"agent": agent_type, "message": message[:50]}
         )
         
-        logger.info(f"📤 User {self.user_id} sent agent request to thread {thread_id}")
+        logger.info(f"[U+1F4E4] User {self.user_id} sent agent request to thread {thread_id}")
         return request_id
     
     async def wait_for_agent_completion(self, thread_id: str, timeout: float = 30.0) -> Dict:
@@ -396,9 +396,9 @@ class TestMultiUserThreadIsolationE2E:
         cls.env = get_env()
         cls.test_environment = cls.env.get("TEST_ENV", cls.env.get("ENVIRONMENT", "test"))
         
-        logger.info("🚀 Starting Multi-User Thread Isolation E2E Tests")
-        logger.info(f"📍 Environment: {cls.test_environment}")
-        logger.info("🎯 Testing multi-user isolation with concurrent thread access")
+        logger.info("[U+1F680] Starting Multi-User Thread Isolation E2E Tests")
+        logger.info(f" PIN:  Environment: {cls.test_environment}")
+        logger.info(" TARGET:  Testing multi-user isolation with concurrent thread access")
     
     def setup_method(self, method):
         """Set up each test method with authentication and isolation framework."""
@@ -406,11 +406,11 @@ class TestMultiUserThreadIsolationE2E:
         self.isolation_framework = MultiUserThreadIsolationFramework(self.test_environment)
         self.test_users: List[IsolatedUserWebSocketClient] = []
         
-        logger.info(f"🧪 Starting test: {method.__name__}")
+        logger.info(f"[U+1F9EA] Starting test: {method.__name__}")
     
     def teardown_method(self, method):
         """Clean up test resources."""
-        logger.info(f"🧹 Cleaning up test: {method.__name__}")
+        logger.info(f"[U+1F9F9] Cleaning up test: {method.__name__}")
         self.test_users.clear()
     
     @pytest.mark.e2e
@@ -427,7 +427,7 @@ class TestMultiUserThreadIsolationE2E:
         Success Criteria: Zero cross-user thread access violations
         """
         test_start_time = time.time()
-        logger.info("👥 CRITICAL: Testing concurrent user thread creation isolation")
+        logger.info("[U+1F465] CRITICAL: Testing concurrent user thread creation isolation")
         
         # Test configuration
         num_concurrent_users = 4
@@ -438,7 +438,7 @@ class TestMultiUserThreadIsolationE2E:
         
         try:
             # Create authenticated user contexts
-            logger.info(f"🔐 Creating {num_concurrent_users} authenticated user contexts...")
+            logger.info(f"[U+1F510] Creating {num_concurrent_users} authenticated user contexts...")
             for i in range(num_concurrent_users):
                 user_context = await create_authenticated_user_context(
                     user_email=f"isolation_test_user_{i}_{int(time.time())}@example.com",
@@ -457,10 +457,10 @@ class TestMultiUserThreadIsolationE2E:
                 user_clients.append(client)
                 self.test_users.append(client)
                 
-                logger.info(f"✅ Created user context {i}: {user_context.user_id}")
+                logger.info(f" PASS:  Created user context {i}: {user_context.user_id}")
             
             # Connect all users concurrently
-            logger.info("🔌 Connecting all users to WebSocket concurrently...")
+            logger.info("[U+1F50C] Connecting all users to WebSocket concurrently...")
             connection_tasks = []
             for client in user_clients:
                 task = asyncio.create_task(self._test_user_thread_creation_isolation(client, threads_per_user))
@@ -476,17 +476,17 @@ class TestMultiUserThreadIsolationE2E:
             
             for i, result in enumerate(results):
                 if isinstance(result, Exception):
-                    logger.error(f"❌ User {i} test failed: {result}")
+                    logger.error(f" FAIL:  User {i} test failed: {result}")
                 else:
                     successful_users += 1
                     total_threads_created += result.get("threads_created", 0)
                     isolation_violations += result.get("isolation_violations", 0)
-                    logger.info(f"✅ User {i}: {result.get('threads_created', 0)} threads created")
+                    logger.info(f" PASS:  User {i}: {result.get('threads_created', 0)} threads created")
             
             # Generate isolation report
             report = self.isolation_framework.generate_isolation_report()
             
-            logger.info("📊 CONCURRENT THREAD CREATION ISOLATION RESULTS:")
+            logger.info(" CHART:  CONCURRENT THREAD CREATION ISOLATION RESULTS:")
             logger.info(f"   Successful Users: {successful_users}/{num_concurrent_users}")
             logger.info(f"   Total Threads Created: {total_threads_created}")
             logger.info(f"   Isolation Violations: {report['isolation_violations']}")
@@ -494,13 +494,13 @@ class TestMultiUserThreadIsolationE2E:
             
             # CRITICAL ASSERTIONS - Expected to FAIL initially
             if report['isolation_violations'] > 0:
-                logger.error("🚨 ISOLATION VIOLATIONS DETECTED - System has multi-user isolation gaps")
-                logger.error(f"🔍 Found {report['isolation_violations']} isolation violations")
+                logger.error(" ALERT:  ISOLATION VIOLATIONS DETECTED - System has multi-user isolation gaps")
+                logger.error(f" SEARCH:  Found {report['isolation_violations']} isolation violations")
                 
                 # Log first violation for debugging
                 if self.isolation_framework.isolation_violations:
                     first_violation = self.isolation_framework.isolation_violations[0]
-                    logger.error(f"🔍 First violation: {first_violation}")
+                    logger.error(f" SEARCH:  First violation: {first_violation}")
                 
                 # This will fail initially - documenting expected system gap
                 pytest.fail(
@@ -508,7 +508,7 @@ class TestMultiUserThreadIsolationE2E:
                     f"Users can access each other's threads. Critical security gap requiring fix."
                 )
             else:
-                logger.info("✅ SUCCESS: Perfect multi-user thread isolation achieved!")
+                logger.info(" PASS:  SUCCESS: Perfect multi-user thread isolation achieved!")
                 
                 # Verify sufficient test coverage
                 assert successful_users >= num_concurrent_users * 0.8, \
@@ -520,8 +520,8 @@ class TestMultiUserThreadIsolationE2E:
         except Exception as e:
             # Generate report even on failure
             report = self.isolation_framework.generate_isolation_report()
-            logger.error(f"📊 Partial results: {report}")
-            logger.error(f"❌ Concurrent thread isolation test failed: {e}")
+            logger.error(f" CHART:  Partial results: {report}")
+            logger.error(f" FAIL:  Concurrent thread isolation test failed: {e}")
             raise
         
         # Verify test duration (no 0.00s tests per CLAUDE.md)
@@ -529,7 +529,7 @@ class TestMultiUserThreadIsolationE2E:
         assert actual_duration > 5.0, \
             f"E2E test completed too quickly ({actual_duration:.2f}s). Must test real concurrent scenarios."
         
-        logger.info(f"✅ Concurrent thread isolation test completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Concurrent thread isolation test completed in {actual_duration:.2f}s")
     
     async def _test_user_thread_creation_isolation(self, client: IsolatedUserWebSocketClient, num_threads: int) -> Dict:
         """Test thread creation isolation for single user."""
@@ -576,7 +576,7 @@ class TestMultiUserThreadIsolationE2E:
                 isolation_violations = user_violations
         
         except Exception as e:
-            logger.error(f"❌ User {client.user_id} thread creation test failed: {e}")
+            logger.error(f" FAIL:  User {client.user_id} thread creation test failed: {e}")
             raise
         
         return {
@@ -599,7 +599,7 @@ class TestMultiUserThreadIsolationE2E:
         Success Criteria: All 5 agent events delivered to correct users only
         """
         test_start_time = time.time()
-        logger.info("🤖 CRITICAL: Testing multi-user agent event isolation")
+        logger.info("[U+1F916] CRITICAL: Testing multi-user agent event isolation")
         
         # Test configuration  
         num_users = 3
@@ -610,7 +610,7 @@ class TestMultiUserThreadIsolationE2E:
         
         try:
             # Create authenticated users with WebSocket connections
-            logger.info(f"🔐 Setting up {num_users} users with agent interactions...")
+            logger.info(f"[U+1F510] Setting up {num_users} users with agent interactions...")
             for i in range(num_users):
                 user_context = await create_authenticated_user_context(
                     user_email=f"agent_isolation_user_{i}_{int(time.time())}@example.com",
@@ -628,7 +628,7 @@ class TestMultiUserThreadIsolationE2E:
                 user_clients.append(client)
                 self.test_users.append(client)
                 
-                logger.info(f"✅ Created agent test user {i}: {user_context.user_id}")
+                logger.info(f" PASS:  Created agent test user {i}: {user_context.user_id}")
             
             # Execute concurrent agent interactions
             agent_tasks = []
@@ -639,7 +639,7 @@ class TestMultiUserThreadIsolationE2E:
                 agent_tasks.append(task)
             
             # Run all agent interactions concurrently
-            logger.info("🚀 Executing concurrent agent interactions...")
+            logger.info("[U+1F680] Executing concurrent agent interactions...")
             agent_interaction_results = await asyncio.gather(*agent_tasks, return_exceptions=True)
             
             # Analyze agent event isolation
@@ -649,20 +649,20 @@ class TestMultiUserThreadIsolationE2E:
             
             for i, result in enumerate(agent_interaction_results):
                 if isinstance(result, Exception):
-                    logger.error(f"❌ User {i} agent interaction failed: {result}")
+                    logger.error(f" FAIL:  User {i} agent interaction failed: {result}")
                 else:
                     successful_agent_interactions += 1
                     total_events_received += result.get("events_received", 0)
                     cross_user_event_leaks += result.get("cross_user_leaks", 0)
                     
-                    logger.info(f"✅ User {i}: {result.get('events_received', 0)} events received")
+                    logger.info(f" PASS:  User {i}: {result.get('events_received', 0)} events received")
                     if result.get("cross_user_leaks", 0) > 0:
-                        logger.error(f"🚨 User {i}: {result['cross_user_leaks']} cross-user event leaks detected")
+                        logger.error(f" ALERT:  User {i}: {result['cross_user_leaks']} cross-user event leaks detected")
             
             # Generate detailed isolation report
             report = self.isolation_framework.generate_isolation_report()
             
-            logger.info("📊 MULTI-USER AGENT EVENT ISOLATION RESULTS:")
+            logger.info(" CHART:  MULTI-USER AGENT EVENT ISOLATION RESULTS:")
             logger.info(f"   Successful Agent Interactions: {successful_agent_interactions}/{num_users}")
             logger.info(f"   Total Events Received: {total_events_received}")
             logger.info(f"   Cross-User Event Leaks: {cross_user_event_leaks}")
@@ -671,13 +671,13 @@ class TestMultiUserThreadIsolationE2E:
             
             # CRITICAL ASSERTIONS - Expected to FAIL initially
             if cross_user_event_leaks > 0 or report['isolation_violations'] > 0:
-                logger.error("🚨 AGENT EVENT ISOLATION FAILURE - Cross-user event leakage detected")
-                logger.error(f"🔍 Event leaks: {cross_user_event_leaks}, Violations: {report['isolation_violations']}")
+                logger.error(" ALERT:  AGENT EVENT ISOLATION FAILURE - Cross-user event leakage detected")
+                logger.error(f" SEARCH:  Event leaks: {cross_user_event_leaks}, Violations: {report['isolation_violations']}")
                 
                 # Log detailed violation for debugging
                 if self.isolation_framework.isolation_violations:
                     for violation in self.isolation_framework.isolation_violations[:3]:  # First 3
-                        logger.error(f"🔍 Violation: {violation}")
+                        logger.error(f" SEARCH:  Violation: {violation}")
                 
                 # Expected failure - documenting system gap
                 pytest.fail(
@@ -686,22 +686,22 @@ class TestMultiUserThreadIsolationE2E:
                     f"Users receiving events meant for other users. Critical routing bug."
                 )
             else:
-                logger.info("✅ SUCCESS: Perfect agent event isolation achieved!")
+                logger.info(" PASS:  SUCCESS: Perfect agent event isolation achieved!")
                 
                 # Verify all critical events were delivered
                 expected_total_events = num_users * agent_requests_per_user * len(self.isolation_framework.critical_agent_events)
                 event_delivery_rate = total_events_received / expected_total_events if expected_total_events > 0 else 0
                 
                 assert event_delivery_rate >= 0.8, \
-                    f"Event delivery rate too low: {event_delivery_rate:.2%} (need ≥80%)"
+                    f"Event delivery rate too low: {event_delivery_rate:.2%} (need  >= 80%)"
                 
                 assert successful_agent_interactions >= num_users * 0.8, \
                     f"Too few successful agent interactions: {successful_agent_interactions}/{num_users}"
         
         except Exception as e:
             report = self.isolation_framework.generate_isolation_report()
-            logger.error(f"📊 Partial results: {report}")
-            logger.error(f"❌ Multi-user agent event isolation test failed: {e}")
+            logger.error(f" CHART:  Partial results: {report}")
+            logger.error(f" FAIL:  Multi-user agent event isolation test failed: {e}")
             raise
         
         # Verify test duration
@@ -709,7 +709,7 @@ class TestMultiUserThreadIsolationE2E:
         assert actual_duration > 8.0, \
             f"Agent event test completed too quickly ({actual_duration:.2f}s)"
         
-        logger.info(f"✅ Multi-user agent event isolation test completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Multi-user agent event isolation test completed in {actual_duration:.2f}s")
     
     async def _test_user_agent_event_isolation(self, client: IsolatedUserWebSocketClient, num_requests: int) -> Dict:
         """Test agent event isolation for single user."""
@@ -744,12 +744,12 @@ class TestMultiUserThreadIsolationE2E:
                 cross_user_leaks = len(leaked_events)
                 
                 if cross_user_leaks > 0:
-                    logger.error(f"🚨 User {client.user_id} received {cross_user_leaks} events meant for other users")
+                    logger.error(f" ALERT:  User {client.user_id} received {cross_user_leaks} events meant for other users")
                     for leak in leaked_events[:3]:  # Log first 3
-                        logger.error(f"🔍 Leaked event: {leak}")
+                        logger.error(f" SEARCH:  Leaked event: {leak}")
         
         except Exception as e:
-            logger.error(f"❌ User {client.user_id} agent event test failed: {e}")
+            logger.error(f" FAIL:  User {client.user_id} agent event test failed: {e}")
             raise
         
         return {
@@ -773,7 +773,7 @@ class TestMultiUserThreadIsolationE2E:
         Success Criteria: Zero isolation violations under stress load
         """
         test_start_time = time.time()
-        logger.info("⚡ CRITICAL: Testing stress multi-user thread access patterns")
+        logger.info(" LIGHTNING:  CRITICAL: Testing stress multi-user thread access patterns")
         
         # Stress test configuration
         num_stress_users = 5
@@ -785,7 +785,7 @@ class TestMultiUserThreadIsolationE2E:
         
         try:
             # Create stress test users
-            logger.info(f"🔥 Setting up {num_stress_users} users for stress testing...")
+            logger.info(f" FIRE:  Setting up {num_stress_users} users for stress testing...")
             for i in range(num_stress_users):
                 user_context = await create_authenticated_user_context(
                     user_email=f"stress_test_user_{i}_{int(time.time())}@example.com",
@@ -803,7 +803,7 @@ class TestMultiUserThreadIsolationE2E:
                 stress_test_clients.append(client)
                 self.test_users.append(client)
                 
-                logger.info(f"⚡ Created stress test user {i}: {user_context.user_id}")
+                logger.info(f" LIGHTNING:  Created stress test user {i}: {user_context.user_id}")
             
             # Execute stress test operations concurrently
             stress_tasks = []
@@ -814,7 +814,7 @@ class TestMultiUserThreadIsolationE2E:
                 stress_tasks.append(task)
             
             # Run all stress operations concurrently
-            logger.info("🚀 Executing high-volume concurrent thread operations...")
+            logger.info("[U+1F680] Executing high-volume concurrent thread operations...")
             stress_results = await asyncio.gather(*stress_tasks, return_exceptions=True)
             
             # Analyze stress test results
@@ -824,18 +824,18 @@ class TestMultiUserThreadIsolationE2E:
             
             for i, result in enumerate(stress_results):
                 if isinstance(result, Exception):
-                    logger.error(f"❌ Stress user {i} failed: {result}")
+                    logger.error(f" FAIL:  Stress user {i} failed: {result}")
                 else:
                     successful_stress_users += 1
                     total_operations_completed += result.get("operations_completed", 0)
                     isolation_violations_under_stress += result.get("isolation_violations", 0)
                     
-                    logger.info(f"⚡ Stress user {i}: {result.get('operations_completed', 0)} operations completed")
+                    logger.info(f" LIGHTNING:  Stress user {i}: {result.get('operations_completed', 0)} operations completed")
             
             # Generate comprehensive stress report
             report = self.isolation_framework.generate_isolation_report()
             
-            logger.info("📊 STRESS MULTI-USER THREAD ACCESS RESULTS:")
+            logger.info(" CHART:  STRESS MULTI-USER THREAD ACCESS RESULTS:")
             logger.info(f"   Successful Stress Users: {successful_stress_users}/{num_stress_users}")
             logger.info(f"   Total Operations Completed: {total_operations_completed}")
             logger.info(f"   Operations Per Second: {total_operations_completed / (time.time() - test_start_time):.1f}")
@@ -844,8 +844,8 @@ class TestMultiUserThreadIsolationE2E:
             
             # CRITICAL ASSERTIONS - Expected to FAIL initially due to race conditions
             if report['isolation_violations'] > 0:
-                logger.error("🚨 STRESS ISOLATION FAILURE - Race conditions cause isolation breaks")
-                logger.error(f"🔍 Found {report['isolation_violations']} violations under stress")
+                logger.error(" ALERT:  STRESS ISOLATION FAILURE - Race conditions cause isolation breaks")
+                logger.error(f" SEARCH:  Found {report['isolation_violations']} violations under stress")
                 
                 # Analyze violation patterns
                 violation_types = {}
@@ -853,7 +853,7 @@ class TestMultiUserThreadIsolationE2E:
                     v_type = violation.get("violation_type", "unknown")
                     violation_types[v_type] = violation_types.get(v_type, 0) + 1
                 
-                logger.error(f"🔍 Violation patterns: {violation_types}")
+                logger.error(f" SEARCH:  Violation patterns: {violation_types}")
                 
                 # Expected failure - stress exposes race conditions
                 pytest.fail(
@@ -862,7 +862,7 @@ class TestMultiUserThreadIsolationE2E:
                     f"System cannot maintain isolation under realistic load."
                 )
             else:
-                logger.info("✅ SUCCESS: Perfect isolation maintained under stress!")
+                logger.info(" PASS:  SUCCESS: Perfect isolation maintained under stress!")
                 
                 # Verify stress test coverage
                 expected_operations = num_stress_users * operations_per_user
@@ -876,8 +876,8 @@ class TestMultiUserThreadIsolationE2E:
         
         except Exception as e:
             report = self.isolation_framework.generate_isolation_report()
-            logger.error(f"📊 Stress test partial results: {report}")
-            logger.error(f"❌ Stress multi-user thread access test failed: {e}")
+            logger.error(f" CHART:  Stress test partial results: {report}")
+            logger.error(f" FAIL:  Stress multi-user thread access test failed: {e}")
             raise
         
         # Verify significant test duration
@@ -885,7 +885,7 @@ class TestMultiUserThreadIsolationE2E:
         assert actual_duration > 10.0, \
             f"Stress test completed too quickly ({actual_duration:.2f}s)"
         
-        logger.info(f"✅ Stress multi-user thread access test completed in {actual_duration:.2f}s")
+        logger.info(f" PASS:  Stress multi-user thread access test completed in {actual_duration:.2f}s")
     
     async def _execute_stress_operations(self, client: IsolatedUserWebSocketClient, 
                                        num_operations: int, operation_delay: float) -> Dict:
@@ -939,7 +939,7 @@ class TestMultiUserThreadIsolationE2E:
                 isolation_violations = user_violations
         
         except Exception as e:
-            logger.error(f"❌ User {client.user_id} stress operations failed: {e}")
+            logger.error(f" FAIL:  User {client.user_id} stress operations failed: {e}")
             raise
         
         return {
@@ -968,13 +968,13 @@ if __name__ == "__main__":
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    logger.info("🚀 Starting Multi-User Thread Isolation E2E Test Suite")
-    logger.info("📋 Tests included:")
+    logger.info("[U+1F680] Starting Multi-User Thread Isolation E2E Test Suite")
+    logger.info("[U+1F4CB] Tests included:")
     logger.info("   1. test_concurrent_user_thread_creation_isolation")
     logger.info("   2. test_multi_user_agent_event_isolation")
     logger.info("   3. test_stress_multi_user_thread_access_patterns")
-    logger.info("🎯 Business Value: Ensures secure multi-user Chat platform isolation")
-    logger.info("⚠️  Expected: Initial FAILURES due to isolation gaps in current system")
+    logger.info(" TARGET:  Business Value: Ensures secure multi-user Chat platform isolation")
+    logger.info(" WARNING: [U+FE0F]  Expected: Initial FAILURES due to isolation gaps in current system")
     
     # Run tests
     pytest.main([__file__, "-v", "-s", "--tb=short"])

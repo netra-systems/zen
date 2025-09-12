@@ -147,11 +147,11 @@ class GoldenPathValidator:
         self.logger.info("=" * 80)
         self.logger.info("GOLDEN PATH BUSINESS VALIDATION - CHAT FUNCTIONALITY")
         self.logger.info("=" * 80)
-        self.logger.info(f"🌍 Environment: {environment_context.environment_type.value}")
-        self.logger.info(f"☁️ Platform: {environment_context.cloud_platform.value}")
-        self.logger.info(f"🎯 Confidence: {environment_context.confidence_score:.2f}")
+        self.logger.info(f"[U+1F30D] Environment: {environment_context.environment_type.value}")
+        self.logger.info(f"[U+2601][U+FE0F] Platform: {environment_context.cloud_platform.value}")
+        self.logger.info(f" TARGET:  Confidence: {environment_context.confidence_score:.2f}")
         if environment_context.service_name:
-            self.logger.info(f"🚀 Service: {environment_context.service_name}")
+            self.logger.info(f"[U+1F680] Service: {environment_context.service_name}")
         self.logger.info("=" * 80)
         
         result = GoldenPathValidationResult()
@@ -172,7 +172,7 @@ class GoldenPathValidator:
                 
                 if validation_result["success"]:
                     result.requirements_passed += 1
-                    self.logger.info(f"✓ {requirement.requirement_name}: {validation_result['message']}")
+                    self.logger.info(f"[U+2713] {requirement.requirement_name}: {validation_result['message']}")
                 else:
                     result.requirements_failed += 1
                     
@@ -184,7 +184,7 @@ class GoldenPathValidator:
                         )
                         result.business_impact_failures.append(requirement.business_impact)
                         self.logger.error(
-                            f"❌ CRITICAL: {requirement.requirement_name} - {validation_result['message']}"
+                            f" FAIL:  CRITICAL: {requirement.requirement_name} - {validation_result['message']}"
                         )
                         self.logger.error(f"   Business Impact: {requirement.business_impact}")
                     else:
@@ -192,7 +192,7 @@ class GoldenPathValidator:
                             f"{requirement.service_type.value}: {requirement.requirement_name} - "
                             f"{validation_result['message']}"
                         )
-                        self.logger.warning(f"⚠️ {requirement.requirement_name}: {validation_result['message']}")
+                        self.logger.warning(f" WARNING: [U+FE0F] {requirement.requirement_name}: {validation_result['message']}")
                 
             except Exception as e:
                 result.requirements_failed += 1
@@ -202,10 +202,10 @@ class GoldenPathValidator:
                     result.overall_success = False
                     result.critical_failures.append(error_msg)
                     result.business_impact_failures.append(requirement.business_impact)
-                    self.logger.error(f"❌ CRITICAL EXCEPTION: {error_msg}")
+                    self.logger.error(f" FAIL:  CRITICAL EXCEPTION: {error_msg}")
                 else:
                     result.warnings.append(error_msg)
-                    self.logger.warning(f"⚠️ EXCEPTION: {error_msg}")
+                    self.logger.warning(f" WARNING: [U+FE0F] EXCEPTION: {error_msg}")
         
         result.services_validated = len(set(req.service_type for req in relevant_requirements))
         
@@ -442,7 +442,7 @@ class GoldenPathValidator:
         self.logger.info("=" * 80)
         
         # Overall status
-        status_emoji = "✅" if result.overall_success else "❌"
+        status_emoji = " PASS: " if result.overall_success else " FAIL: "
         self.logger.info(f"Overall Business Validation: {status_emoji} {'SUCCESS' if result.overall_success else 'FAILED'}")
         
         # Statistics
@@ -452,25 +452,25 @@ class GoldenPathValidator:
         
         # Critical failures (business impact)
         if result.business_impact_failures:
-            self.logger.error(f"\n🚨 BUSINESS IMPACT FAILURES ({len(result.business_impact_failures)}):")
+            self.logger.error(f"\n ALERT:  BUSINESS IMPACT FAILURES ({len(result.business_impact_failures)}):")
             for i, impact in enumerate(result.business_impact_failures, 1):
                 self.logger.error(f"  {i}. {impact}")
         
         # Critical failures (technical)
         if result.critical_failures:
-            self.logger.error(f"\n❌ CRITICAL TECHNICAL FAILURES ({len(result.critical_failures)}):")
+            self.logger.error(f"\n FAIL:  CRITICAL TECHNICAL FAILURES ({len(result.critical_failures)}):")
             for i, failure in enumerate(result.critical_failures, 1):
                 self.logger.error(f"  {i}. {failure}")
         
         # Warnings
         if result.warnings:
-            self.logger.warning(f"\n⚠️ WARNINGS ({len(result.warnings)}):")
+            self.logger.warning(f"\n WARNING: [U+FE0F] WARNINGS ({len(result.warnings)}):")
             for i, warning in enumerate(result.warnings, 1):
                 self.logger.warning(f"  {i}. {warning}")
         
         if result.overall_success:
-            self.logger.info("\n💰 GOLDEN PATH PROTECTED - Chat functionality business value secured!")
+            self.logger.info("\n[U+1F4B0] GOLDEN PATH PROTECTED - Chat functionality business value secured!")
         else:
-            self.logger.error("\n💸 GOLDEN PATH AT RISK - Chat functionality business value threatened!")
+            self.logger.error("\n[U+1F4B8] GOLDEN PATH AT RISK - Chat functionality business value threatened!")
         
         self.logger.info("=" * 80)

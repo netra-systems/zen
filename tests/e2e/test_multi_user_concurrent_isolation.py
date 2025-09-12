@@ -74,7 +74,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         - Results contain user-specific data without cross-contamination
         - User execution contexts don't interfere with each other
         """
-        print(f"🚀 Starting concurrent user isolation test with 3 users")
+        print(f"[U+1F680] Starting concurrent user isolation test with 3 users")
         
         # Create 3 distinct users
         users = []
@@ -82,7 +82,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
             user_token, user_data = await self.create_test_user(f"concurrent_{i}_{int(time.time())}")
             users.append((user_token, user_data))
         
-        print(f"✅ Created {len(users)} test users")
+        print(f" PASS:  Created {len(users)} test users")
         for i, (_, user_data) in enumerate(users):
             print(f"   User {i}: {user_data['email']}")
         
@@ -142,14 +142,14 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
             }
             
             try:
-                print(f"🔌 User {user_index} connecting to WebSocket...")
+                print(f"[U+1F50C] User {user_index} connecting to WebSocket...")
                 
                 async with websockets.connect(websocket_url, additional_headers=headers) as websocket:
-                    print(f"✅ User {user_index} WebSocket connected")
+                    print(f" PASS:  User {user_index} WebSocket connected")
                     
                     # Send request
                     await websocket.send(json.dumps(request))
-                    print(f"📤 User {user_index} sent request")
+                    print(f"[U+1F4E4] User {user_index} sent request")
                     
                     start_time = time.time()
                     timeout_duration = 90.0  # Extended timeout for concurrent execution
@@ -158,7 +158,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
                         try:
                             remaining_time = timeout_duration - (time.time() - start_time)
                             if remaining_time <= 0:
-                                print(f"⏰ User {user_index} session timed out")
+                                print(f"[U+23F0] User {user_index} session timed out")
                                 break
                             
                             message = await asyncio.wait_for(
@@ -169,28 +169,28 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
                             event = json.loads(message)
                             session_result["events"].append(event)
                             
-                            print(f"📨 User {user_index} received: {event['type']}")
+                            print(f"[U+1F4E8] User {user_index} received: {event['type']}")
                             
                             if event['type'] == 'agent_completed':
                                 session_result["completion_time"] = time.time() - start_time
-                                print(f"✅ User {user_index} completed in {session_result['completion_time']:.2f}s")
+                                print(f" PASS:  User {user_index} completed in {session_result['completion_time']:.2f}s")
                                 break
                                 
                         except asyncio.TimeoutError:
-                            print(f"⏰ User {user_index} message timeout")
+                            print(f"[U+23F0] User {user_index} message timeout")
                             continue
                         except json.JSONDecodeError as e:
-                            print(f"❌ User {user_index} JSON decode error: {e}")
+                            print(f" FAIL:  User {user_index} JSON decode error: {e}")
                             continue
                             
             except Exception as e:
                 session_result["error"] = str(e)
-                print(f"❌ User {user_index} session error: {e}")
+                print(f" FAIL:  User {user_index} session error: {e}")
             
             return session_result
         
         # Execute all user sessions concurrently
-        print(f"🏃 Starting concurrent execution for {len(users)} users...")
+        print(f"[U+1F3C3] Starting concurrent execution for {len(users)} users...")
         start_time = time.time()
         
         tasks = []
@@ -202,7 +202,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         session_results = await asyncio.gather(*tasks, return_exceptions=True)
         total_time = time.time() - start_time
         
-        print(f"⏱️ All sessions completed in {total_time:.2f}s")
+        print(f"[U+23F1][U+FE0F] All sessions completed in {total_time:.2f}s")
         
         # Validate session results
         successful_sessions = []
@@ -215,9 +215,9 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
                 successful_sessions.append(result)
         
         assert len(successful_sessions) == 3, f"Expected 3 successful sessions, got {len(successful_sessions)}"
-        print(f"✅ All {len(successful_sessions)} sessions completed successfully")
+        print(f" PASS:  All {len(successful_sessions)} sessions completed successfully")
         
-        # 🚨 CRITICAL: Validate user isolation - each user should get distinct results
+        #  ALERT:  CRITICAL: Validate user isolation - each user should get distinct results
         for i, session in enumerate(successful_sessions):
             events = session["events"]
             event_types = [e['type'] for e in events]
@@ -250,9 +250,9 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
                 assert any(term in result_text for term in ["content", "scaling", "articles", "100", "1000"]), \
                     f"User {i} results don't match content context"
             
-            print(f"✅ User {i} isolation validated - results match expected use case")
+            print(f" PASS:  User {i} isolation validated - results match expected use case")
         
-        # 🚨 CRITICAL: Validate no cross-user data contamination
+        #  ALERT:  CRITICAL: Validate no cross-user data contamination
         for i, session in enumerate(successful_sessions):
             completion_events = [e for e in session["events"] if e['type'] == 'agent_completed']
             result_text = str(completion_events[-1]['data']['result']).lower()
@@ -273,7 +273,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
                     assert term not in result_text, \
                         f"User {i} results contaminated with User {j} data: found '{term}'"
             
-            print(f"✅ User {i} no data contamination detected")
+            print(f" PASS:  User {i} no data contamination detected")
         
         # Performance validation - concurrent execution should be efficient
         max_completion_time = max(s["completion_time"] for s in successful_sessions)
@@ -282,17 +282,17 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         assert max_completion_time < 120, f"Slowest user took too long: {max_completion_time:.2f}s"
         assert avg_completion_time < 90, f"Average completion time too slow: {avg_completion_time:.2f}s"
         
-        print(f"✅ Performance validated:")
+        print(f" PASS:  Performance validated:")
         print(f"   Max completion: {max_completion_time:.2f}s")
         print(f"   Avg completion: {avg_completion_time:.2f}s")
         print(f"   Total test time: {total_time:.2f}s")
         
-        print(f"🎉 CONCURRENT USER ISOLATION SUCCESS!")
-        print(f"   ✓ All users executed concurrently without interference")
-        print(f"   ✓ User contexts properly isolated")
-        print(f"   ✓ No cross-user data contamination")
-        print(f"   ✓ WebSocket events delivered to correct users")
-        print(f"   ✓ Performance within acceptable limits")
+        print(f" CELEBRATION:  CONCURRENT USER ISOLATION SUCCESS!")
+        print(f"   [U+2713] All users executed concurrently without interference")
+        print(f"   [U+2713] User contexts properly isolated")
+        print(f"   [U+2713] No cross-user data contamination")
+        print(f"   [U+2713] WebSocket events delivered to correct users")
+        print(f"   [U+2713] Performance within acceptable limits")
 
 
     @pytest.mark.e2e
@@ -307,7 +307,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         
         Validates system stability and isolation under higher concurrent load.
         """
-        print(f"🚀 Starting high concurrency stress test with 10 users")
+        print(f"[U+1F680] Starting high concurrency stress test with 10 users")
         
         # Create 10 users
         user_count = 10
@@ -316,7 +316,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
             user_token, user_data = await self.create_test_user(f"stress_{i}_{int(time.time())}")
             users.append((user_token, user_data))
         
-        print(f"✅ Created {user_count} stress test users")
+        print(f" PASS:  Created {user_count} stress test users")
         
         # Create varied requests to simulate real load
         request_templates = [
@@ -364,7 +364,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
                             event = json.loads(message)
                             
                             if event['type'] == 'agent_completed':
-                                print(f"✅ Stress user {user_index} completed")
+                                print(f" PASS:  Stress user {user_index} completed")
                                 completed = True
                                 break
                                 
@@ -376,11 +376,11 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
                     return completed
                     
             except Exception as e:
-                print(f"❌ Stress user {user_index} failed: {e}")
+                print(f" FAIL:  Stress user {user_index} failed: {e}")
                 return False
         
         # Execute stress test
-        print(f"🏃 Starting stress test with {user_count} concurrent users...")
+        print(f"[U+1F3C3] Starting stress test with {user_count} concurrent users...")
         start_time = time.time()
         
         tasks = []
@@ -396,7 +396,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         successful_count = sum(1 for r in results if r is True)
         success_rate = (successful_count / user_count) * 100
         
-        print(f"📊 Stress test results:")
+        print(f" CHART:  Stress test results:")
         print(f"   Users: {user_count}")
         print(f"   Successful: {successful_count}")  
         print(f"   Success rate: {success_rate:.1f}%")
@@ -406,9 +406,9 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         assert success_rate >= 80, f"Success rate too low: {success_rate:.1f}% (min 80%)"
         assert total_time < 180, f"Stress test took too long: {total_time:.2f}s (max 180s)"
         
-        print(f"✅ High concurrency stress test passed!")
-        print(f"   ✓ {success_rate:.1f}% success rate (≥80% required)")
-        print(f"   ✓ Completed in {total_time:.2f}s (≤180s required)")
+        print(f" PASS:  High concurrency stress test passed!")
+        print(f"   [U+2713] {success_rate:.1f}% success rate ( >= 80% required)")
+        print(f"   [U+2713] Completed in {total_time:.2f}s ( <= 180s required)")
 
 
     @pytest.mark.e2e
@@ -423,7 +423,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         
         Validates session state isolation and proper cleanup under race conditions.
         """
-        print(f"🚀 Starting user session race condition test")
+        print(f"[U+1F680] Starting user session race condition test")
         
         # Create test user
         user_token, user_data = await self.create_test_user(f"race_{int(time.time())}")
@@ -488,7 +488,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         
         # Execute multiple rapid cycles concurrently
         cycle_count = 5
-        print(f"🔄 Running {cycle_count} rapid session cycles...")
+        print(f" CYCLE:  Running {cycle_count} rapid session cycles...")
         
         tasks = [rapid_session_cycle(i) for i in range(cycle_count)]
         cycle_results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -500,11 +500,11 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         
         for i, result in enumerate(cycle_results):
             if isinstance(result, Exception):
-                print(f"❌ Cycle {i} exception: {result}")
+                print(f" FAIL:  Cycle {i} exception: {result}")
                 continue
             
             if result.get("error"):
-                print(f"❌ Cycle {i} error: {result['error']}")
+                print(f" FAIL:  Cycle {i} error: {result['error']}")
                 continue
                 
             if result["connected"]:
@@ -514,7 +514,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
             
             received_events += result["events_received"]
             
-            print(f"✅ Cycle {result['cycle_id']}: " + 
+            print(f" PASS:  Cycle {result['cycle_id']}: " + 
                   f"Connected={result['connected']}, " +
                   f"Sent={result['request_sent']}, " +
                   f"Events={result['events_received']}, " +
@@ -528,11 +528,11 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         assert request_rate >= 80, f"Request rate too low: {request_rate:.1f}%"
         assert received_events > 0, "No events received across all cycles"
         
-        print(f"✅ Race condition test passed!")
-        print(f"   ✓ Connection rate: {connection_rate:.1f}%")
-        print(f"   ✓ Request rate: {request_rate:.1f}%")
-        print(f"   ✓ Total events received: {received_events}")
-        print(f"   ✓ No system crashes or hangs detected")
+        print(f" PASS:  Race condition test passed!")
+        print(f"   [U+2713] Connection rate: {connection_rate:.1f}%")
+        print(f"   [U+2713] Request rate: {request_rate:.1f}%")
+        print(f"   [U+2713] Total events received: {received_events}")
+        print(f"   [U+2713] No system crashes or hangs detected")
 
 
     @pytest.mark.e2e
@@ -547,7 +547,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         
         Validates permission isolation and proper access control under concurrent load.
         """
-        print(f"🚀 Starting mixed user types concurrent test")
+        print(f"[U+1F680] Starting mixed user types concurrent test")
         
         # Create users with different permission levels
         free_user_token, free_user_data = await create_authenticated_user(
@@ -648,7 +648,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
             return session_result
         
         # Run all user types concurrently
-        print(f"🏃 Executing mixed user types concurrently...")
+        print(f"[U+1F3C3] Executing mixed user types concurrently...")
         tasks = [user_type_session(config) for config in users_config]
         session_results = await asyncio.gather(*tasks, return_exceptions=True)
         
@@ -668,7 +668,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
             assert 'agent_started' in event_types, f"User type {result['tier']} missing agent_started"
             assert 'agent_completed' in event_types, f"User type {result['tier']} missing agent_completed"
             
-            print(f"✅ User type {result['tier']} completed with {len(result['events'])} events")
+            print(f" PASS:  User type {result['tier']} completed with {len(result['events'])} events")
         
         # Validate tier-appropriate responses
         free_result = next(r for r in session_results if r["tier"] == "free")
@@ -678,7 +678,7 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         free_events = len(free_result["events"])
         enterprise_events = len(enterprise_result["events"])
         
-        print(f"📊 Event counts: Free={free_events}, Enterprise={enterprise_events}")
+        print(f" CHART:  Event counts: Free={free_events}, Enterprise={enterprise_events}")
         
         # Get final results
         free_completion = [e for e in free_result["events"] if e['type'] == 'agent_completed'][-1]
@@ -691,8 +691,8 @@ class TestMultiUserConcurrentIsolation(SSotBaseTestCase):
         assert len(enterprise_result_text) >= len(free_result_text), \
             "Enterprise user should receive more comprehensive results"
         
-        print(f"✅ Mixed user types concurrent test passed!")
-        print(f"   ✓ All user tiers completed successfully")
-        print(f"   ✓ Appropriate tier-based response differentiation")
-        print(f"   ✓ No permission violations or cross-tier contamination")
-        print(f"   ✓ Concurrent execution handled properly")
+        print(f" PASS:  Mixed user types concurrent test passed!")
+        print(f"   [U+2713] All user tiers completed successfully")
+        print(f"   [U+2713] Appropriate tier-based response differentiation")
+        print(f"   [U+2713] No permission violations or cross-tier contamination")
+        print(f"   [U+2713] Concurrent execution handled properly")

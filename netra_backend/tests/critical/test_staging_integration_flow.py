@@ -13,7 +13,7 @@ Business Value: Validates complete staging deployment flow.
 Prevents deployment failures that impact customer confidence.
 
 Tests the entire staging deployment pipeline from config to health checks.
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """""
 
 import sys

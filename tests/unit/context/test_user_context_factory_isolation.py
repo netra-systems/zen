@@ -450,7 +450,7 @@ class TestUserContextMemoryCleanup(unittest.TestCase):
                     request_id=RequestID(str(uuid.uuid4()))
                 )
         
-        # Should have 6 total contexts (3 users × 2 contexts)
+        # Should have 6 total contexts (3 users  x  2 contexts)
         total_contexts = sum(len(contexts) for contexts in self.factory.created_contexts.values())
         self.assertEqual(total_contexts, 6)
         
@@ -505,7 +505,7 @@ class TestUserContextInheritancePatterns(unittest.TestCase):
     def test_multi_level_context_inheritance(self):
         """Test multi-level context inheritance maintains isolation."""
         
-        # Create parent → child → grandchild chain
+        # Create parent  ->  child  ->  grandchild chain
         parent = self.factory.create_context(
             user_id=self.user_id,
             thread_id=ThreadID(str(uuid.uuid4())),

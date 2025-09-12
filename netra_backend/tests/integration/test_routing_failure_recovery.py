@@ -2,7 +2,7 @@
 Test WebSocket Routing Failure Recovery
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Ensure system resilience and recovery from routing failures
 - Value Impact: Prevents permanent chat disruption when routing failures occur
 - Strategic Impact: CRITICAL - System must recover from routing failures to maintain user trust
@@ -297,7 +297,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         # Check recovery statistics
         recovery_stats = recovery_manager.get_recovery_stats()
         
-        print(f"🚨 CONNECTION ID MISMATCH RECOVERY RESULTS:")
+        print(f" ALERT:  CONNECTION ID MISMATCH RECOVERY RESULTS:")
         print(f"   Total failures: {recovery_stats['total_failures']}")
         print(f"   Recovery attempts: {recovery_stats['recovery_attempts']}")
         print(f"   Successful recoveries: {recovery_stats['successful_recoveries']}")
@@ -358,7 +358,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
             handlers.append(handler)
         
         # Act: Introduce routing table corruption
-        print(f"🚨 INTRODUCING ROUTING TABLE CORRUPTION:")
+        print(f" ALERT:  INTRODUCING ROUTING TABLE CORRUPTION:")
         
         # Corruption type 1: Stale entries (simulate old connections not cleaned up)
         stale_connections = []
@@ -392,7 +392,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         
         # Get corrupted state statistics  
         pre_healing_stats = await router.get_stats()
-        print(f"🚨 PRE-HEALING ROUTING TABLE STATE:")
+        print(f" ALERT:  PRE-HEALING ROUTING TABLE STATE:")
         print(f"   Total users: {pre_healing_stats['total_users']}")
         print(f"   Total connections: {pre_healing_stats['total_connections']}")
         print(f"   Active connections: {pre_healing_stats['active_connections']}")
@@ -416,10 +416,10 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
                 routing_failures.append(connection["user_id"])
         
         pre_healing_failure_rate = len(routing_failures) / len(connections)
-        print(f"🚨 PRE-HEALING ROUTING FAILURE RATE: {pre_healing_failure_rate:.1%}")
+        print(f" ALERT:  PRE-HEALING ROUTING FAILURE RATE: {pre_healing_failure_rate:.1%}")
         
         # Act: Trigger auto-healing
-        print(f"🚨 TRIGGERING AUTO-HEALING MECHANISMS:")
+        print(f" ALERT:  TRIGGERING AUTO-HEALING MECHANISMS:")
         
         # Healing step 1: Cleanup stale connections
         cleaned_count = await router.cleanup_stale_connections()
@@ -451,7 +451,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         
         # Assert: Validate auto-healing effectiveness
         post_healing_stats = await router.get_stats()
-        print(f"🚨 POST-HEALING ROUTING TABLE STATE:")
+        print(f" ALERT:  POST-HEALING ROUTING TABLE STATE:")
         print(f"   Total users: {post_healing_stats['total_users']}")
         print(f"   Total connections: {post_healing_stats['total_connections']}")
         print(f"   Active connections: {post_healing_stats['active_connections']}")
@@ -477,13 +477,13 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
                 post_healing_failures.append(connection["user_id"])
         
         post_healing_failure_rate = len(post_healing_failures) / len(connections)
-        print(f"🚨 POST-HEALING ROUTING FAILURE RATE: {post_healing_failure_rate:.1%}")
+        print(f" ALERT:  POST-HEALING ROUTING FAILURE RATE: {post_healing_failure_rate:.1%}")
         
         # Calculate healing effectiveness
         healing_improvement = pre_healing_failure_rate - post_healing_failure_rate
         healing_effectiveness = healing_improvement / pre_healing_failure_rate if pre_healing_failure_rate > 0 else 1.0
         
-        print(f"🚨 AUTO-HEALING EFFECTIVENESS: {healing_effectiveness:.1%} improvement")
+        print(f" ALERT:  AUTO-HEALING EFFECTIVENESS: {healing_effectiveness:.1%} improvement")
         
         # CRITICAL: Auto-healing should significantly reduce failures
         assert post_healing_failure_rate < pre_healing_failure_rate, \
@@ -562,7 +562,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         
         for attempt in range(max_retries):
             if circuit_breaker_open:
-                print(f"🚨 Circuit breaker OPEN - skipping attempt {attempt + 1}")
+                print(f" ALERT:  Circuit breaker OPEN - skipping attempt {attempt + 1}")
                 retry_results.append({
                     "attempt": attempt + 1,
                     "success": False,
@@ -603,7 +603,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
                     # Check circuit breaker threshold
                     if consecutive_failures >= circuit_breaker_threshold:
                         circuit_breaker_open = True
-                        print(f"🚨 Circuit breaker OPENED after {consecutive_failures} consecutive failures")
+                        print(f" ALERT:  Circuit breaker OPENED after {consecutive_failures} consecutive failures")
                     
                     retry_results.append({
                         "attempt": attempt + 1,
@@ -637,7 +637,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
                     await asyncio.sleep(delay / 1000)
         
         # Assert: Validate retry and circuit breaker behavior
-        print(f"🚨 RETRY AND CIRCUIT BREAKER RESULTS:")
+        print(f" ALERT:  RETRY AND CIRCUIT BREAKER RESULTS:")
         for result in retry_results:
             print(f"   Attempt {result['attempt']}: {result}")
         
@@ -649,7 +649,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         circuit_breaker_activations = sum(1 for r in retry_results if r.get("reason") == "circuit_breaker_open")
         
         if circuit_breaker_activations > 0:
-            print(f"🚨 Circuit breaker activated {circuit_breaker_activations} times")
+            print(f" ALERT:  Circuit breaker activated {circuit_breaker_activations} times")
             assert circuit_breaker_activations > 0, "Circuit breaker should activate under persistent failures"
         
         # Calculate retry statistics
@@ -659,7 +659,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         
         retry_success_rate = successful_attempts / total_attempts if total_attempts > 0 else 0
         
-        print(f"🚨 RETRY STATISTICS:")
+        print(f" ALERT:  RETRY STATISTICS:")
         print(f"   Total attempts: {total_attempts}")
         print(f"   Successful attempts: {successful_attempts}")
         print(f"   Failed attempts: {failed_attempts}")
@@ -809,7 +809,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
             return results
         
         # Execute concurrent stress test
-        print(f"🚨 STARTING STRESS TEST:")
+        print(f" ALERT:  STARTING STRESS TEST:")
         print(f"   Users: {stress_users}")
         print(f"   Messages per user: {messages_per_user}")
         print(f"   Total operations: {concurrent_operations}")
@@ -853,7 +853,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         throughput_ops_per_sec = total_operations / total_stress_time if total_stress_time > 0 else 0
         
         # Assert: Validate graceful degradation
-        print(f"🚨 STRESS TEST RESULTS:")
+        print(f" ALERT:  STRESS TEST RESULTS:")
         print(f"   Total operations: {total_operations}")
         print(f"   Successful operations: {successful_operations}")
         print(f"   Failed operations: {failed_operations}")
@@ -866,7 +866,7 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         
         # Get recovery statistics
         recovery_stats = recovery_manager.get_recovery_stats()
-        print(f"🚨 RECOVERY UNDER STRESS:")
+        print(f" ALERT:  RECOVERY UNDER STRESS:")
         print(f"   Total failures detected: {recovery_stats['total_failures']}")
         print(f"   Recovery attempts: {recovery_stats['recovery_attempts']}")
         print(f"   Successful recoveries: {recovery_stats['successful_recoveries']}")
@@ -894,11 +894,11 @@ class TestRoutingFailureRecovery(BaseIntegrationTest):
         assert throughput_ops_per_sec > expected_min_throughput, \
             f"Throughput should be >{expected_min_throughput} ops/sec, got {throughput_ops_per_sec:.1f}"
         
-        print(f"🚨 GRACEFUL DEGRADATION VALIDATED:")
-        print(f"   ✅ Maintained {actual_success_rate:.1%} functionality under {stress_failure_rate:.1%} stress")
-        print(f"   ✅ Controlled failure rate within acceptable bounds")
-        print(f"   ✅ Performance degraded gracefully")
-        print(f"   ✅ System remained operational throughout stress period")
+        print(f" ALERT:  GRACEFUL DEGRADATION VALIDATED:")
+        print(f"    PASS:  Maintained {actual_success_rate:.1%} functionality under {stress_failure_rate:.1%} stress")
+        print(f"    PASS:  Controlled failure rate within acceptable bounds")
+        print(f"    PASS:  Performance degraded gracefully")
+        print(f"    PASS:  System remained operational throughout stress period")
         
         # Cleanup
         for handler in handlers:

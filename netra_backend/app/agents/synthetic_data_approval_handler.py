@@ -82,7 +82,7 @@ class SyntheticDataApprovalHandler:
         base_info = f"{workload_type}, {profile.volume:,} records"
         timing_info = self._format_timing_info(profile)
         approval_prompt = "Approve to proceed or reply 'modify' to adjust."
-        return f"📊 Synthetic Data Request: {base_info}, {timing_info}. {approval_prompt}"
+        return f" CHART:  Synthetic Data Request: {base_info}, {timing_info}. {approval_prompt}"
     
     def _format_workload_type(self, workload_type: str) -> str:
         """Format workload type for display"""
@@ -190,7 +190,7 @@ class ApprovalMessageBuilder:
     def build_high_risk_message(profile: WorkloadProfile) -> str:
         """Build high-risk approval message"""
         base_message = ApprovalMessageBuilder.build_standard_message(profile)
-        risk_warning = "⚠️ HIGH RISK: Large volume and/or sensitive data detected."
+        risk_warning = " WARNING: [U+FE0F] HIGH RISK: Large volume and/or sensitive data detected."
         return f"{risk_warning} {base_message}"
     
     @staticmethod
@@ -206,7 +206,7 @@ class ApprovalMessageBuilder:
     @staticmethod
     def _format_standard_message(components: Dict[str, str]) -> str:
         """Format standard message from components"""
-        header = f"📊 Synthetic Data Request: {components['workload_type']}"
+        header = f" CHART:  Synthetic Data Request: {components['workload_type']}"
         details = f"{components['volume']} records, {components['days']} days"
         distribution = f"{components['distribution']} distribution"
         prompt = "Approve to proceed or reply 'modify' to adjust."

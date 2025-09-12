@@ -282,7 +282,7 @@ class TestDisasterRecovery:
     
     async def _restart_services_ordered(self, orchestrator: E2EServiceOrchestrator) -> None:
         """Restart services in dependency order."""
-        # Order: Auth → Backend (Skip Frontend for disaster recovery testing)
+        # Order: Auth  ->  Backend (Skip Frontend for disaster recovery testing)
         await orchestrator.services_manager._start_auth_service()
         await asyncio.sleep(2)  # Allow Auth stabilization
         

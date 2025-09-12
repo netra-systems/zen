@@ -221,11 +221,11 @@ class SimpleImportAnalyzer:
         })
         
         print(f"\nAnalysis completed:")
-        print(f"   • Total files analyzed: {len(test_files)}")
-        print(f"   • Files with imports: {files_with_imports}")
-        print(f"   • Total imports found: {total_imports}")
-        print(f"   • Relative imports: {relative_imports_count}")
-        print(f"   • Potentially missing modules: {len(potentially_missing)}")
+        print(f"   [U+2022] Total files analyzed: {len(test_files)}")
+        print(f"   [U+2022] Files with imports: {files_with_imports}")
+        print(f"   [U+2022] Total imports found: {total_imports}")
+        print(f"   [U+2022] Relative imports: {relative_imports_count}")
+        print(f"   [U+2022] Potentially missing modules: {len(potentially_missing)}")
         
         return self.results
     
@@ -248,11 +248,11 @@ class SimpleImportAnalyzer:
         summary = self.results["summary"]
         print(f"Analysis Directory: {summary['scan_directory']}")
         print(f"Analysis Statistics:")
-        print(f"   • Total files analyzed: {summary['total_files_analyzed']}")
-        print(f"   • Files with imports: {summary['files_with_imports']}")
-        print(f"   • Total imports found: {summary['total_imports_found']}")
-        print(f"   • Relative imports: {summary['relative_imports_count']}")
-        print(f"   • Potentially missing modules: {summary['potentially_missing_modules']}")
+        print(f"   [U+2022] Total files analyzed: {summary['total_files_analyzed']}")
+        print(f"   [U+2022] Files with imports: {summary['files_with_imports']}")
+        print(f"   [U+2022] Total imports found: {summary['total_imports_found']}")
+        print(f"   [U+2022] Relative imports: {summary['relative_imports_count']}")
+        print(f"   [U+2022] Potentially missing modules: {summary['potentially_missing_modules']}")
         
         # Most common imports
         print(f"\nTop 15 Most Used Imports:")

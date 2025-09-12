@@ -186,11 +186,11 @@ class TestWebSocketAuthHandshake:
 
 @pytest.mark.e2e
 class TestReconnectionWithAuth:
-    """Test disconnect → reconnect → resume with auth state."""
+    """Test disconnect  ->  reconnect  ->  resume with auth state."""
     
     @pytest.mark.e2e
     async def test_reconnection_with_auth(self, websocket_auth_tester):
-        """Test disconnect → reconnect → resume with auth."""
+        """Test disconnect  ->  reconnect  ->  resume with auth."""
         user_id = "test_reconnection_user"
         token = websocket_auth_tester.create_test_user_with_token(user_id)
         

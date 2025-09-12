@@ -97,7 +97,7 @@ class TestEventValidatorSsotRegressionPrevention(SSotBaseTestCase):
         print(f"Non-SSOT EventValidator classes: {len(non_ssot_validators)}")
         
         for validator in event_validator_classes:
-            ssot_marker = "✅ SSOT" if validator['is_ssot'] else "❌ VIOLATION"
+            ssot_marker = " PASS:  SSOT" if validator['is_ssot'] else " FAIL:  VIOLATION"
             print(f"  {validator['class_name']} in {validator['file_path']}:{validator['line_number']} - {ssot_marker}")
         
         # REGRESSION PREVENTION: FAIL if any non-SSOT EventValidator classes exist
@@ -370,7 +370,7 @@ class TestEventValidatorSsotRegressionPrevention(SSotBaseTestCase):
             if missing_items:
                 print(f"  Missing {component_type}: {missing_items}")
             else:
-                print(f"  ✅ All {component_type} present")
+                print(f"   PASS:  All {component_type} present")
         
         # REGRESSION PREVENTION: FAIL if critical components are missing
         critical_missing = missing_components['classes'] + missing_components['methods']

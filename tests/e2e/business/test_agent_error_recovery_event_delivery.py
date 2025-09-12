@@ -304,7 +304,7 @@ class TestAgentErrorRecoveryEventDelivery(BaseE2ETest):
         # Get error recovery summary
         error_summary = error_simulator.get_error_recovery_summary()
         
-        self.logger.info("✅ SUCCESS: Agent timeout error recovery with events validated")
+        self.logger.info(" PASS:  SUCCESS: Agent timeout error recovery with events validated")
         self.logger.info(f"  - Total events: {len(all_events)}")
         self.logger.info(f"  - Error events: {len(error_events)}")
         self.logger.info(f"  - Recovery events: {len(recovery_events)}")
@@ -433,7 +433,7 @@ class TestAgentErrorRecoveryEventDelivery(BaseE2ETest):
         # VALIDATION: Connection recovery successful
         # The fact that we could reconnect and the test completed is the validation
         
-        self.logger.info("✅ SUCCESS: WebSocket connection recovery validated")
+        self.logger.info(" PASS:  SUCCESS: WebSocket connection recovery validated")
         self.logger.info(f"  - Initial events before interruption: {len(initial_events)}")
         self.logger.info(f"  - Recovery events after reconnection: {len(recovery_events)}")
     
@@ -559,7 +559,7 @@ class TestAgentErrorRecoveryEventDelivery(BaseE2ETest):
         
         get_error_summary = error_simulator.get_error_recovery_summary()
         
-        self.logger.info("✅ SUCCESS: Partial failure recovery event flow validated")
+        self.logger.info(" PASS:  SUCCESS: Partial failure recovery event flow validated")
         self.logger.info(f"  - Complete event flow: {len(complete_event_flow)}")
         self.logger.info(f"  - Failure indicators: {len(failure_indicators)}")
         self.logger.info(f"  - Recovery indicators: {len(recovery_indicators)}")
@@ -692,7 +692,7 @@ class TestAgentErrorRecoveryEventDelivery(BaseE2ETest):
         assert average_execution_time < 40.0, \
             f"Error scenarios taking too long: {average_execution_time:.2f}s"
         
-        self.logger.info("✅ BUSINESS CONTINUITY SUCCESS: Error scenario resilience validated")
+        self.logger.info(" PASS:  BUSINESS CONTINUITY SUCCESS: Error scenario resilience validated")
         self.logger.info(f"  - Scenarios tested: {len(error_scenarios)}")
         self.logger.info(f"  - WebSocket stability rate: {websocket_stability_rate:.1%}")
         self.logger.info(f"  - Average execution time: {average_execution_time:.2f}s")

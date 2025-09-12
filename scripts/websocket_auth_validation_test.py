@@ -69,10 +69,10 @@ class WebSocketAuthValidationResults:
         
         if success:
             self.success_count += 1
-            logger.info(f"✅ {test_name}: PASSED - {details}")
+            logger.info(f" PASS:  {test_name}: PASSED - {details}")
         else:
             self.error_count += 1
-            logger.error(f"❌ {test_name}: FAILED - {error}")
+            logger.error(f" FAIL:  {test_name}: FAILED - {error}")
             
             # Check for NO_TOKEN errors specifically
             if "NO_TOKEN" in error.upper() or "no token" in error.lower():
@@ -85,7 +85,7 @@ class WebSocketAuthValidationResults:
     def add_business_metric(self, metric_name: str, value: any):
         """Add a business value metric to the report."""
         self.business_value_metrics[metric_name] = value
-        logger.info(f"📊 {metric_name}: {value}")
+        logger.info(f" CHART:  {metric_name}: {value}")
     
     def get_summary(self) -> dict:
         """Get comprehensive validation summary."""
@@ -110,7 +110,7 @@ async def validate_local_websocket_auth():
     """Test WebSocket authentication against local development environment."""
     results = WebSocketAuthValidationResults()
     
-    logger.info("🚀 VALIDATING LOCAL WEBSOCKET AUTHENTICATION")
+    logger.info("[U+1F680] VALIDATING LOCAL WEBSOCKET AUTHENTICATION")
     
     # Test 1: Basic WebSocket Connection with Authentication
     try:
@@ -204,7 +204,7 @@ async def validate_staging_websocket_auth():
     """Test WebSocket authentication against staging environment."""
     results = WebSocketAuthValidationResults()
     
-    logger.info("🌐 VALIDATING STAGING WEBSOCKET AUTHENTICATION")
+    logger.info("[U+1F310] VALIDATING STAGING WEBSOCKET AUTHENTICATION")
     
     # Test 1: Staging WebSocket Connection with E2E Headers
     try:
@@ -272,7 +272,7 @@ async def validate_staging_websocket_auth():
                 results.add_test_result(
                     "Staging WebSocket Authentication",
                     False,
-                    error=f"❌ CRITICAL: NO_TOKEN error still occurring: {e}"
+                    error=f" FAIL:  CRITICAL: NO_TOKEN error still occurring: {e}"
                 )
             else:
                 results.add_test_result(
@@ -301,7 +301,7 @@ async def validate_staging_websocket_auth():
 def analyze_business_value_impact(results: WebSocketAuthValidationResults):
     """Analyze the business value impact of the authentication validation."""
     
-    logger.info("📈 ANALYZING BUSINESS VALUE IMPACT")
+    logger.info("[U+1F4C8] ANALYZING BUSINESS VALUE IMPACT")
     
     # Calculate key business metrics
     total_tests = len(results.test_results)
@@ -314,29 +314,29 @@ def analyze_business_value_impact(results: WebSocketAuthValidationResults):
     
     # Business impact assessment
     if len(results.no_token_errors) == 0 and results.success_count > 0:
-        results.add_business_metric("MRR Risk Mitigation Status", "✅ MITIGATED")
-        results.add_business_metric("Chat Business Value Status", "✅ OPERATIONAL")
-        results.add_business_metric("Customer Experience Impact", "✅ POSITIVE")
+        results.add_business_metric("MRR Risk Mitigation Status", " PASS:  MITIGATED")
+        results.add_business_metric("Chat Business Value Status", " PASS:  OPERATIONAL")
+        results.add_business_metric("Customer Experience Impact", " PASS:  POSITIVE")
     else:
-        results.add_business_metric("MRR Risk Mitigation Status", "❌ AT RISK")
-        results.add_business_metric("Chat Business Value Status", "❌ DEGRADED")
-        results.add_business_metric("Customer Experience Impact", "❌ NEGATIVE")
+        results.add_business_metric("MRR Risk Mitigation Status", " FAIL:  AT RISK")
+        results.add_business_metric("Chat Business Value Status", " FAIL:  DEGRADED")
+        results.add_business_metric("Customer Experience Impact", " FAIL:  NEGATIVE")
     
     # WebSocket event delivery validation
     if "Staging Agent Event Flow" in [r["test_name"] for r in results.test_results]:
         agent_flow_test = next(r for r in results.test_results if r["test_name"] == "Staging Agent Event Flow")
         if agent_flow_test["success"]:
-            results.add_business_metric("WebSocket Agent Events Status", "✅ OPERATIONAL")
-            results.add_business_metric("Real-time AI Interaction Status", "✅ FUNCTIONAL")
+            results.add_business_metric("WebSocket Agent Events Status", " PASS:  OPERATIONAL")
+            results.add_business_metric("Real-time AI Interaction Status", " PASS:  FUNCTIONAL")
         else:
-            results.add_business_metric("WebSocket Agent Events Status", "❌ BROKEN")
-            results.add_business_metric("Real-time AI Interaction Status", "❌ IMPAIRED")
+            results.add_business_metric("WebSocket Agent Events Status", " FAIL:  BROKEN")
+            results.add_business_metric("Real-time AI Interaction Status", " FAIL:  IMPAIRED")
 
 
 async def main():
     """Main validation execution."""
     logger.info("=" * 80)
-    logger.info("🔐 WEBSOCKET AUTHENTICATION VALIDATION - COMPREHENSIVE TEST")
+    logger.info("[U+1F510] WEBSOCKET AUTHENTICATION VALIDATION - COMPREHENSIVE TEST")
     logger.info("=" * 80)
     logger.info("MISSION: Validate WebSocket authentication fixes and business value delivery")
     logger.info("OBJECTIVE: Confirm zero NO_TOKEN errors and operational chat functionality")
@@ -375,44 +375,44 @@ async def main():
     
     # Final Report
     logger.info("\n" + "=" * 80)
-    logger.info("🎯 FINAL VALIDATION REPORT")
+    logger.info(" TARGET:  FINAL VALIDATION REPORT")
     logger.info("=" * 80)
     
     summary = all_results.get_summary()
     
-    logger.info(f"📊 VALIDATION SUMMARY:")
-    logger.info(f"  • Duration: {summary['validation_duration_seconds']:.1f} seconds")
-    logger.info(f"  • Total Tests: {summary['total_tests']}")
-    logger.info(f"  • Passed: {summary['passed_tests']}")
-    logger.info(f"  • Failed: {summary['failed_tests']}")
-    logger.info(f"  • Success Rate: {summary['success_rate_percent']:.1f}%")
+    logger.info(f" CHART:  VALIDATION SUMMARY:")
+    logger.info(f"  [U+2022] Duration: {summary['validation_duration_seconds']:.1f} seconds")
+    logger.info(f"  [U+2022] Total Tests: {summary['total_tests']}")
+    logger.info(f"  [U+2022] Passed: {summary['passed_tests']}")
+    logger.info(f"  [U+2022] Failed: {summary['failed_tests']}")
+    logger.info(f"  [U+2022] Success Rate: {summary['success_rate_percent']:.1f}%")
     
-    logger.info(f"\n🚨 CRITICAL NO_TOKEN ERROR ANALYSIS:")
-    logger.info(f"  • NO_TOKEN Errors Detected: {summary['no_token_error_count']}")
-    logger.info(f"  • NO_TOKEN Errors Eliminated: {'✅ YES' if summary['no_token_errors_eliminated'] else '❌ NO'}")
+    logger.info(f"\n ALERT:  CRITICAL NO_TOKEN ERROR ANALYSIS:")
+    logger.info(f"  [U+2022] NO_TOKEN Errors Detected: {summary['no_token_error_count']}")
+    logger.info(f"  [U+2022] NO_TOKEN Errors Eliminated: {' PASS:  YES' if summary['no_token_errors_eliminated'] else ' FAIL:  NO'}")
     
-    logger.info(f"\n💰 BUSINESS VALUE IMPACT:")
+    logger.info(f"\n[U+1F4B0] BUSINESS VALUE IMPACT:")
     for metric, value in summary['business_value_metrics'].items():
-        logger.info(f"  • {metric}: {value}")
+        logger.info(f"  [U+2022] {metric}: {value}")
     
-    logger.info(f"\n🎯 MISSION OUTCOME:")
+    logger.info(f"\n TARGET:  MISSION OUTCOME:")
     if summary['critical_failure_risk_mitigated']:
-        logger.info("  ✅ SUCCESS: WebSocket authentication fixes are EFFECTIVE")
-        logger.info("  ✅ SUCCESS: NO_TOKEN errors ELIMINATED")
-        logger.info("  ✅ SUCCESS: Business value delivery OPERATIONAL")
-        logger.info("  ✅ SUCCESS: $120K+ MRR risk MITIGATED")
+        logger.info("   PASS:  SUCCESS: WebSocket authentication fixes are EFFECTIVE")
+        logger.info("   PASS:  SUCCESS: NO_TOKEN errors ELIMINATED")
+        logger.info("   PASS:  SUCCESS: Business value delivery OPERATIONAL")
+        logger.info("   PASS:  SUCCESS: $120K+ MRR risk MITIGATED")
     else:
-        logger.error("  ❌ FAILURE: WebSocket authentication fixes are NOT effective")
-        logger.error("  ❌ FAILURE: NO_TOKEN errors still occurring")
-        logger.error("  ❌ FAILURE: Business value delivery at risk")
-        logger.error("  ❌ FAILURE: $120K+ MRR risk remains")
+        logger.error("   FAIL:  FAILURE: WebSocket authentication fixes are NOT effective")
+        logger.error("   FAIL:  FAILURE: NO_TOKEN errors still occurring")
+        logger.error("   FAIL:  FAILURE: Business value delivery at risk")
+        logger.error("   FAIL:  FAILURE: $120K+ MRR risk remains")
     
     # Save detailed report
     report_file = "websocket_auth_validation_report.json"
     with open(report_file, 'w') as f:
         json.dump(summary, f, indent=2, default=str)
     
-    logger.info(f"\n📄 Detailed report saved to: {report_file}")
+    logger.info(f"\n[U+1F4C4] Detailed report saved to: {report_file}")
     logger.info("=" * 80)
     
     # Return appropriate exit code

@@ -155,8 +155,8 @@ This consolidation reduced {metrics['total_files']} test files into 1 comprehens
 - **Duplicate Patterns**: 0
 
 ## Improvements Achieved
-- **File Reduction**: {metrics['total_files']} → 1 ({100 - (1/max(metrics['total_files'], 1) * 100):.1f}% reduction)
-- **Function Optimization**: {metrics['total_functions']} → ~50 ({100 - (50/max(metrics['total_functions'], 1) * 100):.1f}% reduction)
+- **File Reduction**: {metrics['total_files']}  ->  1 ({100 - (1/max(metrics['total_files'], 1) * 100):.1f}% reduction)
+- **Function Optimization**: {metrics['total_functions']}  ->  ~50 ({100 - (50/max(metrics['total_functions'], 1) * 100):.1f}% reduction)
 - **Eliminated Duplicates**: {metrics['duplicate_patterns']} duplicate patterns removed
 - **Removed Stubs**: {metrics['stub_functions']} stub functions eliminated
 

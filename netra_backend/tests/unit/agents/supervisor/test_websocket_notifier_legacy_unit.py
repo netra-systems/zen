@@ -48,11 +48,11 @@ class TestWebSocketNotifierLegacyUnit:
     def context_with_unicode(self):
         """Test context with unicode characters."""
         return AgentExecutionContext(
-            agent_name="测试代理",  # Chinese characters
+            agent_name="[U+6D4B][U+8BD5][U+4EE3][U+7406]",  # Chinese characters
             run_id=str(uuid.uuid4()),
-            thread_id="thread-🚀-测试",  # Mixed unicode
-            user_id="user-ñame",  # Spanish characters
-            correlation_id="corr-🔗-id"  # Emoji
+            thread_id="thread-[U+1F680]-[U+6D4B][U+8BD5]",  # Mixed unicode
+            user_id="user-[U+00F1]ame",  # Spanish characters
+            correlation_id="corr-[U+1F517]-id"  # Emoji
         )
     
     @pytest.fixture
@@ -96,19 +96,19 @@ class TestWebSocketNotifierLegacyUnit:
             await notifier.send_agent_started(context_with_unicode)
             await notifier.send_agent_thinking(
                 context_with_unicode, 
-                "Unicode思考: Processing 🎯 data"
+                "Unicode[U+601D][U+8003]: Processing  TARGET:  data"
             )
             await notifier.send_tool_executing(
                 context_with_unicode, 
-                "unicode_tool_🔧"
+                "unicode_tool_[U+1F527]"
             )
             await notifier.send_agent_completed(
                 context_with_unicode, 
-                {"result": "Unicode成功 ✅"}
+                {"result": "Unicode[U+6210][U+529F]  PASS: "}
             )
             await notifier.send_agent_failed(
                 context_with_unicode,
-                error_message="Unicode错误 ❌"
+                error_message="Unicode[U+9519][U+8BEF]  FAIL: "
             )
             
             # Operations tracking should still work
@@ -131,8 +131,8 @@ class TestWebSocketNotifierLegacyUnit:
         # Send unicode message
         await notifier.send_agent_thinking(
             context_with_unicode,
-            thought="正在分析数据 📊 using AI 🤖",
-            current_operation="unicode_processing_🌍"
+            thought="[U+6B63][U+5728][U+5206][U+6790][U+6570][U+636E]  CHART:  using AI [U+1F916]",
+            current_operation="unicode_processing_[U+1F30D]"
         )
         
         # Verify call was made
@@ -142,8 +142,8 @@ class TestWebSocketNotifierLegacyUnit:
         # Verify unicode is preserved in payload
         message_data = call_args[1]
         payload = message_data['payload']
-        assert payload['thought'] == "正在分析数据 📊 using AI 🤖"
-        assert payload['current_operation'] == "unicode_processing_🌍"
+        assert payload['thought'] == "[U+6B63][U+5728][U+5206][U+6790][U+6570][U+636E]  CHART:  using AI [U+1F916]"
+        assert payload['current_operation'] == "unicode_processing_[U+1F30D]"
         
         # Cleanup
         await notifier.shutdown()

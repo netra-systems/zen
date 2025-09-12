@@ -2,7 +2,7 @@
 Unit Tests for Agent Execution State Transitions
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Revenue protection and user experience reliability
 - Value Impact: Ensures agent execution state tracking prevents silent failures and provides real-time progress
 - Strategic Impact: Core platform functionality - agent state management protects $500K+ ARR from execution failures
@@ -72,9 +72,9 @@ class TestExecutionStateTransitions(SSotBaseTestCase):
             thread_id=self.test_thread_id
         )
         
-        # PENDING → STARTING (normal startup)
+        # PENDING  ->  STARTING (normal startup)
         result = self.tracker.update_execution_state(execution_id, ExecutionState.STARTING)
-        self.assertTrue(result, "Should allow PENDING → STARTING transition")
+        self.assertTrue(result, "Should allow PENDING  ->  STARTING transition")
         
         execution = self.tracker.get_execution(execution_id)
         self.assertEqual(execution.state, ExecutionState.STARTING)
@@ -90,9 +90,9 @@ class TestExecutionStateTransitions(SSotBaseTestCase):
         # Set up STARTING state
         self.tracker.update_execution_state(execution_id, ExecutionState.STARTING)
         
-        # Test STARTING → RUNNING (normal execution flow)
+        # Test STARTING  ->  RUNNING (normal execution flow)
         result = self.tracker.update_execution_state(execution_id, ExecutionState.RUNNING)
-        self.assertTrue(result, "Should allow STARTING → RUNNING transition")
+        self.assertTrue(result, "Should allow STARTING  ->  RUNNING transition")
         
         execution = self.tracker.get_execution(execution_id)
         self.assertEqual(execution.state, ExecutionState.RUNNING)
@@ -109,9 +109,9 @@ class TestExecutionStateTransitions(SSotBaseTestCase):
         self.tracker.update_execution_state(execution_id, ExecutionState.STARTING)
         self.tracker.update_execution_state(execution_id, ExecutionState.RUNNING)
         
-        # Test RUNNING → COMPLETING (normal completion flow)
+        # Test RUNNING  ->  COMPLETING (normal completion flow)
         result = self.tracker.update_execution_state(execution_id, ExecutionState.COMPLETING)
-        self.assertTrue(result, "Should allow RUNNING → COMPLETING transition")
+        self.assertTrue(result, "Should allow RUNNING  ->  COMPLETING transition")
         
         execution = self.tracker.get_execution(execution_id)
         self.assertEqual(execution.state, ExecutionState.COMPLETING)
@@ -128,7 +128,7 @@ class TestExecutionStateTransitions(SSotBaseTestCase):
         self.tracker.update_execution_state(execution_id1, ExecutionState.COMPLETING)
         
         result = self.tracker.update_execution_state(execution_id1, ExecutionState.COMPLETED)
-        self.assertTrue(result, "Should allow COMPLETING → COMPLETED transition")
+        self.assertTrue(result, "Should allow COMPLETING  ->  COMPLETED transition")
         
         # Test FAILED from any state
         execution_id2 = self.tracker.create_execution(
@@ -139,7 +139,7 @@ class TestExecutionStateTransitions(SSotBaseTestCase):
         self.tracker.update_execution_state(execution_id2, ExecutionState.RUNNING)
         
         result = self.tracker.update_execution_state(execution_id2, ExecutionState.FAILED)
-        self.assertTrue(result, "Should allow RUNNING → FAILED transition")
+        self.assertTrue(result, "Should allow RUNNING  ->  FAILED transition")
         
         # Test TIMEOUT from any state
         execution_id3 = self.tracker.create_execution(
@@ -150,7 +150,7 @@ class TestExecutionStateTransitions(SSotBaseTestCase):
         self.tracker.update_execution_state(execution_id3, ExecutionState.RUNNING)
         
         result = self.tracker.update_execution_state(execution_id3, ExecutionState.TIMEOUT)
-        self.assertTrue(result, "Should allow RUNNING → TIMEOUT transition")
+        self.assertTrue(result, "Should allow RUNNING  ->  TIMEOUT transition")
     
     def test_dict_object_state_rejection_issue_305_fix(self):
         """Test that dict objects are rejected as state values (Issue #305 fix)."""

@@ -282,7 +282,7 @@ class BatchTestProcessor:
         """Check if test already passes"""
         if proc_result.returncode == 0:
             result["status"] = "passed"
-            print(f"  ✓ Test already passing")
+            print(f"  [U+2713] Test already passing")
             return True
         return False
 
@@ -310,18 +310,18 @@ class BatchTestProcessor:
             if fixed: result["fix_applied"] = "import_correction"
         else:
             result["status"] = "manual_review"
-            print(f"  ⚠ Needs manual review: {analysis['error_type']}")
+            print(f"   WARNING:  Needs manual review: {analysis['error_type']}")
 
     def _handle_test_timeout(self, result):
         """Handle test timeout"""
         result["status"] = "timeout"
-        print(f"  ⏰ Test timed out")
+        print(f"  [U+23F0] Test timed out")
 
     def _handle_test_error(self, e, result):
         """Handle test execution error"""
         result["status"] = "error"
         result["error"] = str(e)
-        print(f"  ❌ Error: {e}")
+        print(f"   FAIL:  Error: {e}")
 
     def process_single_test(self, test_path: str) -> Dict:
         """Process a single test"""

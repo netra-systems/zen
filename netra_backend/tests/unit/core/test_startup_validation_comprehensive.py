@@ -232,7 +232,7 @@ class TestAddFailedValidationMethod:
         with patch.object(self.validator.logger, 'error') as mock_error:
             self.validator._add_failed_validation("Test", "Category", "Error message")
             
-            mock_error.assert_called_once_with("❌ Test: Error message")
+            mock_error.assert_called_once_with(" FAIL:  Test: Error message")
 
 
 class TestDetermineSuccessMethod:
@@ -595,7 +595,7 @@ class TestValidateAgentsMethod:
             await self.validator._validate_agents(mock_app)
             
             # Should log about registry agents
-            mock_info.assert_any_call("✓ Agent Registry: 8 agents registered")
+            mock_info.assert_any_call("[U+2713] Agent Registry: 8 agents registered")
 
     @pytest.mark.asyncio
     async def test_validate_agents_legacy_registry_empty(self):
@@ -611,7 +611,7 @@ class TestValidateAgentsMethod:
             await self.validator._validate_agents(mock_app)
             
             # Should log about factory pattern
-            mock_info.assert_any_call("ℹ️ Legacy registry empty - agents will be created per-request (factory pattern)")
+            mock_info.assert_any_call("[U+2139][U+FE0F] Legacy registry empty - agents will be created per-request (factory pattern)")
 
     @pytest.mark.asyncio
     async def test_validate_agents_exception_handling(self):
@@ -659,7 +659,7 @@ class TestValidateToolsMethod:
         assert validation.actual_count == 4
         assert validation.status == ComponentStatus.HEALTHY
         assert "Configured 4 tool classes for UserContext" in validation.message
-        assert "Bridge Factory: ✓" in validation.message
+        assert "Bridge Factory: [U+2713]" in validation.message
         assert validation.metadata["mode"] == "UserContext"
         assert validation.metadata["websocket_bridge_factory"] is True
 
@@ -675,10 +675,10 @@ class TestValidateToolsMethod:
         with patch.object(self.validator.logger, 'warning') as mock_warning:
             await self.validator._validate_tools(mock_app)
             
-            mock_warning.assert_any_call("⚠️ WebSocketBridgeFactory NOT configured - per-user WebSocket isolation may fail")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] WebSocketBridgeFactory NOT configured - per-user WebSocket isolation may fail")
         
         validation = self.validator.validations[0]
-        assert "Bridge Factory: ✗" in validation.message
+        assert "Bridge Factory: [U+2717]" in validation.message
         assert validation.metadata["websocket_bridge_factory"] is False
 
     @pytest.mark.asyncio
@@ -691,7 +691,7 @@ class TestValidateToolsMethod:
         with patch.object(self.validator.logger, 'warning') as mock_warning:
             await self.validator._validate_tools(mock_app)
             
-            mock_warning.assert_any_call("⚠️ NO TOOLS CONFIGURED for UserContext")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] NO TOOLS CONFIGURED for UserContext")
         
         validation = self.validator.validations[0]
         assert validation.actual_count == 0
@@ -711,8 +711,8 @@ class TestValidateToolsMethod:
         with patch.object(self.validator.logger, 'warning') as mock_warning:
             await self.validator._validate_tools(mock_app)
             
-            mock_warning.assert_any_call("⚠️ LEGACY: Global tool_dispatcher found - should be None in UserContext architecture")
-            mock_warning.assert_any_call("⚠️ LEGACY Tool Dispatcher: 2 tools - MIGRATE TO UserContext")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] LEGACY: Global tool_dispatcher found - should be None in UserContext architecture")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] LEGACY Tool Dispatcher: 2 tools - MIGRATE TO UserContext")
         
         validation = self.validator.validations[0]
         assert validation.name == "Tool Dispatcher (LEGACY)"
@@ -790,7 +790,7 @@ class TestValidateDatabaseMethod:
         with patch.object(self.validator.logger, 'info') as mock_info:
             await self.validator._validate_database(mock_app)
             
-            mock_info.assert_any_call("ℹ️ Database in mock mode")
+            mock_info.assert_any_call("[U+2139][U+FE0F] Database in mock mode")
         
         assert len(self.validator.validations) == 1
         validation = self.validator.validations[0]
@@ -813,7 +813,7 @@ class TestValidateDatabaseMethod:
         with patch.object(self.validator.logger, 'warning') as mock_warning:
             await self.validator._validate_database(mock_app)
             
-            mock_warning.assert_any_call("⚠️ Database session factory is None but not in mock mode")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] Database session factory is None but not in mock mode")
         
         validation = self.validator.validations[0]
         assert validation.status == ComponentStatus.CRITICAL
@@ -856,7 +856,7 @@ class TestValidateDatabaseMethod:
             with patch.object(self.validator.logger, 'warning') as mock_warning:
                 await self.validator._validate_database(mock_app)
                 
-                mock_warning.assert_any_call("⚠️ ZERO DATABASE TABLES found - expected ~15")
+                mock_warning.assert_any_call(" WARNING: [U+FE0F] ZERO DATABASE TABLES found - expected ~15")
         
         validation = self.validator.validations[0]
         assert validation.actual_count == 0
@@ -967,7 +967,7 @@ class TestValidateWebSocketMethod:
         with patch.object(self.validator.logger, 'info') as mock_info:
             await self.validator._validate_websocket(mock_app)
             
-            mock_info.assert_any_call("✓ WebSocket: 2 handlers, 2 connections")
+            mock_info.assert_any_call("[U+2713] WebSocket: 2 handlers, 2 connections")
         
         validation = self.validator.validations[0]
         assert validation.name == "WebSocket Manager"
@@ -991,7 +991,7 @@ class TestValidateWebSocketMethod:
         with patch.object(self.validator.logger, 'info') as mock_info:
             await self.validator._validate_websocket(mock_app)
             
-            mock_info.assert_any_call("ℹ️ WebSocket handlers will be created per-user (factory pattern)")
+            mock_info.assert_any_call("[U+2139][U+FE0F] WebSocket handlers will be created per-user (factory pattern)")
         
         validation = self.validator.validations[0]
         assert validation.status == ComponentStatus.WARNING  # Zero handlers = WARNING
@@ -1092,9 +1092,9 @@ class TestValidateServicesMethod:
             await self.validator._validate_services(mock_app)
             
             # Should log success for each service
-            mock_info.assert_any_call("✓ LLM Manager: Initialized")
-            mock_info.assert_any_call("✓ Key Manager: Initialized")
-            mock_info.assert_any_call("✓ Security Service: Initialized")
+            mock_info.assert_any_call("[U+2713] LLM Manager: Initialized")
+            mock_info.assert_any_call("[U+2713] Key Manager: Initialized")
+            mock_info.assert_any_call("[U+2713] Security Service: Initialized")
         
         # Should create validation for each service
         assert len(self.validator.validations) >= 8
@@ -1118,8 +1118,8 @@ class TestValidateServicesMethod:
         with patch.object(self.validator.logger, 'warning') as mock_warning:
             await self.validator._validate_services(mock_app)
             
-            mock_warning.assert_any_call("⚠️ LLM Manager is None")
-            mock_warning.assert_any_call("⚠️ Corpus Service is None")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] LLM Manager is None")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] Corpus Service is None")
         
         llm_validation = next(v for v in self.validator.validations if v.name == "LLM Manager")
         assert llm_validation.status == ComponentStatus.CRITICAL  # Critical service
@@ -1140,7 +1140,7 @@ class TestValidateServicesMethod:
         with patch.object(self.validator.logger, 'warning') as mock_warning:
             await self.validator._validate_services(mock_app)
             
-            mock_warning.assert_any_call("⚠️ Key Manager not found in app.state")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] Key Manager not found in app.state")
         
         key_validation = next(v for v in self.validator.validations if v.name == "Key Manager")
         assert key_validation.status == ComponentStatus.CRITICAL
@@ -1170,8 +1170,8 @@ class TestValidateServicesMethod:
             await self.validator._validate_services(mock_app)
             
             mock_info.assert_any_call("Validating UserContext Factory Patterns...")
-            mock_info.assert_any_call("✓ ExecutionEngineFactory: Initialized - Per-user execution isolation")
-            mock_info.assert_any_call("ℹ️ AgentInstanceFactory not configured - Agent instance creation optional")
+            mock_info.assert_any_call("[U+2713] ExecutionEngineFactory: Initialized - Per-user execution isolation")
+            mock_info.assert_any_call("[U+2139][U+FE0F] AgentInstanceFactory not configured - Agent instance creation optional")
         
         # Check factory validations
         factory_validations = [v for v in self.validator.validations if v.category == "Factories"]
@@ -1202,7 +1202,7 @@ class TestValidateServicesMethod:
         with patch.object(self.validator.logger, 'warning') as mock_warning:
             await self.validator._validate_services(mock_app)
             
-            mock_warning.assert_any_call("⚠️ ExecutionEngineFactory not found - Per-user execution isolation missing")
+            mock_warning.assert_any_call(" WARNING: [U+FE0F] ExecutionEngineFactory not found - Per-user execution isolation missing")
         
         factory_validations = [v for v in self.validator.validations if v.category == "Factories"]
         engine_factory = next(v for v in factory_validations if v.name == "ExecutionEngineFactory")
@@ -1249,7 +1249,7 @@ class TestLogResultsMethod:
         with patch.object(self.validator.logger, 'info') as mock_info:
             self.validator._log_results(True, report)
             
-            mock_info.assert_any_call("Overall Status: ✅ PASSED")
+            mock_info.assert_any_call("Overall Status:  PASS:  PASSED")
             mock_info.assert_any_call("Total Validations: 5")
             mock_info.assert_any_call("Healthy: 4")
             mock_info.assert_any_call("Warnings: 1")
@@ -1277,8 +1277,8 @@ class TestLogResultsMethod:
             
             self.validator._log_results(False, report)
             
-            mock_info.assert_any_call("Overall Status: ❌ FAILED")
-            mock_error.assert_any_call("⚠️ 2 CRITICAL FAILURES DETECTED")
+            mock_info.assert_any_call("Overall Status:  FAIL:  FAILED")
+            mock_error.assert_any_call(" WARNING: [U+FE0F] 2 CRITICAL FAILURES DETECTED")
 
     def test_log_results_zero_count_warnings(self):
         """Test _log_results logs zero-count component warnings."""
@@ -1346,7 +1346,7 @@ class TestCriticalPathValidation:
                 await self.validator._validate_critical_paths(mock_app)
                 
                 mock_info.assert_any_call("Validating critical communication paths...")
-                mock_info.assert_any_call("✓ Critical communication paths: All validated")
+                mock_info.assert_any_call("[U+2713] Critical communication paths: All validated")
         
         validation = self.validator.validations[0]
         assert validation.name == "Critical Communication Paths"
@@ -1378,7 +1378,7 @@ class TestCriticalPathValidation:
             with patch.object(self.validator.logger, 'error') as mock_error:
                 await self.validator._validate_critical_paths(mock_app)
                 
-                mock_error.assert_any_call("❌ CRITICAL: 2 chat-breaking communication failures!")
+                mock_error.assert_any_call(" FAIL:  CRITICAL: 2 chat-breaking communication failures!")
         
         validation = self.validator.validations[0]
         assert validation.status == ComponentStatus.CRITICAL
@@ -1406,7 +1406,7 @@ class TestCriticalPathValidation:
             with patch.object(self.validator.logger, 'warning') as mock_warning:
                 await self.validator._validate_critical_paths(mock_app)
                 
-                mock_warning.assert_any_call("⚠️ 1 degraded communication paths")
+                mock_warning.assert_any_call(" WARNING: [U+FE0F] 1 degraded communication paths")
         
         validation = self.validator.validations[0]
         assert validation.status == ComponentStatus.WARNING

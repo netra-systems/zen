@@ -93,7 +93,7 @@ class TestHandlerRegistrationGracePeriod:
             # Should have logged a warning
             mock_logger.warning.assert_called_once()
             warning_call = mock_logger.warning.call_args[0][0]
-            assert "⚠️ ZERO WebSocket message handlers after" in warning_call
+            assert " WARNING: [U+FE0F] ZERO WebSocket message handlers after" in warning_call
 
     def test_grace_period_expired_with_handlers_ready(self):
         """Test normal operation after grace period with handlers."""
@@ -147,7 +147,7 @@ class TestHandlerRegistrationGracePeriod:
             # Should have logged a warning about zero handlers
             mock_logger.warning.assert_called_once()
             warning_call = mock_logger.warning.call_args[0][0]
-            assert "⚠️ ZERO WebSocket message handlers after" in warning_call
+            assert " WARNING: [U+FE0F] ZERO WebSocket message handlers after" in warning_call
 
     def test_get_stats_includes_handler_status(self):
         """Test that get_stats includes the new handler status with grace period info."""

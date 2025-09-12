@@ -182,7 +182,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
             }
         
         # Execute concurrent session operations
-        print(f"🔒 Testing thread safety with {concurrent_users} concurrent users...")
+        print(f"[U+1F512] Testing thread safety with {concurrent_users} concurrent users...")
         test_start = time.time()
         
         user_tasks = [
@@ -208,7 +208,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
         success_rate = len(successful_results) / concurrent_users
         assert success_rate >= 0.95, f"Success rate {success_rate:.3f} below 95% threshold"
         
-        print(f"✅ Concurrent User Session Management Results:")
+        print(f" PASS:  Concurrent User Session Management Results:")
         print(f"   Concurrent users: {concurrent_users}")
         print(f"   Successful users: {len(successful_results)}")
         print(f"   Failed users: {len(failed_results)}")
@@ -252,7 +252,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
         scenario_results = []
         
         for scenario in atomic_test_scenarios:
-            print(f"🔢 Testing atomic operations: {scenario['name']}")
+            print(f"[U+1F522] Testing atomic operations: {scenario['name']}")
             
             test_key = f"atomic_test:{scenario['name']}:{int(time.time())}"
             
@@ -343,7 +343,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
             print(f"   {scenario['name']} Results:")
             print(f"     Expected final value: {expected_value}")
             print(f"     Actual final value: {final_value}")
-            print(f"     Consistency check: {'✓' if consistency_check else '✗'}")
+            print(f"     Consistency check: {'[U+2713]' if consistency_check else '[U+2717]'}")
             print(f"     Successful workers: {len(successful_workers)}/{scenario['concurrent_workers']}")
             print(f"     Operations/second: {scenario_result['operations_per_second']:.1f}")
             
@@ -352,7 +352,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
             if scenario["name"] == "redis_hash_updates":
                 await redis.delete(f"{test_key}:hash")
         
-        print(f"✅ Atomic Operations Consistency Test Results:")
+        print(f" PASS:  Atomic Operations Consistency Test Results:")
         for result in scenario_results:
             print(f"   {result['name']}: {'PASSED' if result['consistency_check'] else 'FAILED'}")
     
@@ -478,7 +478,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
                     }
             
             # Execute concurrent transfers
-            print(f"💰 Testing database transaction isolation with {concurrent_transfers} concurrent transfers...")
+            print(f"[U+1F4B0] Testing database transaction isolation with {concurrent_transfers} concurrent transfers...")
             transfers_start = time.time()
             
             transfer_tasks = [
@@ -512,7 +512,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
             success_rate = len(successful_transfers) / concurrent_transfers
             assert success_rate >= 0.80, f"Transfer success rate {success_rate:.3f} too low (deadlocks may be acceptable)"
             
-            print(f"✅ Database Transaction Isolation Results:")
+            print(f" PASS:  Database Transaction Isolation Results:")
             print(f"   Concurrent transfers: {concurrent_transfers}")
             print(f"   Successful transfers: {len(successful_transfers)}")
             print(f"   Failed transfers: {len(failed_transfers)}")
@@ -520,7 +520,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
             print(f"   Success rate: {success_rate:.3f}")
             print(f"   Expected total balance: {expected_total_balance:.2f}")
             print(f"   Actual total balance: {total_final_balance:.2f}")
-            print(f"   Balance conservation: {'✓' if balance_conservation_check else '✗'}")
+            print(f"   Balance conservation: {'[U+2713]' if balance_conservation_check else '[U+2717]'}")
             print(f"   Transfer duration: {transfers_duration:.2f}s")
             
         finally:
@@ -638,7 +638,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
             }
         
         # Execute concurrent workers with locking
-        print(f"🔐 Testing shared resource locking with {concurrent_workers} workers...")
+        print(f"[U+1F510] Testing shared resource locking with {concurrent_workers} workers...")
         locking_start = time.time()
         
         worker_tasks = [
@@ -694,7 +694,7 @@ class TestThreadSafetyRaceConditionPrevention(BaseIntegrationTest):
         timeout_rate = total_lock_timeouts / total_attempted_operations
         assert timeout_rate <= 0.3, f"Lock timeout rate {timeout_rate:.3f} too high"
         
-        print(f"✅ Shared Resource Locking Test Results:")
+        print(f" PASS:  Shared Resource Locking Test Results:")
         print(f"   Concurrent workers: {concurrent_workers}")
         print(f"   Successful workers: {len(successful_workers)}")
         print(f"   Total operations completed: {total_operations}")

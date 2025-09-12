@@ -14,24 +14,24 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # Test if basic imports work
 try:
     from shared.isolated_environment import IsolatedEnvironment
-    print("✅ Shared imports working")
+    print(" PASS:  Shared imports working")
 except ImportError as e:
-    print(f"❌ Import error: {e}")
+    print(f" FAIL:  Import error: {e}")
 
 try:
     from netra_backend.app.services.user_execution_context import UserExecutionContext
-    print("✅ UserExecutionContext import working")
+    print(" PASS:  UserExecutionContext import working")
 except ImportError as e:
-    print(f"❌ UserExecutionContext import failed: {e}")
+    print(f" FAIL:  UserExecutionContext import failed: {e}")
 
 try:
     from netra_backend.app.agents.supervisor.agent_instance_factory import (
         get_agent_instance_factory,
         configure_agent_instance_factory
     )
-    print("✅ AgentInstanceFactory imports working")
+    print(" PASS:  AgentInstanceFactory imports working")
 except ImportError as e:
-    print(f"❌ AgentInstanceFactory import failed: {e}")
+    print(f" FAIL:  AgentInstanceFactory import failed: {e}")
 
 @dataclass
 class BasicPerformanceTest:
@@ -160,7 +160,7 @@ class SingletonMigrationValidator:
     @staticmethod
     async def run_validation_suite():
         """Run complete validation suite"""
-        print("🔍 Running Singleton Migration Validation Suite")
+        print(" SEARCH:  Running Singleton Migration Validation Suite")
         print("=" * 50)
         
         tests = [
@@ -173,7 +173,7 @@ class SingletonMigrationValidator:
         failed = 0
         
         for test in tests:
-            status = "✅ PASS" if test.success else "❌ FAIL"
+            status = " PASS:  PASS" if test.success else " FAIL:  FAIL"
             duration_ms = test.duration * 1000
             
             print(f"{status} {test.test_name:<30} ({duration_ms:.1f}ms)")
@@ -187,16 +187,16 @@ class SingletonMigrationValidator:
         print(f"Results: {passed} passed, {failed} failed")
         
         if failed == 0:
-            print("✅ Basic singleton migration validation PASSED")
+            print(" PASS:  Basic singleton migration validation PASSED")
             print("Note: This is a limited test without full system dependencies")
         else:
-            print("❌ Basic singleton migration validation FAILED")
+            print(" FAIL:  Basic singleton migration validation FAILED")
             print("Critical issues detected in basic functionality")
         
         return failed == 0
 
 if __name__ == "__main__":
-    print("🚀 Starting Basic Singleton Migration Validation")
+    print("[U+1F680] Starting Basic Singleton Migration Validation")
     print("This test runs without Docker/database dependencies")
     print()
     
@@ -205,8 +205,8 @@ if __name__ == "__main__":
     
     print()
     if result:
-        print("🎉 Basic validation completed successfully")
+        print(" CELEBRATION:  Basic validation completed successfully")
         print("Recommendation: Run full test suite when Docker is available")
     else:
-        print("🚨 Basic validation failed - critical issues present")
+        print(" ALERT:  Basic validation failed - critical issues present")
         print("Recommendation: Fix basic issues before running full tests")

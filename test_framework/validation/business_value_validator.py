@@ -284,7 +284,7 @@ class BusinessValueValidator:
         # Log critical business value issues
         critical_violations = [v for v in violations if v.impact_level in [BusinessValueImpact.REVENUE_CRITICAL, BusinessValueImpact.NEGATIVE_VALUE]]
         for violation in critical_violations:
-            logger.error(f"🚨 BUSINESS VALUE VIOLATION: {violation.description}")
+            logger.error(f" ALERT:  BUSINESS VALUE VIOLATION: {violation.description}")
         
         return result
     
@@ -759,7 +759,7 @@ class BusinessValueValidator:
                     error_parts.append(f"- {v.description} (Impact: ${v.revenue_impact:.0f})")
             
             error_message = (
-                "🚨 BUSINESS VALUE FAILURE - WebSocket events not delivering revenue-critical value!\n"
+                " ALERT:  BUSINESS VALUE FAILURE - WebSocket events not delivering revenue-critical value!\n"
                 + "\n".join(error_parts) + "\n\n"
                 f"Session stats: {self.events_processed} events, {len(self.violations)} violations\n"
                 f"User segment: {self.user_segment}, Conversion: {result.conversion_potential.probability:.1%}\n"

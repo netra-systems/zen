@@ -1,7 +1,7 @@
 """MultiLayer Coordination Service - Centralized coordination for system layers.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Foundation for all real-time features  
+- Segment: ALL (Free  ->  Enterprise) - Foundation for all real-time features  
 - Business Goal: Ensure coordinated operations across WebSocket, Database, Agent, and Cache layers
 - Value Impact: Eliminates coordination gaps that cause data inconsistency and user experience issues
 - Strategic Impact: CRITICAL - Protects $500K+ ARR Golden Path by ensuring system-wide coordination
@@ -112,14 +112,14 @@ class MultiLayerCoordinationService:
         # Setup health monitoring
         self._setup_health_monitoring()
         
-        logger.info("🔗 MultiLayerCoordinationService initialized with health monitoring")
+        logger.info("[U+1F517] MultiLayerCoordinationService initialized with health monitoring")
         
     def _setup_health_monitoring(self):
         """Setup health monitoring callbacks and alerts."""
         if self.health_monitor:
             # Add alert callback for coordination issues
             self.health_monitor.add_alert_callback(self._handle_coordination_alert)
-            logger.debug("📊 Health monitoring callbacks configured")
+            logger.debug(" CHART:  Health monitoring callbacks configured")
             
     async def _handle_coordination_alert(self, alert):
         """Handle coordination health alerts.
@@ -127,11 +127,11 @@ class MultiLayerCoordinationService:
         Args:
             alert: HealthAlert object describing the issue
         """
-        logger.warning(f"🚨 Coordination health alert {alert.alert_id}: {alert.error_message}")
+        logger.warning(f" ALERT:  Coordination health alert {alert.alert_id}: {alert.error_message}")
         
         # Log user impact for business analysis
         if alert.user_impact != "No user impact":
-            logger.error(f"👤 User impact from coordination issue: {alert.user_impact}")
+            logger.error(f"[U+1F464] User impact from coordination issue: {alert.user_impact}")
             
         # Update coordination metrics
         self.coordination_metrics['coordination_failures'] += 1
@@ -149,7 +149,7 @@ class MultiLayerCoordinationService:
         # Link WebSocket manager to database coordinator if both are available
         if self.websocket_manager and hasattr(database_manager, 'transaction_coordinator'):
             database_manager.transaction_coordinator.set_websocket_manager(self.websocket_manager)
-            logger.info("🔗 Database and WebSocket managers linked for coordination")
+            logger.info("[U+1F517] Database and WebSocket managers linked for coordination")
             
     def set_websocket_manager(self, websocket_manager):
         """Set WebSocket manager with coordination support.
@@ -166,7 +166,7 @@ class MultiLayerCoordinationService:
             websocket_manager.set_transaction_coordinator(
                 self.database_manager.transaction_coordinator
             )
-            logger.info("🔗 WebSocket and Database managers linked for coordination")
+            logger.info("[U+1F517] WebSocket and Database managers linked for coordination")
             
     def set_agent_tracker(self, agent_tracker):
         """Set agent execution tracker for state coordination.
@@ -175,7 +175,7 @@ class MultiLayerCoordinationService:
             agent_tracker: Agent execution tracker instance
         """
         self.agent_tracker = agent_tracker
-        logger.debug("🤖 Agent tracker linked to coordination service")
+        logger.debug("[U+1F916] Agent tracker linked to coordination service")
         
     async def execute_coordinated_operation(
         self,
@@ -231,7 +231,7 @@ class MultiLayerCoordinationService:
         self.active_operations[operation_id] = operation
         self.coordination_metrics['operations_started'] += 1
         
-        logger.info(f"🔗 Starting coordinated operation {operation_id}: {operation_name} "
+        logger.info(f"[U+1F517] Starting coordinated operation {operation_id}: {operation_name} "
                    f"(type: {operation_type.value}, user: {user_id})")
         
         # Track coordination timing for health monitoring
@@ -268,7 +268,7 @@ class MultiLayerCoordinationService:
                         db_result = await db_operation(session)
                         coordination_timing['database'] = time.time()
                         
-                logger.debug(f"✅ Database operation completed for {operation_id} "
+                logger.debug(f" PASS:  Database operation completed for {operation_id} "
                            f"in {time.time() - db_start_time:.3f}s")
             
             # 3. Execute agent state updates
@@ -279,7 +279,7 @@ class MultiLayerCoordinationService:
                     await self._execute_agent_state_update(state_update)
                     
                 coordination_timing['agent'] = time.time()
-                logger.debug(f"✅ Agent state updates completed for {operation_id} "
+                logger.debug(f" PASS:  Agent state updates completed for {operation_id} "
                            f"in {time.time() - agent_start_time:.3f}s")
             
             # 4. Execute cache operations
@@ -290,7 +290,7 @@ class MultiLayerCoordinationService:
                     await self._execute_cache_operation(cache_op)
                     
                 coordination_timing['cache'] = time.time()
-                logger.debug(f"✅ Cache operations completed for {operation_id} "
+                logger.debug(f" PASS:  Cache operations completed for {operation_id} "
                            f"in {time.time() - cache_start_time:.3f}s")
             
             # 5. Handle WebSocket events (already queued by coordinated session)
@@ -302,7 +302,7 @@ class MultiLayerCoordinationService:
                     await self._send_websocket_event(event, user_id)
                     
                 coordination_timing['websocket'] = time.time()
-                logger.debug(f"✅ WebSocket events sent for {operation_id} "
+                logger.debug(f" PASS:  WebSocket events sent for {operation_id} "
                            f"in {time.time() - websocket_start_time:.3f}s")
             elif transaction_id:
                 # Events were sent by coordinated session after commit
@@ -323,7 +323,7 @@ class MultiLayerCoordinationService:
             # Cleanup
             del self.active_operations[operation_id]
             
-            logger.info(f"✅ Coordinated operation {operation_id} completed successfully "
+            logger.info(f" PASS:  Coordinated operation {operation_id} completed successfully "
                        f"in {operation_duration:.3f}s")
             
             return {
@@ -341,7 +341,7 @@ class MultiLayerCoordinationService:
             error_time = time.time()
             coordination_timing['error'] = error_time
             
-            logger.critical(f"💥 Coordinated operation {operation_id} failed: {type(e).__name__}: {e}")
+            logger.critical(f"[U+1F4A5] Coordinated operation {operation_id} failed: {type(e).__name__}: {e}")
             
             # Execute rollback coordination
             rollback_result = await self._execute_coordinated_rollback(
@@ -361,7 +361,7 @@ class MultiLayerCoordinationService:
             if operation_id in self.active_operations:
                 del self.active_operations[operation_id]
             
-            logger.error(f"❌ Coordinated operation {operation_id} failed after {operation_duration:.3f}s")
+            logger.error(f" FAIL:  Coordinated operation {operation_id} failed after {operation_duration:.3f}s")
             
             # Re-raise with coordination context
             raise RuntimeError(f"Coordinated operation failed: {e}") from e
@@ -372,7 +372,7 @@ class MultiLayerCoordinationService:
         Args:
             operation: Coordinated operation being started
         """
-        logger.debug(f"🚀 Starting coordination for operation {operation.operation_id}")
+        logger.debug(f"[U+1F680] Starting coordination for operation {operation.operation_id}")
         
         # Future: Add pre-coordination hooks here
         # - Validation checks
@@ -386,7 +386,7 @@ class MultiLayerCoordinationService:
             state_update: Dictionary containing state update parameters
         """
         if not self.agent_tracker:
-            logger.warning("⚠️ Agent tracker not available for state update")
+            logger.warning(" WARNING: [U+FE0F] Agent tracker not available for state update")
             return
             
         try:
@@ -401,16 +401,16 @@ class MultiLayerCoordinationService:
                 elif isinstance(state, ExecutionState):
                     pass  # Already correct type
                 else:
-                    logger.warning(f"⚠️ Invalid state type for update: {type(state)}")
+                    logger.warning(f" WARNING: [U+FE0F] Invalid state type for update: {type(state)}")
                     return
                     
                 self.agent_tracker.update_execution_state(state_exec_id, state)
-                logger.debug(f"🤖 Updated agent state: {state_exec_id} -> {state.value}")
+                logger.debug(f"[U+1F916] Updated agent state: {state_exec_id} -> {state.value}")
             else:
-                logger.warning(f"⚠️ Invalid agent state update parameters: {state_update}")
+                logger.warning(f" WARNING: [U+FE0F] Invalid agent state update parameters: {state_update}")
                 
         except Exception as e:
-            logger.error(f"❌ Agent state update failed: {e}")
+            logger.error(f" FAIL:  Agent state update failed: {e}")
             raise
             
     async def _execute_cache_operation(self, cache_op: Dict[str, Any]):
@@ -422,7 +422,7 @@ class MultiLayerCoordinationService:
         # TODO: Implement cache operations based on cache backend
         # This is a placeholder for future cache coordination
         operation_type = cache_op.get('type', 'unknown')
-        logger.debug(f"💾 Cache operation executed: {operation_type}")
+        logger.debug(f"[U+1F4BE] Cache operation executed: {operation_type}")
         
     async def _send_websocket_event(self, event: Dict[str, Any], user_id: Optional[str]):
         """Send a WebSocket event immediately (fallback mode).
@@ -432,7 +432,7 @@ class MultiLayerCoordinationService:
             user_id: User ID for targeting
         """
         if not self.websocket_manager:
-            logger.warning("⚠️ WebSocket manager not available for event")
+            logger.warning(" WARNING: [U+FE0F] WebSocket manager not available for event")
             return
             
         try:
@@ -446,12 +446,12 @@ class MultiLayerCoordinationService:
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 await self.websocket_manager.send_to_user(user_id, message)
-                logger.debug(f"📤 Sent WebSocket event {event_type} to user {user_id}")
+                logger.debug(f"[U+1F4E4] Sent WebSocket event {event_type} to user {user_id}")
             else:
-                logger.warning(f"⚠️ Cannot send WebSocket event {event_type} - no send method or user_id")
+                logger.warning(f" WARNING: [U+FE0F] Cannot send WebSocket event {event_type} - no send method or user_id")
                 
         except Exception as e:
-            logger.error(f"❌ WebSocket event send failed: {e}")
+            logger.error(f" FAIL:  WebSocket event send failed: {e}")
             raise
             
     async def _execute_coordinated_rollback(
@@ -475,38 +475,38 @@ class MultiLayerCoordinationService:
         rollback_start_time = time.time()
         rollback_results = {}
         
-        logger.warning(f"🔄 Executing coordinated rollback for operation {operation.operation_id}")
+        logger.warning(f" CYCLE:  Executing coordinated rollback for operation {operation.operation_id}")
         
         try:
             # 1. Database rollback (handled by coordinated session)
             if transaction_id and self.database_manager:
                 # Database rollback is handled automatically by the coordinated session
                 rollback_results['database'] = 'handled_by_session'
-                logger.debug(f"🔄 Database rollback handled by coordinated session")
+                logger.debug(f" CYCLE:  Database rollback handled by coordinated session")
             
             # 2. Agent state rollback
             if operation.agent_state_updates and self.agent_tracker:
                 for state_update in operation.agent_state_updates:
                     # Attempt to revert agent state (implementation depends on requirements)
                     rollback_results['agent'] = 'attempted'
-                logger.debug(f"🔄 Agent state rollback attempted")
+                logger.debug(f" CYCLE:  Agent state rollback attempted")
             
             # 3. Cache rollback
             if operation.cache_operations:
                 # TODO: Implement cache rollback based on operation types
                 rollback_results['cache'] = 'attempted'
-                logger.debug(f"🔄 Cache rollback attempted")
+                logger.debug(f" CYCLE:  Cache rollback attempted")
             
             # 4. WebSocket rollback notification
             if operation.websocket_events and operation.user_id:
                 await self._send_rollback_notification(operation, error_message)
                 rollback_results['websocket'] = 'notification_sent'
-                logger.debug(f"🔄 WebSocket rollback notification sent")
+                logger.debug(f" CYCLE:  WebSocket rollback notification sent")
             
             rollback_duration = time.time() - rollback_start_time
             self.coordination_metrics['rollbacks_handled'] += 1
             
-            logger.info(f"✅ Coordinated rollback completed for {operation.operation_id} "
+            logger.info(f" PASS:  Coordinated rollback completed for {operation.operation_id} "
                        f"in {rollback_duration:.3f}s")
             
             return {
@@ -518,7 +518,7 @@ class MultiLayerCoordinationService:
         except Exception as rollback_error:
             rollback_duration = time.time() - rollback_start_time
             
-            logger.critical(f"💥 COORDINATED ROLLBACK FAILED for {operation.operation_id} "
+            logger.critical(f"[U+1F4A5] COORDINATED ROLLBACK FAILED for {operation.operation_id} "
                           f"after {rollback_duration:.3f}s: {rollback_error}")
             logger.critical(f"SYSTEM INTEGRITY AT RISK - Manual intervention may be required")
             
@@ -556,9 +556,9 @@ class MultiLayerCoordinationService:
                 "data": notification_data
             }
             await self.websocket_manager.send_to_user(operation.user_id, message)
-            logger.debug(f"📤 Sent rollback notification to user {operation.user_id}")
+            logger.debug(f"[U+1F4E4] Sent rollback notification to user {operation.user_id}")
         except Exception as e:
-            logger.error(f"❌ Failed to send rollback notification: {e}")
+            logger.error(f" FAIL:  Failed to send rollback notification: {e}")
             
     def _get_coordinated_layers(self, operation: CoordinatedOperation) -> List[str]:
         """Get list of layers involved in the coordinated operation.
@@ -683,10 +683,10 @@ class MultiLayerCoordinationService:
         for op_id in stale_operations:
             operation = self.active_operations.pop(op_id, None)
             if operation:
-                logger.warning(f"🧹 Cleaned up stale operation {op_id}: {operation.operation_name}")
+                logger.warning(f"[U+1F9F9] Cleaned up stale operation {op_id}: {operation.operation_name}")
                 
         if stale_operations:
-            logger.info(f"🧹 Cleaned up {len(stale_operations)} stale coordination operations")
+            logger.info(f"[U+1F9F9] Cleaned up {len(stale_operations)} stale coordination operations")
             
         return len(stale_operations)
         
@@ -698,7 +698,7 @@ class MultiLayerCoordinationService:
         """
         self._coordination_enabled = enabled
         status = "enabled" if enabled else "disabled"
-        logger.info(f"🔗 Multi-layer coordination {status}")
+        logger.info(f"[U+1F517] Multi-layer coordination {status}")
         
     def set_health_monitoring_enabled(self, enabled: bool):
         """Enable or disable health monitoring.
@@ -710,4 +710,4 @@ class MultiLayerCoordinationService:
         if self.health_monitor:
             self.health_monitor.set_monitoring_enabled(enabled)
         status = "enabled" if enabled else "disabled"
-        logger.info(f"🏥 Coordination health monitoring {status}")
+        logger.info(f"[U+1F3E5] Coordination health monitoring {status}")

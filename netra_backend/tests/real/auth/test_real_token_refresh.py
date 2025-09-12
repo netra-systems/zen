@@ -62,7 +62,7 @@ class TestRealTokenRefresh:
     @pytest.fixture(scope="class", autouse=True)
     async def setup_docker_services(self):
         """Start Docker services for token refresh testing."""
-        print("🐳 Starting Docker services for token refresh tests...")
+        print("[U+1F433] Starting Docker services for token refresh tests...")
         
         services = ["backend", "auth", "postgres", "redis"]
         
@@ -74,13 +74,13 @@ class TestRealTokenRefresh:
             )
             
             await asyncio.sleep(5)
-            print("✅ Docker services ready for token refresh tests")
+            print(" PASS:  Docker services ready for token refresh tests")
             yield
             
         except Exception as e:
-            pytest.fail(f"❌ Failed to start Docker services for token refresh tests: {e}")
+            pytest.fail(f" FAIL:  Failed to start Docker services for token refresh tests: {e}")
         finally:
-            print("🧹 Cleaning up Docker services after token refresh tests...")
+            print("[U+1F9F9] Cleaning up Docker services after token refresh tests...")
             await docker_manager.cleanup_async()
 
     @pytest.fixture
@@ -99,7 +99,7 @@ class TestRealTokenRefresh:
             await client.ping()
             yield client
         except Exception as e:
-            pytest.fail(f"❌ Failed to connect to Redis for token refresh tests: {e}")
+            pytest.fail(f" FAIL:  Failed to connect to Redis for token refresh tests: {e}")
         finally:
             if 'client' in locals():
                 await client.aclose()
@@ -167,7 +167,7 @@ class TestRealTokenRefresh:
         assert access_token != refresh_token
         assert access_decoded[JWTConstants.EXPIRES_AT] < refresh_decoded[JWTConstants.EXPIRES_AT]
         
-        print(f"✅ Token pair created and validated for user {user_id}")
+        print(f" PASS:  Token pair created and validated for user {user_id}")
 
     @pytest.mark.asyncio
     async def test_refresh_token_storage_and_retrieval(self, redis_client, jwt_secret_key: str):
@@ -207,7 +207,7 @@ class TestRealTokenRefresh:
             assert parsed_data["refresh_id"] == refresh_id
             assert parsed_data["is_active"] is True
             
-            print(f"✅ Refresh token stored and retrieved for user {user_id}")
+            print(f" PASS:  Refresh token stored and retrieved for user {user_id}")
             
         finally:
             await redis_client.delete(refresh_key)
@@ -280,7 +280,7 @@ class TestRealTokenRefresh:
             assert updated_refresh["use_count"] == 1
             assert "last_used" in updated_refresh
             
-            print(f"✅ Access token refreshed successfully for user {user_id}")
+            print(f" PASS:  Access token refreshed successfully for user {user_id}")
             
         finally:
             await redis_client.delete(refresh_key)
@@ -374,7 +374,7 @@ class TestRealTokenRefresh:
             assert new_stored["is_active"] is True
             assert new_stored["generation"] == 2
             
-            print(f"✅ Token rotation completed successfully for user {user_id}")
+            print(f" PASS:  Token rotation completed successfully for user {user_id}")
             
         finally:
             await redis_client.delete(old_refresh_key)
@@ -406,7 +406,7 @@ class TestRealTokenRefresh:
         with pytest.raises(jwt.ExpiredSignatureError):
             jwt.decode(expired_refresh_token, jwt_secret_key, algorithms=[JWTConstants.HS256_ALGORITHM])
         
-        print(f"✅ Expired refresh token correctly rejected for user {user_id}")
+        print(f" PASS:  Expired refresh token correctly rejected for user {user_id}")
 
     @pytest.mark.asyncio
     async def test_refresh_token_revocation(self, redis_client, jwt_secret_key: str):
@@ -448,7 +448,7 @@ class TestRealTokenRefresh:
             assert "revoked_at" in revoked_data
             assert revoked_data["revocation_reason"] == "user_logout"
             
-            print(f"✅ Refresh token revoked successfully for user {user_id}")
+            print(f" PASS:  Refresh token revoked successfully for user {user_id}")
             
         finally:
             await redis_client.delete(refresh_key)
@@ -528,7 +528,7 @@ class TestRealTokenRefresh:
             final_data = json.loads(await redis_client.get(refresh_key))
             assert final_data["use_count"] == 1
             
-            print(f"✅ Concurrent refresh prevention validated - 1 success, {len(blocked_attempts)} blocked")
+            print(f" PASS:  Concurrent refresh prevention validated - 1 success, {len(blocked_attempts)} blocked")
             
         finally:
             await redis_client.delete(refresh_key)
@@ -588,7 +588,7 @@ class TestRealTokenRefresh:
                 assert data["revocation_reason"] == "security_breach_family_invalidation"
                 assert data["revoked_at"] == invalidation_time
             
-            print(f"✅ Refresh token family invalidation completed for user {user_id}")
+            print(f" PASS:  Refresh token family invalidation completed for user {user_id}")
             
         finally:
             for refresh_key in refresh_keys:

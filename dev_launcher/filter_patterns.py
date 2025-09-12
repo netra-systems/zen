@@ -8,7 +8,7 @@ Contains pattern definitions used by LogFilter for noise reduction.
 NOISE_PATTERNS = [
     # Webpack/Build noise
     r"webpack\.Progress",
-    r"○ Compiling",
+    r"[U+25CB] Compiling",
     r"Compiled.*in \d+ms",
     r"Ready in \d+ms",
     r"HMR.*updated",
@@ -102,7 +102,7 @@ NOISE_PATTERNS = [
 # Patterns to condense in standard mode
 STANDARD_CONDENSE_PATTERNS = [
     (r"Creating ClickHouse table.*: (\w+)", "Table: {1}"),
-    (r"Successfully ensured table exists: (\w+)", "✓ {1}"),
+    (r"Successfully ensured table exists: (\w+)", "[U+2713] {1}"),
     (r"Registered agent: (\w+)", "Agent: {1}"),
     (r"Task Task-\d+ added to background manager", "Background task added"),
 ]

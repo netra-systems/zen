@@ -31,9 +31,9 @@ try:
     from netra_backend.app.websocket_core.agent_handler import AgentMessageHandler
     from netra_backend.app.websocket_core.types import MessageType, WebSocketMessage
     from netra_backend.app.services.message_handlers import MessageHandlerService
-    print("✅ Core imports successful")
+    print(" PASS:  Core imports successful")
 except Exception as e:
-    print(f"❌ Import error: {e}")
+    print(f" FAIL:  Import error: {e}")
     sys.exit(1)
 
 
@@ -47,7 +47,7 @@ class V2LegacyValidationRunner:
         
     def log_result(self, test_name: str, passed: bool, details: str = ""):
         """Log test result."""
-        status = "✅ PASS" if passed else "❌ FAIL"
+        status = " PASS:  PASS" if passed else " FAIL:  FAIL"
         print(f"{status}: {test_name}")
         if details:
             print(f"   Details: {details}")
@@ -56,7 +56,7 @@ class V2LegacyValidationRunner:
     def log_error(self, test_name: str, error: Exception):
         """Log test error."""
         error_msg = f"{test_name}: {str(error)}"
-        print(f"🚨 ERROR: {error_msg}")
+        print(f" ALERT:  ERROR: {error_msg}")
         self.errors.append(error_msg)
         self.results[test_name] = {"passed": False, "error": str(error)}
 
@@ -300,7 +300,7 @@ class V2LegacyValidationRunner:
 
     async def run_all_validations(self):
         """Run all validation tests."""
-        print("🚀 Starting V2 Legacy WebSocket Handler Validation")
+        print("[U+1F680] Starting V2 Legacy WebSocket Handler Validation")
         print("=" * 60)
         
         try:
@@ -310,11 +310,11 @@ class V2LegacyValidationRunner:
             await self.validate_regression_protection()
             
         except Exception as e:
-            print(f"🚨 Critical error during validation: {e}")
+            print(f" ALERT:  Critical error during validation: {e}")
             self.log_error("validation_runner", e)
             
         print("\n" + "=" * 60)
-        print("📊 VALIDATION SUMMARY")
+        print(" CHART:  VALIDATION SUMMARY")
         print("=" * 60)
         
         summary = self.generate_summary()
@@ -324,7 +324,7 @@ class V2LegacyValidationRunner:
         print(f"Success Rate: {summary['success_rate']:.1f}%")
         
         if self.errors:
-            print(f"\n🚨 Errors ({len(self.errors)}):")
+            print(f"\n ALERT:  Errors ({len(self.errors)}):")
             for error in self.errors:
                 print(f"  - {error}")
                 
@@ -338,10 +338,10 @@ async def main():
     
     # Exit with appropriate code
     if summary['failed'] > 0 or len(summary['errors']) > 0:
-        print(f"\n❌ Validation failed with {summary['failed']} failures and {len(summary['errors'])} errors")
+        print(f"\n FAIL:  Validation failed with {summary['failed']} failures and {len(summary['errors'])} errors")
         sys.exit(1)
     else:
-        print(f"\n✅ All validations passed ({summary['passed']}/{summary['total_tests']})")
+        print(f"\n PASS:  All validations passed ({summary['passed']}/{summary['total_tests']})")
         sys.exit(0)
 
 

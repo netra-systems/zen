@@ -74,15 +74,15 @@ class TestComprehensiveFiveWhysCoverage:
             validation_result = self._validate_create_call_parameters(file_path)
             if validation_result['valid']:
                 validated_files.append(file_path)
-                print(f"  ✅ {validation_result['file']}: {validation_result['calls']} calls validated")
+                print(f"   PASS:  {validation_result['file']}: {validation_result['calls']} calls validated")
             else:
-                print(f"  ❌ {validation_result['file']}: {validation_result['error']}")
+                print(f"   FAIL:  {validation_result['file']}: {validation_result['error']}")
         
         # All files should have valid SupervisorAgent.create() usage
         assert len(validated_files) >= 3, \
             f"Expected at least 3 files with valid SupervisorAgent.create() calls, found {len(validated_files)}"
         
-        print(f"✅ WHY #4 - All {len(validated_files)} files with SupervisorAgent.create() calls validated")
+        print(f" PASS:  WHY #4 - All {len(validated_files)} files with SupervisorAgent.create() calls validated")
     
     def test_why_4_test_pattern_signature_change_detection(self):
         """
@@ -120,7 +120,7 @@ class TestComprehensiveFiveWhysCoverage:
             assert scenario['would_break_existing_calls'], \
                 f"Test pattern should detect signature changes for: {scenario['name']}"
         
-        print("✅ WHY #4 - Test patterns would detect SupervisorAgent.create() signature changes")
+        print(" PASS:  WHY #4 - Test patterns would detect SupervisorAgent.create() signature changes")
     
     def test_why_4_process_improvement_validation_coverage(self):
         """
@@ -183,9 +183,9 @@ class TestComprehensiveFiveWhysCoverage:
             failure_details = [f"- {p['check']}: {p['description']}" for p in failed_processes]
             pytest.fail(f"PROCESS GAPS DETECTED - Testing gaps may recur:\n" + "\n".join(failure_details))
         
-        print("✅ WHY #4 - Process improvements prevent testing gaps")
+        print(" PASS:  WHY #4 - Process improvements prevent testing gaps")
         for validation in process_validations:
-            print(f"  ✅ {validation['check']}: {validation['description']}")
+            print(f"   PASS:  {validation['check']}: {validation['description']}")
     
     def test_why_5_interface_evolution_governance_standards(self):
         """
@@ -267,9 +267,9 @@ class TestComprehensiveFiveWhysCoverage:
             failure_details = [f"- {s['check']}: {s['description']}" for s in failed_governance]
             pytest.fail(f"GOVERNANCE FAILURES - Systematic issues may recur:\n" + "\n".join(failure_details))
         
-        print("✅ WHY #5 - Interface evolution governance prevents systematic issues")
+        print(" PASS:  WHY #5 - Interface evolution governance prevents systematic issues")
         for standard in governance_standards:
-            print(f"  ✅ {standard['check']}: {standard['description']}")
+            print(f"   PASS:  {standard['check']}: {standard['description']}")
     
     def test_why_5_regression_prevention_automation(self):
         """
@@ -336,9 +336,9 @@ class TestComprehensiveFiveWhysCoverage:
             failure_details = [f"- {r['check']}: {r['description']}" for r in failed_prevention]
             pytest.fail(f"REGRESSION PREVENTION FAILURES - Issues may recur:\n" + "\n".join(failure_details))
         
-        print("✅ WHY #5 - Automated regression prevention systems active")
+        print(" PASS:  WHY #5 - Automated regression prevention systems active")
         for prevention in regression_prevention:
-            print(f"  ✅ {prevention['check']}: {prevention['description']}")
+            print(f"   PASS:  {prevention['check']}: {prevention['description']}")
     
     def test_comprehensive_five_whys_validation_complete(self):
         """
@@ -430,13 +430,13 @@ class TestComprehensiveFiveWhysCoverage:
                 failure_details.append(details)
             pytest.fail(f"FIVE WHYS REGRESSION - Issues not fully resolved:\n" + "\n".join(failure_details))
         
-        print("✅ COMPREHENSIVE FIVE WHYS VALIDATION COMPLETE")
-        print(f"✅ All {len(comprehensive_validation)} WHY levels validated successfully")
-        print(f"✅ WebSocket supervisor 'name' parameter error CANNOT RECUR")
+        print(" PASS:  COMPREHENSIVE FIVE WHYS VALIDATION COMPLETE")
+        print(f" PASS:  All {len(comprehensive_validation)} WHY levels validated successfully")
+        print(f" PASS:  WebSocket supervisor 'name' parameter error CANNOT RECUR")
         
         # Report all validation results
         for validation in comprehensive_validation:
-            print(f"  ✅ {validation['why_level']}: {validation['description']}")
+            print(f"   PASS:  {validation['why_level']}: {validation['description']}")
     
     def _find_supervisor_create_calls(self) -> List[str]:
         """Find all files containing SupervisorAgent.create() calls."""

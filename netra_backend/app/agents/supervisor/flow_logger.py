@@ -1,7 +1,7 @@
 """Supervisor flow logger for pipeline observability.
 
 Provides structured logging for supervisor execution flows with correlation tracking.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 import time
 from enum import Enum

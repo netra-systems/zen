@@ -61,7 +61,7 @@ async def demo_basic_functionality():
             for issue in issues[:2]:  # Show first 2 issues
                 print(f"  - {issue}")
         else:
-            print(f"Layer '{layer}': ✓ Configuration valid")
+            print(f"Layer '{layer}': [U+2713] Configuration valid")
     
     # Show execution status
     print_section("Current Execution Status")
@@ -80,7 +80,7 @@ async def demo_health_check(agent: LayerExecutionAgent):
     
     print("Component Health:")
     for component, status in health['checks'].items():
-        status_icon = "✓" if status else "✗"
+        status_icon = "[U+2713]" if status else "[U+2717]"
         print(f"  {status_icon} {component}")
     
     if health['issues']:
@@ -318,16 +318,16 @@ async def main():
         print_banner("Demo Complete")
         print("LayerExecutionAgent is ready for integration with the orchestration system!")
         print("\nKey Features Demonstrated:")
-        print("✓ Layer discovery and validation")
-        print("✓ Multiple execution strategies (sequential, parallel, hybrid)")
-        print("✓ Resource allocation and management")
-        print("✓ Health monitoring and reporting")
-        print("✓ Integration with existing unified_test_runner")
-        print("✓ Category execution coordination")
-        print("✓ Progress tracking and error handling")
+        print("[U+2713] Layer discovery and validation")
+        print("[U+2713] Multiple execution strategies (sequential, parallel, hybrid)")
+        print("[U+2713] Resource allocation and management")
+        print("[U+2713] Health monitoring and reporting")
+        print("[U+2713] Integration with existing unified_test_runner")
+        print("[U+2713] Category execution coordination")
+        print("[U+2713] Progress tracking and error handling")
         
     except Exception as e:
-        print(f"\n❌ Demo failed with error: {e}")
+        print(f"\n FAIL:  Demo failed with error: {e}")
         import traceback
         traceback.print_exc()
         return 1

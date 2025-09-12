@@ -276,7 +276,7 @@ class TestUserSessionStateContinuity(BaseE2ETest):
         assert str(run_id_1) in initial_run_ids, "Initial run_id should be in initial events"
         assert str(run_id_2) in continuation_run_ids, "Continuation run_id should be in continuation events"
         
-        self.logger.info("✅ SUCCESS: WebSocket reconnection state preservation validated")
+        self.logger.info(" PASS:  SUCCESS: WebSocket reconnection state preservation validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -439,7 +439,7 @@ class TestUserSessionStateContinuity(BaseE2ETest):
         assert initial_state.thread_id == recovery_state.thread_id, \
             "Thread ID should be consistent across browser refresh"
         
-        self.logger.info("✅ SUCCESS: Browser refresh state recovery validated")
+        self.logger.info(" PASS:  SUCCESS: Browser refresh state recovery validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -569,7 +569,7 @@ class TestUserSessionStateContinuity(BaseE2ETest):
         assert total_events >= num_interactions * 2, \
             f"Too few events across long session: {total_events}"
         
-        self.logger.info(f"✅ SUCCESS: Long session state persistence validated across {num_interactions} interactions")
+        self.logger.info(f" PASS:  SUCCESS: Long session state persistence validated across {num_interactions} interactions")
         self.logger.info(f"  - Total events: {total_events}")
         self.logger.info(f"  - Unique run IDs: {len(set(all_run_ids))}")
         self.logger.info(f"  - Session user IDs: {all_user_ids}")

@@ -90,19 +90,19 @@ class TestAuthServiceLoggingKeyErrorIntegration:
         # This directly tests the method that was failing before the fix
         try:
             config.log_configuration()
-            print("✅ AuthConfig.log_configuration() completed without KeyError - fix validated")
+            print(" PASS:  AuthConfig.log_configuration() completed without KeyError - fix validated")
         except KeyError as ke:
             if "timestamp" in str(ke):
-                pytest.fail("❌ KeyError: 'timestamp' still occurring in AuthConfig.log_configuration() - fix may have regressed")
+                pytest.fail(" FAIL:  KeyError: 'timestamp' still occurring in AuthConfig.log_configuration() - fix may have regressed")
             else:
-                pytest.fail(f"❌ Unexpected KeyError in AuthConfig.log_configuration(): {ke}")
+                pytest.fail(f" FAIL:  Unexpected KeyError in AuthConfig.log_configuration(): {ke}")
         except Exception as e:
             # Other exceptions might occur due to missing dependencies, but KeyError shouldn't
-            print(f"ℹ️ Non-KeyError exception (may be expected): {type(e).__name__}: {e}")
+            print(f"[U+2139][U+FE0F] Non-KeyError exception (may be expected): {type(e).__name__}: {e}")
             
             # Make sure it's not a masked KeyError
             if "timestamp" in str(e):
-                pytest.fail(f"❌ Possible masked KeyError: {e}")
+                pytest.fail(f" FAIL:  Possible masked KeyError: {e}")
         
         # Assert: If we reach here without KeyError, the fix is working
         assert True, "AuthConfig.log_configuration() completed without KeyError"
@@ -133,15 +133,15 @@ class TestAuthServiceLoggingKeyErrorIntegration:
                 # Act: Try to create AuthService instance
                 try:
                     auth_service = AuthService()
-                    print("✅ AuthService initialization completed without KeyError - fix validated")
+                    print(" PASS:  AuthService initialization completed without KeyError - fix validated")
                 except KeyError as ke:
                     if "timestamp" in str(ke):
-                        pytest.fail("❌ KeyError: 'timestamp' still occurring during AuthService init - fix may have regressed")
+                        pytest.fail(" FAIL:  KeyError: 'timestamp' still occurring during AuthService init - fix may have regressed")
                     else:
-                        pytest.fail(f"❌ Unexpected KeyError during AuthService init: {ke}")
+                        pytest.fail(f" FAIL:  Unexpected KeyError during AuthService init: {ke}")
                 except Exception as e:
                     # Other exceptions are expected due to mocked dependencies
-                    print(f"ℹ️ Expected exception due to mocked dependencies: {type(e).__name__}: {e}")
+                    print(f"[U+2139][U+FE0F] Expected exception due to mocked dependencies: {type(e).__name__}: {e}")
 
     def test_json_logging_cloud_run_simulation_no_keyerror(self):
         """
@@ -182,7 +182,7 @@ class TestAuthServiceLoggingKeyErrorIntegration:
                 ssot_logger.warning("Test warning message")
                 ssot_logger.error("Test error message")
                 
-            print("✅ Cloud Run JSON logging completed without KeyError - fix validated")
+            print(" PASS:  Cloud Run JSON logging completed without KeyError - fix validated")
             
             # Verify output (should be JSON if working correctly)
             output = captured_output.getvalue()
@@ -196,17 +196,17 @@ class TestAuthServiceLoggingKeyErrorIntegration:
                             assert 'timestamp' in parsed, "JSON output missing timestamp field"
                             assert 'severity' in parsed, "JSON output missing severity field" 
                             assert 'message' in parsed, "JSON output missing message field"
-                            print(f"✅ Valid JSON output produced: {line[:100]}...")
+                            print(f" PASS:  Valid JSON output produced: {line[:100]}...")
                         except json.JSONDecodeError:
-                            print(f"ℹ️ Non-JSON output (expected in test mode): {line[:50]}...")
+                            print(f"[U+2139][U+FE0F] Non-JSON output (expected in test mode): {line[:50]}...")
             
         except KeyError as ke:
             if "timestamp" in str(ke):
-                pytest.fail("❌ KeyError: 'timestamp' still occurring in Cloud Run simulation - fix may have regressed")
+                pytest.fail(" FAIL:  KeyError: 'timestamp' still occurring in Cloud Run simulation - fix may have regressed")
             else:
-                pytest.fail(f"❌ Unexpected KeyError in Cloud Run simulation: {ke}")
+                pytest.fail(f" FAIL:  Unexpected KeyError in Cloud Run simulation: {ke}")
         except Exception as e:
-            pytest.fail(f"❌ Unexpected error in Cloud Run simulation: {type(e).__name__}: {e}")
+            pytest.fail(f" FAIL:  Unexpected error in Cloud Run simulation: {type(e).__name__}: {e}")
         finally:
             # Cleanup
             env.set("K_SERVICE", None, source="test_cleanup")
@@ -229,15 +229,15 @@ class TestAuthServiceLoggingKeyErrorIntegration:
             logger.warning("Auth service integration test - warning level")  
             logger.error("Auth service integration test - error level")
             
-            print("✅ Auth service logger integration completed without KeyError - fix validated")
+            print(" PASS:  Auth service logger integration completed without KeyError - fix validated")
             
         except KeyError as ke:
             if "timestamp" in str(ke):
-                pytest.fail("❌ KeyError: 'timestamp' still occurring in auth service logger integration - fix may have regressed")
+                pytest.fail(" FAIL:  KeyError: 'timestamp' still occurring in auth service logger integration - fix may have regressed")
             else:
-                pytest.fail(f"❌ Unexpected KeyError in auth service logger integration: {ke}")
+                pytest.fail(f" FAIL:  Unexpected KeyError in auth service logger integration: {ke}")
         except Exception as e:
-            pytest.fail(f"❌ Unexpected error in auth service logger integration: {type(e).__name__}: {e}")
+            pytest.fail(f" FAIL:  Unexpected error in auth service logger integration: {type(e).__name__}: {e}")
 
     def test_concurrent_logging_no_keyerror(self):
         """
@@ -274,12 +274,12 @@ class TestAuthServiceLoggingKeyErrorIntegration:
         # Check for any KeyErrors
         keyerrors = [e for e in errors if isinstance(e, KeyError) and "timestamp" in str(e)]
         if keyerrors:
-            pytest.fail(f"❌ KeyError: 'timestamp' occurred during concurrent logging - fix may have thread safety issues: {keyerrors[0]}")
+            pytest.fail(f" FAIL:  KeyError: 'timestamp' occurred during concurrent logging - fix may have thread safety issues: {keyerrors[0]}")
         
         if errors:
-            print(f"ℹ️ Non-KeyError exceptions occurred (may be expected): {[type(e).__name__ for e in errors]}")
+            print(f"[U+2139][U+FE0F] Non-KeyError exceptions occurred (may be expected): {[type(e).__name__ for e in errors]}")
         
-        print("✅ Concurrent auth service logging completed without KeyError - fix validated")
+        print(" PASS:  Concurrent auth service logging completed without KeyError - fix validated")
 
     def test_exception_logging_no_keyerror(self):
         """
@@ -298,12 +298,12 @@ class TestAuthServiceLoggingKeyErrorIntegration:
                 logger.error("Auth service exception occurred", exception=e)
                 logger.critical("Critical auth service error", exception=e)
                 
-            print("✅ Auth service exception logging completed without KeyError - fix validated")
+            print(" PASS:  Auth service exception logging completed without KeyError - fix validated")
                 
         except KeyError as ke:
             if "timestamp" in str(ke):
-                pytest.fail("❌ KeyError: 'timestamp' still occurring in exception logging - fix may have regressed")
+                pytest.fail(" FAIL:  KeyError: 'timestamp' still occurring in exception logging - fix may have regressed")
             else:
-                pytest.fail(f"❌ Unexpected KeyError in exception logging: {ke}")
+                pytest.fail(f" FAIL:  Unexpected KeyError in exception logging: {ke}")
         except Exception as e:
-            pytest.fail(f"❌ Unexpected error in exception logging: {type(e).__name__}: {e}")
+            pytest.fail(f" FAIL:  Unexpected error in exception logging: {type(e).__name__}: {e}")

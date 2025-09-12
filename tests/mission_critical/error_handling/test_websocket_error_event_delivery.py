@@ -111,7 +111,7 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
         3. Error events are properly delivered to users
         4. Error context is preserved and actionable
         """
-        print("\n🔌 WEBSOCKET ERROR EVENT DELIVERY TEST")
+        print("\n[U+1F50C] WEBSOCKET ERROR EVENT DELIVERY TEST")
         print("=" * 60)
         
         # Setup authenticated WebSocket context
@@ -122,7 +122,7 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
         
         try:
             # Test 1: Establish authenticated WebSocket connection
-            print("\n🔗 Test 1: Authenticated WebSocket Connection")
+            print("\n[U+1F517] Test 1: Authenticated WebSocket Connection")
             
             websocket_connection = None
             connection_established = False
@@ -147,11 +147,11 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
                 )
                 
                 connection_established = True
-                print("✅ WebSocket connection established")
+                print(" PASS:  WebSocket connection established")
                 
             except Exception as e:
-                print(f"⚠️ Real WebSocket connection failed: {e}")
-                print("🔄 Using mock WebSocket connection for testing")
+                print(f" WARNING: [U+FE0F] Real WebSocket connection failed: {e}")
+                print(" CYCLE:  Using mock WebSocket connection for testing")
                 
                 # Use mock connection for testing patterns
                 websocket_connection = MockWebSocketConnection(self.test_user_id)
@@ -161,7 +161,7 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
             assert connection_established, "Could not establish WebSocket connection (real or mock)"
             
             # Test 2: Validate all required WebSocket events can be delivered
-            print("\n📡 Test 2: Required WebSocket Events Delivery")
+            print("\n[U+1F4E1] Test 2: Required WebSocket Events Delivery")
             
             events_delivered = []
             
@@ -210,25 +210,25 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
                     if response:
                         events_delivered.append(event_type)
                         self.websocket_events_received.append(response)
-                        print(f"✅ {event_type} event delivered successfully")
+                        print(f" PASS:  {event_type} event delivered successfully")
                     else:
-                        print(f"❌ {event_type} event not delivered")
+                        print(f" FAIL:  {event_type} event not delivered")
                         
                 except Exception as e:
-                    print(f"⚠️ {event_type} event delivery failed: {e}")
+                    print(f" WARNING: [U+FE0F] {event_type} event delivery failed: {e}")
                     # Continue with other events
             
             print(f"\nRequired events delivered: {len(events_delivered)}/{len(self.required_websocket_events)}")
             print(f"Events: {events_delivered}")
             
             # Test 3: Error Event Delivery Testing
-            print("\n🚨 Test 3: Error Event Delivery")
+            print("\n ALERT:  Test 3: Error Event Delivery")
             
             error_events_delivered = []
             
             for error_type in self.required_error_events:
                 try:
-                    print(f"\n🔥 Testing error type: {error_type}")
+                    print(f"\n FIRE:  Testing error type: {error_type}")
                     
                     # Create error scenario message
                     error_message = await self.create_error_scenario_message(error_type)
@@ -242,34 +242,34 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
                     if error_response and error_response.get("type") == "error":
                         error_events_delivered.append(error_type)
                         self.error_events_received.append(error_response)
-                        print(f"✅ {error_type} error event delivered: {error_response.get('error', 'unknown')}")
+                        print(f" PASS:  {error_type} error event delivered: {error_response.get('error', 'unknown')}")
                         
                         # Validate error context preservation
                         await self.validate_error_context_preservation(error_response, error_type)
                         
                     else:
-                        print(f"❌ {error_type} error event not delivered properly")
+                        print(f" FAIL:  {error_type} error event not delivered properly")
                         print(f"   Response: {error_response}")
                         
                 except Exception as e:
-                    print(f"⚠️ {error_type} error delivery test failed: {e}")
+                    print(f" WARNING: [U+FE0F] {error_type} error delivery test failed: {e}")
                     # Continue with other error types
             
             print(f"\nError events delivered: {len(error_events_delivered)}/{len(self.required_error_events)}")
             print(f"Error events: {error_events_delivered}")
             
             # Test 4: Error Recovery and Continued Event Delivery
-            print("\n🔄 Test 4: Error Recovery and Continued Event Delivery")
+            print("\n CYCLE:  Test 4: Error Recovery and Continued Event Delivery")
             
             recovery_successful = await self._test_error_recovery_patterns(websocket_connection)
             
             # Test Results Summary
-            print("\n📊 WEBSOCKET ERROR EVENT DELIVERY RESULTS")
+            print("\n CHART:  WEBSOCKET ERROR EVENT DELIVERY RESULTS")
             print("=" * 50)
-            print(f"WebSocket Connection: {'✅' if connection_established else '❌'}")
+            print(f"WebSocket Connection: {' PASS: ' if connection_established else ' FAIL: '}")
             print(f"Required Events Delivered: {len(events_delivered)}/{len(self.required_websocket_events)}")
             print(f"Error Events Delivered: {len(error_events_delivered)}/{len(self.required_error_events)}")
-            print(f"Error Recovery: {'✅' if recovery_successful else '❌'}")
+            print(f"Error Recovery: {' PASS: ' if recovery_successful else ' FAIL: '}")
             print(f"Total Events Received: {len(self.websocket_events_received)}")
             print(f"Total Error Events: {len(self.error_events_received)}")
             
@@ -282,7 +282,7 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
             )
             
             if not chat_functionality_working:
-                print("\n🚨 CRITICAL: Chat error handling not fully functional")
+                print("\n ALERT:  CRITICAL: Chat error handling not fully functional")
                 print("This impacts core business value delivery (90% of our value is chat)")
                 
                 missing_functionality = []
@@ -301,14 +301,14 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
                 pytest.fail(f"MISSION CRITICAL: WebSocket error event delivery gaps detected: {missing_functionality}")
             
             else:
-                print("\n✅ SUCCESS: WebSocket error event delivery fully functional")
-                print("✅ Chat error handling supports business value delivery")
+                print("\n PASS:  SUCCESS: WebSocket error event delivery fully functional")
+                print(" PASS:  Chat error handling supports business value delivery")
                 
                 # Validate event ordering and completeness
                 await self.validate_websocket_event_completeness()
             
         except Exception as e:
-            print(f"\n❌ CRITICAL: WebSocket error event delivery test failed: {e}")
+            print(f"\n FAIL:  CRITICAL: WebSocket error event delivery test failed: {e}")
             logger.error(f"WebSocket error event delivery failure: {e}", extra={
                 "user_id": self.test_user_id,
                 "test_type": "websocket_error_events",
@@ -391,13 +391,13 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
         required_fields = ["type", "error", "timestamp"]
         for field in required_fields:
             if field not in error_response:
-                print(f"   ❌ Missing required error field: {field}")
+                print(f"    FAIL:  Missing required error field: {field}")
                 return False
         
         # Check that error is actionable (has useful information)
         error_message = error_response.get("error", "")
         if len(error_message) < 10:
-            print(f"   ❌ Error message too generic: '{error_message}'")
+            print(f"    FAIL:  Error message too generic: '{error_message}'")
             return False
         
         # Check for user context preservation (if applicable)
@@ -405,9 +405,9 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
             # User ID should be preserved in error context where relevant
             error_context = str(error_response)
             if error_type not in ["authentication_error"] and self.test_user_id not in error_context:
-                print(f"   ⚠️ User context may not be preserved in error")
+                print(f"    WARNING: [U+FE0F] User context may not be preserved in error")
         
-        print(f"   ✅ Error context validation passed")
+        print(f"    PASS:  Error context validation passed")
         return True
     
     async def _test_error_recovery_patterns(self, websocket_connection) -> bool:
@@ -427,19 +427,19 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
             recovery_response = await WebSocketTestHelpers.receive_test_message(websocket_connection, timeout=5.0)
             
             if recovery_response and recovery_response.get("type") != "error":
-                print("✅ Error recovery successful - WebSocket continues functioning")
+                print(" PASS:  Error recovery successful - WebSocket continues functioning")
                 return True
             else:
-                print("❌ Error recovery failed - WebSocket not responsive after errors")
+                print(" FAIL:  Error recovery failed - WebSocket not responsive after errors")
                 return False
                 
         except Exception as e:
-            print(f"❌ Error recovery test failed: {e}")
+            print(f" FAIL:  Error recovery test failed: {e}")
             return False
     
     async def validate_websocket_event_completeness(self):
         """Validate that all received WebSocket events have proper structure and completeness."""
-        print("\n🔍 Validating WebSocket event completeness...")
+        print("\n SEARCH:  Validating WebSocket event completeness...")
         
         event_types_received = set()
         malformed_events = []
@@ -480,11 +480,11 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
         print(f"Malformed events: {len(malformed_events)}")
         
         if malformed_events:
-            print("❌ Event structure issues found:")
+            print(" FAIL:  Event structure issues found:")
             for issue in malformed_events[:5]:  # Show first 5
                 print(f"  - {issue}")
         else:
-            print("✅ All events properly structured")
+            print(" PASS:  All events properly structured")
         
         return len(malformed_events) == 0
     
@@ -497,12 +497,12 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
         Business Value: Users need consistent, ordered error feedback for proper UX.
         Error events must be delivered in the correct sequence to be actionable.
         """
-        print("\n📋 WEBSOCKET ERROR EVENT ORDERING TEST")
+        print("\n[U+1F4CB] WEBSOCKET ERROR EVENT ORDERING TEST")
         print("=" * 60)
         
         ws_context, auth_helper = await self.setup_websocket_error_context()
         
-        # Test sequence: normal events → error → recovery
+        # Test sequence: normal events  ->  error  ->  recovery
         test_sequence = [
             {"type": "agent_started", "expect": "success"},
             {"type": "agent_thinking", "expect": "success"}, 
@@ -555,7 +555,7 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
                     "expected": test_event["expect"]
                 })
                 
-                print(f"Event {i+1}: {test_event['type']} → {response.get('type', 'unknown')} ({event_sequence[-1]['latency']:.3f}s)")
+                print(f"Event {i+1}: {test_event['type']}  ->  {response.get('type', 'unknown')} ({event_sequence[-1]['latency']:.3f}s)")
             
             # Validate ordering and timing
             ordering_correct = True
@@ -566,12 +566,12 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
                 if i > 0:
                     prev_event = event_sequence[i-1]
                     if event["receive_time"] < prev_event["receive_time"]:
-                        print(f"❌ Event ordering violation: Event {i} received before Event {i-1}")
+                        print(f" FAIL:  Event ordering violation: Event {i} received before Event {i-1}")
                         ordering_correct = False
                 
                 # Check timing (should be < 2s for good UX)
                 if event["latency"] > 2.0:
-                    print(f"❌ Event timing violation: {event['latency']:.3f}s > 2.0s")
+                    print(f" FAIL:  Event timing violation: {event['latency']:.3f}s > 2.0s")
                     timing_acceptable = False
             
             # Validate error handling in sequence
@@ -581,19 +581,19 @@ class TestWebSocketErrorEventDelivery(SSotBaseTestCase):
                     error_handled_correctly = True
                     break
             
-            print(f"\n📊 Event Ordering Results:")
-            print(f"Sequence Ordering: {'✅' if ordering_correct else '❌'}")
-            print(f"Timing Performance: {'✅' if timing_acceptable else '❌'}")
-            print(f"Error Handling: {'✅' if error_handled_correctly else '❌'}")
+            print(f"\n CHART:  Event Ordering Results:")
+            print(f"Sequence Ordering: {' PASS: ' if ordering_correct else ' FAIL: '}")
+            print(f"Timing Performance: {' PASS: ' if timing_acceptable else ' FAIL: '}")
+            print(f"Error Handling: {' PASS: ' if error_handled_correctly else ' FAIL: '}")
             
             # Overall validation
             ordering_test_passed = ordering_correct and timing_acceptable and error_handled_correctly
             
             if not ordering_test_passed:
-                print("❌ WebSocket event ordering test failed")
+                print(" FAIL:  WebSocket event ordering test failed")
                 print("This impacts user experience and chat reliability")
             else:
-                print("✅ WebSocket event ordering test passed")
+                print(" PASS:  WebSocket event ordering test passed")
             
             assert ordering_test_passed, "WebSocket error event ordering requirements not met"
         

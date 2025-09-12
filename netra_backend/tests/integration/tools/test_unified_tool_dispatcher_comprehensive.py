@@ -675,7 +675,7 @@ class TestUnifiedToolDispatcherComprehensive(BaseIntegrationTest):
             
             # Validate real-time event delivery
             total_events = self.websocket_manager.total_events
-            expected_events = 8  # 4 tools × 2 events each (executing + completed)
+            expected_events = 8  # 4 tools  x  2 events each (executing + completed)
             assert total_events == expected_events, f"Should send {expected_events} events, got {total_events}"
             
             # Validate event-to-execution correlation
@@ -1665,7 +1665,7 @@ class TestUnifiedToolDispatcherComprehensive(BaseIntegrationTest):
                 expected_times = {"simple": 0.25, "medium": 0.5, "complex": 1.0}
                 expected_time = expected_times[tool.execution_complexity]
                 
-                # Allow for reasonable variance (±50% for test environment)
+                # Allow for reasonable variance ( +/- 50% for test environment)
                 assert performance_data["execution_time"] < expected_time * 1.5, \
                     f"{tool.name} took too long: {performance_data['execution_time']:.3f}s vs expected ~{expected_time}s"
                 
@@ -2513,7 +2513,7 @@ class TestUnifiedToolDispatcherComprehensive(BaseIntegrationTest):
                     "hierarchical_component": self._generate_hierarchical_result(),
                     "time_series_component": self._generate_time_series_result(),
                     "binary_data": bytes(range(256)).hex(),  # Hex-encoded binary
-                    "unicode_text": "Mixed data with émojis 🚀 and spëcial chars àéîôù",
+                    "unicode_text": "Mixed data with [U+00E9]mojis [U+1F680] and sp[U+00EB]cial chars [U+00E0][U+00E9][U+00EE][U+00F4][U+00F9]",
                     "nested_arrays": [[[i + j + k for k in range(3)] for j in range(3)] for i in range(3)],
                     "mixed_types": {
                         "string": "text_value",
@@ -2938,7 +2938,7 @@ class TestUnifiedToolDispatcherComprehensive(BaseIntegrationTest):
             
             # Events should show integration context
             workflow_events = [e for e in integration_events if "workflow" in str(e["data"]).lower()]
-            assert len(workflow_events) >= 6, "Should have workflow-related events (3 steps × 2 event types)"
+            assert len(workflow_events) >= 6, "Should have workflow-related events (3 steps  x  2 event types)"
             
             # Validate event sequencing for workflow
             workflow_event_sequence = []
@@ -2948,13 +2948,13 @@ class TestUnifiedToolDispatcherComprehensive(BaseIntegrationTest):
                     event_type = event["type"]
                     workflow_event_sequence.append((tool_name, event_type))
             
-            # Should see proper execution → completion sequence for workflow tools
+            # Should see proper execution  ->  completion sequence for workflow tools
             workflow_tool_names = ["registry_aware_processor", "execution_engine_coordinator", "workflow_orchestrator"]
             
             for tool_name in workflow_tool_names:
                 tool_events = [(name, etype) for name, etype in workflow_event_sequence if name == tool_name]
                 
-                # Each tool should have at least one executing → completed sequence
+                # Each tool should have at least one executing  ->  completed sequence
                 executing_count = len([e for e in tool_events if e[1] == "tool_executing"])
                 completed_count = len([e for e in tool_events if e[1] == "tool_completed"])
                 

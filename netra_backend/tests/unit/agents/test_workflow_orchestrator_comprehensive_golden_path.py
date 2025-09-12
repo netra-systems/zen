@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Protects $500K+ ARR by ensuring proper agent sequence and decision-making
 
 Critical Golden Path Scenarios Tested:
-1. Agent workflow orchestration: Triage → Data Helper → Optimization → Reporting
+1. Agent workflow orchestration: Triage  ->  Data Helper  ->  Optimization  ->  Reporting
 2. Adaptive workflow decisions: Dynamic workflow based on triage results
 3. WebSocket event coordination: User-isolated event emission during workflows
 4. User context isolation: Factory pattern for per-user workflow execution
@@ -148,7 +148,7 @@ class TestWorkflowOrchestratorComprehensiveGoldenPath(SSotAsyncTestCase):
         Test the golden path adaptive workflow orchestration.
         
         BVJ: Validates core AI agent workflow orchestration (foundation of intelligent responses)
-        Critical Path: Triage → Data Helper → Optimization → Reporting
+        Critical Path: Triage  ->  Data Helper  ->  Optimization  ->  Reporting
         """
         # Arrange: Create WorkflowOrchestrator with real business logic
         orchestrator = WorkflowOrchestrator(
@@ -208,7 +208,7 @@ class TestWorkflowOrchestratorComprehensiveGoldenPath(SSotAsyncTestCase):
         Test user context isolation using factory pattern for WebSocket emitters.
         
         BVJ: Enterprise security - ensures workflow events are user-isolated
-        Critical Path: User context → Factory pattern → Isolated WebSocket events
+        Critical Path: User context  ->  Factory pattern  ->  Isolated WebSocket events
         """
         # Arrange: Create orchestrator without initial user context
         orchestrator = WorkflowOrchestrator(
@@ -536,7 +536,7 @@ class TestWorkflowOrchestratorComprehensiveGoldenPath(SSotAsyncTestCase):
         completed_event = next(e for e in self.captured_websocket_events if e['event_type'] == 'workflow_completed')
         assert completed_event['args'][0] == self.test_user_context_1.run_id
         
-        # Verify event sequencing (started → steps → completed)
+        # Verify event sequencing (started  ->  steps  ->  completed)
         event_timestamps = [(e['event_type'], e['timestamp']) for e in self.captured_websocket_events]
         event_timestamps.sort(key=lambda x: x[1])
         

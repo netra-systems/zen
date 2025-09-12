@@ -724,7 +724,7 @@ class TestUserExecutionContextEdgeCases:
     
     def test_unicode_ids(self):
         """Test context with Unicode characters in IDs."""
-        unicode_user_id = "user_测试_🚀"
+        unicode_user_id = "user_[U+6D4B][U+8BD5]_[U+1F680]"
         context = UserExecutionContext(
             user_id=unicode_user_id,
             thread_id="thread_67890",

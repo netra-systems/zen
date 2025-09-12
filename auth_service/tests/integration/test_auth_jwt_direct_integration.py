@@ -125,7 +125,7 @@ class TestAuthJWTDirectIntegration(SSotBaseTestCase):
         self.record_metric("token_expiry_reasonable", True)
         self.record_metric("time_to_expiry_seconds", int(time_to_expiry))
         
-        logger.info("✅ Direct JWT token creation and validation working correctly")
+        logger.info(" PASS:  Direct JWT token creation and validation working correctly")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -197,7 +197,7 @@ class TestAuthJWTDirectIntegration(SSotBaseTestCase):
         self.record_metric("refresh_cycle_success", True)
         self.record_metric("user_data_preserved", True)
         
-        logger.info("✅ Direct JWT refresh token cycle working correctly")
+        logger.info(" PASS:  Direct JWT refresh token cycle working correctly")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -292,7 +292,7 @@ class TestAuthJWTDirectIntegration(SSotBaseTestCase):
         self.record_metric("jwt_security_validation", "comprehensive_success")
         self.record_metric("security_scenarios_tested", len(invalid_scenarios))
         
-        logger.info(f"✅ Direct JWT security validation successful ({len(invalid_scenarios)} scenarios tested)")
+        logger.info(f" PASS:  Direct JWT security validation successful ({len(invalid_scenarios)} scenarios tested)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -398,7 +398,7 @@ class TestAuthJWTDirectIntegration(SSotBaseTestCase):
         self.record_metric("token_uniqueness_verified", True)
         self.record_metric("jwt_multi_user_isolation", "success")
         
-        logger.info(f"✅ Direct JWT multi-user isolation successful ({len(users_data)} users tested)")
+        logger.info(f" PASS:  Direct JWT multi-user isolation successful ({len(users_data)} users tested)")
     
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -485,7 +485,7 @@ class TestAuthJWTDirectIntegration(SSotBaseTestCase):
         self.record_metric("jwt_performance", "acceptable")
         
         logger.info(
-            f"✅ Direct JWT performance acceptable "
+            f" PASS:  Direct JWT performance acceptable "
             f"(creation avg: {avg_creation_time:.3f}s, validation avg: {avg_validation_time:.3f}s)"
         )
     

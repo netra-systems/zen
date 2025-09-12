@@ -1,6 +1,6 @@
 """
 Tests for custom agent error classes.
-All functions ≤8 lines per requirements.
+All functions  <= 8 lines per requirements.
 """""
 
 import sys

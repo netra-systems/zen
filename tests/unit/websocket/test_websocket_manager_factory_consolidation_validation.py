@@ -168,7 +168,7 @@ class TestWebSocketManagerFactoryConsolidation(SSotBaseTestCase, unittest.TestCa
         # SSOT Requirement: Maximum 1 factory class (or 0 if factories are eliminated)
         self.assertLessEqual(
             total_factories, 1,
-            f"FACTORY CONSOLIDATION VIOLATION: Found {total_factories} factory classes, expected ≤1. "
+            f"FACTORY CONSOLIDATION VIOLATION: Found {total_factories} factory classes, expected  <= 1. "
             f"Factory classes found: {[f['name'] for f in factory_classes]}. "
             f"Files: {[f['file_path'] for f in factory_classes]}. "
             "Factory pattern should be consolidated or eliminated in favor of direct instantiation."

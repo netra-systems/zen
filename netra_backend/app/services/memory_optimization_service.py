@@ -123,25 +123,25 @@ class MemoryOptimizationService:
         self._is_running = True
         self._shutdown_event.clear()
         
-        logger.info("🔧 Starting MemoryOptimizationService...")
+        logger.info("[U+1F527] Starting MemoryOptimizationService...")
         
         # Start monitoring if enabled
         if self.monitoring_enabled:
             self._monitoring_task = asyncio.create_task(self._memory_monitoring_loop())
-            logger.info("✅ Memory monitoring started")
+            logger.info(" PASS:  Memory monitoring started")
         
         # Start cleanup if enabled
         if self.cleanup_enabled:
             self._cleanup_task = asyncio.create_task(self._cleanup_loop())
-            logger.info("✅ Memory cleanup started")
+            logger.info(" PASS:  Memory cleanup started")
         
         # Initial memory check
         stats = self.get_memory_stats()
-        logger.info(f"📊 Initial memory usage: {stats.percentage_used:.1f}% "
+        logger.info(f" CHART:  Initial memory usage: {stats.percentage_used:.1f}% "
                    f"({stats.used_mb:.1f}MB/{stats.total_mb:.1f}MB) - {stats.pressure_level.value}")
         
         if stats.pressure_level in [MemoryPressureLevel.HIGH, MemoryPressureLevel.CRITICAL]:
-            logger.warning(f"🚨 HIGH MEMORY PRESSURE DETECTED: {stats.percentage_used:.1f}% - "
+            logger.warning(f" ALERT:  HIGH MEMORY PRESSURE DETECTED: {stats.percentage_used:.1f}% - "
                           "Enabling aggressive cleanup mode")
             await self._emergency_cleanup()
     
@@ -150,7 +150,7 @@ class MemoryOptimizationService:
         if not self._is_running:
             return
         
-        logger.info("🛑 Stopping MemoryOptimizationService...")
+        logger.info("[U+1F6D1] Stopping MemoryOptimizationService...")
         
         self._is_running = False
         self._shutdown_event.set()
@@ -178,7 +178,7 @@ class MemoryOptimizationService:
         for scope in scopes_to_cleanup:
             await self._dispose_scope(scope)
         
-        logger.info("✅ MemoryOptimizationService stopped")
+        logger.info(" PASS:  MemoryOptimizationService stopped")
     
     def get_memory_stats(self) -> MemoryStats:
         """Get current memory statistics."""
@@ -264,7 +264,7 @@ class MemoryOptimizationService:
             self._active_scopes[request_id] = scope
         
         try:
-            logger.debug(f"📦 Created request scope {request_id} for user {user_id}")
+            logger.debug(f"[U+1F4E6] Created request scope {request_id} for user {user_id}")
             yield scope
         finally:
             await self._dispose_scope(scope)
@@ -277,7 +277,7 @@ class MemoryOptimizationService:
             return
         
         try:
-            logger.debug(f"🧹 Disposing request scope {scope.request_id}")
+            logger.debug(f"[U+1F9F9] Disposing request scope {scope.request_id}")
             
             # Run cleanup callbacks in reverse order
             for cleanup_callback in reversed(scope.cleanup_callbacks):
@@ -294,7 +294,7 @@ class MemoryOptimizationService:
             scope.cleanup_callbacks.clear()
             scope._disposed = True
             
-            logger.debug(f"✅ Disposed request scope {scope.request_id}")
+            logger.debug(f" PASS:  Disposed request scope {scope.request_id}")
             
         except Exception as e:
             logger.error(f"Error disposing scope {scope.request_id}: {e}")
@@ -332,7 +332,7 @@ class MemoryOptimizationService:
             if cleanup_callback:
                 scope.cleanup_callbacks.append(cleanup_callback)
             
-            logger.debug(f"📦 Created component {component_name} in scope {scope.request_id}")
+            logger.debug(f"[U+1F4E6] Created component {component_name} in scope {scope.request_id}")
             return component
             
         except Exception as e:
@@ -362,7 +362,7 @@ class MemoryOptimizationService:
             'instance': None
         }
         
-        logger.debug(f"📋 Registered lazy component {component_name} "
+        logger.debug(f"[U+1F4CB] Registered lazy component {component_name} "
                     f"(cost: {memory_cost_mb}MB, deps: {dependencies})")
     
     async def load_component(self, component_name: str) -> Any:
@@ -386,7 +386,7 @@ class MemoryOptimizationService:
         stats = self.get_memory_stats()
         if (stats.pressure_level in [MemoryPressureLevel.HIGH, MemoryPressureLevel.CRITICAL] and
             component_def['memory_cost_mb'] > 50):
-            logger.warning(f"⚠️ Deferring load of {component_name} due to memory pressure "
+            logger.warning(f" WARNING: [U+FE0F] Deferring load of {component_name} due to memory pressure "
                           f"({stats.percentage_used:.1f}%)")
             await self._emergency_cleanup()
         
@@ -407,7 +407,7 @@ class MemoryOptimizationService:
             component_def['loaded'] = True
             self._loaded_components.add(component_name)
             
-            logger.info(f"✅ Loaded component {component_name} "
+            logger.info(f" PASS:  Loaded component {component_name} "
                        f"(cost: {component_def['memory_cost_mb']}MB)")
             
             return instance
@@ -418,7 +418,7 @@ class MemoryOptimizationService:
     
     async def _memory_monitoring_loop(self) -> None:
         """Memory monitoring background task."""
-        logger.info("🔍 Started memory monitoring loop")
+        logger.info(" SEARCH:  Started memory monitoring loop")
         
         while self._is_running:
             try:
@@ -426,15 +426,15 @@ class MemoryOptimizationService:
                 
                 # Log periodic status
                 if len(self._memory_history) % 10 == 0:  # Every 10 checks
-                    logger.info(f"📊 Memory: {stats.percentage_used:.1f}% "
+                    logger.info(f" CHART:  Memory: {stats.percentage_used:.1f}% "
                                f"({stats.used_mb:.1f}MB/{stats.total_mb:.1f}MB)")
                 
                 # Handle memory pressure
                 if stats.percentage_used >= self.critical_threshold:
-                    logger.critical(f"🚨 CRITICAL MEMORY PRESSURE: {stats.percentage_used:.1f}%")
+                    logger.critical(f" ALERT:  CRITICAL MEMORY PRESSURE: {stats.percentage_used:.1f}%")
                     await self._emergency_cleanup()
                 elif stats.percentage_used >= self.warning_threshold:
-                    logger.warning(f"⚠️ HIGH MEMORY USAGE: {stats.percentage_used:.1f}%")
+                    logger.warning(f" WARNING: [U+FE0F] HIGH MEMORY USAGE: {stats.percentage_used:.1f}%")
                     await self._gentle_cleanup()
                 
                 # Wait for next check
@@ -446,11 +446,11 @@ class MemoryOptimizationService:
                 logger.error(f"Error in memory monitoring: {e}")
                 await asyncio.sleep(self.check_interval)
         
-        logger.info("🔍 Memory monitoring loop stopped")
+        logger.info(" SEARCH:  Memory monitoring loop stopped")
     
     async def _cleanup_loop(self) -> None:
         """Background cleanup task."""
-        logger.info("🧹 Started memory cleanup loop")
+        logger.info("[U+1F9F9] Started memory cleanup loop")
         
         while self._is_running:
             try:
@@ -462,7 +462,7 @@ class MemoryOptimizationService:
                 logger.error(f"Error in cleanup loop: {e}")
                 await asyncio.sleep(60)
         
-        logger.info("🧹 Memory cleanup loop stopped")
+        logger.info("[U+1F9F9] Memory cleanup loop stopped")
     
     async def _periodic_cleanup(self) -> None:
         """Perform periodic cleanup tasks."""
@@ -476,7 +476,7 @@ class MemoryOptimizationService:
                     expired_scopes.append(scope)
         
         for scope in expired_scopes:
-            logger.info(f"🕰️ Cleaning up expired scope {scope.request_id}")
+            logger.info(f"[U+1F570][U+FE0F] Cleaning up expired scope {scope.request_id}")
             await self._dispose_scope(scope)
             with self._scope_lock:
                 self._active_scopes.pop(scope.request_id, None)
@@ -485,11 +485,11 @@ class MemoryOptimizationService:
         gc.collect()
         
         if expired_scopes:
-            logger.info(f"🧹 Cleaned up {len(expired_scopes)} expired scopes")
+            logger.info(f"[U+1F9F9] Cleaned up {len(expired_scopes)} expired scopes")
     
     async def _gentle_cleanup(self) -> None:
         """Perform gentle cleanup to reduce memory pressure."""
-        logger.info("🧹 Performing gentle memory cleanup...")
+        logger.info("[U+1F9F9] Performing gentle memory cleanup...")
         
         # Unload non-essential lazy components
         components_to_unload = []
@@ -506,11 +506,11 @@ class MemoryOptimizationService:
         gc.collect()
         
         stats = self.get_memory_stats()
-        logger.info(f"🧹 Gentle cleanup complete - Memory: {stats.percentage_used:.1f}%")
+        logger.info(f"[U+1F9F9] Gentle cleanup complete - Memory: {stats.percentage_used:.1f}%")
     
     async def _emergency_cleanup(self) -> None:
         """Perform aggressive cleanup during critical memory pressure."""
-        logger.critical("🚨 EMERGENCY MEMORY CLEANUP INITIATED")
+        logger.critical(" ALERT:  EMERGENCY MEMORY CLEANUP INITIATED")
         
         # Clean up ALL non-essential scopes
         non_essential_scopes = []
@@ -536,10 +536,10 @@ class MemoryOptimizationService:
             await asyncio.sleep(0.1)
         
         stats = self.get_memory_stats()
-        logger.critical(f"🚨 Emergency cleanup complete - Memory: {stats.percentage_used:.1f}%")
+        logger.critical(f" ALERT:  Emergency cleanup complete - Memory: {stats.percentage_used:.1f}%")
         
         if stats.percentage_used >= 95:
-            logger.critical("🚨 MEMORY STILL CRITICAL AFTER CLEANUP - SYSTEM MAY BE UNSTABLE")
+            logger.critical(" ALERT:  MEMORY STILL CRITICAL AFTER CLEANUP - SYSTEM MAY BE UNSTABLE")
     
     async def _unload_component(self, component_name: str) -> None:
         """Unload a lazy-loaded component to free memory."""
@@ -562,7 +562,7 @@ class MemoryOptimizationService:
             component_def['loaded'] = False
             self._loaded_components.discard(component_name)
             
-            logger.debug(f"🗑️ Unloaded component {component_name}")
+            logger.debug(f"[U+1F5D1][U+FE0F] Unloaded component {component_name}")
             
         except Exception as e:
             logger.error(f"Error unloading component {component_name}: {e}")

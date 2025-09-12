@@ -2,7 +2,7 @@
 LLM Fallback Response Builders
 
 This module creates default responses for different LLM operations.
-Each function is ≤8 lines with strong typing and single responsibility.
+Each function is  <= 8 lines with strong typing and single responsibility.
 """
 
 import time
@@ -14,7 +14,7 @@ T = TypeVar('T', bound=BaseModel)
 
 
 class TriageResponseBuilder:
-    """Builds default triage responses with ≤8 line methods."""
+    """Builds default triage responses with  <= 8 line methods."""
     
     @staticmethod
     def create_base_response() -> Dict[str, Any]:
@@ -47,7 +47,7 @@ class TriageResponseBuilder:
 
 
 class DataAnalysisResponseBuilder:
-    """Builds default data analysis responses with ≤8 line methods."""
+    """Builds default data analysis responses with  <= 8 line methods."""
     
     @staticmethod
     def create_base_response() -> Dict[str, Any]:

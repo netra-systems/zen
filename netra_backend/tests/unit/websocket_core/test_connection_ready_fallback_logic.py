@@ -31,7 +31,7 @@ class TestConnectionReadyFallbackLogic(SSotBaseTestCase):
 
     def test_connection_ready_non_existent_connection_should_return_false_but_returns_true(self):
         """
-        🚨 BUG REPRODUCTION: is_connection_ready_for_messages() with non-existent connection
+         ALERT:  BUG REPRODUCTION: is_connection_ready_for_messages() with non-existent connection
         
         Expected Behavior: Should return False for non-existent connections
         Actual Behavior: Incorrectly returns True (the bug)
@@ -49,7 +49,7 @@ class TestConnectionReadyFallbackLogic(SSotBaseTestCase):
         result = is_connection_ready_for_messages(non_existent_connection_id)
         
         # ASSERT: This should be False but will be True due to the bug
-        # 🚨 THIS TEST WILL FAIL - proving the bug exists
+        #  ALERT:  THIS TEST WILL FAIL - proving the bug exists
         assert result is False, (
             "BUG CONFIRMED: is_connection_ready_for_messages() returned True for non-existent connection. "
             "This is the fallback logic bug identified in Golden Path analysis. "
@@ -139,7 +139,7 @@ class TestConnectionReadyFallbackLogic(SSotBaseTestCase):
         ]
         
         # ASSERT: All should be False but will be True due to the bug
-        # 🚨 THIS TEST WILL FAIL - showing systemic bug impact
+        #  ALERT:  THIS TEST WILL FAIL - showing systemic bug impact
         for i, result in enumerate(results):
             assert result is False, (
                 f"BUG CONFIRMED: Connection {non_existent_connections[i]} returned True "
@@ -158,7 +158,7 @@ class TestConnectionReadyFallbackLogic(SSotBaseTestCase):
         # Log metrics for bug tracking
         metrics = self.get_all_metrics()
         if "bug_detected" in metrics:
-            print(f"\n🚨 BUG DETECTION REPORT:")
+            print(f"\n ALERT:  BUG DETECTION REPORT:")
             print(f"Bug Type: {metrics.get('bug_detected')}")
             print(f"Bug Location: {metrics.get('bug_location')}")
             print(f"Expected Result: {metrics.get('expected_result')}")

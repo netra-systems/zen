@@ -288,7 +288,7 @@ class TestMultiSessionUserAuthenticationIntegration(BaseIntegrationTest):
         assert avg_session_time <= 10.0, f"Average session establishment time too slow: {avg_session_time:.2f}s"
         assert total_execution_time <= 20.0, f"Total multi-session setup too slow: {total_execution_time:.2f}s"
         
-        self.logger.info(f"✅ Successfully authenticated user {auth_user.user_id} from {len(successful_sessions)} concurrent sessions")
+        self.logger.info(f" PASS:  Successfully authenticated user {auth_user.user_id} from {len(successful_sessions)} concurrent sessions")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -426,7 +426,7 @@ class TestMultiSessionUserAuthenticationIntegration(BaseIntegrationTest):
         assert final_isolation_check["isolated"], "Agent execution isolation failed across sessions"
         assert final_isolation_check["context_isolation"], "Agent context isolation failed"
         
-        self.logger.info(f"✅ Successfully executed {total_executions} agents across {num_sessions} concurrent sessions")
+        self.logger.info(f" PASS:  Successfully executed {total_executions} agents across {num_sessions} concurrent sessions")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -588,7 +588,7 @@ class TestMultiSessionUserAuthenticationIntegration(BaseIntegrationTest):
         assert db_isolation["sessions_isolated"], "Database session isolation failed"
         assert db_isolation["event_tracking_isolated"], "Event tracking isolation failed"
         
-        self.logger.info(f"✅ WebSocket event isolation validated - Session 1: {len(session_1_events)} events, Session 2: {len(session_2_events)} events")
+        self.logger.info(f" PASS:  WebSocket event isolation validated - Session 1: {len(session_1_events)} events, Session 2: {len(session_2_events)} events")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -689,7 +689,7 @@ class TestMultiSessionUserAuthenticationIntegration(BaseIntegrationTest):
         assert websocket_thread_isolation["websocket_isolation"], "WebSocket thread access isolation failed"
         assert not websocket_thread_isolation["cross_access_detected"], "Cross-session thread access detected"
         
-        self.logger.info(f"✅ Thread isolation validated across {num_sessions} sessions with {num_sessions * 2} total threads")
+        self.logger.info(f" PASS:  Thread isolation validated across {num_sessions} sessions with {num_sessions * 2} total threads")
     
     # Helper methods for multi-session testing
     

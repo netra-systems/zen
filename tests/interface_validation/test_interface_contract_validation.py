@@ -222,8 +222,8 @@ class TestInterfaceContractValidation(SSotBaseTestCase):
         assert 'websocket_connection_id' not in constructor_params, \
             "UserExecutionContext has deprecated websocket_connection_id parameter"
         
-        print(f"✅ UserExecutionContext interface contract validation passed")
-        print(f"✅ Constructor parameters: {sorted(constructor_params.keys())}")
+        print(f" PASS:  UserExecutionContext interface contract validation passed")
+        print(f" PASS:  Constructor parameters: {sorted(constructor_params.keys())}")
     
     def test_websocket_factory_interface_compliance(self):
         """
@@ -257,8 +257,8 @@ class TestInterfaceContractValidation(SSotBaseTestCase):
         if violations:
             pytest.fail(f"WebSocket factory interface violations found:\n" + "\n".join(violations))
         
-        print(f"✅ WebSocket factory interface compliance validated")
-        print(f"✅ Found {len(factory_calls)} UserExecutionContext calls, all compliant")
+        print(f" PASS:  WebSocket factory interface compliance validated")
+        print(f" PASS:  Found {len(factory_calls)} UserExecutionContext calls, all compliant")
     
     def test_core_factory_interface_compliance(self):
         """
@@ -292,8 +292,8 @@ class TestInterfaceContractValidation(SSotBaseTestCase):
         if violations:
             pytest.fail(f"Core factory interface violations found:\n" + "\n".join(violations))
         
-        print(f"✅ Core factory interface compliance validated")
-        print(f"✅ Found {len(factory_calls)} UserExecutionContext calls, all compliant")
+        print(f" PASS:  Core factory interface compliance validated")
+        print(f" PASS:  Found {len(factory_calls)} UserExecutionContext calls, all compliant")
     
     def test_codebase_wide_interface_contract_scan(self):
         """
@@ -328,8 +328,8 @@ class TestInterfaceContractValidation(SSotBaseTestCase):
             
             pytest.fail(f"Interface contract violations found:{chr(10).join(violation_report)}")
         
-        print(f"✅ Codebase-wide interface contract scan completed")
-        print(f"✅ No violations found for {len(target_classes)} target classes")
+        print(f" PASS:  Codebase-wide interface contract scan completed")
+        print(f" PASS:  No violations found for {len(target_classes)} target classes")
     
     def test_parameter_naming_convention_validation(self):
         """
@@ -378,8 +378,8 @@ class TestInterfaceContractValidation(SSotBaseTestCase):
         if violations:
             pytest.fail(f"Parameter naming convention violations:\n" + "\n".join(violations))
         
-        print(f"✅ Parameter naming convention validation passed")
-        print(f"✅ No deprecated parameter names found in critical files")
+        print(f" PASS:  Parameter naming convention validation passed")
+        print(f" PASS:  No deprecated parameter names found in critical files")
     
     def test_interface_evolution_tracking(self):
         """
@@ -407,10 +407,10 @@ class TestInterfaceContractValidation(SSotBaseTestCase):
         
         # Interface evolution tracking is acceptable if either documentation or scripts exist
         if not (documentation_found or scripts_found):
-            print("⚠️  Interface evolution tracking should be improved")
-            print("⚠️  Consider adding documentation or validation scripts")
+            print(" WARNING: [U+FE0F]  Interface evolution tracking should be improved")
+            print(" WARNING: [U+FE0F]  Consider adding documentation or validation scripts")
         else:
-            print("✅ Interface evolution tracking capabilities found")
+            print(" PASS:  Interface evolution tracking capabilities found")
     
     def test_factory_pattern_consistency_validation(self):
         """
@@ -441,9 +441,9 @@ class TestInterfaceContractValidation(SSotBaseTestCase):
             assert core_websocket_param.default is None or core_websocket_param.default == inspect.Parameter.empty, \
                 "Core factory websocket_client_id should be optional"
         
-        print(f"✅ Factory pattern consistency validation passed")
-        print(f"✅ WebSocket factory parameters: {list(websocket_params.keys())}")
-        print(f"✅ Core factory parameters: {list(core_params.keys())}")
+        print(f" PASS:  Factory pattern consistency validation passed")
+        print(f" PASS:  WebSocket factory parameters: {list(websocket_params.keys())}")
+        print(f" PASS:  Core factory parameters: {list(core_params.keys())}")
 
 
 class TestInterfaceContractRegressionPrevention(SSotBaseTestCase):
@@ -474,11 +474,11 @@ class TestInterfaceContractRegressionPrevention(SSotBaseTestCase):
         precommit_available = os.path.exists(precommit_config)
         
         if tools_available:
-            print(f"✅ Interface validation tools available")
+            print(f" PASS:  Interface validation tools available")
         elif precommit_available:
-            print(f"✅ Pre-commit configuration available (may include interface validation)")
+            print(f" PASS:  Pre-commit configuration available (may include interface validation)")
         else:
-            print(f"⚠️  Automated interface validation tools should be implemented")
+            print(f" WARNING: [U+FE0F]  Automated interface validation tools should be implemented")
     
     def test_interface_change_detection_capabilities(self):
         """
@@ -504,13 +504,13 @@ class TestInterfaceContractRegressionPrevention(SSotBaseTestCase):
         missing_parameters = expected_parameters - current_parameters
         
         if unexpected_parameters:
-            print(f"⚠️  Unexpected parameters detected: {unexpected_parameters}")
+            print(f" WARNING: [U+FE0F]  Unexpected parameters detected: {unexpected_parameters}")
         
         if missing_parameters:
             pytest.fail(f"Expected parameters missing: {missing_parameters}")
         
-        print(f"✅ Interface change detection capabilities validated")
-        print(f"✅ Current UserExecutionContext parameters: {sorted(current_parameters - {'self'})}")
+        print(f" PASS:  Interface change detection capabilities validated")
+        print(f" PASS:  Current UserExecutionContext parameters: {sorted(current_parameters - {'self'})}")
     
     def test_contract_validation_framework_integration(self):
         """
@@ -542,8 +542,8 @@ class TestClass:
         assert len(calls) == 1, "Should detect one UserExecutionContext call"
         assert 'websocket_client_id' in calls[0]['keywords'], "Should extract websocket_client_id parameter"
         
-        print(f"✅ Contract validation framework integration validated")
-        print(f"✅ Framework can extract parameters and analyze source code")
+        print(f" PASS:  Contract validation framework integration validated")
+        print(f" PASS:  Framework can extract parameters and analyze source code")
 
 
 if __name__ == "__main__":

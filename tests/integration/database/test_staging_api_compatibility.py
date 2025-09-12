@@ -4,7 +4,7 @@ Tests for SQLAlchemy 2.0+ and Redis 6.4.0+ API changes that break staging deploy
 
 CRITICAL BUG DETECTION:
 - SQLAlchemy 2.0+ requires text() wrapper for raw SQL
-- Redis 6.4.0+ changed parameter: expire_seconds → ex
+- Redis 6.4.0+ changed parameter: expire_seconds  ->  ex
 - Root cause: SSOT violations with 30+ files using scattered database patterns
 
 Business Value Justification (BVJ):
@@ -96,7 +96,7 @@ class TestStagingDatabaseAPICompatibility:
         This test SHOULD FAIL initially to prove it detects the bug.
         The fix requires wrapping raw SQL strings with text().
         
-        BUG: "SELECT 1 as test_value" → text("SELECT 1 as test_value")
+        BUG: "SELECT 1 as test_value"  ->  text("SELECT 1 as test_value")
         """
         engine = create_async_engine(database_url)
         
@@ -115,7 +115,7 @@ class TestStagingDatabaseAPICompatibility:
                 result = await conn.execute(text("SELECT 1 as test_value"))
                 row = result.fetchone()
                 assert row[0] == 1, "text() wrapped query should work"
-                logger.info("✅ SQLAlchemy text() wrapper compatibility verified")
+                logger.info(" PASS:  SQLAlchemy text() wrapper compatibility verified")
             except Exception as e:
                 pytest.fail(f"text() wrapped query should work but failed: {e}")
         
@@ -161,7 +161,7 @@ class TestStagingDatabaseAPICompatibility:
                     result = await conn.execute(text(query))
                     # Just verify we can execute without error
                     rows = result.fetchall()
-                    logger.info(f"✅ Complex query with text() wrapper succeeded: {len(rows)} rows")
+                    logger.info(f" PASS:  Complex query with text() wrapper succeeded: {len(rows)} rows")
                 except Exception as e:
                     pytest.fail(f"text() wrapped complex query failed: {query} - Error: {e}")
         
@@ -170,12 +170,12 @@ class TestStagingDatabaseAPICompatibility:
     @pytest.mark.asyncio
     async def test_redis_expire_parameter_change(self, redis_connection):
         """
-        Test Redis 6.4.0+ parameter change: expire_seconds → ex.
+        Test Redis 6.4.0+ parameter change: expire_seconds  ->  ex.
         
         This test SHOULD FAIL initially to prove it detects the bug.
         The fix requires changing expire_seconds to ex parameter.
         
-        BUG: redis.set(key, value, expire_seconds=60) → redis.set(key, value, ex=60)
+        BUG: redis.set(key, value, expire_seconds=60)  ->  redis.set(key, value, ex=60)
         """
         test_key = f"test:api_compat:{self.user_id}:{int(time.time())}"
         test_value = "compatibility_test_value"
@@ -203,7 +203,7 @@ class TestStagingDatabaseAPICompatibility:
             ttl = await redis_connection.ttl(test_key)
             assert 50 <= ttl <= 60, f"TTL should be around 60 seconds, got: {ttl}"
             
-            logger.info("✅ Redis 'ex' parameter compatibility verified")
+            logger.info(" PASS:  Redis 'ex' parameter compatibility verified")
             
             # Cleanup
             await redis_connection.delete(test_key)
@@ -234,7 +234,7 @@ class TestStagingDatabaseAPICompatibility:
             ttl_s = await redis_connection.ttl(test_key_s)
             assert 2 <= ttl_s <= 3, f"Second TTL should be around 3s, got: {ttl_s}"
             
-            logger.info("✅ Redis expiration parameter compatibility verified")
+            logger.info(" PASS:  Redis expiration parameter compatibility verified")
             
         except TypeError as e:
             if "expire_seconds" in str(e):
@@ -272,7 +272,7 @@ class TestStagingDatabaseAPICompatibility:
                     result = await conn.execute(text(query))
                     row = result.fetchone()
                     assert row is not None, f"{operation_name} should return a result"
-                    logger.info(f"✅ {operation_name}: {row}")
+                    logger.info(f" PASS:  {operation_name}: {row}")
                     
                 except Exception as e:
                     pytest.fail(f"{operation_name} failed with text() wrapper: {e}")
@@ -312,7 +312,7 @@ class TestStagingDatabaseAPICompatibility:
                 ttl = await redis_connection.ttl(key)
                 assert 250 <= ttl <= 300, f"Batch set TTL incorrect for key: {key}, got: {ttl}"
             
-            logger.info("✅ Redis batch operations parameter compatibility verified")
+            logger.info(" PASS:  Redis batch operations parameter compatibility verified")
             
         except TypeError as e:
             if "expire_seconds" in str(e):
@@ -375,7 +375,7 @@ class TestStagingDatabaseAPICompatibility:
             ttl = await redis_connection.ttl(session_key)
             assert 1700 <= ttl <= 1800, f"Session TTL should be around 1800s, got: {ttl}"
             
-            logger.info("✅ Combined database + Redis API compatibility verified")
+            logger.info(" PASS:  Combined database + Redis API compatibility verified")
             
         except Exception as e:
             pytest.fail(f"Combined database + Redis operation failed: {e}")
@@ -408,7 +408,7 @@ class TestStagingDatabaseAPICompatibility:
         assert len(sqlalchemy_issues) >= 3, "Should detect multiple SQLAlchemy issues"
         assert len(redis_issues) >= 3, "Should detect multiple Redis issues"
         
-        logger.info("✅ Compatibility detection metadata verified")
+        logger.info(" PASS:  Compatibility detection metadata verified")
         logger.info(f"   SQLAlchemy issues detected: {len(sqlalchemy_issues)}")
         logger.info(f"   Redis issues detected: {len(redis_issues)}")
         
@@ -456,7 +456,7 @@ class TestDatabaseAPIViolationDetection:
         for pattern in correct_patterns:
             assert 'text(' in pattern, f"Correct pattern should contain text(): {pattern}"
             
-        logger.info(f"✅ Raw SQL pattern detection configured for {len(problematic_patterns)} patterns")
+        logger.info(f" PASS:  Raw SQL pattern detection configured for {len(problematic_patterns)} patterns")
         assert True, "SQL pattern detection is working correctly"
     
     def test_detect_redis_parameter_usage_patterns(self):
@@ -488,7 +488,7 @@ class TestDatabaseAPIViolationDetection:
         for pattern in correct_patterns:
             assert 'ex=' in pattern, f"Should use new parameter: {pattern}"
             
-        logger.info(f"✅ Redis parameter pattern detection configured for {len(problematic_patterns)} patterns")
+        logger.info(f" PASS:  Redis parameter pattern detection configured for {len(problematic_patterns)} patterns")
         assert True, "Redis parameter detection is working correctly"
 
 if __name__ == "__main__":

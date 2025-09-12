@@ -19,7 +19,7 @@ $500K+ ARR chat functionality.
 INTEGRATION REQUIREMENTS:
 - Uses REAL database connections (no mocks)
 - Tests MUST fail with current broken code  
-- Tests will pass after 'async for' → 'async with' fix
+- Tests will pass after 'async for'  ->  'async with' fix
 - Validates complete session lifecycle with real services
 
 PHASE 1 PRIORITY: Real service validation of async session patterns
@@ -86,7 +86,7 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
         
         EXPECTED BEHAVIOR:
         - With current broken code: Test FAILS with TypeError
-        - After fix (async for → async with): Test PASSES
+        - After fix (async for  ->  async with): Test PASSES
         """
         try:
             # Get the real session context from dependencies
@@ -221,7 +221,7 @@ class TestAgentHandlerDbSessionIntegration(SSotAsyncTestCase):
         Validate that real database sessions have proper lifecycle management
         when used correctly with 'async with' pattern.
         
-        This ensures that the fix (async for → async with) maintains proper
+        This ensures that the fix (async for  ->  async with) maintains proper
         session cleanup and resource management.
         """
         try:

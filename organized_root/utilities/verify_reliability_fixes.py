@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Verify all functions in reliability.py are ≤8 lines.
+Verify all functions in reliability.py are  <= 8 lines.
 """
 
 import ast
@@ -80,11 +80,11 @@ def main():
     
     print("\n" + "=" * 50)
     if violations:
-        print(f"❌ Found {len(violations)} violations (functions > 8 lines):")
+        print(f" FAIL:  Found {len(violations)} violations (functions > 8 lines):")
         for func_name, line_count, start_line in violations:
             print(f"  - {func_name}: {line_count} lines (starts at line {start_line})")
     else:
-        print("✅ All functions are ≤8 lines! No violations found.")
+        print(" PASS:  All functions are  <= 8 lines! No violations found.")
     
     return len(violations) == 0
 

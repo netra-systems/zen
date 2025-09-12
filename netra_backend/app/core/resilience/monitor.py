@@ -6,7 +6,7 @@ This module provides enterprise-grade monitoring with:
 - Performance tracking and trend analysis
 - Integration with external monitoring systems
 
-All functions are ≤8 lines per MANDATORY requirements.
+All functions are  <= 8 lines per MANDATORY requirements.
 """
 
 import asyncio

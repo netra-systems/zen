@@ -10,13 +10,13 @@ Business Value Justification (BVJ):
 This test suite validates the complete UnifiedWebSocketManager functionality that enables
 substantive AI chat interactions and real-time user experience. These tests ensure:
 
-1. WebSocket connection lifecycle management (connect → authenticate → messaging → disconnect)
+1. WebSocket connection lifecycle management (connect  ->  authenticate  ->  messaging  ->  disconnect)
 2. Multi-user session isolation preventing cross-user data leakage
 3. Real-time event broadcasting and message routing between users
 4. Connection pool management and resource limits
 5. Authentication and authorization validation
 6. Connection recovery and reconnection handling
-7. Cross-service WebSocket coordination (backend ↔ frontend)
+7. Cross-service WebSocket coordination (backend [U+2194] frontend)
 8. Performance under concurrent load and stress conditions
 9. Business-critical WebSocket event delivery (agent events, tool status, results)
 10. Connection health monitoring and circuit breaker patterns
@@ -170,7 +170,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         isolated_env
     ):
         """
-        Test complete WebSocket connection lifecycle: connect → authenticate → messaging → disconnect.
+        Test complete WebSocket connection lifecycle: connect  ->  authenticate  ->  messaging  ->  disconnect.
         
         Business Value: Validates the core connection management that enables real-time chat.
         """
@@ -1273,7 +1273,7 @@ class TestUnifiedWebSocketManagerComprehensive(BaseIntegrationTest):
         """
         Test integration with AgentWebSocketBridge and agent execution systems.
         
-        Business Value: Validates the complete agent → WebSocket → user flow.
+        Business Value: Validates the complete agent  ->  WebSocket  ->  user flow.
         """
         bridge_user = "agent_bridge_test_user"
         

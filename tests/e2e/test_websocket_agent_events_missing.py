@@ -89,7 +89,7 @@ class TestWebSocketAgentEventsMissing(BaseE2ETest):
                 timeout=15.0
             ) as websocket:
                 
-                logger.info("✓ Authenticated WebSocket connection established")
+                logger.info("[U+2713] Authenticated WebSocket connection established")
                 
                 # Send agent execution request
                 agent_request = {
@@ -273,7 +273,7 @@ class TestWebSocketAgentEventsMissing(BaseE2ETest):
                     timeout=15.0
                 ) as user2_ws:
                     
-                    logger.info("✓ Both authenticated WebSocket connections established")
+                    logger.info("[U+2713] Both authenticated WebSocket connections established")
                     
                     # Send agent requests from both users simultaneously
                     user1_request = {
@@ -394,7 +394,7 @@ class TestWebSocketAgentEventsMissing(BaseE2ETest):
         of the WebSocket integration gap on user experience and trust.
         
         Business Impact Analysis:
-        - Missing events → No progress visibility → User frustration → Churn
+        - Missing events  ->  No progress visibility  ->  User frustration  ->  Churn
         - Real-time updates are core value proposition for $500K+ ARR
         - User trust depends on transparency during AI processing
         """
@@ -427,7 +427,7 @@ class TestWebSocketAgentEventsMissing(BaseE2ETest):
                 timeout=15.0
             ) as websocket:
                 
-                logger.info("✓ Business user authenticated WebSocket connection established")
+                logger.info("[U+2713] Business user authenticated WebSocket connection established")
                 
                 # Send business-critical agent request
                 business_request = {

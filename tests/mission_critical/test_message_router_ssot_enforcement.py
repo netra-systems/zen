@@ -80,12 +80,12 @@ class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
                 )
             else:
                 # SUCCESS: Single implementation in correct location
-                self.logger.info("✅ SSOT SUCCESS: Single MessageRouter implementation found in canonical location")
+                self.logger.info(" PASS:  SSOT SUCCESS: Single MessageRouter implementation found in canonical location")
         else:
             # EXPECTED INITIAL FAILURE: Multiple implementations
             violation_details = self._format_ssot_violations(router_implementations)
             self.fail(
-                f"❌ SSOT VIOLATION: {implementation_count} MessageRouter implementations found. "
+                f" FAIL:  SSOT VIOLATION: {implementation_count} MessageRouter implementations found. "
                 f"Golden Path requires EXACTLY 1 in {self.canonical_path}.\n"
                 f"BUSINESS IMPACT: Multiple routers cause WebSocket race conditions, "
                 f"connection failures, and chat functionality breakdown affecting $500K+ ARR.\n"
@@ -102,7 +102,7 @@ class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
         
         if not os.path.exists(canonical_full_path):
             self.fail(
-                f"❌ CANONICAL ROUTER MISSING: {canonical_full_path} does not exist. "
+                f" FAIL:  CANONICAL ROUTER MISSING: {canonical_full_path} does not exist. "
                 f"Golden Path chat functionality requires canonical MessageRouter."
             )
         
@@ -111,7 +111,7 @@ class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
         
         if not router_class:
             self.fail(
-                f"❌ CANONICAL ROUTER INVALID: No MessageRouter class found in {canonical_full_path}"
+                f" FAIL:  CANONICAL ROUTER INVALID: No MessageRouter class found in {canonical_full_path}"
             )
         
         # Required interface methods for golden path functionality
@@ -127,11 +127,11 @@ class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
         
         if missing_methods:
             self.fail(
-                f"❌ CANONICAL ROUTER INCOMPLETE: Missing required methods: {missing_methods}. "
+                f" FAIL:  CANONICAL ROUTER INCOMPLETE: Missing required methods: {missing_methods}. "
                 f"Chat functionality requires complete routing interface."
             )
         
-        self.logger.info(f"✅ Canonical MessageRouter has complete interface: {found_methods}")
+        self.logger.info(f" PASS:  Canonical MessageRouter has complete interface: {found_methods}")
 
     def test_no_competing_router_factories_exist(self):
         """Test that no competing MessageRouter factory functions exist.
@@ -153,12 +153,12 @@ class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
                 for path, info in router_factories.items()
             ])
             self.fail(
-                f"❌ COMPETING FACTORIES DETECTED: {len(router_factories)} MessageRouter factories found.\n"
+                f" FAIL:  COMPETING FACTORIES DETECTED: {len(router_factories)} MessageRouter factories found.\n"
                 f"SSOT requires single instantiation pattern.\n"
                 f"FACTORIES FOUND:\n{factory_details}"
             )
         
-        self.logger.info("✅ No competing router factories detected")
+        self.logger.info(" PASS:  No competing router factories detected")
 
     def test_message_router_import_consistency(self):
         """Test that all MessageRouter imports use consistent paths.
@@ -176,7 +176,7 @@ class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
                 for path, files in import_analysis.items()
             ])
             self.fail(
-                f"❌ IMPORT PATH INCONSISTENCY: {len(unique_import_paths)} different import paths found.\n"
+                f" FAIL:  IMPORT PATH INCONSISTENCY: {len(unique_import_paths)} different import paths found.\n"
                 f"SSOT requires all imports to use canonical path: {self.canonical_path}\n"
                 f"IMPORT PATHS FOUND:\n{import_details}"
             )
@@ -191,12 +191,12 @@ class TestMessageRouterSSOTEnforcement(SSotBaseTestCase, unittest.TestCase):
         
         if unique_import_paths and not any(canonical in list(unique_import_paths)[0] for canonical in canonical_variations):
             self.fail(
-                f"❌ NON-CANONICAL IMPORTS: Imports not using canonical path.\n"
+                f" FAIL:  NON-CANONICAL IMPORTS: Imports not using canonical path.\n"
                 f"Expected: {expected_import}\n"
                 f"Found: {list(unique_import_paths)}"
             )
         
-        self.logger.info("✅ MessageRouter imports are consistent")
+        self.logger.info(" PASS:  MessageRouter imports are consistent")
 
     def _discover_message_router_implementations(self) -> Dict[str, Dict[str, Any]]:
         """Discover all MessageRouter class implementations in the codebase."""

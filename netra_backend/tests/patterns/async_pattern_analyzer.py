@@ -1,7 +1,7 @@
 """
 AST Analyzer for Async Test Patterns
 Analyzes async testing patterns in Python code using AST
-Maximum 300 lines, functions ≤8 lines
+Maximum 300 lines, functions  <= 8 lines
 """
 
 import ast
@@ -54,7 +54,7 @@ class AsyncPatternAnalyzer(ast.NodeVisitor):
                 self.pytest_asyncio_decorators.append(node.lineno)
     
     def _check_function_length(self, node: ast.FunctionDef) -> None:
-        """Check function length compliance (≤8 lines)"""
+        """Check function length compliance ( <= 8 lines)"""
         if hasattr(node, 'end_lineno') and node.end_lineno:
             length = node.end_lineno - node.lineno
             if length > 8:

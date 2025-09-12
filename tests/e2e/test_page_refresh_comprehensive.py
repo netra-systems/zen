@@ -549,7 +549,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
     # REMOVED_SYNTAX_ERROR: """Run all page refresh tests."""
     # REMOVED_SYNTAX_ERROR: print(" )
     # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-    # REMOVED_SYNTAX_ERROR: print("🚀 MISSION CRITICAL: Page Refresh Test Suite")
+    # REMOVED_SYNTAX_ERROR: print("[U+1F680] MISSION CRITICAL: Page Refresh Test Suite")
     # REMOVED_SYNTAX_ERROR: print("=" * 60)
 
     # Create a new browser context for each test to ensure isolation
@@ -579,7 +579,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
                     # Print summary
                     # REMOVED_SYNTAX_ERROR: print(" )
                     # REMOVED_SYNTAX_ERROR: " + "=" * 60)
-                    # REMOVED_SYNTAX_ERROR: print("📊 TEST RESULTS SUMMARY")
+                    # REMOVED_SYNTAX_ERROR: print(" CHART:  TEST RESULTS SUMMARY")
                     # REMOVED_SYNTAX_ERROR: print("=" * 60)
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -587,13 +587,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
                     # REMOVED_SYNTAX_ERROR: if self.test_results['critical_failures']:
                         # REMOVED_SYNTAX_ERROR: print(" )
-                        # REMOVED_SYNTAX_ERROR: ⚠️ CRITICAL FAILURES:")
+                        # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F] CRITICAL FAILURES:")
                         # REMOVED_SYNTAX_ERROR: for failure in self.test_results['critical_failures']:
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                             # REMOVED_SYNTAX_ERROR: if self.test_results.get('performance_metrics'):
                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: 📈 PERFORMANCE METRICS:")
+                                # REMOVED_SYNTAX_ERROR: [U+1F4C8] PERFORMANCE METRICS:")
                                 # REMOVED_SYNTAX_ERROR: metrics = self.test_results['performance_metrics']
                                 # REMOVED_SYNTAX_ERROR: for key, value in metrics.items():
                                     # REMOVED_SYNTAX_ERROR: if isinstance(value, float):
@@ -604,13 +604,13 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
                                             # Determine overall status
                                             # REMOVED_SYNTAX_ERROR: if self.test_results['failed'] == 0:
                                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                                # REMOVED_SYNTAX_ERROR: ✅ ALL TESTS PASSED - Page refresh handling is robust!")
+                                                # REMOVED_SYNTAX_ERROR:  PASS:  ALL TESTS PASSED - Page refresh handling is robust!")
                                                 # REMOVED_SYNTAX_ERROR: elif len(self.test_results['critical_failures']) > 0:
                                                     # REMOVED_SYNTAX_ERROR: print(" )
-                                                    # REMOVED_SYNTAX_ERROR: ❌ CRITICAL FAILURES DETECTED - Immediate attention required!")
+                                                    # REMOVED_SYNTAX_ERROR:  FAIL:  CRITICAL FAILURES DETECTED - Immediate attention required!")
                                                     # REMOVED_SYNTAX_ERROR: else:
                                                         # REMOVED_SYNTAX_ERROR: print(" )
-                                                        # REMOVED_SYNTAX_ERROR: ⚠️ SOME TESTS FAILED - Review and fix non-critical issues")
+                                                        # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F] SOME TESTS FAILED - Review and fix non-critical issues")
 
                                                         # REMOVED_SYNTAX_ERROR: return self.test_results
 

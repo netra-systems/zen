@@ -13,7 +13,7 @@ business value delivery through WebSocket events.
 
 Test Coverage:
 1. Message Reception and JSON Parsing (8192 byte limit validation)
-2. Message Routing to AgentHandler (MessageRouter → AgentHandler → MessageHandlerService)
+2. Message Routing to AgentHandler (MessageRouter  ->  AgentHandler  ->  MessageHandlerService)
 3. Authentication validation during message processing
 4. Thread and context creation/retrieval
 5. Agent execution with all 5 critical WebSocket events

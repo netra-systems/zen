@@ -49,10 +49,10 @@ def _get_test_count_rows(results: Dict[str, Any]) -> list[str]:
     """Generate test count summary rows."""
     return [
         f"| Total Tests | {results.get('total_tests', 0)} |",
-        f"| Passed | ✅ {results.get('passed', 0)} |",
-        f"| Failed | ❌ {results.get('failed', 0)} |",
-        f"| Skipped | ⏭️ {results.get('skipped', 0)} |",
-        f"| Errors | 🔥 {results.get('errors', 0)} |"
+        f"| Passed |  PASS:  {results.get('passed', 0)} |",
+        f"| Failed |  FAIL:  {results.get('failed', 0)} |",
+        f"| Skipped | [U+23ED][U+FE0F] {results.get('skipped', 0)} |",
+        f"| Errors |  FIRE:  {results.get('errors', 0)} |"
     ]
 
 
@@ -101,7 +101,7 @@ def _format_failures(results: Dict[str, Any]) -> list[str]:
 
 def _format_single_failure(failure: Dict[str, Any]) -> list[str]:
     """Format single failure entry."""
-    lines = [f"### ❌ {failure.get('test_name', 'Unknown Test')}"]
+    lines = [f"###  FAIL:  {failure.get('test_name', 'Unknown Test')}"]
     if "shard" in failure:
         lines.append(f"**Shard:** {failure['shard']}")
     if "error_message" in failure:
@@ -124,7 +124,7 @@ def _format_errors(results: Dict[str, Any]) -> list[str]:
 
 def _format_single_error(error: Dict[str, Any]) -> list[str]:
     """Format single error entry."""
-    lines = [f"### 🔥 {error.get('test_name', 'Unknown Test')}"]
+    lines = [f"###  FIRE:  {error.get('test_name', 'Unknown Test')}"]
     if "shard" in error:
         lines.append(f"**Shard:** {error['shard']}")
     if "error_message" in error:

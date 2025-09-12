@@ -73,20 +73,20 @@ class WebSocketTestRunnerIntegration:
         
     async def run_pre_deployment_websocket_validation(self, args: argparse.Namespace) -> Dict[str, Any]:
         """Run WebSocket validation before main test execution."""
-        logger.info("🔍 Running pre-deployment WebSocket validation...")
+        logger.info(" SEARCH:  Running pre-deployment WebSocket validation...")
         
         try:
             validation_result = await self.deployment_runner.run_pre_deployment_validation()
             
             # Log results
             if validation_result.get("deployment_ready", False):
-                logger.success(f"✅ Pre-deployment WebSocket validation PASSED ({validation_result.get('success_rate', 0)}%)")
+                logger.success(f" PASS:  Pre-deployment WebSocket validation PASSED ({validation_result.get('success_rate', 0)}%)")
             else:
-                logger.error(f"❌ Pre-deployment WebSocket validation FAILED ({validation_result.get('success_rate', 0)}%)")
+                logger.error(f" FAIL:  Pre-deployment WebSocket validation FAILED ({validation_result.get('success_rate', 0)}%)")
                 
                 # If critical WebSocket issues, consider failing early
                 if validation_result.get("success_rate", 0) < 70:
-                    logger.error("🚫 WebSocket validation failure rate too high - consider stopping test execution")
+                    logger.error("[U+1F6AB] WebSocket validation failure rate too high - consider stopping test execution")
                     
             return validation_result
             
@@ -101,7 +101,7 @@ class WebSocketTestRunnerIntegration:
             
     async def run_post_deployment_websocket_validation(self, args: argparse.Namespace, test_results: Dict[str, Any]) -> Dict[str, Any]:
         """Run WebSocket validation after main test execution."""
-        logger.info("🔍 Running post-deployment WebSocket validation...")
+        logger.info(" SEARCH:  Running post-deployment WebSocket validation...")
         
         try:
             validation_result = await self.deployment_runner.run_post_deployment_validation()
@@ -112,13 +112,13 @@ class WebSocketTestRunnerIntegration:
             
             # Combine insights
             if main_test_success and websocket_validation_success:
-                logger.success("✅ Both main tests and WebSocket validation PASSED - deployment looks healthy")
+                logger.success(" PASS:  Both main tests and WebSocket validation PASSED - deployment looks healthy")
             elif main_test_success and not websocket_validation_success:
-                logger.warning("⚠️ Main tests passed but WebSocket validation FAILED - potential chat functionality issues")
+                logger.warning(" WARNING: [U+FE0F] Main tests passed but WebSocket validation FAILED - potential chat functionality issues")
             elif not main_test_success and websocket_validation_success:
-                logger.warning("⚠️ Main tests failed but WebSocket validation PASSED - non-WebSocket issues detected")
+                logger.warning(" WARNING: [U+FE0F] Main tests failed but WebSocket validation PASSED - non-WebSocket issues detected")
             else:
-                logger.error("❌ Both main tests and WebSocket validation FAILED - deployment has serious issues")
+                logger.error(" FAIL:  Both main tests and WebSocket validation FAILED - deployment has serious issues")
                 
             return validation_result
             
@@ -133,15 +133,15 @@ class WebSocketTestRunnerIntegration:
             
     async def run_websocket_regression_check(self, args: argparse.Namespace) -> Dict[str, Any]:
         """Run WebSocket regression tests to prevent known issues."""
-        logger.info("🔍 Running WebSocket regression prevention tests...")
+        logger.info(" SEARCH:  Running WebSocket regression prevention tests...")
         
         try:
             regression_result = await self.deployment_runner.run_websocket_regression_tests()
             
             if regression_result.get("summary", {}).get("regression_free", False):
-                logger.success("✅ WebSocket regression tests PASSED - no known issues detected")
+                logger.success(" PASS:  WebSocket regression tests PASSED - no known issues detected")
             else:
-                logger.error("❌ WebSocket regression tests FAILED - known issues detected")
+                logger.error(" FAIL:  WebSocket regression tests FAILED - known issues detected")
                 
                 # List specific regressions
                 failed_tests = [
@@ -206,7 +206,7 @@ class WebSocketTestRunnerIntegration:
         # Status summary
         if overall_success:
             report_lines.extend([
-                "### ✅ DEPLOYMENT VALIDATION PASSED",
+                "###  PASS:  DEPLOYMENT VALIDATION PASSED",
                 "- All WebSocket functionality is operational",
                 "- Chat business value ($180K+ MRR) is protected",
                 "- No critical issues detected",
@@ -214,7 +214,7 @@ class WebSocketTestRunnerIntegration:
             ])
         else:
             report_lines.extend([
-                "### ❌ DEPLOYMENT VALIDATION FAILED",
+                "###  FAIL:  DEPLOYMENT VALIDATION FAILED",
                 f"- {len(issues)} critical issues detected:",
             ])
             for issue in issues:
@@ -307,7 +307,7 @@ class WebSocketTestRunnerIntegration:
         
         if overall_success:
             report_lines.extend([
-                "✅ **Deployment approved** - WebSocket functionality is healthy",
+                " PASS:  **Deployment approved** - WebSocket functionality is healthy",
                 "- Monitor WebSocket health metrics for next 2 hours",
                 "- Continue with planned deployment rollout",
                 ""
@@ -319,7 +319,7 @@ class WebSocketTestRunnerIntegration:
             
             if should_rollback:
                 report_lines.extend([
-                    "🚨 **IMMEDIATE ROLLBACK RECOMMENDED**",
+                    " ALERT:  **IMMEDIATE ROLLBACK RECOMMENDED**",
                     f"- Reason: {rollback_reason}",
                     "- Stop deployment rollout immediately",
                     "- Investigate root cause before retry",
@@ -327,7 +327,7 @@ class WebSocketTestRunnerIntegration:
                 ])
             else:
                 report_lines.extend([
-                    "⚠️ **DEPLOYMENT MONITORING REQUIRED**",
+                    " WARNING: [U+FE0F] **DEPLOYMENT MONITORING REQUIRED**",
                     "- Continue deployment with increased monitoring",
                     "- Prepare rollback plan if issues escalate", 
                     "- Monitor business metrics closely",
@@ -354,15 +354,15 @@ class WebSocketTestRunnerIntegration:
     def _get_business_impact_status(self, success_rate: float) -> str:
         """Get business impact status description."""
         if success_rate >= 95:
-            return "✅ Excellent - Full functionality"
+            return " PASS:  Excellent - Full functionality"
         elif success_rate >= 85:
-            return "✅ Good - Minor issues possible"
+            return " PASS:  Good - Minor issues possible"
         elif success_rate >= 70:
-            return "⚠️ Degraded - Moderate impact"
+            return " WARNING: [U+FE0F] Degraded - Moderate impact"
         elif success_rate >= 50:
-            return "🚨 Poor - Significant impact"
+            return " ALERT:  Poor - Significant impact"
         else:
-            return "🚨 Critical - Major functionality loss"
+            return " ALERT:  Critical - Major functionality loss"
             
     def _get_user_impact_description(self, success_rate: float) -> str:
         """Get user impact description."""

@@ -54,7 +54,7 @@ class TestFiveWhysParameterValidation:
         assert websocket_param.default is None or websocket_param.default == inspect.Parameter.empty, \
             "websocket_client_id parameter should be optional"
         
-        print("✅ WHY #1 - Error handling: Parameter signature validation passed")
+        print(" PASS:  WHY #1 - Error handling: Parameter signature validation passed")
     
     def test_why_2_parameter_standardization_source_code_validation(self):
         """
@@ -102,7 +102,7 @@ class TestFiveWhysParameterValidation:
             assert 'websocket_client_id=' in constructor_code, \
                 f"REGRESSION: Missing 'websocket_client_id' parameter in UserExecutionContext creation"
         
-        print("✅ WHY #2 - Parameter standardization: Source code validation passed")
+        print(" PASS:  WHY #2 - Parameter standardization: Source code validation passed")
     
     def test_why_3_factory_interface_consistency_validation(self):
         """
@@ -136,7 +136,7 @@ class TestFiveWhysParameterValidation:
             assert core_websocket_param.default is None or core_websocket_param.default == inspect.Parameter.empty, \
                 "Core factory websocket_client_id should be optional"
         
-        print("✅ WHY #3 - Factory consistency: Interface validation passed")
+        print(" PASS:  WHY #3 - Factory consistency: Interface validation passed")
     
     def test_why_4_deprecated_parameter_rejection_validation(self):
         """
@@ -157,7 +157,7 @@ class TestFiveWhysParameterValidation:
                 db_session=None
             )
         
-        print("✅ WHY #4 - Process improvement: Deprecated parameter properly rejected")
+        print(" PASS:  WHY #4 - Process improvement: Deprecated parameter properly rejected")
     
     def test_why_5_interface_governance_parameter_standards(self):
         """
@@ -190,7 +190,7 @@ class TestFiveWhysParameterValidation:
                 # Other TypeErrors are acceptable (e.g., due to None db_session)
                 pass
         
-        print("✅ WHY #5 - Interface governance: Parameter standards validation passed")
+        print(" PASS:  WHY #5 - Interface governance: Parameter standards validation passed")
     
     def test_end_to_end_parameter_flow_validation(self):
         """
@@ -220,7 +220,7 @@ class TestFiveWhysParameterValidation:
         # 3. Validate the mapping worked correctly
         assert user_context.websocket_client_id == context_connection_id
         
-        print("✅ END-TO-END: Complete parameter flow validation passed")
+        print(" PASS:  END-TO-END: Complete parameter flow validation passed")
     
     def test_regression_prevention_comprehensive_validation(self):
         """
@@ -318,12 +318,12 @@ class TestFiveWhysParameterValidation:
         total_checks = len(validation_results)
         passed_checks = sum(1 for r in validation_results if r['result'])
         
-        print(f"✅ COMPREHENSIVE VALIDATION PASSED: {passed_checks}/{total_checks} checks successful")
-        print(f"✅ WebSocket supervisor parameter regression CANNOT RECUR")
+        print(f" PASS:  COMPREHENSIVE VALIDATION PASSED: {passed_checks}/{total_checks} checks successful")
+        print(f" PASS:  WebSocket supervisor parameter regression CANNOT RECUR")
         
         # Detailed results
         for result in validation_results:
-            status = "✅" if result['result'] else "❌"
+            status = " PASS: " if result['result'] else " FAIL: "
             critical = " (CRITICAL)" if result['critical'] else ""
             print(f"  {status} {result['check']}{critical}: {result['result']}")
 

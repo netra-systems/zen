@@ -402,10 +402,10 @@
     # REMOVED_SYNTAX_ERROR: handler = UnifiedJSONHandler()
 
     # REMOVED_SYNTAX_ERROR: data = { )
-    # REMOVED_SYNTAX_ERROR: "emoji": "🚀",
-    # REMOVED_SYNTAX_ERROR: "chinese": "中文",
-    # REMOVED_SYNTAX_ERROR: "arabic": "العربية",
-    # REMOVED_SYNTAX_ERROR: "special": "€£¥"
+    # REMOVED_SYNTAX_ERROR: "emoji": "[U+1F680]",
+    # REMOVED_SYNTAX_ERROR: "chinese": "[U+4E2D][U+6587]",
+    # REMOVED_SYNTAX_ERROR: "arabic": "[U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]",
+    # REMOVED_SYNTAX_ERROR: "special": "[U+20AC][U+00A3][U+00A5]"
     
     # REMOVED_SYNTAX_ERROR: json_str = handler.dumps(data)
     # REMOVED_SYNTAX_ERROR: parsed = handler.loads(json_str)

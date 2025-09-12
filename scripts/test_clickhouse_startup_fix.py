@@ -318,7 +318,7 @@ async def run_all_tests(verbose: bool = False, simulate_failure: bool = False) -
     logger.info("=" * 60)
     
     if simulate_failure:
-        logger.info("⚠ Running in failure simulation mode")
+        logger.info(" WARNING:  Running in failure simulation mode")
     
     test_functions = [
         test_connection_manager_initialization,
@@ -332,16 +332,16 @@ async def run_all_tests(verbose: bool = False, simulate_failure: bool = False) -
     test_results = []
     
     for test_func in test_functions:
-        logger.info(f"\n🔍 Running {test_func.__name__}...")
+        logger.info(f"\n SEARCH:  Running {test_func.__name__}...")
         
         try:
             result = await test_func()
             test_results.append(result)
             
             if result["success"]:
-                logger.info(f"✅ {result['test_name']}: PASSED")
+                logger.info(f" PASS:  {result['test_name']}: PASSED")
             else:
-                logger.error(f"❌ {result['test_name']}: FAILED")
+                logger.error(f" FAIL:  {result['test_name']}: FAILED")
                 if result["errors"]:
                     for error in result["errors"]:
                         logger.error(f"   - {error}")
@@ -357,7 +357,7 @@ async def run_all_tests(verbose: bool = False, simulate_failure: bool = False) -
                 "errors": [f"Test execution error: {e}"]
             }
             test_results.append(error_result)
-            logger.error(f"❌ {test_func.__name__}: EXECUTION ERROR - {e}")
+            logger.error(f" FAIL:  {test_func.__name__}: EXECUTION ERROR - {e}")
     
     return test_results
 
@@ -378,7 +378,7 @@ def print_summary(test_results: List[Dict[str, Any]]) -> None:
     
     logger.info("\nTest Details:")
     for result in test_results:
-        status = "✅ PASSED" if result["success"] else "❌ FAILED"
+        status = " PASS:  PASSED" if result["success"] else " FAIL:  FAILED"
         logger.info(f"  {result['test_name']}: {status}")
         
         if not result["success"] and result["errors"]:
@@ -388,9 +388,9 @@ def print_summary(test_results: List[Dict[str, Any]]) -> None:
     logger.info("\n" + "=" * 60)
     
     if passed == total:
-        logger.info("🎉 ALL TESTS PASSED! ClickHouse startup fix is working correctly.")
+        logger.info(" CELEBRATION:  ALL TESTS PASSED! ClickHouse startup fix is working correctly.")
     else:
-        logger.warning(f"⚠ {total - passed} tests failed. Review the issues above.")
+        logger.warning(f" WARNING:  {total - passed} tests failed. Review the issues above.")
 
 
 async def main():

@@ -980,7 +980,7 @@
         # REMOVED_SYNTAX_ERROR: { )
         # REMOVED_SYNTAX_ERROR: "workload_type": "test_\x00\x01\x02",  # Binary data
         # REMOVED_SYNTAX_ERROR: "dataset_size": 100,
-        # REMOVED_SYNTAX_ERROR: "unicode_attack": "🚀" * 1000  # Unicode stress
+        # REMOVED_SYNTAX_ERROR: "unicode_attack": "[U+1F680]" * 1000  # Unicode stress
         
         
 

@@ -249,8 +249,8 @@ class TestDatabaseValidationResilience:
             result = await mock_launcher._validate_databases_with_resilience()
             
             # Check that appropriate messages were printed
-            success_messages = [m for m in printed_messages if m[0] == "✅"]
-            warning_messages = [m for m in printed_messages if m[0] == "⚠️"]
+            success_messages = [m for m in printed_messages if m[0] == " PASS: "]
+            warning_messages = [m for m in printed_messages if m[0] == " WARNING: [U+FE0F]"]
             
             assert len(success_messages) >= 2  # Two successful connections
             assert len(warning_messages) >= 1  # One failed connection

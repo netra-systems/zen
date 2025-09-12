@@ -11,7 +11,7 @@ silent failures and compromise business-critical chat functionality validation.
 - Ensure $500K+ ARR chat functionality protection
 - Test real Golden Path execution consistency
 
-**GOLDEN PATH DEFINITION**: The complete user journey from login → AI chat response
+**GOLDEN PATH DEFINITION**: The complete user journey from login  ->  AI chat response
 that represents 90% of platform business value and protects primary revenue stream.
 
 Created: 2025-09-10
@@ -197,7 +197,7 @@ class TestGoldenPathTestRunnerProtection(SSotBaseTestCase):
         # Simulate Golden Path test execution scenarios
         test_scenarios = [
             {
-                "name": "User Login → AI Response Flow",
+                "name": "User Login  ->  AI Response Flow",
                 "description": "Complete Golden Path user journey",
                 "business_value": "Primary revenue flow - 90% of platform value",
                 "critical_components": ["auth", "websocket", "agent_execution", "chat_response"]
@@ -400,7 +400,7 @@ class TestGoldenPathTestRunnerProtection(SSotBaseTestCase):
         revenue_scenarios = [
             {
                 "revenue_tier": "Primary ($500K ARR)",
-                "functionality": "Golden Path user login → AI response",
+                "functionality": "Golden Path user login  ->  AI response",
                 "protection_requirement": "SSOT test runner consistency",
                 "business_criticality": "CRITICAL"
             },

@@ -235,7 +235,7 @@ class ServiceStartupSequenceValidator:
             )
             assert response.status_code in [200, 401]
         except Exception as e:
-            raise RuntimeError(f"Auth → Backend communication failed: {e}")
+            raise RuntimeError(f"Auth  ->  Backend communication failed: {e}")
     
     async def _test_backend_to_frontend_communication(self) -> None:
         """Test backend service to frontend communication."""
@@ -243,7 +243,7 @@ class ServiceStartupSequenceValidator:
             response = await self.client.get("http://localhost:8000/health")
             assert response.status_code == 200
         except Exception as e:
-            raise RuntimeError(f"Backend → Frontend communication failed: {e}")
+            raise RuntimeError(f"Backend  ->  Frontend communication failed: {e}")
     
     async def _test_frontend_to_backend_communication(self) -> None:
         """Test frontend service to backend communication."""
@@ -251,7 +251,7 @@ class ServiceStartupSequenceValidator:
             response = await self.client.get("http://localhost:3000/")
             assert response.status_code == 200
         except Exception as e:
-            raise RuntimeError(f"Frontend → Backend communication failed: {e}")
+            raise RuntimeError(f"Frontend  ->  Backend communication failed: {e}")
     
     async def cleanup(self) -> None:
         """Cleanup test resources."""

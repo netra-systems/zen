@@ -112,7 +112,7 @@ class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
         self.assertNotIn("data", result, "ISSUE: Missing 'data' field expected by SSOT format")
         self.assertNotIn("request_id", result, "ISSUE: Missing 'request_id' field expected by SSOT format")
         
-        print(f"✅ Successfully reproduced Issue #261 API format mismatch")
+        print(f" PASS:  Successfully reproduced Issue #261 API format mismatch")
 
     async def test_golden_path_expected_ssot_format_specification(self):
         """EXPECTED BEHAVIOR: Document the SSOT format that Golden Path tests expect.
@@ -149,7 +149,7 @@ class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
         # Validate data field structure
         self.assertIsInstance(expected_ssot_format["data"], dict)
         
-        print(f"✅ SSOT ExecutionResult format specification documented")
+        print(f" PASS:  SSOT ExecutionResult format specification documented")
 
     async def test_golden_path_test_expectation_analysis(self):
         """Analyze what exactly the failing Golden Path test expects.
@@ -182,14 +182,14 @@ class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
             assert "status" in current_supervisor_result
             pytest.fail("Expected assertion to fail - 'status' should not be in current result")
         except AssertionError:
-            print("✅ Confirmed: 'status' field missing from current result (expected failure)")
+            print(" PASS:  Confirmed: 'status' field missing from current result (expected failure)")
         
         try:
             # Line 305: self.assertEqual(result["status"], "completed")
             assert current_supervisor_result["status"] == "completed"
             pytest.fail("Expected KeyError - 'status' key should not exist")
         except KeyError:
-            print("✅ Confirmed: Cannot access result['status'] - key doesn't exist (expected failure)")
+            print(" PASS:  Confirmed: Cannot access result['status'] - key doesn't exist (expected failure)")
         
         # Show what the test would need to pass
         fixed_result = {
@@ -202,7 +202,7 @@ class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
         self.assertIn("status", fixed_result)
         self.assertEqual(fixed_result["status"], "completed")
         
-        print(f"✅ Analysis complete: Golden Path test needs 'status' field with 'completed' value")
+        print(f" PASS:  Analysis complete: Golden Path test needs 'status' field with 'completed' value")
 
     async def test_execution_status_enum_compliance_check(self):
         """Verify that ExecutionStatus enum values are properly defined and usable."""
@@ -227,7 +227,7 @@ class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
         # SUCCESS = "completed"  # Alias for COMPLETED
         self.assertEqual(ExecutionStatus.SUCCESS.value, "completed")
         
-        print(f"✅ ExecutionStatus enum properly defined with 'completed' value")
+        print(f" PASS:  ExecutionStatus enum properly defined with 'completed' value")
 
     async def test_api_contract_violation_demonstration(self):
         """Demonstrate the API contract violation between SupervisorAgent and Golden Path tests."""
@@ -268,7 +268,7 @@ class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
         self.assertEqual(missing_fields, {"status", "data", "request_id"})
         self.assertGreater(len(extra_fields), 0)
         
-        print(f"✅ API contract violation confirmed: {len(missing_fields)} required fields missing")
+        print(f" PASS:  API contract violation confirmed: {len(missing_fields)} required fields missing")
 
     async def test_fix_validation_template(self):
         """Template test for validating the API fix once implemented.
@@ -325,10 +325,10 @@ class TestExecutionResultAPIReproduction(SSotAsyncTestCase):
             # Validate data contains execution results
             self.assertIsInstance(result["data"], dict)
             
-            print("✅ FIX VALIDATION: All assertions passed - API fix is working correctly!")
+            print(" PASS:  FIX VALIDATION: All assertions passed - API fix is working correctly!")
             
         except (AssertionError, KeyError) as e:
-            print(f"❌ FIX VALIDATION: API fix not yet implemented - {e}")
+            print(f" FAIL:  FIX VALIDATION: API fix not yet implemented - {e}")
             # Don't fail the test - this documents that fix is needed
             # pytest.skip(f"API fix not yet implemented: {e}")
 

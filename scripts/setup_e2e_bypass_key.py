@@ -216,9 +216,9 @@ def main():
         print("\nGranting access to service accounts...")
         for sa in service_accounts:
             if grant_secret_access(project_id, secret_name, sa):
-                print(f"  ✓ Granted access to {sa}")
+                print(f"  [U+2713] Granted access to {sa}")
             else:
-                print(f"  ✗ Failed to grant access to {sa}")
+                print(f"  [U+2717] Failed to grant access to {sa}")
     
     # Print usage instructions
     print("\n" + "="*60)

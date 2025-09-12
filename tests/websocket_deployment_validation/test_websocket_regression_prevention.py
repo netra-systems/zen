@@ -108,7 +108,7 @@ class WebSocketRegressionTester:
     async def run_all_regression_tests(self) -> Dict[str, Any]:
         """Run all regression tests and return comprehensive results."""
         
-        logger.info(f"🔍 Starting WebSocket regression prevention test suite ({len(self.regression_tests)} tests)...")
+        logger.info(f" SEARCH:  Starting WebSocket regression prevention test suite ({len(self.regression_tests)} tests)...")
         
         suite_results = {
             "test_suite": "websocket_regression_prevention",
@@ -126,7 +126,7 @@ class WebSocketRegressionTester:
             test_name = test_config["name"]
             
             try:
-                logger.info(f"🧪 Running regression test: {test_name}")
+                logger.info(f"[U+1F9EA] Running regression test: {test_name}")
                 
                 # Run the specific test function
                 test_result = await test_config["test_func"]()
@@ -142,12 +142,12 @@ class WebSocketRegressionTester:
                 
                 if test_result.get("passed", False):
                     passed_tests += 1
-                    logger.success(f"✅ {test_name} PASSED")
+                    logger.success(f" PASS:  {test_name} PASSED")
                 else:
                     failed_tests += 1
                     if test_config["severity"] == "critical":
                         critical_failures += 1
-                    logger.error(f"❌ {test_name} FAILED: {test_result.get('error', 'Unknown error')}")
+                    logger.error(f" FAIL:  {test_name} FAILED: {test_result.get('error', 'Unknown error')}")
                     
             except Exception as e:
                 failed_tests += 1
@@ -165,7 +165,7 @@ class WebSocketRegressionTester:
                 }
                 
                 suite_results["tests"][test_name] = error_result
-                logger.error(f"❌ {test_name} FAILED with exception: {e}")
+                logger.error(f" FAIL:  {test_name} FAILED with exception: {e}")
                 
         # Generate summary
         total_tests = passed_tests + failed_tests
@@ -184,14 +184,14 @@ class WebSocketRegressionTester:
         
         # Log final results
         if suite_results["summary"]["deployment_safe"]:
-            logger.success(f"🎉 Regression prevention tests PASSED: {success_rate}% success rate")
-            logger.success("✅ No critical regressions detected - deployment safe")
+            logger.success(f" CELEBRATION:  Regression prevention tests PASSED: {success_rate}% success rate")
+            logger.success(" PASS:  No critical regressions detected - deployment safe")
         elif suite_results["summary"]["regression_free"]:
-            logger.warning(f"⚠️ Regression prevention tests mostly passed: {success_rate}% success rate")
-            logger.warning("⚠️ No critical regressions but some issues detected")
+            logger.warning(f" WARNING: [U+FE0F] Regression prevention tests mostly passed: {success_rate}% success rate")
+            logger.warning(" WARNING: [U+FE0F] No critical regressions but some issues detected")
         else:
-            logger.error(f"❌ Regression prevention tests FAILED: {success_rate}% success rate")
-            logger.error(f"🚫 {critical_failures} critical regressions detected - deployment NOT safe")
+            logger.error(f" FAIL:  Regression prevention tests FAILED: {success_rate}% success rate")
+            logger.error(f"[U+1F6AB] {critical_failures} critical regressions detected - deployment NOT safe")
             
         return suite_results
         
@@ -1105,10 +1105,10 @@ async def main():
             result = await test_config["test_func"]()
             
             if result["passed"]:
-                logger.success(f"✅ {args.test} PASSED")
+                logger.success(f" PASS:  {args.test} PASSED")
                 return 0
             else:
-                logger.error(f"❌ {args.test} FAILED: {result.get('error')}")
+                logger.error(f" FAIL:  {args.test} FAILED: {result.get('error')}")
                 return 1
                 
         else:

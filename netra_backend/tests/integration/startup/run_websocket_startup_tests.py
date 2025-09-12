@@ -195,7 +195,7 @@ class WebSocketStartupTestRunner:
         duration = results.get("duration_seconds", 0)
         success = results.get("success", False)
         
-        print(f"Status: {'✅ PASSED' if success else '❌ FAILED'}")
+        print(f"Status: {' PASS:  PASSED' if success else ' FAIL:  FAILED'}")
         print(f"Duration: {duration:.2f} seconds")
         print(f"Return Code: {results.get('return_code', 'Unknown')}")
         

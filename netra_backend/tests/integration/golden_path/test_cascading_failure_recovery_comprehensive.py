@@ -15,8 +15,8 @@ CRITICAL: This test validates REAL multi-service failure recovery scenarios:
 - Real circuit breaker patterns and graceful degradation
 - NO MOCKS - Integration testing with actual service dependency failures
 
-Tests core Golden Path resilience: Service failures → Circuit breakers activate → 
-Graceful degradation → Fallback mechanisms → Service recovery → Full restoration
+Tests core Golden Path resilience: Service failures  ->  Circuit breakers activate  ->  
+Graceful degradation  ->  Fallback mechanisms  ->  Service recovery  ->  Full restoration
 
 This addresses critical missing test scenario identified in golden path analysis.
 """

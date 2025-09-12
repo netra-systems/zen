@@ -509,7 +509,7 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
         self.logger.info(f"Gracefully handled: {websocket_graceful_count}")
         
         for scenario in websocket_failure_scenarios:
-            status = "✅ PASS" if scenario["handled_gracefully"] else "❌ FAIL"
+            status = " PASS:  PASS" if scenario["handled_gracefully"] else " FAIL:  FAIL"
             self.logger.info(f"{status} - {scenario['scenario']}: {scenario.get('error', 'No error')}")
         
         # WebSocket failures should not break core thread functionality
@@ -698,7 +698,7 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
         
         self.logger.info("=== Resource Exhaustion Test Results ===")
         for scenario in resource_exhaustion_scenarios:
-            status = "✅ PASS" if scenario.get("handled_gracefully", False) else "❌ FAIL"
+            status = " PASS:  PASS" if scenario.get("handled_gracefully", False) else " FAIL:  FAIL"
             self.logger.info(f"{status} - {scenario['scenario']}")
             
             if "success_rate" in scenario:
@@ -859,7 +859,7 @@ class TestThreadRoutingErrorScenarios(BaseIntegrationTest):
             for quality_metric in quality_scores:
                 has_quality = scenario.get(quality_metric, False)
                 quality_scores[quality_metric] += 1 if has_quality else 0
-                status = "✅" if has_quality else "❌"
+                status = " PASS: " if has_quality else " FAIL: "
                 self.logger.info(f"{status} {quality_metric.replace('_', ' ').title()}: {has_quality}")
         
         # Calculate overall error message quality

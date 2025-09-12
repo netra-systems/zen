@@ -48,7 +48,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
         
     def test_factory_imports_available(self):
         """Test that all factory implementations can be imported"""
-        print("\n🔍 Testing factory import availability...")
+        print("\n SEARCH:  Testing factory import availability...")
         
         factory_imports = []
         import_errors = []
@@ -71,24 +71,24 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                     'class': factory_class,
                     'source_file': inspect.getfile(factory_class)
                 })
-                print(f"  ✅ {class_name} imported successfully")
+                print(f"   PASS:  {class_name} imported successfully")
             except ImportError as e:
                 import_errors.append(f"{class_name}: {e}")
-                print(f"  ❌ {class_name} import failed: {e}")
+                print(f"   FAIL:  {class_name} import failed: {e}")
             except AttributeError as e:
                 import_errors.append(f"{class_name}: {e}")
-                print(f"  ❌ {class_name} not found in module: {e}")
+                print(f"   FAIL:  {class_name} not found in module: {e}")
         
         # We need at least UserExecutionEngine and one factory
         if len(factory_imports) < 2:
             self.fail(f"Insufficient factory imports available: {import_errors}")
         
-        print(f"  ✅ {len(factory_imports)} factory classes imported successfully")
+        print(f"   PASS:  {len(factory_imports)} factory classes imported successfully")
         return factory_imports
     
     def test_execution_engine_factory_delegation(self):
         """Test that ExecutionEngineFactory delegates to UserExecutionEngine"""
-        print("\n🔍 Testing ExecutionEngineFactory delegation to UserExecutionEngine...")
+        print("\n SEARCH:  Testing ExecutionEngineFactory delegation to UserExecutionEngine...")
         
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
@@ -116,7 +116,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                         f"Factory created {type(engine).__name__}, expected UserExecutionEngine"
                     )
                 else:
-                    print(f"  ✅ Factory correctly created UserExecutionEngine")
+                    print(f"   PASS:  Factory correctly created UserExecutionEngine")
                     
                 # Validate engine properties
                 if hasattr(engine, 'user_id') and engine.user_id != self.test_user_id:
@@ -125,7 +125,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                 if hasattr(engine, 'session_id') and engine.session_id != self.test_session_id:
                     delegation_violations.append(f"Engine session_id mismatch: {engine.session_id} != {self.test_session_id}")
                 
-                print(f"  ✅ Engine properties correctly set")
+                print(f"   PASS:  Engine properties correctly set")
                 
             except Exception as e:
                 delegation_violations.append(f"Factory creation failed: {e}")
@@ -138,7 +138,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
         if missing_methods:
             delegation_violations.append(f"Factory missing required methods: {missing_methods}")
         else:
-            print(f"  ✅ Factory has all required methods: {required_methods}")
+            print(f"   PASS:  Factory has all required methods: {required_methods}")
         
         # Test 3: Multiple factory calls create separate instances
         with patch('netra_backend.app.websocket_core.websocket_manager_factory.WebSocketManagerFactory.get_manager') as mock_get_manager:
@@ -160,7 +160,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                     if engine1.user_id == engine2.user_id:
                         delegation_violations.append("Factory created engines with same user_id")
                     else:
-                        print(f"  ✅ Factory creates separate instances for different users")
+                        print(f"   PASS:  Factory creates separate instances for different users")
                 
             except Exception as e:
                 delegation_violations.append(f"Multiple factory creation failed: {e}")
@@ -169,11 +169,11 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
         if delegation_violations:
             self.fail(f"Factory delegation violations: {delegation_violations}")
         
-        print(f"  ✅ ExecutionEngineFactory correctly delegates to UserExecutionEngine")
+        print(f"   PASS:  ExecutionEngineFactory correctly delegates to UserExecutionEngine")
     
     def test_consolidated_factory_patterns(self):
         """Test consolidated factory patterns delegate to UserExecutionEngine"""
-        print("\n🔍 Testing consolidated factory patterns...")
+        print("\n SEARCH:  Testing consolidated factory patterns...")
         
         try:
             from netra_backend.app.agents.execution_engine_consolidated import ExecutionEngineFactory as ConsolidatedFactory
@@ -192,7 +192,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
             if not create_methods:
                 consolidation_violations.append("ConsolidatedFactory has no create methods")
             else:
-                print(f"  ✅ ConsolidatedFactory has creation methods: {create_methods}")
+                print(f"   PASS:  ConsolidatedFactory has creation methods: {create_methods}")
             
             # Test factory interface consistency
             if hasattr(factory, 'create_execution_engine'):
@@ -210,7 +210,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                                 f"ConsolidatedFactory created {type(engine).__name__}, expected UserExecutionEngine"
                             )
                         else:
-                            print(f"  ✅ ConsolidatedFactory correctly creates UserExecutionEngine")
+                            print(f"   PASS:  ConsolidatedFactory correctly creates UserExecutionEngine")
                             
                     except Exception as e:
                         consolidation_violations.append(f"ConsolidatedFactory creation failed: {e}")
@@ -222,11 +222,11 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
         if consolidation_violations:
             self.fail(f"Factory consolidation violations: {consolidation_violations}")
         
-        print(f"  ✅ Consolidated factory patterns correctly delegate to UserExecutionEngine")
+        print(f"   PASS:  Consolidated factory patterns correctly delegate to UserExecutionEngine")
     
     async def test_factory_async_delegation(self):
         """Test that factory patterns work correctly with async operations"""
-        print("\n🔍 Testing factory async delegation...")
+        print("\n SEARCH:  Testing factory async delegation...")
         
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
@@ -256,7 +256,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                             'test_type': 'async_delegation',
                             'factory_type': 'ExecutionEngineFactory'
                         })
-                        print(f"  ✅ Async WebSocket event sent successfully")
+                        print(f"   PASS:  Async WebSocket event sent successfully")
                     except Exception as e:
                         async_violations.append(f"Async WebSocket event failed: {e}")
                 
@@ -279,7 +279,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                                 f"Async factory created {type(async_engine).__name__}, expected UserExecutionEngine"
                             )
                         else:
-                            print(f"  ✅ Async factory correctly creates UserExecutionEngine")
+                            print(f"   PASS:  Async factory correctly creates UserExecutionEngine")
                         
                     except Exception as e:
                         async_violations.append(f"Async factory creation failed: {e}")
@@ -318,17 +318,17 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
         if success_count != len(concurrent_tasks):
             async_violations.append(f"Only {success_count}/{len(concurrent_tasks)} concurrent operations succeeded")
         else:
-            print(f"  ✅ {success_count} concurrent factory operations completed successfully")
+            print(f"   PASS:  {success_count} concurrent factory operations completed successfully")
         
         # CRITICAL: Async delegation must work for real-time chat functionality
         if async_violations:
             self.fail(f"Async delegation violations: {async_violations}")
         
-        print(f"  ✅ Factory async delegation works correctly")
+        print(f"   PASS:  Factory async delegation works correctly")
     
     def test_factory_interface_consistency(self):
         """Test that all factory interfaces are consistent and delegate to UserExecutionEngine"""
-        print("\n🔍 Testing factory interface consistency...")
+        print("\n SEARCH:  Testing factory interface consistency...")
         
         interface_violations = []
         
@@ -353,7 +353,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                 'source_file': inspect.getfile(factory_class)
             }
         
-        print(f"  ✅ Analyzed {len(factory_classes)} factory interfaces")
+        print(f"   PASS:  Analyzed {len(factory_classes)} factory interfaces")
         
         # Check for interface consistency
         create_method_names = set()
@@ -367,7 +367,7 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
         if not found_patterns:
             interface_violations.append("No common factory patterns found")
         else:
-            print(f"  ✅ Found factory patterns: {found_patterns}")
+            print(f"   PASS:  Found factory patterns: {found_patterns}")
         
         # Check for SSOT compliance - should be minimal duplication
         total_create_methods = sum(len(interface['create_methods']) for interface in factory_interfaces.values())
@@ -378,24 +378,24 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
                 f"Too much method duplication: {total_create_methods} total vs {unique_create_methods} unique"
             )
         else:
-            print(f"  ✅ Reasonable method duplication: {total_create_methods} total, {unique_create_methods} unique")
+            print(f"   PASS:  Reasonable method duplication: {total_create_methods} total, {unique_create_methods} unique")
         
         # Validate file separation
         source_files = set(interface['source_file'] for interface in factory_interfaces.values())
         if len(source_files) != len(factory_classes):
             interface_violations.append("Multiple factory classes in same file detected")
         else:
-            print(f"  ✅ Factory classes properly separated into {len(source_files)} files")
+            print(f"   PASS:  Factory classes properly separated into {len(source_files)} files")
         
         # CRITICAL: Interface consistency is required for SSOT
         if interface_violations:
             self.fail(f"Factory interface violations: {interface_violations}")
         
-        print(f"  ✅ Factory interfaces are consistent and SSOT-compliant")
+        print(f"   PASS:  Factory interfaces are consistent and SSOT-compliant")
     
     def test_factory_memory_efficiency(self):
         """Test that factory patterns don't create memory leaks or excessive objects"""
-        print("\n🔍 Testing factory memory efficiency...")
+        print("\n SEARCH:  Testing factory memory efficiency...")
         
         try:
             from netra_backend.app.agents.supervisor.execution_engine_factory import ExecutionEngineFactory
@@ -426,8 +426,8 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
             creation_time = time.perf_counter() - start_time
             avg_creation_time = creation_time / len(created_engines) if created_engines else float('inf')
             
-            print(f"  ✅ Created {len(created_engines)} engines in {creation_time:.3f}s")
-            print(f"  ✅ Average creation time: {avg_creation_time:.3f}s per engine")
+            print(f"   PASS:  Created {len(created_engines)} engines in {creation_time:.3f}s")
+            print(f"   PASS:  Average creation time: {avg_creation_time:.3f}s per engine")
             
             # Performance thresholds
             if avg_creation_time > 0.1:  # 100ms per engine is too slow
@@ -439,15 +439,15 @@ class TestFactoryDelegationConsolidation(SSotAsyncTestCase):
         # Test factory singleton behavior (if applicable)
         factory2 = ExecutionEngineFactory()
         if factory is factory2:
-            print(f"  ✅ Factory uses singleton pattern")
+            print(f"   PASS:  Factory uses singleton pattern")
         else:
-            print(f"  ✅ Factory creates new instances (non-singleton)")
+            print(f"   PASS:  Factory creates new instances (non-singleton)")
         
         # CRITICAL: Factory performance affects Golden Path response time
         if memory_violations:
             self.fail(f"Factory memory/performance violations: {memory_violations}")
         
-        print(f"  ✅ Factory memory efficiency validated")
+        print(f"   PASS:  Factory memory efficiency validated")
 
 
 if __name__ == '__main__':

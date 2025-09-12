@@ -24,7 +24,7 @@ This test suite validates WebSocket State Machine Authentication Integration:
 
 INTEGRATION SCENARIOS TO TEST:
 Authentication Flow Integration:
-- CONNECTING → ACCEPTED → AUTHENTICATED state flow with real auth
+- CONNECTING  ->  ACCEPTED  ->  AUTHENTICATED state flow with real auth
 - Authentication failure rollback with state machine coordination
 - Concurrent authentication attempts with state consistency
 - State persistence during authentication service timeouts

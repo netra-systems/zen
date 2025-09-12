@@ -849,16 +849,16 @@
                                 # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                                 # REMOVED_SYNTAX_ERROR: for test_name, result in test_results.items():
-                                    # REMOVED_SYNTAX_ERROR: status = "✅ PASS" if result else "❌ FAIL"
+                                    # REMOVED_SYNTAX_ERROR: status = " PASS:  PASS" if result else " FAIL:  FAIL"
                                     # REMOVED_SYNTAX_ERROR: logger.info("formatted_string")
 
                                     # REMOVED_SYNTAX_ERROR: if all_passed:
                                         # REMOVED_SYNTAX_ERROR: logger.info(" )
-                                        # REMOVED_SYNTAX_ERROR: 🎉 WEBSOCKET CRITICAL FIX IS FULLY VALIDATED")
+                                        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  WEBSOCKET CRITICAL FIX IS FULLY VALIDATED")
                                         # REMOVED_SYNTAX_ERROR: logger.info("The tool execution interface fix is working correctly!")
                                         # REMOVED_SYNTAX_ERROR: else:
                                             # REMOVED_SYNTAX_ERROR: logger.error(" )
-                                            # REMOVED_SYNTAX_ERROR: 💥 WEBSOCKET CRITICAL FIX HAS ISSUES")
+                                            # REMOVED_SYNTAX_ERROR: [U+1F4A5] WEBSOCKET CRITICAL FIX HAS ISSUES")
                                             # REMOVED_SYNTAX_ERROR: logger.error("Some aspects of the fix are not working properly!")
 
                                             # REMOVED_SYNTAX_ERROR: logger.info("=" * 80)
@@ -886,9 +886,9 @@
                                                 
 
                                                 # REMOVED_SYNTAX_ERROR: if exit_code == 0:
-                                                    # REMOVED_SYNTAX_ERROR: logger.info("🎉 ALL WEBSOCKET CRITICAL FIX VALIDATION TESTS PASSED!")
+                                                    # REMOVED_SYNTAX_ERROR: logger.info(" CELEBRATION:  ALL WEBSOCKET CRITICAL FIX VALIDATION TESTS PASSED!")
                                                     # REMOVED_SYNTAX_ERROR: else:
-                                                        # REMOVED_SYNTAX_ERROR: logger.error("💥 WEBSOCKET CRITICAL FIX VALIDATION TESTS FAILED!")
+                                                        # REMOVED_SYNTAX_ERROR: logger.error("[U+1F4A5] WEBSOCKET CRITICAL FIX VALIDATION TESTS FAILED!")
                                                         # REMOVED_SYNTAX_ERROR: logger.error("The critical fix may be broken - investigate immediately!")
 
                                                         # REMOVED_SYNTAX_ERROR: exit(exit_code)

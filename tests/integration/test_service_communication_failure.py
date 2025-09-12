@@ -350,7 +350,7 @@ class TestServiceCommunicationFailure:
         # These should be reasonable values for resilience
         assert retry_attempts >= 1, "At least one retry attempt should be configured"
         assert timeout_seconds > 0, "Timeout should be positive"
-        assert timeout_seconds <= 120, "Timeout should be reasonable (≤120s)"
+        assert timeout_seconds <= 120, "Timeout should be reasonable ( <= 120s)"
         
         # Test that IsolatedEnvironment is being used correctly
         assert env is not None, "IsolatedEnvironment should be available"

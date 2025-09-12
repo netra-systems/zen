@@ -15,7 +15,7 @@ CRITICAL SECURITY VALIDATIONS:
 7. Scalability with concurrent users
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) 
+- Segment: ALL (Free  ->  Enterprise) 
 - Business Goal: Eliminate security vulnerabilities preventing safe multi-user AI chat
 - Value Impact: Enables safe concurrent AI interactions without data leakage
 - Revenue Impact: Prevents catastrophic security breaches that could destroy business

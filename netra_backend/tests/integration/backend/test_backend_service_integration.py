@@ -953,7 +953,7 @@ class TestBackendServiceIntegration(BaseIntegrationTest):
 
         # Test cache statistics
         stats = redis_manager.get_stats()
-        assert stats["total_keys"] == 9  # 3 users × 3 keys each
+        assert stats["total_keys"] == 9  # 3 users  x  3 keys each
         assert len(stats["user_namespaces"]) == 3
         assert "cache-user-1" in stats["user_namespaces"]
         assert stats["operations"]["set"] == 9
@@ -1909,7 +1909,7 @@ class TestBackendServiceIntegration(BaseIntegrationTest):
         assert "user_action" in stats["event_type_distribution"]
         assert "agent_execution_started" in stats["event_type_distribution"]
         assert stats["event_type_distribution"]["user_action"] == 2
-        assert stats["total_handler_invocations"] == 12  # 4 events × 3 handlers
+        assert stats["total_handler_invocations"] == 12  # 4 events  x  3 handlers
 
         # Verify event ordering and user context preservation
         for event in coordinator.event_history:

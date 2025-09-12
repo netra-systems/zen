@@ -276,7 +276,7 @@ class BadTestDetector:
             ])
             for test in bad_tests["consistently_failing"]:
                 report_lines.append(
-                    f"  • {test['test']}\n"
+                    f"  [U+2022] {test['test']}\n"
                     f"    Consecutive Failures: {test['consecutive_failures']}\n"
                     f"    Component: {test['component']}"
                 )
@@ -290,7 +290,7 @@ class BadTestDetector:
             ])
             for test in bad_tests["high_failure_rate"]:
                 report_lines.append(
-                    f"  • {test['test']}\n"
+                    f"  [U+2022] {test['test']}\n"
                     f"    Failure Rate: {test['failure_rate']:.1%}\n"
                     f"    Total Failures: {test['total_failures']}\n"
                     f"    Component: {test['component']}"
@@ -304,7 +304,7 @@ class BadTestDetector:
                 "=" * 40
             ])
             for test in bad_tests["recommended_for_fix"]:
-                report_lines.append(f"  • {test}")
+                report_lines.append(f"  [U+2022] {test}")
         
         if bad_tests["recommended_for_deletion"]:
             report_lines.extend([
@@ -313,7 +313,7 @@ class BadTestDetector:
                 "=" * 40
             ])
             for test in bad_tests["recommended_for_deletion"]:
-                report_lines.append(f"  • {test}")
+                report_lines.append(f"  [U+2022] {test}")
         
         report_lines.append("\n" + "=" * 80 + "\n")
         return "\n".join(report_lines)

@@ -161,7 +161,7 @@ class DockerStabilityTestOrchestrator:
         # Emergency stop flag
         self.emergency_stop = threading.Event()
         
-        logger.info(f"🔧 Docker Stability Test Orchestrator initialized")
+        logger.info(f"[U+1F527] Docker Stability Test Orchestrator initialized")
         logger.info(f"   Execution ID: {self.execution_id}")
         logger.info(f"   Test Suites: {len(self.test_suites)}")
         
@@ -180,10 +180,10 @@ class DockerStabilityTestOrchestrator:
             if not health_check:
                 raise RuntimeError("Docker is not available or not responding")
             
-            logger.info("✅ Docker infrastructure initialized and validated")
+            logger.info(" PASS:  Docker infrastructure initialized and validated")
             
         except Exception as e:
-            logger.critical(f"❌ Failed to initialize Docker infrastructure: {e}")
+            logger.critical(f" FAIL:  Failed to initialize Docker infrastructure: {e}")
             raise
     
     def get_system_metrics(self) -> Dict[str, Any]:
@@ -244,13 +244,13 @@ class DockerStabilityTestOrchestrator:
             required_memory = suite_config['required_resources']['memory']
             
             if available_memory_mb < required_memory:
-                logger.warning(f"⚠️ Insufficient memory: {available_memory_mb:.0f}MB available, {required_memory}MB required")
+                logger.warning(f" WARNING: [U+FE0F] Insufficient memory: {available_memory_mb:.0f}MB available, {required_memory}MB required")
                 return False
             
             # Check CPU availability (if load is too high)
             cpu_percent = system_metrics.get('cpu_percent', 100)
             if cpu_percent > 80:
-                logger.warning(f"⚠️ High CPU usage: {cpu_percent:.1f}%")
+                logger.warning(f" WARNING: [U+FE0F] High CPU usage: {cpu_percent:.1f}%")
                 return False
             
             return True
@@ -261,7 +261,7 @@ class DockerStabilityTestOrchestrator:
     
     def run_test_suite(self, suite_key: str, suite_config: Dict[str, Any]) -> TestSuiteResult:
         """Run a single test suite with comprehensive monitoring."""
-        logger.info(f"🚀 Starting test suite: {suite_config['name']}")
+        logger.info(f"[U+1F680] Starting test suite: {suite_config['name']}")
         
         start_time = datetime.now()
         error_messages = []
@@ -280,7 +280,7 @@ class DockerStabilityTestOrchestrator:
                 if not self.args.force:
                     raise RuntimeError("Insufficient system resources")
                 else:
-                    logger.warning("⚠️ Forcing execution despite resource constraints")
+                    logger.warning(" WARNING: [U+FE0F] Forcing execution despite resource constraints")
             
             # Build pytest command
             pytest_cmd = [
@@ -370,7 +370,7 @@ class DockerStabilityTestOrchestrator:
             success = result.returncode == 0 and tests_failed == 0
             
             # Log results
-            status = "✅ SUCCESS" if success else "❌ FAILED"
+            status = " PASS:  SUCCESS" if success else " FAIL:  FAILED"
             logger.info(f"{status} Test suite: {suite_config['name']}")
             logger.info(f"   Duration: {duration:.1f}s (estimated: {suite_config['estimated_duration']}s)")
             logger.info(f"   Tests: {tests_run} run, {tests_passed} passed, {tests_failed} failed, {tests_skipped} skipped")
@@ -398,7 +398,7 @@ class DockerStabilityTestOrchestrator:
             duration = (end_time - start_time).total_seconds()
             error_messages.append(f"Test suite timed out after {duration:.1f}s")
             
-            logger.error(f"⏰ Test suite timed out: {suite_config['name']}")
+            logger.error(f"[U+23F0] Test suite timed out: {suite_config['name']}")
             
             return TestSuiteResult(
                 suite_name=suite_config['name'],
@@ -420,7 +420,7 @@ class DockerStabilityTestOrchestrator:
             duration = (end_time - start_time).total_seconds()
             error_messages.append(str(e))
             
-            logger.error(f"❌ Test suite failed with exception: {suite_config['name']}: {e}")
+            logger.error(f" FAIL:  Test suite failed with exception: {suite_config['name']}: {e}")
             
             return TestSuiteResult(
                 suite_name=suite_config['name'],
@@ -439,7 +439,7 @@ class DockerStabilityTestOrchestrator:
     
     def cleanup_between_suites(self):
         """Clean up resources between test suites."""
-        logger.info("🧹 Cleaning up resources between test suites...")
+        logger.info("[U+1F9F9] Cleaning up resources between test suites...")
         
         try:
             # Force garbage collection
@@ -500,14 +500,14 @@ class DockerStabilityTestOrchestrator:
             except Exception as e:
                 logger.warning(f"Resource cleanup error: {e}")
             
-            logger.info("✅ Inter-suite cleanup completed")
+            logger.info(" PASS:  Inter-suite cleanup completed")
             
         except Exception as e:
             logger.error(f"Critical cleanup error: {e}")
     
     def run_all_suites(self) -> OverallTestReport:
         """Run all test suites with comprehensive orchestration."""
-        logger.info("🚀 Starting Docker Stability Test Suite Orchestration")
+        logger.info("[U+1F680] Starting Docker Stability Test Suite Orchestration")
         
         overall_start_time = datetime.now()
         
@@ -523,14 +523,14 @@ class DockerStabilityTestOrchestrator:
         if not suite_order:
             raise ValueError("No valid test suites specified")
         
-        logger.info(f"📋 Execution plan: {', '.join(suite_order)}")
+        logger.info(f"[U+1F4CB] Execution plan: {', '.join(suite_order)}")
         
         # Execute test suites
         if self.args.parallel_suites and len(suite_order) > 1:
-            logger.info("🔄 Running suites in parallel")
+            logger.info(" CYCLE:  Running suites in parallel")
             self.run_suites_parallel(suite_order)
         else:
-            logger.info("➡️ Running suites sequentially")
+            logger.info("[U+27A1][U+FE0F] Running suites sequentially")
             self.run_suites_sequential(suite_order)
         
         overall_end_time = datetime.now()
@@ -572,11 +572,11 @@ class DockerStabilityTestOrchestrator:
         for i, suite_key in enumerate(suite_order):
             suite_config = self.test_suites[suite_key]
             
-            logger.info(f"📦 [{i+1}/{len(suite_order)}] {suite_config['name']}")
+            logger.info(f"[U+1F4E6] [{i+1}/{len(suite_order)}] {suite_config['name']}")
             
             # Check for emergency stop
             if self.emergency_stop.is_set():
-                logger.warning("🚨 Emergency stop activated - halting test execution")
+                logger.warning(" ALERT:  Emergency stop activated - halting test execution")
                 break
             
             # Run test suite
@@ -601,7 +601,7 @@ class DockerStabilityTestOrchestrator:
         
         # Run parallel-safe suites first
         if parallel_suites and len(parallel_suites) > 1:
-            logger.info(f"🔄 Running parallel suites: {', '.join(parallel_suites)}")
+            logger.info(f" CYCLE:  Running parallel suites: {', '.join(parallel_suites)}")
             
             with ThreadPoolExecutor(max_workers=min(2, len(parallel_suites))) as executor:
                 futures = {
@@ -681,7 +681,7 @@ class DockerStabilityTestOrchestrator:
         # Print console summary
         self.print_summary(report)
         
-        logger.info(f"📊 Reports generated:")
+        logger.info(f" CHART:  Reports generated:")
         logger.info(f"   Detailed: {report_filename}")
         logger.info(f"   Summary:  {csv_filename}")
         
@@ -690,13 +690,13 @@ class DockerStabilityTestOrchestrator:
     def print_summary(self, report: OverallTestReport):
         """Print comprehensive test execution summary."""
         print("\n" + "="*80)
-        print("🐳 DOCKER STABILITY TEST SUITE EXECUTION REPORT")
+        print("[U+1F433] DOCKER STABILITY TEST SUITE EXECUTION REPORT")
         print("="*80)
         
         print(f"Execution ID: {report.execution_id}")
         print(f"Duration: {report.total_duration_seconds:.1f}s ({report.total_duration_seconds/60:.1f} minutes)")
         
-        status = "✅ SUCCESS" if report.overall_success else "❌ FAILED"
+        status = " PASS:  SUCCESS" if report.overall_success else " FAIL:  FAILED"
         print(f"Overall Status: {status}")
         
         print(f"\nTest Summary:")
@@ -708,7 +708,7 @@ class DockerStabilityTestOrchestrator:
         
         print(f"\nSuite Results:")
         for result in report.suite_results:
-            status = "✅" if result.success else "❌"
+            status = " PASS: " if result.success else " FAIL: "
             print(f"  {status} {result.suite_name}")
             print(f"     Duration: {result.duration_seconds:.1f}s")
             print(f"     Tests: {result.tests_passed}/{result.tests_run} passed")
@@ -747,9 +747,9 @@ def setup_emergency_stop_handler(orchestrator):
     import signal
     
     def emergency_stop_handler(signum, frame):
-        logger.warning("🚨 Emergency stop signal received")
+        logger.warning(" ALERT:  Emergency stop signal received")
         orchestrator.emergency_stop.set()
-        print("\n🚨 Emergency stop activated - Test execution will halt after current suite")
+        print("\n ALERT:  Emergency stop activated - Test execution will halt after current suite")
     
     signal.signal(signal.SIGINT, emergency_stop_handler)
     signal.signal(signal.SIGTERM, emergency_stop_handler)
@@ -832,21 +832,21 @@ Examples:
         exit_code = 0 if report.overall_success else 1
         
         if report.overall_success:
-            logger.info("🎉 ALL DOCKER STABILITY TESTS PASSED!")
-            print("\n🎉 Docker infrastructure is BULLETPROOF! 🛡️")
+            logger.info(" CELEBRATION:  ALL DOCKER STABILITY TESTS PASSED!")
+            print("\n CELEBRATION:  Docker infrastructure is BULLETPROOF! [U+1F6E1][U+FE0F]")
         else:
-            logger.error("💥 DOCKER STABILITY TEST FAILURES DETECTED!")
-            print("\n💥 Docker infrastructure needs attention! ⚠️")
+            logger.error("[U+1F4A5] DOCKER STABILITY TEST FAILURES DETECTED!")
+            print("\n[U+1F4A5] Docker infrastructure needs attention!  WARNING: [U+FE0F]")
         
         print(f"\nReport files: {', '.join(report_files)}")
         
         return exit_code
         
     except KeyboardInterrupt:
-        logger.warning("🚨 Test execution interrupted by user")
+        logger.warning(" ALERT:  Test execution interrupted by user")
         return 130
     except Exception as e:
-        logger.error(f"❌ Test orchestration failed: {e}")
+        logger.error(f" FAIL:  Test orchestration failed: {e}")
         return 1
 
 

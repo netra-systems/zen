@@ -521,7 +521,7 @@ class TestRealAgentLLMIntegration(RealAgentLLMIntegrationE2ETest):
                 f"Token efficiency too low: {self.metrics.token_efficiency_score}"
             )
             
-        logger.success("✓ Comprehensive LLM integration flow validated")
+        logger.success("[U+2713] Comprehensive LLM integration flow validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -586,7 +586,7 @@ class TestRealAgentLLMIntegration(RealAgentLLMIntegrationE2ETest):
                     f"(limit: {max_response_time}s)"
                 )
                 
-        logger.success("✓ LLM integration task complexity scaling validated")
+        logger.success("[U+2713] LLM integration task complexity scaling validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -656,7 +656,7 @@ class TestRealAgentLLMIntegration(RealAgentLLMIntegrationE2ETest):
                 f"Must maintain minimum relevance despite errors: {self.metrics.response_relevance_score}"
             )
             
-        logger.success("✓ LLM integration error handling and fallbacks validated")
+        logger.success("[U+2713] LLM integration error handling and fallbacks validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -746,7 +746,7 @@ class TestRealAgentLLMIntegration(RealAgentLLMIntegrationE2ETest):
             f"Concurrent LLM processing took too long: {total_concurrent_time}s"
         )
         
-        logger.success("✓ Concurrent LLM integration resource management validated")
+        logger.success("[U+2713] Concurrent LLM integration resource management validated")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -848,7 +848,7 @@ class TestRealAgentLLMIntegration(RealAgentLLMIntegrationE2ETest):
                 recommendations = llm_result["result"].get("recommendations", [])
                 conversation_context["accumulated_insights"].extend(insights + recommendations)
                 
-        logger.success("✓ LLM integration business context preservation validated")
+        logger.success("[U+2713] LLM integration business context preservation validated")
 
 
 if __name__ == "__main__":
@@ -869,10 +869,10 @@ if __name__ == "__main__":
             }
             
             await test_instance.test_comprehensive_llm_integration_flow(mock_services)
-            logger.success("✓ All LLM integration tests passed")
+            logger.success("[U+2713] All LLM integration tests passed")
             
         except Exception as e:
-            logger.error(f"✗ LLM integration tests failed: {e}")
+            logger.error(f"[U+2717] LLM integration tests failed: {e}")
             raise
     
     asyncio.run(run_direct_tests())

@@ -134,7 +134,7 @@ class TestWebSocketMessageValidationEdgeCases:
     def test_special_characters_in_messages(self):
         """Test special characters in message fields."""
         special_chars = "!@#$%^&*()_+-=[]{}|;':\",./<>?"
-        unicode_chars = "🚀✨🔥💯🎉"
+        unicode_chars = "[U+1F680][U+2728] FIRE: [U+1F4AF] CELEBRATION: "
         
         message = create_standard_message(
             MessageType.USER_MESSAGE,

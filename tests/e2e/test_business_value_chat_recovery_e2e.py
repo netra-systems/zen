@@ -11,18 +11,18 @@ Business Value Justification (BVJ):
 - Strategic Impact: Tests resilience patterns that prevent customer churn during issues
 
 CRITICAL SUCCESS METRICS:
-✅ Graceful degradation maintains partial business value
-✅ Error recovery preserves user session and context
-✅ Fallback patterns deliver alternative value when primary fails
-✅ User experience remains positive during service issues
-✅ Business insights still delivered despite technical challenges
+ PASS:  Graceful degradation maintains partial business value
+ PASS:  Error recovery preserves user session and context
+ PASS:  Fallback patterns deliver alternative value when primary fails
+ PASS:  User experience remains positive during service issues
+ PASS:  Business insights still delivered despite technical challenges
 
 RECOVERY PATTERNS TESTED:
-• Connection recovery - Reconnect and resume chat sessions
-• Agent failure recovery - Alternative approaches when agents fail
-• Partial response recovery - Extract value from incomplete responses  
-• Service degradation - Maintain core functionality during slowdowns
-• Context preservation - Maintain user state across recovery scenarios
+[U+2022] Connection recovery - Reconnect and resume chat sessions
+[U+2022] Agent failure recovery - Alternative approaches when agents fail
+[U+2022] Partial response recovery - Extract value from incomplete responses  
+[U+2022] Service degradation - Maintain core functionality during slowdowns
+[U+2022] Context preservation - Maintain user state across recovery scenarios
 
 COMPLIANCE:
 @compliance CLAUDE.md - Resilience by default (Section 2.6)
@@ -97,29 +97,29 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         self.business_value_preserved = 0.0
         self.user_experience_impact = 0.0
         
-        print(f"\n🔄 BUSINESS VALUE CHAT RECOVERY E2E - Environment: {self.environment}")
-        print(f"🎯 Target: Graceful recovery with business value preservation")
-        print(f"💼 Business Impact: Resilience patterns protect revenue during issues")
+        print(f"\n CYCLE:  BUSINESS VALUE CHAT RECOVERY E2E - Environment: {self.environment}")
+        print(f" TARGET:  Target: Graceful recovery with business value preservation")
+        print(f"[U+1F4BC] Business Impact: Resilience patterns protect revenue during issues")
     
     def teardown_method(self):
         """Clean up and report recovery metrics."""
         test_duration = time.time() - self.test_start_time
         recovery_success_rate = (self.successful_recoveries / max(1, self.recovery_attempts)) * 100
         
-        print(f"\n📊 Chat Recovery Test Summary:")
-        print(f"⏱️ Duration: {test_duration:.2f}s")
-        print(f"🔄 Recovery Attempts: {self.recovery_attempts}")
-        print(f"✅ Successful Recoveries: {self.successful_recoveries}")
-        print(f"📈 Recovery Success Rate: {recovery_success_rate:.1f}%")
-        print(f"💰 Business Value Preserved: {self.business_value_preserved:.1f}%")
-        print(f"👥 User Experience Impact: {self.user_experience_impact:.1f}%")
+        print(f"\n CHART:  Chat Recovery Test Summary:")
+        print(f"[U+23F1][U+FE0F] Duration: {test_duration:.2f}s")
+        print(f" CYCLE:  Recovery Attempts: {self.recovery_attempts}")
+        print(f" PASS:  Successful Recoveries: {self.successful_recoveries}")
+        print(f"[U+1F4C8] Recovery Success Rate: {recovery_success_rate:.1f}%")
+        print(f"[U+1F4B0] Business Value Preserved: {self.business_value_preserved:.1f}%")
+        print(f"[U+1F465] User Experience Impact: {self.user_experience_impact:.1f}%")
         
         if recovery_success_rate >= 80.0 and self.business_value_preserved >= 70.0:
-            print(f"✅ EXCELLENT RECOVERY - Business continuity ensured")
+            print(f" PASS:  EXCELLENT RECOVERY - Business continuity ensured")
         elif recovery_success_rate >= 60.0 and self.business_value_preserved >= 50.0:
-            print(f"✅ GOOD RECOVERY - Acceptable business resilience")
+            print(f" PASS:  GOOD RECOVERY - Acceptable business resilience")
         else:
-            print(f"❌ POOR RECOVERY - Revenue at risk during failures")
+            print(f" FAIL:  POOR RECOVERY - Revenue at risk during failures")
         
         super().teardown_method()
     
@@ -185,7 +185,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates connection resilience for uninterrupted service.
         """
-        print("\n🧪 CRITICAL: Testing WebSocket connection recovery...")
+        print("\n[U+1F9EA] CRITICAL: Testing WebSocket connection recovery...")
         
         # STEP 1: Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -195,7 +195,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
             websocket_enabled=True
         )
         
-        print(f"👤 User authenticated for connection recovery: {user_context.user_id}")
+        print(f"[U+1F464] User authenticated for connection recovery: {user_context.user_id}")
         
         # STEP 2: Establish initial connection and start chat
         initial_request = (
@@ -216,7 +216,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                     user_context=user_context
                 )
                 
-                print(f"📤 Initial request sent: {initial_message['message_id']}")
+                print(f"[U+1F4E4] Initial request sent: {initial_message['message_id']}")
                 
                 # Capture initial events for a short period
                 initial_events = await self.golden_path_helper.capture_events_with_timeout(
@@ -224,15 +224,15 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                     required_events={"agent_started", "agent_thinking"}
                 )
                 
-                print(f"📨 Captured {len(initial_events)} initial events before 'connection issue'")
+                print(f"[U+1F4E8] Captured {len(initial_events)} initial events before 'connection issue'")
                 
         except Exception as e:
-            print(f"🔄 Simulated connection issue: {str(e)[:100]}")
+            print(f" CYCLE:  Simulated connection issue: {str(e)[:100]}")
         
         self.recovery_attempts += 1
         
         # STEP 4: Attempt recovery with new connection
-        print("🔄 Attempting recovery with new connection...")
+        print(" CYCLE:  Attempting recovery with new connection...")
         
         try:
             # Create new connection (simulating recovery)
@@ -269,20 +269,20 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                     else:
                         self.user_experience_impact = 50.0  # Moderate impact
                     
-                    print(f"✅ Connection recovery successful")
-                    print(f"💰 Business value preserved: {recovery_business_value:.1f}%")
-                    print(f"⏱️ Recovery time: {recovery_time:.2f}s")
+                    print(f" PASS:  Connection recovery successful")
+                    print(f"[U+1F4B0] Business value preserved: {recovery_business_value:.1f}%")
+                    print(f"[U+23F1][U+FE0F] Recovery time: {recovery_time:.2f}s")
                     
                     # Validate recovery quality
                     assert recovery_business_value >= 40.0, f"Insufficient business value after recovery: {recovery_business_value:.1f}%"
                     assert recovery_time < 90.0, f"Recovery took too long: {recovery_time:.2f}s"
                     
                 else:
-                    print(f"❌ Recovery attempt failed")
+                    print(f" FAIL:  Recovery attempt failed")
                     raise AssertionError("Connection recovery failed to restore service")
         
         except Exception as e:
-            print(f"❌ Recovery failed: {str(e)[:200]}")
+            print(f" FAIL:  Recovery failed: {str(e)[:200]}")
             raise
     
     @pytest.mark.asyncio
@@ -295,7 +295,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates fallback patterns that maintain customer satisfaction.
         """
-        print("\n🧪 CRITICAL: Testing agent failure graceful degradation...")
+        print("\n[U+1F9EA] CRITICAL: Testing agent failure graceful degradation...")
         
         # STEP 1: Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -334,8 +334,8 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                     self.business_value_preserved = business_value
                     self.successful_recoveries += 1
                     
-                    print(f"✅ Agent handled challenging request successfully")
-                    print(f"💰 Business value delivered: {business_value:.1f}%")
+                    print(f" PASS:  Agent handled challenging request successfully")
+                    print(f"[U+1F4B0] Business value delivered: {business_value:.1f}%")
                 
                 else:
                     # Graceful degradation scenario
@@ -353,20 +353,20 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                         self.successful_recoveries += 1
                         self.business_value_preserved = partial_value
                         
-                        print(f"✅ Graceful degradation successful")
-                        print(f"📊 Partial events: {len(meaningful_events)}")
-                        print(f"💰 Partial value preserved: {partial_value:.1f}%")
+                        print(f" PASS:  Graceful degradation successful")
+                        print(f" CHART:  Partial events: {len(meaningful_events)}")
+                        print(f"[U+1F4B0] Partial value preserved: {partial_value:.1f}%")
                         
                         # Validate graceful degradation
                         assert partial_value >= 20.0, f"Degradation provided insufficient value: {partial_value:.1f}%"
                         assert len(meaningful_events) >= 1, "Should provide at least minimal feedback"
                     
                     else:
-                        print(f"❌ No graceful degradation - complete failure")
+                        print(f" FAIL:  No graceful degradation - complete failure")
                         self.business_value_preserved = 0.0
                 
                 # STEP 5: Test alternative value delivery
-                print("🔄 Testing alternative value delivery...")
+                print(" CYCLE:  Testing alternative value delivery...")
                 
                 alternative_request = (
                     "Since my previous request was complex, please provide a straightforward "
@@ -385,7 +385,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                     alternative_value = alternative_result.execution_metrics.business_value_score
                     self.business_value_preserved = max(self.business_value_preserved, alternative_value)
                     
-                    print(f"✅ Alternative value delivery successful: {alternative_value:.1f}%")
+                    print(f" PASS:  Alternative value delivery successful: {alternative_value:.1f}%")
                 
                 degradation_time = time.time() - degradation_start
                 self.user_experience_impact = min(50.0, degradation_time * 0.5)  # Impact increases with time
@@ -395,7 +395,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                 assert degradation_time < 180.0, f"Degradation handling too slow: {degradation_time:.2f}s"
                 
             except Exception as e:
-                print(f"⚠️ Agent failure scenario: {str(e)[:200]}")
+                print(f" WARNING: [U+FE0F] Agent failure scenario: {str(e)[:200]}")
                 # Even in failure, should attempt graceful handling
                 self.business_value_preserved = 10.0  # Minimal fallback value
     
@@ -409,7 +409,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates business continuity during infrastructure stress.
         """
-        print("\n🧪 CRITICAL: Testing service degradation business continuity...")
+        print("\n[U+1F9EA] CRITICAL: Testing service degradation business continuity...")
         
         # STEP 1: Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -457,7 +457,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         # STEP 3: Execute degradation scenarios
         async with self.golden_path_helper.authenticated_websocket_connection(user_context):
             for i, scenario in enumerate(degradation_scenarios):
-                print(f"🔄 Testing degradation scenario {i+1}: {scenario['name']}")
+                print(f" CYCLE:  Testing degradation scenario {i+1}: {scenario['name']}")
                 
                 self.recovery_attempts += 1
                 scenario_start = time.time()
@@ -479,9 +479,9 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                             successful_scenarios += 1
                             self.successful_recoveries += 1
                             
-                            print(f"   ✅ Success: {business_value:.1f}% value in {scenario_time:.2f}s")
+                            print(f"    PASS:  Success: {business_value:.1f}% value in {scenario_time:.2f}s")
                         else:
-                            print(f"   ⚠️ Low value: {business_value:.1f}% in {scenario_time:.2f}s")
+                            print(f"    WARNING: [U+FE0F] Low value: {business_value:.1f}% in {scenario_time:.2f}s")
                     
                     else:
                         # Check for partial value in failed scenarios
@@ -494,12 +494,12 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                             self.successful_recoveries += 1
                             total_business_value += partial_value
                             
-                            print(f"   ✅ Partial success: {partial_value:.1f}% value (degraded)")
+                            print(f"    PASS:  Partial success: {partial_value:.1f}% value (degraded)")
                         else:
-                            print(f"   ❌ Failed: {partial_value:.1f}% value")
+                            print(f"    FAIL:  Failed: {partial_value:.1f}% value")
                 
                 except Exception as e:
-                    print(f"   ❌ Exception: {str(e)[:100]}")
+                    print(f"    FAIL:  Exception: {str(e)[:100]}")
                 
                 # Brief delay between scenarios
                 await asyncio.sleep(1.0)
@@ -512,17 +512,17 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         self.business_value_preserved = avg_business_value
         self.user_experience_impact = min(60.0, continuity_time * 0.8)
         
-        print(f"📊 Business continuity results:")
-        print(f"   • Success rate: {success_rate:.1f}%")
-        print(f"   • Average business value: {avg_business_value:.1f}%")
-        print(f"   • Total time: {continuity_time:.2f}s")
+        print(f" CHART:  Business continuity results:")
+        print(f"   [U+2022] Success rate: {success_rate:.1f}%")
+        print(f"   [U+2022] Average business value: {avg_business_value:.1f}%")
+        print(f"   [U+2022] Total time: {continuity_time:.2f}s")
         
         # Critical business continuity validation
         assert success_rate >= 66.0, f"Business continuity success rate too low: {success_rate:.1f}%"
         assert avg_business_value >= 25.0, f"Average business value too low during degradation: {avg_business_value:.1f}%"
         assert continuity_time < 180.0, f"Business continuity testing too slow: {continuity_time:.2f}s"
         
-        print(f"✅ Service degradation business continuity validated")
+        print(f" PASS:  Service degradation business continuity validated")
     
     @pytest.mark.asyncio
     async def test_comprehensive_recovery_resilience_suite(self):
@@ -534,7 +534,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         
         BUSINESS IMPACT: Validates comprehensive resilience for enterprise reliability.
         """
-        print("\n🧪 CRITICAL: Testing comprehensive recovery resilience...")
+        print("\n[U+1F9EA] CRITICAL: Testing comprehensive recovery resilience...")
         
         # STEP 1: Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -581,7 +581,7 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         )
         
         for i, recovery_test in enumerate(recovery_tests):
-            print(f"🔄 Recovery test {i+1}: {recovery_test['name']}")
+            print(f" CYCLE:  Recovery test {i+1}: {recovery_test['name']}")
             
             self.recovery_attempts += 1
             test_start = time.time()
@@ -613,12 +613,12 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
                     
                     if resilience_score >= recovery_test["expected_resilience"]:
                         recovery_patterns_validated += 1
-                        print(f"   ✅ Resilient: {resilience_score:.1f}% in {test_time:.2f}s")
+                        print(f"    PASS:  Resilient: {resilience_score:.1f}% in {test_time:.2f}s")
                     else:
-                        print(f"   ⚠️ Degraded: {resilience_score:.1f}% in {test_time:.2f}s")
+                        print(f"    WARNING: [U+FE0F] Degraded: {resilience_score:.1f}% in {test_time:.2f}s")
             
             except Exception as e:
-                print(f"   ❌ Test failed: {str(e)[:100]}")
+                print(f"    FAIL:  Test failed: {str(e)[:100]}")
                 total_resilience_score += 10.0  # Minimal fallback score
             
             # Brief recovery between tests
@@ -632,19 +632,19 @@ class TestBusinessValueChatRecoveryE2E(SSotBaseTestCase):
         self.business_value_preserved = avg_resilience
         self.user_experience_impact = min(70.0, comprehensive_time * 0.6)
         
-        print(f"🎉 Comprehensive recovery resilience summary:")
-        print(f"   • Pattern success rate: {pattern_success_rate:.1f}%")
-        print(f"   • Average resilience: {avg_resilience:.1f}%")
-        print(f"   • Recovery time: {comprehensive_time:.2f}s")
-        print(f"   • Patterns validated: {recovery_patterns_validated}/{len(recovery_tests)}")
+        print(f" CELEBRATION:  Comprehensive recovery resilience summary:")
+        print(f"   [U+2022] Pattern success rate: {pattern_success_rate:.1f}%")
+        print(f"   [U+2022] Average resilience: {avg_resilience:.1f}%")
+        print(f"   [U+2022] Recovery time: {comprehensive_time:.2f}s")
+        print(f"   [U+2022] Patterns validated: {recovery_patterns_validated}/{len(recovery_tests)}")
         
         # Critical comprehensive resilience validation
         assert pattern_success_rate >= 66.0, f"Recovery pattern success rate too low: {pattern_success_rate:.1f}%"
         assert avg_resilience >= 40.0, f"Average resilience too low: {avg_resilience:.1f}%"
         assert comprehensive_time < 240.0, f"Comprehensive recovery testing too slow: {comprehensive_time:.2f}s"
         
-        print(f"✅ Comprehensive recovery resilience validated")
-        print(f"🏢 Enterprise-grade reliability confirmed")
+        print(f" PASS:  Comprehensive recovery resilience validated")
+        print(f"[U+1F3E2] Enterprise-grade reliability confirmed")
 
 
 if __name__ == "__main__":

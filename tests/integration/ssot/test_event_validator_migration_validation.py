@@ -251,7 +251,7 @@ class TestEventValidatorMigrationValidation(SSotBaseTestCase):
         self.assertLessEqual(
             len(custom_validators), 1,  # Allow for SSOT implementation
             f"MIGRATION VIOLATION: Found {len(custom_validators)} custom EventValidator implementations. "
-            f"Expected ≤1 (SSOT only). Custom validators found: {[v['class_name'] for v in custom_validators]}"
+            f"Expected  <= 1 (SSOT only). Custom validators found: {[v['class_name'] for v in custom_validators]}"
         )
     
     def test_ssot_validator_exists_and_complete(self):

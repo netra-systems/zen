@@ -375,9 +375,9 @@ class LegacyImportScanner:
         is_clean = results['total_violations'] == 0
         
         if is_clean:
-            logger.success("✓ Codebase is CLEAN - no legacy imports found!")
+            logger.success("[U+2713] Codebase is CLEAN - no legacy imports found!")
         else:
-            logger.error(f"✗ Codebase has {results['total_violations']} legacy import violations")
+            logger.error(f"[U+2717] Codebase has {results['total_violations']} legacy import violations")
             
             # Show top violations
             summary = results['summary']

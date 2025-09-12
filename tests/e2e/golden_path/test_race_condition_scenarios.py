@@ -202,10 +202,10 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         self.record_metric("avg_connection_time", avg_connection_time)
         self.record_metric("total_test_time", rapid_test_time)
         
-        print(f"\n📡 RAPID CONNECTION TEST RESULTS:")
-        print(f"   ✅ Success Rate: {success_rate:.1%} ({successful_connections}/{rapid_attempts})")
-        print(f"   ⏱️  Avg Connection Time: {avg_connection_time:.2f}s")
-        print(f"   🎯 Total Test Time: {rapid_test_time:.2f}s")
+        print(f"\n[U+1F4E1] RAPID CONNECTION TEST RESULTS:")
+        print(f"    PASS:  Success Rate: {success_rate:.1%} ({successful_connections}/{rapid_attempts})")
+        print(f"   [U+23F1][U+FE0F]  Avg Connection Time: {avg_connection_time:.2f}s")
+        print(f"    TARGET:  Total Test Time: {rapid_test_time:.2f}s")
         
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -357,12 +357,12 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         self.record_metric("race_condition_demonstrated", race_condition_demonstrated)
         self.record_metric("avg_response_time", avg_response_time)
         
-        print(f"\n🏁 HANDSHAKE RACE CONDITION TEST:")
-        print(f"   ✅ Successful Scenarios: {successful_scenarios}/4")
-        print(f"   📨 Scenarios with Responses: {scenarios_with_responses}/4")
+        print(f"\n[U+1F3C1] HANDSHAKE RACE CONDITION TEST:")
+        print(f"    PASS:  Successful Scenarios: {successful_scenarios}/4")
+        print(f"   [U+1F4E8] Scenarios with Responses: {scenarios_with_responses}/4")
         if race_condition_demonstrated is not None:
-            print(f"   🏁 Race Condition Effect: {'Demonstrated' if race_condition_demonstrated else 'Well Handled'}")
-        print(f"   ⏱️  Avg Response Time: {avg_response_time:.2f}s")
+            print(f"   [U+1F3C1] Race Condition Effect: {'Demonstrated' if race_condition_demonstrated else 'Well Handled'}")
+        print(f"   [U+23F1][U+FE0F]  Avg Response Time: {avg_response_time:.2f}s")
         
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -413,15 +413,15 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         for i, result in enumerate(connection_results):
             if isinstance(result, Exception):
                 failed_connections += 1
-                print(f"❌ Concurrent connection {i} failed: {result}")
+                print(f" FAIL:  Concurrent connection {i} failed: {result}")
             else:
                 if result["success"]:
                     successful_connections += 1
                     connection_times.append(result["connection_time"])
-                    print(f"✅ Concurrent connection {i} succeeded in {result['connection_time']:.2f}s")
+                    print(f" PASS:  Concurrent connection {i} succeeded in {result['connection_time']:.2f}s")
                 else:
                     failed_connections += 1
-                    print(f"❌ Concurrent connection {i} failed: {result.get('error', 'Unknown error')}")
+                    print(f" FAIL:  Concurrent connection {i} failed: {result.get('error', 'Unknown error')}")
         
         # Business requirements for concurrent connections
         success_rate = successful_connections / concurrent_connections
@@ -456,12 +456,12 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
             self.record_metric("avg_concurrent_connection_time", avg_connection_time)
             self.record_metric("max_concurrent_connection_time", max_connection_time)
         
-        print(f"\n🔀 CONCURRENT HANDSHAKES TEST:")
-        print(f"   ✅ Success Rate: {success_rate:.1%} ({successful_connections}/{concurrent_connections})")
-        print(f"   ⏱️  Total Test Time: {concurrent_test_time:.2f}s")
+        print(f"\n[U+1F500] CONCURRENT HANDSHAKES TEST:")
+        print(f"    PASS:  Success Rate: {success_rate:.1%} ({successful_connections}/{concurrent_connections})")
+        print(f"   [U+23F1][U+FE0F]  Total Test Time: {concurrent_test_time:.2f}s")
         if connection_times:
-            print(f"   📊 Avg Connection Time: {avg_connection_time:.2f}s")
-            print(f"   📊 Max Connection Time: {max_connection_time:.2f}s")
+            print(f"    CHART:  Avg Connection Time: {avg_connection_time:.2f}s")
+            print(f"    CHART:  Max Connection Time: {max_connection_time:.2f}s")
         
     async def _create_concurrent_connection(
         self, 
@@ -692,11 +692,11 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         self.record_metric("working_reconnections", working_reconnections)
         self.record_metric("restart_simulation_time", restart_simulation_time)
         
-        print(f"\n🔄 SERVICE RESTART SIMULATION TEST:")
-        print(f"   🟢 Initial Connection: {'Working' if initial_connection_working else 'Failed'}")
-        print(f"   ✅ Successful Reconnections: {successful_reconnections}/{len(reconnection_results)}")
-        print(f"   💬 Working Reconnections: {working_reconnections}/{len(reconnection_results)}")
-        print(f"   ⏱️  Recovery Time: {restart_simulation_time:.2f}s")
+        print(f"\n CYCLE:  SERVICE RESTART SIMULATION TEST:")
+        print(f"   [U+1F7E2] Initial Connection: {'Working' if initial_connection_working else 'Failed'}")
+        print(f"    PASS:  Successful Reconnections: {successful_reconnections}/{len(reconnection_results)}")
+        print(f"   [U+1F4AC] Working Reconnections: {working_reconnections}/{len(reconnection_results)}")
+        print(f"   [U+23F1][U+FE0F]  Recovery Time: {restart_simulation_time:.2f}s")
         
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -884,12 +884,12 @@ class TestRaceConditionScenarios(SSotAsyncTestCase):
         self.record_metric("scenarios_meeting_timing", scenarios_meeting_timing)
         self.record_metric("total_scenarios_tested", len(golden_path_scenarios))
         
-        print(f"\n⏰ GOLDEN PATH TIMING REQUIREMENTS TEST:")
-        print(f"   ✅ Successful Scenarios: {successful_scenarios}/{len(golden_path_scenarios)}")
-        print(f"   ⏱️  Timing Requirements Met: {scenarios_meeting_timing}/{len(golden_path_scenarios)}")
+        print(f"\n[U+23F0] GOLDEN PATH TIMING REQUIREMENTS TEST:")
+        print(f"    PASS:  Successful Scenarios: {successful_scenarios}/{len(golden_path_scenarios)}")
+        print(f"   [U+23F1][U+FE0F]  Timing Requirements Met: {scenarios_meeting_timing}/{len(golden_path_scenarios)}")
         if successful_results:
-            print(f"   📊 Avg Connection Time: {avg_connection_time:.2f}s")
-            print(f"   📊 Avg Total Time: {avg_total_time:.2f}s")
+            print(f"    CHART:  Avg Connection Time: {avg_connection_time:.2f}s")
+            print(f"    CHART:  Avg Total Time: {avg_total_time:.2f}s")
 
 
 if __name__ == "__main__":

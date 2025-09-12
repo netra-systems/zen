@@ -135,9 +135,9 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
         
         async with aiohttp.ClientSession() as session:
             try:
-                print(f"🔍 Testing {endpoint_url} with real authentication...")
-                print(f"🔑 Using JWT token: {jwt_token[:50]}...")
-                print(f"📝 Payload: {json.dumps(test_payload, indent=2)}")
+                print(f" SEARCH:  Testing {endpoint_url} with real authentication...")
+                print(f"[U+1F511] Using JWT token: {jwt_token[:50]}...")
+                print(f"[U+1F4DD] Payload: {json.dumps(test_payload, indent=2)}")
                 
                 async with session.post(
                     endpoint_url,
@@ -147,8 +147,8 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
                 ) as response:
                     
                     response_text = await response.text()
-                    print(f"📊 Response status: {response.status}")
-                    print(f"📄 Response: {response_text[:500]}...")
+                    print(f" CHART:  Response status: {response.status}")
+                    print(f"[U+1F4C4] Response: {response_text[:500]}...")
                     
                     # CRITICAL: This assertion should FAIL initially with 404
                     self.assertNotEqual(
@@ -213,8 +213,8 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
         
         async with aiohttp.ClientSession() as session:
             try:
-                print(f"🔍 Testing GET {get_endpoint_url} with real authentication...")
-                print(f"🧵 Thread ID: {test_thread_id}")
+                print(f" SEARCH:  Testing GET {get_endpoint_url} with real authentication...")
+                print(f"[U+1F9F5] Thread ID: {test_thread_id}")
                 
                 async with session.get(
                     get_endpoint_url,
@@ -223,8 +223,8 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
                 ) as response:
                     
                     response_text = await response.text()
-                    print(f"📊 GET Response status: {response.status}")
-                    print(f"📄 GET Response: {response_text[:500]}...")
+                    print(f" CHART:  GET Response status: {response.status}")
+                    print(f"[U+1F4C4] GET Response: {response_text[:500]}...")
                     
                     # CRITICAL: This assertion should FAIL initially with 404
                     self.assertNotEqual(
@@ -262,8 +262,8 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
         
         async with aiohttp.ClientSession() as session:
             try:
-                print(f"🔍 Testing POST {post_endpoint_url} with real authentication...")
-                print(f"📝 Message payload: {json.dumps(test_message_payload, indent=2)}")
+                print(f" SEARCH:  Testing POST {post_endpoint_url} with real authentication...")
+                print(f"[U+1F4DD] Message payload: {json.dumps(test_message_payload, indent=2)}")
                 
                 async with session.post(
                     post_endpoint_url,
@@ -273,8 +273,8 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
                 ) as response:
                     
                     response_text = await response.text()
-                    print(f"📊 POST Response status: {response.status}")
-                    print(f"📄 POST Response: {response_text[:500]}...")
+                    print(f" CHART:  POST Response status: {response.status}")
+                    print(f"[U+1F4C4] POST Response: {response_text[:500]}...")
                     
                     # CRITICAL: This assertion should FAIL initially with 404
                     self.assertNotEqual(
@@ -317,10 +317,10 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
         )
         
         try:
-            print(f"🔌 Testing WebSocket connection with real authentication...")
-            print(f"🌐 Environment: {self.test_environment}")
-            print(f"🔗 WebSocket URL: {self.websocket_url}")
-            print(f"👤 User ID: {user_context.user_id}")
+            print(f"[U+1F50C] Testing WebSocket connection with real authentication...")
+            print(f"[U+1F310] Environment: {self.test_environment}")
+            print(f"[U+1F517] WebSocket URL: {self.websocket_url}")
+            print(f"[U+1F464] User ID: {user_context.user_id}")
             
             # Use the E2E WebSocket auth helper for proper connection
             websocket = await self.websocket_auth_helper.connect_authenticated_websocket(timeout=30.0)
@@ -339,7 +339,7 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
-            print(f"📤 Sending WebSocket message: {json.dumps(test_message, indent=2)}")
+            print(f"[U+1F4E4] Sending WebSocket message: {json.dumps(test_message, indent=2)}")
             await websocket.send(json.dumps(test_message))
             
             # Wait for agent execution events (should receive all 5 critical events)
@@ -359,14 +359,14 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
                         
                         event = json.loads(event_json)
                         events_received.append(event)
-                        print(f"📨 Received WebSocket event: {event.get('type', 'unknown')}")
+                        print(f"[U+1F4E8] Received WebSocket event: {event.get('type', 'unknown')}")
                         
                         # Break if we get completion event
                         if event.get("type") == "agent_completed":
                             break
                             
                     except asyncio.TimeoutError:
-                        print(f"⏰ WebSocket timeout after {timeout_duration}s")
+                        print(f"[U+23F0] WebSocket timeout after {timeout_duration}s")
                         break
                         
             except Exception as e:
@@ -390,7 +390,7 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
                     f"Environment: {self.test_environment}"
                 )
             
-            print(f"✅ WebSocket connectivity successful. Events received: {event_types}")
+            print(f" PASS:  WebSocket connectivity successful. Events received: {event_types}")
             
         except Exception as e:
             self.fail(
@@ -424,11 +424,11 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
         failed_endpoints = []
         successful_endpoints = []
         
-        print(f"🔍 Comprehensive 404 reproduction test starting...")
-        print(f"🌐 Environment: {self.test_environment}")
-        print(f"🔑 Using real authentication with JWT")
-        print(f"👤 User ID: {user_context.user_id}")
-        print(f"🧵 Thread ID: {test_thread_id}")
+        print(f" SEARCH:  Comprehensive 404 reproduction test starting...")
+        print(f"[U+1F310] Environment: {self.test_environment}")
+        print(f"[U+1F511] Using real authentication with JWT")
+        print(f"[U+1F464] User ID: {user_context.user_id}")
+        print(f"[U+1F9F5] Thread ID: {test_thread_id}")
         
         async with aiohttp.ClientSession() as session:
             for endpoint_config in self.critical_frontend_endpoints:
@@ -442,7 +442,7 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
                 endpoint_url = f"{self.backend_url}{test_endpoint}"
                 
                 try:
-                    print(f"\n🔍 Testing {method} {test_endpoint} ({description})")
+                    print(f"\n SEARCH:  Testing {method} {test_endpoint} ({description})")
                     
                     if method == "GET":
                         async with session.get(endpoint_url, headers=headers, timeout=30) as response:
@@ -469,13 +469,13 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
                 f"COMPREHENSIVE 404 REPRODUCTION - FRONTEND CONNECTIVITY FAILURES:\n"
                 f"Environment: {self.test_environment}\n"
                 f"Failed endpoints ({len(failed_endpoints)}):\n"
-                + "\n".join(f"  ❌ {failure}" for failure in failed_endpoints)
+                + "\n".join(f"   FAIL:  {failure}" for failure in failed_endpoints)
             )
             
             if successful_endpoints:
                 failure_message += (
                     f"\n\nWorking endpoints ({len(successful_endpoints)}):\n"
-                    + "\n".join(f"  ✅ {success}" for success in successful_endpoints)
+                    + "\n".join(f"   PASS:  {success}" for success in successful_endpoints)
                 )
             
             failure_message += (
@@ -489,7 +489,7 @@ class TestFrontendConnectivity404Reproduction(BaseE2ETest):
         """Process endpoint response and return result."""
         response_text = await response.text()
         
-        print(f"  📊 {response.status} - {response_text[:100]}...")
+        print(f"   CHART:  {response.status} - {response_text[:100]}...")
         
         if response.status == 404:
             return {

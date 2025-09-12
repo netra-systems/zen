@@ -7,7 +7,7 @@ Tests 5-6 from AGENT_STARTUP_E2E_TEST_PLAN.md:
 Uses REAL WebSocket connections and agent state management for true integration validation.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Critical reliability foundation
+- Segment: ALL (Free  ->  Enterprise) - Critical reliability foundation
 - Business Goal: Protect agent session continuity and user isolation 
 - Value Impact: Prevents lost sessions and data contamination issues
 - Revenue Impact: Protects $200K+ MRR through reliable agent state management

@@ -674,9 +674,9 @@ class TestNoRaceConditionsSingleEmitter(SSotAsyncTestCase):
         if (self.race_metrics.timing_conflicts_detected == 0 and 
             self.race_metrics.event_order_violations == 0 and
             self.race_metrics.resource_contention_incidents == 0):
-            print("✅ RACE CONDITIONS ELIMINATED - Single emitter successful!")
+            print(" PASS:  RACE CONDITIONS ELIMINATED - Single emitter successful!")
         else:
-            print("❌ Race conditions still detected - consolidation incomplete")
+            print(" FAIL:  Race conditions still detected - consolidation incomplete")
         
         print("===============================================\n")
         

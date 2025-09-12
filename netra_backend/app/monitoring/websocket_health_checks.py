@@ -145,17 +145,17 @@ class WebSocketHealthChecker:
         self.health_task: Optional[asyncio.Task] = None
         self.critical_check_task: Optional[asyncio.Task] = None
         
-        logger.info("🏥 WebSocket Health Checker initialized")
+        logger.info("[U+1F3E5] WebSocket Health Checker initialized")
     
     async def start_health_monitoring(self) -> None:
         """Start automated health monitoring."""
         if not self.health_task:
             self.health_task = asyncio.create_task(self._health_check_loop())
-            logger.info("🏥 Health monitoring started")
+            logger.info("[U+1F3E5] Health monitoring started")
         
         if not self.critical_check_task:
             self.critical_check_task = asyncio.create_task(self._critical_check_loop())
-            logger.info("🏥 Critical health monitoring started")
+            logger.info("[U+1F3E5] Critical health monitoring started")
     
     async def stop_health_monitoring(self) -> None:
         """Stop health monitoring."""
@@ -175,7 +175,7 @@ class WebSocketHealthChecker:
                 pass
             self.critical_check_task = None
         
-        logger.info("🏥 Health monitoring stopped")
+        logger.info("[U+1F3E5] Health monitoring stopped")
     
     async def _health_check_loop(self) -> None:
         """Main health check loop."""
@@ -185,10 +185,10 @@ class WebSocketHealthChecker:
                 await asyncio.sleep(self.health_check_interval)
                 
         except asyncio.CancelledError:
-            logger.info("🏥 Health check loop cancelled")
+            logger.info("[U+1F3E5] Health check loop cancelled")
             raise
         except Exception as e:
-            logger.error(f"🚨 Health check loop error: {e}", exc_info=True)
+            logger.error(f" ALERT:  Health check loop error: {e}", exc_info=True)
             await asyncio.sleep(10)  # Brief pause before retrying
     
     async def _critical_check_loop(self) -> None:
@@ -199,10 +199,10 @@ class WebSocketHealthChecker:
                 await asyncio.sleep(self.critical_check_interval)
                 
         except asyncio.CancelledError:
-            logger.info("🏥 Critical check loop cancelled")
+            logger.info("[U+1F3E5] Critical check loop cancelled")
             raise
         except Exception as e:
-            logger.error(f"🚨 Critical check loop error: {e}", exc_info=True)
+            logger.error(f" ALERT:  Critical check loop error: {e}", exc_info=True)
             await asyncio.sleep(5)  # Brief pause before retrying
     
     async def _perform_comprehensive_health_check(self) -> Dict[str, HealthCheckResult]:
@@ -681,7 +681,7 @@ class WebSocketHealthChecker:
         try:
             channels = [NotificationChannel.LOG, NotificationChannel.DATABASE]
             await self.alert_manager.deliver_notifications(alert, channels, {})
-            logger.info(f"🚨 Health alert sent: {health_result.check_type.value}")
+            logger.info(f" ALERT:  Health alert sent: {health_result.check_type.value}")
             
         except Exception as e:
             logger.error(f"Failed to send health alert: {e}")
@@ -804,7 +804,7 @@ class WebSocketHealthChecker:
     
     async def emergency_health_assessment(self) -> Dict[str, Any]:
         """Perform emergency health assessment for critical issues."""
-        logger.critical("🚨 EMERGENCY HEALTH ASSESSMENT: Performing critical system checks")
+        logger.critical(" ALERT:  EMERGENCY HEALTH ASSESSMENT: Performing critical system checks")
         
         # Perform all critical checks immediately
         critical_results = await asyncio.gather(
@@ -837,11 +837,11 @@ class WebSocketHealthChecker:
         
         # Log emergency assessment
         if critical_issues:
-            logger.critical(f"🚨 EMERGENCY ASSESSMENT: {len(critical_issues)} critical issues found")
+            logger.critical(f" ALERT:  EMERGENCY ASSESSMENT: {len(critical_issues)} critical issues found")
             for issue in critical_issues:
-                logger.critical(f"🚨 CRITICAL ISSUE: {issue}")
+                logger.critical(f" ALERT:  CRITICAL ISSUE: {issue}")
         else:
-            logger.info("🏥 Emergency assessment: No critical issues detected")
+            logger.info("[U+1F3E5] Emergency assessment: No critical issues detected")
         
         return assessment
 
@@ -868,7 +868,7 @@ async def start_websocket_health_monitoring() -> None:
     """Start global WebSocket health monitoring."""
     health_checker = get_websocket_health_checker()
     await health_checker.start_health_monitoring()
-    logger.info("🏥 Global WebSocket health monitoring started")
+    logger.info("[U+1F3E5] Global WebSocket health monitoring started")
 
 
 async def stop_websocket_health_monitoring() -> None:
@@ -876,7 +876,7 @@ async def stop_websocket_health_monitoring() -> None:
     global _websocket_health_checker
     if _websocket_health_checker:
         await _websocket_health_checker.stop_health_monitoring()
-        logger.info("🏥 Global WebSocket health monitoring stopped")
+        logger.info("[U+1F3E5] Global WebSocket health monitoring stopped")
 
 
 async def perform_emergency_health_check() -> Dict[str, Any]:

@@ -624,7 +624,7 @@ class TestAgentWebSocketBridgeCoordination:
         monitor = AgentWebSocketCoordinationMonitor()
         tester = AgentWebSocketCoordinationTester(monitor)
         
-        logger.info("🚀 Starting AgentWebSocketBridge SSOT coordination test")
+        logger.info("[U+1F680] Starting AgentWebSocketBridge SSOT coordination test")
         
         coordination_config = {
             "coordination_type": "bridge",
@@ -675,9 +675,9 @@ class TestAgentWebSocketBridgeCoordination:
             assert integration_health["health_check_pass_rate"] >= 0.8, \
                 f"Health check pass rate too low: {integration_health['health_check_pass_rate']:.1%}"
         
-        logger.info("✅ AgentWebSocketBridge SSOT coordination VALIDATED")
+        logger.info(" PASS:  AgentWebSocketBridge SSOT coordination VALIDATED")
         logger.info(f"  Coordination duration: {result['coordination_duration']:.1f}s")
-        logger.info(f"  Bridge state: {result['initial_state']} → {result['final_state']}")
+        logger.info(f"  Bridge state: {result['initial_state']}  ->  {result['final_state']}")
         logger.info(f"  Coordination effectiveness: {effectiveness['mean_effectiveness']:.1f}")
 
     @pytest.mark.asyncio
@@ -691,7 +691,7 @@ class TestAgentWebSocketBridgeCoordination:
         monitor = AgentWebSocketCoordinationMonitor()
         tester = AgentWebSocketCoordinationTester(monitor)
         
-        logger.info("🚀 Starting multi-service WebSocket coordination test")
+        logger.info("[U+1F680] Starting multi-service WebSocket coordination test")
         
         services_config = {
             "agent_service": {"coordination_mode": "bridge"},
@@ -753,7 +753,7 @@ class TestAgentWebSocketBridgeCoordination:
             assert service_coordination["data_consistency_rate"] >= 0.9, \
                 f"Data consistency rate too low: {service_coordination['data_consistency_rate']:.1%}"
         
-        logger.info("✅ Multi-service WebSocket coordination VALIDATED")
+        logger.info(" PASS:  Multi-service WebSocket coordination VALIDATED")
         logger.info(f"  Services coordinated: {result['services_coordinated']}")
         logger.info(f"  Successful coordinations: {result['successful_coordinations']}")
         logger.info(f"  Cross-service messages: {cross_service_communication['total_messages']}")
@@ -770,7 +770,7 @@ class TestAgentWebSocketBridgeCoordination:
         monitor = AgentWebSocketCoordinationMonitor()
         tester = AgentWebSocketCoordinationTester(monitor)
         
-        logger.info(f"🚀 Starting {concurrent_sessions} concurrent coordination isolation test")
+        logger.info(f"[U+1F680] Starting {concurrent_sessions} concurrent coordination isolation test")
         
         async def isolated_coordination_session(session_index: int) -> Dict[str, Any]:
             """Execute isolated coordination session."""
@@ -833,7 +833,7 @@ class TestAgentWebSocketBridgeCoordination:
         assert effectiveness["sessions_above_60"] >= len(successful_sessions) * 0.8, \
             f"Too few sessions with good effectiveness: {effectiveness['sessions_above_60']}/{len(successful_sessions)}"
         
-        logger.info("✅ Concurrent coordination isolation VALIDATED")
+        logger.info(" PASS:  Concurrent coordination isolation VALIDATED")
         logger.info(f"  Successful sessions: {len(successful_sessions)}/{concurrent_sessions}")
         logger.info(f"  Average duration: {avg_coordination_duration:.1f}s")
         logger.info(f"  Coordination conflicts: {coordination_conflicts['total_conflicts']}")
@@ -850,7 +850,7 @@ class TestAgentWebSocketBridgeCoordination:
         monitor = AgentWebSocketCoordinationMonitor()
         tester = AgentWebSocketCoordinationTester(monitor)
         
-        logger.info("🚀 Starting coordination health monitoring integration test")
+        logger.info("[U+1F680] Starting coordination health monitoring integration test")
         
         # Test multiple coordination scenarios with health monitoring
         coordination_scenarios = [
@@ -936,7 +936,7 @@ class TestAgentWebSocketBridgeCoordination:
         assert effectiveness["mean_effectiveness"] >= 0.7, \
             f"Mean coordination effectiveness with health monitoring: {effectiveness['mean_effectiveness']:.1f} < 0.7"
         
-        logger.info("✅ Coordination health monitoring integration VALIDATED")
+        logger.info(" PASS:  Coordination health monitoring integration VALIDATED")
         logger.info(f"  Health monitoring scenarios: {len(coordination_scenarios)}")
         logger.info(f"  Health checks: {integration_health.get('total_health_checks', 0)}")
         logger.info(f"  Health pass rate: {integration_health.get('health_check_pass_rate', 0):.1%}")
@@ -954,7 +954,7 @@ class TestAgentWebSocketBridgeCoordination:
         monitor = AgentWebSocketCoordinationMonitor()
         tester = AgentWebSocketCoordinationTester(monitor)
         
-        logger.info("🚀 Starting integration data consistency coordination test")
+        logger.info("[U+1F680] Starting integration data consistency coordination test")
         
         # Test data consistency across multiple coordination operations
         consistency_test_operations = 5
@@ -1031,7 +1031,7 @@ class TestAgentWebSocketBridgeCoordination:
         assert cross_service_communication["total_messages"] >= consistency_test_operations * 2, \
             f"Insufficient cross-service messages for consistency validation: {cross_service_communication['total_messages']}"
         
-        logger.info("✅ Integration data consistency coordination VALIDATED")
+        logger.info(" PASS:  Integration data consistency coordination VALIDATED")
         logger.info(f"  Consistency operations: {successful_consistency_operations}/{consistency_test_operations}")
         logger.info(f"  Data consistency rate: {service_coordination.get('data_consistency_rate', 0):.1%}")
         logger.info(f"  Coordination conflicts: {coordination_conflicts['total_conflicts']}")

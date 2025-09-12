@@ -1,4 +1,4 @@
-"""Query validation and fixing for ClickHouse queries with ≤8 line functions.
+"""Query validation and fixing for ClickHouse queries with  <= 8 line functions.
 
 This module ensures ALL queries use correct array syntax before execution.
 """

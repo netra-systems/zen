@@ -5,7 +5,7 @@ This module tests for race conditions in multi-user WebSocket isolation under re
 Validates that WebSocket connections remain isolated and stable with real authentication and services.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Ensure reliable multi-user real-time communication
 - Value Impact: Prevents data leakage, connection interference, and user experience degradation
 - Strategic Impact: CRITICAL - Multi-user isolation is core security and functionality requirement
@@ -379,7 +379,7 @@ class TestMultiUserWebSocketIsolationE2E(SSotBaseTestCase):
             f"Race conditions may have affected message sending."
         )
         
-        assert total_messages_sent == 30, (  # 10 connections × 3 messages each
+        assert total_messages_sent == 30, (  # 10 connections  x  3 messages each
             f"Expected 30 messages sent, got {total_messages_sent}. "
             f"Race conditions may have caused message sending failures."
         )
@@ -427,7 +427,7 @@ class TestMultiUserWebSocketIsolationE2E(SSotBaseTestCase):
                 await websocket.close()
         
         logger.info(
-            f"✅ 10 concurrent WebSocket connections E2E test passed in {connection_time:.2f}s. "
+            f" PASS:  10 concurrent WebSocket connections E2E test passed in {connection_time:.2f}s. "
             f"Connections: {successful_connections}/10, Messaging: {successful_messaging}/10, "
             f"Messages sent: {total_messages_sent}, Isolation violations: {len(self.user_isolation_violations)}, "
             f"Race conditions: {len(self.race_condition_detections)}"
@@ -571,7 +571,7 @@ class TestMultiUserWebSocketIsolationE2E(SSotBaseTestCase):
                 await websocket.close()
         
         logger.info(
-            f"✅ WebSocket agent execution isolation E2E test passed. "
+            f" PASS:  WebSocket agent execution isolation E2E test passed. "
             f"Successful executions: {successful_executions}/6, "
             f"User events isolated: {len(user_events)} users, "
             f"Isolation violations: {len(self.user_isolation_violations)}, "
@@ -717,7 +717,7 @@ class TestMultiUserWebSocketIsolationE2E(SSotBaseTestCase):
                 await websocket.close()
         
         logger.info(
-            f"✅ WebSocket authentication token isolation E2E test passed. "
+            f" PASS:  WebSocket authentication token isolation E2E test passed. "
             f"Successful auth tests: {successful_auth_tests}/5, "
             f"Different permission levels tested: {len(permission_sets)}, "
             f"Isolation violations: {len(self.user_isolation_violations)}, "

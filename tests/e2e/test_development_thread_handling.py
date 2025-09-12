@@ -127,7 +127,7 @@ class TestDevelopmentThreadHandling:
         problematic_thread_ids = [
             "thread_dev-temp-e946eb46",
             "thread_with-special-chars_123",
-            "thread_unicode_测试",
+            "thread_unicode_[U+6D4B][U+8BD5]",
             "thread_very_long_id_" + "x" * 100
         ]
         

@@ -308,7 +308,7 @@ class EnterpriseAgentQualityEvaluator:
         
         # Structured response indicates thoroughness
         structure_indicators = [
-            "1.", "2.", "3.", "•", "-", "*",  # Lists/bullets
+            "1.", "2.", "3.", "[U+2022]", "-", "*",  # Lists/bullets
             "summary", "conclusion", "recommendations", "next steps",  # Sections
             "overview", "analysis", "findings", "approach"  # Professional structure
         ]
@@ -721,7 +721,7 @@ class TestAgentResponseQualityGrading(BaseE2ETest):
         
         # Log success metrics
         self.logger.info(
-            f"✅ Optimization agent meets enterprise quality standards: "
+            f" PASS:  Optimization agent meets enterprise quality standards: "
             f"Overall={quality_evaluation['overall_quality']:.3f}, "
             f"Business Value={quality_evaluation['business_value']:.3f}, "
             f"Technical Accuracy={quality_evaluation['technical_accuracy']:.3f}, "
@@ -800,7 +800,7 @@ class TestAgentResponseQualityGrading(BaseE2ETest):
         
         # Success logging
         self.logger.info(
-            f"✅ MISSION CRITICAL test passed: All 5 WebSocket events verified AND "
+            f" PASS:  MISSION CRITICAL test passed: All 5 WebSocket events verified AND "
             f"response meets enterprise quality (Q={quality_evaluation['overall_quality']:.3f}). "
             f"Events: {set(received_events)}"
         )
@@ -899,7 +899,7 @@ class TestAgentResponseQualityGrading(BaseE2ETest):
                 )
                 
                 self.logger.info(
-                    f"✅ Scenario {scenario['name']}: Quality {quality_evaluation['overall_quality']:.3f} "
+                    f" PASS:  Scenario {scenario['name']}: Quality {quality_evaluation['overall_quality']:.3f} "
                     f"(expected >= {scenario['expected_min_quality']})"
                 )
                 
@@ -920,7 +920,7 @@ class TestAgentResponseQualityGrading(BaseE2ETest):
         # Log summary
         avg_quality = sum(r["evaluation"]["overall_quality"] for r in evaluation_results) / len(evaluation_results)
         self.logger.info(
-            f"✅ Quality evaluation robustness test completed. "
+            f" PASS:  Quality evaluation robustness test completed. "
             f"Average quality across all scenarios: {avg_quality:.3f}"
         )
     
@@ -1019,14 +1019,14 @@ class TestAgentResponseQualityGrading(BaseE2ETest):
                 f"(BV={result['evaluation']['business_value']:.2f}, "
                 f"TA={result['evaluation']['technical_accuracy']:.2f}, "
                 f"UX={result['evaluation']['user_experience']:.2f}) "
-                f"Enterprise Standard: {'✅' if result['evaluation']['meets_enterprise_standard'] else '❌'}"
+                f"Enterprise Standard: {' PASS: ' if result['evaluation']['meets_enterprise_standard'] else ' FAIL: '}"
             )
         
         # Verify consistent quality across all agents
         avg_quality = sum(r["evaluation"]["overall_quality"] for r in quality_results) / len(quality_results)
         assert avg_quality >= 0.8, f"Average agent quality {avg_quality:.3f} below enterprise standard"
         
-        self.logger.info(f"✅ All agents meet enterprise quality standards. Average quality: {avg_quality:.3f}")
+        self.logger.info(f" PASS:  All agents meet enterprise quality standards. Average quality: {avg_quality:.3f}")
 
 
 # Simplified Quality Grader for Basic Testing
@@ -1177,7 +1177,7 @@ class AgentResponseQualityGrader:
         
         # Basic completeness: response length and structure
         completeness = min(1.0, len(response) / 500)  # Up to 500 chars = complete
-        if any(indicator in response.lower() for indicator in ["1.", "2.", "•", "-", "first", "next"]):
+        if any(indicator in response.lower() for indicator in ["1.", "2.", "[U+2022]", "-", "first", "next"]):
             completeness += 0.2  # Structured response bonus
         completeness = min(1.0, completeness)
         

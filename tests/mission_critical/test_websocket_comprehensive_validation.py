@@ -379,7 +379,7 @@ class TestUltraComprehensiveWebSocketValidation:
     @pytest.mark.timeout(60)
     async def test_comprehensive_single_user_flow(self):
         """Test comprehensive single user flow with factory pattern."""
-        print("🎯 Testing comprehensive single user flow")
+        print(" TARGET:  Testing comprehensive single user flow")
         
         user_id = "single_user_test"
         success = await self.test_harness.simulate_complete_agent_flow(user_id)
@@ -395,14 +395,14 @@ class TestUltraComprehensiveWebSocketValidation:
         assert factory_metrics["emitters_created"] >= 1, "Factory should have created at least 1 emitter"
         assert factory_metrics["emitters_active"] >= 1, "Factory should have active emitters"
         
-        print("✅ Comprehensive single user flow test passed")
+        print(" PASS:  Comprehensive single user flow test passed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     @pytest.mark.timeout(120)
     async def test_comprehensive_user_isolation(self):
         """Test comprehensive user isolation with factory pattern."""
-        print("🔒 Testing comprehensive user isolation")
+        print("[U+1F512] Testing comprehensive user isolation")
         
         # Create multiple isolated users
         user_count = 15
@@ -424,14 +424,14 @@ class TestUltraComprehensiveWebSocketValidation:
         assert factory_metrics["emitters_created"] >= user_count, \
             f"Factory should have created {user_count} emitters, got {factory_metrics['emitters_created']}"
         
-        print("✅ Comprehensive user isolation test passed")
+        print(" PASS:  Comprehensive user isolation test passed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     @pytest.mark.timeout(90)
     async def test_comprehensive_event_delivery_reliability(self):
         """Test comprehensive event delivery reliability."""
-        print("📡 Testing comprehensive event delivery reliability")
+        print("[U+1F4E1] Testing comprehensive event delivery reliability")
         
         # Test with some network issues
         user_ids = []
@@ -462,14 +462,14 @@ class TestUltraComprehensiveWebSocketValidation:
         analysis = test_results["analysis"]
         assert analysis["total_events"] >= 30, "Should have delivered many events despite network issues"
         
-        print("✅ Comprehensive event delivery reliability test passed")
+        print(" PASS:  Comprehensive event delivery reliability test passed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     @pytest.mark.timeout(120)
     async def test_comprehensive_high_load_performance(self):
         """Test comprehensive performance under high load."""
-        print("💪 Testing comprehensive high load performance")
+        print("[U+1F4AA] Testing comprehensive high load performance")
         
         # High load scenario
         high_load_results = await self.test_harness.run_concurrent_user_scenarios(user_count=25)
@@ -491,14 +491,14 @@ class TestUltraComprehensiveWebSocketValidation:
         analysis = results["analysis"]
         assert analysis["total_events"] >= 75, "Should process many events under load"  # 25 users * 3 events minimum
         
-        print("✅ Comprehensive high load performance test passed")
+        print(" PASS:  Comprehensive high load performance test passed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     @pytest.mark.timeout(60)
     async def test_comprehensive_event_ordering_validation(self):
         """Test comprehensive event ordering validation."""
-        print("📋 Testing comprehensive event ordering validation")
+        print("[U+1F4CB] Testing comprehensive event ordering validation")
         
         # Create users with specific ordering requirements
         ordering_test_users = []
@@ -521,14 +521,14 @@ class TestUltraComprehensiveWebSocketValidation:
         assert analysis["users_with_complete_flows"] == len(ordering_test_users), \
             "Not all users completed their flows"
         
-        print("✅ Comprehensive event ordering validation test passed")
+        print(" PASS:  Comprehensive event ordering validation test passed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     @pytest.mark.timeout(60)
     async def test_comprehensive_factory_resource_management(self):
         """Test comprehensive factory resource management."""
-        print("🧹 Testing comprehensive factory resource management")
+        print("[U+1F9F9] Testing comprehensive factory resource management")
         
         initial_metrics = self.test_harness.factory.get_factory_metrics()
         initial_active = initial_metrics["emitters_active"]
@@ -556,13 +556,13 @@ class TestUltraComprehensiveWebSocketValidation:
         # Some emitters may still be cleaning up, so allow for that
         assert final_metrics["emitters_cleaned"] >= 5, "Factory should track cleaned emitters"
         
-        print("✅ Comprehensive factory resource management test passed")
+        print(" PASS:  Comprehensive factory resource management test passed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
     async def test_comprehensive_final_validation(self):
         """Final comprehensive validation test."""
-        print("🎖️ Running final comprehensive validation")
+        print("[U+1F396][U+FE0F] Running final comprehensive validation")
         
         # Run the most demanding test scenario
         final_user_count = 20
@@ -596,9 +596,9 @@ class TestUltraComprehensiveWebSocketValidation:
         assert factory_metrics["emitters_created"] == final_user_count, \
             "Factory should have created correct number of emitters"
         
-        print("🏆 FINAL COMPREHENSIVE VALIDATION PASSED!")
-        print("🎯 All WebSocket notification requirements validated successfully")
-        print("💼 Business value preservation: Chat functionality fully operational with factory pattern")
+        print(" TROPHY:  FINAL COMPREHENSIVE VALIDATION PASSED!")
+        print(" TARGET:  All WebSocket notification requirements validated successfully")
+        print("[U+1F4BC] Business value preservation: Chat functionality fully operational with factory pattern")
 
 
 # ============================================================================
@@ -694,7 +694,7 @@ class TestFactoryPatternRegressionPrevention:
 
 if __name__ == "__main__":
     # Run the ultra-comprehensive test suite
-    print("🚀 Starting Ultra-Comprehensive WebSocket Factory Validation Test Suite")
+    print("[U+1F680] Starting Ultra-Comprehensive WebSocket Factory Validation Test Suite")
     
     # Run with maximum verbosity and strict failure reporting
     pytest.main([

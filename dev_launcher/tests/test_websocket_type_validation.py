@@ -513,7 +513,7 @@ def test_json_serialization_edge_cases():
     edge_case_payloads = [
         {'text': 'Message with "quotes" and \'apostrophes\''},
         {'text': 'Message with\nnewlines\tand\ttabs'},
-        {'text': 'Message with unicode: 🚀 ñ © ∞'},
+        {'text': 'Message with unicode: [U+1F680] [U+00F1] [U+00A9]  infinity '},
         {'text': 'Message with escaped chars: \\n \\t \\"'},
         {'metadata': {'nested': {'deeply': {'nested': 'value'}}}},
         {'array_field': [1, 'two', {'three': 3}, None]},
@@ -598,12 +598,12 @@ def test_unicode_and_encoding_issues():
     Should FAIL if unicode causes encoding/decoding errors.
     """
     unicode_test_cases = [
-        {'text': '🚀 Rocket emoji test'},
-        {'text': 'Ñoño niño - Spanish characters'},
-        {'text': '中文测试 - Chinese characters'},
-        {'text': 'Русский текст - Russian text'},
-        {'text': '🎉🎊🎈 Multiple emojis 🔥💯⚡'},
-        {'text': 'Math symbols: ∞ ∑ ∆ ∫ ≠ ≤ ≥'},
+        {'text': '[U+1F680] Rocket emoji test'},
+        {'text': '[U+00D1]o[U+00F1]o ni[U+00F1]o - Spanish characters'},
+        {'text': '[U+4E2D][U+6587][U+6D4B][U+8BD5] - Chinese characters'},
+        {'text': 'Pucck[U+0438][U+0439] tekct - Russian text'},
+        {'text': ' CELEBRATION: [U+1F38A][U+1F388] Multiple emojis  FIRE: [U+1F4AF] LIGHTNING: '},
+        {'text': 'Math symbols:  infinity  [U+2211] [U+2206] [U+222B]  !=   <=   >= '},
         {'text': 'Control chars: \u0000\u0001\u0002\u0003'},
     ]
     

@@ -444,7 +444,7 @@ class TestWebSocketMultiService:
                     f"Version mismatch should not cause internal server error: {error_message}"
                 )
     
-    # Helper methods (each ≤8 lines)
+    # Helper methods (each  <= 8 lines)
     def _identify_service_origin(self, event: Dict[str, Any]) -> str:
         """Identify which service originated the event."""
         payload = str(event.get("payload", {})).lower()

@@ -128,7 +128,7 @@ class WebSocketResilienceMonitor:
             if scenario_id in self.resilience_scenarios:
                 self.resilience_scenarios[scenario_id]["failures_injected"] += 1
         
-        logger.info(f"💥 Failure injected: {failure_event['failure_type']} for scenario {scenario_id}")
+        logger.info(f"[U+1F4A5] Failure injected: {failure_event['failure_type']} for scenario {scenario_id}")
         
         return {
             "success": True,
@@ -784,7 +784,7 @@ class TestWebSocketResiliencePatterns:
         injector = WebSocketFailureInjector(monitor)
         executor = ResilientWebSocketAgentExecutor(monitor, injector)
         
-        logger.info("🚀 Starting WebSocket connection failure recovery test")
+        logger.info("[U+1F680] Starting WebSocket connection failure recovery test")
         
         resilience_scenario = {
             "scenario_type": "connection_failure",
@@ -829,7 +829,7 @@ class TestWebSocketResiliencePatterns:
         assert failure_metrics["total_recoveries_observed"] >= 1, \
             "No recoveries were observed"
         
-        logger.info("✅ WebSocket connection failure recovery VALIDATED")
+        logger.info(" PASS:  WebSocket connection failure recovery VALIDATED")
         logger.info(f"  Resilience score: {result['resilience_score']:.1f}")
         logger.info(f"  Event success rate: {result['event_success_rate']:.1%}")
         logger.info(f"  Recovery time: {recovery_metrics.get('mean_recovery_time', 0):.1f}s")
@@ -846,7 +846,7 @@ class TestWebSocketResiliencePatterns:
         injector = WebSocketFailureInjector(monitor)
         executor = ResilientWebSocketAgentExecutor(monitor, injector)
         
-        logger.info("🚀 Starting service degradation graceful handling test")
+        logger.info("[U+1F680] Starting service degradation graceful handling test")
         
         resilience_scenario = {
             "scenario_type": "service_degradation",
@@ -889,7 +889,7 @@ class TestWebSocketResiliencePatterns:
         assert degradation_summary["avg_availability_impact"] <= 30, \
             f"Availability impact too high: {degradation_summary['avg_availability_impact']}% > 30%"
         
-        logger.info("✅ Service degradation graceful handling VALIDATED")
+        logger.info(" PASS:  Service degradation graceful handling VALIDATED")
         logger.info(f"  Resilience score: {result['resilience_score']:.1f}")
         logger.info(f"  Performance impact: {degradation_summary['avg_performance_impact']:.1f}%")
         logger.info(f"  Availability impact: {degradation_summary['avg_availability_impact']:.1f}%")
@@ -906,7 +906,7 @@ class TestWebSocketResiliencePatterns:
         injector = WebSocketFailureInjector(monitor)
         executor = ResilientWebSocketAgentExecutor(monitor, injector)
         
-        logger.info("🚀 Starting circuit breaker pattern validation test")
+        logger.info("[U+1F680] Starting circuit breaker pattern validation test")
         
         resilience_scenario = {
             "scenario_type": "circuit_breaker",
@@ -948,7 +948,7 @@ class TestWebSocketResiliencePatterns:
         assert result["events_sent"] >= 2, \
             f"Too few events during circuit breaker test: {result['events_sent']} < 2"
         
-        logger.info("✅ Circuit breaker pattern validation VALIDATED")
+        logger.info(" PASS:  Circuit breaker pattern validation VALIDATED")
         logger.info(f"  Circuit breaker activations: {failure_metrics['total_circuit_breaker_activations']}")
         logger.info(f"  Resilience score: {result['resilience_score']:.1f}")
         logger.info(f"  Recovery time: {recovery_metrics.get('mean_recovery_time', 0):.1f}s")
@@ -966,7 +966,7 @@ class TestWebSocketResiliencePatterns:
         injector = WebSocketFailureInjector(monitor)
         executor = ResilientWebSocketAgentExecutor(monitor, injector)
         
-        logger.info(f"🚀 Starting {concurrent_scenarios} concurrent resilience isolation test")
+        logger.info(f"[U+1F680] Starting {concurrent_scenarios} concurrent resilience isolation test")
         
         async def isolated_resilience_test(scenario_index: int) -> Dict[str, Any]:
             """Execute isolated resilience test for one scenario."""
@@ -1025,7 +1025,7 @@ class TestWebSocketResiliencePatterns:
         assert resilience_report["scenario_summary"]["completion_rate"] >= 0.8, \
             f"Scenario completion rate too low: {resilience_report['scenario_summary']['completion_rate']:.1%}"
         
-        logger.info("✅ Concurrent resilience isolation VALIDATED")
+        logger.info(" PASS:  Concurrent resilience isolation VALIDATED")
         logger.info(f"  Scenarios: {len(successful_scenarios)}/{concurrent_scenarios}")
         logger.info(f"  Average resilience score: {avg_resilience_score:.1f}")
         logger.info(f"  Average event success: {avg_event_success:.1%}")
@@ -1043,7 +1043,7 @@ class TestWebSocketResiliencePatterns:
         injector = WebSocketFailureInjector(monitor)
         executor = ResilientWebSocketAgentExecutor(monitor, injector)
         
-        logger.info("🚀 Starting resource exhaustion protection test")
+        logger.info("[U+1F680] Starting resource exhaustion protection test")
         
         resilience_scenario = {
             "scenario_type": "resource_exhaustion",
@@ -1088,7 +1088,7 @@ class TestWebSocketResiliencePatterns:
         assert result["events_sent"] >= 1, \
             f"No events sent during resource exhaustion: {result['events_sent']}"
         
-        logger.info("✅ Resource exhaustion protection VALIDATED")
+        logger.info(" PASS:  Resource exhaustion protection VALIDATED")
         logger.info(f"  Resilience score: {result['resilience_score']:.1f}")
         logger.info(f"  Max performance impact: {degradation_summary['max_performance_impact']:.1f}%")
         logger.info(f"  Max availability impact: {degradation_summary['max_availability_impact']:.1f}%")

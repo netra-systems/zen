@@ -1,5 +1,5 @@
 """
-🔧 INTEGRATION TEST SUITE: Authentication Service Synchronization
+[U+1F527] INTEGRATION TEST SUITE: Authentication Service Synchronization
 
 Tests synchronization between Backend and Auth Service for consistent authentication state.
 This validates that both services maintain synchronized JWT secrets, user sessions, and auth state.
@@ -139,7 +139,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
         
         BUSINESS VALUE: Prevents auth inconsistencies that cause service failures.
         """
-        logger.info("🔑 Integration: Testing JWT secret synchronization")
+        logger.info("[U+1F511] Integration: Testing JWT secret synchronization")
         
         # Get JWT secret from both services (using unified manager)
         from shared.jwt_secret_manager import get_unified_jwt_secret
@@ -170,7 +170,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
             assert sync_validation["both_secrets_valid"], "Both services must have valid JWT secrets"
             assert len(backend_secret) >= 32, "JWT secret must be at least 32 characters for security"
             
-            logger.info("✅ JWT secret synchronization validated")
+            logger.info(" PASS:  JWT secret synchronization validated")
             
         except Exception as e:
             pytest.fail(f"JWT SECRET SYNC ERROR: Failed to validate synchronization - {str(e)}")
@@ -181,7 +181,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
         
         BUSINESS VALUE: Ensures users get consistent auth experience across all APIs.
         """
-        logger.info("🔍 Integration: Testing token validation consistency")
+        logger.info(" SEARCH:  Integration: Testing token validation consistency")
         
         # Create test user and token
         user_id = f"sync-test-{uuid.uuid4().hex[:8]}"
@@ -245,7 +245,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
         assert auth_validation.get("user_id") == user_id, "User ID must be consistent"
         assert backend_validation.get("valid") == auth_validation.get("valid"), "Validation status must match"
         
-        logger.info("✅ Token validation consistency confirmed")
+        logger.info(" PASS:  Token validation consistency confirmed")
         
     async def test_user_session_state_synchronization(self):
         """
@@ -253,7 +253,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
         
         BUSINESS VALUE: Users don't lose session context when switching between service endpoints.
         """
-        logger.info("👤 Integration: Testing user session state synchronization")
+        logger.info("[U+1F464] Integration: Testing user session state synchronization")
         
         user_id = f"session-sync-{uuid.uuid4().hex[:8]}"
         user_email = f"sessionsync-{int(time.time())}@netra.test"
@@ -340,7 +340,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
         if not auth_accessible:
             logger.warning("Auth service token validation not accessible - may be expected in test environment")
         
-        logger.info(f"✅ Session state synchronization tested")
+        logger.info(f" PASS:  Session state synchronization tested")
         logger.info(f"   Accessible services: {len(accessible_services)}/{len(session_tests)}")
         
     async def test_service_configuration_synchronization(self):
@@ -349,7 +349,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
         
         BUSINESS VALUE: Configuration changes propagate correctly to prevent service divergence.
         """
-        logger.info("⚙️ Integration: Testing service configuration synchronization")
+        logger.info("[U+2699][U+FE0F] Integration: Testing service configuration synchronization")
         
         # Test configuration consistency across services
         config_tests = []
@@ -429,7 +429,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
             logger.info(f"  Environments: {list(environments)}")
             logger.info(f"  Versions: {list(versions)}")
         
-        logger.info(f"✅ Service configuration synchronization tested")
+        logger.info(f" PASS:  Service configuration synchronization tested")
         
     async def test_service_restart_sync_recovery(self):
         """
@@ -437,7 +437,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
         
         BUSINESS VALUE: Services maintain sync even after restarts or redeployments.
         """
-        logger.info("🔄 Integration: Testing service restart synchronization recovery")
+        logger.info(" CYCLE:  Integration: Testing service restart synchronization recovery")
         
         # Create token before "restart"
         pre_restart_user_id = f"restart-test-{uuid.uuid4().hex[:8]}"
@@ -492,7 +492,7 @@ class TestAuthServiceSync(BaseIntegrationTest):
                 "user_consistency": pre_decoded["sub"] == post_decoded["sub"]
             })
             
-            logger.info("✅ Service restart synchronization recovery validated")
+            logger.info(" PASS:  Service restart synchronization recovery validated")
             
         except Exception as e:
             self.validator.record_sync_test("post_restart_sync", {
@@ -513,7 +513,7 @@ class TestAuthServiceSyncRobustness(BaseIntegrationTest):
         
         BUSINESS VALUE: Sync maintained even under realistic user load.
         """
-        logger.info("⚡ Integration: Testing auth sync under concurrent load")
+        logger.info(" LIGHTNING:  Integration: Testing auth sync under concurrent load")
         
         auth_helper = E2EAuthHelper()
         concurrent_operations = 20
@@ -568,7 +568,7 @@ class TestAuthServiceSyncRobustness(BaseIntegrationTest):
             failure_details = [f"Op {r['operation_id']}: {r.get('error')}" for r in failed_ops[:3]]
             logger.warning(f"Failed operations: {failure_details}")
         
-        logger.info(f"✅ Concurrent auth sync tested")
+        logger.info(f" PASS:  Concurrent auth sync tested")
         logger.info(f"   Operations: {concurrent_operations}")
         logger.info(f"   Success rate: {success_rate:.1%}")
         logger.info(f"   Consistency rate: {consistency_rate:.1%}")

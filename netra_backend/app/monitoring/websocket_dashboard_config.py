@@ -155,7 +155,7 @@ class WebSocketDashboardConfigManager:
         self.dashboards: Dict[str, WebSocketDashboardConfig] = {}
         self.default_dashboards: Dict[DashboardRole, WebSocketDashboardConfig] = {}
         self._initialize_default_dashboards()
-        logger.info("🎛️ WebSocket Dashboard Config Manager initialized")
+        logger.info("[U+1F39B][U+FE0F] WebSocket Dashboard Config Manager initialized")
     
     def _initialize_default_dashboards(self) -> None:
         """Initialize default dashboard configurations for different roles."""
@@ -451,7 +451,7 @@ class WebSocketDashboardConfigManager:
                 dashboard = self._dict_to_dashboard_config(config)
                 self.dashboards[dashboard_id] = dashboard
                 
-            logger.info(f"📊 Imported {len(configs)} dashboard configurations")
+            logger.info(f" CHART:  Imported {len(configs)} dashboard configurations")
             
         except Exception as e:
             logger.error(f"Failed to import dashboard configurations: {e}")
@@ -484,7 +484,7 @@ def get_dashboard_config_manager() -> WebSocketDashboardConfigManager:
     global _dashboard_config_manager
     if _dashboard_config_manager is None:
         _dashboard_config_manager = WebSocketDashboardConfigManager()
-        logger.info("✅ WebSocket Dashboard Config Manager singleton created")
+        logger.info(" PASS:  WebSocket Dashboard Config Manager singleton created")
     return _dashboard_config_manager
 
 
@@ -506,13 +506,13 @@ async def initialize_monitoring_dashboards() -> None:
         dashboard_count = len(manager.dashboards)
         role_count = len(manager.default_dashboards)
         
-        logger.info(f"🎛️ Initialized {dashboard_count} WebSocket monitoring dashboards")
-        logger.info(f"📊 Created default dashboards for {role_count} user roles")
+        logger.info(f"[U+1F39B][U+FE0F] Initialized {dashboard_count} WebSocket monitoring dashboards")
+        logger.info(f" CHART:  Created default dashboards for {role_count} user roles")
         
         # Log available dashboards
         for dashboard_id, dashboard in manager.dashboards.items():
             widget_count = sum(len(section.widgets) for section in dashboard.sections)
-            logger.info(f"  📈 {dashboard.name}: {widget_count} widgets across {len(dashboard.sections)} sections")
+            logger.info(f"  [U+1F4C8] {dashboard.name}: {widget_count} widgets across {len(dashboard.sections)} sections")
         
     except Exception as e:
         logger.error(f"Failed to initialize WebSocket monitoring dashboards: {e}")
@@ -575,4 +575,4 @@ async def get_dashboard_data_for_api(dashboard_id: str) -> Optional[Dict[str, An
 
 
 # Module initialization
-logger.info("🎛️ WebSocket Dashboard Configuration module loaded")
+logger.info("[U+1F39B][U+FE0F] WebSocket Dashboard Configuration module loaded")

@@ -1,7 +1,7 @@
 """Quality Routes Request Handlers and Business Logic
 
 This module provides request handlers and business logic for quality routes.
-Each function is ≤8 lines as per architectural requirements.
+Each function is  <= 8 lines as per architectural requirements.
 """
 
 from datetime import UTC, datetime, timedelta

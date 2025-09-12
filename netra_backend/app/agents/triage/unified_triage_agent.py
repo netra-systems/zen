@@ -1071,7 +1071,7 @@ Focus on:
         # Reporting ALWAYS runs last in supervisor (don't include here)
         # The supervisor will add it automatically
         
-        logger.info(f"Triage recommends workflow: {' → '.join(next_agents + ['reporting'])}")
+        logger.info(f"Triage recommends workflow: {'  ->  '.join(next_agents + ['reporting'])}")
         logger.info(f"Reasoning: data={triage_result.data_sufficiency}, "
                    f"category={triage_result.category}, "
                    f"action_required={user_intent.action_required if user_intent else False}")

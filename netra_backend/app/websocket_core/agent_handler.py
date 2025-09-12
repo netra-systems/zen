@@ -94,8 +94,8 @@ class AgentMessageHandler(BaseMessageHandler):
             "golden_path_stage": "agent_message_processing_start"
         }
         
-        logger.info(f"🤖 GOLDEN PATH AGENT PROCESSING: Starting v3 clean processing for {message_type} from user {user_id[:8] if user_id else 'unknown'}...")
-        logger.info(f"🔍 AGENT PROCESSING CONTEXT: {json.dumps(agent_processing_context, indent=2)}")
+        logger.info(f"[U+1F916] GOLDEN PATH AGENT PROCESSING: Starting v3 clean processing for {message_type} from user {user_id[:8] if user_id else 'unknown'}...")
+        logger.info(f" SEARCH:  AGENT PROCESSING CONTEXT: {json.dumps(agent_processing_context, indent=2)}")
         
         try:
             # Extract identifiers from message - use existing IDs for session continuity
@@ -116,11 +116,11 @@ class AgentMessageHandler(BaseMessageHandler):
                 connection_id = ws_manager.get_connection_id_by_websocket(websocket)
                 if connection_id:
                     ws_manager.update_connection_thread(connection_id, thread_id)
-                    logger.debug(f"✅ THREAD ASSOCIATION: Updated connection {connection_id} → thread {thread_id}")
+                    logger.debug(f" PASS:  THREAD ASSOCIATION: Updated connection {connection_id}  ->  thread {thread_id}")
                 else:
                     # Generate connection ID if not found using SSOT
                     connection_id = UnifiedIdGenerator.generate_websocket_connection_id(user_id)
-                    logger.warning(f"⚠️ FALLBACK CONNECTION ID: Generated {connection_id} for user {user_id[:8]}...")
+                    logger.warning(f" WARNING: [U+FE0F] FALLBACK CONNECTION ID: Generated {connection_id} for user {user_id[:8]}...")
 
             # Create clean WebSocketContext (no mock objects!)
             # Use actual context thread_id from get_user_execution_context for session continuity
@@ -144,8 +144,8 @@ class AgentMessageHandler(BaseMessageHandler):
                 "golden_path_stage": "websocket_context_ready"
             }
             
-            logger.info(f"🔧 GOLDEN PATH CONTEXT: WebSocket context created for user {user_id[:8] if user_id else 'unknown'}...")
-            logger.debug(f"🔍 CONTEXT CREATION: {json.dumps(context_creation_details, indent=2)}")
+            logger.info(f"[U+1F527] GOLDEN PATH CONTEXT: WebSocket context created for user {user_id[:8] if user_id else 'unknown'}...")
+            logger.debug(f" SEARCH:  CONTEXT CREATION: {json.dumps(context_creation_details, indent=2)}")
             
             # Get database session using async generator pattern
             async for db_session in get_request_scoped_db_session():
@@ -196,9 +196,9 @@ class AgentMessageHandler(BaseMessageHandler):
                         }
                         
                         self._update_processing_stats(message.type)
-                        logger.info(f"✅ GOLDEN PATH AGENT SUCCESS: Processed {message_type} for user {user_id[:8] if user_id else 'unknown'}... in {processing_duration*1000:.2f}ms")
-                        logger.info(f"🔍 AGENT SUCCESS CONTEXT: {json.dumps(success_context, indent=2)}")
-                        logger.info(f"📡 EXPECTED EVENTS: User should receive agent_started → agent_thinking → tool_executing → tool_completed → agent_completed")
+                        logger.info(f" PASS:  GOLDEN PATH AGENT SUCCESS: Processed {message_type} for user {user_id[:8] if user_id else 'unknown'}... in {processing_duration*1000:.2f}ms")
+                        logger.info(f" SEARCH:  AGENT SUCCESS CONTEXT: {json.dumps(success_context, indent=2)}")
+                        logger.info(f"[U+1F4E1] EXPECTED EVENTS: User should receive agent_started  ->  agent_thinking  ->  tool_executing  ->  tool_completed  ->  agent_completed")
                     else:
                         # CRITICAL: Log agent processing failure with detailed context
                         processing_duration = time.time() - processing_start
@@ -217,9 +217,9 @@ class AgentMessageHandler(BaseMessageHandler):
                         }
                         
                         self.processing_stats["errors"] += 1
-                        logger.critical(f"🚨 GOLDEN PATH AGENT FAILURE: Failed to process {message_type} for user {user_id[:8] if user_id else 'unknown'}... after {processing_duration*1000:.2f}ms")
-                        logger.critical(f"🔍 AGENT FAILURE CONTEXT: {json.dumps(failure_context, indent=2)}")
-                        logger.error(f"❌ NO WEBSOCKET EVENTS: User will not receive agent_started/agent_thinking/tool_executing/tool_completed/agent_completed events")
+                        logger.critical(f" ALERT:  GOLDEN PATH AGENT FAILURE: Failed to process {message_type} for user {user_id[:8] if user_id else 'unknown'}... after {processing_duration*1000:.2f}ms")
+                        logger.critical(f" SEARCH:  AGENT FAILURE CONTEXT: {json.dumps(failure_context, indent=2)}")
+                        logger.error(f" FAIL:  NO WEBSOCKET EVENTS: User will not receive agent_started/agent_thinking/tool_executing/tool_completed/agent_completed events")
                     
                     return success
                     
@@ -309,7 +309,7 @@ class AgentMessageHandler(BaseMessageHandler):
                     websocket=websocket
                 )
             
-            logger.info(f"✅ Successfully processed {message.type} for {websocket_context.user_id} with v3 clean pattern")
+            logger.info(f" PASS:  Successfully processed {message.type} for {websocket_context.user_id} with v3 clean pattern")
             return True
             
         except Exception as e:

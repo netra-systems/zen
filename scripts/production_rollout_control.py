@@ -98,10 +98,10 @@ class ProductionRolloutController:
             )
             
             if self.feature_flags.create_flag(flag_name, config):
-                logger.info(f"✅ Initialized flag: {flag_name}")
+                logger.info(f" PASS:  Initialized flag: {flag_name}")
                 success_count += 1
             else:
-                logger.error(f"❌ Failed to initialize flag: {flag_name}")
+                logger.error(f" FAIL:  Failed to initialize flag: {flag_name}")
         
         logger.info(f"Initialized {success_count}/{len(self.isolation_flags)} flags")
         return success_count == len(self.isolation_flags)
@@ -206,7 +206,7 @@ class ProductionRolloutController:
         success = self.feature_flags.update_rollout_stage(flag_name, stage, updated_by)
         
         if success:
-            logger.info(f"✅ Successfully updated {flag_name} to {stage.value}")
+            logger.info(f" PASS:  Successfully updated {flag_name} to {stage.value}")
             
             # Log audit trail
             self._log_audit_event("stage_update", {
@@ -216,7 +216,7 @@ class ProductionRolloutController:
                 "timestamp": time.time()
             })
         else:
-            logger.error(f"❌ Failed to update {flag_name} to {stage.value}")
+            logger.error(f" FAIL:  Failed to update {flag_name} to {stage.value}")
         
         return success
 
@@ -239,9 +239,9 @@ class ProductionRolloutController:
         all_successful = success_count == len(self.isolation_flags)
         
         if all_successful:
-            logger.info(f"✅ Successfully updated all {len(self.isolation_flags)} flags to {stage.value}")
+            logger.info(f" PASS:  Successfully updated all {len(self.isolation_flags)} flags to {stage.value}")
         else:
-            logger.error(f"❌ Only {success_count}/{len(self.isolation_flags)} flags updated successfully")
+            logger.error(f" FAIL:  Only {success_count}/{len(self.isolation_flags)} flags updated successfully")
         
         return all_successful
 
@@ -253,7 +253,7 @@ class ProductionRolloutController:
         success = self.feature_flags.emergency_disable_all(reason, updated_by)
         
         if success:
-            logger.critical("✅ Emergency disable completed successfully")
+            logger.critical(" PASS:  Emergency disable completed successfully")
             
             # Log critical audit event
             self._log_audit_event("emergency_disable", {
@@ -263,7 +263,7 @@ class ProductionRolloutController:
                 "all_flags_disabled": True
             })
         else:
-            logger.critical("❌ Emergency disable failed - manual intervention required")
+            logger.critical(" FAIL:  Emergency disable failed - manual intervention required")
         
         return success
 
@@ -325,22 +325,22 @@ class ProductionRolloutController:
                         )
                         
                         if rollback_result.returncode == 0:
-                            logger.info(f"✅ Successfully rolled back {service} to {previous_revision}")
+                            logger.info(f" PASS:  Successfully rolled back {service} to {previous_revision}")
                         else:
-                            logger.error(f"❌ Failed to rollback {service}: {rollback_result.stderr}")
+                            logger.error(f" FAIL:  Failed to rollback {service}: {rollback_result.stderr}")
                             return False
                     else:
-                        logger.error(f"❌ Not enough revisions found for {service}")
+                        logger.error(f" FAIL:  Not enough revisions found for {service}")
                         return False
                 else:
-                    logger.error(f"❌ Failed to get revisions for {service}: {result.stderr}")
+                    logger.error(f" FAIL:  Failed to get revisions for {service}: {result.stderr}")
                     return False
             
-            logger.critical("✅ Emergency rollback completed successfully")
+            logger.critical(" PASS:  Emergency rollback completed successfully")
             return True
             
         except Exception as e:
-            logger.critical(f"❌ Emergency rollback failed: {e}")
+            logger.critical(f" FAIL:  Emergency rollback failed: {e}")
             return False
 
     def verify_full_deployment(self) -> bool:
@@ -352,39 +352,39 @@ class ProductionRolloutController:
         # Check all flags are at 100%
         for flag_name in self.isolation_flags:
             if flag_name not in status["flags"]:
-                logger.error(f"❌ Flag not found: {flag_name}")
+                logger.error(f" FAIL:  Flag not found: {flag_name}")
                 return False
             
             flag_status = status["flags"][flag_name]
             
             if not flag_status.get("enabled", False):
-                logger.error(f"❌ Flag not enabled: {flag_name}")
+                logger.error(f" FAIL:  Flag not enabled: {flag_name}")
                 return False
             
             if flag_status.get("rollout_percentage", 0) < 100:
-                logger.error(f"❌ Flag not at 100%: {flag_name} ({flag_status.get('rollout_percentage', 0)}%)")
+                logger.error(f" FAIL:  Flag not at 100%: {flag_name} ({flag_status.get('rollout_percentage', 0)}%)")
                 return False
             
             if flag_status.get("circuit_breaker_open", False):
-                logger.error(f"❌ Circuit breaker open: {flag_name}")
+                logger.error(f" FAIL:  Circuit breaker open: {flag_name}")
                 return False
         
         # Check isolation metrics
         metrics = status.get("isolation_metrics")
         if metrics:
             if metrics.get("isolation_score", 0) < 0.99:
-                logger.error(f"❌ Isolation score too low: {metrics.get('isolation_score', 0)}")
+                logger.error(f" FAIL:  Isolation score too low: {metrics.get('isolation_score', 0)}")
                 return False
             
             if metrics.get("cascade_failures", 0) > 0:
-                logger.error(f"❌ Cascade failures detected: {metrics.get('cascade_failures', 0)}")
+                logger.error(f" FAIL:  Cascade failures detected: {metrics.get('cascade_failures', 0)}")
                 return False
             
             if metrics.get("error_rate", 0) > 0.01:
-                logger.error(f"❌ Error rate too high: {metrics.get('error_rate', 0)}")
+                logger.error(f" FAIL:  Error rate too high: {metrics.get('error_rate', 0)}")
                 return False
         
-        logger.info("✅ Full deployment verification successful")
+        logger.info(" PASS:  Full deployment verification successful")
         return True
 
     def _safety_checks_passed(self) -> bool:
@@ -394,27 +394,27 @@ class ProductionRolloutController:
         # Check Redis connectivity
         try:
             self.feature_flags.redis.ping()
-            logger.info("✅ Redis connectivity verified")
+            logger.info(" PASS:  Redis connectivity verified")
         except Exception as e:
-            logger.error(f"❌ Redis connectivity failed: {e}")
+            logger.error(f" FAIL:  Redis connectivity failed: {e}")
             return False
         
         # Check environment
         if self.environment not in ["staging", "production"]:
-            logger.warning(f"⚠️ Unusual environment: {self.environment}")
+            logger.warning(f" WARNING: [U+FE0F] Unusual environment: {self.environment}")
         
         # Check current isolation metrics
         metrics = self.feature_flags.get_current_isolation_metrics()
         if metrics:
             if metrics.isolation_score < 0.95:
-                logger.error(f"❌ Current isolation score too low: {metrics.isolation_score}")
+                logger.error(f" FAIL:  Current isolation score too low: {metrics.isolation_score}")
                 return False
             
             if metrics.cascade_failures > 0:
-                logger.error(f"❌ Active cascade failures: {metrics.cascade_failures}")
+                logger.error(f" FAIL:  Active cascade failures: {metrics.cascade_failures}")
                 return False
         
-        logger.info("✅ All safety checks passed")
+        logger.info(" PASS:  All safety checks passed")
         return True
 
     def _log_audit_event(self, event_type: str, details: Dict) -> None:
@@ -463,17 +463,17 @@ class ProductionRolloutController:
         # Flag status
         print(f"\nFeature Flags:")
         for flag_name, flag_status in status['flags'].items():
-            enabled = "✅ ON " if flag_status.get('enabled', False) else "❌ OFF"
+            enabled = " PASS:  ON " if flag_status.get('enabled', False) else " FAIL:  OFF"
             stage = flag_status.get('rollout_stage', 'unknown')
             percentage = flag_status.get('rollout_percentage', 0)
-            circuit = "🚨 OPEN" if flag_status.get('circuit_breaker_open', False) else ""
+            circuit = " ALERT:  OPEN" if flag_status.get('circuit_breaker_open', False) else ""
             
             print(f"  {flag_name:25} {enabled} {stage:10} {percentage:5.1f}% {circuit}")
             
             if detailed and 'last_updated' in flag_status:
                 updated_time = time.ctime(flag_status['last_updated'])
                 updated_by = flag_status.get('updated_by', 'unknown')
-                print(f"    └─ Updated: {updated_time} by {updated_by}")
+                print(f"    [U+2514][U+2500] Updated: {updated_time} by {updated_by}")
         
         print("\n" + "="*60)
 
@@ -564,7 +564,7 @@ Examples:
             
         elif args.command == "update-stage":
             if not args.flag or not args.stage:
-                print("❌ --flag and --stage required for update-stage")
+                print(" FAIL:  --flag and --stage required for update-stage")
                 sys.exit(1)
             
             stage = RolloutStage(args.stage)
@@ -573,7 +573,7 @@ Examples:
             
         elif args.command == "update-all-stages":
             if not args.stage:
-                print("❌ --stage required for update-all-stages")
+                print(" FAIL:  --stage required for update-all-stages")
                 sys.exit(1)
             
             stage = RolloutStage(args.stage)
@@ -582,7 +582,7 @@ Examples:
             
         elif args.command == "emergency-disable":
             if not args.reason:
-                print("❌ --reason required for emergency-disable")
+                print(" FAIL:  --reason required for emergency-disable")
                 sys.exit(1)
             
             success = controller.emergency_disable(args.reason, args.updated_by)
@@ -590,7 +590,7 @@ Examples:
             
         elif args.command == "emergency-rollback":
             if not args.reason:
-                print("❌ --reason required for emergency-rollback")
+                print(" FAIL:  --reason required for emergency-rollback")
                 sys.exit(1)
             
             success = controller.emergency_rollback(args.reason)
@@ -601,10 +601,10 @@ Examples:
             sys.exit(0 if success else 1)
             
     except KeyboardInterrupt:
-        print("\n⚠️ Operation interrupted by user")
+        print("\n WARNING: [U+FE0F] Operation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f" FAIL:  Error: {e}")
         logger.exception("Unexpected error in rollout control")
         sys.exit(1)
 

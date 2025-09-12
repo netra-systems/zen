@@ -203,12 +203,12 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
                     memory_exhaustion_metrics.exhaustion_detected = True
                     exhaustion_phase = "exhausted"
                     phase_start_time = time.time()
-                    print(f"💾 Memory exhaustion detected at chunk {chunk_id}: {current_snapshot.memory_mb:.1f}MB ({memory_growth_percent:.1f}% growth)")
+                    print(f"[U+1F4BE] Memory exhaustion detected at chunk {chunk_id}: {current_snapshot.memory_mb:.1f}MB ({memory_growth_percent:.1f}% growth)")
                 
                 # Trigger graceful degradation if memory usage is very high
                 if memory_growth_percent > 75 and not memory_exhaustion_metrics.graceful_degradation_triggered:
                     memory_exhaustion_metrics.graceful_degradation_triggered = True
-                    print(f"⚠️ Graceful degradation triggered at chunk {chunk_id}")
+                    print(f" WARNING: [U+FE0F] Graceful degradation triggered at chunk {chunk_id}")
                     
                     # Simulate graceful degradation: reduce operation frequency
                     await asyncio.sleep(0.1)  # Slow down operations
@@ -224,12 +224,12 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
                         gc.collect()
                         exhaustion_phase = "recovering"
                         phase_start_time = time.time()
-                        print(f"🔄 Memory recovery initiated")
+                        print(f" CYCLE:  Memory recovery initiated")
                         break
                 
                 # Safety check: don't consume too much memory
                 if current_snapshot.memory_mb > initial_snapshot.memory_mb * 3:  # 3x original memory
-                    print(f"🛑 Safety limit reached at chunk {chunk_id}, stopping memory consumption")
+                    print(f"[U+1F6D1] Safety limit reached at chunk {chunk_id}, stopping memory consumption")
                     break
                 
                 # Small delay between chunks
@@ -237,7 +237,7 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
         
         finally:
             # Cleanup: release all memory consumers
-            print(f"🧹 Cleaning up {len(memory_consumers)} memory chunks...")
+            print(f"[U+1F9F9] Cleaning up {len(memory_consumers)} memory chunks...")
             cleanup_start = time.time()
             memory_consumers.clear()
             gc.collect()  # Force garbage collection
@@ -262,15 +262,15 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
         assert memory_recovered, f"Memory not properly recovered: {memory_exhaustion_metrics.final_usage:.1f}MB vs initial {initial_snapshot.memory_mb:.1f}MB"
         assert memory_exhaustion_metrics.recovery_time_seconds < 10.0, f"Memory recovery took too long: {memory_exhaustion_metrics.recovery_time_seconds:.1f}s"
         
-        print(f"✅ Memory Exhaustion Detection and Recovery Results:")
+        print(f" PASS:  Memory Exhaustion Detection and Recovery Results:")
         print(f"   Initial memory: {initial_snapshot.memory_mb:.1f}MB")
         print(f"   Peak memory: {memory_exhaustion_metrics.peak_usage:.1f}MB")
         print(f"   Final memory: {memory_exhaustion_metrics.final_usage:.1f}MB")
         print(f"   Memory growth: {memory_exhaustion_metrics.peak_usage - initial_snapshot.memory_mb:.1f}MB")
-        print(f"   Exhaustion detected: {'✓' if memory_exhaustion_metrics.exhaustion_detected else '✗'}")
-        print(f"   Graceful degradation: {'✓' if memory_exhaustion_metrics.graceful_degradation_triggered else '✗'}")
+        print(f"   Exhaustion detected: {'[U+2713]' if memory_exhaustion_metrics.exhaustion_detected else '[U+2717]'}")
+        print(f"   Graceful degradation: {'[U+2713]' if memory_exhaustion_metrics.graceful_degradation_triggered else '[U+2717]'}")
         print(f"   Recovery time: {memory_exhaustion_metrics.recovery_time_seconds:.2f}s")
-        print(f"   Memory recovered: {'✓' if memory_recovered else '✗'}")
+        print(f"   Memory recovered: {'[U+2713]' if memory_recovered else '[U+2717]'}")
         print(f"   Operations completed: {operations_count}")
         print(f"   Errors during exhaustion: {len(memory_exhaustion_metrics.errors_during_exhaustion)}")
     
@@ -344,7 +344,7 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
                     # Check if we've likely exhausted the connection pool
                     if current_active > 30 and not connection_exhaustion_metrics.exhaustion_detected:
                         connection_exhaustion_metrics.exhaustion_detected = True
-                        print(f"🗃️ Database connection exhaustion detected with {current_active} active connections")
+                        print(f"[U+1F5C3][U+FE0F] Database connection exhaustion detected with {current_active} active connections")
                     
                     active_connections.discard(operation_id)
                 
@@ -386,7 +386,7 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
                 }
         
         # Execute connection exhaustion test
-        print(f"🔗 Testing database connection exhaustion with {max_concurrent_connections} concurrent operations...")
+        print(f"[U+1F517] Testing database connection exhaustion with {max_concurrent_connections} concurrent operations...")
         exhaustion_start = time.time()
         
         # Launch all operations simultaneously to maximize connection pressure
@@ -400,7 +400,7 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
         exhaustion_duration = time.time() - exhaustion_start
         
         # Recovery test: perform simple operations after exhaustion
-        print(f"🔄 Testing connection pool recovery...")
+        print(f" CYCLE:  Testing connection pool recovery...")
         recovery_start = time.time()
         
         recovery_operations = 10
@@ -437,7 +437,7 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
         # Allow for some failures during exhaustion, but not complete failure
         assert overall_success_rate >= 0.60, f"Overall success rate {overall_success_rate:.3f} too low"
         
-        print(f"✅ Database Connection Exhaustion Results:")
+        print(f" PASS:  Database Connection Exhaustion Results:")
         print(f"   Concurrent operations: {max_concurrent_connections}")
         print(f"   Successful operations: {len(successful_operations)}")
         print(f"   Failed operations: {len(failed_operations)}")
@@ -534,11 +534,11 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
                             memory_growth = current_memory - initial_memory
                             if memory_growth > 50 * 1024 * 1024 and not redis_memory_metrics.exhaustion_detected:
                                 redis_memory_metrics.exhaustion_detected = True
-                                print(f"🔴 Redis memory exhaustion detected at key {key_id}: {current_memory_mb:.1f}MB")
+                                print(f"[U+1F534] Redis memory exhaustion detected at key {key_id}: {current_memory_mb:.1f}MB")
                                 
                                 # Trigger graceful degradation
                                 redis_memory_metrics.graceful_degradation_triggered = True
-                                print(f"⚠️ Redis graceful degradation triggered")
+                                print(f" WARNING: [U+FE0F] Redis graceful degradation triggered")
                                 break
                                 
                         except Exception as e:
@@ -555,7 +555,7 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
                         if not redis_memory_metrics.exhaustion_detected:
                             redis_memory_metrics.exhaustion_detected = True
                             redis_memory_metrics.graceful_degradation_triggered = True
-                            print(f"🔴 Redis OOM detected at key {key_id}")
+                            print(f"[U+1F534] Redis OOM detected at key {key_id}")
                             break
                     else:
                         redis_memory_metrics.errors_during_exhaustion.append(
@@ -564,7 +564,7 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
         
         finally:
             # Test recovery: cleanup keys and verify Redis recovery
-            print(f"🧹 Cleaning up {len(keys_created)} Redis keys...")
+            print(f"[U+1F9F9] Cleaning up {len(keys_created)} Redis keys...")
             recovery_start = time.time()
             
             # Delete keys in batches to avoid overwhelming Redis
@@ -614,7 +614,7 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
         failure_rate = memory_operations_failed / (operations_completed + memory_operations_failed)
         assert failure_rate <= 0.5, f"Too many Redis operations failed: {failure_rate:.3f}"
         
-        print(f"✅ Redis Memory Exhaustion Results:")
+        print(f" PASS:  Redis Memory Exhaustion Results:")
         print(f"   Initial memory: {redis_memory_metrics.initial_usage:.1f}MB")
         print(f"   Peak memory: {redis_memory_metrics.peak_usage:.1f}MB")
         print(f"   Final memory: {redis_memory_metrics.final_usage:.1f}MB")
@@ -622,8 +622,8 @@ class TestResourceExhaustionDetectionHandling(BaseIntegrationTest):
         print(f"   Operations completed: {operations_completed}")
         print(f"   Operations failed: {memory_operations_failed}")
         print(f"   Failure rate: {failure_rate:.3f}")
-        print(f"   Exhaustion detected: {'✓' if redis_memory_metrics.exhaustion_detected else '✗'}")
-        print(f"   Memory recovered: {'✓' if memory_recovered else '✗'}")
+        print(f"   Exhaustion detected: {'[U+2713]' if redis_memory_metrics.exhaustion_detected else '[U+2717]'}")
+        print(f"   Memory recovered: {'[U+2713]' if memory_recovered else '[U+2717]'}")
         print(f"   Recovery time: {redis_memory_metrics.recovery_time_seconds:.2f}s")
         print(f"   Keys created: {len(keys_created)}")
         print(f"   Errors during exhaustion: {len(redis_memory_metrics.errors_during_exhaustion)}")

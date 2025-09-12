@@ -369,7 +369,7 @@ class PortAllocator:
             
             logger.info(f"Confirmed allocation of port {port} to {service_name}")
             if process_id:
-                logger.debug(f"  → Process ID: {process_id}")
+                logger.debug(f"   ->  Process ID: {process_id}")
             
             return True
     

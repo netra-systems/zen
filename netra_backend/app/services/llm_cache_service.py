@@ -1,7 +1,7 @@
 """LLM Response Caching Service.
 
 Main orchestrator for LLM response caching using modular components.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 from datetime import datetime, timezone

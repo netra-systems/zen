@@ -434,7 +434,7 @@ class BusinessScenarioFactory:
             failure_query = {
                 "type": "agent_request",
                 "agent": "cost_optimizer",
-                "message": f"🚨 FORCE_FAILURE_SCENARIO 🚨 {scenario.query_message}",
+                "message": f" ALERT:  FORCE_FAILURE_SCENARIO  ALERT:  {scenario.query_message}",
                 "context": {
                     "user_role": scenario.user_role.value,
                     "arr_value": scenario.arr_value,

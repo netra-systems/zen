@@ -366,7 +366,7 @@ work_phases: List[Dict[str, Any]]
         # REMOVED_SYNTAX_ERROR: user = MockChatUser(user_id="e2e-user-1", thread_id="e2e-thread-1")
         # REMOVED_SYNTAX_ERROR: await user.connect_to_chat()
 
-        # REMOVED_SYNTAX_ERROR: print("✅ User connected to chat")
+        # REMOVED_SYNTAX_ERROR: print(" PASS:  User connected to chat")
 
         # User sends message
         # REMOVED_SYNTAX_ERROR: user_message = "Help me analyze my AWS costs and find optimization opportunities"
@@ -405,7 +405,7 @@ work_phases: List[Dict[str, Any]]
 
         # REMOVED_SYNTAX_ERROR: await failure_simulator.simulate_agent_working(execution_id, work_phases)
 
-        # REMOVED_SYNTAX_ERROR: print("⚙️  Agent worked normally through several phases")
+        # REMOVED_SYNTAX_ERROR: print("[U+2699][U+FE0F]  Agent worked normally through several phases")
 
         # Verify user received progress updates
         # REMOVED_SYNTAX_ERROR: thinking_messages = user.get_received_messages_by_type("agent_thinking")
@@ -415,14 +415,14 @@ work_phases: List[Dict[str, Any]]
 
         # AGENT DIES SILENTLY
         # REMOVED_SYNTAX_ERROR: print("\
-        # REMOVED_SYNTAX_ERROR: 💀 AGENT DIES SILENTLY (simulating production bug scenario)")
+        # REMOVED_SYNTAX_ERROR: [U+1F480] AGENT DIES SILENTLY (simulating production bug scenario)")
         # REMOVED_SYNTAX_ERROR: await failure_simulator.kill_agent_silently(execution_id)
 
         # Clear received messages to focus on death handling
         # REMOVED_SYNTAX_ERROR: user.clear_received_messages()
 
         # User should eventually receive death notification
-        # REMOVED_SYNTAX_ERROR: print("⏳ Waiting for user to receive death notification...")
+        # REMOVED_SYNTAX_ERROR: print("[U+23F3] Waiting for user to receive death notification...")
 
         # REMOVED_SYNTAX_ERROR: death_notification = await user.wait_for_error_notification(timeout_seconds=20)
 
@@ -430,7 +430,7 @@ work_phases: List[Dict[str, Any]]
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: else:
-                # REMOVED_SYNTAX_ERROR: print("❌ No death notification received (this indicates the bug exists)")
+                # REMOVED_SYNTAX_ERROR: print(" FAIL:  No death notification received (this indicates the bug exists)")
 
                 # Check if execution tracker detected the death
                 # REMOVED_SYNTAX_ERROR: await asyncio.sleep(5)  # Give time for detection
@@ -460,7 +460,7 @@ work_phases: List[Dict[str, Any]]
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                     # REMOVED_SYNTAX_ERROR: print("\
-                    # REMOVED_SYNTAX_ERROR: ✅ E2E USER EXPERIENCE TEST PASSED!")
+                    # REMOVED_SYNTAX_ERROR:  PASS:  E2E USER EXPERIENCE TEST PASSED!")
                     # REMOVED_SYNTAX_ERROR: print("   - Agent death was detected")
                     # REMOVED_SYNTAX_ERROR: print("   - User received proper notification")
                     # REMOVED_SYNTAX_ERROR: print("   - Error message was provided")
@@ -520,7 +520,7 @@ work_phases: List[Dict[str, Any]]
                                 # REMOVED_SYNTAX_ERROR: for execution_id in execution_ids:
                                     # REMOVED_SYNTAX_ERROR: await failure_simulator.simulate_agent_working(execution_id, [work_phase])
 
-                                    # REMOVED_SYNTAX_ERROR: print("⚙️  All agents started working")
+                                    # REMOVED_SYNTAX_ERROR: print("[U+2699][U+FE0F]  All agents started working")
 
                                     # Kill most agents (simulate mass failure)
                                     # REMOVED_SYNTAX_ERROR: failed_agents = 3  # Kill 3 out of 4 agents
@@ -535,7 +535,7 @@ work_phases: List[Dict[str, Any]]
                                         # REMOVED_SYNTAX_ERROR: execution_ids[3],
                                         # REMOVED_SYNTAX_ERROR: {"response": "I"ve analyzed your cloud usage and found several optimization opportunities."}
                                         
-                                        # REMOVED_SYNTAX_ERROR: print("✅ Agent 3 completed successfully")
+                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Agent 3 completed successfully")
 
                                         # Clear all user messages to focus on failure notifications
                                         # REMOVED_SYNTAX_ERROR: for user in users:
@@ -543,7 +543,7 @@ work_phases: List[Dict[str, Any]]
 
                                             # Wait for all users to receive death notifications
                                             # REMOVED_SYNTAX_ERROR: print("\
-                                            # REMOVED_SYNTAX_ERROR: ⏳ Waiting for death notifications to all affected users...")
+                                            # REMOVED_SYNTAX_ERROR: [U+23F3] Waiting for death notifications to all affected users...")
 
                                             # REMOVED_SYNTAX_ERROR: death_notifications_received = []
 
@@ -563,7 +563,7 @@ work_phases: List[Dict[str, Any]]
                                                         # REMOVED_SYNTAX_ERROR: completion_messages = success_user.get_received_messages_by_type("agent_completed")
 
                                                         # REMOVED_SYNTAX_ERROR: print(f"\
-                                                        # REMOVED_SYNTAX_ERROR: 📊 Results Summary:")
+                                                        # REMOVED_SYNTAX_ERROR:  CHART:  Results Summary:")
                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -588,7 +588,7 @@ work_phases: List[Dict[str, Any]]
                                                                 # REMOVED_SYNTAX_ERROR: "Successful agent should complete normally"
 
                                                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                                                # REMOVED_SYNTAX_ERROR: ✅ MULTIPLE USERS E2E TEST PASSED!")
+                                                                # REMOVED_SYNTAX_ERROR:  PASS:  MULTIPLE USERS E2E TEST PASSED!")
                                                                 # REMOVED_SYNTAX_ERROR: print("   - Multiple agent deaths detected")
                                                                 # REMOVED_SYNTAX_ERROR: print("   - Users received appropriate notifications")
                                                                 # REMOVED_SYNTAX_ERROR: print("   - Successful agents completed normally")
@@ -613,7 +613,7 @@ work_phases: List[Dict[str, Any]]
                                                                         # REMOVED_SYNTAX_ERROR: user = MockChatUser(user_id="recovery-user", thread_id="recovery-thread")
                                                                         # REMOVED_SYNTAX_ERROR: await user.connect_to_chat()
 
-                                                                        # REMOVED_SYNTAX_ERROR: print("✅ User connected for recovery test")
+                                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  User connected for recovery test")
 
                                                                         # User asks a complex question that might cause agent issues
                                                                         # REMOVED_SYNTAX_ERROR: complex_message = ("Please analyze my entire AWS infrastructure, identify all cost " )
@@ -659,11 +659,11 @@ work_phases: List[Dict[str, Any]]
                                                                         
 
                                                                         # REMOVED_SYNTAX_ERROR: await failure_simulator.simulate_agent_working(execution_id_1, complex_work_phases)
-                                                                        # REMOVED_SYNTAX_ERROR: print("⚙️  First agent worked through complex analysis phases")
+                                                                        # REMOVED_SYNTAX_ERROR: print("[U+2699][U+FE0F]  First agent worked through complex analysis phases")
 
                                                                         # Agent dies during complex processing
                                                                         # REMOVED_SYNTAX_ERROR: print("\
-                                                                        # REMOVED_SYNTAX_ERROR: 💀 First agent dies during complex processing...")
+                                                                        # REMOVED_SYNTAX_ERROR: [U+1F480] First agent dies during complex processing...")
                                                                         # REMOVED_SYNTAX_ERROR: await failure_simulator.kill_agent_silently(execution_id_1)
 
                                                                         # Wait for death detection and notification
@@ -674,7 +674,7 @@ work_phases: List[Dict[str, Any]]
 
                                                                         # SIMULATE RECOVERY - Start second agent
                                                                         # REMOVED_SYNTAX_ERROR: print("\
-                                                                        # REMOVED_SYNTAX_ERROR: 🔄 Starting recovery agent...")
+                                                                        # REMOVED_SYNTAX_ERROR:  CYCLE:  Starting recovery agent...")
 
                                                                         # Queue recovery message to user
                                                                         # REMOVED_SYNTAX_ERROR: user.websocket.queue_message({ ))
@@ -733,7 +733,7 @@ work_phases: List[Dict[str, Any]]
                                                                         
 
                                                                         # REMOVED_SYNTAX_ERROR: await failure_simulator.complete_agent_successfully(execution_id_2, recovery_result)
-                                                                        # REMOVED_SYNTAX_ERROR: print("✅ Recovery agent completed successfully")
+                                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  Recovery agent completed successfully")
 
                                                                         # Wait for completion notification
                                                                         # REMOVED_SYNTAX_ERROR: completion_response = await user.wait_for_agent_response(timeout_seconds=10)
@@ -753,7 +753,7 @@ work_phases: List[Dict[str, Any]]
                                                                             # REMOVED_SYNTAX_ERROR: message_counts[msg_type] = message_counts.get(msg_type, 0) + 1
 
                                                                             # REMOVED_SYNTAX_ERROR: print(f"\
-                                                                            # REMOVED_SYNTAX_ERROR: 📊 User Experience Summary:")
+                                                                            # REMOVED_SYNTAX_ERROR:  CHART:  User Experience Summary:")
                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                             # REMOVED_SYNTAX_ERROR: for msg_type, count in message_counts.items():
                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -776,7 +776,7 @@ work_phases: List[Dict[str, Any]]
                                                                                     # REMOVED_SYNTAX_ERROR: assert status_2.execution_record.state == ExecutionState.SUCCESS, "Recovery agent should succeed"
 
                                                                                     # REMOVED_SYNTAX_ERROR: print("\
-                                                                                    # REMOVED_SYNTAX_ERROR: ✅ AGENT RECOVERY E2E TEST PASSED!")
+                                                                                    # REMOVED_SYNTAX_ERROR:  PASS:  AGENT RECOVERY E2E TEST PASSED!")
                                                                                     # REMOVED_SYNTAX_ERROR: print("   - Agent failure detected and user notified")
                                                                                     # REMOVED_SYNTAX_ERROR: print("   - Recovery agent started automatically")
                                                                                     # REMOVED_SYNTAX_ERROR: print("   - Recovery agent completed successfully")
@@ -800,7 +800,7 @@ work_phases: List[Dict[str, Any]]
                                                                                         # REMOVED_SYNTAX_ERROR: user = MockChatUser(user_id="resilience-user", thread_id="resilience-thread")
                                                                                         # REMOVED_SYNTAX_ERROR: await user.connect_to_chat()
 
-                                                                                        # REMOVED_SYNTAX_ERROR: print("✅ User connected for resilience test")
+                                                                                        # REMOVED_SYNTAX_ERROR: print(" PASS:  User connected for resilience test")
 
                                                                                         # Send multiple messages in sequence, with some agents failing
                                                                                         # REMOVED_SYNTAX_ERROR: test_scenarios = [ )
@@ -872,7 +872,7 @@ work_phases: List[Dict[str, Any]]
                                                                                                                         # REMOVED_SYNTAX_ERROR: failed_agents += 1
 
                                                                                                                         # REMOVED_SYNTAX_ERROR: print(f"\
-                                                                                                                        # REMOVED_SYNTAX_ERROR: 📊 Final Results:")
+                                                                                                                        # REMOVED_SYNTAX_ERROR:  CHART:  Final Results:")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -913,7 +913,7 @@ work_phases: List[Dict[str, Any]]
                                                                                                                         # REMOVED_SYNTAX_ERROR: assert not user.websocket.is_closed, "WebSocket should still be open"
 
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("\
-                                                                                                                        # REMOVED_SYNTAX_ERROR: ✅ CHAT UI RESILIENCE TEST PASSED!")
+                                                                                                                        # REMOVED_SYNTAX_ERROR:  PASS:  CHAT UI RESILIENCE TEST PASSED!")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("   - Multiple agents processed concurrently")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("   - Failures properly detected and reported")
                                                                                                                         # REMOVED_SYNTAX_ERROR: print("   - Successes completed normally")

@@ -66,7 +66,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         netra_backend.app.database._sessionmaker = None
         
         self.logger = logging.getLogger(__name__)
-        self.logger.info("🧪 SQLAlchemy Pool Unit Test Setup")
+        self.logger.info("[U+1F9EA] SQLAlchemy Pool Unit Test Setup")
     
     def teardown_method(self):
         """Cleanup method for unit test isolation."""
@@ -75,7 +75,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         netra_backend.app.database._engine = None
         netra_backend.app.database._sessionmaker = None
         
-        self.logger.info("🧹 SQLAlchemy Pool Unit Test Cleanup")
+        self.logger.info("[U+1F9F9] SQLAlchemy Pool Unit Test Cleanup")
     
     @pytest.mark.unit
     def test_async_engine_pool_compatibility_validation(self):
@@ -85,7 +85,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         CRITICAL: This test validates the core logic that should prevent the staging
         failure by detecting incompatible pool + engine combinations.
         """
-        self.logger.info("⚙️ Testing async engine pool compatibility validation")
+        self.logger.info("[U+2699][U+FE0F] Testing async engine pool compatibility validation")
         
         # Test cases for pool compatibility with AsyncEngine
         compatibility_test_cases = [
@@ -115,7 +115,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         compatibility_results = []
         
         for test_case in compatibility_test_cases:
-            self.logger.info(f"🧪 Testing {test_case['name']}: {test_case['description']}")
+            self.logger.info(f"[U+1F9EA] Testing {test_case['name']}: {test_case['description']}")
             
             result = {
                 "name": test_case["name"],
@@ -151,7 +151,7 @@ class TestSQLAlchemyAsyncPoolUnit:
                 )
                 
                 result["actual_compatible"] = is_compatible
-                self.logger.info(f"✅ {test_case['name']} validation passed")
+                self.logger.info(f" PASS:  {test_case['name']} validation passed")
                 
             except ArgumentError as e:
                 result["error_type"] = type(e)
@@ -159,24 +159,24 @@ class TestSQLAlchemyAsyncPoolUnit:
                 
                 if test_case["expected_error"] == ArgumentError:
                     result["actual_compatible"] = False  # Expected failure
-                    self.logger.info(f"✅ {test_case['name']} correctly detected incompatibility")
+                    self.logger.info(f" PASS:  {test_case['name']} correctly detected incompatibility")
                 else:
-                    self.logger.error(f"❌ {test_case['name']} unexpected ArgumentError: {e}")
+                    self.logger.error(f" FAIL:  {test_case['name']} unexpected ArgumentError: {e}")
                     
             except Exception as e:
                 result["error_type"] = type(e)
                 result["error_message"] = str(e)
-                self.logger.error(f"❌ {test_case['name']} unexpected error: {e}")
+                self.logger.error(f" FAIL:  {test_case['name']} unexpected error: {e}")
             
             compatibility_results.append(result)
         
         # Validate compatibility test results
-        self.logger.info("📊 POOL COMPATIBILITY VALIDATION RESULTS:")
+        self.logger.info(" CHART:  POOL COMPATIBILITY VALIDATION RESULTS:")
         
         for result in compatibility_results:
             expected = result["expected_compatible"]
             actual = result["actual_compatible"]
-            match_status = "✅ MATCH" if expected == actual else "❌ MISMATCH"
+            match_status = " PASS:  MATCH" if expected == actual else " FAIL:  MISMATCH"
             
             self.logger.info(f"  {result['name']}: Expected={expected}, Actual={actual} - {match_status}")
             
@@ -200,7 +200,7 @@ class TestSQLAlchemyAsyncPoolUnit:
                 "Error message doesn't match staging failure pattern"
             )
         
-        self.logger.info("✅ Async engine pool compatibility validation logic verified")
+        self.logger.info(" PASS:  Async engine pool compatibility validation logic verified")
     
     @pytest.mark.unit
     def test_database_url_construction_validation(self):
@@ -210,7 +210,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         BUSINESS VALUE: Ensures database URL construction is consistent and valid
         across different environments and service configurations.
         """
-        self.logger.info("🔗 Testing database URL construction validation")
+        self.logger.info("[U+1F517] Testing database URL construction validation")
         
         # Mock different environment configurations
         test_environments = [
@@ -255,7 +255,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         url_construction_results = []
         
         for env_config in test_environments:
-            self.logger.info(f"🌍 Testing {env_config['name']} URL construction")
+            self.logger.info(f"[U+1F30D] Testing {env_config['name']} URL construction")
             
             result = {
                 "environment": env_config["name"],
@@ -284,21 +284,21 @@ class TestSQLAlchemyAsyncPoolUnit:
                         assert database_url.startswith("postgresql+asyncpg://"), f"Invalid URL protocol: {database_url}"
                         assert len(database_url) > 20, f"URL too short: {database_url}"
                         
-                        self.logger.info(f"✅ {env_config['name']} URL construction successful")
+                        self.logger.info(f" PASS:  {env_config['name']} URL construction successful")
                         
             except Exception as e:
                 result["error"] = str(e)
-                self.logger.info(f"❌ {env_config['name']} URL construction failed: {e}")
+                self.logger.info(f" FAIL:  {env_config['name']} URL construction failed: {e}")
             
             url_construction_results.append(result)
         
         # Validate URL construction results
-        self.logger.info("📊 DATABASE URL CONSTRUCTION RESULTS:")
+        self.logger.info(" CHART:  DATABASE URL CONSTRUCTION RESULTS:")
         
         for result in url_construction_results:
             expected = result["expected_valid"]
             actual = result["actual_valid"]
-            match_status = "✅ MATCH" if expected == actual else "❌ MISMATCH"
+            match_status = " PASS:  MATCH" if expected == actual else " FAIL:  MISMATCH"
             
             self.logger.info(f"  {result['environment']}: Expected={expected}, Actual={actual} - {match_status}")
             
@@ -324,7 +324,7 @@ class TestSQLAlchemyAsyncPoolUnit:
             if invalid_env["actual_valid"]:
                 self.logger.warning(f"Invalid environment {invalid_env['environment']} unexpectedly produced valid URL - may have fallback logic")
         
-        self.logger.info("✅ Database URL construction validation verified")
+        self.logger.info(" PASS:  Database URL construction validation verified")
     
     @pytest.mark.unit
     def test_engine_creation_parameter_validation(self):
@@ -334,7 +334,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         BUSINESS VALUE: Validates that engine creation parameters are properly
         validated and produce appropriate errors for debugging.
         """
-        self.logger.info("⚙️ Testing engine creation parameter validation")
+        self.logger.info("[U+2699][U+FE0F] Testing engine creation parameter validation")
         
         # Test different engine creation parameter sets
         parameter_test_cases = [
@@ -376,7 +376,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         parameter_validation_results = []
         
         for test_case in parameter_test_cases:
-            self.logger.info(f"🧪 Testing {test_case['name']}: {test_case['description']}")
+            self.logger.info(f"[U+1F9EA] Testing {test_case['name']}: {test_case['description']}")
             
             result = {
                 "name": test_case["name"],
@@ -410,30 +410,30 @@ class TestSQLAlchemyAsyncPoolUnit:
                 is_valid = validate_engine_parameters(**test_case["params"])
                 result["actual_valid"] = is_valid
                 
-                self.logger.info(f"✅ {test_case['name']} parameter validation passed")
+                self.logger.info(f" PASS:  {test_case['name']} parameter validation passed")
                 
             except (ValueError, ArgumentError) as e:
                 result["error"] = str(e)
                 
                 if not test_case["expected_valid"]:
                     result["actual_valid"] = False  # Expected failure
-                    self.logger.info(f"✅ {test_case['name']} correctly detected invalid parameters")
+                    self.logger.info(f" PASS:  {test_case['name']} correctly detected invalid parameters")
                 else:
-                    self.logger.error(f"❌ {test_case['name']} unexpected parameter error: {e}")
+                    self.logger.error(f" FAIL:  {test_case['name']} unexpected parameter error: {e}")
                     
             except Exception as e:
                 result["error"] = str(e)
-                self.logger.error(f"❌ {test_case['name']} unexpected error: {e}")
+                self.logger.error(f" FAIL:  {test_case['name']} unexpected error: {e}")
             
             parameter_validation_results.append(result)
         
         # Validate parameter validation results
-        self.logger.info("📊 ENGINE PARAMETER VALIDATION RESULTS:")
+        self.logger.info(" CHART:  ENGINE PARAMETER VALIDATION RESULTS:")
         
         for result in parameter_validation_results:
             expected = result["expected_valid"]
             actual = result["actual_valid"]
-            match_status = "✅ MATCH" if expected == actual else "❌ MISMATCH"
+            match_status = " PASS:  MATCH" if expected == actual else " FAIL:  MISMATCH"
             
             self.logger.info(f"  {result['name']}: Expected={expected}, Actual={actual} - {match_status}")
             
@@ -450,7 +450,7 @@ class TestSQLAlchemyAsyncPoolUnit:
                 f"expected {expected}, got {actual}"
             )
         
-        self.logger.info("✅ Engine creation parameter validation verified")
+        self.logger.info(" PASS:  Engine creation parameter validation verified")
     
     @pytest.mark.unit
     def test_configuration_drift_detection_logic(self):
@@ -460,7 +460,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         BUSINESS VALUE: Prevents configuration inconsistencies between netra_backend
         and auth_service that could cause integration failures.
         """
-        self.logger.info("🔍 Testing configuration drift detection logic")
+        self.logger.info(" SEARCH:  Testing configuration drift detection logic")
         
         # Mock configurations for different services
         service_configurations = {
@@ -532,7 +532,7 @@ class TestSQLAlchemyAsyncPoolUnit:
             return drift_report
         
         # Test configuration drift detection
-        self.logger.info("🔍 Analyzing netra_backend vs auth_service configuration drift")
+        self.logger.info(" SEARCH:  Analyzing netra_backend vs auth_service configuration drift")
         
         drift_report = detect_configuration_drift(
             service_configurations["netra_backend"],
@@ -540,24 +540,24 @@ class TestSQLAlchemyAsyncPoolUnit:
         )
         
         # Log drift analysis results
-        self.logger.info("📊 CONFIGURATION DRIFT ANALYSIS:")
+        self.logger.info(" CHART:  CONFIGURATION DRIFT ANALYSIS:")
         self.logger.info(f"  Has drift: {drift_report['has_drift']}")
         self.logger.info(f"  Differences: {len(drift_report['differences'])}")
         self.logger.info(f"  Compatibility issues: {len(drift_report['compatibility_issues'])}")
         self.logger.info(f"  Recommendations: {len(drift_report['recommendations'])}")
         
         if drift_report["differences"]:
-            self.logger.info("  🔍 Configuration differences:")
+            self.logger.info("   SEARCH:  Configuration differences:")
             for diff in drift_report["differences"]:
                 self.logger.info(f"    {diff['parameter']}: netra_backend={diff['service1']}, auth_service={diff['service2']}")
         
         if drift_report["compatibility_issues"]:
-            self.logger.info("  ⚠️ Compatibility issues:")
+            self.logger.info("   WARNING: [U+FE0F] Compatibility issues:")
             for issue in drift_report["compatibility_issues"]:
                 self.logger.info(f"    {issue['severity']}: {issue['description']}")
         
         if drift_report["recommendations"]:
-            self.logger.info("  💡 Recommendations:")
+            self.logger.info("   IDEA:  Recommendations:")
             for rec in drift_report["recommendations"]:
                 self.logger.info(f"    - {rec}")
         
@@ -571,7 +571,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         assert drift_report["has_drift"], "Configuration drift should be detected between services"
         assert len(drift_report["differences"]) > 0, "Should detect poolclass differences"
         
-        self.logger.info("✅ Configuration drift detection logic verified")
+        self.logger.info(" PASS:  Configuration drift detection logic verified")
     
     @pytest.mark.unit
     def test_engine_cleanup_validation(self):
@@ -581,7 +581,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         BUSINESS VALUE: Ensures proper cleanup of database engines and connections
         to prevent resource leaks in production environments.
         """
-        self.logger.info("🧹 Testing engine cleanup validation")
+        self.logger.info("[U+1F9F9] Testing engine cleanup validation")
         
         cleanup_test_results = []
         
@@ -590,7 +590,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         disposal_error = None
         
         try:
-            self.logger.info("🧪 Testing engine disposal logic")
+            self.logger.info("[U+1F9EA] Testing engine disposal logic")
             
             # Mock AsyncEngine for disposal testing (simplified for unit test)
             mock_engine = Mock(spec=AsyncEngine)
@@ -611,11 +611,11 @@ class TestSQLAlchemyAsyncPoolUnit:
             mock_engine.dispose.assert_called_once()
             
             engine_disposal_success = cleanup_successful
-            self.logger.info("✅ Engine disposal logic validated")
+            self.logger.info(" PASS:  Engine disposal logic validated")
             
         except Exception as e:
             disposal_error = str(e)
-            self.logger.error(f"❌ Engine disposal test failed: {e}")
+            self.logger.error(f" FAIL:  Engine disposal test failed: {e}")
         
         cleanup_test_results.append({
             "test": "engine_disposal",
@@ -628,7 +628,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         multiple_cleanup_error = None
         
         try:
-            self.logger.info("🧪 Testing multiple engine cleanup")
+            self.logger.info("[U+1F9EA] Testing multiple engine cleanup")
             
             # Mock multiple engines
             mock_engines = [Mock(spec=AsyncEngine) for _ in range(3)]
@@ -658,11 +658,11 @@ class TestSQLAlchemyAsyncPoolUnit:
                 engine.dispose.assert_called_once()
             
             multiple_cleanup_success = all(cleanup_results)
-            self.logger.info("✅ Multiple engine cleanup logic validated")
+            self.logger.info(" PASS:  Multiple engine cleanup logic validated")
             
         except Exception as e:
             multiple_cleanup_error = str(e)
-            self.logger.error(f"❌ Multiple engine cleanup test failed: {e}")
+            self.logger.error(f" FAIL:  Multiple engine cleanup test failed: {e}")
         
         cleanup_test_results.append({
             "test": "multiple_cleanup",
@@ -675,7 +675,7 @@ class TestSQLAlchemyAsyncPoolUnit:
         error_handling_error = None
         
         try:
-            self.logger.info("🧪 Testing cleanup error handling")
+            self.logger.info("[U+1F9EA] Testing cleanup error handling")
             
             # Mock engine that raises error during disposal
             mock_failing_engine = Mock(spec=AsyncEngine)
@@ -698,11 +698,11 @@ class TestSQLAlchemyAsyncPoolUnit:
             
             # Should handle error gracefully (return False, not raise)
             error_handling_success = cleanup_result is False
-            self.logger.info("✅ Cleanup error handling logic validated")
+            self.logger.info(" PASS:  Cleanup error handling logic validated")
             
         except Exception as e:
             error_handling_error = str(e)
-            self.logger.error(f"❌ Cleanup error handling test failed: {e}")
+            self.logger.error(f" FAIL:  Cleanup error handling test failed: {e}")
         
         cleanup_test_results.append({
             "test": "error_handling",
@@ -711,11 +711,11 @@ class TestSQLAlchemyAsyncPoolUnit:
         })
         
         # Validate cleanup test results
-        self.logger.info("📊 ENGINE CLEANUP VALIDATION RESULTS:")
+        self.logger.info(" CHART:  ENGINE CLEANUP VALIDATION RESULTS:")
         
         successful_tests = 0
         for result in cleanup_test_results:
-            success_icon = "✅" if result["success"] else "❌"
+            success_icon = " PASS: " if result["success"] else " FAIL: "
             self.logger.info(f"  {success_icon} {result['test']}: {'SUCCESS' if result['success'] else 'FAILED'}")
             
             if result["error"]:
@@ -732,4 +732,4 @@ class TestSQLAlchemyAsyncPoolUnit:
         assert multiple_cleanup_success, "Multiple engine cleanup must work"
         assert error_handling_success, "Cleanup error handling must work"
         
-        self.logger.info(f"✅ Engine cleanup validation verified: {successful_tests}/{len(cleanup_test_results)} tests passed")
+        self.logger.info(f" PASS:  Engine cleanup validation verified: {successful_tests}/{len(cleanup_test_results)} tests passed")

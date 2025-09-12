@@ -17,19 +17,19 @@ from test_framework.layer_system import LayerSystem
 
 def demonstrate_layer_system():
     """Demonstrate the layer system capabilities"""
-    print("🚀 Netra Apex Layered Test System Demonstration")
+    print("[U+1F680] Netra Apex Layered Test System Demonstration")
     print("=" * 60)
     
     # Initialize layer system
     project_root = Path(__file__).parent.parent
     layer_system = LayerSystem(project_root)
     
-    print(f"📁 Project root: {project_root}")
-    print(f"⚙️  Configuration: {layer_system.config_path}")
+    print(f"[U+1F4C1] Project root: {project_root}")
+    print(f"[U+2699][U+FE0F]  Configuration: {layer_system.config_path}")
     print()
     
     # Show system summary
-    print("📊 System Summary:")
+    print(" CHART:  System Summary:")
     summary = layer_system.get_system_summary()
     for key, value in summary.items():
         if isinstance(value, dict):
@@ -41,7 +41,7 @@ def demonstrate_layer_system():
     print()
     
     # Show available layers
-    print("🗂️  Available Layers:")
+    print("[U+1F5C2][U+FE0F]  Available Layers:")
     for i, (layer_name, layer) in enumerate(layer_system.layers.items(), 1):
         print(f"  {i}. {layer.name} ({layer_name})")
         print(f"     Priority: {layer.priority}, Order: {layer.execution_order}")
@@ -55,7 +55,7 @@ def demonstrate_layer_system():
         print()
     
     # Create execution plan
-    print("📋 Creating Execution Plan...")
+    print("[U+1F4CB] Creating Execution Plan...")
     selected_layers = ["fast_feedback", "core_integration", "service_integration"]
     plan = layer_system.create_execution_plan(selected_layers, "dev")
     
@@ -66,7 +66,7 @@ def demonstrate_layer_system():
     print()
     
     # Show detailed execution plan
-    print("📝 Detailed Execution Plan:")
+    print("[U+1F4DD] Detailed Execution Plan:")
     for phase_num, phase_layers in enumerate(plan.execution_sequence, 1):
         print(f"  Phase {phase_num}: {len(phase_layers)} layer(s)")
         for layer_name in phase_layers:
@@ -80,19 +80,19 @@ def demonstrate_layer_system():
     print()
     
     # Demonstrate category mapping
-    print("🔍 Category-to-Layer Mapping:")
+    print(" SEARCH:  Category-to-Layer Mapping:")
     all_categories = set()
     for layer_name, layer in layer_system.layers.items():
         for category in layer.categories:
             all_categories.add(category.name)
-            print(f"  {category.name:15} → {layer.name} (Layer {layer.execution_order})")
+            print(f"  {category.name:15}  ->  {layer.name} (Layer {layer.execution_order})")
     print()
     
     # Show configuration validation
-    print("✅ Configuration Validation:")
+    print(" PASS:  Configuration Validation:")
     issues = layer_system.validate_configuration()
     if not issues:
-        print("  Configuration is valid! ✓")
+        print("  Configuration is valid! [U+2713]")
     else:
         print("  Issues found:")
         for issue in issues:
@@ -103,11 +103,11 @@ def demonstrate_layer_system():
     output_path = project_root / "test_reports" / "demo_execution_plan.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     layer_system.export_execution_plan(plan, output_path)
-    print(f"📄 Execution plan exported to: {output_path}")
+    print(f"[U+1F4C4] Execution plan exported to: {output_path}")
     print()
     
     # Show usage examples
-    print("💡 Usage Examples:")
+    print(" IDEA:  Usage Examples:")
     print("  # Run with layered execution (development)")
     print("  python unified_test_runner.py --use-layers --env dev")
     print()
@@ -126,7 +126,7 @@ def demonstrate_layer_system():
 
 def show_timing_analysis(layer_system: LayerSystem, plan):
     """Show timing analysis and optimization suggestions"""
-    print("⏱️  Timing Analysis:")
+    print("[U+23F1][U+FE0F]  Timing Analysis:")
     print("=" * 60)
     
     # Sequential vs parallel timing
@@ -162,7 +162,7 @@ def show_timing_analysis(layer_system: LayerSystem, plan):
 
 def show_migration_strategy():
     """Show migration strategy from current system"""
-    print("🔄 Migration Strategy:")
+    print(" CYCLE:  Migration Strategy:")
     print("=" * 60)
     
     current_categories = [
@@ -171,7 +171,7 @@ def show_migration_strategy():
         "cypress", "e2e", "performance"
     ]
     
-    print("Current category system → Layered system mapping:")
+    print("Current category system  ->  Layered system mapping:")
     print()
     
     category_to_layer = {
@@ -192,7 +192,7 @@ def show_migration_strategy():
     for category in current_categories:
         if category in category_to_layer:
             layer, order, timing = category_to_layer[category]
-            print(f"  {category:15} → Layer {order}: {layer:20} ({timing})")
+            print(f"  {category:15}  ->  Layer {order}: {layer:20} ({timing})")
     
     print()
     print("Migration steps:")
@@ -216,11 +216,11 @@ def main():
         # Migration strategy
         show_migration_strategy()
         
-        print("✨ Layered Test System Demonstration Complete!")
-        print("   Ready to revolutionize test execution timing and dependencies! 🚀")
+        print("[U+2728] Layered Test System Demonstration Complete!")
+        print("   Ready to revolutionize test execution timing and dependencies! [U+1F680]")
         
     except Exception as e:
-        print(f"❌ Error during demonstration: {e}")
+        print(f" FAIL:  Error during demonstration: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

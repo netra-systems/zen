@@ -61,14 +61,14 @@ class CoordinationFixValidator:
                 self.test_results[test_name] = success
                 
                 if success:
-                    logger.info(f"✅ {test_name} PASSED ({duration:.2f}s)")
+                    logger.info(f" PASS:  {test_name} PASSED ({duration:.2f}s)")
                 else:
-                    logger.error(f"❌ {test_name} FAILED ({duration:.2f}s)")
+                    logger.error(f" FAIL:  {test_name} FAILED ({duration:.2f}s)")
                     overall_success = False
                     
             except Exception as e:
                 duration = time.time() - start_time if 'start_time' in locals() else 0
-                logger.error(f"💥 {test_name} EXCEPTION ({duration:.2f}s): {e}")
+                logger.error(f"[U+1F4A5] {test_name} EXCEPTION ({duration:.2f}s): {e}")
                 self.test_results[test_name] = False
                 self.error_details[test_name] = str(e)
                 overall_success = False
@@ -88,7 +88,7 @@ class CoordinationFixValidator:
             
             # Get startup order
             startup_order = dependency_manager.get_startup_order()
-            logger.info(f"Computed startup order: {' → '.join(startup_order)}")
+            logger.info(f"Computed startup order: {'  ->  '.join(startup_order)}")
             
             # Validate order constraints
             db_idx = startup_order.index("database")
@@ -387,16 +387,16 @@ class CoordinationFixValidator:
             for test_name, result in self.test_results.items():
                 if not result:
                     error = self.error_details.get(test_name, "No error details")
-                    logger.info(f"  ❌ {test_name}: {error}")
+                    logger.info(f"   FAIL:  {test_name}: {error}")
         
         logger.info("\nTEST MAPPING TO ORIGINAL ISSUES:")
-        logger.info("  dependency_resolution     → test_06_services_starting_before_dependencies")
-        logger.info("  readiness_separation      → test_07_health_check_false_positives_during_init")
-        logger.info("  port_allocation           → test_08_port_binding_race_conditions")
-        logger.info("  service_discovery         → test_09_service_discovery_timing_issues")
-        logger.info("  graceful_degradation      → test_10_graceful_degradation_optional_services")
-        logger.info("  complete_workflow         → End-to-end integration validation")
-        logger.info("  cleanup                   → Resource management validation")
+        logger.info("  dependency_resolution      ->  test_06_services_starting_before_dependencies")
+        logger.info("  readiness_separation       ->  test_07_health_check_false_positives_during_init")
+        logger.info("  port_allocation            ->  test_08_port_binding_race_conditions")
+        logger.info("  service_discovery          ->  test_09_service_discovery_timing_issues")
+        logger.info("  graceful_degradation       ->  test_10_graceful_degradation_optional_services")
+        logger.info("  complete_workflow          ->  End-to-end integration validation")
+        logger.info("  cleanup                    ->  Resource management validation")
         
         logger.info("=" * 60)
 
@@ -412,16 +412,16 @@ async def main():
         success = await validator.run_all_tests()
         
         if success:
-            logger.info("🎉 ALL COORDINATION FIXES VALIDATED SUCCESSFULLY!")
+            logger.info(" CELEBRATION:  ALL COORDINATION FIXES VALIDATED SUCCESSFULLY!")
             logger.info("The service coordination system should now handle:")
-            logger.info("  ✅ Service dependency ordering")
-            logger.info("  ✅ Readiness vs health check separation") 
-            logger.info("  ✅ Port allocation conflict prevention")
-            logger.info("  ✅ Service discovery timing issues")
-            logger.info("  ✅ Graceful degradation with optional services")
+            logger.info("   PASS:  Service dependency ordering")
+            logger.info("   PASS:  Readiness vs health check separation") 
+            logger.info("   PASS:  Port allocation conflict prevention")
+            logger.info("   PASS:  Service discovery timing issues")
+            logger.info("   PASS:  Graceful degradation with optional services")
             return 0
         else:
-            logger.error("❌ Some coordination fixes failed validation")
+            logger.error(" FAIL:  Some coordination fixes failed validation")
             logger.error("Please review the failed tests and fix the issues")
             return 1
             

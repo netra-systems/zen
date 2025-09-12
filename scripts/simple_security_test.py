@@ -21,7 +21,7 @@ def test_production_detection():
         # Simulate the production detection logic from our fix
         is_production = env in ['production', 'prod'] or 'prod' in project.lower()
         
-        status = "✅" if is_production == expected else "❌"
+        status = " PASS: " if is_production == expected else " FAIL: "
         print(f"{status} ENV={env}, PROJECT={project} -> is_production={is_production} (expected {expected})")
     
     print()
@@ -54,7 +54,7 @@ def test_e2e_bypass_logic():
             allow_e2e_bypass = has_headers or has_env_vars
             security_mode = "development_permissive"
         
-        status = "🔒" if not allow_e2e_bypass else "🔓"
+        status = "[U+1F512]" if not allow_e2e_bypass else "[U+1F513]"
         print(f"{status} {description}: bypass={allow_e2e_bypass} (mode: {security_mode})")
     
     print()
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     test_e2e_bypass_logic()
     
     print("=== Security Validation Summary ===")
-    print("✅ Production environments correctly block ALL E2E bypass attempts")
-    print("✅ Non-production environments allow E2E bypass with headers or env vars")
-    print("✅ Security fix is working as intended")
+    print(" PASS:  Production environments correctly block ALL E2E bypass attempts")
+    print(" PASS:  Non-production environments allow E2E bypass with headers or env vars")
+    print(" PASS:  Security fix is working as intended")

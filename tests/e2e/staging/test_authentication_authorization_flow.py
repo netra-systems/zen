@@ -53,7 +53,7 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
         This test validates the authentication mechanism itself, so it starts
         without authentication and validates the full auth flow.
         """
-        self.logger.info("🚀 Starting JWT Authentication Complete Flow E2E Test")
+        self.logger.info("[U+1F680] Starting JWT Authentication Complete Flow E2E Test")
         
         # This is the ONLY test that doesn't start with authentication
         # because it's testing the authentication system itself
@@ -81,7 +81,7 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                 access_token = register_result["access_token"]
                 user_data = register_result["user"]
                 
-                self.logger.info(f"✅ User registered: {user_data.get('email')}")
+                self.logger.info(f" PASS:  User registered: {user_data.get('email')}")
             
             # Step 2: Validate JWT token structure
             try:
@@ -96,7 +96,7 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                 assert token_payload["email"] == test_email, "JWT email doesn't match"
                 assert token_payload["sub"] == user_data["id"], "JWT subject doesn't match user ID"
                 
-                self.logger.info("✅ JWT token structure validated")
+                self.logger.info(" PASS:  JWT token structure validated")
                 
             except jwt.InvalidTokenError as e:
                 pytest.fail(f"Invalid JWT token structure: {e}")
@@ -112,7 +112,7 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                 assert validate_result.get("valid") == True, "Token should be valid"
                 assert validate_result.get("user_id") == user_data["id"], "User ID mismatch in validation"
                 
-                self.logger.info("✅ JWT token validation successful")
+                self.logger.info(" PASS:  JWT token validation successful")
             
             # Step 4: Test login flow with existing user
             login_url = f"{self.staging_config.urls.auth_url}/auth/login"
@@ -131,7 +131,7 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                 new_token = login_result["access_token"]
                 assert new_token != access_token, "Login should generate new token"
                 
-                self.logger.info("✅ Login flow successful")
+                self.logger.info(" PASS:  Login flow successful")
             
             # Step 5: Test WebSocket authentication with JWT
             try:
@@ -158,24 +158,24 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
                     # Any response indicates authentication worked
-                    self.logger.info("✅ WebSocket authentication successful")
+                    self.logger.info(" PASS:  WebSocket authentication successful")
                 except asyncio.TimeoutError:
                     # No response is also acceptable for ping
-                    self.logger.info("✅ WebSocket connection established (no response to ping)")
+                    self.logger.info(" PASS:  WebSocket connection established (no response to ping)")
                 
                 await websocket.close()
                 
             except Exception as e:
                 pytest.fail(f"WebSocket authentication failed: {e}")
             
-            self.logger.info("✅ JWT Authentication Complete Flow E2E Test completed")
+            self.logger.info(" PASS:  JWT Authentication Complete Flow E2E Test completed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
     @pytest.mark.staging
     async def test_oauth_integration_flow(self, real_services):
         """Test OAuth integration and token exchange."""
-        self.logger.info("🚀 Starting OAuth Integration E2E Test")
+        self.logger.info("[U+1F680] Starting OAuth Integration E2E Test")
         
         # MANDATORY: Start with authenticated user for OAuth integration test
         token, user_data = await create_authenticated_user(
@@ -213,11 +213,11 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                         async with session.get(validate_url, headers=oauth_headers) as validate_resp:
                             assert validate_resp.status == 200, "OAuth token should validate successfully"
                             
-                        self.logger.info("✅ OAuth simulation flow successful")
+                        self.logger.info(" PASS:  OAuth simulation flow successful")
                         
                     else:
                         # OAuth simulation not available - test standard token exchange
-                        self.logger.info("⚠️ OAuth simulation unavailable, testing token exchange")
+                        self.logger.info(" WARNING: [U+FE0F] OAuth simulation unavailable, testing token exchange")
                         
                         # Test token refresh/exchange endpoint
                         refresh_url = f"{self.staging_config.urls.auth_url}/auth/refresh"
@@ -227,12 +227,12 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                             if refresh_resp.status == 200:
                                 refresh_result = await refresh_resp.json()
                                 assert "access_token" in refresh_result, "Token refresh should return new token"
-                                self.logger.info("✅ Token refresh flow successful")
+                                self.logger.info(" PASS:  Token refresh flow successful")
                             else:
-                                self.logger.info("⚠️ Token refresh not implemented, OAuth integration partial")
+                                self.logger.info(" WARNING: [U+FE0F] Token refresh not implemented, OAuth integration partial")
                         
             except asyncio.TimeoutError:
-                self.logger.warning("⚠️ OAuth endpoint timeout - may not be available in staging")
+                self.logger.warning(" WARNING: [U+FE0F] OAuth endpoint timeout - may not be available in staging")
                 # Continue with basic validation
                 
             # Test that original token still works for basic operations
@@ -243,14 +243,14 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                 # Health endpoint should work with or without auth
                 assert resp.status in [200, 401], "Health endpoint should respond"
                 
-        self.logger.info("✅ OAuth Integration E2E Test completed")
+        self.logger.info(" PASS:  OAuth Integration E2E Test completed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
     @pytest.mark.staging
     async def test_session_management_and_expiration(self, real_services):
         """Test user session management and token expiration handling."""
-        self.logger.info("🚀 Starting Session Management and Expiration E2E Test")
+        self.logger.info("[U+1F680] Starting Session Management and Expiration E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -270,7 +270,7 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                 initial_validation = await resp.json()
                 assert initial_validation.get("valid") == True, "Token should validate initially"
                 
-                self.logger.info("✅ Session established successfully")
+                self.logger.info(" PASS:  Session established successfully")
             
             # Step 2: Test session persistence across requests
             websocket_headers = self.auth_helper.get_websocket_headers(token)
@@ -304,10 +304,10 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
                         pass  # No response expected for session test
                     
                     await websocket.close()
-                    self.logger.info(f"✅ Session persistence test {connection_num + 1} successful")
+                    self.logger.info(f" PASS:  Session persistence test {connection_num + 1} successful")
                     
                 except Exception as e:
-                    self.logger.warning(f"⚠️ Session persistence test {connection_num + 1} failed: {e}")
+                    self.logger.warning(f" WARNING: [U+FE0F] Session persistence test {connection_num + 1} failed: {e}")
                     # Continue with other tests
             
             # Step 3: Test token expiration handling
@@ -322,38 +322,38 @@ class TestAuthenticationAuthorizationFlow(BaseE2ETest):
             short_headers = {"Authorization": f"Bearer {short_lived_token}"}
             async with session.get(validate_url, headers=short_headers) as resp:
                 if resp.status == 200:
-                    self.logger.info("✅ Short-lived token validated initially")
+                    self.logger.info(" PASS:  Short-lived token validated initially")
                     
                     # Wait for token to expire (with some buffer time)
-                    self.logger.info("⏳ Waiting for token expiration...")
+                    self.logger.info("[U+23F3] Waiting for token expiration...")
                     await asyncio.sleep(70)  # Wait 70 seconds for 1-minute token to expire
                     
                     # Test expired token
                     async with session.get(validate_url, headers=short_headers) as expired_resp:
                         # Should either reject expired token or handle gracefully
                         if expired_resp.status == 401:
-                            self.logger.info("✅ Expired token correctly rejected")
+                            self.logger.info(" PASS:  Expired token correctly rejected")
                         elif expired_resp.status == 200:
                             # Some systems may have longer grace periods
                             expired_result = await expired_resp.json()
                             if expired_result.get("valid") == False:
-                                self.logger.info("✅ Expired token marked as invalid")
+                                self.logger.info(" PASS:  Expired token marked as invalid")
                             else:
-                                self.logger.warning("⚠️ Expired token still marked as valid (may have grace period)")
+                                self.logger.warning(" WARNING: [U+FE0F] Expired token still marked as valid (may have grace period)")
                         else:
-                            self.logger.warning(f"⚠️ Unexpected response to expired token: {expired_resp.status}")
+                            self.logger.warning(f" WARNING: [U+FE0F] Unexpected response to expired token: {expired_resp.status}")
                 else:
-                    self.logger.warning("⚠️ Short-lived token creation may not be supported")
+                    self.logger.warning(" WARNING: [U+FE0F] Short-lived token creation may not be supported")
             
             # Step 4: Test session cleanup
             # Original token should still work
             async with session.get(validate_url, headers=headers) as resp:
                 if resp.status == 200:
-                    self.logger.info("✅ Original token still valid after expiration tests")
+                    self.logger.info(" PASS:  Original token still valid after expiration tests")
                 else:
-                    self.logger.warning("⚠️ Original token may have been affected by expiration test")
+                    self.logger.warning(" WARNING: [U+FE0F] Original token may have been affected by expiration test")
         
-        self.logger.info("✅ Session Management and Expiration E2E Test completed")
+        self.logger.info(" PASS:  Session Management and Expiration E2E Test completed")
         
     async def teardown_method(self):
         """Cleanup after each test method."""

@@ -183,7 +183,7 @@ class FakeTestScanner:
         recommendations = []
         
         if not results:
-            recommendations.append("✅ No fake tests detected! Codebase follows testing best practices.")
+            recommendations.append(" PASS:  No fake tests detected! Codebase follows testing best practices.")
             return recommendations
         
         # Count by severity
@@ -194,30 +194,30 @@ class FakeTestScanner:
         # Priority recommendations based on findings
         if severities.get('critical', 0) > 0:
             recommendations.append(
-                f"🚨 CRITICAL: Remove {severities['critical']} empty/auto-pass tests immediately"
+                f" ALERT:  CRITICAL: Remove {severities['critical']} empty/auto-pass tests immediately"
             )
         
         if severities.get('high', 0) > 0:
             recommendations.append(
-                f"⚠️ HIGH: Address {severities['high']} mock-only tests in current sprint"
+                f" WARNING: [U+FE0F] HIGH: Address {severities['high']} mock-only tests in current sprint"
             )
         
         if severities.get('medium', 0) > 0:
             recommendations.append(
-                f"📋 MEDIUM: Schedule {severities['medium']} trivial tests for refactoring"
+                f"[U+1F4CB] MEDIUM: Schedule {severities['medium']} trivial tests for refactoring"
             )
         
         if severities.get('low', 0) > 0:
             recommendations.append(
-                f"🔧 LOW: Consider consolidating {severities['low']} duplicate tests"
+                f"[U+1F527] LOW: Consider consolidating {severities['low']} duplicate tests"
             )
         
         # General recommendations
         recommendations.extend([
-            "📚 Use patterns from app/tests/examples/test_real_functionality_examples.py",
-            "🔍 Add fake test detection to CI pipeline to prevent regressions",
-            "📖 Review SPEC/testing.xml for detailed fake test guidance",
-            "🎯 Focus on testing real business logic, not mocks or constants"
+            "[U+1F4DA] Use patterns from app/tests/examples/test_real_functionality_examples.py",
+            " SEARCH:  Add fake test detection to CI pipeline to prevent regressions",
+            "[U+1F4D6] Review SPEC/testing.xml for detailed fake test guidance",
+            " TARGET:  Focus on testing real business logic, not mocks or constants"
         ])
         
         return recommendations
@@ -326,12 +326,12 @@ class FakeTestScanner:
         bad_stats = self.bad_detector.get_statistics()
         if bad_stats['consistently_failing'] > 0:
             recommendations.insert(0, 
-                f"🔥 URGENT: Fix {bad_stats['consistently_failing']} consistently failing tests"
+                f" FIRE:  URGENT: Fix {bad_stats['consistently_failing']} consistently failing tests"
             )
         
         if bad_stats['high_failure_rate'] > 0:
             recommendations.insert(1,
-                f"⚡ HIGH PRIORITY: Address {bad_stats['high_failure_rate']} high failure rate tests"
+                f" LIGHTNING:  HIGH PRIORITY: Address {bad_stats['high_failure_rate']} high failure rate tests"
             )
         
         return recommendations
@@ -441,13 +441,13 @@ Examples:
             if not args.report_only:
                 fake_count = results_summary.get('total_fake_tests', 0)
                 if fake_count > 0:
-                    print(f"\n⚠️  Found {fake_count} fake tests requiring attention")
+                    print(f"\n WARNING: [U+FE0F]  Found {fake_count} fake tests requiring attention")
                     critical_count = len([r for r in scanner.fake_detector.results 
                                         if r.severity in ['critical', 'high']])
                     if critical_count > 0:
-                        print(f"🚨  {critical_count} are critical/high severity - immediate action required")
+                        print(f" ALERT:   {critical_count} are critical/high severity - immediate action required")
                 else:
-                    print("✅  No fake tests detected - good job!")
+                    print(" PASS:   No fake tests detected - good job!")
         else:
             print(report)
             
@@ -457,13 +457,13 @@ Examples:
                             if r.severity in ['critical', 'high']])
         
         if critical_count > 0:
-            print(f"\n❌ Exiting with error code due to {critical_count} critical/high severity fake tests")
+            print(f"\n FAIL:  Exiting with error code due to {critical_count} critical/high severity fake tests")
             sys.exit(2)  # Critical fake tests found
         elif fake_count > 0:
-            print(f"\n⚠️  Exiting with warning due to {fake_count} fake tests found")
+            print(f"\n WARNING: [U+FE0F]  Exiting with warning due to {fake_count} fake tests found")
             sys.exit(1)  # Fake tests found but not critical
         else:
-            print("\n✅ All tests appear to be legitimate - no fake tests detected!")
+            print("\n PASS:  All tests appear to be legitimate - no fake tests detected!")
             sys.exit(0)  # Success
             
     except Exception as e:

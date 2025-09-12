@@ -1,4 +1,4 @@
-"""Supervisor completion and statistics helpers (≤300 lines).
+"""Supervisor completion and statistics helpers ( <= 300 lines).
 
 Business Value: Centralized completion tracking and statistics for supervisor operations.
 Supports monitoring and observability requirements for Enterprise segment.

@@ -168,10 +168,10 @@ class StagingTester:
             success, message = test_func()
             
             if success:
-                print("✅ PASSED")
+                print(" PASS:  PASSED")
                 results["passed"] += 1
             else:
-                print("❌ FAILED")
+                print(" FAIL:  FAILED")
                 results["failed"] += 1
                 
             results["tests"].append({
@@ -180,20 +180,20 @@ class StagingTester:
                 "message": message
             })
             
-            print(f"  → {message}\n")
+            print(f"   ->  {message}\n")
             
         # Summary
         print("="*60)
         print("TEST SUMMARY")
         print("="*60)
         print(f"Total Tests: {len(tests)}")
-        print(f"Passed: {results['passed']} ✅")
-        print(f"Failed: {results['failed']} ❌")
+        print(f"Passed: {results['passed']}  PASS: ")
+        print(f"Failed: {results['failed']}  FAIL: ")
         
         if results["failed"] == 0:
-            print("\n🎉 All tests passed! Staging environment is fully operational.")
+            print("\n CELEBRATION:  All tests passed! Staging environment is fully operational.")
         else:
-            print("\n⚠️ Some tests failed. Please check the failures above.")
+            print("\n WARNING: [U+FE0F] Some tests failed. Please check the failures above.")
             print("\nFailed tests:")
             for test in results["tests"]:
                 if not test["passed"]:

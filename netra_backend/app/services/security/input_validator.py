@@ -5,7 +5,7 @@ This module provides comprehensive input validation functionality for the Netra 
 Following SSOT principles, this is the canonical implementation for input validation.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Prevent injection attacks and malicious input processing
 - Value Impact: Protects user data and system integrity from security threats
 - Strategic Impact: Critical for maintaining trust and regulatory compliance

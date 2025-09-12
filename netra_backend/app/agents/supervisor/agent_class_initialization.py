@@ -193,13 +193,13 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
                 "domain": "corpus_management"
             }
         )
-        logger.info("  ✓ Registered corpus_admin agent")
+        logger.info("  [U+2713] Registered corpus_admin agent")
     except ImportError as e:
         registration_failures.append(f"corpus_admin: {e}")
-        logger.warning(f"  ⚠ Failed to import corpus_admin agent: {e}")
+        logger.warning(f"   WARNING:  Failed to import corpus_admin agent: {e}")
     except Exception as e:
         registration_failures.append(f"corpus_admin: {e}")
-        logger.error(f"  ❌ Failed to register corpus_admin agent: {e}")
+        logger.error(f"   FAIL:  Failed to register corpus_admin agent: {e}")
         
     # Supply Researcher Agent
     try:
@@ -216,13 +216,13 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
                 "domain": "supply_research"
             }
         )
-        logger.info("  ✓ Registered supply_researcher agent")
+        logger.info("  [U+2713] Registered supply_researcher agent")
     except ImportError as e:
         registration_failures.append(f"supply_researcher: {e}")
-        logger.warning(f"  ⚠ Failed to import supply_researcher agent: {e}")
+        logger.warning(f"   WARNING:  Failed to import supply_researcher agent: {e}")
     except Exception as e:
         registration_failures.append(f"supply_researcher: {e}")
-        logger.error(f"  ❌ Failed to register supply_researcher agent: {e}")
+        logger.error(f"   FAIL:  Failed to register supply_researcher agent: {e}")
         
     # GitHub Analyzer Agent
     try:
@@ -239,13 +239,13 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
                 "domain": "code_analysis"
             }
         )
-        logger.info("  ✓ Registered github_analyzer agent")
+        logger.info("  [U+2713] Registered github_analyzer agent")
     except ImportError as e:
         registration_failures.append(f"github_analyzer: {e}")
-        logger.warning(f"  ⚠ Failed to import github_analyzer agent: {e}")
+        logger.warning(f"   WARNING:  Failed to import github_analyzer agent: {e}")
     except Exception as e:
         registration_failures.append(f"github_analyzer: {e}")
-        logger.error(f"  ❌ Failed to register github_analyzer agent: {e}")
+        logger.error(f"   FAIL:  Failed to register github_analyzer agent: {e}")
         
     # Synthetic Data Agent - CRITICAL for data generation workflows
     try:
@@ -263,16 +263,16 @@ def _register_specialized_agents(registry: AgentClassRegistry) -> None:
                 "critical": True  # Mark as critical agent
             }
         )
-        logger.info("  ✓ Registered synthetic_data agent")
+        logger.info("  [U+2713] Registered synthetic_data agent")
     except ImportError as e:
         registration_failures.append(f"synthetic_data (CRITICAL): {e}")
-        logger.error(f"  ❌ CRITICAL: Failed to import synthetic_data agent: {e}")
+        logger.error(f"   FAIL:  CRITICAL: Failed to import synthetic_data agent: {e}")
         # Log detailed import error for debugging
         import traceback
         logger.error(f"  Import traceback:\n{traceback.format_exc()}")
     except Exception as e:
         registration_failures.append(f"synthetic_data (CRITICAL): {e}")
-        logger.error(f"  ❌ CRITICAL: Failed to register synthetic_data agent: {e}")
+        logger.error(f"   FAIL:  CRITICAL: Failed to register synthetic_data agent: {e}")
     
     # Summary of registration results
     if registration_failures:

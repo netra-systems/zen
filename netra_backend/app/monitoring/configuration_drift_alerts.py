@@ -349,7 +349,7 @@ class ConfigurationDriftAlerting:
         business_impact = alert_payload["business_impact_mrr"]
         
         slack_message = {
-            "text": f"🚨 Configuration Drift Alert: {config_key}",
+            "text": f" ALERT:  Configuration Drift Alert: {config_key}",
             "attachments": [{
                 "color": "danger" if severity == "critical" else "warning",
                 "fields": [
@@ -422,7 +422,7 @@ class ConfigurationDriftAlerting:
         business_impact = alert_payload["business_impact_mrr"]
         
         email_content = {
-            "subject": f"🚨 Configuration Drift Alert: {config_key} ({severity})",
+            "subject": f" ALERT:  Configuration Drift Alert: {config_key} ({severity})",
             "body": f"""
             Configuration Drift Detected
             
@@ -557,12 +557,12 @@ class ConfigurationDriftAlerting:
         # 3. Trigger emergency response procedures
         # 4. Activate incident management protocols
         
-        logger.error(f"🚨 EXECUTIVE ESCALATION: ${total_impact:,.0f} MRR at risk - {len(critical_drifts)} critical configuration drifts")
+        logger.error(f" ALERT:  EXECUTIVE ESCALATION: ${total_impact:,.0f} MRR at risk - {len(critical_drifts)} critical configuration drifts")
         
         # Simulate executive notification
         executive_notification = {
             "recipients": ["cto@netra.com", "ceo@netra.com", "head-of-platform@netra.com"],
-            "subject": f"🚨 URGENT: ${total_impact:,.0f} MRR at Risk - Configuration Drift Incident",
+            "subject": f" ALERT:  URGENT: ${total_impact:,.0f} MRR at Risk - Configuration Drift Incident",
             "priority": "urgent",
             "escalation_level": "executive"
         }

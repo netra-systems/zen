@@ -58,7 +58,7 @@ class CITestStubChecker:
     
     def _print_detailed_report(self, violations):
         """Print detailed violation report."""
-        print(f"❌ Found {len(violations)} test stubs in production code")
+        print(f" FAIL:  Found {len(violations)} test stubs in production code")
         print()
         
         # Group by severity
@@ -66,22 +66,22 @@ class CITestStubChecker:
         medium_violations = [v for v in violations if v.severity == "MEDIUM"]
         
         if high_violations:
-            print(f"🚨 HIGH SEVERITY ({len(high_violations)} violations):")
+            print(f" ALERT:  HIGH SEVERITY ({len(high_violations)} violations):")
             for v in high_violations:
-                print(f"  📁 {v.file_path}")
-                print(f"     📍 Line {v.line_number}: {v.description}")
-                print(f"     🔧 Action: {v.recommended_action}")
+                print(f"  [U+1F4C1] {v.file_path}")
+                print(f"      PIN:  Line {v.line_number}: {v.description}")
+                print(f"     [U+1F527] Action: {v.recommended_action}")
                 print()
         
         if medium_violations:
-            print(f"⚠️  MEDIUM SEVERITY ({len(medium_violations)} violations):")
+            print(f" WARNING: [U+FE0F]  MEDIUM SEVERITY ({len(medium_violations)} violations):")
             for v in medium_violations:
-                print(f"  📁 {v.file_path}")
-                print(f"     📍 Line {v.line_number}: {v.description}")
-                print(f"     🔧 Action: {v.recommended_action}")
+                print(f"  [U+1F4C1] {v.file_path}")
+                print(f"      PIN:  Line {v.line_number}: {v.description}")
+                print(f"     [U+1F527] Action: {v.recommended_action}")
                 print()
         
-        print("💡 To fix these issues:")
+        print(" IDEA:  To fix these issues:")
         print("   1. Review SPEC/no_test_stubs.xml for guidelines")
         print("   2. Replace test stubs with real implementations")
         print("   3. Move test helpers to app/tests/ directory")

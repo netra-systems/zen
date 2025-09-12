@@ -39,16 +39,16 @@ def run_coverage_intelligence(args: list):
         result = subprocess.run(cmd, cwd=PROJECT_ROOT, check=True)
         return result.returncode == 0
     except subprocess.CalledProcessError as e:
-        print(f"❌ Coverage analysis failed with exit code {e.returncode}")
+        print(f" FAIL:  Coverage analysis failed with exit code {e.returncode}")
         return False
     except Exception as e:
-        print(f"❌ Error running coverage analysis: {e}")
+        print(f" FAIL:  Error running coverage analysis: {e}")
         return False
 
 def show_usage():
     """Show usage instructions optimized for Claude."""
     print("""
-🤖 CLAUDE COVERAGE COMMAND GUIDE
+[U+1F916] CLAUDE COVERAGE COMMAND GUIDE
 ===============================
 
 QUICK COMMANDS:
@@ -80,40 +80,40 @@ def main():
     command = sys.argv[1].lower()
     
     if command == "status":
-        print("📊 COVERAGE STATUS OVERVIEW")
+        print(" CHART:  COVERAGE STATUS OVERVIEW")
         print("=" * 40)
         run_coverage_intelligence(["--priority-only"])
         
     elif command == "priorities":
-        print("🎯 TOP TEST CREATION PRIORITIES")
+        print(" TARGET:  TOP TEST CREATION PRIORITIES")
         print("=" * 40)
         run_coverage_intelligence(["--priority-only"])
         
     elif command == "explain":
-        print("📚 LINE vs BRANCH COVERAGE EXPLANATION")
+        print("[U+1F4DA] LINE vs BRANCH COVERAGE EXPLANATION")
         print("=" * 50)
         # Run full report but focus on explanation section
         run_coverage_intelligence([])
         
     elif command == "full":
-        print("📋 COMPLETE COVERAGE INTELLIGENCE REPORT")
+        print("[U+1F4CB] COMPLETE COVERAGE INTELLIGENCE REPORT")
         print("=" * 50)
         run_coverage_intelligence([])
         
     elif command == "export":
         output_file = "coverage_intelligence_report.json"
-        print(f"📄 EXPORTING COVERAGE ANALYSIS TO {output_file}")
+        print(f"[U+1F4C4] EXPORTING COVERAGE ANALYSIS TO {output_file}")
         print("=" * 50)
         success = run_coverage_intelligence(["--format", "json", "--output", output_file])
         if success:
-            print(f"✅ Report exported to {output_file}")
+            print(f" PASS:  Report exported to {output_file}")
             print("   Use this JSON data for further analysis or automation")
         
     elif command in ["help", "--help", "-h"]:
         show_usage()
         
     else:
-        print(f"❌ Unknown command: {command}")
+        print(f" FAIL:  Unknown command: {command}")
         show_usage()
 
 if __name__ == "__main__":

@@ -144,7 +144,7 @@
         # REMOVED_SYNTAX_ERROR: message="Starting triage analysis..."
         
         
-        # REMOVED_SYNTAX_ERROR: print("📊 Progress update 1: Triage starting")
+        # REMOVED_SYNTAX_ERROR: print(" CHART:  Progress update 1: Triage starting")
 
         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(1)
 
@@ -156,7 +156,7 @@
         # REMOVED_SYNTAX_ERROR: message="Analyzing user request..."
         
         
-        # REMOVED_SYNTAX_ERROR: print("📊 Progress update 2: Analysis in progress")
+        # REMOVED_SYNTAX_ERROR: print(" CHART:  Progress update 2: Analysis in progress")
 
         # REMOVED_SYNTAX_ERROR: await asyncio.sleep(1)
 
@@ -167,7 +167,7 @@
 
         # Now simulate AGENT DEATH - no more heartbeats or progress updates!
         # REMOVED_SYNTAX_ERROR: print(" )
-        # REMOVED_SYNTAX_ERROR: 💀 SIMULATING AGENT DEATH - No more heartbeats...")
+        # REMOVED_SYNTAX_ERROR: [U+1F480] SIMULATING AGENT DEATH - No more heartbeats...")
 
         # The old system would miss this completely
         # The new system SHOULD detect this via heartbeat monitoring
@@ -201,7 +201,7 @@
                         # REMOVED_SYNTAX_ERROR: break
                         # REMOVED_SYNTAX_ERROR: elif status.execution_record.state == NewExecutionState.TIMEOUT:
                             # REMOVED_SYNTAX_ERROR: timeout_detected = True
-                            # REMOVED_SYNTAX_ERROR: print(f"⏰ TIMEOUT DETECTED")
+                            # REMOVED_SYNTAX_ERROR: print(f"[U+23F0] TIMEOUT DETECTED")
                             # REMOVED_SYNTAX_ERROR: verifier.record_event({ ))
                             # REMOVED_SYNTAX_ERROR: 'type': 'execution_timeout',
                             # REMOVED_SYNTAX_ERROR: 'data': {'execution_id': execution_id}
@@ -233,8 +233,8 @@
                                     # REMOVED_SYNTAX_ERROR: f"CRITICAL FAILURE: New execution tracking system failed to detect agent death! " \
                                     # REMOVED_SYNTAX_ERROR: "formatted_string"
 
-                                    # REMOVED_SYNTAX_ERROR: print("✅ SUCCESS: New execution tracking system detected agent death/timeout!")
-                                    # REMOVED_SYNTAX_ERROR: print("🐛 BUG IS FIXED: Silent agent death is now detected!")
+                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  SUCCESS: New execution tracking system detected agent death/timeout!")
+                                    # REMOVED_SYNTAX_ERROR: print("[U+1F41B] BUG IS FIXED: Silent agent death is now detected!")
 
                                     # Cleanup
                                     # REMOVED_SYNTAX_ERROR: await tracker.shutdown()

@@ -11,7 +11,7 @@ AGENT 17: User Journey Tests - End-to-End Critical Business Flows
 These are the MOST IMPORTANT TESTS in the entire system.
 They verify the system actually works end-to-end across all services.
 
-ARCHITECTURE COMPLIANCE: ≤300 lines, functions ≤8 lines, modular design
+ARCHITECTURE COMPLIANCE:  <= 300 lines, functions  <= 8 lines, modular design
 """
 
 import asyncio
@@ -155,7 +155,7 @@ class FirstTimeUserJourneyTest(JourneyTestBase):
     async def test_complete_first_time_user_journey(self) -> JourneyTestResult:
         """
         BVJ: First-time user success = $1200+ LTV potential
-        Test complete flow: signup → email verification → login → chat → response
+        Test complete flow: signup  ->  email verification  ->  login  ->  chat  ->  response
         """
         result = await self.setup_journey("first_time_user")
         start_time = time.time()
@@ -274,7 +274,7 @@ class ChatInteractionJourneyTest(JourneyTestBase):
     async def test_chat_interaction_journey(self) -> JourneyTestResult:
         """
         BVJ: Chat interaction = core product value delivery
-        Test WebSocket connection → authentication → message → agent response
+        Test WebSocket connection  ->  authentication  ->  message  ->  agent response
         """
         result = await self.setup_journey("chat_interaction")
         start_time = time.time()

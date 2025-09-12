@@ -30,7 +30,7 @@ class SummaryDisplay:
     def show_success_summary(self):
         """Show success summary."""
         print("\n" + "=" * 60)
-        self._print("✨", "SUCCESS", "Development environment is running!")
+        self._print("[U+2728]", "SUCCESS", "Development environment is running!")
         print("=" * 60)
         self._show_auth_summary()
         self._show_backend_summary()
@@ -41,7 +41,7 @@ class SummaryDisplay:
         """Show auth service summary."""
         auth_info = self.service_discovery.read_auth_info()
         if auth_info:
-            self._print("🔐", "AUTH", "")
+            self._print("[U+1F510]", "AUTH", "")
             print(f"  URL: {auth_info['url']}")
             print(f"  Health: {auth_info['health']}")
             print(f"  Docs: {auth_info.get('docs', auth_info['url'] + '/docs')}")
@@ -51,14 +51,14 @@ class SummaryDisplay:
         """Show backend summary."""
         backend_info = self.service_discovery.read_backend_info()
         if backend_info:
-            self._print("🔧", "BACKEND", "")
+            self._print("[U+1F527]", "BACKEND", "")
             print(f"  API: {backend_info['api_url']}")
             print(f"  WebSocket: {backend_info['ws_url']}")
             print(f"  Logs: Real-time streaming (cyan)")
     
     def _show_frontend_summary(self):
         """Show frontend summary."""
-        self._print("🌐", "FRONTEND", "")
+        self._print("[U+1F310]", "FRONTEND", "")
         print(f"  URL: http://localhost:{self.config.frontend_port}")
         print(f"  Logs: Real-time streaming (magenta)")
     

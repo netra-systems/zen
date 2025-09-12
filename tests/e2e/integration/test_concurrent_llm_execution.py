@@ -251,7 +251,7 @@ class TestConcurrentLLMExecution:
         assert successful >= 12, f"Mixed workload handling poor: {successful}/15"
         assert total_time < 25.0, f"Mixed workload too slow: {total_time:.2f}s"
     
-    # Helper methods (≤8 lines each)
+    # Helper methods ( <= 8 lines each)
     
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""

@@ -174,7 +174,7 @@ class TestCompleteGoldenPathIntegrationEnhanced(BaseIntegrationTest):
         
         self.assert_business_value_delivered(final_business_value, "cost_savings")
         
-        self.logger.info(f"✅ Complete Golden Path validated with service abstraction in {total_flow_time:.2f}s")
+        self.logger.info(f" PASS:  Complete Golden Path validated with service abstraction in {total_flow_time:.2f}s")
     
     # Golden Path Stage Implementations with Service Abstraction
     
@@ -335,7 +335,7 @@ class TestCompleteGoldenPathIntegrationEnhanced(BaseIntegrationTest):
         websocket_events = []
         
         try:
-            # Execute Golden Path agent pipeline: Triage → Data Helper → UVS Reporting
+            # Execute Golden Path agent pipeline: Triage  ->  Data Helper  ->  UVS Reporting
             # CRITICAL: Real business logic preserved, only infrastructure abstracted
             pipeline_agents = ["triage_agent", "data_helper_agent", "uvs_reporting_agent"]
             pipeline_results = []

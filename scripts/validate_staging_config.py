@@ -62,7 +62,7 @@ def validate_staging_configuration():
     print(f"   Detected environment: {detected_env}")
     
     if detected_env != "staging":
-        print(f"   ⚠ WARNING: Environment detection returned '{detected_env}' instead of 'staging'")
+        print(f"    WARNING:  WARNING: Environment detection returned '{detected_env}' instead of 'staging'")
         print("   This may be due to local .env file overriding settings")
     else:
         print("   [OK] Environment correctly detected as staging")
@@ -115,7 +115,7 @@ def validate_staging_configuration():
         else:
             print(f"   [ERROR] ClickHouse port is {ch_config.port}, expected 8443")
     else:
-        print("   ⚠ WARNING: clickhouse_https config not found")
+        print("    WARNING:  WARNING: clickhouse_https config not found")
     
     # Test 5: Check if password would be loaded from GCP
     print("\n5. GCP Secret Manager Integration:")
@@ -138,11 +138,11 @@ def validate_staging_configuration():
                 print(f"   Required in staging: {mapping.get('required', False)}")
                 print(f"   Rotation enabled: {mapping.get('rotation_enabled', False)}")
             else:
-                print("   ⚠ WARNING: CLICKHOUSE_PASSWORD not in secret mappings")
+                print("    WARNING:  WARNING: CLICKHOUSE_PASSWORD not in secret mappings")
         else:
-            print("   ⚠ GCP Secret Manager not available (may be normal for local testing)")
+            print("    WARNING:  GCP Secret Manager not available (may be normal for local testing)")
     except Exception as e:
-        print(f"   ⚠ Failed to check GCP Secret Manager: {e}")
+        print(f"    WARNING:  Failed to check GCP Secret Manager: {e}")
     
     # Test 6: Validate no localhost defaults
     print("\n6. Validating no localhost defaults in staging...")

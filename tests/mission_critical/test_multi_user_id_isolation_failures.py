@@ -5,7 +5,7 @@ MISSION CRITICAL: This test suite validates that ID generation provides proper
 user isolation and prevents cross-user data contamination through ID conflicts.
 
 Business Value Justification:
-- Segment: ALL (Free → Enterprise) - USER SECURITY CRITICAL
+- Segment: ALL (Free  ->  Enterprise) - USER SECURITY CRITICAL
 - Business Goal: Prevent user data leakage and ensure complete user isolation
 - Value Impact: Protects user privacy and prevents catastrophic data breaches
 - Strategic Impact: CRITICAL for multi-user platform trust and regulatory compliance

@@ -138,7 +138,7 @@ class TestAuthenticatedUserLoadPerformanceE2E(BaseE2ETest):
                 assert actual_permissions.issuperset(expected_permissions), \
                     f"Missing permissions for {tier} tier: {expected_permissions - actual_permissions}"
         
-        print(f"✅ Concurrent authentication test completed: {len(successful_auths)}/{len(auth_results)} successful")
+        print(f" PASS:  Concurrent authentication test completed: {len(successful_auths)}/{len(auth_results)} successful")
     
     async def _authenticate_user_e2e(self, user_scenario: Dict[str, Any]) -> Dict[str, Any]:
         """Authenticate a single user and measure performance"""
@@ -314,7 +314,7 @@ class TestAuthenticatedUserLoadPerformanceE2E(BaseE2ETest):
             missing_events = required_events - event_types
             assert len(missing_events) == 0, f"Missing required WebSocket events: {missing_events}"
         
-        print(f"✅ Multi-user agent execution completed: {len(successful_executions)}/{len(agent_results)} successful")
+        print(f" PASS:  Multi-user agent execution completed: {len(successful_executions)}/{len(agent_results)} successful")
     
     async def _execute_agent_request_e2e(self, user: Dict[str, Any], agent_type: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute agent request for authenticated user"""
@@ -440,7 +440,7 @@ class TestAuthenticatedUserLoadPerformanceE2E(BaseE2ETest):
                 messages_per_second = total_messages / total_ws_duration
                 assert messages_per_second > 5, f"WebSocket message throughput too low: {messages_per_second:.2f} msg/s"
         
-        print(f"✅ Authenticated WebSocket test completed: {len(successful_connections)}/{len(ws_results)} connections")
+        print(f" PASS:  Authenticated WebSocket test completed: {len(successful_connections)}/{len(ws_results)} connections")
     
     async def _test_authenticated_websocket_connection(self, user: Dict[str, Any]) -> Dict[str, Any]:
         """Test authenticated WebSocket connection for a single user"""

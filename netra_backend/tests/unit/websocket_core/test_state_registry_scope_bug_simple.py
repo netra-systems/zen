@@ -20,7 +20,7 @@ def test_state_registry_scope_bug_direct_reproduction():
     
     EXPECTED RESULT: NameError: name 'state_registry' is not defined
     """
-    print("🔴 TESTING: state_registry scope bug direct reproduction")
+    print("[U+1F534] TESTING: state_registry scope bug direct reproduction")
     
     # Try to access state_registry directly - should fail with NameError
     try:
@@ -30,10 +30,10 @@ def test_state_registry_scope_bug_direct_reproduction():
     except NameError as e:
         # This is the expected behavior - state_registry is not accessible
         error_message = str(e)
-        print(f"✅ CONFIRMED BUG: {error_message}")
+        print(f" PASS:  CONFIRMED BUG: {error_message}")
         assert "state_registry" in error_message
         assert "not defined" in error_message
-        print("✅ TEST SUCCESS: state_registry scope bug reproduced successfully")
+        print(" PASS:  TEST SUCCESS: state_registry scope bug reproduced successfully")
 
 
 @pytest.mark.asyncio
@@ -46,7 +46,7 @@ async def test_websocket_route_state_registry_access_bug():
     2. websocket_endpoint() tries to access state_registry but it's out of scope
     3. Results in NameError causing 100% connection failures
     """
-    print("🔴 TESTING: WebSocket route state_registry access bug")
+    print("[U+1F534] TESTING: WebSocket route state_registry access bug")
     
     from netra_backend.app.routes.websocket import _initialize_connection_state
     
@@ -65,7 +65,7 @@ async def test_websocket_route_state_registry_access_bug():
             mock_websocket, "testing", "jwt.test_token", mock_registry
         )
         
-        print(f"✅ Connection state initialized: {preliminary_connection_id}")
+        print(f" PASS:  Connection state initialized: {preliminary_connection_id}")
         
         # Now simulate the websocket_endpoint() code that tries to access state_registry
         # This is the exact code from lines 1404, 1407, 1420 in websocket.py
@@ -74,23 +74,23 @@ async def test_websocket_route_state_registry_access_bug():
             state_registry.unregister_connection(preliminary_connection_id)  # noqa: F821
             pytest.fail("Expected NameError when accessing state_registry outside initialization function")
         except NameError as e:
-            print(f"✅ CONFIRMED BUG: Line 1404 equivalent fails with: {e}")
+            print(f" PASS:  CONFIRMED BUG: Line 1404 equivalent fails with: {e}")
             
         try:
             # Line 1407: state_registry.register_connection(connection_id, user_id)
             state_registry.register_connection("new_connection_id", "user_123")  # noqa: F821
             pytest.fail("Expected NameError when accessing state_registry outside initialization function")
         except NameError as e:
-            print(f"✅ CONFIRMED BUG: Line 1407 equivalent fails with: {e}")
+            print(f" PASS:  CONFIRMED BUG: Line 1407 equivalent fails with: {e}")
             
         try:
             # Line 1420: state_registry.register_connection(connection_id, user_id)
             state_registry.register_connection("fallback_connection_id", "user_456")  # noqa: F821  
             pytest.fail("Expected NameError when accessing state_registry outside initialization function")
         except NameError as e:
-            print(f"✅ CONFIRMED BUG: Line 1420 equivalent fails with: {e}")
+            print(f" PASS:  CONFIRMED BUG: Line 1420 equivalent fails with: {e}")
             
-        print("✅ TEST SUCCESS: All state_registry accesses fail with scope bug")
+        print(" PASS:  TEST SUCCESS: All state_registry accesses fail with scope bug")
 
 
 def test_websocket_production_scenario_scope_bug():
@@ -104,7 +104,7 @@ def test_websocket_production_scenario_scope_bug():
     4. Connection fails with internal server error
     5. User sees 100% connection failure rate
     """
-    print("🔴 TESTING: Production scenario scope bug")
+    print("[U+1F534] TESTING: Production scenario scope bug")
     
     # Simulate the production code path
     def simulate_websocket_endpoint_auth_flow():
@@ -115,12 +115,12 @@ def test_websocket_production_scenario_scope_bug():
         connection_id = "ws_final_67890"
         user_id = "production_user"
         
-        print(f"✅ Simulated successful connection initialization: {preliminary_connection_id}")
+        print(f" PASS:  Simulated successful connection initialization: {preliminary_connection_id}")
         
         # This simulates the authentication flow where the bug occurs
         # Lines 1399-1421 in websocket.py
         if connection_id != preliminary_connection_id:
-            print("🔄 Connection ID migration required - accessing state_registry...")
+            print(" CYCLE:  Connection ID migration required - accessing state_registry...")
             
             try:
                 # Line 1404: Unregister preliminary connection
@@ -141,22 +141,22 @@ def test_websocket_production_scenario_scope_bug():
     # Execute production scenario simulation
     success, error_message = simulate_websocket_endpoint_auth_flow()
     
-    print(f"🔍 Production scenario result: Success={success}, Error='{error_message}'")
+    print(f" SEARCH:  Production scenario result: Success={success}, Error='{error_message}'")
     
     # For this test, we EXPECT failure due to scope bug
     assert not success, "Expected production scenario to fail due to state_registry scope bug"
     assert "NameError" in error_message, f"Expected NameError, got: {error_message}"
     assert "state_registry" in error_message, f"Expected state_registry error, got: {error_message}"
     
-    print("✅ TEST SUCCESS: Production scenario fails due to state_registry scope bug")
-    print("💰 BUSINESS IMPACT: 100% WebSocket connection failure rate")
-    print("💰 REVENUE IMPACT: $500K+ ARR chat functionality completely broken")
+    print(" PASS:  TEST SUCCESS: Production scenario fails due to state_registry scope bug")
+    print("[U+1F4B0] BUSINESS IMPACT: 100% WebSocket connection failure rate")
+    print("[U+1F4B0] REVENUE IMPACT: $500K+ ARR chat functionality completely broken")
 
 
 if __name__ == "__main__":
     # Run the tests directly
     print("=" * 80)
-    print("🔴 RUNNING STATE_REGISTRY SCOPE BUG REPRODUCTION TESTS")
+    print("[U+1F534] RUNNING STATE_REGISTRY SCOPE BUG REPRODUCTION TESTS")
     print("=" * 80)
     
     test_state_registry_scope_bug_direct_reproduction()
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     print()
     
     print("=" * 80)
-    print("✅ ALL TESTS PASSED - STATE_REGISTRY SCOPE BUG CONFIRMED")
-    print("🚨 CRITICAL: This bug causes 100% WebSocket connection failure rate")
-    print("💰 BUSINESS IMPACT: Complete loss of chat functionality ($500K+ ARR)")
+    print(" PASS:  ALL TESTS PASSED - STATE_REGISTRY SCOPE BUG CONFIRMED")
+    print(" ALERT:  CRITICAL: This bug causes 100% WebSocket connection failure rate")
+    print("[U+1F4B0] BUSINESS IMPACT: Complete loss of chat functionality ($500K+ ARR)")
     print("=" * 80)

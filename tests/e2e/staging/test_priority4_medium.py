@@ -266,7 +266,7 @@ class TestMediumResources:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Memory monitoring endpoint available: {endpoint}")
+                        print(f"[U+2713] Memory monitoring endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -286,9 +286,9 @@ class TestMediumResources:
                             memory_results[endpoint]["parse_error"] = str(e)[:50]
                             
                     elif response.status_code in [401, 403]:
-                        print(f"• Memory endpoint requires auth: {endpoint}")
+                        print(f"[U+2022] Memory endpoint requires auth: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Memory endpoint not implemented: {endpoint}")
+                        print(f"[U+2022] Memory endpoint not implemented: {endpoint}")
                         
                 except Exception as e:
                     memory_results[endpoint] = {"error": str(e)[:100]}
@@ -350,7 +350,7 @@ class TestMediumResources:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Database monitoring endpoint available: {endpoint}")
+                        print(f"[U+2713] Database monitoring endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -370,9 +370,9 @@ class TestMediumResources:
                             db_results[endpoint]["parse_error"] = str(e)[:50]
                             
                     elif response.status_code in [401, 403]:
-                        print(f"• Database endpoint requires auth: {endpoint}")
+                        print(f"[U+2022] Database endpoint requires auth: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Database endpoint not implemented: {endpoint}")  
+                        print(f"[U+2022] Database endpoint not implemented: {endpoint}")  
                         
                 except Exception as e:
                     db_results[endpoint] = {"error": str(e)[:100]}
@@ -393,7 +393,7 @@ class TestMediumResources:
                     }
                     
                     if found_db_health:
-                        print(f"✓ Database health indicators in health endpoint: {found_db_health}")
+                        print(f"[U+2713] Database health indicators in health endpoint: {found_db_health}")
                         
             except Exception as e:
                 db_results["health_db_check"] = {"error": str(e)[:50]}
@@ -529,7 +529,7 @@ class TestMediumReliability:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Circuit breaker endpoint available: {endpoint}")
+                        print(f"[U+2713] Circuit breaker endpoint available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -549,9 +549,9 @@ class TestMediumReliability:
                             breaker_results[endpoint]["parse_error"] = str(e)[:50]
                             
                     elif response.status_code in [401, 403]:
-                        print(f"• Circuit breaker endpoint requires auth: {endpoint}")
+                        print(f"[U+2022] Circuit breaker endpoint requires auth: {endpoint}")
                     elif response.status_code == 404:
-                        print(f"• Circuit breaker not implemented: {endpoint}")
+                        print(f"[U+2022] Circuit breaker not implemented: {endpoint}")
                         
                 except Exception as e:
                     breaker_results[endpoint] = {"error": str(e)[:100]}
@@ -719,7 +719,7 @@ class TestMediumReliability:
                     }
                     
                     if response.status_code == 200:
-                        print(f"✓ Connection pool monitoring available: {endpoint}")
+                        print(f"[U+2713] Connection pool monitoring available: {endpoint}")
                         try:
                             data = response.json()
                             data_str = json.dumps(data).lower()
@@ -775,7 +775,7 @@ class TestMediumReliability:
 def verify_test_duration(test_name: str, duration: float, minimum: float = 0.3):
     """Verify test took real time to execute"""
     assert duration >= minimum, \
-        f"🚨 FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
+        f" ALERT:  FAKE TEST DETECTED: {test_name} completed in {duration:.3f}s (minimum: {minimum}s). " \
         f"This test is not making real network calls!"
 
 

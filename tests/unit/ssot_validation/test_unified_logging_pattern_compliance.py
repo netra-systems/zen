@@ -78,7 +78,7 @@ class TestUnifiedLoggingPatternCompliance(SSotBaseTestCase):
             f"BUSINESS IMPACT: $500K+ ARR debugging capability compromised without unified logging."
         )
         
-        print("✅ SSOT COMPLIANCE: Both files use unified logging pattern")
+        print(" PASS:  SSOT COMPLIANCE: Both files use unified logging pattern")
         
     def test_no_legacy_logging_imports_remain(self):
         """
@@ -122,7 +122,7 @@ class TestUnifiedLoggingPatternCompliance(SSotBaseTestCase):
             f"and 'central_logger.get_logger(__name__)' for Golden Path correlation compliance."
         )
         
-        print("✅ NO LEGACY IMPORTS: All legacy logging patterns successfully removed")
+        print(" PASS:  NO LEGACY IMPORTS: All legacy logging patterns successfully removed")
         
     def test_logger_variable_naming_consistency(self):
         """
@@ -156,7 +156,7 @@ class TestUnifiedLoggingPatternCompliance(SSotBaseTestCase):
             f"Consistent naming ensures Golden Path debugging correlation works properly."
         )
         
-        print("✅ CONSISTENT NAMING: Both files use standard logger variable naming")
+        print(" PASS:  CONSISTENT NAMING: Both files use standard logger variable naming")
         
     def _analyze_file_logging_compliance(self, file_path: str, filename: str) -> Dict:
         """
@@ -248,7 +248,7 @@ class TestUnifiedLoggingPatternCompliance(SSotBaseTestCase):
                 f"SSOT remediation required for Golden Path correlation tracking."
             )
             
-            print("✅ CONTEXT PROPAGATION: Both modules use central_logger for unified context")
+            print(" PASS:  CONTEXT PROPAGATION: Both modules use central_logger for unified context")
 
 
 if __name__ == '__main__':
@@ -261,4 +261,4 @@ if __name__ == '__main__':
     if result.failures or result.errors:
         print("\nEXPECTED DURING REMEDIATION: Some tests may fail until SSOT logging is fully implemented")
     else:
-        print("\n✅ ALL TESTS PASSED: SSOT logging pattern compliance achieved!")
+        print("\n PASS:  ALL TESTS PASSED: SSOT logging pattern compliance achieved!")

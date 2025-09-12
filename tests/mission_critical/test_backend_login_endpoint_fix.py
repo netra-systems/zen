@@ -5,7 +5,7 @@ from shared.isolated_environment import IsolatedEnvironment
 # REMOVED_SYNTAX_ERROR: Validates comprehensive authentication flows, user journeys, and revenue-critical auth systems.
 
 # REMOVED_SYNTAX_ERROR: COVERAGE:
-    # REMOVED_SYNTAX_ERROR: - Complete signup → login → chat flow validation
+    # REMOVED_SYNTAX_ERROR: - Complete signup  ->  login  ->  chat flow validation
     # REMOVED_SYNTAX_ERROR: - JWT token lifecycle management
     # REMOVED_SYNTAX_ERROR: - Cross-service authentication testing
     # REMOVED_SYNTAX_ERROR: - Performance monitoring under load
@@ -422,7 +422,7 @@ from shared.isolated_environment import IsolatedEnvironment
     
 
 # REMOVED_SYNTAX_ERROR: def test_complete_signup_to_login_flow(self, client, mock_auth_client, valid_user_data):
-    # REMOVED_SYNTAX_ERROR: """Test complete signup → login → token validation flow."""
+    # REMOVED_SYNTAX_ERROR: """Test complete signup  ->  login  ->  token validation flow."""
     # REMOVED_SYNTAX_ERROR: pass
     # Mock successful registration
     # REMOVED_SYNTAX_ERROR: mock_auth_client.register.return_value = { )

@@ -53,7 +53,7 @@ class TestFactoryDelegationValidation(unittest.TestCase):
         
     def test_factory_creates_user_execution_engine_instances(self):
         """Test that factory creates UserExecutionEngine instances"""
-        print("\n🔍 Testing factory creates UserExecutionEngine instances...")
+        print("\n SEARCH:  Testing factory creates UserExecutionEngine instances...")
         
         user_id = "test_user_123"
         session_id = "test_session_456"
@@ -76,11 +76,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             self.assertEqual(engine.session_id, session_id)
             self.assertEqual(engine.websocket_manager, self.mock_websocket_manager)
             
-            print("  ✅ Factory creates UserExecutionEngine with correct properties")
+            print("   PASS:  Factory creates UserExecutionEngine with correct properties")
             
     def test_factory_multiple_users_isolation(self):
         """Test factory creates isolated engines for different users"""
-        print("\n🔍 Testing factory creates isolated engines for multiple users...")
+        print("\n SEARCH:  Testing factory creates isolated engines for multiple users...")
         
         users = [
             ("user_1", "session_1"),
@@ -119,11 +119,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
                     self.assertNotEqual(engine1.session_id, engine2.session_id,
                                       f"Engine {i} and {j} should have different session IDs")
         
-        print(f"  ✅ Factory creates {len(engines)} isolated engines for different users")
+        print(f"   PASS:  Factory creates {len(engines)} isolated engines for different users")
         
     def test_factory_websocket_integration(self):
         """Test factory properly integrates with WebSocket manager"""
-        print("\n🔍 Testing factory WebSocket manager integration...")
+        print("\n SEARCH:  Testing factory WebSocket manager integration...")
         
         user_id = "test_user_ws"
         session_id = "test_session_ws"
@@ -142,11 +142,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             # Verify engine has correct WebSocket manager
             self.assertEqual(engine.websocket_manager, self.mock_websocket_manager)
             
-            print("  ✅ Factory properly integrates with WebSocketManagerFactory")
+            print("   PASS:  Factory properly integrates with WebSocketManagerFactory")
             
     def test_factory_concurrent_creation(self):
         """Test factory handles concurrent creation requests correctly"""
-        print("\n🔍 Testing factory handles concurrent creation...")
+        print("\n SEARCH:  Testing factory handles concurrent creation...")
         
         async def create_engine_async(user_id: str, session_id: str):
             """Helper to create engine in async context"""
@@ -188,11 +188,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             return engines
         
         engines = asyncio.run(test_concurrent())
-        print(f"  ✅ Factory successfully handles {len(engines)} concurrent creations")
+        print(f"   PASS:  Factory successfully handles {len(engines)} concurrent creations")
         
     def test_factory_error_handling(self):
         """Test factory error handling for edge cases"""
-        print("\n🔍 Testing factory error handling...")
+        print("\n SEARCH:  Testing factory error handling...")
         
         # Test 1: Missing user_id
         with self.assertRaises((ValueError, TypeError)) as context:
@@ -200,7 +200,7 @@ class TestFactoryDelegationValidation(unittest.TestCase):
                 user_id=None,
                 session_id="test_session"
             )
-        print("  ✅ Factory correctly handles missing user_id")
+        print("   PASS:  Factory correctly handles missing user_id")
         
         # Test 2: Missing session_id  
         with self.assertRaises((ValueError, TypeError)) as context:
@@ -208,7 +208,7 @@ class TestFactoryDelegationValidation(unittest.TestCase):
                 user_id="test_user",
                 session_id=None
             )
-        print("  ✅ Factory correctly handles missing session_id")
+        print("   PASS:  Factory correctly handles missing session_id")
         
         # Test 3: Empty string parameters
         with patch.object(WebSocketManagerFactory, 'get_manager') as mock_get_manager:
@@ -219,11 +219,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
                     user_id="",
                     session_id="test_session"
                 )
-        print("  ✅ Factory correctly handles empty user_id")
+        print("   PASS:  Factory correctly handles empty user_id")
         
     def test_factory_websocket_manager_failure_handling(self):
         """Test factory handles WebSocket manager creation failures"""
-        print("\n🔍 Testing factory handles WebSocket manager failures...")
+        print("\n SEARCH:  Testing factory handles WebSocket manager failures...")
         
         user_id = "test_user_fail"
         session_id = "test_session_fail"
@@ -240,11 +240,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             
             self.assertIn("WebSocket manager creation failed", str(context.exception))
         
-        print("  ✅ Factory properly propagates WebSocket manager creation failures")
+        print("   PASS:  Factory properly propagates WebSocket manager creation failures")
         
     def test_factory_method_compatibility(self):
         """Test factory provides all methods needed to replace deprecated patterns"""
-        print("\n🔍 Testing factory method compatibility...")
+        print("\n SEARCH:  Testing factory method compatibility...")
         
         # Test factory has expected methods
         required_methods = [
@@ -257,7 +257,7 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             self.assertTrue(callable(getattr(self.factory, method_name)),
                           f"Factory.{method_name} should be callable")
         
-        print("  ✅ Factory has all required methods")
+        print("   PASS:  Factory has all required methods")
         
         # Test factory creates consistent engines for same user
         user_id = "consistent_user"
@@ -275,11 +275,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             self.assertEqual(engine1.user_id, engine2.user_id, "Should have same user_id")
             self.assertNotEqual(engine1.session_id, engine2.session_id, "Should have different session_ids")
         
-        print("  ✅ Factory creates consistent engines for same user")
+        print("   PASS:  Factory creates consistent engines for same user")
         
     def test_factory_replaces_deprecated_patterns(self):
         """Test that factory can replace deprecated creation patterns"""
-        print("\n🔍 Testing factory replaces deprecated creation patterns...")
+        print("\n SEARCH:  Testing factory replaces deprecated creation patterns...")
         
         user_id = "pattern_test_user"
         session_id = "pattern_test_session"
@@ -300,11 +300,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             # Pattern 3: Verify tool dispatcher integration
             self.assertIsNotNone(engine.tool_dispatcher)
             
-        print("  ✅ Factory successfully replaces deprecated creation patterns")
+        print("   PASS:  Factory successfully replaces deprecated creation patterns")
         
     def test_factory_instance_reuse_vs_creation(self):
         """Test factory behavior regarding instance reuse vs new creation"""
-        print("\n🔍 Testing factory instance creation vs reuse behavior...")
+        print("\n SEARCH:  Testing factory instance creation vs reuse behavior...")
         
         user_id = "reuse_test_user"
         session_id = "reuse_test_session"
@@ -325,11 +325,11 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             self.assertEqual(engine1.user_id, engine2.user_id)
             self.assertEqual(engine1.session_id, engine2.session_id)
             
-        print("  ✅ Factory creates new instances (no unsafe reuse)")
+        print("   PASS:  Factory creates new instances (no unsafe reuse)")
         
     def test_factory_singleton_pattern_verification(self):
         """Test that factory itself follows proper singleton/instance patterns"""
-        print("\n🔍 Testing factory instance patterns...")
+        print("\n SEARCH:  Testing factory instance patterns...")
         
         # Test factory instance creation
         factory1 = ExecutionEngineFactory()
@@ -357,7 +357,7 @@ class TestFactoryDelegationValidation(unittest.TestCase):
             # Engines should be separate instances
             self.assertIsNot(engine1, engine2)
             
-        print("  ✅ Factory instances work correctly (stateless pattern)")
+        print("   PASS:  Factory instances work correctly (stateless pattern)")
 
 
 if __name__ == '__main__':

@@ -118,18 +118,18 @@ class DockerIntegrationTestRunner:
                 )
                 
                 if test_result.returncode == 0:
-                    return True, "✅ Docker daemon is running and functional"
+                    return True, " PASS:  Docker daemon is running and functional"
                 else:
-                    return False, f"❌ Docker daemon running but cannot execute containers: {test_result.stderr}"
+                    return False, f" FAIL:  Docker daemon running but cannot execute containers: {test_result.stderr}"
             else:
-                return False, f"❌ Docker daemon not available: {result.stderr}"
+                return False, f" FAIL:  Docker daemon not available: {result.stderr}"
                 
         except subprocess.TimeoutExpired:
-            return False, "❌ Docker daemon check timed out"
+            return False, " FAIL:  Docker daemon check timed out"
         except FileNotFoundError:
-            return False, "❌ Docker command not found - Docker not installed"
+            return False, " FAIL:  Docker command not found - Docker not installed"
         except Exception as e:
-            return False, f"❌ Docker check failed: {e}"
+            return False, f" FAIL:  Docker check failed: {e}"
     
     def get_test_categories_for_mode(self) -> List[str]:
         """Get test categories to run based on mode."""
@@ -243,7 +243,7 @@ class DockerIntegrationTestRunner:
         # Category details
         report_lines.append("CATEGORY RESULTS:")
         for category, success in self.test_results.items():
-            status = "✅ PASSED" if success else "❌ FAILED"
+            status = " PASS:  PASSED" if success else " FAIL:  FAILED"
             time_taken = self.execution_times.get(category, 0)
             importance = self.test_categories.get(category, {}).get("importance", "UNKNOWN")
             
@@ -271,7 +271,7 @@ class DockerIntegrationTestRunner:
         
         if critical_failed:
             report_lines.extend([
-                "🚨 CRITICAL INFRASTRUCTURE FAILURES:",
+                " ALERT:  CRITICAL INFRASTRUCTURE FAILURES:",
                 *[f"  - {cat}: Infrastructure reliability at risk" for cat in critical_failed],
                 ""
             ])
@@ -279,9 +279,9 @@ class DockerIntegrationTestRunner:
         # Recommendations
         report_lines.extend([
             "RECOMMENDATIONS:",
-            f"  Docker Infrastructure: {'✅ STABLE' if successful_categories >= total_categories * 0.8 else '⚠️  NEEDS ATTENTION'}",
-            f"  CI/CD Pipeline: {'✅ READY' if 'ci_pipeline' not in critical_failed + high_failed else '❌ NOT READY'}",
-            f"  Development Environment: {'✅ RELIABLE' if 'orchestration' not in critical_failed else '❌ UNSTABLE'}",
+            f"  Docker Infrastructure: {' PASS:  STABLE' if successful_categories >= total_categories * 0.8 else ' WARNING: [U+FE0F]  NEEDS ATTENTION'}",
+            f"  CI/CD Pipeline: {' PASS:  READY' if 'ci_pipeline' not in critical_failed + high_failed else ' FAIL:  NOT READY'}",
+            f"  Development Environment: {' PASS:  RELIABLE' if 'orchestration' not in critical_failed else ' FAIL:  UNSTABLE'}",
             ""
         ])
         
@@ -294,7 +294,7 @@ class DockerIntegrationTestRunner:
         Returns:
             True if all tests passed or were skipped appropriately.
         """
-        print(f"🐳 Starting Docker Integration Test Runner - {self.mode.upper()} mode")
+        print(f"[U+1F433] Starting Docker Integration Test Runner - {self.mode.upper()} mode")
         print("=" * 60)
         
         # Check Docker availability first
@@ -302,7 +302,7 @@ class DockerIntegrationTestRunner:
         print(f"Docker Status: {docker_status}")
         
         if not docker_available:
-            print("\n⚠️  Docker not available - will run validation tests only")
+            print("\n WARNING: [U+FE0F]  Docker not available - will run validation tests only")
             print("   Real Docker orchestration tests will be skipped")
         
         print()
@@ -311,7 +311,7 @@ class DockerIntegrationTestRunner:
         categories_to_run = self.get_test_categories_for_mode()
         estimated_time = self.estimate_execution_time(categories_to_run)
         
-        print(f"📋 Test Plan:")
+        print(f"[U+1F4CB] Test Plan:")
         print(f"   Categories: {len(categories_to_run)}")
         print(f"   Estimated Time: {estimated_time} minutes")
         print(f"   Categories: {', '.join(categories_to_run)}")
@@ -323,26 +323,26 @@ class DockerIntegrationTestRunner:
                 cat for cat in categories_to_run
                 if not self.test_categories.get(cat, {}).get("requires_docker", True)
             ]
-            print(f"🔄 Filtered to non-Docker tests: {', '.join(categories_to_run)}")
+            print(f" CYCLE:  Filtered to non-Docker tests: {', '.join(categories_to_run)}")
             print()
         
         # Run test categories
         total_start_time = time.time()
         
         for i, category in enumerate(categories_to_run, 1):
-            print(f"🧪 [{i}/{len(categories_to_run)}] Running {category} tests...")
+            print(f"[U+1F9EA] [{i}/{len(categories_to_run)}] Running {category} tests...")
             
             success, output, execution_time = self.run_test_category(category)
             
             self.test_results[category] = success
             self.execution_times[category] = execution_time
             
-            status = "✅ PASSED" if success else "❌ FAILED"
+            status = " PASS:  PASSED" if success else " FAIL:  FAILED"
             print(f"   Result: {status} ({execution_time:.1f}s)")
             
             if not success and "skipped" not in output.lower():
                 # Show failure details for actual failures (not skips)
-                print(f"   ⚠️  Failure details available in full report")
+                print(f"    WARNING: [U+FE0F]  Failure details available in full report")
             
             print()
         
@@ -357,7 +357,7 @@ class DockerIntegrationTestRunner:
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(report)
         
-        print(f"📄 Full report saved to: {report_file}")
+        print(f"[U+1F4C4] Full report saved to: {report_file}")
         
         # Determine overall success
         successful_categories = sum(1 for success in self.test_results.values() if success)
@@ -366,10 +366,10 @@ class DockerIntegrationTestRunner:
         overall_success = success_rate >= 0.8  # 80% success rate threshold
         
         if overall_success:
-            print(f"🎉 Docker integration testing completed successfully!")
+            print(f" CELEBRATION:  Docker integration testing completed successfully!")
             print(f"   Infrastructure reliability validated for $2M+ ARR protection")
         else:
-            print(f"⚠️  Docker integration testing completed with issues")
+            print(f" WARNING: [U+FE0F]  Docker integration testing completed with issues")
             print(f"   Infrastructure reliability needs attention")
         
         return overall_success
@@ -461,10 +461,10 @@ Examples:
         return 0 if success else 1
         
     except KeyboardInterrupt:
-        print("\n\n🛑 Test execution interrupted by user")
+        print("\n\n[U+1F6D1] Test execution interrupted by user")
         return 130
     except Exception as e:
-        print(f"\n\n💥 Test execution failed with exception: {e}")
+        print(f"\n\n[U+1F4A5] Test execution failed with exception: {e}")
         logger.exception("Test runner exception")
         return 1
 

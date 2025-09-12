@@ -42,7 +42,7 @@ class TestDockerFastFailValidation:
         EXPECTED RESULT: PASS - Should complete quickly with proper fast-fail logic
         PURPOSE: Validates Issue #411 fix implementation
         """
-        logger.info("✅ VALIDATION TEST: Docker availability fast-fail - SHOULD COMPLETE < 2s")
+        logger.info(" PASS:  VALIDATION TEST: Docker availability fast-fail - SHOULD COMPLETE < 2s")
         
         start_time = time.time()
         fast_fail_threshold = 2.0  # Should complete within 2 seconds
@@ -69,7 +69,7 @@ class TestDockerFastFailValidation:
             else:
                 logger.info("Docker unavailable detected quickly - fast-fail working")
                 
-            logger.info(f"✅ PASS: Fast-fail validation successful ({duration:.1f}s)")
+            logger.info(f" PASS:  PASS: Fast-fail validation successful ({duration:.1f}s)")
             
         except Exception as e:
             duration = time.time() - start_time
@@ -80,7 +80,7 @@ class TestDockerFastFailValidation:
                 f"Should fail quickly when Docker unavailable."
             )
             
-            logger.info(f"✅ PASS: Fast exception handling ({duration:.1f}s): {e}")
+            logger.info(f" PASS:  PASS: Fast exception handling ({duration:.1f}s): {e}")
 
     def test_websocket_graceful_degradation_when_docker_unavailable(self):
         """
@@ -89,7 +89,7 @@ class TestDockerFastFailValidation:
         EXPECTED RESULT: PASS - Should skip cleanly without hanging
         PURPOSE: Validates WebSocket test resilience after Issue #411 fix
         """
-        logger.info("✅ VALIDATION TEST: WebSocket graceful degradation - SHOULD SKIP CLEANLY")
+        logger.info(" PASS:  VALIDATION TEST: WebSocket graceful degradation - SHOULD SKIP CLEANLY")
         
         start_time = time.time()
         graceful_threshold = 3.0  # Should handle gracefully within 3 seconds
@@ -114,7 +114,7 @@ class TestDockerFastFailValidation:
                 
                 assert not docker_available, "Mock should return Docker unavailable"
                 
-                logger.info(f"✅ PASS: Graceful degradation successful ({duration:.1f}s)")
+                logger.info(f" PASS:  PASS: Graceful degradation successful ({duration:.1f}s)")
                 
         except Exception as e:
             duration = time.time() - start_time
@@ -123,7 +123,7 @@ class TestDockerFastFailValidation:
                 f"GRACEFUL DEGRADATION FAILED: Exception after {duration:.1f}s: {e}"
             )
             
-            logger.info(f"✅ PASS: Exception handled gracefully ({duration:.1f}s): {e}")
+            logger.info(f" PASS:  PASS: Exception handled gracefully ({duration:.1f}s): {e}")
 
     def test_docker_rate_limiter_fast_timeout_enforcement(self):
         """
@@ -132,7 +132,7 @@ class TestDockerFastFailValidation:
         EXPECTED RESULT: PASS - Should timeout quickly and predictably
         PURPOSE: Validates rate limiter timeout fix for Issue #411
         """
-        logger.info("✅ VALIDATION TEST: Rate limiter fast timeout - SHOULD TIMEOUT QUICKLY")
+        logger.info(" PASS:  VALIDATION TEST: Rate limiter fast timeout - SHOULD TIMEOUT QUICKLY")
         
         start_time = time.time()
         timeout_setting = 2.0  # Set 2s timeout
@@ -155,7 +155,7 @@ class TestDockerFastFailValidation:
                     f"TIMEOUT ENFORCEMENT FAILED: Available Docker took {duration:.1f}s "
                     f"(should be < {timeout_setting + tolerance}s)"
                 )
-                logger.info(f"✅ PASS: Docker available, completed quickly ({duration:.1f}s)")
+                logger.info(f" PASS:  PASS: Docker available, completed quickly ({duration:.1f}s)")
                 return
                 
             # If Docker unavailable, should fail quickly
@@ -164,7 +164,7 @@ class TestDockerFastFailValidation:
                 f"(should be < {timeout_setting + tolerance}s)"
             )
             
-            logger.info(f"✅ PASS: Docker unavailable, failed quickly ({duration:.1f}s)")
+            logger.info(f" PASS:  PASS: Docker unavailable, failed quickly ({duration:.1f}s)")
             
         except subprocess.TimeoutExpired as e:
             duration = time.time() - start_time
@@ -172,10 +172,10 @@ class TestDockerFastFailValidation:
             # Timeout should occur close to the specified timeout
             assert abs(duration - timeout_setting) < tolerance, (
                 f"TIMEOUT TIMING FAILED: Timeout at {duration:.1f}s "
-                f"(should be ~{timeout_setting}s ± {tolerance}s)"
+                f"(should be ~{timeout_setting}s  +/-  {tolerance}s)"
             )
             
-            logger.info(f"✅ PASS: Timeout enforced correctly ({duration:.1f}s)")
+            logger.info(f" PASS:  PASS: Timeout enforced correctly ({duration:.1f}s)")
             
         except Exception as e:
             duration = time.time() - start_time
@@ -185,7 +185,7 @@ class TestDockerFastFailValidation:
                 f"EXCEPTION TIMING FAILED: Exception after {duration:.1f}s: {e}"
             )
             
-            logger.info(f"✅ PASS: Exception handled quickly ({duration:.1f}s): {e}")
+            logger.info(f" PASS:  PASS: Exception handled quickly ({duration:.1f}s): {e}")
 
     def test_caching_prevents_repeated_slow_checks(self):
         """
@@ -194,7 +194,7 @@ class TestDockerFastFailValidation:
         EXPECTED RESULT: PASS - Second check should be nearly instantaneous
         PURPOSE: Validates caching optimization for Issue #411
         """
-        logger.info("✅ VALIDATION TEST: Docker availability caching - SHOULD CACHE RESULTS")
+        logger.info(" PASS:  VALIDATION TEST: Docker availability caching - SHOULD CACHE RESULTS")
         
         manager = UnifiedDockerManager()
         
@@ -223,7 +223,7 @@ class TestDockerFastFailValidation:
             f"(should be < {cache_threshold}s due to caching)"
         )
         
-        logger.info(f"✅ PASS: Caching working correctly (speedup: {duration1/duration2:.1f}x)")
+        logger.info(f" PASS:  PASS: Caching working correctly (speedup: {duration1/duration2:.1f}x)")
 
     def test_mission_critical_websocket_no_hang_simulation(self):
         """
@@ -232,7 +232,7 @@ class TestDockerFastFailValidation:
         EXPECTED RESULT: PASS - Should complete or skip without hanging
         PURPOSE: Validates end-to-end fix for Issue #411
         """
-        logger.info("✅ VALIDATION TEST: Mission critical no hang - SHOULD COMPLETE/SKIP QUICKLY")
+        logger.info(" PASS:  VALIDATION TEST: Mission critical no hang - SHOULD COMPLETE/SKIP QUICKLY")
         
         start_time = time.time()
         no_hang_threshold = 5.0  # Should complete within 5 seconds
@@ -254,13 +254,13 @@ class TestDockerFastFailValidation:
                     f"(should be < {no_hang_threshold}s)"
                 )
                 
-                logger.info(f"✅ PASS: Graceful skip in {duration:.1f}s")
+                logger.info(f" PASS:  PASS: Graceful skip in {duration:.1f}s")
                 pytest.skip("Docker unavailable - test skipped gracefully (fix working)")
                 
             else:
                 # Docker available - test can proceed
                 duration = time.time() - start_time
-                logger.info(f"✅ PASS: Docker available, proceeding with test ({duration:.1f}s)")
+                logger.info(f" PASS:  PASS: Docker available, proceeding with test ({duration:.1f}s)")
                 
         except Exception as e:
             duration = time.time() - start_time
@@ -270,14 +270,14 @@ class TestDockerFastFailValidation:
                 f"EXCEPTION HANDLING FAILED: Exception after {duration:.1f}s: {e}"
             )
             
-            logger.info(f"✅ PASS: Exception handled quickly ({duration:.1f}s): {e}")
+            logger.info(f" PASS:  PASS: Exception handled quickly ({duration:.1f}s): {e}")
 
 
 if __name__ == "__main__":
     # Run validation tests for direct execution
     test_instance = TestDockerFastFailValidation()
     
-    print("✅ ISSUE #411 VALIDATION TESTS - These tests should PASS after fixes")
+    print(" PASS:  ISSUE #411 VALIDATION TESTS - These tests should PASS after fixes")
     print("=" * 80)
     
     tests = [
@@ -295,16 +295,16 @@ if __name__ == "__main__":
         try:
             print(f"\n{len(tests) - passed - failed}. Testing {test_name}...")
             test_func()
-            print(f"   ✅ PASS: {test_name}")
+            print(f"    PASS:  PASS: {test_name}")
             passed += 1
         except Exception as e:
-            print(f"   ❌ FAIL: {test_name} - {e}")
+            print(f"    FAIL:  FAIL: {test_name} - {e}")
             failed += 1
     
     print("\n" + "=" * 80)
-    print(f"📊 VALIDATION RESULTS: {passed} passed, {failed} failed")
+    print(f" CHART:  VALIDATION RESULTS: {passed} passed, {failed} failed")
     
     if failed == 0:
-        print("🎯 ALL VALIDATION TESTS PASSED - Issue #411 fixes are working!")
+        print(" TARGET:  ALL VALIDATION TESTS PASSED - Issue #411 fixes are working!")
     else:
-        print("⚠️  Some validation tests failed - Issue #411 fixes need more work")
+        print(" WARNING: [U+FE0F]  Some validation tests failed - Issue #411 fixes need more work")

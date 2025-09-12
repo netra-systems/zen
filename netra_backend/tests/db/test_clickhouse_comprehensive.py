@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Analytics accuracy directly drives pricing optimization and customer insights
 
 This test suite validates ClickHouse as the CANONICAL SSOT for analytics data collection and querying.
-Critical for golden path: user interactions → usage analytics → business intelligence → pricing optimization.
+Critical for golden path: user interactions  ->  usage analytics  ->  business intelligence  ->  pricing optimization.
 
 SSOT Compliance:
 - Tests the ONLY source for analytics data operations  
@@ -570,7 +570,7 @@ class TestClickHouseBusinessScenarios:
         """Test user behavior analytics tracking scenario.
         
         BVJ: Core analytics functionality - user behavior drives product decisions.
-        Golden Path: User interactions → analytics storage → business insights.
+        Golden Path: User interactions  ->  analytics storage  ->  business insights.
         """
         if mock_service is None:
             mock_service = ClickHouseService(force_mock=True)
@@ -608,7 +608,7 @@ class TestClickHouseBusinessScenarios:
         """Test agent performance analytics collection scenario.
         
         BVJ: Agent optimization insights drive product improvements and customer value.
-        Golden Path: Agent executions → performance metrics → optimization recommendations.
+        Golden Path: Agent executions  ->  performance metrics  ->  optimization recommendations.
         """
         if mock_service is None:
             mock_service = ClickHouseService(force_mock=True)
@@ -648,7 +648,7 @@ class TestClickHouseBusinessScenarios:
         """Test business metrics collection and querying scenario.
         
         BVJ: Business intelligence drives strategic decisions and revenue optimization.
-        Golden Path: Usage data → business metrics → strategic insights → revenue growth.
+        Golden Path: Usage data  ->  business metrics  ->  strategic insights  ->  revenue growth.
         """
         if mock_service is None:
             mock_service = ClickHouseService(force_mock=True)

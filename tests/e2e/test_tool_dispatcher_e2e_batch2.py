@@ -798,9 +798,9 @@ class TestToolDispatcherE2EAuthenticated(SSotAsyncTestCase):
 def validate_e2e_execution_time():
     """Validate that E2E tests execute with measurable time to prevent CLAUDE.md violations."""
     import sys
-    print("\n🔍 E2E Test Execution Time Validation Enabled")
-    print("⚠️  Any E2E test completing in <1ms will be flagged as a CLAUDE.md violation")
-    print("✅ This ensures tests use REAL services and authentication\n")
+    print("\n SEARCH:  E2E Test Execution Time Validation Enabled")
+    print(" WARNING: [U+FE0F]  Any E2E test completing in <1ms will be flagged as a CLAUDE.md violation")
+    print(" PASS:  This ensures tests use REAL services and authentication\n")
 
 
 if __name__ == "__main__":

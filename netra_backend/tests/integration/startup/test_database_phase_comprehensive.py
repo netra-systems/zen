@@ -719,5 +719,5 @@ class TestDatabasePhaseComprehensive(BaseIntegrationTest):
         
         # Final validation log
         self.logger.info(
-            "🚀 DATABASE PHASE VALIDATION COMPLETE: Database infrastructure is ready to support chat functionality"
+            "[U+1F680] DATABASE PHASE VALIDATION COMPLETE: Database infrastructure is ready to support chat functionality"
         )

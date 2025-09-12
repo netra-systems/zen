@@ -163,7 +163,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         
         # Log analysis
         analysis = self.lifecycle_tracker.get_analysis_report()
-        logger.info(f"📊 Registry lifecycle analysis for {method.__name__}: {analysis}")
+        logger.info(f" CHART:  Registry lifecycle analysis for {method.__name__}: {analysis}")
         
         super().teardown_method(method)
         
@@ -186,7 +186,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         CRITICAL: This test should fail if multiple registries are created
         for the same logical supervisor, leading to registration conflicts.
         """
-        logger.info("🧪 Testing WebSocket supervisor factory registry isolation")
+        logger.info("[U+1F9EA] Testing WebSocket supervisor factory registry isolation")
         
         # Mock user context
         mock_context = Mock()
@@ -219,7 +219,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
             
         # Analyze the results
         analysis = self.lifecycle_tracker.get_analysis_report()
-        logger.info(f"📊 Isolation test results: {analysis}")
+        logger.info(f" CHART:  Isolation test results: {analysis}")
         
         # CRITICAL VALIDATIONS:
         
@@ -228,13 +228,13 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         actual_registries = analysis['total_registries_created']
         
         if actual_registries != expected_registries:
-            logger.error(f"❌ Registry isolation failure: Expected {expected_registries} registries, got {actual_registries}")
+            logger.error(f" FAIL:  Registry isolation failure: Expected {expected_registries} registries, got {actual_registries}")
             # This might indicate the issue where registries are shared or not properly isolated
             
         # 2. No tools should be registered multiple times across registries
         duplicate_tools = analysis['duplicate_tool_registrations']
         if duplicate_tools:
-            logger.error(f"❌ Duplicate tool registrations detected: {duplicate_tools}")
+            logger.error(f" FAIL:  Duplicate tool registrations detected: {duplicate_tools}")
             pytest.fail(f"REPRODUCED BUG: Tools registered multiple times across registries: {duplicate_tools}")
             
         # 3. All registrations should succeed (no "already registered" errors)
@@ -244,7 +244,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         ]
         
         if failed_registrations:
-            logger.error(f"❌ 'Already registered' errors detected: {len(failed_registrations)}")
+            logger.error(f" FAIL:  'Already registered' errors detected: {len(failed_registrations)}")
             errors = [f"{r['tool_name']}: {r['error']}" for r in failed_registrations]
             pytest.fail(f"REPRODUCED BUG: Tool registration conflicts: {errors}")
             
@@ -255,10 +255,10 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         ]
         
         if basemodel_registrations:
-            logger.error(f"❌ BaseModel registrations detected: {len(basemodel_registrations)}")
+            logger.error(f" FAIL:  BaseModel registrations detected: {len(basemodel_registrations)}")
             pytest.fail(f"REPRODUCED BUG: BaseModel classes being registered as tools")
             
-        logger.info("✅ Registry isolation test passed - no duplicate registration issues")
+        logger.info(" PASS:  Registry isolation test passed - no duplicate registration issues")
         
     def test_tool_registry_cleanup_on_supervisor_destruction(self):
         """
@@ -267,7 +267,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         
         CRITICAL: Validates that tool registries don't leak between connections.
         """
-        logger.info("🧪 Testing tool registry cleanup on supervisor destruction")
+        logger.info("[U+1F9EA] Testing tool registry cleanup on supervisor destruction")
         
         mock_context = Mock()
         mock_context.user_id = "cleanup_test_user"
@@ -279,7 +279,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
                 self.name = "cleanup_test_tool"
                 
         # Step 1: Create supervisor tool system
-        logger.info("📦 Creating supervisor tool system...")
+        logger.info("[U+1F4E6] Creating supervisor tool system...")
         system = asyncio.run(UserContextToolFactory.create_user_tool_system(
             context=mock_context,
             tool_classes=[CleanupTestTool]
@@ -297,7 +297,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         ))
         
         # Step 3: Destroy the supervisor system (simulate WebSocket disconnect)
-        logger.info("🗑️ Destroying supervisor tool system...")
+        logger.info("[U+1F5D1][U+FE0F] Destroying supervisor tool system...")
         del system['registry']
         del system['dispatcher'] 
         del system
@@ -311,7 +311,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         time.sleep(0.1)
         
         # Step 5: Create new supervisor with same tools and verify no conflicts
-        logger.info("🔄 Creating new supervisor tool system after cleanup...")
+        logger.info(" CYCLE:  Creating new supervisor tool system after cleanup...")
         
         new_system = asyncio.run(UserContextToolFactory.create_user_tool_system(
             context=mock_context,
@@ -320,7 +320,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         
         # Analyze results
         analysis = self.lifecycle_tracker.get_analysis_report()
-        logger.info(f"📊 Cleanup test results: {analysis}")
+        logger.info(f" CHART:  Cleanup test results: {analysis}")
         
         # CRITICAL VALIDATIONS:
         
@@ -343,7 +343,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
             errors = [f"{r['tool_name']}: {r['error']}" for r in failed_registrations]
             pytest.fail(f"REPRODUCED BUG: Registration failures after cleanup: {errors}")
             
-        logger.info("✅ Registry cleanup test passed")
+        logger.info(" PASS:  Registry cleanup test passed")
         
     def test_concurrent_registry_creation_thread_safety(self):
         """
@@ -353,7 +353,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         CRITICAL: This test reproduces the exact race conditions possible
         in multi-user WebSocket scenarios.
         """
-        logger.info("🧪 Testing concurrent registry creation thread safety")
+        logger.info("[U+1F9EA] Testing concurrent registry creation thread safety")
         
         def create_registry_system(thread_id: int) -> dict:
             """Create a registry system in a specific thread."""
@@ -390,7 +390,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         
         # Execute concurrent registry creation
         num_threads = 5
-        logger.info(f"⚡ Creating {num_threads} concurrent registry systems...")
+        logger.info(f" LIGHTNING:  Creating {num_threads} concurrent registry systems...")
         
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
             start_time = time.time()
@@ -398,17 +398,17 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
             results = [future.result() for future in as_completed(futures)]
             execution_time = time.time() - start_time
             
-        logger.info(f"⏱️ Concurrent creation completed in {execution_time:.3f}s")
+        logger.info(f"[U+23F1][U+FE0F] Concurrent creation completed in {execution_time:.3f}s")
         
         # Analyze results
         analysis = self.lifecycle_tracker.get_analysis_report()
-        logger.info(f"📊 Concurrency test results: {analysis}")
+        logger.info(f" CHART:  Concurrency test results: {analysis}")
         
         successful_creations = [r for r in results if r['success']]
         failed_creations = [r for r in results if not r['success']]
         
-        logger.info(f"   ✅ Successful: {len(successful_creations)}/{num_threads}")
-        logger.info(f"   ❌ Failed: {len(failed_creations)}")
+        logger.info(f"    PASS:  Successful: {len(successful_creations)}/{num_threads}")
+        logger.info(f"    FAIL:  Failed: {len(failed_creations)}")
         
         # CRITICAL VALIDATIONS:
         
@@ -425,7 +425,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
                 
             # Log other failures for analysis
             other_errors = [f"Thread {r['thread_id']}: {r['error']}" for r in failed_creations]
-            logger.warning(f"⚠️ Other concurrent creation failures: {other_errors}")
+            logger.warning(f" WARNING: [U+FE0F] Other concurrent creation failures: {other_errors}")
             
         # 2. Should have created separate registries for each thread
         expected_registries = num_threads
@@ -440,9 +440,9 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         # 4. Thread distribution should be appropriate
         thread_count = analysis['thread_distribution']
         if thread_count < num_threads:
-            logger.warning(f"⚠️ Registry creation happened in {thread_count} threads instead of {num_threads}")
+            logger.warning(f" WARNING: [U+FE0F] Registry creation happened in {thread_count} threads instead of {num_threads}")
             
-        logger.info("✅ Concurrent registry creation test passed")
+        logger.info(" PASS:  Concurrent registry creation test passed")
         
     def test_registry_instance_proliferation_detection(self):
         """
@@ -452,7 +452,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         
         CRITICAL: This test directly addresses the root cause identified in the audit.
         """
-        logger.info("🧪 Testing registry instance proliferation detection")
+        logger.info("[U+1F9EA] Testing registry instance proliferation detection")
         
         # This test simulates the various ways ToolRegistry gets instantiated
         # across the codebase, as identified in the audit
@@ -470,7 +470,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         registries = []
         
         # Pattern 1: UserContextToolFactory creates registry (line 69)
-        logger.info("📝 Testing UserContextToolFactory registry creation pattern...")
+        logger.info("[U+1F4DD] Testing UserContextToolFactory registry creation pattern...")
         system1 = asyncio.run(UserContextToolFactory.create_user_tool_system(
             context=mock_context,
             tool_classes=[ProliferationTestTool]
@@ -478,14 +478,14 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
         registries.append(('UserContextToolFactory', system1['registry']))
         
         # Pattern 2: Direct ToolRegistry instantiation (multiple points)
-        logger.info("📝 Testing direct ToolRegistry instantiation patterns...")
+        logger.info("[U+1F4DD] Testing direct ToolRegistry instantiation patterns...")
         direct_registry1 = ToolRegistry()
         direct_registry2 = ToolRegistry()
         registries.append(('Direct_1', direct_registry1))
         registries.append(('Direct_2', direct_registry2))
         
         # Pattern 3: UnifiedToolDispatcherFactory might create registries
-        logger.info("📝 Testing UnifiedToolDispatcherFactory registry creation...")
+        logger.info("[U+1F4DD] Testing UnifiedToolDispatcherFactory registry creation...")
         try:
             dispatcher = UnifiedToolDispatcherFactory.create_for_request(
                 user_context=mock_context,
@@ -495,18 +495,18 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
             if hasattr(dispatcher, 'registry'):
                 registries.append(('UnifiedToolDispatcherFactory', dispatcher.registry))
         except Exception as e:
-            logger.warning(f"⚠️ UnifiedToolDispatcherFactory test failed: {e}")
+            logger.warning(f" WARNING: [U+FE0F] UnifiedToolDispatcherFactory test failed: {e}")
             
         # Analyze the proliferation
         analysis = self.lifecycle_tracker.get_analysis_report()
-        logger.info(f"📊 Proliferation test results: {analysis}")
+        logger.info(f" CHART:  Proliferation test results: {analysis}")
         
         # CRITICAL VALIDATIONS:
         
         # 1. Detect if multiple registries were created unnecessarily
         unique_registry_ids = set(id(registry) for _, registry in registries)
         if len(unique_registry_ids) > 1:
-            logger.warning(f"⚠️ Registry proliferation detected: {len(unique_registry_ids)} distinct registries created")
+            logger.warning(f" WARNING: [U+FE0F] Registry proliferation detected: {len(unique_registry_ids)} distinct registries created")
             logger.info(f"   Registry sources: {[source for source, _ in registries]}")
             
             # This is the architectural issue - too many registries being created
@@ -528,7 +528,7 @@ class TestToolRegistryLifecycleManagement(SSotBaseTestCase):
                         if "already registered" in str(e):
                             pytest.fail(f"REPRODUCED BUG: Cross-registry registration conflict between {source1} and {source2}: {e}")
                             
-        logger.info("✅ Registry proliferation detection test completed")
+        logger.info(" PASS:  Registry proliferation detection test completed")
 
 
 @pytest.mark.integration 
@@ -545,7 +545,7 @@ class TestWebSocketRegistryCleanup(SSotBaseTestCase):
         Test registry cleanup on WebSocket disconnect (integration level).
         Should catch resource leak scenarios without full E2E overhead.
         """
-        logger.info("🧪 Testing WebSocket registry cleanup (integration)")
+        logger.info("[U+1F9EA] Testing WebSocket registry cleanup (integration)")
         
         # Create mock WebSocket connection context
         mock_context = Mock()
@@ -558,7 +558,7 @@ class TestWebSocketRegistryCleanup(SSotBaseTestCase):
                 self.name = "websocket_test_tool"
                 
         # Step 1: Simulate WebSocket connection with tool system
-        logger.info("🔌 Simulating WebSocket connection with tool registry...")
+        logger.info("[U+1F50C] Simulating WebSocket connection with tool registry...")
         system = await UserContextToolFactory.create_user_tool_system(
             context=mock_context,
             tool_classes=[WebSocketTestTool]
@@ -571,7 +571,7 @@ class TestWebSocketRegistryCleanup(SSotBaseTestCase):
         assert registry.get_tool("websocket_test_tool") is not None
         
         # Step 2: Simulate connection disconnect and cleanup
-        logger.info("🔌❌ Simulating WebSocket disconnect and cleanup...")
+        logger.info("[U+1F50C] FAIL:  Simulating WebSocket disconnect and cleanup...")
         
         # In a real scenario, this would happen when the WebSocket closes
         # For now, we simulate by clearing the registry
@@ -582,7 +582,7 @@ class TestWebSocketRegistryCleanup(SSotBaseTestCase):
         assert after_cleanup_count == 0, f"Registry not cleaned up: {after_cleanup_count} tools remain"
         
         # Step 4: Simulate reconnection
-        logger.info("🔄 Simulating WebSocket reconnection...")
+        logger.info(" CYCLE:  Simulating WebSocket reconnection...")
         new_system = await UserContextToolFactory.create_user_tool_system(
             context=mock_context,
             tool_classes=[WebSocketTestTool]
@@ -593,14 +593,14 @@ class TestWebSocketRegistryCleanup(SSotBaseTestCase):
         # Should be able to register tools again without conflicts
         assert new_registry.get_tool("websocket_test_tool") is not None
         
-        logger.info("✅ WebSocket registry cleanup integration test passed")
+        logger.info(" PASS:  WebSocket registry cleanup integration test passed")
         
     async def test_websocket_reconnection_fresh_registry_integration(self):
         """
         Test that WebSocket reconnection gets fresh registry (integration level).
         Should catch registry state pollution between connections.
         """
-        logger.info("🧪 Testing WebSocket reconnection fresh registry (integration)")
+        logger.info("[U+1F9EA] Testing WebSocket reconnection fresh registry (integration)")
         
         mock_context = Mock()
         mock_context.user_id = "reconnection_user"
@@ -613,7 +613,7 @@ class TestWebSocketRegistryCleanup(SSotBaseTestCase):
                 self.connection_id = mock_context.run_id
                 
         # First connection
-        logger.info("🔌 First WebSocket connection...")
+        logger.info("[U+1F50C] First WebSocket connection...")
         system1 = await UserContextToolFactory.create_user_tool_system(
             context=mock_context,
             tool_classes=[ReconnectionTestTool]
@@ -627,7 +627,7 @@ class TestWebSocketRegistryCleanup(SSotBaseTestCase):
         mock_context.get_correlation_id.return_value = "reconnection_correlation_2"
         
         # Second connection (simulated reconnection)
-        logger.info("🔄 WebSocket reconnection...")
+        logger.info(" CYCLE:  WebSocket reconnection...")
         system2 = await UserContextToolFactory.create_user_tool_system(
             context=mock_context,
             tool_classes=[ReconnectionTestTool]
@@ -651,4 +651,4 @@ class TestWebSocketRegistryCleanup(SSotBaseTestCase):
         if id(tool1) == id(tool2):
             pytest.fail("REPRODUCED BUG: Reconnection reused same tool instance")
             
-        logger.info("✅ WebSocket reconnection fresh registry test passed")
+        logger.info(" PASS:  WebSocket reconnection fresh registry test passed")

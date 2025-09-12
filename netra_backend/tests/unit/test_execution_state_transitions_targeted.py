@@ -1,7 +1,7 @@
 """
 Targeted test for ExecutionState transition bug reproduction.
 
-PURPOSE: Reproduce the specific TIMEOUT → FAILED invalid transition bug identified in issue #276.
+PURPOSE: Reproduce the specific TIMEOUT  ->  FAILED invalid transition bug identified in issue #276.
 
 EXPECTED BEHAVIOR:
 - Test should FAIL with an invalid state transition error
@@ -38,10 +38,10 @@ class TestExecutionStateTransitionsBug(SSotBaseTestCase):
     
     def test_timeout_to_failed_transition_should_fail(self):
         """
-        Test that reproduces the TIMEOUT → FAILED invalid transition bug.
+        Test that reproduces the TIMEOUT  ->  FAILED invalid transition bug.
         
         EXPECTED RESULT: This test should FAIL with an invalid state transition error.
-        This demonstrates the bug where ExecutionState doesn't allow TIMEOUT → FAILED transitions.
+        This demonstrates the bug where ExecutionState doesn't allow TIMEOUT  ->  FAILED transitions.
         """
         # Create an execution
         self.execution_id = self.tracker.create_execution(
@@ -72,7 +72,7 @@ class TestExecutionStateTransitionsBug(SSotBaseTestCase):
         record = self.tracker.get_execution(self.execution_id)
         self.assertEqual(record.state, ExecutionState.TIMEOUT, "Execution should be in TIMEOUT state")
         
-        # NOW ATTEMPT THE PROBLEMATIC TRANSITION: TIMEOUT → FAILED
+        # NOW ATTEMPT THE PROBLEMATIC TRANSITION: TIMEOUT  ->  FAILED
         # This should fail due to the state machine validation
         # but the current implementation might allow it, creating inconsistency
         
@@ -86,10 +86,10 @@ class TestExecutionStateTransitionsBug(SSotBaseTestCase):
             )
             
             # If we reach here without exception, the bug is present
-            # The system should prevent TIMEOUT → FAILED transitions
+            # The system should prevent TIMEOUT  ->  FAILED transitions
             if success:
                 self.fail(
-                    "BUG REPRODUCED: ExecutionState allowed invalid TIMEOUT → FAILED transition. "
+                    "BUG REPRODUCED: ExecutionState allowed invalid TIMEOUT  ->  FAILED transition. "
                     "This creates inconsistent agent execution states and can cause deadlocks."
                 )
     
@@ -172,7 +172,7 @@ class TestExecutionStateTransitionsBug(SSotBaseTestCase):
             record = self.tracker.get_execution(self.execution_id)
             if record.current_phase == AgentExecutionPhase.FAILED:
                 self.fail(
-                    "BUG REPRODUCED: AgentExecutionPhase allowed invalid TIMEOUT → FAILED transition. "
+                    "BUG REPRODUCED: AgentExecutionPhase allowed invalid TIMEOUT  ->  FAILED transition. "
                     "Phase transitions should validate state machine rules."
                 )
     

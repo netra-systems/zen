@@ -2,7 +2,7 @@
 Comprehensive Unit Tests for auth_integration/auth.py - AUTH Integration SSOT
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Auth integration enables Golden Path access
+- Segment: ALL (Free  ->  Enterprise) - Auth integration enables Golden Path access
 - Business Goal: Enable secure user access to $50K+ MRR AI optimization platform  
 - Value Impact: Authentication is the gateway - without it, users cannot access ANY services
 - Strategic Impact: FastAPI dependencies ensure multi-user isolation and JWT validation

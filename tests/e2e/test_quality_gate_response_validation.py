@@ -247,7 +247,7 @@ env = get_env()
                                                 # REMOVED_SYNTAX_ERROR: pass
                                                 # REMOVED_SYNTAX_ERROR: scoring_test_cases = [ )
                                                 # REMOVED_SYNTAX_ERROR: { )
-                                                # REMOVED_SYNTAX_ERROR: "content": "Latency optimization: 200ms→95ms (52.5% improvement). Memory: 24GB→16GB (33% reduction). GPU utilization: 65%→89% (+24pp).",
+                                                # REMOVED_SYNTAX_ERROR: "content": "Latency optimization: 200ms -> 95ms (52.5% improvement). Memory: 24GB -> 16GB (33% reduction). GPU utilization: 65% -> 89% (+24pp).",
                                                 # REMOVED_SYNTAX_ERROR: "expected_min_scores": { )
                                                 # REMOVED_SYNTAX_ERROR: "specificity": 0.7,
                                                 # REMOVED_SYNTAX_ERROR: "actionability": 0.5,
@@ -374,8 +374,8 @@ env = get_env()
                                                                                     # REMOVED_SYNTAX_ERROR: """Test quality gate collects and aggregates validation metrics"""
                                                                                     # REMOVED_SYNTAX_ERROR: pass
                                                                                     # REMOVED_SYNTAX_ERROR: metrics_test_data = [ )
-                                                                                    # REMOVED_SYNTAX_ERROR: ("GPU memory: 24GB→16GB (33% reduction)", ContentType.OPTIMIZATION),
-                                                                                    # REMOVED_SYNTAX_ERROR: ("Database queries: 500ms→150ms (70% faster)", ContentType.DATA_ANALYSIS),
+                                                                                    # REMOVED_SYNTAX_ERROR: ("GPU memory: 24GB -> 16GB (33% reduction)", ContentType.OPTIMIZATION),
+                                                                                    # REMOVED_SYNTAX_ERROR: ("Database queries: 500ms -> 150ms (70% faster)", ContentType.DATA_ANALYSIS),
                                                                                     # REMOVED_SYNTAX_ERROR: ("Deploy model to 8 nodes with monitoring", ContentType.ACTION_PLAN),
                                                                                     # REMOVED_SYNTAX_ERROR: ("Analysis shows significant performance gains", ContentType.REPORT)
                                                                                     
@@ -425,9 +425,9 @@ env = get_env()
                                                                                                 # Removed problematic line: async def test_concurrent_quality_validation(self, quality_service):
                                                                                                     # REMOVED_SYNTAX_ERROR: """Test quality gate handles concurrent validation requests"""
                                                                                                     # REMOVED_SYNTAX_ERROR: concurrent_test_data = [ )
-                                                                                                    # REMOVED_SYNTAX_ERROR: "GPU optimization: 45%→85% utilization (+40pp)",
-                                                                                                    # REMOVED_SYNTAX_ERROR: "Database indexing: 850ms→180ms (78.8% improvement)",
-                                                                                                    # REMOVED_SYNTAX_ERROR: "Memory allocation: 32GB→20GB (37.5% reduction)",
+                                                                                                    # REMOVED_SYNTAX_ERROR: "GPU optimization: 45% -> 85% utilization (+40pp)",
+                                                                                                    # REMOVED_SYNTAX_ERROR: "Database indexing: 850ms -> 180ms (78.8% improvement)",
+                                                                                                    # REMOVED_SYNTAX_ERROR: "Memory allocation: 32GB -> 20GB (37.5% reduction)",
                                                                                                     # REMOVED_SYNTAX_ERROR: "Cache implementation: 40% response time improvement",
                                                                                                     # REMOVED_SYNTAX_ERROR: "Query optimization: B-tree indexing on primary keys"
                                                                                                     # REMOVED_SYNTAX_ERROR: ] * 4  # 20 concurrent validations
@@ -471,12 +471,12 @@ env = get_env()
                                                                                                         # REMOVED_SYNTAX_ERROR: pass
                                                                                                         # REMOVED_SYNTAX_ERROR: enterprise_responses = [ )
                                                                                                         # REMOVED_SYNTAX_ERROR: { )
-                                                                                                        # REMOVED_SYNTAX_ERROR: "content": "GPU cluster optimization: 52%→89% utilization (+37pp). Memory: 24GB→16GB (33% reduction). Cost savings: $8,400/month infrastructure reduction.",
+                                                                                                        # REMOVED_SYNTAX_ERROR: "content": "GPU cluster optimization: 52% -> 89% utilization (+37pp). Memory: 24GB -> 16GB (33% reduction). Cost savings: $8,400/month infrastructure reduction.",
                                                                                                         # REMOVED_SYNTAX_ERROR: "tier": "enterprise_premium",
                                                                                                         # REMOVED_SYNTAX_ERROR: "expected_pass": True
                                                                                                         # REMOVED_SYNTAX_ERROR: },
                                                                                                         # REMOVED_SYNTAX_ERROR: { )
-                                                                                                        # REMOVED_SYNTAX_ERROR: "content": "Database query performance: 850ms→180ms (78.8% improvement). Throughput: 1,200→3,400 QPS (183% increase). Index optimization on user_id column.",
+                                                                                                        # REMOVED_SYNTAX_ERROR: "content": "Database query performance: 850ms -> 180ms (78.8% improvement). Throughput: 1,200 -> 3,400 QPS (183% increase). Index optimization on user_id column.",
                                                                                                         # REMOVED_SYNTAX_ERROR: "tier": "enterprise_standard",
                                                                                                         # REMOVED_SYNTAX_ERROR: "expected_pass": True
                                                                                                         # REMOVED_SYNTAX_ERROR: },

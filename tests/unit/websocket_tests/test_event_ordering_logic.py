@@ -25,7 +25,7 @@ VALIDATION RULES:
 - Invalid sequences must be rejected
 
 This ensures users see logical progression:
-"Agent started → Agent thinking → Tool executing → Tool completed → Agent completed"
+"Agent started  ->  Agent thinking  ->  Tool executing  ->  Tool completed  ->  Agent completed"
 """
 
 import pytest
@@ -148,7 +148,7 @@ class TestWebSocketEventSequenceValidation(unittest.TestCase):
         self.assertFalse(self.validator.add_event(WebSocketEventType.AGENT_STARTED))
     
     def test_valid_minimal_sequence(self):
-        """Test the minimal valid sequence: agent_started → agent_completed."""
+        """Test the minimal valid sequence: agent_started  ->  agent_completed."""
         # Add agent_started
         self.assertTrue(self.validator.add_event(WebSocketEventType.AGENT_STARTED))
         

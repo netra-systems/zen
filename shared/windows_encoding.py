@@ -302,8 +302,8 @@ if __name__ == "__main__":
     success = manager.setup_all()
     
     if success:
-        print("✅ Windows encoding setup successful")
-        print("Testing Unicode output: 🚀 🔧 ✨")
+        print(" PASS:  Windows encoding setup successful")
+        print("Testing Unicode output: [U+1F680] [U+1F527] [U+2728]")
     else:
         print("[OK] Windows encoding setup completed with warnings")
         print("Testing Unicode output: [ROCKET] [GEAR] [SPARKLES]")

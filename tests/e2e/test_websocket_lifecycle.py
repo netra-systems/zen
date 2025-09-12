@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Critical for user retention and conversion to paid tiers
 
 ARCHITECTURE COMPLIANCE:
-- File ≤300 lines, functions ≤8 lines each
+- File  <= 300 lines, functions  <= 8 lines each
 - Real WebSocket connections only (no mocks)
 - Performance thresholds: <500ms connection, <1s streaming, <3s roundtrip
 """

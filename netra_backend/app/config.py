@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Value Impact: +$12K MRR from improved reliability
 - Revenue Impact: Prevents data inconsistency losses
 
-🔴 CRITICAL AUTH ARCHITECTURE WARNING:
+[U+1F534] CRITICAL AUTH ARCHITECTURE WARNING:
 - This config is for the MAIN BACKEND only
 - Auth service has its OWN configuration
 - Auth service runs SEPARATELY on port 8001

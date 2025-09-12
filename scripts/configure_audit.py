@@ -30,36 +30,36 @@ class AuditConfigurator:
     def show_status(self):
         """Show current configuration status"""
         print("\n" + "=" * 60)
-        print("🔍 NETRA CODE AUDIT - Configuration Status")
+        print(" SEARCH:  NETRA CODE AUDIT - Configuration Status")
         print("=" * 60)
         
-        print("\n📋 Core Features:")
-        print(f"  Duplicate Detection: {'✅' if self.config.flags.duplicate_detection else '❌'}")
-        print(f"  Legacy Detection: {'✅' if self.config.flags.legacy_code_detection else '❌'}")
-        print(f"  Claude Analysis: {'✅' if self.config.flags.claude_analysis else '❌'}")
-        print(f"  Auto Remediation: {'✅' if self.config.flags.auto_remediation else '❌'}")
+        print("\n[U+1F4CB] Core Features:")
+        print(f"  Duplicate Detection: {' PASS: ' if self.config.flags.duplicate_detection else ' FAIL: '}")
+        print(f"  Legacy Detection: {' PASS: ' if self.config.flags.legacy_code_detection else ' FAIL: '}")
+        print(f"  Claude Analysis: {' PASS: ' if self.config.flags.claude_analysis else ' FAIL: '}")
+        print(f"  Auto Remediation: {' PASS: ' if self.config.flags.auto_remediation else ' FAIL: '}")
         
-        print("\n🎚️ Audit Levels:")
+        print("\n[U+1F39A][U+FE0F] Audit Levels:")
         print(f"  Duplicates: {self.config.flags.duplicate_level.value}")
         print(f"  Legacy: {self.config.flags.legacy_level.value}")
         print(f"  Complexity: {self.config.flags.complexity_level.value}")
         print(f"  Imports: {self.config.flags.import_level.value}")
         
-        print("\n📊 Thresholds:")
+        print("\n CHART:  Thresholds:")
         print(f"  Duplicate Similarity: {self.config.flags.duplicate_threshold.value}")
         print(f"  Max Complexity: {self.config.flags.max_complexity}")
         print(f"  Max File Lines: {self.config.flags.max_file_lines}")
         print(f"  Max Function Lines: {self.config.flags.max_function_lines}")
         
-        print("\n🔧 Options:")
-        print(f"  Allow Emergency Bypass: {'✅' if self.config.flags.allow_emergency_bypass else '❌'}")
-        print(f"  Allow User Override: {'✅' if self.config.flags.allow_user_override else '❌'}")
-        print(f"  Check New Files Only: {'✅' if self.config.flags.check_new_files_only else '❌'}")
-        print(f"  Exclude Tests: {'✅' if self.config.flags.exclude_tests else '❌'}")
+        print("\n[U+1F527] Options:")
+        print(f"  Allow Emergency Bypass: {' PASS: ' if self.config.flags.allow_emergency_bypass else ' FAIL: '}")
+        print(f"  Allow User Override: {' PASS: ' if self.config.flags.allow_user_override else ' FAIL: '}")
+        print(f"  Check New Files Only: {' PASS: ' if self.config.flags.check_new_files_only else ' FAIL: '}")
+        print(f"  Exclude Tests: {' PASS: ' if self.config.flags.exclude_tests else ' FAIL: '}")
         
-        print("\n📁 Config File:")
+        print("\n[U+1F4C1] Config File:")
         print(f"  Location: {self.config.config_path}")
-        print(f"  Exists: {'✅' if self.config.config_path.exists() else '❌'}")
+        print(f"  Exists: {' PASS: ' if self.config.config_path.exists() else ' FAIL: '}")
     
     def set_level(self, category: str, level: str):
         """Set audit level for a category"""
@@ -70,11 +70,11 @@ class AuditConfigurator:
             if hasattr(self.config.flags, field_name):
                 setattr(self.config.flags, field_name, audit_level)
                 self.config.save_config()
-                print(f"✅ Set {category} level to {level}")
+                print(f" PASS:  Set {category} level to {level}")
             else:
-                print(f"❌ Unknown category: {category}")
+                print(f" FAIL:  Unknown category: {category}")
         except ValueError:
-            print(f"❌ Invalid level: {level}")
+            print(f" FAIL:  Invalid level: {level}")
             print(f"   Valid levels: {', '.join([l.value for l in AuditLevel])}")
     
     def set_feature(self, feature: str, enabled: bool):
@@ -92,9 +92,9 @@ class AuditConfigurator:
             setattr(self.config.flags, field_name, enabled)
             self.config.save_config()
             status = "enabled" if enabled else "disabled"
-            print(f"✅ {feature} {status}")
+            print(f" PASS:  {feature} {status}")
         else:
-            print(f"❌ Unknown feature: {feature}")
+            print(f" FAIL:  Unknown feature: {feature}")
     
     def set_threshold(self, threshold_type: str, value: str):
         """Set a threshold value"""
@@ -103,9 +103,9 @@ class AuditConfigurator:
                 threshold = DuplicateThreshold[value.upper()]
                 self.config.flags.duplicate_threshold = threshold
                 self.config.save_config()
-                print(f"✅ Set duplicate threshold to {threshold.value}")
+                print(f" PASS:  Set duplicate threshold to {threshold.value}")
             except KeyError:
-                print(f"❌ Invalid threshold: {value}")
+                print(f" FAIL:  Invalid threshold: {value}")
                 print(f"   Valid: {', '.join([t.name.lower() for t in DuplicateThreshold])}")
         else:
             # Numeric thresholds
@@ -116,11 +116,11 @@ class AuditConfigurator:
                 if hasattr(self.config.flags, field_name):
                     setattr(self.config.flags, field_name, numeric_value)
                     self.config.save_config()
-                    print(f"✅ Set {threshold_type} threshold to {numeric_value}")
+                    print(f" PASS:  Set {threshold_type} threshold to {numeric_value}")
                 else:
-                    print(f"❌ Unknown threshold: {threshold_type}")
+                    print(f" FAIL:  Unknown threshold: {threshold_type}")
             except ValueError:
-                print(f"❌ Invalid numeric value: {value}")
+                print(f" FAIL:  Invalid numeric value: {value}")
     
     def quick_setup(self, mode: str):
         """Quick setup for common scenarios"""
@@ -170,7 +170,7 @@ class AuditConfigurator:
         }
         
         if mode not in modes:
-            print(f"❌ Unknown mode: {mode}")
+            print(f" FAIL:  Unknown mode: {mode}")
             print(f"   Available: {', '.join(modes.keys())}")
             return
         
@@ -179,7 +179,7 @@ class AuditConfigurator:
             setattr(self.config.flags, key, value)
         
         self.config.save_config()
-        print(f"✅ Applied {mode} configuration preset")
+        print(f" PASS:  Applied {mode} configuration preset")
         print("\nSettings applied:")
         for key, value in settings.items():
             print(f"  {key}: {value if not hasattr(value, 'value') else value.value}")
@@ -193,13 +193,13 @@ class AuditConfigurator:
         )
         
         self.config.add_team(team)
-        print(f"✅ Added team: {team_name}")
+        print(f" PASS:  Added team: {team_name}")
         print(f"   Can override: {can_override}")
         print(f"   Max overrides/day: {max_overrides}")
     
     def test_config(self):
         """Test configuration with sample code"""
-        print("\n🧪 Testing configuration...")
+        print("\n[U+1F9EA] Testing configuration...")
         
         # Create test file
         test_file = Path("test_audit_config.py")
@@ -232,13 +232,13 @@ print("Debug output")  # Print in production
                 text=True
             )
             
-            print("\n📊 Test Results:")
+            print("\n CHART:  Test Results:")
             print(result.stdout)
             
             if result.returncode == 0:
-                print("✅ Audit passed (no blocking issues)")
+                print(" PASS:  Audit passed (no blocking issues)")
             else:
-                print("⛔ Audit would block commit")
+                print("[U+26D4] Audit would block commit")
             
         finally:
             test_file.unlink(missing_ok=True)
@@ -312,7 +312,7 @@ def main():
     
     elif args.command == "init":
         configurator.config.save_config()
-        print(f"✅ Initialized config at {configurator.config.config_path}")
+        print(f" PASS:  Initialized config at {configurator.config.config_path}")
     
     else:
         parser.print_help()

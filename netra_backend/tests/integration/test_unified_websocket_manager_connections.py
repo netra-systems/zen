@@ -95,7 +95,7 @@ class TestUnifiedWebSocketManagerConnections(BaseIntegrationTest):
         assert self.websocket_manager._connection_manager is self.websocket_manager
         assert self.websocket_manager.connection_manager is self.websocket_manager
         
-        self.logger.info("✅ UnifiedWebSocketManager initialization patterns validated")
+        self.logger.info(" PASS:  UnifiedWebSocketManager initialization patterns validated")
     
     @pytest.mark.integration
     async def test_websocket_connection_addition_patterns(self, test_websocket_connection):
@@ -126,7 +126,7 @@ class TestUnifiedWebSocketManagerConnections(BaseIntegrationTest):
         assert user_id in self.websocket_manager.active_connections
         assert len(self.websocket_manager.active_connections[user_id]) == 1
         
-        self.logger.info("✅ WebSocket connection addition patterns validated")
+        self.logger.info(" PASS:  WebSocket connection addition patterns validated")
     
     @pytest.mark.integration
     async def test_websocket_connection_removal_patterns(self, test_websocket_connection):
@@ -156,7 +156,7 @@ class TestUnifiedWebSocketManagerConnections(BaseIntegrationTest):
             conn_ids = [c.connection_id for c in self.websocket_manager.active_connections[user_id]]
             assert connection_id not in conn_ids
         
-        self.logger.info("✅ WebSocket connection removal patterns validated")
+        self.logger.info(" PASS:  WebSocket connection removal patterns validated")
     
     @pytest.mark.integration
     async def test_user_scoped_connection_isolation_patterns(self):
@@ -214,7 +214,7 @@ class TestUnifiedWebSocketManagerConnections(BaseIntegrationTest):
         assert user2_health['user_id'] == user2_connection.user_id
         assert user1_health != user2_health
         
-        self.logger.info("✅ User-scoped connection isolation patterns validated")
+        self.logger.info(" PASS:  User-scoped connection isolation patterns validated")
     
     @pytest.mark.integration
     async def test_websocket_event_emission_coordination_patterns(self, test_websocket_connection):
@@ -266,7 +266,7 @@ class TestUnifiedWebSocketManagerConnections(BaseIntegrationTest):
         sent_broadcast = mock_websocket.send_json.call_args[0][0]
         assert sent_broadcast == broadcast_message
         
-        self.logger.info("✅ WebSocket event emission coordination patterns validated")
+        self.logger.info(" PASS:  WebSocket event emission coordination patterns validated")
     
     @pytest.mark.integration
     async def test_connection_lifecycle_management_patterns(self):
@@ -306,7 +306,7 @@ class TestUnifiedWebSocketManagerConnections(BaseIntegrationTest):
         user_connections = self.websocket_manager.get_user_connections(user_id)
         assert len(user_connections) == 0
         
-        self.logger.info("✅ Connection lifecycle management patterns validated")
+        self.logger.info(" PASS:  Connection lifecycle management patterns validated")
     
     @pytest.mark.integration 
     async def test_message_queuing_and_recovery_coordination_patterns(self):
@@ -364,7 +364,7 @@ class TestUnifiedWebSocketManagerConnections(BaseIntegrationTest):
         assert "error_recovery_enabled" in error_stats
         assert error_stats["error_recovery_enabled"] is True
         
-        self.logger.info("✅ Message queuing and recovery coordination patterns validated")
+        self.logger.info(" PASS:  Message queuing and recovery coordination patterns validated")
     
     @pytest.mark.integration
     async def test_websocket_manager_statistics_and_monitoring_patterns(self):
@@ -421,7 +421,7 @@ class TestUnifiedWebSocketManagerConnections(BaseIntegrationTest):
         assert isinstance(overall_health["score"], (int, float))
         assert overall_health["status"] in ["healthy", "warning", "degraded", "critical"]
         
-        self.logger.info("✅ WebSocket manager statistics and monitoring patterns validated")
+        self.logger.info(" PASS:  WebSocket manager statistics and monitoring patterns validated")
 
 
 # Additional helper functions for WebSocket coordination validation

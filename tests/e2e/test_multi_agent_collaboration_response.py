@@ -171,12 +171,12 @@ env = get_env()
         # Create mock sub-agents with different specializations
         # REMOVED_SYNTAX_ERROR: optimization_agent = MockSubAgent( )
         # REMOVED_SYNTAX_ERROR: name="OptimizationAgent",
-        # REMOVED_SYNTAX_ERROR: response_content="GPU memory optimized: 24GB→16GB (33% reduction). Cost savings: $2,400/month."
+        # REMOVED_SYNTAX_ERROR: response_content="GPU memory optimized: 24GB -> 16GB (33% reduction). Cost savings: $2,400/month."
         
 
         # REMOVED_SYNTAX_ERROR: analysis_agent = MockSubAgent( )
         # REMOVED_SYNTAX_ERROR: name="AnalysisAgent",
-        # REMOVED_SYNTAX_ERROR: response_content="Database query performance: 850ms→180ms (78.8% improvement) using B-tree indexing."
+        # REMOVED_SYNTAX_ERROR: response_content="Database query performance: 850ms -> 180ms (78.8% improvement) using B-tree indexing."
         
 
         # REMOVED_SYNTAX_ERROR: reporting_agent = MockSubAgent( )
@@ -517,7 +517,7 @@ env = get_env()
                                                                                                 # REMOVED_SYNTAX_ERROR: "produces": ["gpu_baseline"]
                                                                                                 # REMOVED_SYNTAX_ERROR: },
                                                                                                 # REMOVED_SYNTAX_ERROR: { )
-                                                                                                # REMOVED_SYNTAX_ERROR: "agent": MockSubAgent("StateConsumer", "Optimization result: 24GB→16GB (33% reduction) based on baseline."),
+                                                                                                # REMOVED_SYNTAX_ERROR: "agent": MockSubAgent("StateConsumer", "Optimization result: 24GB -> 16GB (33% reduction) based on baseline."),
                                                                                                 # REMOVED_SYNTAX_ERROR: "role": "consumer",
                                                                                                 # REMOVED_SYNTAX_ERROR: "consumes": ["gpu_baseline"]
                                                                                                 # REMOVED_SYNTAX_ERROR: },
@@ -608,7 +608,7 @@ env = get_env()
                                                                                                                     # Create agents with varying response quality
                                                                                                                     # REMOVED_SYNTAX_ERROR: quality_test_agents = [ )
                                                                                                                     # REMOVED_SYNTAX_ERROR: { )
-                                                                                                                    # REMOVED_SYNTAX_ERROR: "agent": MockSubAgent("HighQualityAgent", "GPU optimization: 24GB→16GB (33% reduction). Latency: 200ms→125ms (37.5% improvement). Cost: $2,400/month savings."),
+                                                                                                                    # REMOVED_SYNTAX_ERROR: "agent": MockSubAgent("HighQualityAgent", "GPU optimization: 24GB -> 16GB (33% reduction). Latency: 200ms -> 125ms (37.5% improvement). Cost: $2,400/month savings."),
                                                                                                                     # REMOVED_SYNTAX_ERROR: "expected_quality": "high"
                                                                                                                     # REMOVED_SYNTAX_ERROR: },
                                                                                                                     # REMOVED_SYNTAX_ERROR: { )
@@ -696,8 +696,8 @@ env = get_env()
                                                                                                                             # REMOVED_SYNTAX_ERROR: pass
                                                                                                                             # Create enterprise workflow scenario
                                                                                                                             # REMOVED_SYNTAX_ERROR: enterprise_workflow_agents = [ )
-                                                                                                                            # REMOVED_SYNTAX_ERROR: MockSubAgent("CostAnalysisAgent", "Cost analysis: GPU cluster $12,000/month → $7,200/month (40% reduction). ROI: 3.2 months payback."),
-                                                                                                                            # REMOVED_SYNTAX_ERROR: MockSubAgent("PerformanceAgent", "Performance metrics: Latency 200ms→95ms (52.5% improvement). Throughput: 1,200→3,400 QPS (183% increase)."),
+                                                                                                                            # REMOVED_SYNTAX_ERROR: MockSubAgent("CostAnalysisAgent", "Cost analysis: GPU cluster $12,000/month  ->  $7,200/month (40% reduction). ROI: 3.2 months payback."),
+                                                                                                                            # REMOVED_SYNTAX_ERROR: MockSubAgent("PerformanceAgent", "Performance metrics: Latency 200ms -> 95ms (52.5% improvement). Throughput: 1,200 -> 3,400 QPS (183% increase)."),
                                                                                                                             # REMOVED_SYNTAX_ERROR: MockSubAgent("SecurityAgent", "Security validation: All optimizations maintain SOC2 compliance. Zero security vulnerabilities introduced."),
                                                                                                                             # REMOVED_SYNTAX_ERROR: MockSubAgent("ComplianceAgent", "Compliance check: GDPR, HIPAA, SOX requirements maintained. Audit trail preserved for 7-year retention.")
                                                                                                                             

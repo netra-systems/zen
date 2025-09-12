@@ -172,7 +172,7 @@ class StagingE2ETestRunner:
     
     def deploy_to_staging(self) -> bool:
         """Deploy fixes to staging environment"""
-        print("\n🚀 Deploying to staging...")
+        print("\n[U+1F680] Deploying to staging...")
         
         # Run deployment script
         deploy_script = PROJECT_ROOT / "scripts" / "deploy_to_gcp.py"

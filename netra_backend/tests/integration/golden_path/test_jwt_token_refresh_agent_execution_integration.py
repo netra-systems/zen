@@ -180,7 +180,7 @@ class TestJWTTokenRefreshAgentExecutionIntegration(BaseIntegrationTest):
             f"SLA violation affects user experience quality."
         )
         
-        logger.info(f"✅ JWT token refresh during agent execution SUCCESSFUL")
+        logger.info(f" PASS:  JWT token refresh during agent execution SUCCESSFUL")
         logger.info(f"   Initial token: {refresh_validation.initial_token[:20]}...")
         logger.info(f"   Refreshed token: {refresh_validation.refreshed_token[:20]}...")
         logger.info(f"   WebSocket events: {refresh_validation.websocket_events_received}")
@@ -318,7 +318,7 @@ class TestJWTTokenRefreshAgentExecutionIntegration(BaseIntegrationTest):
             f"Only {successful_executions}/{num_concurrent_users} concurrent executions succeeded"
         )
         
-        logger.info(f"✅ Concurrent JWT token refresh test SUCCESSFUL: {successful_executions} users")
+        logger.info(f" PASS:  Concurrent JWT token refresh test SUCCESSFUL: {successful_executions} users")
         
     # Helper methods
     

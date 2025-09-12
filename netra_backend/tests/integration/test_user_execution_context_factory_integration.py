@@ -191,7 +191,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         for i in range(1, len(contexts)):
             assert 'modified' not in contexts[i].agent_context
 
-        self.logger.info(f"✅ Created {len(contexts)} isolated UserExecutionContext instances")
+        self.logger.info(f" PASS:  Created {len(contexts)} isolated UserExecutionContext instances")
 
     @pytest.mark.asyncio
     async def test_02_execution_engine_factory_initialization_validation(self):
@@ -208,7 +208,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
             ExecutionEngineFactory(websocket_bridge=None)
         
         assert "requires websocket_bridge" in str(exc_info.value)
-        self.logger.info("✅ Factory correctly rejects None websocket_bridge")
+        self.logger.info(" PASS:  Factory correctly rejects None websocket_bridge")
 
         # Test 2: Factory initialization with valid WebSocket bridge should succeed
         mock_bridge = self._create_mock_websocket_bridge()
@@ -226,7 +226,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         assert metrics['active_engines_count'] == 0
         assert metrics['creation_errors'] == 0
         
-        self.logger.info("✅ ExecutionEngineFactory initialized with proper validation")
+        self.logger.info(" PASS:  ExecutionEngineFactory initialized with proper validation")
 
     @pytest.mark.asyncio
     async def test_03_multi_user_concurrent_factory_instantiation(self, real_services_fixture):
@@ -281,7 +281,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         assert metrics['active_engines_count'] == 3
         assert metrics['creation_errors'] == 0
 
-        self.logger.info(f"✅ Created {len(engines)} concurrent engines in {creation_time:.1f}ms")
+        self.logger.info(f" PASS:  Created {len(engines)} concurrent engines in {creation_time:.1f}ms")
 
     @pytest.mark.asyncio
     async def test_04_factory_user_engine_limits_enforcement(self, real_services_fixture):
@@ -322,7 +322,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         metrics = factory.get_factory_metrics()
         assert metrics['user_limit_rejections'] == 1
 
-        self.logger.info(f"✅ Factory correctly enforced user engine limit ({factory._max_engines_per_user})")
+        self.logger.info(f" PASS:  Factory correctly enforced user engine limit ({factory._max_engines_per_user})")
 
     @pytest.mark.asyncio
     async def test_05_context_propagation_through_child_contexts(self):
@@ -370,7 +370,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         assert audit_trail['parent_request_id'] == parent_context.request_id
         assert audit_trail['operation_depth'] == 1
 
-        self.logger.info("✅ Child context properly inherits data with isolation")
+        self.logger.info(" PASS:  Child context properly inherits data with isolation")
 
     @pytest.mark.asyncio 
     async def test_06_factory_websocket_emitter_integration(self, real_services_fixture):
@@ -412,7 +412,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         # Validate emitter isolation - different instances
         assert id(engines[0].websocket_emitter) != id(engines[1].websocket_emitter)
 
-        self.logger.info("✅ Factory created isolated WebSocket emitters for each user")
+        self.logger.info(" PASS:  Factory created isolated WebSocket emitters for each user")
 
     @pytest.mark.asyncio
     async def test_07_factory_state_isolation_between_users(self, real_services_fixture):
@@ -459,7 +459,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         assert user2_context.user_id in user_ids
         assert len(set(user_ids)) == 2  # Two unique users
 
-        self.logger.info("✅ Factory maintains complete state isolation between users")
+        self.logger.info(" PASS:  Factory maintains complete state isolation between users")
 
     @pytest.mark.asyncio
     async def test_08_factory_initialization_error_recovery(self, real_services_fixture):
@@ -501,7 +501,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         assert metrics['total_engines_created'] == 1
         assert metrics['active_engines_count'] == 1
 
-        self.logger.info("✅ Factory handles initialization errors and recovers gracefully")
+        self.logger.info(" PASS:  Factory handles initialization errors and recovers gracefully")
 
     @pytest.mark.asyncio
     async def test_09_user_context_cleanup_and_resource_management(self, real_services_fixture):
@@ -543,7 +543,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         for engine in engines:
             assert not engine.is_active()
 
-        self.logger.info("✅ Factory properly cleaned up all user contexts and resources")
+        self.logger.info(" PASS:  Factory properly cleaned up all user contexts and resources")
 
     @pytest.mark.asyncio
     async def test_10_context_sharing_violations_prevention(self, real_services_fixture):
@@ -579,7 +579,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         with pytest.raises(TypeError):
             validate_user_context(invalid_context)
 
-        self.logger.info("✅ System prevents context sharing violations and validates isolation")
+        self.logger.info(" PASS:  System prevents context sharing violations and validates isolation")
 
     @pytest.mark.asyncio
     async def test_11_factory_based_thread_isolation(self, real_services_fixture):
@@ -629,7 +629,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         # Validate both engines are for the same user
         assert engine1.get_user_context().user_id == engine2.get_user_context().user_id
 
-        self.logger.info("✅ Factory maintains thread isolation for multi-thread users")
+        self.logger.info(" PASS:  Factory maintains thread isolation for multi-thread users")
 
     @pytest.mark.asyncio
     async def test_12_user_specific_configuration_inheritance(self, real_services_fixture):
@@ -676,7 +676,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         child_context.agent_context['user_preferences']['language'] = 'es'
         assert user_context.agent_context['user_preferences']['language'] == 'en'
 
-        self.logger.info("✅ User-specific configuration properly inherited in child contexts")
+        self.logger.info(" PASS:  User-specific configuration properly inherited in child contexts")
 
     @pytest.mark.asyncio
     async def test_13_context_validation_and_type_safety(self):
@@ -723,7 +723,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         with pytest.raises(TypeError):
             validate_user_context("not_a_context")
 
-        self.logger.info("✅ Context validation properly enforces type safety and data integrity")
+        self.logger.info(" PASS:  Context validation properly enforces type safety and data integrity")
 
     @pytest.mark.asyncio
     async def test_14_factory_circuit_breaker_patterns(self, real_services_fixture):
@@ -777,7 +777,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         self.created_engines.append(new_engine)
         assert new_engine.is_active()
 
-        self.logger.info("✅ Factory implements proper circuit breaker patterns")
+        self.logger.info(" PASS:  Factory implements proper circuit breaker patterns")
 
     @pytest.mark.asyncio
     async def test_15_context_memory_management_under_load(self, real_services_fixture):
@@ -844,7 +844,7 @@ class TestUserExecutionContextFactoryIntegration(BaseIntegrationTest):
         final_metrics = factory.get_factory_metrics()
         assert final_metrics['active_engines_count'] == 0
 
-        self.logger.info(f"✅ Created and cleaned {len(all_contexts)} contexts under load in {creation_time:.1f}ms")
+        self.logger.info(f" PASS:  Created and cleaned {len(all_contexts)} contexts under load in {creation_time:.1f}ms")
 
     def assert_business_value_delivered(self, result: Dict, expected_value_type: str):
         """Assert that integration test delivers actual business value."""

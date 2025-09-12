@@ -194,7 +194,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
             assert 'timestamp' in sent_message, "Must include timestamp for sequencing"
             assert 'estimated_duration' in payload, "Must set user expectation for completion time"
             
-            self.logger.info(f"✅ CRITICAL: agent_started event successfully delivered for {agent_name}")
+            self.logger.info(f" PASS:  CRITICAL: agent_started event successfully delivered for {agent_name}")
             
         finally:
             await websocket_manager.shutdown()
@@ -272,7 +272,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
             assert payload['confidence_level'] == 'high', "Must communicate AI confidence to user"
             assert len(payload['next_actions']) > 0, "Must show planned actions for transparency"
             
-            self.logger.info(f"✅ CRITICAL: agent_thinking event with reasoning delivered for {agent_name}")
+            self.logger.info(f" PASS:  CRITICAL: agent_thinking event with reasoning delivered for {agent_name}")
             
         finally:
             await websocket_manager.shutdown()
@@ -352,7 +352,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
             assert payload['parameters']['analysis_type'] == 'optimization_focused', "Must show value-focused approach"
             assert 'estimated_runtime' in payload, "Must manage user time expectations"
             
-            self.logger.info(f"✅ CRITICAL: tool_executing event delivered for {tool_name}")
+            self.logger.info(f" PASS:  CRITICAL: tool_executing event delivered for {tool_name}")
             
         finally:
             await websocket_manager.shutdown()
@@ -456,7 +456,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
             
             assert payload['actionable_recommendations'] == 8, "Must count actionable items"
             
-            self.logger.info(f"✅ CRITICAL: tool_completed event with $127K savings delivered")
+            self.logger.info(f" PASS:  CRITICAL: tool_completed event with $127K savings delivered")
             
         finally:
             await websocket_manager.shutdown()
@@ -558,7 +558,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
             assert payload['insights_generated'] >= 20, "Must demonstrate substantial analysis"
             assert payload['user_satisfaction_predicted'] == 'high', "Must predict positive user outcome"
             
-            self.logger.info(f"✅ CRITICAL: agent_completed event with $127K value delivered")
+            self.logger.info(f" PASS:  CRITICAL: agent_completed event with $127K value delivered")
             
         finally:
             await websocket_manager.shutdown()
@@ -571,7 +571,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
         Test correct ordering of agent events during execution flow.
         
         MISSION CRITICAL: Agent events must follow logical order for coherent user experience.
-        Proper sequencing: agent_started → agent_thinking → tool_executing → tool_completed → agent_completed
+        Proper sequencing: agent_started  ->  agent_thinking  ->  tool_executing  ->  tool_completed  ->  agent_completed
         
         Business Value: Logical event flow builds user confidence and understanding of AI process.
         """
@@ -641,7 +641,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
                 assert message['user_id'] == user_data['id'], f"Event {i} should have correct user_id"
                 assert message['thread_id'] == connection.thread_id, f"Event {i} should have correct thread_id"
             
-            self.logger.info("✅ CRITICAL: All 5 agent events delivered in correct sequence")
+            self.logger.info(" PASS:  CRITICAL: All 5 agent events delivered in correct sequence")
             
         finally:
             await websocket_manager.shutdown()
@@ -812,7 +812,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
                     assert any('%' in str(v) or '$' in str(v) for v in final_result.values() if isinstance(v, str)), \
                         "agent_completed must quantify business value"
                 
-            self.logger.info("✅ CRITICAL: All agent event payloads contain required business value fields")
+            self.logger.info(" PASS:  CRITICAL: All agent event payloads contain required business value fields")
             
         finally:
             await websocket_manager.shutdown()
@@ -936,7 +936,7 @@ class TestWebSocketAgentEventsIntegration(BaseIntegrationTest):
                     message = json.loads(call[0][0])
                     assert message['user_id'] == user_id, f"User {i} should not receive other users' events"
             
-            self.logger.info("✅ CRITICAL: Concurrent agent events properly isolated between users")
+            self.logger.info(" PASS:  CRITICAL: Concurrent agent events properly isolated between users")
             
         finally:
             await websocket_manager.shutdown()

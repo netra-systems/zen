@@ -483,7 +483,7 @@
                                                 
 
                                                 # Message with various special characters and unicode
-                                                # REMOVED_SYNTAX_ERROR: special_thinking = "Hello 🌟 Special chars: áéíóú ñ çÇ 中文 русский العربية"
+                                                # REMOVED_SYNTAX_ERROR: special_thinking = "Hello [U+1F31F] Special chars: [U+00E1][U+00E9][U+00ED][U+00F3][U+00FA] [U+00F1] [U+00E7][U+00C7] [U+4E2D][U+6587] pucck[U+0438][U+0439] [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]"
 
                                                 # REMOVED_SYNTAX_ERROR: await emitter.notify_agent_thinking("TestAgent", test_user_context['run_id'], special_thinking)
                                                 # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)
@@ -502,8 +502,8 @@
                                                 # REMOVED_SYNTAX_ERROR: deserialized = json.loads(json_str)
 
                                                 # Verify special characters are preserved
-                                                # REMOVED_SYNTAX_ERROR: assert "🌟" in deserialized["data"]["thinking"]
-                                                # REMOVED_SYNTAX_ERROR: assert "中文" in deserialized["data"]["thinking"]
+                                                # REMOVED_SYNTAX_ERROR: assert "[U+1F31F]" in deserialized["data"]["thinking"]
+                                                # REMOVED_SYNTAX_ERROR: assert "[U+4E2D][U+6587]" in deserialized["data"]["thinking"]
 
                                                 # REMOVED_SYNTAX_ERROR: await emitter.cleanup()
 

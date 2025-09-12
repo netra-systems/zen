@@ -182,7 +182,7 @@ class TestDeploymentScriptConflicts(SSotBaseTestCase):
         inconsistencies = self._detect_configuration_inconsistencies(configurations)
         
         if inconsistencies:
-            print(f"\n⚠️  CONFIGURATION INCONSISTENCIES DETECTED:")
+            print(f"\n WARNING: [U+FE0F]  CONFIGURATION INCONSISTENCIES DETECTED:")
             for inconsistency in inconsistencies:
                 print(f"  - {inconsistency}")
         
@@ -258,7 +258,7 @@ class TestDeploymentScriptConflicts(SSotBaseTestCase):
         print(f"GCP services: {list(gcp_config.keys())}")
         
         if drift_analysis["drifts"]:
-            print(f"\n⚠️  CONFIGURATION DRIFTS DETECTED:")
+            print(f"\n WARNING: [U+FE0F]  CONFIGURATION DRIFTS DETECTED:")
             for drift in drift_analysis["drifts"]:
                 print(f"  - {drift}")
         
@@ -292,7 +292,7 @@ class TestDeploymentScriptConflicts(SSotBaseTestCase):
         
         print(f"\n=== DEPLOYMENT SCRIPT FUNCTIONALITY ANALYSIS ===")
         for script_name, result in functionality_results.items():
-            status = "✅ FUNCTIONAL" if result["functional"] else "❌ NON-FUNCTIONAL"
+            status = " PASS:  FUNCTIONAL" if result["functional"] else " FAIL:  NON-FUNCTIONAL"
             print(f"{script_name}: {status}")
             if result["error"]:
                 print(f"  Error: {result['error']}")
@@ -556,7 +556,7 @@ class TestSSotDeploymentValidation(SSotBaseTestCase):
         circular_deps = self._detect_circular_dependencies(dependency_chain)
         
         if circular_deps:
-            print(f"\n⚠️  CIRCULAR DEPENDENCIES DETECTED:")
+            print(f"\n WARNING: [U+FE0F]  CIRCULAR DEPENDENCIES DETECTED:")
             for cycle in circular_deps:
                 print(f"  - {' -> '.join(cycle)}")
         
@@ -730,7 +730,7 @@ class TestGoldenPathDeploymentProtection(SSotBaseTestCase):
                     config_issues.append(f"{config_source} missing {critical_config}")
         
         if config_issues:
-            print(f"\n⚠️  AUTH CONFIGURATION ISSUES:")
+            print(f"\n WARNING: [U+FE0F]  AUTH CONFIGURATION ISSUES:")
             for issue in config_issues:
                 print(f"  - {issue}")
         

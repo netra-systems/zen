@@ -122,7 +122,7 @@ class TestWebSocketJWTEncodingFailureScenarios:
         """
         Test that would fail if unicode handling regresses.
         """
-        unicode_token = "token_with_émoji_🚀_and_特殊字符"
+        unicode_token = "token_with_[U+00E9]moji_[U+1F680]_and_[U+7279][U+6B8A][U+5B57][U+7B26]"
         
         try:
             # Try the broken Latin-1 encoding (which can't handle unicode)

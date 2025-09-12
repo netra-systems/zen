@@ -2,7 +2,7 @@
 JWT Token Cross-Service Flow Test - Critical Security Infrastructure
 
 BVJ: Segment: ALL | Goal: Security | Impact: All authenticated operations across services
-Tests comprehensive JWT token flow: Auth Service → Backend → WebSocket → Service-to-Service auth
+Tests comprehensive JWT token flow: Auth Service  ->  Backend  ->  WebSocket  ->  Service-to-Service auth
 Performance requirement: Token operations <2s (network-aware)
 
 Business Value: $50K+ MRR - Prevents authentication failures across service boundaries

@@ -468,7 +468,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         # Test configuration
         self.base_timeout = 20.0 if self.test_environment == "staging" else 15.0
         
-        print(f"🔬 RACE CONDITION REPRODUCTION TEST SETUP:")
+        print(f"[U+1F52C] RACE CONDITION REPRODUCTION TEST SETUP:")
         print(f"   Environment: {self.test_environment}")
         print(f"   WebSocket URL: {self.websocket_auth_helper.config.websocket_url}")
         print(f"   Base timeout: {self.base_timeout}s")
@@ -481,7 +481,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         This test specifically targets the race condition that occurs when WebSocket
         connections are attempted before the backend services are fully ready.
         """
-        print("🧪 TESTING: Reproduce 'Need to call accept first' Race Condition")
+        print("[U+1F9EA] TESTING: Reproduce 'Need to call accept first' Race Condition")
         
         # Services are ensured by real_services pytest fixtures
         
@@ -513,19 +513,19 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
                 race_condition_results.append(result)
                 
                 if result.success:
-                    print(f"     ✅ {profile.name}: Connection successful in {result.connection_time:.3f}s")
+                    print(f"      PASS:  {profile.name}: Connection successful in {result.connection_time:.3f}s")
                     print(f"       Events received: {len(result.websocket_events_received)}")
                 else:
-                    print(f"     ❌ {profile.name}: Connection failed - {result.error_message}")
+                    print(f"      FAIL:  {profile.name}: Connection failed - {result.error_message}")
                     if result.race_condition_detected:
-                        print(f"       🚨 Race condition detected: {result.race_condition_type.value}")
+                        print(f"        ALERT:  Race condition detected: {result.race_condition_type.value}")
         
         # Analyze results
         successful_connections = [r for r in race_condition_results if r.success]
         failed_connections = [r for r in race_condition_results if not r.success]
         race_conditions_detected = [r for r in race_condition_results if r.race_condition_detected]
         
-        print(f"📊 RACE CONDITION REPRODUCTION RESULTS:")
+        print(f" CHART:  RACE CONDITION REPRODUCTION RESULTS:")
         print(f"   Total tests: {len(race_condition_results)}")
         print(f"   Successful: {len(successful_connections)}")
         print(f"   Failed: {len(failed_connections)}")
@@ -549,7 +549,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         success_rate = len(successful_connections) / len(race_condition_results)
         assert success_rate >= 0.3, f"Too many total failures: {success_rate:.1%} success rate"
         
-        print("✅ RACE CONDITION REPRODUCTION TEST COMPLETED")
+        print(" PASS:  RACE CONDITION REPRODUCTION TEST COMPLETED")
     
     @pytest.mark.asyncio
     async def test_progressive_cloud_run_latency_simulation(self):
@@ -559,7 +559,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         This test validates that WebSocket connections work correctly across
         different Cloud Run performance scenarios with increasing latency.
         """
-        print("🧪 TESTING: Progressive Cloud Run Latency Simulation")
+        print("[U+1F9EA] TESTING: Progressive Cloud Run Latency Simulation")
         
         # Services are ensured by real_services pytest fixtures
         
@@ -589,13 +589,13 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
                 if result.success:
                     connection_time = result.connection_time
                     events_count = len(result.websocket_events_received)
-                    print(f"     ✅ {profile.name}: {connection_time:.3f}s, {events_count} events")
+                    print(f"      PASS:  {profile.name}: {connection_time:.3f}s, {events_count} events")
                 else:
                     error_msg = result.error_message[:100] if result.error_message else "Unknown error"
-                    print(f"     ❌ {profile.name}: Failed - {error_msg}")
+                    print(f"      FAIL:  {profile.name}: Failed - {error_msg}")
                     
                     if result.race_condition_detected:
-                        print(f"       🚨 Race condition: {result.race_condition_type.value}")
+                        print(f"        ALERT:  Race condition: {result.race_condition_type.value}")
                 
                 # Brief delay between profile tests
                 await asyncio.sleep(0.5)
@@ -606,9 +606,9 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
             profile_name = result.latency_profile
             successful_by_profile[profile_name] = result.success
         
-        print(f"📊 PROGRESSIVE LATENCY SIMULATION RESULTS:")
+        print(f" CHART:  PROGRESSIVE LATENCY SIMULATION RESULTS:")
         for profile_name in profile_names:
-            status = "✅ PASS" if successful_by_profile.get(profile_name) else "❌ FAIL"
+            status = " PASS:  PASS" if successful_by_profile.get(profile_name) else " FAIL:  FAIL"
             print(f"   {profile_name}: {status}")
         
         # Calculate performance degradation
@@ -623,7 +623,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         # At least 50% of profiles should work (validates fix handles reasonable latency)
         assert success_rate >= 0.5, f"Poor latency tolerance: {success_rate:.1%} success rate"
         
-        print("✅ PROGRESSIVE CLOUD RUN LATENCY SIMULATION COMPLETED")
+        print(" PASS:  PROGRESSIVE CLOUD RUN LATENCY SIMULATION COMPLETED")
     
     @pytest.mark.asyncio
     async def test_concurrent_websocket_connections_with_race_detection(self):
@@ -633,7 +633,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         This test validates that multiple concurrent WebSocket connections work
         correctly under latency and can detect/handle race conditions gracefully.
         """
-        print("🧪 TESTING: Concurrent WebSocket Connections with Race Detection")
+        print("[U+1F9EA] TESTING: Concurrent WebSocket Connections with Race Detection")
         
         # Services are ensured by real_services pytest fixtures
         
@@ -678,7 +678,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         total_failed = [r for r in all_concurrent_results if not r.success]
         total_race_conditions = [r for r in all_concurrent_results if r.race_condition_detected]
         
-        print(f"📊 CONCURRENT CONNECTION RESULTS:")
+        print(f" CHART:  CONCURRENT CONNECTION RESULTS:")
         print(f"   Total concurrent tests: {total_tests}")
         print(f"   Total successful: {len(total_successful)}")
         print(f"   Total failed: {len(total_failed)}")
@@ -716,7 +716,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         catastrophic_rate = len(catastrophic_races) / total_tests
         assert catastrophic_rate <= 0.3, f"Too many catastrophic race conditions: {catastrophic_rate:.1%}"
         
-        print("✅ CONCURRENT WEBSOCKET CONNECTIONS WITH RACE DETECTION COMPLETED")
+        print(" PASS:  CONCURRENT WEBSOCKET CONNECTIONS WITH RACE DETECTION COMPLETED")
     
     @pytest.mark.asyncio 
     async def test_websocket_event_delivery_under_race_conditions(self):
@@ -726,7 +726,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         This test ensures that all 5 critical WebSocket events are delivered
         correctly even when race conditions or timing issues are present.
         """
-        print("🧪 TESTING: WebSocket Event Delivery Under Race Conditions")
+        print("[U+1F9EA] TESTING: WebSocket Event Delivery Under Race Conditions")
         
         # Services are ensured by real_services pytest fixtures
         
@@ -790,11 +790,11 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
                                 if "type" in response_data:
                                     event_type = response_data["type"]
                                     events_received.append(event_type)
-                                    print(f"     📨 Event received: {event_type}")
+                                    print(f"     [U+1F4E8] Event received: {event_type}")
                                     
                                     # Break if we get agent completion
                                     if event_type == "agent_completed":
-                                        print(f"     🏁 Agent execution completed")
+                                        print(f"     [U+1F3C1] Agent execution completed")
                                         break
                                         
                             except json.JSONDecodeError:
@@ -817,7 +817,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
                         "error": None
                     })
                     
-                    print(f"     ✅ {scenario_name}: {len(events_received)} events received")
+                    print(f"      PASS:  {scenario_name}: {len(events_received)} events received")
                     print(f"       Critical events missing: {len(event_validation.missing_events)}")
                     
                 except Exception as e:
@@ -835,9 +835,9 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
                         "race_type": race_type.value if race_type else None
                     })
                     
-                    print(f"     ❌ {scenario_name}: Failed - {error_message}")
+                    print(f"      FAIL:  {scenario_name}: Failed - {error_message}")
                     if race_detected:
-                        print(f"       🚨 Race condition detected: {race_type.value}")
+                        print(f"        ALERT:  Race condition detected: {race_type.value}")
                 
                 finally:
                     if websocket:
@@ -850,7 +850,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         successful_scenarios = [r for r in event_delivery_results if r["success"]]
         failed_scenarios = [r for r in event_delivery_results if not r["success"]]
         
-        print(f"📊 EVENT DELIVERY UNDER RACE CONDITIONS RESULTS:")
+        print(f" CHART:  EVENT DELIVERY UNDER RACE CONDITIONS RESULTS:")
         print(f"   Successful scenarios: {len(successful_scenarios)}/{len(event_delivery_results)}")
         print(f"   Failed scenarios: {len(failed_scenarios)}")
         
@@ -885,7 +885,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         success_rate = len(successful_scenarios) / len(event_delivery_results)
         assert success_rate >= 0.67, f"Poor event delivery success rate: {success_rate:.1%}"
         
-        print("✅ WEBSOCKET EVENT DELIVERY UNDER RACE CONDITIONS COMPLETED")
+        print(" PASS:  WEBSOCKET EVENT DELIVERY UNDER RACE CONDITIONS COMPLETED")
     
     @pytest.mark.asyncio
     async def test_race_condition_recovery_and_reconnection(self):
@@ -895,7 +895,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         This test validates that the system can recover gracefully from race
         conditions and successfully reconnect WebSocket connections.
         """
-        print("🧪 TESTING: Race Condition Recovery and Reconnection")
+        print("[U+1F9EA] TESTING: Race Condition Recovery and Reconnection")
         
         # Services are ensured by real_services pytest fixtures
         
@@ -931,7 +931,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
                     test_name=f"{scenario['name']}_initial"
                 )
                 
-                print(f"     Initial connection ({initial_profile.name}): {'✅' if initial_result.success else '❌'}")
+                print(f"     Initial connection ({initial_profile.name}): {' PASS: ' if initial_result.success else ' FAIL: '}")
                 if not initial_result.success and initial_result.race_condition_detected:
                     print(f"       Race condition detected: {initial_result.race_condition_type.value}")
                 
@@ -945,7 +945,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
                     test_name=f"{scenario['name']}_recovery"
                 )
                 
-                print(f"     Recovery connection ({recovery_profile.name}): {'✅' if recovery_result.success else '❌'}")
+                print(f"     Recovery connection ({recovery_profile.name}): {' PASS: ' if recovery_result.success else ' FAIL: '}")
                 
                 recovery_results.append({
                     "scenario_name": scenario["name"],
@@ -960,7 +960,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         successful_recoveries = [r for r in recovery_results if r["recovery_success"]]
         failed_recoveries = [r for r in recovery_results if not r["recovery_success"]]
         
-        print(f"📊 RECOVERY AND RECONNECTION RESULTS:")
+        print(f" CHART:  RECOVERY AND RECONNECTION RESULTS:")
         print(f"   Total scenarios: {len(recovery_results)}")
         print(f"   Successful recoveries: {len(successful_recoveries)}")
         print(f"   Failed recoveries: {len(failed_recoveries)}")
@@ -992,7 +992,7 @@ class TestWebSocketRaceConditionCloudRunReproduction(SSotBaseTestCase):
         # At least some race-to-success recoveries should occur (validates fix works)
         assert patterns["race_to_success"] > 0, "No successful recovery from race conditions observed"
         
-        print("✅ RACE CONDITION RECOVERY AND RECONNECTION COMPLETED")
+        print(" PASS:  RACE CONDITION RECOVERY AND RECONNECTION COMPLETED")
 
 
 @pytest.mark.e2e
@@ -1019,7 +1019,7 @@ class TestWebSocketRaceConditionPerformanceBenchmarks:
         This test provides detailed timing analysis for WebSocket connections
         under different Cloud Run latency conditions.
         """
-        print("📊 PERFORMANCE BENCHMARK: WebSocket Connection Timing")
+        print(" CHART:  PERFORMANCE BENCHMARK: WebSocket Connection Timing")
         
         # Test all latency profiles
         profile_names = ["fast", "typical", "slow", "stress"]
@@ -1083,7 +1083,7 @@ class TestWebSocketRaceConditionPerformanceBenchmarks:
                 print(f"     Results: 0/{iterations} successful (all failed)")
         
         # Report comprehensive benchmark results
-        print("📊 WEBSOCKET CONNECTION TIMING BENCHMARK RESULTS:")
+        print(" CHART:  WEBSOCKET CONNECTION TIMING BENCHMARK RESULTS:")
         for profile_name, stats in benchmark_results.items():
             print(f"   {profile_name}:")
             print(f"     Success rate: {stats['success_rate']:.1%}")
@@ -1099,7 +1099,7 @@ class TestWebSocketRaceConditionPerformanceBenchmarks:
             if fast_stats["successful"] > 0:
                 assert fast_stats["avg_connection_time"] <= 3.0, f"Fast profile too slow: {fast_stats['avg_connection_time']:.3f}s"
         
-        print("✅ WEBSOCKET CONNECTION TIMING BENCHMARKS COMPLETED")
+        print(" PASS:  WEBSOCKET CONNECTION TIMING BENCHMARKS COMPLETED")
 
 
 if __name__ == "__main__":

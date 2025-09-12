@@ -95,14 +95,14 @@ class TestMessageRouterInterfaceConsistency(SSotBaseTestCase, unittest.TestCase)
         if missing_interfaces:
             violation_summary = self._format_interface_violations(missing_interfaces)
             self.fail(
-                f"❌ INTERFACE CONSISTENCY VIOLATION: {len(missing_interfaces)} MessageRouter "
+                f" FAIL:  INTERFACE CONSISTENCY VIOLATION: {len(missing_interfaces)} MessageRouter "
                 f"implementations have incomplete interfaces.\n"
                 f"BUSINESS IMPACT: Inconsistent interfaces cause method call failures, "
                 f"WebSocket errors, and chat functionality breakdown.\n"
                 f"INTERFACE VIOLATIONS:\n{violation_summary}"
             )
         
-        self.logger.info(f"✅ All {len(router_implementations)} MessageRouter implementations have consistent interfaces")
+        self.logger.info(f" PASS:  All {len(router_implementations)} MessageRouter implementations have consistent interfaces")
 
     def test_method_signatures_are_compatible(self):
         """Test that method signatures across routers are compatible.
@@ -125,14 +125,14 @@ class TestMessageRouterInterfaceConsistency(SSotBaseTestCase, unittest.TestCase)
         if signature_mismatches:
             mismatch_details = self._format_signature_mismatches(signature_mismatches)
             self.fail(
-                f"❌ METHOD SIGNATURE MISMATCH: {len(signature_mismatches)} methods have "
+                f" FAIL:  METHOD SIGNATURE MISMATCH: {len(signature_mismatches)} methods have "
                 f"incompatible signatures across MessageRouter implementations.\n"
                 f"BUSINESS IMPACT: Signature mismatches cause runtime TypeError exceptions "
                 f"during message routing, breaking chat functionality.\n"
                 f"SIGNATURE MISMATCHES:\n{mismatch_details}"
             )
         
-        self.logger.info("✅ All method signatures are compatible across MessageRouter implementations")
+        self.logger.info(" PASS:  All method signatures are compatible across MessageRouter implementations")
 
     def test_return_types_are_consistent(self):
         """Test that method return types are consistent across implementations.
@@ -156,14 +156,14 @@ class TestMessageRouterInterfaceConsistency(SSotBaseTestCase, unittest.TestCase)
         if inconsistent_returns:
             return_details = self._format_return_type_inconsistencies(inconsistent_returns)
             self.fail(
-                f"❌ RETURN TYPE INCONSISTENCY: {len(inconsistent_returns)} methods have "
+                f" FAIL:  RETURN TYPE INCONSISTENCY: {len(inconsistent_returns)} methods have "
                 f"different return types across MessageRouter implementations.\n"
                 f"BUSINESS IMPACT: Inconsistent return types cause type errors and "
                 f"unpredictable behavior in chat message processing.\n"
                 f"RETURN TYPE INCONSISTENCIES:\n{return_details}"
             )
         
-        self.logger.info("✅ All method return types are consistent")
+        self.logger.info(" PASS:  All method return types are consistent")
 
     def test_required_properties_exist(self):
         """Test that required properties exist in all implementations.
@@ -188,14 +188,14 @@ class TestMessageRouterInterfaceConsistency(SSotBaseTestCase, unittest.TestCase)
         if missing_properties:
             property_details = self._format_missing_properties(missing_properties)
             self.fail(
-                f"❌ MISSING REQUIRED PROPERTIES: {len(missing_properties)} MessageRouter "
+                f" FAIL:  MISSING REQUIRED PROPERTIES: {len(missing_properties)} MessageRouter "
                 f"implementations are missing required properties.\n"
                 f"BUSINESS IMPACT: Missing properties cause AttributeError exceptions "
                 f"during message routing operations.\n"
                 f"MISSING PROPERTIES:\n{property_details}"
             )
         
-        self.logger.info("✅ All required properties are present in all implementations")
+        self.logger.info(" PASS:  All required properties are present in all implementations")
 
     def _discover_message_router_implementations(self) -> Dict[str, Dict[str, Any]]:
         """Discover all MessageRouter implementations for interface analysis."""

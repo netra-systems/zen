@@ -172,22 +172,22 @@ class EnhancedStagingWebSocketEventValidator:
     
     async def authenticate_staging_user(self, credentials: Dict[str, str]) -> AuthenticationFlowResult:
         """Authenticate user with staging auth service."""
-        logger.info(f"🔐 Authenticating staging user: {credentials['email']}")
+        logger.info(f"[U+1F510] Authenticating staging user: {credentials['email']}")
         start_time = time.time()
         
         # Try registration first
         registration_result = await self._attempt_user_registration(credentials)
         if registration_result.success:
-            logger.info(f"✅ User registration successful in {registration_result.response_time:.2f}s")
+            logger.info(f" PASS:  User registration successful in {registration_result.response_time:.2f}s")
             return registration_result
         
         # Try login if registration failed (user might already exist)
         login_result = await self._attempt_user_login(credentials)
         if login_result.success:
-            logger.info(f"✅ User login successful in {login_result.response_time:.2f}s")
+            logger.info(f" PASS:  User login successful in {login_result.response_time:.2f}s")
             return login_result
         
-        logger.error(f"❌ Authentication failed for {credentials['email']}")
+        logger.error(f" FAIL:  Authentication failed for {credentials['email']}")
         return AuthenticationFlowResult(
             success=False,
             method="both_failed",
@@ -289,7 +289,7 @@ class EnhancedStagingWebSocketEventValidator:
     async def establish_mock_websocket_connection(self, auth_result: AuthenticationFlowResult) -> Optional[Dict[str, Any]]:
         """Mock WebSocket connection for testing when websockets package not available."""
         if not websockets:
-            logger.info("🔌 Mocking WebSocket connection (websockets package not available)")
+            logger.info("[U+1F50C] Mocking WebSocket connection (websockets package not available)")
             if not auth_result.success or not auth_result.access_token:
                 logger.error("Cannot establish WebSocket connection without valid authentication")
                 return None
@@ -304,7 +304,7 @@ class EnhancedStagingWebSocketEventValidator:
                 "connected": True
             }
         
-        logger.info(f"🔌 Establishing WebSocket connection to {self.staging_websocket_url}")
+        logger.info(f"[U+1F50C] Establishing WebSocket connection to {self.staging_websocket_url}")
         
         if not auth_result.success or not auth_result.access_token:
             logger.error("Cannot establish WebSocket connection without valid authentication")
@@ -326,18 +326,18 @@ class EnhancedStagingWebSocketEventValidator:
                 close_timeout=10
             )
             
-            logger.info("✅ WebSocket connection established successfully")
+            logger.info(" PASS:  WebSocket connection established successfully")
             self.authentication_metrics["websocket_connections"] += 1
             return {"connection": websocket, "connected": True}
             
         except Exception as e:
-            logger.error(f"❌ WebSocket connection failed: {e}")
+            logger.error(f" FAIL:  WebSocket connection failed: {e}")
             self.authentication_metrics["websocket_failures"] += 1
             return None
     
     async def validate_mock_websocket_event_flow(self, connection: Dict[str, Any], timeout_seconds: int = 30) -> List[WebSocketEventValidation]:
         """Mock WebSocket event flow validation when real WebSocket not available."""
-        logger.info("🎯 Validating mock WebSocket event flow...")
+        logger.info(" TARGET:  Validating mock WebSocket event flow...")
         
         if not connection or not connection.get("connected"):
             return []
@@ -360,14 +360,14 @@ class EnhancedStagingWebSocketEventValidator:
             validation = self._validate_single_websocket_event(event_data, time.time())
             received_events.append(validation)
             
-            logger.info(f"📥 Simulated event: {validation.event_type}")
+            logger.info(f"[U+1F4E5] Simulated event: {validation.event_type}")
             
             # Simulate early completion
             if i >= 3:  # Minimum viable event flow
                 break
         
         total_time = time.time() - start_time
-        logger.info(f"🎯 Mock WebSocket event validation completed in {total_time:.2f}s - {len(received_events)} events received")
+        logger.info(f" TARGET:  Mock WebSocket event validation completed in {total_time:.2f}s - {len(received_events)} events received")
         
         return received_events
     
@@ -435,7 +435,7 @@ class EnhancedStagingWebSocketEventValidator:
     
     async def measure_user_journey_performance(self, credentials: Dict[str, str]) -> UserJourneyMetrics:
         """Measure complete user journey performance from auth to AI value."""
-        logger.info(f"📊 Measuring user journey performance for {credentials['email']}...")
+        logger.info(f" CHART:  Measuring user journey performance for {credentials['email']}...")
         
         metrics = UserJourneyMetrics()
         journey_start_time = time.time()
@@ -447,7 +447,7 @@ class EnhancedStagingWebSocketEventValidator:
             metrics.login_time = time.time() - auth_start
             
             if not auth_result.success:
-                logger.error("❌ Authentication failed in user journey")
+                logger.error(" FAIL:  Authentication failed in user journey")
                 return metrics
             
             # Step 2: WebSocket connection
@@ -456,7 +456,7 @@ class EnhancedStagingWebSocketEventValidator:
             metrics.first_websocket_connection_time = time.time() - ws_start
             
             if not websocket:
-                logger.error("❌ WebSocket connection failed in user journey")
+                logger.error(" FAIL:  WebSocket connection failed in user journey")
                 return metrics
             
             # Step 3: AI agent interaction
@@ -487,13 +487,13 @@ class EnhancedStagingWebSocketEventValidator:
                 monthly_value = 29.99
                 metrics.revenue_attribution = monthly_value * metrics.conversion_probability * 0.15  # 15% of users convert
             
-            logger.info(f"📊 User journey completed in {metrics.total_journey_time:.2f}s")
+            logger.info(f" CHART:  User journey completed in {metrics.total_journey_time:.2f}s")
             logger.info(f"   User satisfaction: {metrics.user_satisfaction_score:.1f}/5.0")
             logger.info(f"   Conversion probability: {metrics.conversion_probability:.1%}")
             logger.info(f"   Revenue attribution: ${metrics.revenue_attribution:.2f}")
             
         except Exception as e:
-            logger.error(f"❌ User journey measurement failed: {e}")
+            logger.error(f" FAIL:  User journey measurement failed: {e}")
             metrics.total_journey_time = time.time() - journey_start_time
         
         return metrics
@@ -512,7 +512,7 @@ class TestStagingWebSocketAuthentication:
     
     async def test_authentication_flow_comprehensive(self, validator):
         """Test comprehensive authentication flows - 25+ scenarios."""
-        logger.info("🚀 Starting comprehensive authentication flow tests...")
+        logger.info("[U+1F680] Starting comprehensive authentication flow tests...")
         
         # Test 1: User registration flow
         credentials = validator.generate_test_user_credentials()
@@ -536,7 +536,7 @@ class TestStagingWebSocketAuthentication:
     
     async def test_user_journey_validation_comprehensive(self, validator):
         """Test comprehensive user journeys - 25+ scenarios."""
-        logger.info("🚀 Starting comprehensive user journey tests...")
+        logger.info("[U+1F680] Starting comprehensive user journey tests...")
         
         # Journey 1: First-time user complete onboarding
         credentials = validator.generate_test_user_credentials()
@@ -566,7 +566,7 @@ class TestStagingWebSocketAuthentication:
     
     async def test_performance_under_load(self, validator):
         """Test performance under load - 10+ performance scenarios."""
-        logger.info("🚀 Starting performance under load tests...")
+        logger.info("[U+1F680] Starting performance under load tests...")
         
         # Performance test 1: Concurrent authentication
         num_concurrent_users = 5  # Reduced for testing
@@ -615,7 +615,7 @@ class TestStagingWebSocketAuthentication:
     
     async def test_business_metrics_calculation(self, validator):
         """Test business metrics calculation and tracking."""
-        logger.info("🚀 Testing business metrics calculation...")
+        logger.info("[U+1F680] Testing business metrics calculation...")
         
         # Generate some test data
         await validator.measure_user_journey_performance(validator.generate_test_user_credentials())
@@ -636,7 +636,7 @@ class TestStagingWebSocketAuthentication:
     
     async def test_websocket_event_validation(self, validator):
         """Test WebSocket event validation patterns."""
-        logger.info("🚀 Testing WebSocket event validation...")
+        logger.info("[U+1F680] Testing WebSocket event validation...")
         
         # Test event validation with mock events
         test_events = [

@@ -2,7 +2,7 @@
 Test State Consistency Across Service Restarts - State Management & Context Swimlane
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise) - Core system reliability functionality
+- Segment: All (Free  ->  Enterprise) - Core system reliability functionality
 - Business Goal: Ensure state consistency and conversation continuity across service restarts
 - Value Impact: Prevents data loss and maintains user experience during system maintenance
 - Strategic Impact: CRITICAL - Service restart resilience is fundamental to platform reliability

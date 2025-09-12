@@ -335,7 +335,7 @@ class FileSplitter:
             report.append("SUGGESTED SPLITS:")
             
             for split in suggestion.suggested_splits:
-                report.append(f"  • {split['name']} ({split['type']})")
+                report.append(f"  [U+2022] {split['name']} ({split['type']})")
                 if 'description' in split:
                     report.append(f"    {split['description']}")
             
@@ -378,7 +378,7 @@ def main():
             print(f"Strategy: {suggestion.split_strategy}")
             print(f"Confidence: {suggestion.confidence:.1%}")
             for split in suggestion.suggested_splits:
-                print(f"  → {split['name']}")
+                print(f"   ->  {split['name']}")
         else:
             print(f"File {file_path} is within size limits or cannot be analyzed")
     else:

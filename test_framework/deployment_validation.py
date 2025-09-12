@@ -322,14 +322,14 @@ class DeploymentValidationTestCase(BaseTestCase, DeploymentValidationMixin):
             warning_metrics = self.get_warning_metrics()
             
             if failing_metrics or warning_metrics:
-                print(f"\n📊 Deployment Validation Summary:")
+                print(f"\n CHART:  Deployment Validation Summary:")
                 print(f"   Health Score: {self.calculate_deployment_health_score():.1f}%")
                 
                 if failing_metrics:
-                    print(f"   ❌ Failing Metrics: {[m.name for m in failing_metrics]}")
+                    print(f"    FAIL:  Failing Metrics: {[m.name for m in failing_metrics]}")
                 
                 if warning_metrics:
-                    print(f"   ⚠️ Warning Metrics: {[m.name for m in warning_metrics]}")
+                    print(f"    WARNING: [U+FE0F] Warning Metrics: {[m.name for m in warning_metrics]}")
         
         super().teardown_method()
     

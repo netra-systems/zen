@@ -5,7 +5,7 @@ THIS SUITE VALIDATES THE ENTIRE ACTIONS AGENT USER JOURNEY.
 Business Value: $3M+ ARR - Complete user-to-action-plan pipeline
 
 This E2E test suite validates the complete workflow:
-1. User request → Supervisor → ActionsAgent → Action Plan
+1. User request  ->  Supervisor  ->  ActionsAgent  ->  Action Plan
 2. Real WebSocket connections with real-time user experience
 3. Real database persistence and state management
 4. Real LLM interactions with actual API calls
@@ -158,11 +158,11 @@ class RealWebSocketClient:
             # Start message listener
             asyncio.create_task(self._message_listener())
 
-            logger.info(f"✅ WebSocket connected to {ws_url}")
+            logger.info(f" PASS:  WebSocket connected to {ws_url}")
             return True
 
         except Exception as e:
-            logger.error(f"❌ WebSocket connection failed: {e}")
+            logger.error(f" FAIL:  WebSocket connection failed: {e}")
             self.connection_established = False
             return False
 
@@ -208,7 +208,7 @@ class RealWebSocketClient:
                 'message': message,
                 'timestamp': time.time()
             }))
-            logger.info(f"📤 Sent message: {message[:100]}...")
+            logger.info(f"[U+1F4E4] Sent message: {message[:100]}...")
             return True
         except Exception as e:
             logger.error(f"Failed to send WebSocket message: {e}")
@@ -220,24 +220,24 @@ class RealWebSocketClient:
         found_events = []
         expected_set = set(expected_types)
 
-        logger.info(f"⏳ Waiting for events: {expected_types}")
+        logger.info(f"[U+23F3] Waiting for events: {expected_types}")
 
         while time.time() - start_time < timeout:
             async with self._lock:
                 for message in self.received_messages:
                     if message['message_type'] in expected_types and message not in found_events:
                         found_events.append(message)
-                        logger.info(f"📨 Received event: {message['message_type']}")
+                        logger.info(f"[U+1F4E8] Received event: {message['message_type']}")
 
                 # Check if we have all expected event types
                 found_types = set(msg['message_type'] for msg in found_events)
                 if expected_set.issubset(found_types):
-                    logger.info(f"✅ All expected events received: {found_types}")
+                    logger.info(f" PASS:  All expected events received: {found_types}")
                     return found_events
 
             await asyncio.sleep(0.5)
 
-        logger.warning(f"⚠️ Timeout waiting for events. Expected: {expected_types}, Found: {[e['message_type'] for e in found_events]}")
+        logger.warning(f" WARNING: [U+FE0F] Timeout waiting for events. Expected: {expected_types}, Found: {[e['message_type'] for e in found_events]}")
         return found_events
 
     async def disconnect(self):
@@ -245,7 +245,7 @@ class RealWebSocketClient:
         if self.websocket:
             await self.websocket.close()
             self.connection_established = False
-            logger.info("🔌 WebSocket disconnected")
+            logger.info("[U+1F50C] WebSocket disconnected")
 
 
 class RealServiceIntegrator:
@@ -263,7 +263,7 @@ class RealServiceIntegrator:
             connector=connector,
             timeout=aiohttp.ClientTimeout(total=60.0)
         )
-        logger.info(f"🌐 HTTP session initialized for {self.base_url}")
+        logger.info(f"[U+1F310] HTTP session initialized for {self.base_url}")
         return self.session
 
     async def create_thread(self, user_id: str) -> str:
@@ -279,7 +279,7 @@ class RealServiceIntegrator:
                 if response.status == 200:
                     data = await response.json()
                     thread_id = data.get('thread_id')
-                    logger.info(f"📄 Created thread {thread_id} for user {user_id}")
+                    logger.info(f"[U+1F4C4] Created thread {thread_id} for user {user_id}")
                     return thread_id
                 else:
                     logger.error(f"Thread creation failed: {response.status}")
@@ -304,7 +304,7 @@ class RealServiceIntegrator:
             ) as response:
                 success = response.status == 200
                 if success:
-                    logger.info(f"📨 Message sent to thread {thread_id}")
+                    logger.info(f"[U+1F4E8] Message sent to thread {thread_id}")
                 else:
                     logger.error(f"Message sending failed: {response.status}")
                 return success
@@ -323,7 +323,7 @@ class RealServiceIntegrator:
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    logger.info(f"📋 Thread {thread_id} status: {data.get('status')}")
+                    logger.info(f"[U+1F4CB] Thread {thread_id} status: {data.get('status')}")
                     return data
                 else:
                     logger.error(f"Thread status check failed: {response.status}")
@@ -336,7 +336,7 @@ class RealServiceIntegrator:
         """Clean up HTTP session."""
         if self.session:
             await self.session.close()
-            logger.info("🧹 HTTP session cleaned up")
+            logger.info("[U+1F9F9] HTTP session cleaned up")
 
 
 # ============================================================================
@@ -349,7 +349,7 @@ class TestActionsAgentCompleteUserFlow:
     @pytest.fixture
     async def setup_complete_e2e_environment(self):
         """Setup complete real services environment for E2E testing."""
-        logger.info("🚀 Setting up complete E2E environment with REAL services...")
+        logger.info("[U+1F680] Setting up complete E2E environment with REAL services...")
 
         # Start real services
         self.docker_manager = UnifiedDockerManager()
@@ -374,12 +374,12 @@ class TestActionsAgentCompleteUserFlow:
         # Test session tracking
         self.test_sessions: List[E2ETestSession] = []
 
-        logger.info("✅ E2E environment ready with real services")
+        logger.info(" PASS:  E2E environment ready with real services")
 
         yield
 
         # Cleanup
-        logger.info("🧹 Cleaning up E2E environment...")
+        logger.info("[U+1F9F9] Cleaning up E2E environment...")
         for session in self.test_sessions:
             if session.websocket_connection:
                 try:
@@ -394,7 +394,7 @@ class TestActionsAgentCompleteUserFlow:
     @pytest.mark.critical
     async def test_complete_user_to_action_plan_journey(self, setup_complete_e2e_environment):
         """CRITICAL: Test complete user journey from request to action plan."""
-        logger.info("\\n" + "🎯 STARTING COMPLETE USER-TO-ACTION-PLAN JOURNEY TEST")
+        logger.info("\\n" + " TARGET:  STARTING COMPLETE USER-TO-ACTION-PLAN JOURNEY TEST")
 
         # Create E2E test session
         session = E2ETestSession(
@@ -409,16 +409,16 @@ class TestActionsAgentCompleteUserFlow:
 
         try:
             # STEP 1: Create thread through real API
-            logger.info("📝 Step 1: Creating thread through real backend API...")
+            logger.info("[U+1F4DD] Step 1: Creating thread through real backend API...")
             session.thread_id = await self.service_integrator.create_thread(session.user_id)
 
             assert session.thread_id is not None, \
                 "Failed to create thread through real API - backend may be down"
 
-            logger.info(f"✅ Thread created: {session.thread_id}")
+            logger.info(f" PASS:  Thread created: {session.thread_id}")
 
             # STEP 2: Establish real WebSocket connection
-            logger.info("🔌 Step 2: Establishing real WebSocket connection...")
+            logger.info("[U+1F50C] Step 2: Establishing real WebSocket connection...")
             ws_client = RealWebSocketClient()
 
             websocket_connected = await ws_client.connect(session.thread_id, session.user_id)
@@ -436,7 +436,7 @@ class TestActionsAgentCompleteUserFlow:
                     'timestamp': time.time(),
                     'data': data
                 })
-                logger.info(f"📡 Event received: {data.get('type')}")
+                logger.info(f"[U+1F4E1] Event received: {data.get('type')}")
 
             # Register for all critical agent events
             critical_events = [
@@ -447,10 +447,10 @@ class TestActionsAgentCompleteUserFlow:
             for event_type in critical_events:
                 ws_client.on_message(event_type, track_agent_event)
 
-            logger.info("✅ Real WebSocket connection established")
+            logger.info(" PASS:  Real WebSocket connection established")
 
             # STEP 3: Send realistic user message for action planning
-            logger.info("💬 Step 3: Sending realistic user request...")
+            logger.info("[U+1F4AC] Step 3: Sending realistic user request...")
             user_request = (
                 "I need to optimize our cloud costs while maintaining performance. "
                 "Our monthly cloud bill is $50,000 and we're seeing 15% month-over-month growth. "
@@ -468,10 +468,10 @@ class TestActionsAgentCompleteUserFlow:
             )
             assert api_sent, "Failed to send message through API"
 
-            logger.info("✅ User request sent through both WebSocket and API")
+            logger.info(" PASS:  User request sent through both WebSocket and API")
 
             # STEP 4: Wait for and validate real-time agent events
-            logger.info("⏳ Step 4: Waiting for real-time agent processing...")
+            logger.info("[U+23F3] Step 4: Waiting for real-time agent processing...")
 
             # Wait for critical agent lifecycle events
             agent_events = await ws_client.wait_for_events(
@@ -485,20 +485,20 @@ class TestActionsAgentCompleteUserFlow:
                 responsiveness_delay = first_event_time - journey_start_time
 
                 metrics.websocket_responsiveness_score = max(0.0, 1.0 - (responsiveness_delay / 10.0))
-                logger.info(f"⚡ Responsiveness delay: {responsiveness_delay:.2f}s (score: {metrics.websocket_responsiveness_score:.2f})")
+                logger.info(f" LIGHTNING:  Responsiveness delay: {responsiveness_delay:.2f}s (score: {metrics.websocket_responsiveness_score:.2f})")
             else:
                 metrics.websocket_responsiveness_score = 0.0
-                logger.warning("⚠️ No agent events received")
+                logger.warning(" WARNING: [U+FE0F] No agent events received")
 
             # STEP 5: Validate action plan generation and quality
-            logger.info("📋 Step 5: Validating action plan generation...")
+            logger.info("[U+1F4CB] Step 5: Validating action plan generation...")
 
             # Wait additional time for final results
             await asyncio.sleep(5.0)
 
             # Check thread status through API
             thread_status = await self.service_integrator.get_thread_status(session.thread_id)
-            logger.info(f"📋 Thread status: {thread_status}")
+            logger.info(f"[U+1F4CB] Thread status: {thread_status}")
 
             # Analyze action plan quality from received events
             final_reports = [event for event in agent_events 
@@ -520,16 +520,16 @@ class TestActionsAgentCompleteUserFlow:
                 quality_score = sum(quality_indicators.values()) / len(quality_indicators)
                 metrics.action_plan_quality_score = quality_score
 
-                logger.info(f"🎯 Action plan quality score: {quality_score:.2f}")
+                logger.info(f" TARGET:  Action plan quality score: {quality_score:.2f}")
                 for indicator, present in quality_indicators.items():
-                    status = "✅" if present else "❌"
+                    status = " PASS: " if present else " FAIL: "
                     logger.info(f"  {status} {indicator}: {present}")
             else:
                 metrics.action_plan_quality_score = 0.0
-                logger.warning("⚠️ No action plan received")
+                logger.warning(" WARNING: [U+FE0F] No action plan received")
 
             # STEP 6: Measure overall chat value delivery
-            logger.info("💎 Step 6: Measuring chat value delivery...")
+            logger.info("[U+1F48E] Step 6: Measuring chat value delivery...")
 
             total_events = len(agent_events)
             event_types = [e['message_type'] for e in agent_events]
@@ -546,7 +546,7 @@ class TestActionsAgentCompleteUserFlow:
             chat_value_score = sum(value_indicators.values()) / len(value_indicators)
             metrics.chat_value_delivery_score = chat_value_score
 
-            logger.info(f"💎 Chat value delivery score: {chat_value_score:.2f}")
+            logger.info(f"[U+1F48E] Chat value delivery score: {chat_value_score:.2f}")
 
             # Calculate final metrics
             journey_end_time = time.time()
@@ -569,7 +569,7 @@ class TestActionsAgentCompleteUserFlow:
                 f"Overall user experience score too low: {overall_ux_score:.2f} (min 0.6). System is not delivering business value."
 
             # SUCCESS REPORT
-            logger.info("\\n" + "🎉 E2E USER JOURNEY COMPLETED SUCCESSFULLY")
+            logger.info("\\n" + " CELEBRATION:  E2E USER JOURNEY COMPLETED SUCCESSFULLY")
             logger.info("=" * 60)
             logger.info(f"WebSocket Responsiveness: {metrics.websocket_responsiveness_score:.2f}")
             logger.info(f"Action Plan Quality: {metrics.action_plan_quality_score:.2f}")
@@ -581,7 +581,7 @@ class TestActionsAgentCompleteUserFlow:
             logger.info("=" * 60)
 
         except Exception as e:
-            logger.error(f"🚨 E2E test failed: {e}")
+            logger.error(f" ALERT:  E2E test failed: {e}")
             metrics.error_handling_ux_score = 0.0
             raise
 
@@ -599,7 +599,7 @@ class TestActionsAgentCompleteUserFlow:
     @pytest.mark.critical
     async def test_concurrent_user_sessions_e2e(self, setup_complete_e2e_environment):
         """CRITICAL: Test multiple concurrent user sessions E2E."""
-        logger.info("\\n" + "👥 STARTING CONCURRENT USER SESSIONS E2E TEST")
+        logger.info("\\n" + "[U+1F465] STARTING CONCURRENT USER SESSIONS E2E TEST")
 
         concurrent_users = 3
         user_sessions = []
@@ -668,19 +668,19 @@ class TestActionsAgentCompleteUserFlow:
             f"Concurrent execution too slow: {total_time:.2f}s (max 90s). Performance degrades under load."
 
         # Log results
-        logger.info(f"✅ Concurrent test completed: {len(successful_sessions)}/{concurrent_users} successful")
+        logger.info(f" PASS:  Concurrent test completed: {len(successful_sessions)}/{concurrent_users} successful")
         for result in results:
             if isinstance(result, dict):
                 if result['success']:
-                    logger.info(f"  ✅ User {result['user_index']}: {result['events_received']} events")
+                    logger.info(f"   PASS:  User {result['user_index']}: {result['events_received']} events")
                 else:
-                    logger.warning(f"  ❌ User {result['user_index']}: {result['error']}")
+                    logger.warning(f"   FAIL:  User {result['user_index']}: {result['error']}")
 
     @pytest.mark.asyncio 
     @pytest.mark.critical
     async def test_error_recovery_user_experience(self, setup_complete_e2e_environment):
         """CRITICAL: Test error recovery from user experience perspective."""
-        logger.info("\\n" + "🛠️ STARTING ERROR RECOVERY USER EXPERIENCE TEST")
+        logger.info("\\n" + "[U+1F6E0][U+FE0F] STARTING ERROR RECOVERY USER EXPERIENCE TEST")
 
         # Create session
         session = E2ETestSession(
@@ -711,7 +711,7 @@ class TestActionsAgentCompleteUserFlow:
             recovery_scores = []
 
             for i, error_scenario in enumerate(error_scenarios):
-                logger.info(f"🧪 Testing error scenario {i+1}: {error_scenario[:50]}...")
+                logger.info(f"[U+1F9EA] Testing error scenario {i+1}: {error_scenario[:50]}...")
 
                 # Send problematic request
                 await ws_client.send_user_message(error_scenario)
@@ -735,10 +735,10 @@ class TestActionsAgentCompleteUserFlow:
                         recovery_score += 0.2  # Bonus for non-error response
 
                     recovery_scores.append(min(1.0, recovery_score))
-                    logger.info(f"✅ Recovery time: {recovery_time:.2f}s, score: {recovery_score:.2f}")
+                    logger.info(f" PASS:  Recovery time: {recovery_time:.2f}s, score: {recovery_score:.2f}")
                 else:
                     recovery_scores.append(0.0)
-                    logger.warning(f"❌ No response to error scenario {i+1}")
+                    logger.warning(f" FAIL:  No response to error scenario {i+1}")
 
                 # Brief pause between scenarios
                 await asyncio.sleep(2.0)
@@ -749,10 +749,10 @@ class TestActionsAgentCompleteUserFlow:
             assert avg_recovery_score >= 0.5, \
                 f"Error recovery score too low: {avg_recovery_score:.2f} (min 0.5). System does not handle errors gracefully."
 
-            logger.info(f"✅ Error recovery test passed: {avg_recovery_score:.2f} average score")
+            logger.info(f" PASS:  Error recovery test passed: {avg_recovery_score:.2f} average score")
 
         except Exception as e:
-            logger.error(f"🚨 Error recovery test failed: {e}")
+            logger.error(f" ALERT:  Error recovery test failed: {e}")
             raise
 
         finally:

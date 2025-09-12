@@ -26,7 +26,7 @@ TEST_FILE = "netra_backend/tests/integration/test_mcp_service_realistic.py"
 
 def check_imports():
     """Check that the test file imports correctly."""
-    print("🔍 Checking test file imports...")
+    print(" SEARCH:  Checking test file imports...")
     
     try:
         sys.path.insert(0, str(PROJECT_ROOT))
@@ -37,22 +37,22 @@ def check_imports():
             TestMCPServiceModuleFunctionsRealistic
         )
         
-        print("✅ Test classes imported successfully")
+        print(" PASS:  Test classes imported successfully")
         print(f"   - TestMCPServiceRealisticIntegration: 8 test methods")
         print(f"   - TestMCPServiceModuleFunctionsRealistic: 2 test methods")
         return True
         
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f" FAIL:  Import error: {e}")
         return False
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f" FAIL:  Unexpected error: {e}")
         return False
 
 
 def check_test_collection():
     """Check that pytest can collect the tests."""
-    print("\n🔍 Checking test collection...")
+    print("\n SEARCH:  Checking test collection...")
     
     try:
         cmd = [
@@ -75,23 +75,23 @@ def check_test_collection():
             lines = result.stdout.split('\n')
             test_count = sum(1 for line in lines if 'Coroutine test_' in line)
             
-            print(f"✅ Test collection successful: {test_count} tests discovered")
+            print(f" PASS:  Test collection successful: {test_count} tests discovered")
             return True
         else:
-            print(f"❌ Test collection failed: {result.stderr}")
+            print(f" FAIL:  Test collection failed: {result.stderr}")
             return False
             
     except subprocess.TimeoutExpired:
-        print("❌ Test collection timed out")
+        print(" FAIL:  Test collection timed out")
         return False
     except Exception as e:
-        print(f"❌ Collection error: {e}")
+        print(f" FAIL:  Collection error: {e}")
         return False
 
 
 def run_lightweight_test():
     """Run a lightweight test to verify basic functionality."""
-    print("\n🔍 Running lightweight test validation...")
+    print("\n SEARCH:  Running lightweight test validation...")
     
     try:
         # Run just the module function tests (lightweight, no heavy dependencies)
@@ -110,7 +110,7 @@ def run_lightweight_test():
         )
         
         if result.returncode == 0:
-            print("✅ Lightweight tests passed successfully")
+            print(" PASS:  Lightweight tests passed successfully")
             
             # Extract test results
             lines = result.stdout.split('\n')
@@ -119,7 +119,7 @@ def run_lightweight_test():
             
             return True
         else:
-            print("⚠️  Lightweight tests had issues (may be due to missing services):")
+            print(" WARNING: [U+FE0F]  Lightweight tests had issues (may be due to missing services):")
             print(f"   Output: {result.stdout}")
             print(f"   Errors: {result.stderr}")
             
@@ -132,22 +132,22 @@ def run_lightweight_test():
             return False
             
     except subprocess.TimeoutExpired:
-        print("❌ Lightweight tests timed out")
+        print(" FAIL:  Lightweight tests timed out")
         return False
     except Exception as e:
-        print(f"❌ Test execution error: {e}")
+        print(f" FAIL:  Test execution error: {e}")
         return False
 
 
 def check_test_vs_mock_comparison():
     """Compare the new test with the old mock test."""
-    print("\n🔍 Comparing with original mock test...")
+    print("\n SEARCH:  Comparing with original mock test...")
     
     mock_test_file = PROJECT_ROOT / "netra_backend/tests/unit/test_mcp_service_core.py"
     realistic_test_file = PROJECT_ROOT / "netra_backend/tests/integration/test_mcp_service_realistic.py"
     
     if not mock_test_file.exists():
-        print("⚠️  Original mock test file not found")
+        print(" WARNING: [U+FE0F]  Original mock test file not found")
         return True
     
     try:
@@ -167,7 +167,7 @@ def check_test_vs_mock_comparison():
             realistic_content = f.read()
             realistic_test_count = realistic_content.count('def test_')
         
-        print(f"📊 Comparison Results:")
+        print(f" CHART:  Comparison Results:")
         print(f"   Mock Test:      {mock_lines:4d} lines, {mock_test_count:2d} test methods")
         print(f"   Realistic Test: {realistic_lines:4d} lines, {realistic_test_count:2d} test methods")
         
@@ -181,7 +181,7 @@ def check_test_vs_mock_comparison():
         
         if realistic_patterns < mock_patterns:
             reduction = ((mock_patterns - realistic_patterns) / mock_patterns * 100)
-            print(f"   ✅ {reduction:.1f}% reduction in mock usage")
+            print(f"    PASS:  {reduction:.1f}% reduction in mock usage")
         
         # Check for real service usage
         real_service_indicators = [
@@ -197,18 +197,18 @@ def check_test_vs_mock_comparison():
         print(f"     Realistic: {realistic_real_usage:3d} indicators")
         
         if realistic_real_usage > mock_real_usage:
-            print(f"   ✅ Significant increase in real service integration")
+            print(f"    PASS:  Significant increase in real service integration")
         
         return True
         
     except Exception as e:
-        print(f"❌ Comparison error: {e}")
+        print(f" FAIL:  Comparison error: {e}")
         return False
 
 
 def main():
     """Main validation function."""
-    print("🚀 MCP Service Realistic Test Validation")
+    print("[U+1F680] MCP Service Realistic Test Validation")
     print("=" * 50)
     
     checks = [
@@ -221,38 +221,38 @@ def main():
     results = []
     
     for check_name, check_func in checks:
-        print(f"\n📋 {check_name}")
+        print(f"\n[U+1F4CB] {check_name}")
         print("-" * 30)
         
         try:
             success = check_func()
             results.append((check_name, success))
         except Exception as e:
-            print(f"❌ {check_name} failed with exception: {e}")
+            print(f" FAIL:  {check_name} failed with exception: {e}")
             results.append((check_name, False))
     
     # Summary
     print("\n" + "=" * 50)
-    print("📊 VALIDATION SUMMARY")
+    print(" CHART:  VALIDATION SUMMARY")
     print("=" * 50)
     
     passed = sum(1 for _, success in results if success)
     total = len(results)
     
     for check_name, success in results:
-        status = "✅ PASS" if success else "❌ FAIL"
+        status = " PASS:  PASS" if success else " FAIL:  FAIL"
         print(f"   {check_name:25} {status}")
     
     print(f"\nOverall: {passed}/{total} checks passed")
     
     if passed == total:
-        print("\n🎉 All validations passed! The realistic MCP service tests are ready.")
+        print("\n CELEBRATION:  All validations passed! The realistic MCP service tests are ready.")
         print("\nTo run the tests:")
         print("   python scripts/unified_test_runner.py --category integration --pattern 'mcp_service_realistic'")
         print("   python -m pytest netra_backend/tests/integration/test_mcp_service_realistic.py -v")
         return 0
     else:
-        print(f"\n⚠️  {total - passed} validation(s) failed. Please review the issues above.")
+        print(f"\n WARNING: [U+FE0F]  {total - passed} validation(s) failed. Please review the issues above.")
         return 1
 
 

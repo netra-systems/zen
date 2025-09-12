@@ -131,7 +131,7 @@ class TestChatStreaming:
         tool_completed_index = next(i for i, e in enumerate(events) if e["type"] == "tool_completed")
         assert tool_executing_index < tool_completed_index, "tool_executing should come before tool_completed"
         
-        logger.info(f"✅ Chat streaming test passed with {len(events)} events")
+        logger.info(f" PASS:  Chat streaming test passed with {len(events)} events")
     
     async def test_chat_stream_event_data_structure(self, streaming_client: StreamingTestClient):
         """Test that streaming events have proper data structure."""
@@ -179,7 +179,7 @@ class TestChatStreaming:
                 assert "result" in event, "agent_completed should have result"
                 assert "duration_ms" in event, "agent_completed should have duration_ms"
         
-        logger.info("✅ Event data structure validation passed")
+        logger.info(" PASS:  Event data structure validation passed")
     
     async def test_chat_stream_response_chunks(self, streaming_client: StreamingTestClient):
         """Test that response is properly chunked for streaming effect."""
@@ -204,7 +204,7 @@ class TestChatStreaming:
             # This is acceptable as long as we get a response_complete event
             pass
         
-        logger.info("✅ Response chunking validation passed")
+        logger.info(" PASS:  Response chunking validation passed")
     
     async def test_chat_stream_authentication_required(self, test_client: AsyncClient):
         """Test that authentication is required for streaming."""
@@ -233,7 +233,7 @@ class TestChatStreaming:
         
         assert response.status_code == 401, "Should reject invalid token"
         
-        logger.info("✅ Authentication validation passed")
+        logger.info(" PASS:  Authentication validation passed")
     
     async def test_chat_stream_error_handling(self, streaming_client: StreamingTestClient):
         """Test error handling in streaming responses."""
@@ -248,7 +248,7 @@ class TestChatStreaming:
         assert "stream_start" in event_types, "Should start stream even with errors"
         assert "stream_end" in event_types, "Should end stream properly even with errors"
         
-        logger.info("✅ Error handling validation passed")
+        logger.info(" PASS:  Error handling validation passed")
 
 
 class TestAgentLifecycleControl:
@@ -271,7 +271,7 @@ class TestAgentLifecycleControl:
         assert "timestamp" in data
         assert "user_id" in data
         
-        logger.info("✅ Agent start endpoint test passed")
+        logger.info(" PASS:  Agent start endpoint test passed")
     
     async def test_agent_stop_endpoint(self, test_client: AsyncClient, jwt_token: str):
         """Test agent stop endpoint."""
@@ -289,7 +289,7 @@ class TestAgentLifecycleControl:
         assert data["run_id"] == "test-run-123"
         assert "timestamp" in data
         
-        logger.info("✅ Agent stop endpoint test passed")
+        logger.info(" PASS:  Agent stop endpoint test passed")
     
     async def test_agent_cancel_endpoint(self, test_client: AsyncClient, jwt_token: str):
         """Test agent cancel endpoint."""
@@ -307,7 +307,7 @@ class TestAgentLifecycleControl:
         assert data["run_id"] == "test-run-123"
         assert "timestamp" in data
         
-        logger.info("✅ Agent cancel endpoint test passed")
+        logger.info(" PASS:  Agent cancel endpoint test passed")
     
     async def test_agent_status_endpoint(self, test_client: AsyncClient, jwt_token: str):
         """Test agent status endpoint."""
@@ -327,7 +327,7 @@ class TestAgentLifecycleControl:
         assert "websocket_events_enabled" in data
         assert data["websocket_events_enabled"] is True
         
-        logger.info("✅ Agent status endpoint test passed")
+        logger.info(" PASS:  Agent status endpoint test passed")
 
 
 class TestHealthChecks:
@@ -350,7 +350,7 @@ class TestHealthChecks:
         assert features["agent_lifecycle_control"] is True
         assert features["websocket_events"] is True
         
-        logger.info("✅ Health check validation passed")
+        logger.info(" PASS:  Health check validation passed")
 
 
 @pytest.mark.asyncio
@@ -417,7 +417,7 @@ async def test_full_investor_demo_flow(streaming_client: StreamingTestClient, te
     # Should complete within reasonable time for demo (10 seconds max)
     assert total_duration < 10.0, f"Demo took too long: {total_duration} seconds"
     
-    logger.info(f"✅ INVESTOR DEMO VALIDATION PASSED - Duration: {total_duration:.2f}s, Events: {len(events)}")
+    logger.info(f" PASS:  INVESTOR DEMO VALIDATION PASSED - Duration: {total_duration:.2f}s, Events: {len(events)}")
     
     # 6. Validate business value metrics
     response_chunks = [e for e in events if e["type"] == "response_chunk"]
@@ -427,7 +427,7 @@ async def test_full_investor_demo_flow(streaming_client: StreamingTestClient, te
     thinking_events = [e for e in events if e["type"] == "agent_thinking"]
     assert len(thinking_events) > 0, "Must show AI reasoning for transparency"
     
-    logger.info("🎯 COMPLETE INVESTOR DEMO FLOW VALIDATED - READY FOR $120K+ MRR DEMOS")
+    logger.info(" TARGET:  COMPLETE INVESTOR DEMO FLOW VALIDATED - READY FOR $120K+ MRR DEMOS")
 
 
 if __name__ == "__main__":

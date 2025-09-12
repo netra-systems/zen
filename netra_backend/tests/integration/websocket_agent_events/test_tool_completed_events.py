@@ -598,7 +598,7 @@ class TestToolCompletedEvents(BaseIntegrationTest):
             if result and isinstance(result, str):
                 # Check for accessibility-friendly formatting
                 # Should not rely solely on visual formatting
-                visual_only_formatting = ["&nbsp;", "<i>", "<b>", "░", "▓"]
+                visual_only_formatting = ["&nbsp;", "<i>", "<b>", "[U+2591]", "[U+2593]"]
                 has_visual_only = any(formatting in result for formatting in visual_only_formatting)
                 assert not has_visual_only, "Results should not rely on visual-only formatting"
                 

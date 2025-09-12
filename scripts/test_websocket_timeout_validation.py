@@ -85,7 +85,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
                 f"expected {expected_recv_timeout}s to fix race condition with agent execution timeout"
             )
             
-            print("   ✅ Staging WebSocket recv timeout is correctly configured at 35s")
+            print("    PASS:  Staging WebSocket recv timeout is correctly configured at 35s")
     
     def test_staging_agent_execution_timeout_is_30_seconds(self):
         """
@@ -94,7 +94,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
         Issue #404 Root Cause: 15s agent timeout vs 3s WebSocket timeout.
         Expected Fix: Staging should return 30s agent execution timeout.
         """
-        print("\n🔍 Testing staging agent execution timeout configuration...")
+        print("\n SEARCH:  Testing staging agent execution timeout configuration...")
         
         # Mock environment to be staging
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
@@ -115,7 +115,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
                 f"expected {expected_agent_timeout}s for proper coordination with WebSocket timeout"
             )
             
-            print("   ✅ Staging agent execution timeout is correctly configured at 30s")
+            print("    PASS:  Staging agent execution timeout is correctly configured at 30s")
     
     def test_timeout_hierarchy_validation_staging(self):
         """
@@ -124,7 +124,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
         Issue #404 Root Cause: WebSocket timeout (3s) < Agent timeout (15s) = race condition.
         Expected Fix: WebSocket timeout (35s) > Agent timeout (30s) = proper hierarchy.
         """
-        print("\n🔍 Testing staging timeout hierarchy validation...")
+        print("\n SEARCH:  Testing staging timeout hierarchy validation...")
         
         # Mock environment to be staging  
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
@@ -166,7 +166,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
                 f"Should be at least {min_gap}s"
             )
             
-            print("   ✅ Staging timeout hierarchy is properly configured")
+            print("    PASS:  Staging timeout hierarchy is properly configured")
     
     def test_convenience_functions_return_staging_values(self):
         """
@@ -174,7 +174,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
         
         Tests the global convenience functions that are likely used throughout the codebase.
         """
-        print("\n🔍 Testing convenience functions for staging timeout values...")
+        print("\n SEARCH:  Testing convenience functions for staging timeout values...")
         
         # Mock environment to be staging
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
@@ -193,7 +193,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
             hierarchy_valid = validate_timeout_hierarchy()
             self.assertTrue(hierarchy_valid, "Timeout hierarchy validation convenience function failed")
             
-            print("   ✅ Convenience functions return correct staging timeout values")
+            print("    PASS:  Convenience functions return correct staging timeout values")
     
     def test_gcp_initialization_validator_timeout_optimization(self):
         """
@@ -202,7 +202,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
         The GCP initialization validator has performance optimizations that should
         use shorter timeouts in staging compared to the 1.2s race condition timeouts.
         """
-        print("\n🔍 Testing GCP initialization validator timeout optimization...")
+        print("\n SEARCH:  Testing GCP initialization validator timeout optimization...")
         
         # Mock environment to be staging
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}):
@@ -235,7 +235,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
                 f"Staging max total timeout should be {expected_max_timeout}s, got {validator.max_total_timeout}s"
             )
             
-            print("   ✅ GCP initialization validator correctly configured for staging")
+            print("    PASS:  GCP initialization validator correctly configured for staging")
     
     def test_race_condition_detection_in_old_configuration(self):
         """
@@ -244,7 +244,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
         This test validates that the old problematic configuration (3s WebSocket, 15s Agent)
         would be properly detected as invalid by our validation logic.
         """
-        print("\n🔍 Testing race condition detection with old configuration...")
+        print("\n SEARCH:  Testing race condition detection with old configuration...")
         
         # Create a mock timeout configuration with the old problematic values
         from netra_backend.app.core.timeout_configuration import TimeoutConfig
@@ -294,7 +294,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
             f"VALIDATION FAILURE: Hierarchy gap should be negative for race condition. Got: {hierarchy_gap}s"
         )
         
-        print("   ✅ Race condition properly detected in old configuration")
+        print("    PASS:  Race condition properly detected in old configuration")
 
 
 class TestEnvironmentDetection(unittest.TestCase):
@@ -310,7 +310,7 @@ class TestEnvironmentDetection(unittest.TestCase):
     
     def test_environment_detection_staging(self):
         """Test that staging environment is properly detected."""
-        print("\n🔍 Testing staging environment detection...")
+        print("\n SEARCH:  Testing staging environment detection...")
         
         with patch.dict(os.environ, {'ENVIRONMENT': 'staging'}, clear=False):
             manager = CloudNativeTimeoutManager()
@@ -325,11 +325,11 @@ class TestEnvironmentDetection(unittest.TestCase):
                 f"Environment detection failed. Expected CLOUD_RUN_STAGING, got {detected_env}"
             )
             
-            print("   ✅ Staging environment properly detected")
+            print("    PASS:  Staging environment properly detected")
     
     def test_environment_detection_production(self):
         """Test that production environment is properly detected."""
-        print("\n🔍 Testing production environment detection...")
+        print("\n SEARCH:  Testing production environment detection...")
         
         with patch.dict(os.environ, {'ENVIRONMENT': 'production'}, clear=False):
             manager = CloudNativeTimeoutManager()
@@ -344,11 +344,11 @@ class TestEnvironmentDetection(unittest.TestCase):
                 f"Environment detection failed. Expected CLOUD_RUN_PRODUCTION, got {detected_env}"
             )
             
-            print("   ✅ Production environment properly detected")
+            print("    PASS:  Production environment properly detected")
     
     def test_environment_detection_local(self):
         """Test that local development environment is properly detected."""
-        print("\n🔍 Testing local development environment detection...")
+        print("\n SEARCH:  Testing local development environment detection...")
         
         # Clear ENVIRONMENT variable or set to development
         with patch.dict(os.environ, {'ENVIRONMENT': 'development'}, clear=False):
@@ -364,7 +364,7 @@ class TestEnvironmentDetection(unittest.TestCase):
                 f"Environment detection failed. Expected LOCAL_DEVELOPMENT, got {detected_env}"
             )
             
-            print("   ✅ Local development environment properly detected")
+            print("    PASS:  Local development environment properly detected")
 
 
 def run_timeout_validation_tests():
@@ -398,30 +398,30 @@ def run_timeout_validation_tests():
     
     # Print results summary
     print("\n" + "=" * 80)
-    print("🏁 TEST EXECUTION SUMMARY")
+    print("[U+1F3C1] TEST EXECUTION SUMMARY")
     print("=" * 80)
     
     if result.wasSuccessful():
-        print("✅ ALL TESTS PASSED")
-        print("✅ ASSESSMENT: 3.0s staging timeouts are deployed and working")
-        print("✅ RACE CONDITION: RESOLVED - Timeout hierarchy properly configured")
-        print("✅ RECOMMENDATION: PROCEED TO VALIDATION - No remediation needed")
+        print(" PASS:  ALL TESTS PASSED")
+        print(" PASS:  ASSESSMENT: 3.0s staging timeouts are deployed and working")
+        print(" PASS:  RACE CONDITION: RESOLVED - Timeout hierarchy properly configured")
+        print(" PASS:  RECOMMENDATION: PROCEED TO VALIDATION - No remediation needed")
         return True
     else:
-        print("❌ TESTS FAILED")
-        print(f"❌ Failures: {len(result.failures)}")
-        print(f"❌ Errors: {len(result.errors)}")
-        print("❌ ASSESSMENT: 1.2s race condition timeouts may still be active")
-        print("❌ RECOMMENDATION: PROCEED TO REMEDIATION - Fix timeout configuration")
+        print(" FAIL:  TESTS FAILED")
+        print(f" FAIL:  Failures: {len(result.failures)}")
+        print(f" FAIL:  Errors: {len(result.errors)}")
+        print(" FAIL:  ASSESSMENT: 1.2s race condition timeouts may still be active")
+        print(" FAIL:  RECOMMENDATION: PROCEED TO REMEDIATION - Fix timeout configuration")
         
         if result.failures:
-            print("\n🔍 FAILURE DETAILS:")
+            print("\n SEARCH:  FAILURE DETAILS:")
             for test, traceback in result.failures:
                 print(f"   FAILED: {test}")
                 print(f"   REASON: {traceback.split('AssertionError:')[-1].strip() if 'AssertionError:' in traceback else 'Unknown'}")
         
         if result.errors:
-            print("\n🔍 ERROR DETAILS:")
+            print("\n SEARCH:  ERROR DETAILS:")
             for test, traceback in result.errors:
                 print(f"   ERROR: {test}")
                 print(f"   REASON: {traceback.split('Exception:')[-1].strip() if 'Exception:' in traceback else 'Unknown'}")

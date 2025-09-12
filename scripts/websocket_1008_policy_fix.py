@@ -146,7 +146,7 @@ if not auth_result.success:
     
     # Enhanced logging with proper error classification
     error_category = "POLICY_VIOLATION" if close_code == 1008 else "SERVICE_ERROR"
-    logger.error(f"🔒 SSOT AUTHENTICATION FAILED ({error_category}): {auth_result.error_code} - {close_reason}")
+    logger.error(f"[U+1F512] SSOT AUTHENTICATION FAILED ({error_category}): {auth_result.error_code} - {close_reason}")
     
     # Send appropriate error message
     auth_error = create_error_message(

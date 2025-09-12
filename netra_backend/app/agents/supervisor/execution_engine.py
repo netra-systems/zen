@@ -1,5 +1,5 @@
 """
-🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+ ALERT:  CRITICAL SSOT MIGRATION - FILE DEPRECATED  ALERT: 
 
 This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
 
@@ -12,7 +12,7 @@ isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH
 """
 
 """
-🚨 CRITICAL SSOT MIGRATION - FILE DEPRECATED 🚨
+ ALERT:  CRITICAL SSOT MIGRATION - FILE DEPRECATED  ALERT: 
 
 This file has been DEPRECATED as part of ExecutionEngine SSOT consolidation.
 
@@ -26,7 +26,7 @@ isolation vulnerabilities. UserExecutionEngine is now the SINGLE SOURCE OF TRUTH
 
 """Execution engine for supervisor agent pipelines with UserExecutionContext support.
 
-🚨 CRITICAL SSOT MIGRATION NOTICE 🚨
+ ALERT:  CRITICAL SSOT MIGRATION NOTICE  ALERT: 
 This ExecutionEngine is DEPRECATED and will be REMOVED in the next release.
 
 MIGRATION REQUIRED:
@@ -103,7 +103,7 @@ logger = central_logger.get_logger(__name__)
 class ExecutionEngine:
     """Request-scoped agent execution orchestration.
     
-    🚨 DEPRECATED - Use UserExecutionEngine instead!
+     ALERT:  DEPRECATED - Use UserExecutionEngine instead!
     
     MIGRATION PATH:
     from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
@@ -208,7 +208,7 @@ class ExecutionEngine:
         # Phase 3: Response caching for 80% performance improvement on repeat queries
         self._response_cache: Dict[str, Dict] = {}
         self._cache_ttl_seconds = 300  # 5 minutes TTL for agent responses
-        logger.info("✅ Phase 3: Response caching initialized for 80% performance improvement")
+        logger.info(" PASS:  Phase 3: Response caching initialized for 80% performance improvement")
         
         self._init_components()
         self._init_death_monitoring()
@@ -301,7 +301,7 @@ class ExecutionEngine:
         
     async def _handle_agent_death(self, execution_record) -> None:
         """Handle agent death detection."""
-        logger.critical(f"💀 AGENT DEATH DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
+        logger.critical(f"[U+1F480] AGENT DEATH DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
         
         # Send death notification via WebSocket
         if self.websocket_bridge:
@@ -320,7 +320,7 @@ class ExecutionEngine:
         
     async def _handle_agent_timeout(self, execution_record) -> None:
         """Handle agent timeout detection."""
-        logger.error(f"⏱️ AGENT TIMEOUT: {execution_record.agent_name} exceeded {execution_record.timeout_seconds}s")
+        logger.error(f"[U+23F1][U+FE0F] AGENT TIMEOUT: {execution_record.agent_name} exceeded {execution_record.timeout_seconds}s")
         
         # Send timeout notification via WebSocket
         if self.websocket_bridge:
@@ -813,7 +813,7 @@ class ExecutionEngine:
             successful_results = sum(1 for r in results if not getattr(r, 'is_error', False))
             
             logger.info(
-                f"⚡ Phase 3 Parallel Execution: {steps_count} steps in {parallel_duration:.3f}s "
+                f" LIGHTNING:  Phase 3 Parallel Execution: {steps_count} steps in {parallel_duration:.3f}s "
                 f"({successful_results}/{steps_count} successful) - "
                 f"Target: 40% faster than sequential"
             )
@@ -852,7 +852,7 @@ class ExecutionEngine:
         if cache_key in self._response_cache:
             cache_entry = self._response_cache[cache_key]
             if self._is_cache_valid(cache_entry):
-                logger.info(f"⚡ Phase 3 Cache HIT: {context.agent_name} - 80% faster response")
+                logger.info(f" LIGHTNING:  Phase 3 Cache HIT: {context.agent_name} - 80% faster response")
                 return cache_entry['result']
         return None
     
@@ -864,7 +864,7 @@ class ExecutionEngine:
                 'result': result,
                 'timestamp': time.time()
             }
-            logger.debug(f"⚡ Phase 3 Response cached: {context.agent_name}")
+            logger.debug(f" LIGHTNING:  Phase 3 Response cached: {context.agent_name}")
     
     async def _execute_step_parallel_safe(self, step: PipelineStep,
                                         context: AgentExecutionContext,

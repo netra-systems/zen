@@ -1,6 +1,6 @@
 """
 Tests for global error handler and decorator functionality.
-All functions ≤8 lines per requirements.
+All functions  <= 8 lines per requirements.
 """""
 
 import sys

@@ -1,4 +1,4 @@
-"""🚨 CRITICAL INTEGRATION TESTS: AgentRegistry User Isolation and Factory Patterns
+""" ALERT:  CRITICAL INTEGRATION TESTS: AgentRegistry User Isolation and Factory Patterns
 
 BUSINESS CRITICAL SCENARIOS:
 - Enterprise customer isolation ($15K+ MRR per customer protection)

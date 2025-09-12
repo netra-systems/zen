@@ -2,7 +2,7 @@
 Agent Registry and Factory Patterns Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Ensure secure multi-user agent execution isolation and factory pattern reliability
 - Value Impact: Users must not access other users' data or contexts, preventing $10M+ liability from data leakage
 - Strategic Impact: Core platform security and multi-tenancy capability enabling 10+ concurrent users
@@ -223,7 +223,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         assert 'active_contexts' in metrics
         assert metrics['total_instances_created'] >= 0
         
-        self.logger.info("✅ Agent factory creation and initialization test passed")
+        self.logger.info(" PASS:  Agent factory creation and initialization test passed")
 
     @pytest.mark.integration
     async def test_user_context_isolation_boundary_enforcement(self):
@@ -264,7 +264,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         for context in user_contexts:
             await self.agent_registry.cleanup_user_session(context.user_id)
             
-        self.logger.info("✅ User context isolation boundary enforcement test passed")
+        self.logger.info(" PASS:  User context isolation boundary enforcement test passed")
 
     @pytest.mark.integration
     async def test_agent_registry_lifecycle_management(self):
@@ -297,7 +297,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         assert cleanup_metrics['status'] == 'cleaned'
         assert cleanup_metrics['user_id'] == test_user.user_id
         
-        self.logger.info("✅ Agent registry lifecycle management test passed")
+        self.logger.info(" PASS:  Agent registry lifecycle management test passed")
 
     @pytest.mark.integration  
     async def test_multi_user_agent_instance_isolation(self):
@@ -369,7 +369,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
             except Exception as e:
                 self.logger.warning(f"Cleanup failed for user {user_id}: {e}")
         
-        self.logger.info("✅ Multi-user agent instance isolation test passed")
+        self.logger.info(" PASS:  Multi-user agent instance isolation test passed")
 
     @pytest.mark.integration
     async def test_agent_factory_configuration_and_customization(self):
@@ -410,7 +410,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         assert hasattr(performance_config, 'max_concurrent_per_user')
         assert hasattr(performance_config, 'execution_timeout')
         
-        self.logger.info("✅ Agent factory configuration and customization test passed")
+        self.logger.info(" PASS:  Agent factory configuration and customization test passed")
 
     @pytest.mark.integration
     async def test_agent_creation_with_proper_dependency_injection(self):
@@ -467,7 +467,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         await emitter.cleanup()
         await self.agent_factory.cleanup_user_context(context)
         
-        self.logger.info("✅ Agent creation with proper dependency injection test passed")
+        self.logger.info(" PASS:  Agent creation with proper dependency injection test passed")
 
     @pytest.mark.integration
     async def test_agent_registry_cleanup_and_resource_management(self):
@@ -527,7 +527,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         final_metrics = self.agent_factory.get_factory_metrics()
         assert final_metrics['total_contexts_cleaned'] >= 0
         
-        self.logger.info("✅ Agent registry cleanup and resource management test passed")
+        self.logger.info(" PASS:  Agent registry cleanup and resource management test passed")
 
     @pytest.mark.integration
     async def test_factory_pattern_inheritance_and_polymorphism(self):
@@ -579,7 +579,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         assert health['using_universal_registry'] is True
         assert health['factory_patterns_enabled'] is True
         
-        self.logger.info("✅ Factory pattern inheritance and polymorphism test passed")
+        self.logger.info(" PASS:  Factory pattern inheritance and polymorphism test passed")
 
     @pytest.mark.integration
     async def test_agent_registry_concurrency_and_thread_safety(self):
@@ -669,7 +669,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         final_monitoring = await self.agent_registry.monitor_all_users()
         assert 'total_users' in final_monitoring
         
-        self.logger.info(f"✅ Concurrent operations test passed: "
+        self.logger.info(f" PASS:  Concurrent operations test passed: "
                         f"{successful_users}/{num_concurrent_users} users successful, "
                         f"{total_operations} operations completed, "
                         f"{total_errors} errors, "
@@ -736,7 +736,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         await self.agent_registry.cleanup_user_session("recovery_test_user")
         await self.agent_registry.cleanup_user_session(test_user.user_id)
         
-        self.logger.info("✅ Agent factory error handling and validation test passed")
+        self.logger.info(" PASS:  Agent factory error handling and validation test passed")
 
     @pytest.mark.integration
     async def test_agent_registry_performance_and_scalability(self):
@@ -849,7 +849,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         assert factory_metrics['creation_errors'] == 0
         assert factory_metrics['cleanup_errors'] == 0
         
-        self.logger.info(f"✅ Performance and scalability test passed with {num_users} users")
+        self.logger.info(f" PASS:  Performance and scalability test passed with {num_users} users")
 
     @pytest.mark.integration
     async def test_factory_based_user_session_isolation(self):
@@ -961,7 +961,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
                 isolation_test_data[user_id]['context']
             )
         
-        self.logger.info("✅ Factory-based user session isolation test passed")
+        self.logger.info(" PASS:  Factory-based user session isolation test passed")
 
     @pytest.mark.integration
     async def test_agent_registry_integration_with_execution_contexts(self):
@@ -1027,7 +1027,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         # Cleanup
         await self.agent_registry.cleanup_user_session(test_user.user_id)
         
-        self.logger.info("✅ Agent registry integration with execution contexts test passed")
+        self.logger.info(" PASS:  Agent registry integration with execution contexts test passed")
 
     @pytest.mark.integration
     async def test_agent_factory_security_and_permission_validation(self):
@@ -1108,7 +1108,7 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         await emitter.cleanup()
         await self.agent_factory.cleanup_user_context(context)
         
-        self.logger.info("✅ Agent factory security and permission validation test passed")
+        self.logger.info(" PASS:  Agent factory security and permission validation test passed")
 
     @pytest.mark.integration
     async def test_agent_registry_observability_and_monitoring(self):
@@ -1190,4 +1190,4 @@ class TestAgentRegistryFactoryPatterns(BaseIntegrationTest):
         # Final cleanup
         await self.agent_factory.cleanup_user_context(test_context)
         
-        self.logger.info("✅ Agent registry observability and monitoring test passed")
+        self.logger.info(" PASS:  Agent registry observability and monitoring test passed")

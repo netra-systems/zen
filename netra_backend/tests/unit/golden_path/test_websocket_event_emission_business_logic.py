@@ -68,7 +68,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
         assert "optimize" in payload["message"].lower()
         assert "starting" in payload["message"].lower()
         
-        print("✅ Agent started event emission test passed")
+        print(" PASS:  Agent started event emission test passed")
 
     def test_agent_thinking_event_emission_engagement(self):
         """
@@ -123,7 +123,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
             message = thinking_event["payload"]["message"]
             assert len(message) > 10  # Substantive message
             
-        print("✅ Agent thinking event emission engagement test passed")
+        print(" PASS:  Agent thinking event emission engagement test passed")
 
     def test_tool_executing_event_emission_transparency(self):
         """
@@ -167,7 +167,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
             assert "purpose" in payload
             assert "status" in payload
             
-        print("✅ Tool executing event emission transparency test passed")
+        print(" PASS:  Tool executing event emission transparency test passed")
 
     def test_tool_completed_event_emission_value_delivery(self):
         """
@@ -213,7 +213,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
         assert results["performance_issues_found"] > 0
         assert "%" in results["potential_improvement"]
         
-        print("✅ Tool completed event emission value delivery test passed")
+        print(" PASS:  Tool completed event emission value delivery test passed")
 
     def test_agent_completed_event_emission_final_value(self):
         """
@@ -265,7 +265,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
         assert "performance_improvement" in business_value
         assert "cost_savings" in business_value
         
-        print("✅ Agent completed event emission final value test passed")
+        print(" PASS:  Agent completed event emission final value test passed")
 
     def test_websocket_event_emission_sequence_validation(self):
         """
@@ -312,7 +312,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
             assert "user_id" in event
             assert event["user_id"] == user_id
         
-        print(f"✅ WebSocket event emission sequence validation test passed ({len(event_sequence)} events)")
+        print(f" PASS:  WebSocket event emission sequence validation test passed ({len(event_sequence)} events)")
 
     def test_websocket_event_business_context_preservation(self):
         """
@@ -352,7 +352,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
             assert context["request_priority"] == "high"
             assert context["session_id"] == "session_enterprise_123"
             
-        print("✅ WebSocket event business context preservation test passed")
+        print(" PASS:  WebSocket event business context preservation test passed")
 
     def test_websocket_event_emission_error_handling(self):
         """
@@ -394,7 +394,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
                 # Should not reach here - errors should be handled gracefully
                 pytest.fail(f"WebSocket event emission should handle errors gracefully: {e}")
         
-        print("✅ WebSocket event emission error handling test passed")
+        print(" PASS:  WebSocket event emission error handling test passed")
 
     def test_websocket_event_performance_requirements(self):
         """
@@ -444,7 +444,7 @@ class TestWebSocketEventEmissionBusinessLogic(SSotBaseTestCase):
             assert "processed_at" in event
             assert event["user_id"] == user_id
             
-        print(f"✅ WebSocket event performance test passed (processed {len(events)} events in {processing_duration*1000:.1f}ms)")
+        print(f" PASS:  WebSocket event performance test passed (processed {len(events)} events in {processing_duration*1000:.1f}ms)")
 
 
 if __name__ == "__main__":

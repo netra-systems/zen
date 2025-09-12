@@ -328,7 +328,7 @@ class TestHealthCascade:
             assert cascade_result.get("auth_detected_as_failed", False), "Auth failure not detected"
             assert cascade_result.get("cascade_detected", False), "Cascade not detected"
             
-            logger.info("✓ Auth failure cascade validated")
+            logger.info("[U+2713] Auth failure cascade validated")
             
         finally:
             await failure_simulator.restore_all_services()
@@ -347,7 +347,7 @@ class TestHealthCascade:
             assert cascade_result.get("backend_failure_detected", False), "Backend failure not detected"
             assert cascade_result.get("cascade_propagated", False), "Backend failure cascade not propagated"
             
-            logger.info("✓ Backend failure cascade validated")
+            logger.info("[U+2713] Backend failure cascade validated")
             
         finally:
             await failure_simulator.restore_all_services()
@@ -365,7 +365,7 @@ class TestHealthCascade:
             assert degradation_result.get("system_responsive", False), "System not responsive during partial degradation"
             assert degradation_result.get("partial_degradation_handled", False), "Partial degradation not handled"
             
-            logger.info("✓ Partial degradation handling validated")
+            logger.info("[U+2713] Partial degradation handling validated")
             
         finally:
             await failure_simulator.restore_all_services()
@@ -386,7 +386,7 @@ class TestHealthCascade:
             assert recovery_result.get("recovery_propagated", False), "Recovery not propagated"
             assert recovery_result.get("services_recovered", 0) > 0, "No services recovered"
             
-            logger.info("✓ Recovery propagation validated")
+            logger.info("[U+2713] Recovery propagation validated")
             
         finally:
             await failure_simulator.restore_all_services()
@@ -405,7 +405,7 @@ class TestHealthCascade:
             # Either direct circuit breaker activation OR fast-fail behavior indicates proper functioning
             assert circuit_working or fast_fail, f"Circuit breaker behavior not detected: {circuit_result}"
             
-            logger.info("✓ Circuit breaker activation validated")
+            logger.info("[U+2713] Circuit breaker activation validated")
             
         except Exception as e:
             # Circuit breaker tests may fail if services are not configured for circuit breaking

@@ -604,7 +604,7 @@ class TestStartupWebSocketEventsMissionCritical(IntegrationTestCase):
                     await scenario['test_method'](test_user)
                     
                     # If we reach here, error handling worked correctly
-                    print(f"✅ Error scenario '{scenario['name']}' handled correctly")
+                    print(f" PASS:  Error scenario '{scenario['name']}' handled correctly")
                     
                 except Exception as e:
                     # Record business critical failure
@@ -889,39 +889,39 @@ class TestStartupWebSocketEventsMissionCritical(IntegrationTestCase):
         # Report Mission-Critical Success/Failure Status
         critical_failures = len(self.mission_critical_metrics['business_critical_failures'])
         
-        print(f"\n🚨 MISSION CRITICAL STATUS:")
+        print(f"\n ALERT:  MISSION CRITICAL STATUS:")
         if critical_failures == 0 and self.mission_critical_metrics['chat_functionality_validated']:
-            print(f"  ✅ ALL MISSION CRITICAL REQUIREMENTS MET")
-            print(f"  ✅ CHAT FUNCTIONALITY (90% of business value) VALIDATED")
-            print(f"  ✅ WEBSOCKET EVENTS SYSTEM FULLY OPERATIONAL")
+            print(f"   PASS:  ALL MISSION CRITICAL REQUIREMENTS MET")
+            print(f"   PASS:  CHAT FUNCTIONALITY (90% of business value) VALIDATED")
+            print(f"   PASS:  WEBSOCKET EVENTS SYSTEM FULLY OPERATIONAL")
         else:
-            print(f"  ❌ MISSION CRITICAL FAILURES DETECTED: {critical_failures}")
-            print(f"  ❌ CHAT FUNCTIONALITY AT RISK")
-            print(f"  ❌ BUSINESS VALUE DELIVERY COMPROMISED")
+            print(f"   FAIL:  MISSION CRITICAL FAILURES DETECTED: {critical_failures}")
+            print(f"   FAIL:  CHAT FUNCTIONALITY AT RISK")
+            print(f"   FAIL:  BUSINESS VALUE DELIVERY COMPROMISED")
         
         # Report CLAUDE.md Section 6.1 Compliance
         required_events_validated = len(self.mission_critical_metrics['required_events_validated'])
         total_required_events = len(self.required_websocket_events)
         
-        print(f"\n📋 CLAUDE.md SECTION 6.1 COMPLIANCE:")
+        print(f"\n[U+1F4CB] CLAUDE.md SECTION 6.1 COMPLIANCE:")
         print(f"  Required WebSocket Events: {required_events_validated}/{total_required_events}")
         
         for event_type in self.required_websocket_events:
-            status = "✅" if event_type in self.mission_critical_metrics['required_events_validated'] else "❌"
+            status = " PASS: " if event_type in self.mission_critical_metrics['required_events_validated'] else " FAIL: "
             print(f"    {status} {event_type}")
         
         # Report Integration Metrics
-        print(f"\n🔧 INTEGRATION METRICS:")
-        print(f"  Startup + WebSocket Integration: {'✅ SUCCESS' if self.mission_critical_metrics['startup_websocket_integration_success'] else '❌ FAILED'}")
-        print(f"  Authentication Validated: {'✅ SUCCESS' if self.mission_critical_metrics['authentication_validated'] else '❌ FAILED'}")
-        print(f"  Multi-User Isolation: {'✅ SUCCESS' if self.mission_critical_metrics['multi_user_isolation_validated'] else '❌ FAILED'}")
+        print(f"\n[U+1F527] INTEGRATION METRICS:")
+        print(f"  Startup + WebSocket Integration: {' PASS:  SUCCESS' if self.mission_critical_metrics['startup_websocket_integration_success'] else ' FAIL:  FAILED'}")
+        print(f"  Authentication Validated: {' PASS:  SUCCESS' if self.mission_critical_metrics['authentication_validated'] else ' FAIL:  FAILED'}")
+        print(f"  Multi-User Isolation: {' PASS:  SUCCESS' if self.mission_critical_metrics['multi_user_isolation_validated'] else ' FAIL:  FAILED'}")
         
         # Report Connection Metrics
         connections_created = self.mission_critical_metrics['websocket_connections_created']
         connections_successful = self.mission_critical_metrics['websocket_connections_successful']
         connection_success_rate = (connections_successful / connections_created) * 100 if connections_created > 0 else 0
         
-        print(f"\n🌐 WEBSOCKET CONNECTION METRICS:")
+        print(f"\n[U+1F310] WEBSOCKET CONNECTION METRICS:")
         print(f"  Connections Created: {connections_created}")
         print(f"  Connections Successful: {connections_successful}")
         print(f"  Success Rate: {connection_success_rate:.1f}%")
@@ -931,29 +931,29 @@ class TestStartupWebSocketEventsMissionCritical(IntegrationTestCase):
         events_received = self.mission_critical_metrics['agent_events_received']
         event_success_rate = (events_received / events_sent) * 100 if events_sent > 0 else 0
         
-        print(f"\n📡 WEBSOCKET EVENT METRICS:")
+        print(f"\n[U+1F4E1] WEBSOCKET EVENT METRICS:")
         print(f"  Events Sent: {events_sent}")
         print(f"  Events Received: {events_received}")
         print(f"  Event Success Rate: {event_success_rate:.1f}%")
         
         # Report Business Critical Failures
         if self.mission_critical_metrics['business_critical_failures']:
-            print(f"\n💥 BUSINESS CRITICAL FAILURES:")
+            print(f"\n[U+1F4A5] BUSINESS CRITICAL FAILURES:")
             for failure in self.mission_critical_metrics['business_critical_failures']:
-                print(f"  ❌ {failure['scenario']}: {failure['description']}")
+                print(f"   FAIL:  {failure['scenario']}: {failure['description']}")
                 print(f"     Error: {failure['error']}")
                 print(f"     Time: {failure['timestamp']}")
         
         # Final Business Impact Assessment
         print(f"\n{'='*100}")
         if critical_failures == 0 and self.mission_critical_metrics['chat_functionality_validated']:
-            print(f"✅ BUSINESS IMPACT: POSITIVE - Chat functionality fully operational")
+            print(f" PASS:  BUSINESS IMPACT: POSITIVE - Chat functionality fully operational")
             print(f"   - Real-time WebSocket events working perfectly")
             print(f"   - Multi-user isolation validated")
             print(f"   - All CLAUDE.md Section 6 requirements met")
             print(f"   - 90% of business value (chat) is protected")
         else:
-            print(f"❌ BUSINESS IMPACT: CRITICAL - Chat functionality at risk")
+            print(f" FAIL:  BUSINESS IMPACT: CRITICAL - Chat functionality at risk")
             print(f"   - WebSocket event failures detected")
             print(f"   - Business value delivery compromised")
             print(f"   - Immediate action required to prevent revenue loss")

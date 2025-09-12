@@ -155,7 +155,7 @@ class DataHelper:
                     })
                 current_category = line.strip().replace('[', '').replace(']', '').replace('**', '').replace(':', '')
                 current_items = []
-            elif line.strip().startswith('- ') or line.strip().startswith('• '):
+            elif line.strip().startswith('- ') or line.strip().startswith('[U+2022] '):
                 # Extract data item
                 item_text = line.strip()[2:]
                 justification = ""

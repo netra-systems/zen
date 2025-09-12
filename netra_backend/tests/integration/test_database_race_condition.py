@@ -32,7 +32,7 @@ class TestDatabaseRaceCondition:
     @pytest.mark.asyncio
     async def test_concurrent_session_creation_race_condition(self):
         """Test concurrent session creation that should trigger race condition."""
-        logger.info("🧪 Testing concurrent session creation race condition")
+        logger.info("[U+1F9EA] Testing concurrent session creation race condition")
         
         race_condition_detected = False
         error_details = []
@@ -60,7 +60,7 @@ class TestDatabaseRaceCondition:
         
         # Launch multiple concurrent operations
         num_operations = 10
-        logger.info(f"🚀 Launching {num_operations} concurrent database operations")
+        logger.info(f"[U+1F680] Launching {num_operations} concurrent database operations")
         
         tasks = [
             concurrent_database_operation(i) 
@@ -75,20 +75,20 @@ class TestDatabaseRaceCondition:
         race_condition_count = sum(1 for r in results if isinstance(r, str) and "race_condition" in r)
         error_count = len(results) - success_count
         
-        logger.info(f"📊 RESULTS: Success: {success_count}, Race conditions: {race_condition_count}, Other errors: {error_count}")
+        logger.info(f" CHART:  RESULTS: Success: {success_count}, Race conditions: {race_condition_count}, Other errors: {error_count}")
         
         if error_details:
             for detail in error_details:
-                logger.error(f"   🔍 {detail}")
+                logger.error(f"    SEARCH:  {detail}")
         
         # For this test, detecting race condition is actually "success"
         # as it proves the issue exists
         if race_condition_count > 0:
-            logger.info(f"✅ RACE CONDITION REPRODUCED: {race_condition_count} operations hit race condition")
+            logger.info(f" PASS:  RACE CONDITION REPRODUCED: {race_condition_count} operations hit race condition")
             # Mark as passing since we successfully reproduced the issue
             assert race_condition_count > 0, f"Expected to reproduce race condition, got {race_condition_count} race conditions"
         else:
-            logger.warning(f"⚠️ Race condition NOT reproduced in this run. Success: {success_count}")
+            logger.warning(f" WARNING: [U+FE0F] Race condition NOT reproduced in this run. Success: {success_count}")
             # Don't fail the test - race conditions are intermittent
             assert success_count > 0, f"Expected at least some operations to succeed"
 
@@ -96,7 +96,7 @@ class TestDatabaseRaceCondition:
     @pytest.mark.asyncio
     async def test_session_factory_concurrent_access(self):
         """Test concurrent access to session factory directly."""
-        logger.info("🧪 Testing session factory concurrent access")
+        logger.info("[U+1F9EA] Testing session factory concurrent access")
         
         factory = await get_session_factory()
         race_conditions = []
@@ -136,14 +136,14 @@ class TestDatabaseRaceCondition:
         success_count = sum(1 for r in results if isinstance(r, str) and "success" in r)
         race_count = len(race_conditions)
         
-        logger.info(f"📊 Factory test results: Success: {success_count}, Race conditions: {race_count}")
+        logger.info(f" CHART:  Factory test results: Success: {success_count}, Race conditions: {race_count}")
         
         if race_conditions:
             for race_error in race_conditions:
-                logger.error(f"   🔍 RACE: {race_error}")
-            logger.info(f"✅ RACE CONDITION REPRODUCED via factory: {race_count} instances")
+                logger.error(f"    SEARCH:  RACE: {race_error}")
+            logger.info(f" PASS:  RACE CONDITION REPRODUCED via factory: {race_count} instances")
         else:
-            logger.info(f"✅ No race conditions detected in factory operations")
+            logger.info(f" PASS:  No race conditions detected in factory operations")
         
         # Ensure at least some operations succeeded
         assert success_count > 0, f"Expected some successful operations, got {success_count}"
@@ -152,7 +152,7 @@ class TestDatabaseRaceCondition:
     @pytest.mark.asyncio 
     async def test_isolated_session_concurrent_access(self):
         """Test concurrent access using get_isolated_session."""
-        logger.info("🧪 Testing isolated session concurrent access")
+        logger.info("[U+1F9EA] Testing isolated session concurrent access")
         
         errors = []
         
@@ -192,16 +192,16 @@ class TestDatabaseRaceCondition:
         success_count = sum(1 for r in results if isinstance(r, str) and "success" in r)
         race_count = sum(1 for r in results if isinstance(r, str) and "race" in r)
         
-        logger.info(f"📊 Isolated session results: Success: {success_count}, Race conditions: {race_count}")
+        logger.info(f" CHART:  Isolated session results: Success: {success_count}, Race conditions: {race_count}")
         
         if errors:
             for error in errors:
-                logger.error(f"   🔍 {error}")
+                logger.error(f"    SEARCH:  {error}")
         
         if race_count > 0:
-            logger.info(f"✅ RACE CONDITION REPRODUCED in isolated sessions: {race_count} instances")
+            logger.info(f" PASS:  RACE CONDITION REPRODUCED in isolated sessions: {race_count} instances")
         else:
-            logger.info(f"✅ No race conditions in isolated session operations")
+            logger.info(f" PASS:  No race conditions in isolated session operations")
         
         # Ensure operations work
         assert success_count > 0, f"Expected successful operations, got {success_count}"
@@ -210,7 +210,7 @@ class TestDatabaseRaceCondition:
     @pytest.mark.asyncio
     async def test_fix_validation_separate_connections(self):
         """Test that sessions truly get separate connections and don't race."""
-        logger.info("🧪 Testing fix: separate connections prevent race conditions")
+        logger.info("[U+1F9EA] Testing fix: separate connections prevent race conditions")
         
         # Track session connection details
         connection_info = []
@@ -258,14 +258,14 @@ class TestDatabaseRaceCondition:
         unique_pids = set(info['connection_pid'] for info in connection_info)
         unique_sessions = set(info['session_id'] for info in connection_info)
         
-        logger.info(f"📊 Connection analysis:")
-        logger.info(f"   🔍 Total operations: {len(connection_info)}")
-        logger.info(f"   🔍 Unique connection PIDs: {len(unique_pids)}")
-        logger.info(f"   🔍 Unique session objects: {len(unique_sessions)}")
-        logger.info(f"   🔍 PIDs: {sorted(unique_pids)}")
+        logger.info(f" CHART:  Connection analysis:")
+        logger.info(f"    SEARCH:  Total operations: {len(connection_info)}")
+        logger.info(f"    SEARCH:  Unique connection PIDs: {len(unique_pids)}")
+        logger.info(f"    SEARCH:  Unique session objects: {len(unique_sessions)}")
+        logger.info(f"    SEARCH:  PIDs: {sorted(unique_pids)}")
         
         for info in connection_info:
-            logger.debug(f"   🔍 Op {info['operation_id']}: PID {info['connection_pid']}, Session {info['session_id']}")
+            logger.debug(f"    SEARCH:  Op {info['operation_id']}: PID {info['connection_pid']}, Session {info['session_id']}")
         
         # Validate proper isolation
         success_count = sum(1 for r in results if "success" in r)
@@ -273,18 +273,18 @@ class TestDatabaseRaceCondition:
         
         # If connection pooling is working correctly, we might see some PID reuse
         # But if we have race conditions, operations would fail with InterfaceError
-        logger.info(f"✅ CONNECTION ISOLATION VALIDATION: All {success_count} operations succeeded")
+        logger.info(f" PASS:  CONNECTION ISOLATION VALIDATION: All {success_count} operations succeeded")
         
         if len(unique_pids) < len(connection_info):
-            logger.info(f"🔄 CONNECTION POOLING: Detected connection reuse (healthy)")
+            logger.info(f" CYCLE:  CONNECTION POOLING: Detected connection reuse (healthy)")
         else:
-            logger.info(f"🔗 SEPARATE CONNECTIONS: Each operation got separate connection")
+            logger.info(f"[U+1F517] SEPARATE CONNECTIONS: Each operation got separate connection")
 
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_rapid_session_creation_stress(self):
         """Stress test rapid session creation to force race conditions."""
-        logger.info("🧪 STRESS TEST: Rapid session creation")
+        logger.info("[U+1F9EA] STRESS TEST: Rapid session creation")
         
         race_conditions = []
         successful_operations = []
@@ -338,7 +338,7 @@ class TestDatabaseRaceCondition:
         
         # Launch many operations simultaneously 
         num_rapid_ops = 15
-        logger.info(f"🚀 Launching {num_rapid_ops} rapid operations simultaneously")
+        logger.info(f"[U+1F680] Launching {num_rapid_ops} rapid operations simultaneously")
         
         tasks = [rapid_operation(i) for i in range(num_rapid_ops)]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -348,26 +348,26 @@ class TestDatabaseRaceCondition:
         race_count = len(race_conditions)
         error_count = len(results) - success_count
         
-        logger.info(f"📊 STRESS TEST RESULTS:")
-        logger.info(f"   ✅ Successful operations: {success_count}")
-        logger.info(f"   ⚠️  Race conditions detected: {race_count}")
-        logger.info(f"   ❌ Other errors: {error_count - race_count}")
+        logger.info(f" CHART:  STRESS TEST RESULTS:")
+        logger.info(f"    PASS:  Successful operations: {success_count}")
+        logger.info(f"    WARNING: [U+FE0F]  Race conditions detected: {race_count}")
+        logger.info(f"    FAIL:  Other errors: {error_count - race_count}")
         
         if successful_operations:
             avg_duration = sum(op['duration'] for op in successful_operations) / len(successful_operations)
-            logger.info(f"   ⏱️  Average operation duration: {avg_duration:.3f}s")
+            logger.info(f"   [U+23F1][U+FE0F]  Average operation duration: {avg_duration:.3f}s")
         
         if race_conditions:
-            logger.error("🚨 RACE CONDITIONS DETECTED:")
+            logger.error(" ALERT:  RACE CONDITIONS DETECTED:")
             for race in race_conditions[:5]:  # Show first 5
-                logger.error(f"   🔍 Op {race['op_id']}: {race['error']}")
+                logger.error(f"    SEARCH:  Op {race['op_id']}: {race['error']}")
             if len(race_conditions) > 5:
                 logger.error(f"   ... and {len(race_conditions) - 5} more")
             
             # For this test, detecting race conditions means we successfully reproduced the bug
-            logger.info(f"✅ STRESS TEST SUCCESS: Reproduced {race_count} race conditions")
+            logger.info(f" PASS:  STRESS TEST SUCCESS: Reproduced {race_count} race conditions")
         else:
-            logger.info("✅ STRESS TEST: No race conditions detected (fix may be working)")
+            logger.info(" PASS:  STRESS TEST: No race conditions detected (fix may be working)")
         
         # Test should pass if we either reproduce the race condition OR all operations succeed
         assert (race_count > 0) or (success_count == num_rapid_ops), \

@@ -75,7 +75,7 @@ class TestRedisConnectionIssues:
                     'no redis service'
                 ]), f"Expected Redis provisioning error but got: {e}"
                 
-                print(f"✅ Correctly detected Redis not provisioned in staging: {e}")
+                print(f" PASS:  Correctly detected Redis not provisioned in staging: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -122,7 +122,7 @@ class TestRedisConnectionIssues:
                         'connection refused'
                     ]), f"Expected URL formatting error for {repr(malformed_url)} but got: {e}"
                     
-                    print(f"✅ Redis URL formatting error detected for {repr(malformed_url)}: {e}")
+                    print(f" PASS:  Redis URL formatting error detected for {repr(malformed_url)}: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -154,13 +154,13 @@ class TestRedisConnectionIssues:
                     'access denied'
                 ]), f"Expected Redis authentication error but got: {e}"
                 
-                print(f"✅ Redis authentication failure correctly detected: {e}")
+                print(f" PASS:  Redis authentication failure correctly detected: {e}")
                 
             except Exception as e:
                 # Connection refused is also acceptable (Redis not available)
                 error_msg = str(e).lower()
                 if 'connection refused' in error_msg:
-                    print(f"✅ Redis connection refused (service not available): {e}")
+                    print(f" PASS:  Redis connection refused (service not available): {e}")
                 else:
                     pytest.fail(f"Expected Redis authentication or connection error but got: {e}")
     
@@ -195,7 +195,7 @@ class TestRedisConnectionIssues:
                         'pool'
                     ]), f"Expected Redis pool initialization error but got: {e}"
                     
-                    print(f"✅ Redis connection pool initialization failure detected: {e}")
+                    print(f" PASS:  Redis connection pool initialization failure detected: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -232,13 +232,13 @@ class TestRedisConnectionIssues:
                         await operation()
                         pytest.fail(f"Expected Redis {op_name} operation to fail")
                     except ConnectionError as e:
-                        print(f"✅ Redis {op_name} operation correctly failed: {e}")
+                        print(f" PASS:  Redis {op_name} operation correctly failed: {e}")
                         
             except Exception as e:
                 # Any Redis-related error is acceptable
                 error_msg = str(e).lower()
                 assert 'redis' in error_msg, f"Expected Redis-related error but got: {e}"
-                print(f"✅ Redis operations failed as expected: {e}")
+                print(f" PASS:  Redis operations failed as expected: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -269,7 +269,7 @@ class TestRedisConnectionIssues:
                 if elapsed > 5:
                     pytest.fail("Redis connection should have timed out or failed quickly")
                     
-                print("✅ Redis connection succeeded (unexpected but acceptable)")
+                print(" PASS:  Redis connection succeeded (unexpected but acceptable)")
                 
             except (TimeoutError, ConnectionError) as e:
                 elapsed = asyncio.get_event_loop().time() - start_time
@@ -283,7 +283,7 @@ class TestRedisConnectionIssues:
                     'connection refused'
                 ]), f"Expected timeout or connection error but got: {e}"
                 
-                print(f"✅ Redis connection timeout correctly detected in {elapsed:.2f}s: {e}")
+                print(f" PASS:  Redis connection timeout correctly detected in {elapsed:.2f}s: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -304,7 +304,7 @@ class TestRedisConnectionIssues:
                 redis_client = redis.from_url(cluster_redis_url)
                 await redis_client.ping()
                 
-                print("✅ Redis connection succeeded (single instance mode)")
+                print(" PASS:  Redis connection succeeded (single instance mode)")
                 
             except Exception as e:
                 error_msg = str(e).lower()
@@ -317,7 +317,7 @@ class TestRedisConnectionIssues:
                     'mode'
                 ]), f"Expected Redis configuration error but got: {e}"
                 
-                print(f"✅ Redis cluster configuration mismatch detected: {e}")
+                print(f" PASS:  Redis cluster configuration mismatch detected: {e}")
     
     @pytest.mark.staging
     def test_staging_environment_redis_requirements(self):
@@ -357,7 +357,7 @@ class TestRedisConnectionIssues:
                         'not configured'
                     ]), f"Expected Redis configuration requirement error but got: {e}"
                     
-                    print(f"✅ Staging correctly requires Redis configuration: {e}")
+                    print(f" PASS:  Staging correctly requires Redis configuration: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -377,7 +377,7 @@ class TestRedisConnectionIssues:
                 redis_client = redis.from_url(ssl_redis_url)
                 await redis_client.ping()
                 
-                print("✅ Redis SSL connection succeeded (SSL properly configured)")
+                print(" PASS:  Redis SSL connection succeeded (SSL properly configured)")
                 
             except Exception as e:
                 error_msg = str(e).lower()
@@ -390,7 +390,7 @@ class TestRedisConnectionIssues:
                     'tls'
                 ]), f"Expected SSL-related error but got: {e}"
                 
-                print(f"✅ Redis SSL configuration mismatch detected: {e}")
+                print(f" PASS:  Redis SSL configuration mismatch detected: {e}")
     
     @pytest.mark.asyncio
     @pytest.mark.staging
@@ -421,7 +421,7 @@ class TestRedisConnectionIssues:
                 max_memory = info.get('maxmemory', 0)
                 
                 if max_memory > 0 and used_memory > max_memory:
-                    print(f"⚠️ Redis memory pressure detected: {used_memory}/{max_memory} bytes")
+                    print(f" WARNING: [U+FE0F] Redis memory pressure detected: {used_memory}/{max_memory} bytes")
                 
                 # Try to perform operation that might fail due to memory
                 await redis_client.set("test_key", "test_value")
@@ -438,7 +438,7 @@ class TestRedisConnectionIssues:
                     'eviction'
                 ]), f"Expected Redis memory-related error but got: {e}"
                 
-                print(f"✅ Redis memory management issue detected: {e}")
+                print(f" PASS:  Redis memory management issue detected: {e}")
 
 
 if __name__ == "__main__":

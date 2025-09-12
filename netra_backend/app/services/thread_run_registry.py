@@ -149,11 +149,11 @@ class ThreadRunRegistry:
         """
         # Validate input parameters
         if not run_id or not isinstance(run_id, str) or run_id.strip() == "":
-            logger.error(f"🚨 INVALID run_id: '{run_id}' - must be non-empty string")
+            logger.error(f" ALERT:  INVALID run_id: '{run_id}' - must be non-empty string")
             return False
         
         if not thread_id or not isinstance(thread_id, str) or thread_id.strip() == "":
-            logger.error(f"🚨 INVALID thread_id: '{thread_id}' - must be non-empty string")
+            logger.error(f" ALERT:  INVALID thread_id: '{thread_id}' - must be non-empty string")
             return False
         
         try:
@@ -178,12 +178,12 @@ class ThreadRunRegistry:
                 self._metrics['active_mappings'] = len(self._run_to_thread)
                 
                 if self.config.enable_debug_logging:
-                    logger.info(f"✅ REGISTERED: run_id={run_id} → thread_id={thread_id} (metadata: {metadata})")
+                    logger.info(f" PASS:  REGISTERED: run_id={run_id}  ->  thread_id={thread_id} (metadata: {metadata})")
                 
                 return True
                 
         except Exception as e:
-            logger.error(f"🚨 REGISTRATION FAILED: run_id={run_id}, thread_id={thread_id}: {e}")
+            logger.error(f" ALERT:  REGISTRATION FAILED: run_id={run_id}, thread_id={thread_id}: {e}")
             return False
     
     async def get_thread(self, run_id: str) -> Optional[str]:
@@ -205,14 +205,14 @@ class ThreadRunRegistry:
                 if mapping is None:
                     self._metrics['failed_lookups'] += 1
                     if self.config.enable_debug_logging:
-                        logger.debug(f"🔍 LOOKUP MISS: run_id={run_id} not found")
+                        logger.debug(f" SEARCH:  LOOKUP MISS: run_id={run_id} not found")
                     return None
                 
                 # Check if mapping is expired
                 if self._is_mapping_expired(mapping):
                     self._metrics['failed_lookups'] += 1
                     if self.config.enable_debug_logging:
-                        logger.debug(f"🔍 LOOKUP EXPIRED: run_id={run_id} mapping expired")
+                        logger.debug(f" SEARCH:  LOOKUP EXPIRED: run_id={run_id} mapping expired")
                     return None
                 
                 # Update access tracking
@@ -223,13 +223,13 @@ class ThreadRunRegistry:
                 self._metrics['successful_lookups'] += 1
                 
                 if self.config.enable_debug_logging:
-                    logger.debug(f"✅ LOOKUP SUCCESS: run_id={run_id} → thread_id={mapping.thread_id}")
+                    logger.debug(f" PASS:  LOOKUP SUCCESS: run_id={run_id}  ->  thread_id={mapping.thread_id}")
                 
                 return mapping.thread_id
                 
         except Exception as e:
             self._metrics['failed_lookups'] += 1
-            logger.error(f"🚨 LOOKUP ERROR: run_id={run_id}: {e}")
+            logger.error(f" ALERT:  LOOKUP ERROR: run_id={run_id}: {e}")
             return None
     
     async def get_runs(self, thread_id: str) -> List[str]:
@@ -256,12 +256,12 @@ class ThreadRunRegistry:
                         active_runs.append(run_id)
                 
                 if self.config.enable_debug_logging:
-                    logger.debug(f"🔍 THREAD RUNS: thread_id={thread_id} → {len(active_runs)} active runs")
+                    logger.debug(f" SEARCH:  THREAD RUNS: thread_id={thread_id}  ->  {len(active_runs)} active runs")
                 
                 return active_runs
                 
         except Exception as e:
-            logger.error(f"🚨 GET RUNS ERROR: thread_id={thread_id}: {e}")
+            logger.error(f" ALERT:  GET RUNS ERROR: thread_id={thread_id}: {e}")
             return []
     
     async def unregister_run(self, run_id: str) -> bool:
@@ -281,7 +281,7 @@ class ThreadRunRegistry:
                 mapping = self._run_to_thread.pop(run_id, None)
                 
                 if mapping is None:
-                    logger.debug(f"🔍 UNREGISTER MISS: run_id={run_id} not found")
+                    logger.debug(f" SEARCH:  UNREGISTER MISS: run_id={run_id} not found")
                     return False
                 
                 # Remove from reverse mapping
@@ -297,12 +297,12 @@ class ThreadRunRegistry:
                 self._metrics['active_mappings'] = len(self._run_to_thread)
                 
                 if self.config.enable_debug_logging:
-                    logger.info(f"🗑️ UNREGISTERED: run_id={run_id} from thread_id={thread_id}")
+                    logger.info(f"[U+1F5D1][U+FE0F] UNREGISTERED: run_id={run_id} from thread_id={thread_id}")
                 
                 return True
                 
         except Exception as e:
-            logger.error(f"🚨 UNREGISTER ERROR: run_id={run_id}: {e}")
+            logger.error(f" ALERT:  UNREGISTER ERROR: run_id={run_id}: {e}")
             return False
     
     async def cleanup_old_mappings(self) -> int:
@@ -344,14 +344,14 @@ class ThreadRunRegistry:
                 self._metrics['last_cleanup'] = current_time
                 
                 if cleaned_count > 0:
-                    logger.info(f"🧹 CLEANUP COMPLETED: Removed {cleaned_count} expired mappings")
+                    logger.info(f"[U+1F9F9] CLEANUP COMPLETED: Removed {cleaned_count} expired mappings")
                 elif self.config.enable_debug_logging:
-                    logger.debug(f"🧹 CLEANUP COMPLETED: No expired mappings found")
+                    logger.debug(f"[U+1F9F9] CLEANUP COMPLETED: No expired mappings found")
                 
                 return cleaned_count
                 
         except Exception as e:
-            logger.error(f"🚨 CLEANUP ERROR: {e}")
+            logger.error(f" ALERT:  CLEANUP ERROR: {e}")
             return 0
     
     def _is_mapping_expired(self, mapping: RunMapping) -> bool:
@@ -381,13 +381,13 @@ class ThreadRunRegistry:
                 # Log status periodically
                 if self.config.enable_debug_logging:
                     active_count = len(self._run_to_thread)
-                    logger.debug(f"🧹 Cleanup cycle: {cleaned} expired, {active_count} active mappings")
+                    logger.debug(f"[U+1F9F9] Cleanup cycle: {cleaned} expired, {active_count} active mappings")
                 
             except asyncio.CancelledError:
                 logger.debug("Cleanup loop cancelled")
                 break
             except Exception as e:
-                logger.error(f"🚨 Error in cleanup loop: {e}")
+                logger.error(f" ALERT:  Error in cleanup loop: {e}")
                 # Continue running despite errors
                 await asyncio.sleep(60)  # Wait 1 minute before retrying
         
@@ -445,7 +445,7 @@ class ThreadRunRegistry:
                 }
                 
         except Exception as e:
-            logger.error(f"🚨 Error getting metrics: {e}")
+            logger.error(f" ALERT:  Error getting metrics: {e}")
             return {
                 'error': f'Metrics retrieval failed: {e}',
                 'timestamp': datetime.now(timezone.utc).isoformat()
@@ -480,7 +480,7 @@ class ThreadRunRegistry:
             }
             
         except Exception as e:
-            logger.error(f"🚨 Error getting status: {e}")
+            logger.error(f" ALERT:  Error getting status: {e}")
             return {
                 'registry_healthy': False,
                 'error': f'Status retrieval failed: {e}',
@@ -547,7 +547,7 @@ class ThreadRunRegistry:
                 }
                 
         except Exception as e:
-            logger.error(f"🚨 Error listing mappings: {e}")
+            logger.error(f" ALERT:  Error listing mappings: {e}")
             return {'error': f'Mapping listing failed: {e}'}
 
 

@@ -7,7 +7,7 @@ These tests are designed to FAIL initially (UserContextManager does not exist)
 and then PASS once proper integration is implemented.
 
 Business Value Justification (BVJ):
-- Segment: All segments (Free → Enterprise)
+- Segment: All segments (Free  ->  Enterprise)
 - Business Goal: Ensure UserContextManager integrates seamlessly with existing systems
 - Value Impact: Validates that user isolation works across all system components
 - Revenue Impact: Critical for system reliability protecting $500K+ ARR user flows

@@ -3,7 +3,7 @@ BUSINESS CRITICAL: Cost Calculator Accuracy & Model Pricing
 
 BVJ: Growth & Enterprise (80% revenue) - Protects core value proposition.
 Prevents $100K+ ARR loss from pricing errors. Direct impact on conversions.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import sys

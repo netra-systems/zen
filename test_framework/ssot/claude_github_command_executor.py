@@ -94,15 +94,15 @@ class CommandResult:
         """Format as Claude-friendly response."""
         if self.success:
             if self.command_type == CommandType.CREATE_ISSUE.value:
-                return f"✅ GitHub issue created successfully!\n\n**Issue #{self.issue_number}**\n{self.github_issue_url}\n\n{self.message}"
+                return f" PASS:  GitHub issue created successfully!\n\n**Issue #{self.issue_number}**\n{self.github_issue_url}\n\n{self.message}"
             elif self.command_type == CommandType.SEARCH_ISSUES.value:
-                return f"🔍 {self.message}\n\n{self._format_search_results()}"
+                return f" SEARCH:  {self.message}\n\n{self._format_search_results()}"
             elif self.command_type == CommandType.UPDATE_ISSUE.value:
-                return f"📝 {self.message}\n\n{self.github_issue_url if self.github_issue_url else ''}"
+                return f"[U+1F4DD] {self.message}\n\n{self.github_issue_url if self.github_issue_url else ''}"
             else:
-                return f"✅ {self.message}"
+                return f" PASS:  {self.message}"
         else:
-            return f"❌ **Error:** {self.message}\n\n{self.error_details if self.error_details else ''}"
+            return f" FAIL:  **Error:** {self.message}\n\n{self.error_details if self.error_details else ''}"
     
     def _format_search_results(self) -> str:
         """Format search results for Claude response."""
@@ -629,7 +629,7 @@ class ClaudeGitHubCommandExecutor:
         thread_id = command.user_context.get('thread_id', 'unknown')
         
         link_comment = (
-            f"🔗 **Linked to Claude Conversation**\n\n"
+            f"[U+1F517] **Linked to Claude Conversation**\n\n"
             f"This issue has been linked to Claude thread: `{thread_id}`\n"
             f"Timestamp: {command.user_context['timestamp']}\n"
             f"User: {command.user_context['user_id']}"
@@ -684,7 +684,7 @@ class ClaudeGitHubCommandExecutor:
     def _handle_help(self, command: ClaudeCommand) -> CommandResult:
         """Handle help command."""
         help_text = """
-## 🤖 GitHub Commands for Claude
+## [U+1F916] GitHub Commands for Claude
 
 I can help you manage GitHub issues through natural language commands:
 

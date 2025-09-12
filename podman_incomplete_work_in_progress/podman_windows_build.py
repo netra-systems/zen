@@ -230,7 +230,7 @@ class PodmanWindowsBuilder:
                 logger.error(f"Build failed:\n{result.stderr}")
                 return False
             
-            logger.info(f"✅ Successfully built {image_name}")
+            logger.info(f" PASS:  Successfully built {image_name}")
             return True
             
         except Exception as e:
@@ -258,7 +258,7 @@ class PodmanWindowsBuilder:
                 logger.error(f"Failed to build {service_name}")
                 success = False
             else:
-                logger.info(f"✅ {service_name} built successfully")
+                logger.info(f" PASS:  {service_name} built successfully")
         
         return success
     
@@ -303,10 +303,10 @@ def main():
             )
         
         if success:
-            logger.info("\n✅ Build completed successfully!")
+            logger.info("\n PASS:  Build completed successfully!")
             sys.exit(0)
         else:
-            logger.error("\n❌ Build failed!")
+            logger.error("\n FAIL:  Build failed!")
             sys.exit(1)
     
     finally:

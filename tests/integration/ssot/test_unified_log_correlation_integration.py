@@ -11,8 +11,8 @@ This test suite validates SSOT log correlation across ALL services in the Netra 
 Tests MUST FAIL initially to prove fragmented log correlation exists.
 
 Integration Coverage:
-1. Backend ↔ Auth Service log correlation  
-2. Backend ↔ Analytics Service log correlation
+1. Backend [U+2194] Auth Service log correlation  
+2. Backend [U+2194] Analytics Service log correlation
 3. Multi-service request tracing with unified correlation IDs
 4. Cross-service log aggregation and correlation
 5. WebSocket event correlation with backend logs

@@ -399,15 +399,15 @@ class OAuthHealthMonitor:
         # Add specific issues
         blocks = report["checks"].get("recent_blocks", {})
         if blocks.get("blocks_count", 0) > 0:
-            lines.append(f"• {blocks['blocks_count']} OAuth callbacks blocked in last 5 min")
+            lines.append(f"[U+2022] {blocks['blocks_count']} OAuth callbacks blocked in last 5 min")
         
         success = report["checks"].get("success_rate", {})
         if success.get("success_rate", 100) < 95:
-            lines.append(f"• OAuth success rate: {success.get('success_rate')}%")
+            lines.append(f"[U+2022] OAuth success rate: {success.get('success_rate')}%")
         
         rule = report["checks"].get("security_rule", {})
         if not rule.get("rule_exists"):
-            lines.append("• OAuth exception rule is missing!")
+            lines.append("[U+2022] OAuth exception rule is missing!")
         
         return "\n".join(lines)
     

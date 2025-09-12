@@ -2,7 +2,7 @@
 JWT Token Flow Tests - Comprehensive Backend JWT Testing
 
 Business Value: $15K MRR - Security integrity across all services
-Tests complete JWT flow: Creation → Validation → Cross-service → Expiry
+Tests complete JWT flow: Creation  ->  Validation  ->  Cross-service  ->  Expiry
 
 CRITICAL: Real JWT libraries (PyJWT) with actual cross-service communication
 Maximum 300 lines enforced - focuses on core JWT flows only
@@ -270,7 +270,7 @@ class TestSessionManagementUnified:
     @pytest.mark.asyncio
     async def test_session_management_unified(self, test_harness, jwt_helper):
         """Test session consistency.
-        Create session in Auth Service → Backend validates → Frontend maintains
+        Create session in Auth Service  ->  Backend validates  ->  Frontend maintains
         """
         # Create session via Auth Service dev login
         real_token = await jwt_helper.get_real_token_from_auth()
@@ -330,7 +330,7 @@ class TestTokenExpirationHandling:
     @pytest.mark.asyncio
     async def test_token_expiration_handling(self, test_harness, jwt_helper):
         """Test token expiry scenarios.
-        Access token expires (15 min) → Refresh token valid (7 days) → Auto-refresh
+        Access token expires (15 min)  ->  Refresh token valid (7 days)  ->  Auto-refresh
         """
         # Create expired access token
         expired_payload = jwt_helper.create_expired_payload()

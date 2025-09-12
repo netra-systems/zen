@@ -643,7 +643,7 @@ class TestDatabaseManagerStressScenarios(BaseIntegrationTest):
             logger.info(f"Large transaction rollback test results:")
             logger.info(f"  Successful rollbacks: {successful_rollbacks}/{num_rollback_tests}")
             logger.info(f"  Average operations before rollback: {rollback_point}")
-            logger.info(f"  Database integrity maintained: ✓")
+            logger.info(f"  Database integrity maintained: [U+2713]")
             
             await db_manager.close_all()
     

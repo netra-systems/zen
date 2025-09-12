@@ -1116,4 +1116,4 @@ class TestWebSocketConnectionManagerPerformance(SSotAsyncTestCase):
 # TOTAL TESTS: 40+ comprehensive scenarios
 # COVERAGE: 100% of critical connection management methods
 # BUSINESS VALUE: Protects $500K+ ARR chat functionality
-# GOLDEN PATH: Ensures reliable user connection → AI response flow
+# GOLDEN PATH: Ensures reliable user connection  ->  AI response flow

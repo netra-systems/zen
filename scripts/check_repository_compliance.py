@@ -318,7 +318,7 @@ class RepositoryComplianceChecker:
     def generate_report(self, violations: List[Violation]) -> str:
         """Generate a formatted compliance report."""
         if not violations:
-            return "✅ No repository compliance violations found!"
+            return " PASS:  No repository compliance violations found!"
         
         # Group violations by type and severity
         errors = [v for v in violations if v.severity == "error"]
@@ -332,7 +332,7 @@ class RepositoryComplianceChecker:
         
         if errors:
             report_lines.extend([
-                f"❌ ERRORS ({len(errors)}):",
+                f" FAIL:  ERRORS ({len(errors)}):",
                 ""
             ])
             
@@ -343,7 +343,7 @@ class RepositoryComplianceChecker:
         
         if warnings:
             report_lines.extend([
-                f"⚠️  WARNINGS ({len(warnings)}):",
+                f" WARNING: [U+FE0F]  WARNINGS ({len(warnings)}):",
                 ""
             ])
             
@@ -543,14 +543,14 @@ def main():
     error_count = len([v for v in violations if v.severity == "error"])
     
     if error_count > 0:
-        print(f"\n❌ Found {error_count} error(s). Commit blocked.")
+        print(f"\n FAIL:  Found {error_count} error(s). Commit blocked.")
         return 1
     elif violations:
         warning_count = len([v for v in violations if v.severity == "warning"])
-        print(f"\n⚠️  Found {warning_count} warning(s). Commit allowed.")
+        print(f"\n WARNING: [U+FE0F]  Found {warning_count} warning(s). Commit allowed.")
         return 0
     else:
-        print("\n✅ No violations found. Commit allowed.")
+        print("\n PASS:  No violations found. Commit allowed.")
         return 0
 
 

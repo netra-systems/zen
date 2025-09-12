@@ -115,7 +115,7 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
             access_token = login_data["access_token"]
             refresh_token = login_data["refresh_token"]
             
-            print(f"✅ JWT Login successful - Access token: {access_token[:30]}...")
+            print(f" PASS:  JWT Login successful - Access token: {access_token[:30]}...")
             
             # Step 2: Use access token to make authenticated request to backend
             headers = {"Authorization": f"Bearer {access_token}"}
@@ -130,7 +130,7 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
             assert protected_response.status_code == 200, f"Protected endpoint failed: {protected_response.text}"
             discovery_data = protected_response.json()
             
-            print("✅ Authenticated backend request successful")
+            print(" PASS:  Authenticated backend request successful")
             print(f"   - Discovery data keys: {list(discovery_data.keys())}")
             
             # Step 3: Test token validation directly  
@@ -144,7 +144,7 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
             assert validation_data["valid"] is True
             assert validation_data["user_id"] == test_user_credentials["user_id"]
             
-            print("✅ JWT token validation successful")
+            print(" PASS:  JWT token validation successful")
             
             # Step 4: Test refresh token flow
             refresh_response = await client.post(
@@ -158,7 +158,7 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
             new_access_token = refresh_data["access_token"]
             assert new_access_token != access_token  # Should be different
             
-            print("✅ JWT token refresh successful")
+            print(" PASS:  JWT token refresh successful")
             
             # Step 5: Use new access token 
             new_headers = {"Authorization": f"Bearer {new_access_token}"}
@@ -170,8 +170,8 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
             
             assert final_response.status_code == 200
             
-            print("✅ New JWT token works correctly")
-            print("\n🎯 COMPLETE E2E JWT AUTHENTICATION FLOW SUCCESSFUL")
+            print(" PASS:  New JWT token works correctly")
+            print("\n TARGET:  COMPLETE E2E JWT AUTHENTICATION FLOW SUCCESSFUL")
 
     @pytest.mark.asyncio
     async def test_e2e_jwt_websocket_authentication(
@@ -216,13 +216,13 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
                 response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
                 assert response is not None
                 
-                print("✅ WebSocket authentication with JWT successful")
+                print(" PASS:  WebSocket authentication with JWT successful")
                 
         except ImportError:
             pytest.skip("websockets library not available")
         except Exception as e:
             # WebSocket might not be fully implemented yet
-            print(f"⚠️ WebSocket JWT auth test skipped: {e}")
+            print(f" WARNING: [U+FE0F] WebSocket JWT auth test skipped: {e}")
 
     @pytest.mark.asyncio
     async def test_e2e_jwt_authentication_failure_scenarios(
@@ -263,7 +263,7 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
             # Should require authentication
             assert no_auth_response.status_code in [401, 403], f"Expected auth required but got: {no_auth_response.status_code}"
             
-            print("✅ JWT authentication failure scenarios handled correctly")
+            print(" PASS:  JWT authentication failure scenarios handled correctly")
 
     @pytest.mark.asyncio
     async def test_e2e_golden_path_validation_vs_actual_jwt_functionality(
@@ -304,7 +304,7 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
                 
                 jwt_fully_functional = auth_request.status_code == 200
                 
-                print("🔍 JWT FUNCTIONALITY VERIFICATION:")
+                print(" SEARCH:  JWT FUNCTIONALITY VERIFICATION:")
                 print(f"   - JWT login works: {jwt_works}")
                 print(f"   - JWT authentication works: {jwt_fully_functional}")
                 
@@ -318,12 +318,12 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
                         
                         # Look for Golden Path validation results
                         if "golden_path" in health_data or "jwt_validation" in health_data:
-                            print("🔍 GOLDEN PATH VALIDATION STATUS:")
+                            print(" SEARCH:  GOLDEN PATH VALIDATION STATUS:")
                             print(f"   - Health data: {health_data}")
                             
-                        print("\n🚨 ARCHITECTURAL MISMATCH DEMONSTRATED:")
-                        print("   - JWT authentication: ✅ WORKING")
-                        print("   - Golden Path detection: ❌ FAILING")
+                        print("\n ALERT:  ARCHITECTURAL MISMATCH DEMONSTRATED:")
+                        print("   - JWT authentication:  PASS:  WORKING")
+                        print("   - Golden Path detection:  FAIL:  FAILING")
                         print("   - Root cause: Golden Path expects app.state.key_manager")
                         print("   - Reality: We use UnifiedJWTValidator pattern")
                         
@@ -392,7 +392,7 @@ class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):
                 assert user1_response.status_code == 200
                 assert user2_response.status_code == 200
                 
-                print("✅ Multi-user JWT isolation working correctly")
+                print(" PASS:  Multi-user JWT isolation working correctly")
                 
         except Exception as e:
             pytest.skip(f"Cannot create multiple test users: {e}")

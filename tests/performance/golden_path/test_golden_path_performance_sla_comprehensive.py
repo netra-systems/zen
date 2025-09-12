@@ -174,7 +174,7 @@ class TestGoldenPathPerformanceSLAComprehensive(SSotAsyncTestCase):
         
         self.performance_measurements.append(performance_summary)
         
-        logger.info(f"✅ WebSocket connection SLA validated: {avg_connection_time*1000:.1f}ms avg, {p95_connection_time*1000:.1f}ms P95")
+        logger.info(f" PASS:  WebSocket connection SLA validated: {avg_connection_time*1000:.1f}ms avg, {p95_connection_time*1000:.1f}ms P95")
 
     @pytest.mark.performance
     @pytest.mark.golden_path
@@ -276,7 +276,7 @@ class TestGoldenPathPerformanceSLAComprehensive(SSotAsyncTestCase):
         
         self.performance_measurements.append(execution_performance)
         
-        logger.info(f"✅ Agent execution SLA validated: {avg_execution_time*1000:.1f}ms avg execution, {avg_first_response*1000 if avg_first_response else 'N/A'}ms avg first response")
+        logger.info(f" PASS:  Agent execution SLA validated: {avg_execution_time*1000:.1f}ms avg execution, {avg_first_response*1000 if avg_first_response else 'N/A'}ms avg first response")
 
     @pytest.mark.performance
     @pytest.mark.golden_path
@@ -402,7 +402,7 @@ class TestGoldenPathPerformanceSLAComprehensive(SSotAsyncTestCase):
         
         self.performance_measurements.append(concurrency_performance)
         
-        logger.info(f"✅ Concurrent user capacity SLA validated: {len(successful_users)}/{target_concurrent_users} users, {success_rate:.2%} success rate")
+        logger.info(f" PASS:  Concurrent user capacity SLA validated: {len(successful_users)}/{target_concurrent_users} users, {success_rate:.2%} success rate")
 
     @pytest.mark.performance
     @pytest.mark.golden_path
@@ -505,7 +505,7 @@ class TestGoldenPathPerformanceSLAComprehensive(SSotAsyncTestCase):
         
         self.performance_measurements.append(event_performance)
         
-        logger.info(f"✅ Event delivery latency SLA validated: {avg_latency_ms:.1f}ms avg, {p95_latency_ms:.1f}ms P95")
+        logger.info(f" PASS:  Event delivery latency SLA validated: {avg_latency_ms:.1f}ms avg, {p95_latency_ms:.1f}ms P95")
 
     @pytest.mark.performance
     @pytest.mark.golden_path
@@ -639,7 +639,7 @@ class TestGoldenPathPerformanceSLAComprehensive(SSotAsyncTestCase):
         self.performance_measurements.append(memory_performance)
         self.memory_samples.extend(memory_samples)
         
-        logger.info(f"✅ Memory efficiency SLA validated: {memory_per_engine_mb:.1f}MB per engine, {cleanup_efficiency:.2%} cleanup efficiency")
+        logger.info(f" PASS:  Memory efficiency SLA validated: {memory_per_engine_mb:.1f}MB per engine, {cleanup_efficiency:.2%} cleanup efficiency")
 
     @pytest.mark.performance
     @pytest.mark.golden_path
@@ -732,7 +732,7 @@ class TestGoldenPathPerformanceSLAComprehensive(SSotAsyncTestCase):
         
         self.performance_measurements.append(recovery_performance)
         
-        logger.info(f"✅ Error recovery SLA validated: {avg_recovery_time*1000:.1f}ms avg recovery, {avg_error_rate:.2%} avg error rate")
+        logger.info(f" PASS:  Error recovery SLA validated: {avg_recovery_time*1000:.1f}ms avg recovery, {avg_error_rate:.2%} avg error rate")
 
     def _get_memory_usage(self) -> int:
         """Get current process memory usage in bytes."""
@@ -763,14 +763,14 @@ class TestGoldenPathPerformanceSLAComprehensive(SSotAsyncTestCase):
         # Generate and log performance report
         performance_report = self._generate_performance_report()
         
-        logger.info(f"📊 Performance Test Summary:")
+        logger.info(f" CHART:  Performance Test Summary:")
         logger.info(f"  - Total Measurements: {performance_report['total_measurements']}")
         logger.info(f"  - SLA Compliance: {performance_report['overall_sla_compliance']}")
         
         for measurement in self.performance_measurements:
             metric_name = measurement.get("metric", "unknown")
             compliance = measurement.get("sla_compliance", False)
-            status = "✅" if compliance else "❌"
+            status = " PASS: " if compliance else " FAIL: "
             logger.info(f"  {status} {metric_name}: {'PASS' if compliance else 'FAIL'}")
         
         # Clear performance data

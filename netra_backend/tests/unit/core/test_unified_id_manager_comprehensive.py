@@ -899,7 +899,7 @@ class TestUnifiedIDManagerComprehensive:
     def test_edge_case_unicode_and_special_characters(self):
         """Test handling of Unicode and special characters."""
         special_thread_ids = [
-            "thread_with_unicode_测试",
+            "thread_with_unicode_[U+6D4B][U+8BD5]",
             "thread-with-hyphens",
             "thread.with.dots",
             "thread with spaces",  # Note: may not be ideal but should handle gracefully

@@ -3,7 +3,7 @@ Comprehensive E2E Golden Path Tests for Staging Environment
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)
-- Business Goal: Validate complete "users login → get AI responses" flow protecting $500K+ ARR
+- Business Goal: Validate complete "users login  ->  get AI responses" flow protecting $500K+ ARR
 - Value Impact: Ensures end-to-end chat functionality works in production-like environment
 - Strategic Impact: Validates 90% of platform value through complete user journey
 
@@ -153,11 +153,11 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                 try:
                     async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as response:
                         if response.status == 200:
-                            logger.info(f"✅ {check_name}: OK")
+                            logger.info(f" PASS:  {check_name}: OK")
                         else:
-                            logger.warning(f"⚠️ {check_name}: Status {response.status}")
+                            logger.warning(f" WARNING: [U+FE0F] {check_name}: Status {response.status}")
                 except Exception as e:
-                    logger.warning(f"⚠️ {check_name}: Error {e}")
+                    logger.warning(f" WARNING: [U+FE0F] {check_name}: Error {e}")
 
     @pytest.mark.e2e
     @pytest.mark.golden_path
@@ -172,7 +172,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         journey_start_time = time.time()
         
         # Phase 1: WebSocket Connection Establishment
-        logger.info("🚀 Starting Golden Path E2E Test - Phase 1: Connection")
+        logger.info("[U+1F680] Starting Golden Path E2E Test - Phase 1: Connection")
         
         connection_start = time.time()
         
@@ -197,7 +197,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             # Verify connection SLA
             assert connection_time <= self.sla_requirements["connection_time_max_seconds"], f"Connection too slow: {connection_time:.2f}s"
             
-            logger.info(f"✅ WebSocket connected to staging in {connection_time:.2f}s")
+            logger.info(f" PASS:  WebSocket connected to staging in {connection_time:.2f}s")
             
             # Wait for welcome message
             welcome_timeout = 5.0
@@ -209,14 +209,14 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             welcome_data = json.loads(welcome_message)
             assert welcome_data.get("type") == "connection_ready", f"Expected welcome message, got: {welcome_data}"
             
-            logger.info("✅ Welcome message received from staging")
+            logger.info(" PASS:  Welcome message received from staging")
             
         except Exception as e:
-            logger.error(f"❌ Failed to connect to staging WebSocket: {e}")
+            logger.error(f" FAIL:  Failed to connect to staging WebSocket: {e}")
             pytest.skip(f"Staging WebSocket connection failed: {e}")
         
         # Phase 2: Send Chat Message and Initiate Agent Execution
-        logger.info("🚀 Phase 2: Chat Message Submission")
+        logger.info("[U+1F680] Phase 2: Chat Message Submission")
         
         chat_message = {
             "type": "user_message",
@@ -228,10 +228,10 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         message_send_time = time.time()
         await websocket.send(json.dumps(chat_message))
         
-        logger.info("✅ Chat message sent to staging")
+        logger.info(" PASS:  Chat message sent to staging")
         
         # Phase 3: Real-time Event Collection and Validation
-        logger.info("🚀 Phase 3: Real-time Event Collection")
+        logger.info("[U+1F680] Phase 3: Real-time Event Collection")
         
         # Track events with timing
         events_received = []
@@ -283,11 +283,11 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                         # Mark required events as received
                         if event_type in required_events:
                             required_events[event_type] = True
-                            logger.info(f"✅ Received critical event: {event_type}")
+                            logger.info(f" PASS:  Received critical event: {event_type}")
                         
                         # Check if we have all required events
                         if all(required_events.values()):
-                            logger.info("✅ All critical events received")
+                            logger.info(" PASS:  All critical events received")
                             break
                             
                     except json.JSONDecodeError:
@@ -302,12 +302,12 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                         break  # No events received, likely an issue
         
         except Exception as e:
-            logger.error(f"❌ Error during event collection: {e}")
+            logger.error(f" FAIL:  Error during event collection: {e}")
         
         total_execution_time = time.time() - message_send_time
         
         # Phase 4: Event Validation and Quality Assessment
-        logger.info("🚀 Phase 4: Event Validation")
+        logger.info("[U+1F680] Phase 4: Event Validation")
         
         # Verify we received events
         assert len(events_received) > 0, "Should receive at least some events from staging"
@@ -316,7 +316,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         missing_events = [event_type for event_type, received in required_events.items() if not received]
         
         if missing_events:
-            logger.warning(f"⚠️ Missing critical events in staging: {missing_events}")
+            logger.warning(f" WARNING: [U+FE0F] Missing critical events in staging: {missing_events}")
             # For staging, we'll log warnings but not fail the test completely
             # This allows for staging environment issues while still validating core functionality
         
@@ -334,7 +334,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             assert max_gap < 30.0, f"Event gap too large (indicates hanging): {max_gap:.2f}s"
         
         # Phase 5: Final Response and Quality Validation
-        logger.info("🚀 Phase 5: Final Response Validation")
+        logger.info("[U+1F680] Phase 5: Final Response Validation")
         
         # Look for final response in events
         final_response = None
@@ -350,7 +350,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             
             # Quality requirements (relaxed for staging)
             if response_quality_score < self.sla_requirements["response_quality_min_score"]:
-                logger.warning(f"⚠️ Response quality below threshold: {response_quality_score:.2f}")
+                logger.warning(f" WARNING: [U+FE0F] Response quality below threshold: {response_quality_score:.2f}")
         
         # Phase 6: Performance and SLA Summary
         journey_total_time = time.time() - journey_start_time
@@ -377,7 +377,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         event_success_rate = sum(required_events.values()) / len(required_events)
         assert event_success_rate >= 0.6, f"Too few critical events received: {event_success_rate:.2%}"
         
-        logger.info(f"🎉 Golden Path E2E Test COMPLETED: {journey_total_time:.2f}s total, {len(events_received)} events, {event_success_rate:.2%} critical events")
+        logger.info(f" CELEBRATION:  Golden Path E2E Test COMPLETED: {journey_total_time:.2f}s total, {len(events_received)} events, {event_success_rate:.2%} critical events")
         
         # Close WebSocket connection
         await websocket.close()
@@ -511,7 +511,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
                         # Should not contain references to other users
                         assert f"user_{other_index}" not in event_str.lower(), f"User {user_index} events contain user {other_index} data"
         
-        logger.info(f"🎉 Multi-user concurrency test completed: {success_rate:.2%} success rate, {concurrent_total_time:.2f}s total")
+        logger.info(f" CELEBRATION:  Multi-user concurrency test completed: {success_rate:.2%} success rate, {concurrent_total_time:.2f}s total")
 
     @pytest.mark.e2e
     @pytest.mark.golden_path
@@ -529,7 +529,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
         performance_results = []
         
         for run_index in range(num_performance_runs):
-            logger.info(f"🚀 Performance Run {run_index + 1}/{num_performance_runs}")
+            logger.info(f"[U+1F680] Performance Run {run_index + 1}/{num_performance_runs}")
             
             run_start = time.time()
             
@@ -643,7 +643,7 @@ class TestCompleteGoldenPathE2EStaging(SSotAsyncTestCase):
             "avg_execution_time": avg_execution_time
         }
         
-        logger.info(f"🎉 Performance SLA validation completed: {performance_summary}")
+        logger.info(f" CELEBRATION:  Performance SLA validation completed: {performance_summary}")
 
     def _assess_response_quality(self, response_data: Dict[str, Any]) -> float:
         """Assess the quality of an AI response."""

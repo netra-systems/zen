@@ -1,9 +1,9 @@
 """
-🔴 SHARED AUTH SERVICE - Single Source of Truth
+[U+1F534] SHARED AUTH SERVICE - Single Source of Truth
 Consolidated authentication models and dependency injection.
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Single auth source eliminates $5K MRR loss
 - Value Impact: 5-10% conversion improvement
 - Revenue Impact: +$5K MRR recovered
@@ -55,7 +55,7 @@ from netra_backend.app.auth_integration.validators import (
     validate_token_format,
 )
 
-# 🔴 CONSOLIDATED AUTH MODELS - Single Source of Truth
+# [U+1F534] CONSOLIDATED AUTH MODELS - Single Source of Truth
 from netra_backend.app.schemas.auth_types import (
     AuditLog,
     AuthConfig,
@@ -103,7 +103,7 @@ __all__ = [
     'require_admin',
     'require_developer',
     
-    # 🔴 CONSOLIDATED MODELS - Use these instead of duplicates
+    # [U+1F534] CONSOLIDATED MODELS - Use these instead of duplicates
     'LoginRequest',
     'LoginResponse', 
     'TokenData',

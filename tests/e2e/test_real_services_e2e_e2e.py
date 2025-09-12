@@ -159,7 +159,7 @@ class TestRealServiceE2ESuite:
         CRITICAL Test: Complete cold start from zero state to AI response.
         
         Performance Requirement: < 5 seconds total
-        Coverage: User signup → JWT generation → Backend init → WebSocket → AI response
+        Coverage: User signup  ->  JWT generation  ->  Backend init  ->  WebSocket  ->  AI response
         
         BVJ: Protects $100K+ MRR by ensuring new users get immediate value
         """

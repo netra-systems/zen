@@ -1,7 +1,7 @@
 """Critical E2E Tests for Primary Optimization Flow - Agent Pipeline
 
 This is the #1 priority test suite implementing critical tests for the complete agent pipeline:
-User Request → Triage → Supervisor → Data → Optimization → Actions → Reporting
+User Request  ->  Triage  ->  Supervisor  ->  Data  ->  Optimization  ->  Actions  ->  Reporting
 
 Tests focus on:
 - Full pipeline execution with real agent responses  
@@ -342,7 +342,7 @@ class TestAgentPipelineCritical:
         ]
         assert len(actionable_recommendations) >= 1, "No actionable optimization recommendations found"
         
-        print("✅ Full pipeline execution successful - all agents completed with valid results")
+        print(" PASS:  Full pipeline execution successful - all agents completed with valid results")
         print(f"[TEST] Pipeline completed successfully in {total_time:.2f}s with all validation checks passed")
     
     @pytest.mark.asyncio
@@ -445,7 +445,7 @@ class TestAgentPipelineCritical:
         report_content = state.report_result.content.lower()
         assert any(keyword in report_content for keyword in ['optimization', 'analysis', 'recommendation'])
         
-        print("✅ State propagation test successful - context preserved across all agents")
+        print(" PASS:  State propagation test successful - context preserved across all agents")
     
     @pytest.mark.asyncio
     async def test_error_recovery_with_invalid_inputs(self, pipeline_components, test_environment):
@@ -454,9 +454,9 @@ class TestAgentPipelineCritical:
         # Test scenarios with problematic inputs that should trigger fallback mechanisms
         error_scenarios = [
             ("empty_request", ""),
-            ("invalid_characters", "���##@@@invalid����"),
+            ("invalid_characters", "[U+FFFD][U+FFFD][U+FFFD]##@@@invalid[U+FFFD][U+FFFD][U+FFFD][U+FFFD]"),
             ("extremely_long_request", "Analyze costs " * 1000),  # Very long request
-            ("non_english_request", "分析我的AI成本并提供优化建议"),  # Non-English
+            ("non_english_request", "[U+5206][U+6790][U+6211][U+7684]AI[U+6210][U+672C][U+5E76][U+63D0][U+4F9B][U+4F18][U+5316][U+5EFA][U+8BAE]"),  # Non-English
             ("code_injection_attempt", "<script>alert('test')</script> analyze my AI costs")
         ]
         
@@ -502,7 +502,7 @@ class TestAgentPipelineCritical:
             pipeline_survived = True  # If we reach here, pipeline didn't crash
             assert pipeline_survived, f"Pipeline crashed on {scenario_name}"
         
-        print("✅ Error recovery test successful - system handles invalid inputs gracefully")
+        print(" PASS:  Error recovery test successful - system handles invalid inputs gracefully")
     
     @pytest.mark.asyncio
     async def test_performance_metrics_aggregation(self, pipeline_components, test_environment):
@@ -583,7 +583,7 @@ class TestAgentPipelineCritical:
         # At minimum, should have some performance data
         assert len(performance_metadata) >= 1, "No performance metadata collected"
         
-        print("✅ Performance metrics aggregation test successful")
+        print(" PASS:  Performance metrics aggregation test successful")
     
     @pytest.mark.asyncio
     async def test_context_preservation_through_handoffs(self, pipeline_components, test_environment):
@@ -718,7 +718,7 @@ class TestAgentPipelineCritical:
             # (Some may be acceptable if marked as "future considerations")
             
         print(f"Context preserved through {preserved_stages} stages: {state.context_tracking['preserved_through_stages']}")
-        print("✅ Context preservation test successful")
+        print(" PASS:  Context preservation test successful")
 
 
 @pytest.mark.e2e
@@ -819,4 +819,4 @@ class TestAgentPipelineStaging:
         
         print(f"Production load test: {len(successful_runs)}/{len(results)} successful")
         print(f"Total time: {total_time:.2f}s, Success rate: {success_rate:.1%}")
-        print("✅ Production load test successful")
+        print(" PASS:  Production load test successful")

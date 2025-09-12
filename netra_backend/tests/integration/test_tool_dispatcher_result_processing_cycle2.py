@@ -83,7 +83,7 @@ class TestToolDispatcherResultProcessing(BaseIntegrationTest):
             {
                 "tool": "text_analysis_tool",
                 "test_data": {
-                    "strings": ["simple text", "unicode: áéíóú 中文 🤖", "", "multi\nline\ntext"],
+                    "strings": ["simple text", "unicode: [U+00E1][U+00E9][U+00ED][U+00F3][U+00FA] [U+4E2D][U+6587] [U+1F916]", "", "multi\nline\ntext"],
                     "json_strings": ['{"key": "value"}', '[1, 2, 3]'],
                     "encoded_text": "base64encodedtext=="
                 },

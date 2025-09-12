@@ -31,7 +31,7 @@ def test_auth_service_url_OLD():
     auth_url = get_auth_service_url()  # Returns "http://127.0.0.1:8082"
     
     # This fails if Docker assigns port 8083 instead
-    assert auth_url == "http://127.0.0.1:8001"  # ❌ Brittle
+    assert auth_url == "http://127.0.0.1:8001"  #  FAIL:  Brittle
 
 
 # AFTER: Flexible assertion
@@ -58,7 +58,7 @@ class TestServiceURLAlignmentOLD:
     def __init__(self):
         self.expected_url_patterns = {
             "auth_service": {
-                "development": "http://127.0.0.1:8001",  # ❌ Hardcoded port
+                "development": "http://127.0.0.1:8001",  #  FAIL:  Hardcoded port
                 "staging": "https://auth.staging.netrasystems.ai",
                 "production": "https://auth.netrasystems.ai"
             }
@@ -67,7 +67,7 @@ class TestServiceURLAlignmentOLD:
     def test_auth_url(self, environment):
         auth_url = get_auth_service_url()
         expected = self.expected_url_patterns["auth_service"][environment]
-        assert auth_url == expected  # ❌ Fails with dynamic ports in dev
+        assert auth_url == expected  #  FAIL:  Fails with dynamic ports in dev
 
 
 # AFTER: Flexible comparison based on environment
@@ -88,10 +88,10 @@ class TestServiceURLAlignmentNEW:
         if environment in ["staging", "production"]:
             # Staging/Production must use exact URLs
             expected = self.expected_url_patterns["auth_service"][environment]
-            assert auth_url == expected  # ✅ Exact match for prod environments
+            assert auth_url == expected  #  PASS:  Exact match for prod environments
         else:
             # Development/Test can use dynamic ports
-            assert_is_localhost_url(auth_url)  # ✅ Flexible for dev
+            assert_is_localhost_url(auth_url)  #  PASS:  Flexible for dev
             
             # Optional: verify against dynamic discovery
             assert_service_url_valid("auth", auth_url, allow_dynamic=True)
@@ -106,9 +106,9 @@ def test_all_services_OLD():
     """OLD: Multiple hardcoded assertions."""
     services = get_all_service_urls()
     
-    assert services["backend"] == "http://localhost:8000"  # ❌
-    assert services["auth"] == "http://localhost:8081"     # ❌  
-    assert services["frontend"] == "http://localhost:3000" # ❌
+    assert services["backend"] == "http://localhost:8000"  #  FAIL: 
+    assert services["auth"] == "http://localhost:8081"     #  FAIL:   
+    assert services["frontend"] == "http://localhost:3000" #  FAIL: 
 
 
 # AFTER: Flexible testing with context manager
@@ -143,7 +143,7 @@ def test_with_docker_dynamic_ports():
     if backend_url:
         # We discovered the actual port
         config = get_backend_config()
-        assert config.api_url == backend_url  # ✅ Exact match with discovered port
+        assert config.api_url == backend_url  #  PASS:  Exact match with discovered port
     else:
         # Fallback to flexible assertion
         config = get_backend_config()
@@ -233,12 +233,12 @@ if __name__ == "__main__":
     
     # Test the NEW versions
     test_auth_service_url_NEW()
-    print("✅ test_auth_service_url_NEW passed")
+    print(" PASS:  test_auth_service_url_NEW passed")
     
     test_all_services_NEW()
-    print("✅ test_all_services_NEW passed")
+    print(" PASS:  test_all_services_NEW passed")
     
     test_with_docker_dynamic_ports()
-    print("✅ test_with_docker_dynamic_ports passed")
+    print(" PASS:  test_with_docker_dynamic_ports passed")
     
-    print("\n✅ All migration examples passed!")
+    print("\n PASS:  All migration examples passed!")

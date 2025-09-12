@@ -1,7 +1,7 @@
 """LLM Response Processing Module
 
 Handles response processing, streaming, and structured output utilities.
-Each function must be ≤8 lines as per module architecture requirements.
+Each function must be  <= 8 lines as per module architecture requirements.
 """
 import json
 import time

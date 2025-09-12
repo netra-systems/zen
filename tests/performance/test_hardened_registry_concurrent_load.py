@@ -24,7 +24,7 @@
     # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
     # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
 
-    # REMOVED_SYNTAX_ERROR: '''🚨 PERFORMANCE CRITICAL: Hardened Agent Registry Concurrent Load Tests
+    # REMOVED_SYNTAX_ERROR: ''' ALERT:  PERFORMANCE CRITICAL: Hardened Agent Registry Concurrent Load Tests
 
     # REMOVED_SYNTAX_ERROR: These tests validate that the hardened agent registry can handle:
         # REMOVED_SYNTAX_ERROR: 1. 10+ concurrent users without performance degradation

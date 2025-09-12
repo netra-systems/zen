@@ -2,7 +2,7 @@
 WebSocket Event Consistency Test - SSOT Execution Engine Consolidation
 
 This test verifies that all execution engines send the same critical WebSocket events
-for the Golden Path user flow (login → AI responses), ensuring consistent UX during
+for the Golden Path user flow (login  ->  AI responses), ensuring consistent UX during
 the SSOT consolidation from 7 engines to UserExecutionEngine.
 
 Business Value: Protects the 90% of platform value delivered through chat by ensuring
@@ -408,7 +408,7 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         self.record_metric("engines_with_complete_events", len(engines_with_complete_events))
         self.record_metric("golden_path_websocket_protected", True)
         
-        print(f"✅ Golden Path WebSocket Protection: {engines_with_complete_events} engines send all critical events")
+        print(f" PASS:  Golden Path WebSocket Protection: {engines_with_complete_events} engines send all critical events")
     
     async def async_teardown_method(self, method=None):
         """Report WebSocket event consistency results."""
@@ -442,9 +442,9 @@ class TestWebSocketEventConsistency(SSotAsyncTestCase):
         # Golden Path assessment
         complete_engines = [e for e in self.websocket_events.keys() if e not in self.missing_events]
         if complete_engines:
-            print(f"✅ Golden Path Protected: {complete_engines} engines send complete event set")
+            print(f" PASS:  Golden Path Protected: {complete_engines} engines send complete event set")
         else:
-            print("⚠️ Golden Path at Risk: No engine sends complete WebSocket events")
+            print(" WARNING: [U+FE0F] Golden Path at Risk: No engine sends complete WebSocket events")
         
         print("=" * 60)
         

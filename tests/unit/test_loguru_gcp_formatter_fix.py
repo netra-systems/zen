@@ -59,7 +59,7 @@
     # REMOVED_SYNTAX_ERROR: websocket = TestWebSocketConnection()  # Real WebSocket implementation
     # REMOVED_SYNTAX_ERROR: level_mock.name = 'INFO'
     # REMOVED_SYNTAX_ERROR: level_mock.no = 20
-    # REMOVED_SYNTAX_ERROR: level_mock.icon = 'ℹ️'
+    # REMOVED_SYNTAX_ERROR: level_mock.icon = '[U+2139][U+FE0F]'
 
     # Create a datetime object for time
     # REMOVED_SYNTAX_ERROR: time_obj = datetime.now(timezone.utc)

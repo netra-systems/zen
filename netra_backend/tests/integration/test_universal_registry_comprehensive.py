@@ -197,7 +197,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert "platform" in backend_item.tags
         assert backend_item.metadata.get("service_type") == "core_infrastructure"
         
-        self.logger.info(f"✅ Service registration and discovery test passed: {len(registered_services)} services registered")
+        self.logger.info(f" PASS:  Service registration and discovery test passed: {len(registered_services)} services registered")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -246,7 +246,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert analytics_metrics["total_items"] == 2
         assert ai_metrics["total_items"] == 2
         
-        self.logger.info("✅ Multi-service registry isolation validation passed")
+        self.logger.info(" PASS:  Multi-service registry isolation validation passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -321,7 +321,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert mesh_metrics["infrastructure_tier"] == 2
         assert mesh_metrics["application_tier"] == 2
         
-        self.logger.info("✅ Service-to-service communication coordination test passed")
+        self.logger.info(" PASS:  Service-to-service communication coordination test passed")
 
     # ===================== SERVICE HEALTH MONITORING AND AVAILABILITY =====================
 
@@ -411,7 +411,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert circuit_breaker_stats["degraded"] == "OPEN"
         assert circuit_breaker_stats["unhealthy"] == "OPEN"
         
-        self.logger.info(f"✅ Service health monitoring test passed: {len(availability_stats)} services monitored")
+        self.logger.info(f" PASS:  Service health monitoring test passed: {len(availability_stats)} services monitored")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -490,7 +490,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         registry_health = registry.validate_health()
         assert registry_health["status"] == "warning"  # Some services are unhealthy
         
-        self.logger.info(f"✅ Load balancing and failover test passed: {len(healthy_backends)}/{len(backend_services)} healthy instances")
+        self.logger.info(f" PASS:  Load balancing and failover test passed: {len(healthy_backends)}/{len(backend_services)} healthy instances")
 
     # ===================== CROSS-SERVICE DEPENDENCY MANAGEMENT =====================
 
@@ -612,7 +612,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         # Database and directly dependent services should be unhealthy
         assert failure_cascade_results["database"]["status"] == "unhealthy"
         
-        self.logger.info(f"✅ Cross-service dependency management test passed: {len(startup_order)} services coordinated")
+        self.logger.info(f" PASS:  Cross-service dependency management test passed: {len(startup_order)} services coordinated")
 
     # ===================== PERFORMANCE AND CONCURRENT OPERATIONS =====================
 
@@ -747,7 +747,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert load_health["status"] in ["healthy", "warning"]
         assert load_health["metrics"]["total_items"] == len(all_services)
         
-        self.logger.info(f"✅ Concurrent load test passed: {operations_per_second:.1f} ops/sec, {len(all_services)} services")
+        self.logger.info(f" PASS:  Concurrent load test passed: {operations_per_second:.1f} ops/sec, {len(all_services)} services")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -869,7 +869,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         expected_remaining = total_expected_services - sum(r["removed"] for r in successful_removals)
         assert len(remaining_services) == expected_remaining
         
-        self.logger.info(f"✅ Thread safety validation passed: {thread_count} threads, {total_expected_services} initial operations")
+        self.logger.info(f" PASS:  Thread safety validation passed: {thread_count} threads, {total_expected_services} initial operations")
 
     # ===================== BUSINESS-CRITICAL REGISTRY OPERATIONS =====================
 
@@ -929,7 +929,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert metrics["category_distribution"]["core"] == 3
         assert metrics["category_distribution"]["business_critical"] == 3
         
-        self.logger.info("✅ Agent registry business-critical operations test passed")
+        self.logger.info(" PASS:  Agent registry business-critical operations test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1024,7 +1024,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         
         assert secondary_failover_events + admin_failover_events == failover_events
         
-        self.logger.info("✅ WebSocket manager registry integration test passed")
+        self.logger.info(" PASS:  WebSocket manager registry integration test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1142,7 +1142,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         for service_name, status in connection_pool_status.items():
             assert status["utilization"] <= 1.0, f"Connection pool overload: {service_name}"
         
-        self.logger.info("✅ Database manager registry coordination test passed")
+        self.logger.info(" PASS:  Database manager registry coordination test passed")
 
     # ===================== CONFIGURATION AND ENVIRONMENT MANAGEMENT =====================
 
@@ -1270,7 +1270,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert len(staging_drift) == 0, f"Staging config drift: {staging_drift}"
         assert len(production_drift) == 0, f"Production config drift: {production_drift}"
         
-        self.logger.info("✅ Configuration management and environment-specific discovery test passed")
+        self.logger.info(" PASS:  Configuration management and environment-specific discovery test passed")
 
     # ===================== SECURITY AND AUTHORIZATION VALIDATION =====================
 
@@ -1442,7 +1442,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert unauthorized_events[0]["details"]["blocked"] is True
         assert access_events[0]["details"]["authorized"] is True
         
-        self.logger.info("✅ Registry security and authorization validation test passed")
+        self.logger.info(" PASS:  Registry security and authorization validation test passed")
 
     # ===================== RESOURCE MANAGEMENT AND CLEANUP =====================
 
@@ -1603,7 +1603,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         assert registry_health["status"] == "warning"  # Warning due to empty registry
         assert "Registry is empty" in registry_health["issues"]
         
-        self.logger.info(f"✅ Resource management and cleanup test passed: cleaned up {emergency_report['services_removed']} services")
+        self.logger.info(f" PASS:  Resource management and cleanup test passed: cleaned up {emergency_report['services_removed']} services")
 
     # ===================== INTEGRATION WITH MAJOR PLATFORM SERVICES =====================
 
@@ -1791,7 +1791,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
         total_components_cleaned = sum(result["cleaned"] for result in shutdown_results.values())
         assert total_components_cleaned > 0
         
-        self.logger.info(f"✅ Platform services integration test passed: {total_components_cleaned} components coordinated")
+        self.logger.info(f" PASS:  Platform services integration test passed: {total_components_cleaned} components coordinated")
 
     # ===================== GLOBAL REGISTRY FACTORY PATTERNS =====================
 
@@ -1956,7 +1956,7 @@ class TestUniversalRegistryComprehensive(BaseIntegrationTest):
             if registry_type == "agent":
                 assert "global_test_agent" in global_items
         
-        self.logger.info(f"✅ Global registry factory patterns test passed: {total_items_cleaned} scoped items managed")
+        self.logger.info(f" PASS:  Global registry factory patterns test passed: {total_items_cleaned} scoped items managed")
 
 
 # ===================== PERFORMANCE BENCHMARKING =====================
@@ -2100,7 +2100,7 @@ class TestUniversalRegistryPerformanceBenchmarks(BaseIntegrationTest):
         # Performance should not degrade more than 50% across load scenarios
         assert performance_ratio > 0.5, f"Performance degrades too much: {performance_ratio}"
         
-        self.logger.info(f"✅ Registry scaling characteristics validated across {len(scaling_results)} load scenarios")
+        self.logger.info(f" PASS:  Registry scaling characteristics validated across {len(scaling_results)} load scenarios")
 
 
 # Mark the test to be run at appropriate times

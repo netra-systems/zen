@@ -655,9 +655,9 @@ class ReportBuilder:
     def _format_all_content_sections(self, summary: ExecutiveSummary, report: FactoryStatusReport) -> Dict[str, List[str]]:
         """Format all content sections."""
         return {
-            'highlights': ["Key Highlights:", *[f"  • {h}" for h in summary.key_highlights]],
-            'actions': ["Action Items:", *[f"  • {a}" for a in summary.action_items]],
-            'recommendations': ["Recommendations:", *[f"  • {r}" for r in report.recommendations]]
+            'highlights': ["Key Highlights:", *[f"  [U+2022] {h}" for h in summary.key_highlights]],
+            'actions': ["Action Items:", *[f"  [U+2022] {a}" for a in summary.action_items]],
+            'recommendations': ["Recommendations:", *[f"  [U+2022] {r}" for r in report.recommendations]]
         }
     
     def _flatten_content_sections(self, sections: Dict[str, List[str]]) -> List[str]:

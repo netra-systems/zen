@@ -22,9 +22,9 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
         # Import should succeed with correct SSOT path
         try:
             from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge, AgentWebSocketBridge
-            print("✅ SUCCESS: SSOT WebSocket agent bridge imports working correctly")
-            print("✅ RESOLVED: Issue #360 - Agent handlers can be set up properly")
-            print("✅ BENEFIT: WebSocket connections can handle agent messages")
+            print(" PASS:  SUCCESS: SSOT WebSocket agent bridge imports working correctly")
+            print(" PASS:  RESOLVED: Issue #360 - Agent handlers can be set up properly")
+            print(" PASS:  BENEFIT: WebSocket connections can handle agent messages")
         except ImportError as e:
             pytest.fail(f"SSOT import should succeed but failed: {e}")
 
@@ -42,9 +42,9 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
             assert callable(create_agent_websocket_bridge), "Bridge creation function should be callable"
             assert AgentWebSocketBridge is not None, "Bridge class should be available"
             
-            print("✅ SUCCESS: Agent WebSocket bridge creation available")
-            print("✅ RESOLVED: Communication channel between agents and users established") 
-            print("✅ FUNCTIONALITY: SSOT bridge implementation working")
+            print(" PASS:  SUCCESS: Agent WebSocket bridge creation available")
+            print(" PASS:  RESOLVED: Communication channel between agents and users established") 
+            print(" PASS:  FUNCTIONALITY: SSOT bridge implementation working")
             
         except ImportError as e:
             pytest.fail(f"Bridge creation import should succeed but failed: {e}")
@@ -70,9 +70,9 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
             # Verify the import succeeded
             assert create_agent_websocket_bridge is not None
             
-            print("✅ SUCCESS: WebSocket connects AND agent functionality available")
-            print("✅ USER EXPERIENCE: Connection established with full agent capabilities") 
-            print("✅ RESOLVED: Agent handlers register successfully with SSOT imports")
+            print(" PASS:  SUCCESS: WebSocket connects AND agent functionality available")
+            print(" PASS:  USER EXPERIENCE: Connection established with full agent capabilities") 
+            print(" PASS:  RESOLVED: Agent handlers register successfully with SSOT imports")
             
         except ImportError as e:
             pytest.fail(f"Agent handler setup should work with SSOT imports but failed: {e}")
@@ -97,9 +97,9 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
             # Verify bridge creation function is available
             assert create_agent_websocket_bridge is not None
             
-            print("✅ GOLDEN PATH SUCCESS: Agent execution pipeline functional")
-            print("✅ USER BENEFIT: /api/agent/v2/execute can process requests")
-            print("✅ BUSINESS IMPACT: $500K+ ARR protected - AI responses restored")
+            print(" PASS:  GOLDEN PATH SUCCESS: Agent execution pipeline functional")
+            print(" PASS:  USER BENEFIT: /api/agent/v2/execute can process requests")
+            print(" PASS:  BUSINESS IMPACT: $500K+ ARR protected - AI responses restored")
             
         except ImportError as e:
             pytest.fail(f"Agent message routing should work with SSOT imports but failed: {e}")
@@ -125,9 +125,9 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
             # Verify the bridge creation function is available for event delivery
             assert create_agent_websocket_bridge is not None
             
-            print("✅ WEBSOCKET EVENTS SUCCESS: Real-time updates available for users")
-            print(f"✅ AVAILABLE EVENTS: {expected_events}")
-            print("✅ USER EXPERIENCE: Progress indication and feedback working")
+            print(" PASS:  WEBSOCKET EVENTS SUCCESS: Real-time updates available for users")
+            print(f" PASS:  AVAILABLE EVENTS: {expected_events}")
+            print(" PASS:  USER EXPERIENCE: Progress indication and feedback working")
             
         except ImportError as e:
             pytest.fail(f"WebSocket event delivery should work with SSOT imports but failed: {e}")
@@ -151,9 +151,9 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
             assert create_agent_websocket_bridge is not None, "Bridge creation function should be available"
             assert AgentWebSocketBridge is not None, "Bridge class should be available"
             
-            print("✅ CURRENT STATE: Agent bridge imports working successfully")
-            print("✅ SSOT COMPLIANCE: Correct import paths established")
-            print("✅ GOLDEN PATH FUNCTIONAL: Complete user flow operational")
+            print(" PASS:  CURRENT STATE: Agent bridge imports working successfully")
+            print(" PASS:  SSOT COMPLIANCE: Correct import paths established")
+            print(" PASS:  GOLDEN PATH FUNCTIONAL: Complete user flow operational")
             
         except ImportError as e:
             pytest.fail(f"SSOT imports should be working but failed: {e}")
@@ -168,9 +168,9 @@ class TestWebSocketSSOTAgentIntegration(SSotAsyncBaseTestCase):
         with pytest.raises(ModuleNotFoundError, match="No module named 'netra_backend.app.agents.agent_websocket_bridge'"):
             from netra_backend.app.agents.agent_websocket_bridge import create_agent_websocket_bridge
             
-        print("✅ REGRESSION PROTECTION: Broken import path correctly remains broken")
-        print("✅ CONFUSION PREVENTION: Old path cannot accidentally be used")
-        print("✅ SSOT ENFORCEMENT: Only correct SSOT path works")
+        print(" PASS:  REGRESSION PROTECTION: Broken import path correctly remains broken")
+        print(" PASS:  CONFUSION PREVENTION: Old path cannot accidentally be used")
+        print(" PASS:  SSOT ENFORCEMENT: Only correct SSOT path works")
 
 
 class TestWebSocketSSOTBusinessImpactValidation(SSotAsyncBaseTestCase):
@@ -199,10 +199,10 @@ class TestWebSocketSSOTBusinessImpactValidation(SSotAsyncBaseTestCase):
             # Verify the import that enables the chat flow
             assert create_agent_websocket_bridge is not None
             
-            print("✅ BUSINESS SUCCESS: Golden Path fully functional")
-            print("✅ CHAT VALUE: 90% of platform value restored")
-            print("✅ REVENUE PROTECTED: $500K+ ARR secured")
-            print(f"✅ SUCCESS POINT: Step 4 - {chat_flow_steps[3]}")
+            print(" PASS:  BUSINESS SUCCESS: Golden Path fully functional")
+            print(" PASS:  CHAT VALUE: 90% of platform value restored")
+            print(" PASS:  REVENUE PROTECTED: $500K+ ARR secured")
+            print(f" PASS:  SUCCESS POINT: Step 4 - {chat_flow_steps[3]}")
             
         except ImportError as e:
             pytest.fail(f"Golden Path should be working but failed: {e}")
@@ -232,9 +232,9 @@ class TestWebSocketSSOTBusinessImpactValidation(SSotAsyncBaseTestCase):
         # All users should succeed
         assert successful_users == len(user_scenarios), f"All users should have agent execution capability, got {successful_users}/{len(user_scenarios)}"
         
-        print(f"✅ SCALABILITY SUCCESS: {successful_users}/{len(user_scenarios)} users can execute agents")
-        print("✅ CUSTOMER EXPERIENCE: Universal service restoration") 
-        print("✅ SUPPORT IMPACT: Reduced customer complaint volume")
+        print(f" PASS:  SCALABILITY SUCCESS: {successful_users}/{len(user_scenarios)} users can execute agents")
+        print(" PASS:  CUSTOMER EXPERIENCE: Universal service restoration") 
+        print(" PASS:  SUPPORT IMPACT: Reduced customer complaint volume")
 
     async def test_api_endpoint_success_with_working_imports(self):
         """
@@ -254,10 +254,10 @@ class TestWebSocketSSOTBusinessImpactValidation(SSotAsyncBaseTestCase):
             # Verify the import that enables API success
             assert create_agent_websocket_bridge is not None
             
-            print(f"✅ API SUCCESS: {api_endpoint} can return {expected_success_code} responses")
-            print("✅ LOG IMPROVEMENT: Reduced error rates in staging logs")
-            print("✅ CLIENT BENEFIT: Frontend receives agent responses instead of errors")
-            print("✅ MONITORING: Healthy endpoint status indicators")
+            print(f" PASS:  API SUCCESS: {api_endpoint} can return {expected_success_code} responses")
+            print(" PASS:  LOG IMPROVEMENT: Reduced error rates in staging logs")
+            print(" PASS:  CLIENT BENEFIT: Frontend receives agent responses instead of errors")
+            print(" PASS:  MONITORING: Healthy endpoint status indicators")
             
         except ImportError as e:
             pytest.fail(f"API should work with SSOT imports but failed: {e}")
@@ -276,9 +276,9 @@ class TestWebSocketSSOTBusinessImpactValidation(SSotAsyncBaseTestCase):
             assert hasattr(create_agent_websocket_bridge, '__call__'), "Should be a callable function"
             assert AgentWebSocketBridge is not None, "Should be a valid class"
             
-            print("✅ SSOT PATH VALIDATION: Correct import path working")
-            print("✅ CONSISTENCY CHECK: Function and class both available")
-            print("✅ INTEGRATION READY: Bridge components accessible")
+            print(" PASS:  SSOT PATH VALIDATION: Correct import path working")
+            print(" PASS:  CONSISTENCY CHECK: Function and class both available")
+            print(" PASS:  INTEGRATION READY: Bridge components accessible")
             
         except ImportError as e:
             pytest.fail(f"SSOT path validation failed: {e}")
@@ -295,9 +295,9 @@ class TestWebSocketSSOTBusinessImpactValidation(SSotAsyncBaseTestCase):
             # Basic class validation (without full instantiation which needs context)
             assert hasattr(AgentWebSocketBridge, '__init__'), "Class should have constructor"
             
-            print("✅ CLASS ACCESSIBILITY: AgentWebSocketBridge class importable")
-            print("✅ INSTANTIATION READY: Class available for bridge creation")
-            print("✅ ARCHITECTURE COMPATIBLE: Bridge class follows SSOT pattern")
+            print(" PASS:  CLASS ACCESSIBILITY: AgentWebSocketBridge class importable")
+            print(" PASS:  INSTANTIATION READY: Class available for bridge creation")
+            print(" PASS:  ARCHITECTURE COMPATIBLE: Bridge class follows SSOT pattern")
             
         except ImportError as e:
             pytest.fail(f"AgentWebSocketBridge class import failed: {e}")

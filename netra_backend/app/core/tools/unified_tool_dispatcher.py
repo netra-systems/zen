@@ -177,7 +177,7 @@ class UnifiedToolDispatcher:
         )
         
         logger.warning(
-            f"🔄 SSOT REDIRECT: UnifiedToolDispatcher.create_for_user() -> ToolDispatcherFactory.create_for_request() "
+            f" CYCLE:  SSOT REDIRECT: UnifiedToolDispatcher.create_for_user() -> ToolDispatcherFactory.create_for_request() "
             f"for user {user_context.user_id} (Phase 2 factory consolidation)"
         )
         
@@ -218,7 +218,7 @@ class UnifiedToolDispatcher:
             )
             
             logger.info(
-                f"✅ SSOT REDIRECT SUCCESS: Created dispatcher via ToolDispatcherFactory for user {user_context.user_id} "
+                f" PASS:  SSOT REDIRECT SUCCESS: Created dispatcher via ToolDispatcherFactory for user {user_context.user_id} "
                 f"(admin_tools: {enable_admin_tools})"
             )
             
@@ -227,7 +227,7 @@ class UnifiedToolDispatcher:
             
         except Exception as e:
             logger.error(
-                f"🚨 SSOT REDIRECT FAILED: ToolDispatcherFactory creation failed for user {user_context.user_id}: {e}. "
+                f" ALERT:  SSOT REDIRECT FAILED: ToolDispatcherFactory creation failed for user {user_context.user_id}: {e}. "
                 f"Falling back to original implementation."
             )
             
@@ -270,7 +270,7 @@ class UnifiedToolDispatcher:
         )
         
         logger.warning(
-            f"🔄 SSOT REDIRECT: UnifiedToolDispatcher.create_scoped() -> ToolDispatcherFactory.create_scoped() "
+            f" CYCLE:  SSOT REDIRECT: UnifiedToolDispatcher.create_scoped() -> ToolDispatcherFactory.create_scoped() "
             f"for user {user_context.user_id} (Phase 2 factory consolidation)"
         )
         
@@ -297,7 +297,7 @@ class UnifiedToolDispatcher:
                 # Create compatibility wrapper that provides the expected interface
                 dispatcher = factory._create_unified_compatibility_wrapper(dispatcher, websocket_bridge)
             
-            logger.info(f"✅ SSOT SCOPED: Created scoped dispatcher via ToolDispatcherFactory for user {user_context.user_id}")
+            logger.info(f" PASS:  SSOT SCOPED: Created scoped dispatcher via ToolDispatcherFactory for user {user_context.user_id}")
             yield dispatcher
     
     @classmethod
@@ -330,7 +330,7 @@ class UnifiedToolDispatcher:
                     'dispatcher_id': self.dispatcher_id
                 }
                 
-                logger.info(f"🎭 Created FactoryDispatcherWrapper {self.dispatcher_id} for SSOT compatibility")
+                logger.info(f"[U+1F3AD] Created FactoryDispatcherWrapper {self.dispatcher_id} for SSOT compatibility")
             
             @property
             def tools(self):
@@ -410,7 +410,7 @@ class UnifiedToolDispatcher:
                 if hasattr(self._dispatcher, 'cleanup'):
                     await self._dispatcher.cleanup()
                 self._is_active = False
-                logger.info(f"🎭 Cleaned up FactoryDispatcherWrapper {self.dispatcher_id}")
+                logger.info(f"[U+1F3AD] Cleaned up FactoryDispatcherWrapper {self.dispatcher_id}")
         
         return FactoryDispatcherWrapper(tool_dispatcher, user_context, websocket_bridge)
     
@@ -427,7 +427,7 @@ class UnifiedToolDispatcher:
         This preserves the original UnifiedToolDispatcher behavior for safety.
         """
         logger.warning(
-            f"⏪ FALLBACK: Using original UnifiedToolDispatcher implementation for user {user_context.user_id}"
+            f"[U+23EA] FALLBACK: Using original UnifiedToolDispatcher implementation for user {user_context.user_id}"
         )
         
         # Determine strategy based on admin tools
@@ -501,7 +501,7 @@ class UnifiedToolDispatcher:
             instance._setup_websocket_events()
         
         logger.info(
-            f"✅ Created UnifiedToolDispatcher {instance.dispatcher_id} "
+            f" PASS:  Created UnifiedToolDispatcher {instance.dispatcher_id} "
             f"[strategy={strategy.value}, user={user_context.user_id}]"
         )
         
@@ -580,7 +580,7 @@ class UnifiedToolDispatcher:
             def __init__(self, bridge, context):
                 self.bridge = bridge
                 self.context = context
-                logger.debug(f"✅ Created WebSocket bridge adapter for user {context.user_id}")
+                logger.debug(f" PASS:  Created WebSocket bridge adapter for user {context.user_id}")
             
             async def send_event(self, event_type: str, data: Dict[str, Any]):
                 """Send event via AgentWebSocketBridge using proper notification methods."""
@@ -599,7 +599,7 @@ class UnifiedToolDispatcher:
                             parameters=params
                         )
                         if success:
-                            logger.debug(f"🔧 TOOL EXECUTING: {data['tool_name']} → user {self.context.user_id}")
+                            logger.debug(f"[U+1F527] TOOL EXECUTING: {data['tool_name']}  ->  user {self.context.user_id}")
                         return success
                         
                     elif event_type == "tool_completed":
@@ -624,15 +624,15 @@ class UnifiedToolDispatcher:
                             execution_time_ms=data.get("execution_time_ms")
                         )
                         if success:
-                            logger.debug(f"✅ TOOL COMPLETED: {data['tool_name']} → user {self.context.user_id}")
+                            logger.debug(f" PASS:  TOOL COMPLETED: {data['tool_name']}  ->  user {self.context.user_id}")
                         return success
                         
                     else:
-                        logger.warning(f"⚠️  Unknown event type for WebSocket bridge adapter: {event_type}")
+                        logger.warning(f" WARNING: [U+FE0F]  Unknown event type for WebSocket bridge adapter: {event_type}")
                         return False
                         
                 except Exception as e:
-                    logger.error(f"🚨 WebSocket bridge adapter failed to send {event_type} event: {e}")
+                    logger.error(f" ALERT:  WebSocket bridge adapter failed to send {event_type} event: {e}")
                     return False
             
             def has_websocket_support(self):
@@ -734,11 +734,11 @@ class UnifiedToolDispatcher:
         else:
             # Fallback to class name if no name attribute
             tool_name = getattr(tool, '__class__', type(tool)).__name__.lower()
-            logger.warning(f"⚠️ Tool {tool.__class__.__name__} missing 'name' attribute, using fallback: {tool_name}")
+            logger.warning(f" WARNING: [U+FE0F] Tool {tool.__class__.__name__} missing 'name' attribute, using fallback: {tool_name}")
         
         # ENHANCED: Check for duplicate tool registration
         if self.has_tool(tool_name):
-            logger.warning(f"⚠️ Tool {tool_name} already registered, skipping duplicate registration")
+            logger.warning(f" WARNING: [U+FE0F] Tool {tool_name} already registered, skipping duplicate registration")
             return
         
         # Use the UniversalRegistry's register method with proper error handling
@@ -754,14 +754,14 @@ class UnifiedToolDispatcher:
         except ValueError as e:
             # CRITICAL FIX: Handle BaseModel validation failures gracefully
             if "BaseModel" in str(e) or "validation failed" in str(e).lower():
-                logger.warning(f"⚠️ Tool {tool.__class__.__name__} rejected by registry validation: {e}")
+                logger.warning(f" WARNING: [U+FE0F] Tool {tool.__class__.__name__} rejected by registry validation: {e}")
                 logger.warning(f"   Skipping invalid tool registration to prevent system failure")
                 return  # Skip this tool but continue with others
             else:
                 # Re-raise other validation errors
                 raise
         except Exception as e:
-            logger.error(f"🚨 Unexpected error registering tool {tool_name}: {e}")
+            logger.error(f" ALERT:  Unexpected error registering tool {tool_name}: {e}")
             raise
     
     def register_tools(self, tools: List['BaseTool']) -> int:
@@ -1040,7 +1040,7 @@ class UnifiedToolDispatcher:
             
         except Exception as e:
             # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
-            logger.critical(f"🚨 CRITICAL: WebSocket tool_executing event FAILED for tool {tool_name} - user {self.user_context.user_id}: {e}")
+            logger.critical(f" ALERT:  CRITICAL: WebSocket tool_executing event FAILED for tool {tool_name} - user {self.user_context.user_id}: {e}")
             # Try to use UnifiedWebSocketEmitter for retry if available
             await self._attempt_critical_event_recovery("tool_executing", tool_name, parameters, e)
             return None
@@ -1143,7 +1143,7 @@ class UnifiedToolDispatcher:
             
         except Exception as e:
             # CRITICAL FAILURE: Silent failures threaten $500K+ ARR chat functionality
-            logger.critical(f"🚨 CRITICAL: WebSocket tool_completed event FAILED for tool {tool_name} - user {self.user_context.user_id}: {e}")
+            logger.critical(f" ALERT:  CRITICAL: WebSocket tool_completed event FAILED for tool {tool_name} - user {self.user_context.user_id}: {e}")
             # Try to use UnifiedWebSocketEmitter for retry if available
             await self._attempt_critical_event_recovery("tool_completed", tool_name, {"error": error} if error else {"result": result}, e)
             return None
@@ -1258,15 +1258,15 @@ class UnifiedToolDispatcher:
                 success = await emitter.notify_custom(event_type, recovery_data)
             
             if success:
-                logger.info(f"✅ RECOVERY SUCCESS: {event_type} event recovered for tool {tool_name} - user {self.user_context.user_id}")
+                logger.info(f" PASS:  RECOVERY SUCCESS: {event_type} event recovered for tool {tool_name} - user {self.user_context.user_id}")
             else:
-                logger.error(f"❌ RECOVERY FAILED: {event_type} event could not be recovered for tool {tool_name} - user {self.user_context.user_id}")
+                logger.error(f" FAIL:  RECOVERY FAILED: {event_type} event could not be recovered for tool {tool_name} - user {self.user_context.user_id}")
                 
         except Exception as recovery_error:
-            logger.error(f"💥 RECOVERY EXCEPTION: Event recovery system failed for {event_type}/{tool_name} - user {self.user_context.user_id}: {recovery_error}")
+            logger.error(f"[U+1F4A5] RECOVERY EXCEPTION: Event recovery system failed for {event_type}/{tool_name} - user {self.user_context.user_id}: {recovery_error}")
             # At this point we've tried everything - log as critical business impact
             logger.critical(
-                f"🚨 BUSINESS IMPACT: Complete WebSocket event failure for user {self.user_context.user_id} "
+                f" ALERT:  BUSINESS IMPACT: Complete WebSocket event failure for user {self.user_context.user_id} "
                 f"- tool: {tool_name}, event: {event_type}. Chat functionality compromised. "
                 f"Original error: {original_error}, Recovery error: {recovery_error}"
             )
@@ -1442,10 +1442,10 @@ class UnifiedToolDispatcher:
             # Final metrics update
             self._metrics['cleanup_time'] = datetime.now(timezone.utc)
             
-            logger.info(f"✅ Cleaned up dispatcher {self.dispatcher_id}")
+            logger.info(f" PASS:  Cleaned up dispatcher {self.dispatcher_id}")
             
         except Exception as e:
-            logger.error(f"🚨 Cleanup failed for dispatcher {self.dispatcher_id}: {e}")
+            logger.error(f" ALERT:  Cleanup failed for dispatcher {self.dispatcher_id}: {e}")
         finally:
             # Always unregister, even if cleanup partially fails
             self._unregister_dispatcher(self)

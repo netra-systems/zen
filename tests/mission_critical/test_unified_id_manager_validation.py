@@ -395,26 +395,26 @@
         # REMOVED_SYNTAX_ERROR: try:
             # Test import
             # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-            # REMOVED_SYNTAX_ERROR: print("✓ Import successful")
+            # REMOVED_SYNTAX_ERROR: print("[U+2713] Import successful")
 
             # Test basic functionality
             # REMOVED_SYNTAX_ERROR: test_id = UnifiedIDManager.generate_run_id("startup_test")
             # REMOVED_SYNTAX_ERROR: assert UnifiedIDManager.validate_run_id(test_id)
-            # REMOVED_SYNTAX_ERROR: print("✓ Basic ID generation works")
+            # REMOVED_SYNTAX_ERROR: print("[U+2713] Basic ID generation works")
 
             # Test extraction
             # REMOVED_SYNTAX_ERROR: extracted = UnifiedIDManager.extract_thread_id(test_id)
             # REMOVED_SYNTAX_ERROR: assert extracted == "startup_test"
-            # REMOVED_SYNTAX_ERROR: print("✓ Thread extraction works")
+            # REMOVED_SYNTAX_ERROR: print("[U+2713] Thread extraction works")
 
             # Test signature
             # REMOVED_SYNTAX_ERROR: import inspect
             # REMOVED_SYNTAX_ERROR: sig = inspect.signature(UnifiedIDManager.generate_run_id)
             # REMOVED_SYNTAX_ERROR: assert len(sig.parameters) == 1
-            # REMOVED_SYNTAX_ERROR: print("✓ Method signature correct (1 argument)")
+            # REMOVED_SYNTAX_ERROR: print("[U+2713] Method signature correct (1 argument)")
 
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: ✅ All startup validations passed!")
+            # REMOVED_SYNTAX_ERROR:  PASS:  All startup validations passed!")
 
             # REMOVED_SYNTAX_ERROR: except Exception as e:
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")

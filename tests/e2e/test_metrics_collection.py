@@ -19,8 +19,8 @@ METRICS PIPELINE VALIDATION:
 - Dashboard data availability verification
 
 ARCHITECTURAL COMPLIANCE:
-- File size: ≤300 lines (modular design)
-- Function size: ≤8 lines each (composition pattern)
+- File size:  <= 300 lines (modular design)
+- Function size:  <= 8 lines each (composition pattern)
 - Real metrics pipeline (no mocks for production validation)
 - Comprehensive end-to-end validation
 """

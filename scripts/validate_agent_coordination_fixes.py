@@ -74,7 +74,7 @@ class CoordinationTestValidator:
         assert not integrity_result.is_valid, "Should detect data corruption"
         assert integrity_result.business_impact is not None, "Should assess business impact"
         
-        logger.info("✅ Data integrity validation tests passed")
+        logger.info(" PASS:  Data integrity validation tests passed")
         return True
     
     def test_execution_order_validation(self) -> bool:
@@ -104,7 +104,7 @@ class CoordinationTestValidator:
         assert not is_valid, "Incorrect order should fail"
         assert len(violations) > 0, "Should detect order violations"
         
-        logger.info("✅ Execution order validation tests passed")
+        logger.info(" PASS:  Execution order validation tests passed")
         return True
     
     def test_tool_result_propagation(self) -> bool:
@@ -148,7 +148,7 @@ class CoordinationTestValidator:
         )
         assert not result, "Missing propagation should fail validation"
         
-        logger.info("✅ Tool result propagation tests passed")
+        logger.info(" PASS:  Tool result propagation tests passed")
         return True
     
     def test_concurrent_isolation(self) -> bool:
@@ -186,7 +186,7 @@ class CoordinationTestValidator:
         )
         # Note: This might still pass with our simple overlap detection, which is expected
         
-        logger.info("✅ Concurrent isolation tests passed")
+        logger.info(" PASS:  Concurrent isolation tests passed")
         return True
     
     async def test_workflow_orchestrator_integration(self) -> bool:
@@ -240,7 +240,7 @@ class CoordinationTestValidator:
         assert hasattr(orchestrator, 'coordination_validator'), "Orchestrator should have coordination validator"
         assert isinstance(orchestrator.coordination_validator, AgentCoordinationValidator), "Should be AgentCoordinationValidator instance"
         
-        logger.info("✅ Workflow orchestrator integration tests passed")
+        logger.info(" PASS:  Workflow orchestrator integration tests passed")
         return True
     
     async def run_all_tests(self) -> bool:
@@ -261,11 +261,11 @@ class CoordinationTestValidator:
                     result = test_func()
                     if result:
                         sync_passed += 1
-                        logger.info(f"✅ {test_name} passed")
+                        logger.info(f" PASS:  {test_name} passed")
                     else:
-                        logger.error(f"❌ {test_name} failed")
+                        logger.error(f" FAIL:  {test_name} failed")
                 except Exception as e:
-                    logger.error(f"❌ {test_name} failed with exception: {e}")
+                    logger.error(f" FAIL:  {test_name} failed with exception: {e}")
             
             # Run async tests
             async_passed = 0
@@ -278,24 +278,24 @@ class CoordinationTestValidator:
                     result = await test_func()
                     if result:
                         async_passed += 1
-                        logger.info(f"✅ {test_name} passed")
+                        logger.info(f" PASS:  {test_name} passed")
                     else:
-                        logger.error(f"❌ {test_name} failed")
+                        logger.error(f" FAIL:  {test_name} failed")
                 except Exception as e:
-                    logger.error(f"❌ {test_name} failed with exception: {e}")
+                    logger.error(f" FAIL:  {test_name} failed with exception: {e}")
             
             total_tests = len(tests) + len(async_tests)
             total_passed = sync_passed + async_passed
             
-            logger.info(f"\n🎯 VALIDATION SUMMARY:")
+            logger.info(f"\n TARGET:  VALIDATION SUMMARY:")
             logger.info(f"   Tests passed: {total_passed}/{total_tests}")
             logger.info(f"   Success rate: {(total_passed/total_tests)*100:.1f}%")
             
             if total_passed == total_tests:
-                logger.info(f"🎉 ALL COORDINATION FIXES VALIDATED SUCCESSFULLY!")
+                logger.info(f" CELEBRATION:  ALL COORDINATION FIXES VALIDATED SUCCESSFULLY!")
                 return True
             else:
-                logger.error(f"⚠️ Some coordination tests failed - fixes need refinement")
+                logger.error(f" WARNING: [U+FE0F] Some coordination tests failed - fixes need refinement")
                 return False
                 
         except Exception as e:
@@ -309,17 +309,17 @@ async def main():
     success = await validator.run_all_tests()
     
     if success:
-        logger.info("\n✅ AGENT COORDINATION FIXES VALIDATION COMPLETED SUCCESSFULLY")
+        logger.info("\n PASS:  AGENT COORDINATION FIXES VALIDATION COMPLETED SUCCESSFULLY")
         logger.info("The following issues have been fixed:")
-        logger.info("1. ✅ Agent handoff data integrity preservation")
-        logger.info("2. ✅ Tool result propagation for revenue calculations")
-        logger.info("3. ✅ Agent execution order enforcement")
-        logger.info("4. ✅ Race condition prevention in concurrent execution")
-        logger.info("5. ✅ Data integrity validation infrastructure")
+        logger.info("1.  PASS:  Agent handoff data integrity preservation")
+        logger.info("2.  PASS:  Tool result propagation for revenue calculations")
+        logger.info("3.  PASS:  Agent execution order enforcement")
+        logger.info("4.  PASS:  Race condition prevention in concurrent execution")
+        logger.info("5.  PASS:  Data integrity validation infrastructure")
         
         sys.exit(0)
     else:
-        logger.error("\n❌ COORDINATION FIXES VALIDATION FAILED")
+        logger.error("\n FAIL:  COORDINATION FIXES VALIDATION FAILED")
         logger.error("Some fixes require additional work before deployment")
         sys.exit(1)
 

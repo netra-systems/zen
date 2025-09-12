@@ -1,7 +1,7 @@
 """LLM heartbeat logging module.
 
 Provides heartbeat logging for long-running LLM calls with correlation tracking.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 import asyncio
 import time

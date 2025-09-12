@@ -724,10 +724,10 @@
 
         # REMOVED_SYNTAX_ERROR: overall_status = results['overall_status']
         # REMOVED_SYNTAX_ERROR: status_emoji = { )
-        # REMOVED_SYNTAX_ERROR: 'success': '✅',
-        # REMOVED_SYNTAX_ERROR: 'partial_success': '⚠️',
-        # REMOVED_SYNTAX_ERROR: 'failure': '❌'
-        # REMOVED_SYNTAX_ERROR: }.get(overall_status, '❓')
+        # REMOVED_SYNTAX_ERROR: 'success': ' PASS: ',
+        # REMOVED_SYNTAX_ERROR: 'partial_success': ' WARNING: [U+FE0F]',
+        # REMOVED_SYNTAX_ERROR: 'failure': ' FAIL: '
+        # REMOVED_SYNTAX_ERROR: }.get(overall_status, '[U+2753]')
 
         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -737,7 +737,7 @@
 
         # REMOVED_SYNTAX_ERROR: if 'stages' in auth_results:
             # REMOVED_SYNTAX_ERROR: for stage_name, stage_data in auth_results['stages'].items():
-                # REMOVED_SYNTAX_ERROR: status = '✅' if stage_data['success'] else '❌'
+                # REMOVED_SYNTAX_ERROR: status = ' PASS: ' if stage_data['success'] else ' FAIL: '
                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                 # REMOVED_SYNTAX_ERROR: if 'simulated_health_check' in auth_results:
@@ -757,14 +757,14 @@
 
                         # REMOVED_SYNTAX_ERROR: if 'timeout_tests' in timeout_results:
                             # REMOVED_SYNTAX_ERROR: for test in timeout_results['timeout_tests']:
-                                # REMOVED_SYNTAX_ERROR: status = '✅ SUCCESS' if test['success'] else '❌ FAILED'
+                                # REMOVED_SYNTAX_ERROR: status = ' PASS:  SUCCESS' if test['success'] else ' FAIL:  FAILED'
                                 # REMOVED_SYNTAX_ERROR: time_info = "formatted_string"
                                 # REMOVED_SYNTAX_ERROR: timeout_info = "formatted_string"
 
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                 # REMOVED_SYNTAX_ERROR: if test.get('timed_out'):
-                                    # REMOVED_SYNTAX_ERROR: print(f"     ⏰ Operation timed out")
+                                    # REMOVED_SYNTAX_ERROR: print(f"     [U+23F0] Operation timed out")
                                     # REMOVED_SYNTAX_ERROR: if test.get('error') and not test.get('timed_out'):
                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
@@ -774,7 +774,7 @@
 
                                         # REMOVED_SYNTAX_ERROR: if 'url_checks' in url_results:
                                             # REMOVED_SYNTAX_ERROR: for check in url_results['url_checks']:
-                                                # REMOVED_SYNTAX_ERROR: status = '✅' if check['success'] else '❌'
+                                                # REMOVED_SYNTAX_ERROR: status = ' PASS: ' if check['success'] else ' FAIL: '
                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                 # REMOVED_SYNTAX_ERROR: if check.get('description'):
                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -783,7 +783,7 @@
 
                                                         # REMOVED_SYNTAX_ERROR: if 'ssl_parameter_checks' in url_results:
                                                             # REMOVED_SYNTAX_ERROR: for check in url_results['ssl_parameter_checks']:
-                                                                # REMOVED_SYNTAX_ERROR: status = '✅' if check['success'] else '❌'
+                                                                # REMOVED_SYNTAX_ERROR: status = ' PASS: ' if check['success'] else ' FAIL: '
                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                 # REMOVED_SYNTAX_ERROR: if check.get('description'):
                                                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -800,7 +800,7 @@
                                                                         # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                         # REMOVED_SYNTAX_ERROR: for result in concurrent_results['results']:
-                                                                            # REMOVED_SYNTAX_ERROR: status = '✅' if result['success'] else '❌'
+                                                                            # REMOVED_SYNTAX_ERROR: status = ' PASS: ' if result['success'] else ' FAIL: '
                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                             # Summary and assertions
@@ -823,14 +823,14 @@
                                                                                         # REMOVED_SYNTAX_ERROR: critical_issues.append("Auth service would still return 503 Service Unavailable")
 
                                                                                         # REMOVED_SYNTAX_ERROR: if critical_issues:
-                                                                                            # REMOVED_SYNTAX_ERROR: print("❌ CRITICAL ISSUES FOUND:")
+                                                                                            # REMOVED_SYNTAX_ERROR: print(" FAIL:  CRITICAL ISSUES FOUND:")
                                                                                             # REMOVED_SYNTAX_ERROR: for issue in critical_issues:
                                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                                                 # REMOVED_SYNTAX_ERROR: print(f" )
                                                                                                 # REMOVED_SYNTAX_ERROR: These are PRIMARY BLOCKERS that prevent full system operation.")
                                                                                                 # REMOVED_SYNTAX_ERROR: else:
-                                                                                                    # REMOVED_SYNTAX_ERROR: print("✅ ALL CRITICAL FIXES WORKING:")
+                                                                                                    # REMOVED_SYNTAX_ERROR: print(" PASS:  ALL CRITICAL FIXES WORKING:")
                                                                                                     # REMOVED_SYNTAX_ERROR: print("  - Auth service 503 errors fixed")
                                                                                                     # REMOVED_SYNTAX_ERROR: print("  - Database connection timeouts handled")
                                                                                                     # REMOVED_SYNTAX_ERROR: print("  - System can start and respond to health checks")
@@ -857,12 +857,12 @@
 
                                                                                                     # REMOVED_SYNTAX_ERROR: if results['overall_status'] == 'success':
                                                                                                         # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                        # REMOVED_SYNTAX_ERROR: 🎉 COMPREHENSIVE VALIDATION SUCCESSFUL!")
+                                                                                                        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  COMPREHENSIVE VALIDATION SUCCESSFUL!")
                                                                                                         # REMOVED_SYNTAX_ERROR: print(f"The PRIMARY BLOCKER (503 Service Unavailable errors) has been resolved.")
                                                                                                         # REMOVED_SYNTAX_ERROR: print(f"All services should now start successfully and respond to health checks.")
                                                                                                         # REMOVED_SYNTAX_ERROR: else:
                                                                                                             # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                            # REMOVED_SYNTAX_ERROR: ⚠️  PARTIAL SUCCESS - Some non-critical issues remain")
+                                                                                                            # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  PARTIAL SUCCESS - Some non-critical issues remain")
                                                                                                             # REMOVED_SYNTAX_ERROR: print(f"The PRIMARY BLOCKER is resolved but some optimizations could be made.")
 
                                                                                                             # Removed problematic line: @pytest.mark.asyncio
@@ -909,7 +909,7 @@
                                                                                                                             
                                                                                                                             # REMOVED_SYNTAX_ERROR: http_status = 503
 
-                                                                                                                            # Removed problematic line: print(f"❌ Would await asyncio.sleep(0) )
+                                                                                                                            # Removed problematic line: print(f" FAIL:  Would await asyncio.sleep(0) )
                                                                                                                             # REMOVED_SYNTAX_ERROR: return 503 Service Unavailable")
                                                                                                                             # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                                                                                                             # REMOVED_SYNTAX_ERROR: else:
@@ -923,7 +923,7 @@
                                                                                                                                 
                                                                                                                                 # REMOVED_SYNTAX_ERROR: http_status = 200
 
-                                                                                                                                # REMOVED_SYNTAX_ERROR: print(f"✅ Would return 200 OK")
+                                                                                                                                # REMOVED_SYNTAX_ERROR: print(f" PASS:  Would return 200 OK")
                                                                                                                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
                                                                                                                                 # REMOVED_SYNTAX_ERROR: else:
@@ -936,7 +936,7 @@
                                                                                                                                     # REMOVED_SYNTAX_ERROR: http_status = 200
                                                                                                                                     # REMOVED_SYNTAX_ERROR: db_ready = True
 
-                                                                                                                                    # REMOVED_SYNTAX_ERROR: print(f"✅ Development environment - would return 200 OK")
+                                                                                                                                    # REMOVED_SYNTAX_ERROR: print(f" PASS:  Development environment - would return 200 OK")
 
                                                                                                                                     # Clean up
                                                                                                                                     # REMOVED_SYNTAX_ERROR: await auth_conn.close(timeout=5.0)
@@ -952,7 +952,7 @@
                                                                                                                                     
 
                                                                                                                                     # REMOVED_SYNTAX_ERROR: print(f" )
-                                                                                                                                    # REMOVED_SYNTAX_ERROR: ✅ Auth service health endpoint simulation successful - no 503 errors!")
+                                                                                                                                    # REMOVED_SYNTAX_ERROR:  PASS:  Auth service health endpoint simulation successful - no 503 errors!")
 
                                                                                                                                     # REMOVED_SYNTAX_ERROR: except Exception as e:
                                                                                                                                         # REMOVED_SYNTAX_ERROR: await auth_conn.close(timeout=5.0)  # Ensure cleanup
@@ -974,15 +974,15 @@
 
     # REMOVED_SYNTAX_ERROR: for test_name, test_result in results.items():
         # REMOVED_SYNTAX_ERROR: if test_name != 'overall_status':
-            # REMOVED_SYNTAX_ERROR: status = '✅ PASS' if test_result.get('success') else '❌ FAIL'
+            # REMOVED_SYNTAX_ERROR: status = ' PASS:  PASS' if test_result.get('success') else ' FAIL:  FAIL'
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
 
             # REMOVED_SYNTAX_ERROR: if overall_status == 'success':
                 # REMOVED_SYNTAX_ERROR: print(f" )
-                # REMOVED_SYNTAX_ERROR: 🎉 All database connectivity fixes working!")
+                # REMOVED_SYNTAX_ERROR:  CELEBRATION:  All database connectivity fixes working!")
                 # REMOVED_SYNTAX_ERROR: print(f"The PRIMARY BLOCKER (503 errors) has been resolved.")
                 # REMOVED_SYNTAX_ERROR: else:
                     # REMOVED_SYNTAX_ERROR: print(f" )
-                    # REMOVED_SYNTAX_ERROR: ⚠️  Some issues remain - check individual test results")
+                    # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  Some issues remain - check individual test results")
 
                     # REMOVED_SYNTAX_ERROR: asyncio.run(main())

@@ -98,7 +98,7 @@ def cleanup_directory(base_path: str, config: dict) -> Tuple[int, int, List[str]
     """
     base_dir = Path(base_path)
     if not base_dir.exists():
-        print(f"  ⚠️  Directory does not exist: {base_path}")
+        print(f"   WARNING: [U+FE0F]  Directory does not exist: {base_path}")
         return 0, 0, []
     
     files_deleted = 0

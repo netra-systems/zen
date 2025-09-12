@@ -53,9 +53,9 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         # GCP staging auth service URL
         self.staging_auth_url = self.auth_client.settings.base_url
         
-        print(f"\n🎯 E2E Test Setup - Environment: {self.environment}")
-        print(f"🎯 Auth Service URL: {self.staging_auth_url}")
-        print(f"🎯 Test User: {self.test_email}")
+        print(f"\n TARGET:  E2E Test Setup - Environment: {self.environment}")
+        print(f" TARGET:  Auth Service URL: {self.staging_auth_url}")
+        print(f" TARGET:  Test User: {self.test_email}")
     
     def teardown_method(self, method=None):
         """Clean up E2E test environment."""
@@ -87,7 +87,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         EXPECTED RESULT: Should FAIL due to auth service timeouts in real GCP environment.
         """
         
-        print(f"\n🚀 Starting Golden Path E2E test against {self.staging_auth_url}")
+        print(f"\n[U+1F680] Starting Golden Path E2E test against {self.staging_auth_url}")
         
         golden_path_metrics = {
             "login_duration": None,
@@ -101,7 +101,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         start_time = time.time()
         
         # Step 1: User Login (Real auth service call)
-        print("📝 Step 1: Testing real user login to staging auth service...")
+        print("[U+1F4DD] Step 1: Testing real user login to staging auth service...")
         login_start = time.time()
         
         try:
@@ -110,23 +110,23 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
             
             if not login_result:
                 golden_path_metrics["failed_steps"].append("login_no_result")
-                print(f"❌ Login failed: No result from auth service")
+                print(f" FAIL:  Login failed: No result from auth service")
             else:
-                print(f"✅ Login succeeded in {golden_path_metrics['login_duration']:.3f}s")
+                print(f" PASS:  Login succeeded in {golden_path_metrics['login_duration']:.3f}s")
                 
         except asyncio.TimeoutError as e:
             golden_path_metrics["login_duration"] = time.time() - login_start
             golden_path_metrics["failed_steps"].append("login_timeout")
             golden_path_metrics["timeout_errors"].append(f"login: {str(e)}")
-            print(f"⏰ Login timed out after {golden_path_metrics['login_duration']:.3f}s")
+            print(f"[U+23F0] Login timed out after {golden_path_metrics['login_duration']:.3f}s")
             
         except Exception as e:
             golden_path_metrics["login_duration"] = time.time() - login_start  
             golden_path_metrics["failed_steps"].append(f"login_error_{type(e).__name__}")
-            print(f"❌ Login failed with error: {e}")
+            print(f" FAIL:  Login failed with error: {e}")
         
         # Step 2: WebSocket Authentication (Real connectivity check)
-        print("🔌 Step 2: Testing WebSocket auth connectivity to staging...")
+        print("[U+1F50C] Step 2: Testing WebSocket auth connectivity to staging...")
         ws_start = time.time()
         
         try:
@@ -135,23 +135,23 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
             
             if not ws_connectivity:
                 golden_path_metrics["failed_steps"].append("websocket_connectivity_failed")
-                print(f"❌ WebSocket connectivity failed after {golden_path_metrics['websocket_auth_duration']:.3f}s")
+                print(f" FAIL:  WebSocket connectivity failed after {golden_path_metrics['websocket_auth_duration']:.3f}s")
             else:
-                print(f"✅ WebSocket connectivity succeeded in {golden_path_metrics['websocket_auth_duration']:.3f}s")
+                print(f" PASS:  WebSocket connectivity succeeded in {golden_path_metrics['websocket_auth_duration']:.3f}s")
                 
         except asyncio.TimeoutError as e:
             golden_path_metrics["websocket_auth_duration"] = time.time() - ws_start
             golden_path_metrics["failed_steps"].append("websocket_timeout")
             golden_path_metrics["timeout_errors"].append(f"websocket: {str(e)}")
-            print(f"⏰ WebSocket connectivity timed out after {golden_path_metrics['websocket_auth_duration']:.3f}s")
+            print(f"[U+23F0] WebSocket connectivity timed out after {golden_path_metrics['websocket_auth_duration']:.3f}s")
             
         except Exception as e:
             golden_path_metrics["websocket_auth_duration"] = time.time() - ws_start
             golden_path_metrics["failed_steps"].append(f"websocket_error_{type(e).__name__}")
-            print(f"❌ WebSocket connectivity failed with error: {e}")
+            print(f" FAIL:  WebSocket connectivity failed with error: {e}")
         
         # Step 3: Chat Authentication (Real token validation)  
-        print("💬 Step 3: Testing chat authentication token validation...")
+        print("[U+1F4AC] Step 3: Testing chat authentication token validation...")
         chat_start = time.time()
         
         # Generate test token or use from login
@@ -165,26 +165,26 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
             
             if not chat_validation or not chat_validation.get("valid"):
                 golden_path_metrics["failed_steps"].append("chat_auth_validation_failed")
-                print(f"❌ Chat auth validation failed after {golden_path_metrics['chat_auth_duration']:.3f}s")
+                print(f" FAIL:  Chat auth validation failed after {golden_path_metrics['chat_auth_duration']:.3f}s")
             else:
-                print(f"✅ Chat auth validation succeeded in {golden_path_metrics['chat_auth_duration']:.3f}s")
+                print(f" PASS:  Chat auth validation succeeded in {golden_path_metrics['chat_auth_duration']:.3f}s")
                 
         except asyncio.TimeoutError as e:
             golden_path_metrics["chat_auth_duration"] = time.time() - chat_start
             golden_path_metrics["failed_steps"].append("chat_auth_timeout")  
             golden_path_metrics["timeout_errors"].append(f"chat_auth: {str(e)}")
-            print(f"⏰ Chat auth validation timed out after {golden_path_metrics['chat_auth_duration']:.3f}s")
+            print(f"[U+23F0] Chat auth validation timed out after {golden_path_metrics['chat_auth_duration']:.3f}s")
             
         except Exception as e:
             golden_path_metrics["chat_auth_duration"] = time.time() - chat_start
             golden_path_metrics["failed_steps"].append(f"chat_auth_error_{type(e).__name__}")
-            print(f"❌ Chat auth validation failed with error: {e}")
+            print(f" FAIL:  Chat auth validation failed with error: {e}")
         
         # Calculate total Golden Path duration
         golden_path_metrics["total_duration"] = time.time() - start_time
         
         # Report E2E results
-        print(f"\n📊 Golden Path E2E Results:")
+        print(f"\n CHART:  Golden Path E2E Results:")
         print(f"   Total Duration: {golden_path_metrics['total_duration']:.3f}s")
         print(f"   Failed Steps: {len(golden_path_metrics['failed_steps'])}/3")
         print(f"   Timeout Errors: {len(golden_path_metrics['timeout_errors'])}")
@@ -221,7 +221,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         EXPECTED RESULT: Should reveal timeout configuration vs actual performance gap.
         """
         
-        print(f"\n📏 Measuring staging auth service performance...")
+        print(f"\n[U+1F4CF] Measuring staging auth service performance...")
         
         performance_metrics = {
             "health_check_times": [],
@@ -245,34 +245,34 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         # Health check timeout is hardcoded to 0.5s for staging
         performance_metrics["configured_timeouts"]["health_check"] = 0.5
         
-        print(f"🎯 Configured Timeouts: {performance_metrics['configured_timeouts']}")
+        print(f" TARGET:  Configured Timeouts: {performance_metrics['configured_timeouts']}")
         
         # Test 1: Multiple health checks to measure consistency
-        print("🔍 Testing health check performance (10 attempts)...")
+        print(" SEARCH:  Testing health check performance (10 attempts)...")
         for i in range(10):
             try:
                 start = time.time()
                 result = await self.auth_client._check_auth_service_connectivity()
                 duration = time.time() - start
                 performance_metrics["health_check_times"].append(duration)
-                print(f"   Health check {i+1}: {duration:.3f}s ({'✅' if result else '❌'})")
+                print(f"   Health check {i+1}: {duration:.3f}s ({' PASS: ' if result else ' FAIL: '})")
                 
             except asyncio.TimeoutError:
                 duration = time.time() - start
                 performance_metrics["health_check_times"].append(duration)
                 performance_metrics["failures"].append(f"health_check_{i+1}_timeout")
-                print(f"   Health check {i+1}: ⏰ TIMEOUT after {duration:.3f}s")
+                print(f"   Health check {i+1}: [U+23F0] TIMEOUT after {duration:.3f}s")
                 
             except Exception as e:
                 duration = time.time() - start  
                 performance_metrics["health_check_times"].append(duration)
                 performance_metrics["failures"].append(f"health_check_{i+1}_error")
-                print(f"   Health check {i+1}: ❌ ERROR after {duration:.3f}s - {e}")
+                print(f"   Health check {i+1}:  FAIL:  ERROR after {duration:.3f}s - {e}")
             
             await asyncio.sleep(0.1)  # Brief pause between tests
         
         # Test 2: Token validation performance
-        print("🔍 Testing token validation performance (5 attempts)...")
+        print(" SEARCH:  Testing token validation performance (5 attempts)...")
         test_token = "staging_performance_test_token"
         
         for i in range(5):
@@ -283,19 +283,19 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
                 performance_metrics["token_validation_times"].append(duration)
                 
                 valid = result and result.get("valid", False) if result else False
-                print(f"   Validation {i+1}: {duration:.3f}s ({'✅' if valid else '❌'})")
+                print(f"   Validation {i+1}: {duration:.3f}s ({' PASS: ' if valid else ' FAIL: '})")
                 
             except asyncio.TimeoutError:
                 duration = time.time() - start
                 performance_metrics["token_validation_times"].append(duration)
                 performance_metrics["failures"].append(f"token_validation_{i+1}_timeout")
-                print(f"   Validation {i+1}: ⏰ TIMEOUT after {duration:.3f}s")
+                print(f"   Validation {i+1}: [U+23F0] TIMEOUT after {duration:.3f}s")
                 
             except Exception as e:
                 duration = time.time() - start
                 performance_metrics["token_validation_times"].append(duration) 
                 performance_metrics["failures"].append(f"token_validation_{i+1}_error")
-                print(f"   Validation {i+1}: ❌ ERROR after {duration:.3f}s - {e}")
+                print(f"   Validation {i+1}:  FAIL:  ERROR after {duration:.3f}s - {e}")
             
             await asyncio.sleep(0.2)  # Brief pause between tests
         
@@ -305,7 +305,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
             max_health = max(performance_metrics["health_check_times"])
             min_health = min(performance_metrics["health_check_times"])
             
-            print(f"\n📊 Health Check Performance:")
+            print(f"\n CHART:  Health Check Performance:")
             print(f"   Average: {avg_health:.3f}s")
             print(f"   Range: {min_health:.3f}s - {max_health:.3f}s")
             print(f"   Configured timeout: {performance_metrics['configured_timeouts']['health_check']:.1f}s")
@@ -324,13 +324,13 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
             avg_validation = sum(performance_metrics["token_validation_times"]) / len(performance_metrics["token_validation_times"])
             max_validation = max(performance_metrics["token_validation_times"])
             
-            print(f"\n📊 Token Validation Performance:")
+            print(f"\n CHART:  Token Validation Performance:")
             print(f"   Average: {avg_validation:.3f}s")
             print(f"   Max: {max_validation:.3f}s")
             print(f"   Total configured timeout: {performance_metrics['configured_timeouts']['total']:.1f}s")
         
         # Overall failure analysis
-        print(f"\n📊 Failure Analysis:")
+        print(f"\n CHART:  Failure Analysis:")
         print(f"   Total failures: {len(performance_metrics['failures'])}")
         print(f"   Timeout failures: {len([f for f in performance_metrics['failures'] if 'timeout' in f])}")
         
@@ -353,7 +353,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         EXPECTED RESULT: Should FAIL, demonstrating real WebSocket auth issues.
         """
         
-        print(f"\n🔌 Testing real WebSocket auth handshake in staging...")
+        print(f"\n[U+1F50C] Testing real WebSocket auth handshake in staging...")
         
         handshake_metrics = {
             "initial_connectivity": None,
@@ -366,7 +366,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         start_time = time.time()
         
         # Step 1: Initial connectivity (like WebSocket would do)
-        print("🔍 Step 1: Initial auth service connectivity check...")
+        print(" SEARCH:  Step 1: Initial auth service connectivity check...")
         conn_start = time.time()
         
         try:
@@ -375,20 +375,20 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
             
             if connectivity:
                 handshake_metrics["handshake_steps"].append("connectivity_success")
-                print(f"   ✅ Connectivity: {handshake_metrics['initial_connectivity']:.3f}s")
+                print(f"    PASS:  Connectivity: {handshake_metrics['initial_connectivity']:.3f}s")
             else:
                 handshake_metrics["handshake_steps"].append("connectivity_failed") 
                 handshake_metrics["failures"].append("connectivity_check_failed")
-                print(f"   ❌ Connectivity failed: {handshake_metrics['initial_connectivity']:.3f}s")
+                print(f"    FAIL:  Connectivity failed: {handshake_metrics['initial_connectivity']:.3f}s")
                 
         except asyncio.TimeoutError:
             handshake_metrics["initial_connectivity"] = time.time() - conn_start
             handshake_metrics["handshake_steps"].append("connectivity_timeout")
             handshake_metrics["failures"].append("connectivity_timeout")
-            print(f"   ⏰ Connectivity timeout: {handshake_metrics['initial_connectivity']:.3f}s")
+            print(f"   [U+23F0] Connectivity timeout: {handshake_metrics['initial_connectivity']:.3f}s")
             
         # Step 2: Auth token validation (WebSocket auth phase)
-        print("🔐 Step 2: WebSocket token validation...")  
+        print("[U+1F510] Step 2: WebSocket token validation...")  
         auth_start = time.time()
         
         # Use a realistic WebSocket auth token
@@ -400,28 +400,28 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
             
             if validation and validation.get("valid"):
                 handshake_metrics["handshake_steps"].append("auth_validation_success")
-                print(f"   ✅ Auth validation: {handshake_metrics['auth_validation']:.3f}s")
+                print(f"    PASS:  Auth validation: {handshake_metrics['auth_validation']:.3f}s")
             else:
                 handshake_metrics["handshake_steps"].append("auth_validation_failed")
                 handshake_metrics["failures"].append("auth_validation_rejected")
-                print(f"   ❌ Auth validation failed: {handshake_metrics['auth_validation']:.3f}s")
+                print(f"    FAIL:  Auth validation failed: {handshake_metrics['auth_validation']:.3f}s")
                 
         except asyncio.TimeoutError:
             handshake_metrics["auth_validation"] = time.time() - auth_start
             handshake_metrics["handshake_steps"].append("auth_validation_timeout")
             handshake_metrics["failures"].append("auth_validation_timeout") 
-            print(f"   ⏰ Auth validation timeout: {handshake_metrics['auth_validation']:.3f}s")
+            print(f"   [U+23F0] Auth validation timeout: {handshake_metrics['auth_validation']:.3f}s")
             
         except Exception as e:
             handshake_metrics["auth_validation"] = time.time() - auth_start
             handshake_metrics["handshake_steps"].append("auth_validation_error")
             handshake_metrics["failures"].append(f"auth_validation_error_{type(e).__name__}")
-            print(f"   ❌ Auth validation error: {handshake_metrics['auth_validation']:.3f}s - {e}")
+            print(f"    FAIL:  Auth validation error: {handshake_metrics['auth_validation']:.3f}s - {e}")
         
         # Calculate total handshake time
         handshake_metrics["total_handshake_time"] = time.time() - start_time
         
-        print(f"\n📊 WebSocket Handshake Results:")
+        print(f"\n CHART:  WebSocket Handshake Results:")
         print(f"   Total handshake time: {handshake_metrics['total_handshake_time']:.3f}s")
         print(f"   Successful steps: {len([s for s in handshake_metrics['handshake_steps'] if 'success' in s])}/2")
         print(f"   Failed steps: {len(handshake_metrics['failures'])}")
@@ -456,7 +456,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         EXPECTED RESULT: Should reveal network latency patterns causing timeout issues.
         """
         
-        print(f"\n🌐 Testing GCP Cloud Run network latency patterns...")
+        print(f"\n[U+1F310] Testing GCP Cloud Run network latency patterns...")
         
         latency_metrics = {
             "connection_attempts": [],
@@ -467,7 +467,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
         }
         
         # Test multiple connection attempts to identify patterns
-        print("📡 Testing 20 auth service connections to identify latency patterns...")
+        print("[U+1F4E1] Testing 20 auth service connections to identify latency patterns...")
         
         for attempt in range(20):
             attempt_metrics = {
@@ -506,12 +506,12 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
                 attempt_metrics["total_time"] = time.time() - start
                 attempt_metrics["error"] = "timeout"
                 latency_metrics["timeout_occurrences"].append(attempt_metrics)
-                print(f"   Attempt {attempt + 1:2d}: ⏰ TIMEOUT after {attempt_metrics['total_time']:.3f}s")
+                print(f"   Attempt {attempt + 1:2d}: [U+23F0] TIMEOUT after {attempt_metrics['total_time']:.3f}s")
                 
             except Exception as e:
                 attempt_metrics["total_time"] = time.time() - start  
                 attempt_metrics["error"] = type(e).__name__
-                print(f"   Attempt {attempt + 1:2d}: ❌ ERROR after {attempt_metrics['total_time']:.3f}s - {e}")
+                print(f"   Attempt {attempt + 1:2d}:  FAIL:  ERROR after {attempt_metrics['total_time']:.3f}s - {e}")
             
             # Brief pause to avoid overwhelming
             await asyncio.sleep(0.1)
@@ -539,7 +539,7 @@ class TestGoldenPathAuthResilience(SSotAsyncTestCase):
                 "std_dev": (sum((t - avg_latency) ** 2 for t in response_times) / len(response_times)) ** 0.5
             }
             
-            print(f"\n📊 GCP Network Latency Analysis:")
+            print(f"\n CHART:  GCP Network Latency Analysis:")
             print(f"   Average: {avg_latency:.3f}s")
             print(f"   Range: {min_latency:.3f}s - {max_latency:.3f}s")
             print(f"   P50: {p50:.3f}s, P95: {p95:.3f}s, P99: {p99:.3f}s")

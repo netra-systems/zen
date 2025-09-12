@@ -93,32 +93,32 @@ class Issue358DeploymentExecutor:
             if output.strip():
                 self.log_step("WARNING: Uncommitted changes detected", "WARNING")
             else:
-                self.log_step("✅ Git working directory clean")
+                self.log_step(" PASS:  Git working directory clean")
                 checks_passed += 1
         
         # Check 2: Current branch
         success, output = self.execute_command(["git", "branch", "--show-current"], "Check current branch")
         if success and "develop-long-lived" in output:
-            self.log_step("✅ On develop-long-lived branch")
+            self.log_step(" PASS:  On develop-long-lived branch")
             checks_passed += 1
         else:
-            self.log_step("❌ Not on develop-long-lived branch", "ERROR")
+            self.log_step(" FAIL:  Not on develop-long-lived branch", "ERROR")
         
         # Check 3: GCP authentication
         success, output = self.execute_command(["gcloud", "auth", "list", "--filter=status:ACTIVE", "--format=value(account)"], "Check GCP auth")
         if success and output.strip():
-            self.log_step(f"✅ GCP authenticated as: {output.strip()}")
+            self.log_step(f" PASS:  GCP authenticated as: {output.strip()}")
             checks_passed += 1
         else:
-            self.log_step("❌ GCP not authenticated", "ERROR")
+            self.log_step(" FAIL:  GCP not authenticated", "ERROR")
         
         # Check 4: GCP project
         success, output = self.execute_command(["gcloud", "config", "get-value", "project"], "Check GCP project")
         if success and self.project_id in output:
-            self.log_step(f"✅ GCP project set to: {output.strip()}")
+            self.log_step(f" PASS:  GCP project set to: {output.strip()}")
             checks_passed += 1
         else:
-            self.log_step(f"❌ GCP project not set to {self.project_id}", "ERROR")
+            self.log_step(f" FAIL:  GCP project not set to {self.project_id}", "ERROR")
         
         # Check 5: Architecture compliance
         success, output = self.execute_command(
@@ -126,29 +126,29 @@ class Issue358DeploymentExecutor:
             "Check architecture compliance"
         )
         if success:
-            self.log_step("✅ Architecture compliance check passed")
+            self.log_step(" PASS:  Architecture compliance check passed")
             checks_passed += 1
         else:
-            self.log_step("⚠️ Architecture compliance issues detected", "WARNING")
+            self.log_step(" WARNING: [U+FE0F] Architecture compliance issues detected", "WARNING")
             checks_passed += 1  # Non-blocking for emergency deployment
         
         # Check 6: Deployment script exists
         deploy_script = project_root / "scripts" / "deploy_to_gcp_actual.py"
         if deploy_script.exists():
-            self.log_step("✅ Deployment script found")
+            self.log_step(" PASS:  Deployment script found")
             checks_passed += 1
         else:
-            self.log_step("❌ Deployment script not found", "ERROR")
+            self.log_step(" FAIL:  Deployment script not found", "ERROR")
         
         success_rate = (checks_passed / total_checks) * 100
         self.log_step(f"PREREQUISITE RESULTS: {checks_passed}/{total_checks} checks passed ({success_rate:.1f}%)")
         
         if checks_passed < 4:  # Minimum required for safe deployment
-            self.log_step("❌ PREREQUISITE CHECK FAILED: Insufficient checks passed for safe deployment", "ERROR")
+            self.log_step(" FAIL:  PREREQUISITE CHECK FAILED: Insufficient checks passed for safe deployment", "ERROR")
             return False
         
         if checks_passed < total_checks:
-            self.log_step("⚠️ PREREQUISITE CHECK WARNING: Some non-critical checks failed", "WARNING")
+            self.log_step(" WARNING: [U+FE0F] PREREQUISITE CHECK WARNING: Some non-critical checks failed", "WARNING")
         
         return True
     
@@ -187,18 +187,18 @@ class Issue358DeploymentExecutor:
                 with open(backup_file, 'w') as f:
                     json.dump(backup_info, f, indent=2)
                 
-                self.log_step(f"✅ Backup created: {backup_file}")
-                self.log_step(f"✅ Current image: {current_image}")
+                self.log_step(f" PASS:  Backup created: {backup_file}")
+                self.log_step(f" PASS:  Current image: {current_image}")
                 self.backup_file = backup_file
                 self.current_image = current_image
                 
                 return True
                 
             except json.JSONDecodeError as e:
-                self.log_step(f"❌ Failed to parse service configuration: {e}", "ERROR")
+                self.log_step(f" FAIL:  Failed to parse service configuration: {e}", "ERROR")
                 return False
         else:
-            self.log_step("❌ Failed to get current deployment configuration", "ERROR")
+            self.log_step(" FAIL:  Failed to get current deployment configuration", "ERROR")
             return False
     
     def execute_deployment(self) -> bool:
@@ -221,7 +221,7 @@ class Issue358DeploymentExecutor:
         )
         
         if success:
-            self.log_step("✅ DEPLOYMENT COMPLETED SUCCESSFULLY")
+            self.log_step(" PASS:  DEPLOYMENT COMPLETED SUCCESSFULLY")
             self.log_step("Deployment output summary:")
             # Log last few lines of output
             output_lines = output.strip().split('\n')
@@ -230,7 +230,7 @@ class Issue358DeploymentExecutor:
                     self.log_step(f"  {line}")
             return True
         else:
-            self.log_step("❌ DEPLOYMENT FAILED", "ERROR")
+            self.log_step(" FAIL:  DEPLOYMENT FAILED", "ERROR")
             self.log_step(f"Error details: {output}")
             return False
     
@@ -255,14 +255,14 @@ class Issue358DeploymentExecutor:
             if response.status_code == 200:
                 health_data = response.json()
                 if health_data.get("status") == "healthy":
-                    self.log_step("✅ Health endpoint validation passed")
+                    self.log_step(" PASS:  Health endpoint validation passed")
                     validation_results["health_check"] = True
                 else:
-                    self.log_step(f"❌ Health endpoint unhealthy: {health_data}")
+                    self.log_step(f" FAIL:  Health endpoint unhealthy: {health_data}")
             else:
-                self.log_step(f"❌ Health endpoint returned {response.status_code}")
+                self.log_step(f" FAIL:  Health endpoint returned {response.status_code}")
         except Exception as e:
-            self.log_step(f"❌ Health endpoint check failed: {e}", "ERROR")
+            self.log_step(f" FAIL:  Health endpoint check failed: {e}", "ERROR")
         
         # Validation 2: WebSocket connectivity
         try:
@@ -270,10 +270,10 @@ class Issue358DeploymentExecutor:
             ws_url = self.staging_url.replace("https://", "wss://") + "/ws"
             ws = websocket.create_connection(ws_url, timeout=10)
             ws.close()
-            self.log_step("✅ WebSocket connectivity validation passed")
+            self.log_step(" PASS:  WebSocket connectivity validation passed")
             validation_results["websocket_tests"] = True
         except Exception as e:
-            self.log_step(f"❌ WebSocket connectivity failed: {e}", "ERROR")
+            self.log_step(f" FAIL:  WebSocket connectivity failed: {e}", "ERROR")
         
         # Validation 3: API compatibility test
         success, output = self.execute_command([
@@ -281,10 +281,10 @@ class Issue358DeploymentExecutor:
         ], "Test API compatibility")
         
         if success:
-            self.log_step("✅ API compatibility validation passed")
+            self.log_step(" PASS:  API compatibility validation passed")
             validation_results["api_compatibility"] = True
         else:
-            self.log_step("❌ API compatibility validation failed")
+            self.log_step(" FAIL:  API compatibility validation failed")
         
         # Validation 4: Golden Path readiness
         success, output = self.execute_command([
@@ -292,10 +292,10 @@ class Issue358DeploymentExecutor:
         ], "Test Golden Path readiness")
         
         if success:
-            self.log_step("✅ Golden Path readiness validation passed")
+            self.log_step(" PASS:  Golden Path readiness validation passed")
             validation_results["golden_path_ready"] = True
         else:
-            self.log_step("❌ Golden Path readiness validation failed")
+            self.log_step(" FAIL:  Golden Path readiness validation failed")
         
         # Calculate validation score
         passed_validations = sum(validation_results.values())
@@ -309,10 +309,10 @@ class Issue358DeploymentExecutor:
         critical_passed = all(validation_results[key] for key in critical_validations)
         
         if critical_passed:
-            self.log_step("✅ CRITICAL VALIDATIONS PASSED - Deployment acceptable")
+            self.log_step(" PASS:  CRITICAL VALIDATIONS PASSED - Deployment acceptable")
             return True
         else:
-            self.log_step("❌ CRITICAL VALIDATIONS FAILED - Deployment unsuccessful", "ERROR")
+            self.log_step(" FAIL:  CRITICAL VALIDATIONS FAILED - Deployment unsuccessful", "ERROR")
             return False
     
     def execute_rollback(self) -> bool:
@@ -320,7 +320,7 @@ class Issue358DeploymentExecutor:
         self.log_step("=== EMERGENCY ROLLBACK EXECUTION ===")
         
         if not hasattr(self, 'current_image'):
-            self.log_step("❌ No backup information available for rollback", "ERROR")
+            self.log_step(" FAIL:  No backup information available for rollback", "ERROR")
             return False
         
         # Deploy previous image
@@ -338,23 +338,23 @@ class Issue358DeploymentExecutor:
         )
         
         if success:
-            self.log_step("✅ ROLLBACK COMPLETED")
+            self.log_step(" PASS:  ROLLBACK COMPLETED")
             
             # Wait and validate rollback
             time.sleep(30)
             try:
                 response = requests.get(f"{self.staging_url}/health", timeout=10)
                 if response.status_code == 200:
-                    self.log_step("✅ Rollback health check passed")
+                    self.log_step(" PASS:  Rollback health check passed")
                     return True
                 else:
-                    self.log_step("⚠️ Rollback health check failed", "WARNING")
+                    self.log_step(" WARNING: [U+FE0F] Rollback health check failed", "WARNING")
                     return False
             except Exception as e:
-                self.log_step(f"⚠️ Rollback validation failed: {e}", "WARNING")
+                self.log_step(f" WARNING: [U+FE0F] Rollback validation failed: {e}", "WARNING")
                 return False
         else:
-            self.log_step("❌ ROLLBACK FAILED", "ERROR")
+            self.log_step(" FAIL:  ROLLBACK FAILED", "ERROR")
             return False
     
     def generate_report(self, deployment_success: bool, validation_success: bool) -> str:
@@ -405,51 +405,51 @@ class Issue358DeploymentExecutor:
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
         
-        self.log_step(f"📊 DEPLOYMENT REPORT: {report_file}")
+        self.log_step(f" CHART:  DEPLOYMENT REPORT: {report_file}")
         
         return str(report_file)
     
     def execute_full_remediation(self) -> bool:
         """Execute complete Issue #358 remediation process."""
-        self.log_step("🚀 STARTING ISSUE #358 COMPLETE REMEDIATION")
+        self.log_step("[U+1F680] STARTING ISSUE #358 COMPLETE REMEDIATION")
         self.log_step(f"Target: {self.project_id} in {self.region}")
         self.log_step(f"Business Impact: $500K+ ARR protection")
         
         try:
             # Phase 1: Prerequisites
             if not self.check_prerequisites():
-                self.log_step("❌ REMEDIATION FAILED: Prerequisites not met", "ERROR")
+                self.log_step(" FAIL:  REMEDIATION FAILED: Prerequisites not met", "ERROR")
                 return False
             
             # Phase 2: Backup
             if not self.backup_current_deployment():
-                self.log_step("❌ REMEDIATION FAILED: Could not create backup", "ERROR")
+                self.log_step(" FAIL:  REMEDIATION FAILED: Could not create backup", "ERROR")
                 return False
             
             # Phase 3: Deployment
             deployment_success = self.execute_deployment()
             if not deployment_success:
-                self.log_step("💥 DEPLOYMENT FAILED - Attempting rollback", "ERROR")
+                self.log_step("[U+1F4A5] DEPLOYMENT FAILED - Attempting rollback", "ERROR")
                 self.execute_rollback()
                 return False
             
             # Phase 4: Validation
             validation_success = self.validate_deployment()
             if not validation_success:
-                self.log_step("💥 VALIDATION FAILED - Manual intervention required", "ERROR")
+                self.log_step("[U+1F4A5] VALIDATION FAILED - Manual intervention required", "ERROR")
                 self.log_step("Rollback decision: Manual review recommended")
                 return False
             
             # Success
-            self.log_step("🎉 ISSUE #358 REMEDIATION COMPLETED SUCCESSFULLY")
-            self.log_step("✅ Golden Path failure resolved")
-            self.log_step("✅ $500K+ ARR protection restored")
-            self.log_step("✅ Core chat functionality operational")
+            self.log_step(" CELEBRATION:  ISSUE #358 REMEDIATION COMPLETED SUCCESSFULLY")
+            self.log_step(" PASS:  Golden Path failure resolved")
+            self.log_step(" PASS:  $500K+ ARR protection restored")
+            self.log_step(" PASS:  Core chat functionality operational")
             
             return True
             
         except Exception as e:
-            self.log_step(f"💥 UNEXPECTED ERROR: {e}", "ERROR")
+            self.log_step(f"[U+1F4A5] UNEXPECTED ERROR: {e}", "ERROR")
             self.log_step("Attempting emergency rollback...")
             self.execute_rollback()
             return False
@@ -474,20 +474,20 @@ def main():
     args = parser.parse_args()
     
     if args.dry_run:
-        print("🧪 DRY RUN MODE: No actual deployment will be performed")
+        print("[U+1F9EA] DRY RUN MODE: No actual deployment will be performed")
     
     executor = Issue358DeploymentExecutor(args.project, args.region)
     
     if args.rollback_only:
-        print("🔄 ROLLBACK ONLY MODE")
+        print(" CYCLE:  ROLLBACK ONLY MODE")
         success = executor.execute_rollback()
         sys.exit(0 if success else 1)
     
     if args.dry_run:
         # Only run prerequisites in dry run
         success = executor.check_prerequisites()
-        print("\n📋 DRY RUN RESULTS:")
-        print("✅ Prerequisites check completed" if success else "❌ Prerequisites check failed")
+        print("\n[U+1F4CB] DRY RUN RESULTS:")
+        print(" PASS:  Prerequisites check completed" if success else " FAIL:  Prerequisites check failed")
         print("Note: Actual deployment was not performed (dry run mode)")
         sys.exit(0 if success else 1)
     
@@ -496,15 +496,15 @@ def main():
     
     print("\n" + "="*80)
     if success:
-        print("🎉 ISSUE #358 REMEDIATION: SUCCESS")
-        print("✅ Golden Path failure resolved")
-        print("✅ $500K+ ARR protection restored")
-        print("📊 Business impact: Core chat functionality operational")
+        print(" CELEBRATION:  ISSUE #358 REMEDIATION: SUCCESS")
+        print(" PASS:  Golden Path failure resolved")
+        print(" PASS:  $500K+ ARR protection restored")
+        print(" CHART:  Business impact: Core chat functionality operational")
     else:
-        print("💥 ISSUE #358 REMEDIATION: FAILED")
-        print("❌ Golden Path still broken")
-        print("💰 Business impact: $500K+ ARR still at risk")
-        print("🚨 Immediate manual intervention required")
+        print("[U+1F4A5] ISSUE #358 REMEDIATION: FAILED")
+        print(" FAIL:  Golden Path still broken")
+        print("[U+1F4B0] Business impact: $500K+ ARR still at risk")
+        print(" ALERT:  Immediate manual intervention required")
     
     print("="*80)
     

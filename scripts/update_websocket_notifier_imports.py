@@ -53,13 +53,13 @@ def update_import_in_file(file_path: str) -> bool:
 
 def main():
     """Main function to update all files with deprecated imports."""
-    print("🔍 Finding files with deprecated WebSocketNotifier imports...")
+    print(" SEARCH:  Finding files with deprecated WebSocketNotifier imports...")
     
     files = find_files_with_deprecated_imports()
-    print(f"📁 Found {len(files)} files with deprecated imports")
+    print(f"[U+1F4C1] Found {len(files)} files with deprecated imports")
     
     if not files:
-        print("✅ No files found with deprecated imports")
+        print(" PASS:  No files found with deprecated imports")
         return
     
     # Filter out files we already updated
@@ -71,30 +71,30 @@ def main():
     
     files = [f for f in files if not any(f.endswith(skip) for skip in already_updated)]
     
-    print(f"📝 Updating {len(files)} files...")
+    print(f"[U+1F4DD] Updating {len(files)} files...")
     
     updated_count = 0
     failed_files = []
     
     for file_path in files:
-        print(f"  📄 Updating {file_path}...")
+        print(f"  [U+1F4C4] Updating {file_path}...")
         if update_import_in_file(file_path):
             updated_count += 1
-            print(f"    ✅ Updated")
+            print(f"     PASS:  Updated")
         else:
             failed_files.append(file_path)
-            print(f"    ❌ Failed or no changes needed")
+            print(f"     FAIL:  Failed or no changes needed")
     
-    print(f"\n📊 Summary:")
-    print(f"  ✅ Updated: {updated_count} files")
-    print(f"  ❌ Failed: {len(failed_files)} files")
+    print(f"\n CHART:  Summary:")
+    print(f"   PASS:  Updated: {updated_count} files")
+    print(f"   FAIL:  Failed: {len(failed_files)} files")
     
     if failed_files:
-        print(f"\n❌ Failed files:")
+        print(f"\n FAIL:  Failed files:")
         for f in failed_files:
             print(f"  - {f}")
     
-    print(f"\n⚠️  IMPORTANT: This script only updates IMPORT statements.")
+    print(f"\n WARNING: [U+FE0F]  IMPORTANT: This script only updates IMPORT statements.")
     print(f"   WebSocketNotifier instantiation still needs manual review!")
     print(f"   Next step: Review and update instantiation patterns to SSOT factory.")
 

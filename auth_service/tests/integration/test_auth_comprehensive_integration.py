@@ -207,7 +207,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
         
         self.record_metric("jwt_lifecycle_complete", "success")
         self.increment_db_query_count(2)  # JWT operations may involve cache queries
-        logger.info("✅ JWT token lifecycle complete cycle working correctly")
+        logger.info(" PASS:  JWT token lifecycle complete cycle working correctly")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -329,7 +329,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
         
         self.record_metric("jwt_security_validation", "comprehensive_pass")
         self.record_metric("security_test_cases", len(security_test_cases))
-        logger.info(f"✅ JWT security validation comprehensive ({len(security_test_cases)} cases passed)")
+        logger.info(f" PASS:  JWT security validation comprehensive ({len(security_test_cases)} cases passed)")
     
     # === SESSION MANAGEMENT AND PERSISTENCE TESTS ===
     
@@ -436,7 +436,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
         self.record_metric("session_persistence_test", "success")
         self.increment_db_query_count(1)  # Session query
         
-        logger.info(f"✅ Session persistence working ({successful_requests}/{request_count} requests successful)")
+        logger.info(f" PASS:  Session persistence working ({successful_requests}/{request_count} requests successful)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -565,7 +565,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
         
         self.record_metric("session_isolation_test", "success")
         self.record_metric("unique_user_sessions", len(unique_tokens))
-        logger.info(f"✅ Session isolation working correctly ({len(test_users)} users tested)")
+        logger.info(f" PASS:  Session isolation working correctly ({len(test_users)} users tested)")
     
     # === CROSS-SERVICE AUTHENTICATION VALIDATION TESTS ===
     
@@ -673,7 +673,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
         
         self.record_metric("service_token_validation", "success")
         self.record_metric("cross_service_auth_test", "success")
-        logger.info("✅ Cross-service authentication integration working correctly")
+        logger.info(" PASS:  Cross-service authentication integration working correctly")
     
     # === DATABASE OPERATIONS AND USER MANAGEMENT TESTS ===
     
@@ -807,7 +807,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
         self.increment_db_query_count(2)  # Update operation
         
         self.record_metric("database_user_management_test", "comprehensive_success")
-        logger.info("✅ Database user management comprehensive testing successful")
+        logger.info(" PASS:  Database user management comprehensive testing successful")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -968,7 +968,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
         self.record_metric("database_transaction_integrity_test", "comprehensive_success")
         self.increment_db_query_count(2)  # 2 verification queries
         
-        logger.info("✅ Database transaction integrity and rollback testing successful")
+        logger.info(" PASS:  Database transaction integrity and rollback testing successful")
     
     # === MULTI-USER ISOLATION AND SECURITY TESTS ===
     
@@ -1203,7 +1203,7 @@ class TestAuthComprehensiveIntegration(SSotBaseTestCase):
         self.record_metric("successful_attacks", successful_cross_user_attacks)
         self.record_metric("isolation_violations", total_violations)
         
-        logger.info(f"✅ Multi-user isolation comprehensive test successful ({len(isolated_users)} users, 0 violations)")
+        logger.info(f" PASS:  Multi-user isolation comprehensive test successful ({len(isolated_users)} users, 0 violations)")
     
     # === TEST VALIDATION AND CLEANUP ===
     

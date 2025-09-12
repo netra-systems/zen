@@ -2,7 +2,7 @@
 New User Flow Tester - E2E Authentication Test Helper
 
 BVJ (Business Value Justification):
-1. Segment: Free → Paid conversion segment (most critical)
+1. Segment: Free  ->  Paid conversion segment (most critical)
 2. Business Goal: Validate complete new user journey from signup to first chat
 3. Value Impact: Protects $50K+ MRR new user funnel conversion
 4. Revenue Impact: Prevents user onboarding failures that cost conversions
@@ -19,7 +19,7 @@ from typing import Any, Dict
 
 
 class CompleteNewUserFlowTester:
-    """Test #1: Complete New User Registration → First Chat."""
+    """Test #1: Complete New User Registration  ->  First Chat."""
     
     def __init__(self, auth_tester):
         self.auth_tester = auth_tester

@@ -116,19 +116,19 @@ class TestSSOTCompliance:
             error_msg = f"Found {total_violations} SSOT violations in {len(all_violations)} files:\n\n"
             
             for file_path, violations in all_violations.items():
-                error_msg += f"📁 {file_path}:\n"
+                error_msg += f"[U+1F4C1] {file_path}:\n"
                 for line_num, line in violations:
                     error_msg += f"  Line {line_num}: {line}\n"
                 error_msg += "\n"
             
-            error_msg += "🔧 REMEDIATION:\n"
+            error_msg += "[U+1F527] REMEDIATION:\n"
             error_msg += "Replace scattered UUID patterns with SSOT methods:\n\n"
-            error_msg += "❌ BAD: str(uuid.uuid4())\n"
-            error_msg += "✅ GOOD: UnifiedIdGenerator.generate_base_id('prefix')\n\n"
-            error_msg += "❌ BAD: uuid.uuid4().hex[:8]\n"
-            error_msg += "✅ GOOD: generate_uuid_replacement()\n\n"
-            error_msg += "❌ BAD: f'conn_{uuid.uuid4().hex[:8]}'\n"
-            error_msg += "✅ GOOD: UnifiedIdGenerator.generate_websocket_connection_id(user_id)\n\n"
+            error_msg += " FAIL:  BAD: str(uuid.uuid4())\n"
+            error_msg += " PASS:  GOOD: UnifiedIdGenerator.generate_base_id('prefix')\n\n"
+            error_msg += " FAIL:  BAD: uuid.uuid4().hex[:8]\n"
+            error_msg += " PASS:  GOOD: generate_uuid_replacement()\n\n"
+            error_msg += " FAIL:  BAD: f'conn_{uuid.uuid4().hex[:8]}'\n"
+            error_msg += " PASS:  GOOD: UnifiedIdGenerator.generate_websocket_connection_id(user_id)\n\n"
             error_msg += "See SSOT_UNIFIED_ID_MANAGER_AUDIT_REPORT.md for complete remediation guide."
             
             pytest.fail(error_msg)
@@ -173,8 +173,8 @@ class TestSSOTCompliance:
         if violations:
             error_msg = "Found UserExecutionContext creation with SSOT violations:\n\n"
             for violation in violations:
-                error_msg += f"  🚨 {violation}\n"
-            error_msg += "\n✅ SOLUTION: Use create_user_execution_context_factory() from shared.id_generation\n"
+                error_msg += f"   ALERT:  {violation}\n"
+            error_msg += "\n PASS:  SOLUTION: Use create_user_execution_context_factory() from shared.id_generation\n"
             pytest.fail(error_msg)
     
     def test_unified_id_generator_functionality(self):
@@ -270,7 +270,7 @@ class TestSSOTCompliance:
         
         if not violations_found:
             # Success - log that critical files are compliant
-            print("✅ All critical production files are SSOT compliant")
+            print(" PASS:  All critical production files are SSOT compliant")
 
 
 class TestIDGenerationRegression:

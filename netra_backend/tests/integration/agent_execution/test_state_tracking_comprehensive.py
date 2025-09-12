@@ -241,7 +241,7 @@ class TestStateTrackingComprehensive(BaseAgentExecutionTest):
                 'cache_duration': cache_duration
             })
         
-        logger.info(f"✅ Redis cache consistency verified for {len(state_sequence)} state updates")
+        logger.info(f" PASS:  Redis cache consistency verified for {len(state_sequence)} state updates")
 
     async def test_database_state_persistence_with_cache_sync(self):
         """Test database state persistence synchronized with cache layer.
@@ -308,7 +308,7 @@ class TestStateTrackingComprehensive(BaseAgentExecutionTest):
                     parsed = json.loads(cached)
                     assert parsed['state'] == 'completed', "Cache-DB state mismatch"
         
-        logger.info(f"✅ Database persistence with cache sync verified for {execution_count} executions")
+        logger.info(f" PASS:  Database persistence with cache sync verified for {execution_count} executions")
 
     async def test_concurrent_state_tracking_consistency(self):
         """Test state tracking consistency under concurrent operations.
@@ -362,7 +362,7 @@ class TestStateTrackingComprehensive(BaseAgentExecutionTest):
                     assert parsed['state'] == 'completed', \
                         f"Cache inconsistency for {execution_id}"
         
-        logger.info(f"✅ Concurrent consistency verified: {success_rate:.2%} success rate in {total_time:.2f}s")
+        logger.info(f" PASS:  Concurrent consistency verified: {success_rate:.2%} success rate in {total_time:.2f}s")
 
     async def test_cache_invalidation_and_refresh_patterns(self):
         """Test cache invalidation and refresh under various scenarios.
@@ -450,7 +450,7 @@ class TestStateTrackingComprehensive(BaseAgentExecutionTest):
         expired_data = await self.redis_client.get(short_ttl_key)
         assert expired_data is None, "Cache should have expired"
         
-        logger.info("✅ Cache invalidation and refresh patterns verified")
+        logger.info(" PASS:  Cache invalidation and refresh patterns verified")
 
     async def test_redis_failure_fallback_to_database(self):
         """Test graceful fallback to database when Redis is unavailable.
@@ -532,7 +532,7 @@ class TestStateTrackingComprehensive(BaseAgentExecutionTest):
             except Exception as e:
                 logger.warning(f"Redis recovery failed: {e}")
         
-        logger.info("✅ Redis failure fallback to database verified")
+        logger.info(" PASS:  Redis failure fallback to database verified")
 
     async def test_session_state_management_with_redis(self):
         """Test user session state management with Redis integration.
@@ -625,7 +625,7 @@ class TestStateTrackingComprehensive(BaseAgentExecutionTest):
             assert exec_info['status'] == 'completed'
             assert 'completed_at' in exec_info
         
-        logger.info(f"✅ Session state management verified for {len(execution_ids)} executions")
+        logger.info(f" PASS:  Session state management verified for {len(execution_ids)} executions")
 
     async def test_performance_metrics_state_tracking(self):
         """Test performance characteristics of state tracking system.
@@ -683,7 +683,7 @@ class TestStateTrackingComprehensive(BaseAgentExecutionTest):
             'p95_latency': p95_latency
         }
         
-        logger.info(f"✅ Performance verified: {throughput:.1f} ops/s, {avg_latency:.3f}s avg latency")
+        logger.info(f" PASS:  Performance verified: {throughput:.1f} ops/s, {avg_latency:.3f}s avg latency")
 
     # Helper methods for state tracking tests
 

@@ -66,7 +66,7 @@ class TestRedisConfigurationValidation:
         
         Failure Mode: Test MUST fail if staging config points to localhost
         """
-        print("🔍 Testing staging Redis URL configuration (not localhost)")
+        print(" SEARCH:  Testing staging Redis URL configuration (not localhost)")
         
         # Mock staging environment
         with patch.dict(os.environ, {
@@ -112,7 +112,7 @@ class TestRedisConfigurationValidation:
                 f"Redis URL should use port 6379, got: {redis_url}"
             )
             
-            print("✅ PASS: Staging Redis URL correctly configured for GCP Memory Store")
+            print(" PASS:  PASS: Staging Redis URL correctly configured for GCP Memory Store")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -124,7 +124,7 @@ class TestRedisConfigurationValidation:
         CRITICAL: Same as staging test but for production environment.
         Ensures production doesn't suffer from localhost configuration issues.
         """
-        print("🔍 Testing production Redis URL configuration (not localhost)")
+        print(" SEARCH:  Testing production Redis URL configuration (not localhost)")
         
         # Mock production environment
         with patch.dict(os.environ, {
@@ -151,7 +151,7 @@ class TestRedisConfigurationValidation:
                 f"Redis URL should start with 'redis://', got: {redis_url}"
             )
             
-            print("✅ PASS: Production Redis URL correctly configured for GCP Memory Store")
+            print(" PASS:  PASS: Production Redis URL correctly configured for GCP Memory Store")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -163,7 +163,7 @@ class TestRedisConfigurationValidation:
         This test validates that test environments can use localhost
         (unlike staging/production which must use Memory Store).
         """
-        print("🧪 Testing test environment Redis URL (localhost allowed)")
+        print("[U+1F9EA] Testing test environment Redis URL (localhost allowed)")
         
         # Mock test environment
         with patch.dict(os.environ, {
@@ -189,7 +189,7 @@ class TestRedisConfigurationValidation:
                 f"Test environment should use port 6381, got: {redis_url}"
             )
             
-            print("✅ PASS: Test environment correctly configured for localhost Redis")
+            print(" PASS:  PASS: Test environment correctly configured for localhost Redis")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -201,7 +201,7 @@ class TestRedisConfigurationValidation:
         CRITICAL: This test validates that different environments use
         appropriate Redis ports (test: 6381, staging/prod: 6379).
         """
-        print("🔌 Testing Redis port configuration by environment")
+        print("[U+1F50C] Testing Redis port configuration by environment")
         
         test_cases = [
             {
@@ -251,9 +251,9 @@ class TestRedisConfigurationValidation:
                     f"in URL: {redis_url}"
                 )
                 
-                print(f"    ✅ {case['description']}")
+                print(f"     PASS:  {case['description']}")
         
-        print("✅ PASS: All environment port configurations validated")
+        print(" PASS:  PASS: All environment port configurations validated")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -265,7 +265,7 @@ class TestRedisConfigurationValidation:
         CRITICAL: This test identifies deprecated configuration patterns
         that were mentioned in the audit logs and should be phased out.
         """
-        print("⚠️  Testing deprecated REDIS_URL pattern detection")
+        print(" WARNING: [U+FE0F]  Testing deprecated REDIS_URL pattern detection")
         
         # Mock environment with deprecated REDIS_URL pattern
         with patch.dict(os.environ, {
@@ -293,7 +293,7 @@ class TestRedisConfigurationValidation:
                 # This is a documentation test - doesn't fail but warns
                 assert True, "Deprecated pattern documented"
             
-            print("✅ PASS: Deprecated REDIS_URL pattern detection working")
+            print(" PASS:  PASS: Deprecated REDIS_URL pattern detection working")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -305,7 +305,7 @@ class TestRedisConfigurationValidation:
         This test validates the RedisConnectionConfig class used by
         the Redis manager to ensure proper configuration validation.
         """
-        print("🔧 Testing Redis connection configuration validation")
+        print("[U+1F527] Testing Redis connection configuration validation")
         
         # Test valid configuration
         valid_config = RedisConnectionConfig(
@@ -360,7 +360,7 @@ class TestRedisConfigurationValidation:
             f"Localhost config should not be staging-safe: {localhost_config.host}"
         )
         
-        print("✅ PASS: Redis connection configuration validation working")
+        print(" PASS:  PASS: Redis connection configuration validation working")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -372,7 +372,7 @@ class TestRedisConfigurationValidation:
         This test validates that missing or invalid Redis configuration
         is handled gracefully with clear error messages.
         """
-        print("❌ Testing Redis configuration error handling")
+        print(" FAIL:  Testing Redis configuration error handling")
         
         # Test missing REDIS_URL
         with patch.dict(os.environ, {}, clear=True):  # Clear environment
@@ -423,7 +423,7 @@ class TestRedisConfigurationValidation:
                 # This is acceptable - should validate URL format
                 assert True, "Invalid URL format appropriately handled"
         
-        print("✅ PASS: Redis configuration error handling validated")
+        print(" PASS:  PASS: Redis configuration error handling validated")
 
     @pytest.mark.unit
     @pytest.mark.infrastructure
@@ -435,7 +435,7 @@ class TestRedisConfigurationValidation:
         This test validates that each environment has appropriate
         default Redis configuration when explicit config is missing.
         """
-        print("🌍 Testing environment-specific Redis defaults")
+        print("[U+1F30D] Testing environment-specific Redis defaults")
         
         environments = ['test', 'development', 'staging', 'production']
         
@@ -475,16 +475,16 @@ class TestRedisConfigurationValidation:
                         f"{environment} Redis URL should start with redis://, got: {redis_url}"
                     )
                     
-                    print(f"    ✅ {environment} defaults validated")
+                    print(f"     PASS:  {environment} defaults validated")
                     
                 except Exception as e:
-                    print(f"    ❌ {environment} default config error: {e}")
+                    print(f"     FAIL:  {environment} default config error: {e}")
                     # Some environments may require explicit configuration
                     assert "redis" in str(e).lower(), (
                         f"{environment} error should mention Redis: {e}"
                     )
         
-        print("✅ PASS: Environment-specific Redis defaults validated")
+        print(" PASS:  PASS: Environment-specific Redis defaults validated")
 
 
 # Test metadata for unit test reporting

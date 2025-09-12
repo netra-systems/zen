@@ -1,5 +1,5 @@
 """
-🔴 MISSION CRITICAL: WebSocket Authentication Events Test Suite
+[U+1F534] MISSION CRITICAL: WebSocket Authentication Events Test Suite
 
 Tests WebSocket authentication integration with agent events - the core of our chat value.
 This validates that authenticated users receive proper WebSocket events during agent execution.
@@ -155,7 +155,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         
         BUSINESS IMPACT: Without WebSocket auth, users cannot use chat = $0 value delivery
         """
-        logger.info("🔴 MISSION CRITICAL: Testing WebSocket authentication core flow")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing WebSocket authentication core flow")
         
         # Create authenticated user
         user_id = f"ws-auth-{uuid.uuid4().hex[:8]}"
@@ -205,7 +205,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         except Exception as e:
             pytest.fail(f"MISSION CRITICAL: WebSocket authentication failed - {str(e)}")
         
-        logger.info("✅ MISSION CRITICAL: WebSocket authentication validated")
+        logger.info(" PASS:  MISSION CRITICAL: WebSocket authentication validated")
     
     async def test_agent_events_with_websocket_auth(self):
         """
@@ -213,7 +213,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         
         BUSINESS IMPACT: Without agent events, chat has no value = Users see no AI responses
         """
-        logger.info("🔴 MISSION CRITICAL: Testing agent events with WebSocket auth")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing agent events with WebSocket auth")
         
         # Setup authenticated user
         user_id = f"agent-events-{uuid.uuid4().hex[:8]}"
@@ -284,7 +284,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         except Exception as e:
             pytest.fail(f"MISSION CRITICAL: Agent events with WebSocket auth failed - {str(e)}")
         
-        logger.info("✅ MISSION CRITICAL: Agent events with WebSocket auth validated")
+        logger.info(" PASS:  MISSION CRITICAL: Agent events with WebSocket auth validated")
     
     async def test_multi_user_websocket_isolation(self):
         """
@@ -292,7 +292,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         
         BUSINESS IMPACT: Event crossover = Users see each other's data = Privacy breach
         """
-        logger.info("🔴 MISSION CRITICAL: Testing multi-user WebSocket isolation")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing multi-user WebSocket isolation")
         
         user_count = 3
         websocket_connections = []
@@ -380,7 +380,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
                 except:
                     pass
         
-        logger.info(f"✅ MISSION CRITICAL: Multi-user WebSocket isolation validated for {user_count} users")
+        logger.info(f" PASS:  MISSION CRITICAL: Multi-user WebSocket isolation validated for {user_count} users")
     
     async def test_websocket_token_refresh_seamless(self):
         """
@@ -388,7 +388,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         
         BUSINESS IMPACT: Token refresh disconnects = Chat interruption = Bad UX
         """
-        logger.info("🔴 MISSION CRITICAL: Testing WebSocket token refresh")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing WebSocket token refresh")
         
         user_id = f"token-refresh-{uuid.uuid4().hex[:8]}"
         email = f"tokenrefresh-{int(time.time())}@netra.test"
@@ -457,7 +457,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         except Exception as e:
             pytest.fail(f"MISSION CRITICAL: WebSocket token refresh failed - {str(e)}")
         
-        logger.info("✅ MISSION CRITICAL: WebSocket token refresh validated")
+        logger.info(" PASS:  MISSION CRITICAL: WebSocket token refresh validated")
     
     async def test_websocket_connection_recovery(self):
         """
@@ -465,7 +465,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         
         BUSINESS IMPACT: Connection drops without recovery = Chat stops working
         """
-        logger.info("🔴 MISSION CRITICAL: Testing WebSocket connection recovery")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing WebSocket connection recovery")
         
         user_id = f"recovery-test-{uuid.uuid4().hex[:8]}"
         email = f"recovery-{int(time.time())}@netra.test"
@@ -529,7 +529,7 @@ class TestWebSocketAuthEvents(SSotAsyncTestCase):
         
         assert recovery_successful, "MISSION CRITICAL: WebSocket recovery not completed"
         
-        logger.info("✅ MISSION CRITICAL: WebSocket connection recovery validated")
+        logger.info(" PASS:  MISSION CRITICAL: WebSocket connection recovery validated")
 
 
 @pytest.mark.mission_critical
@@ -544,7 +544,7 @@ class TestWebSocketAuthPerformance(SSotAsyncTestCase):
         
         BUSINESS IMPACT: Auth bottlenecks = Users can't connect = Lost engagement
         """
-        logger.info("🔴 MISSION CRITICAL: Testing concurrent WebSocket auth connections")
+        logger.info("[U+1F534] MISSION CRITICAL: Testing concurrent WebSocket auth connections")
         
         concurrent_users = 10
         auth_helper = E2EWebSocketAuthHelper()
@@ -620,7 +620,7 @@ class TestWebSocketAuthPerformance(SSotAsyncTestCase):
             assert avg_duration < 1.0, f"BUSINESS CRITICAL: Average WebSocket auth {avg_duration:.3f}s too slow"
             assert max_duration < 3.0, f"BUSINESS CRITICAL: Max WebSocket auth {max_duration:.3f}s unacceptable"
             
-            logger.info(f"✅ MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:.3f}s")
+            logger.info(f" PASS:  MISSION CRITICAL: {len(successful_connections)} concurrent WebSocket auths, avg {avg_duration:.3f}s")
             
         finally:
             # Cleanup connections

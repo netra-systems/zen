@@ -38,7 +38,7 @@ def force_cancel_workflow(token: str, owner: str, repo: str, run_id: int) -> boo
     response = requests.post(url, headers=headers)
     
     if response.status_code == 202:
-        print(f"✓ Successfully force-cancelled workflow run #{run_id}")
+        print(f"[U+2713] Successfully force-cancelled workflow run #{run_id}")
         return True
     elif response.status_code == 409:
         print(f"Workflow run #{run_id} is not in a state that can be cancelled")
@@ -80,7 +80,7 @@ def _extract_run_info(run: dict) -> Tuple[str, str, int, int, str, str]:
 
 def _print_run_info(i: int, status: str, conclusion: str, run_id: int, run_number: int, name: str, created: str) -> None:
     """Print formatted run information."""
-    status_emoji = "🔄" if status == "in_progress" else "✓" if status == "completed" else "⏸"
+    status_emoji = " CYCLE: " if status == "in_progress" else "[U+2713]" if status == "completed" else "[U+23F8]"
     print(f"{i+1}. {status_emoji} Run #{run_number} (ID: {run_id})")
     print(f"   Name: {name}")
     print(f"   Status: {status} / {conclusion}")

@@ -35,7 +35,7 @@ async def test_websocket_agent_events_with_e2e_user():
     
     # Add connection to manager
     await manager.add_connection(connection)
-    print(f"✅ Added connection for user: {connection.user_id}")
+    print(f" PASS:  Added connection for user: {connection.user_id}")
     
     # Test critical WebSocket events that agents use
     test_events = [
@@ -54,7 +54,7 @@ async def test_websocket_agent_events_with_e2e_user():
                 event_type=event_type,
                 data=event_data
             )
-            print(f"✅ Successfully sent {event_type} event")
+            print(f" PASS:  Successfully sent {event_type} event")
             
             # Verify the mock was called with correct data
             assert mock_websocket.send_json.called
@@ -66,10 +66,10 @@ async def test_websocket_agent_events_with_e2e_user():
             mock_websocket.send_json.reset_mock()
             
         except Exception as e:
-            print(f"❌ Failed to send {event_type} event: {e}")
+            print(f" FAIL:  Failed to send {event_type} event: {e}")
             return False
     
-    print("✅ ALL WEBSOCKET AGENT EVENTS WORKING")
+    print(" PASS:  ALL WEBSOCKET AGENT EVENTS WORKING")
     return True
 
 async def test_multiple_user_patterns():
@@ -105,9 +105,9 @@ async def test_multiple_user_patterns():
             data={"test": "data", "user_pattern": pattern}
         )
         
-        print(f"✅ Pattern {pattern} - WebSocket events working")
+        print(f" PASS:  Pattern {pattern} - WebSocket events working")
     
-    print("✅ ALL USER PATTERNS SUPPORT WEBSOCKET EVENTS")
+    print(" PASS:  ALL USER PATTERNS SUPPORT WEBSOCKET EVENTS")
     return True
 
 async def test_connection_health_and_isolation():
@@ -143,13 +143,13 @@ async def test_connection_health_and_isolation():
     assert health1['total_connections'] == 1
     assert health2['total_connections'] == 1
     
-    print(f"✅ User isolation maintained: {user1} and {user2}")
+    print(f" PASS:  User isolation maintained: {user1} and {user2}")
     
     # Test that events go to correct users
     await manager.emit_critical_event(user1, "isolated_event", {"target": user1})
     await manager.emit_critical_event(user2, "isolated_event", {"target": user2})
     
-    print("✅ EVENT ISOLATION WORKING")
+    print(" PASS:  EVENT ISOLATION WORKING")
     return True
 
 async def main():
@@ -166,18 +166,18 @@ async def main():
         
         if all([test1, test2, test3]):
             print("\n" + "="*60)
-            print("✅ WEBSOCKET AGENT EVENTS VALIDATION: ALL TESTS PASSED")
-            print("✅ SYSTEM STABILITY: MAINTAINED")
-            print("✅ BUSINESS VALUE: WebSocket events work with e2e deployment users")
-            print("✅ NO BREAKING CHANGES: Existing patterns continue to work")
+            print(" PASS:  WEBSOCKET AGENT EVENTS VALIDATION: ALL TESTS PASSED")
+            print(" PASS:  SYSTEM STABILITY: MAINTAINED")
+            print(" PASS:  BUSINESS VALUE: WebSocket events work with e2e deployment users")
+            print(" PASS:  NO BREAKING CHANGES: Existing patterns continue to work")
             print("="*60)
             return True
         else:
-            print("\n❌ SOME TESTS FAILED - SYSTEM MAY BE UNSTABLE")
+            print("\n FAIL:  SOME TESTS FAILED - SYSTEM MAY BE UNSTABLE")
             return False
             
     except Exception as e:
-        print(f"\n❌ CRITICAL ERROR IN WEBSOCKET EVENTS: {e}")
+        print(f"\n FAIL:  CRITICAL ERROR IN WEBSOCKET EVENTS: {e}")
         return False
 
 if __name__ == "__main__":

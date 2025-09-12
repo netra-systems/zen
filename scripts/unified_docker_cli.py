@@ -66,7 +66,7 @@ class UnifiedDockerCLI:
         
         services = args.services or ["postgres", "redis", "backend", "auth"]
         
-        print(f"🚀 Starting services: {', '.join(services)}")
+        print(f"[U+1F680] Starting services: {', '.join(services)}")
         
         try:
             success = await manager.start_services_smart(
@@ -75,7 +75,7 @@ class UnifiedDockerCLI:
             )
             
             if success:
-                print("✅ Services started successfully")
+                print(" PASS:  Services started successfully")
                 
                 if args.show_urls:
                     # Show service URLs
@@ -84,24 +84,24 @@ class UnifiedDockerCLI:
                     
                     if current_env in state.get('environments', {}):
                         ports = state['environments'][current_env].get('ports', {})
-                        print("\\n🌐 Service URLs:")
+                        print("\\n[U+1F310] Service URLs:")
                         for service, port in ports.items():
                             print(f"  {service}: http://localhost:{port}")
                 
                 return 0
             else:
-                print("❌ Failed to start services")
+                print(" FAIL:  Failed to start services")
                 return 1
                 
         except Exception as e:
-            print(f"❌ Error starting services: {e}")
+            print(f" FAIL:  Error starting services: {e}")
             return 1
     
     async def cmd_stop(self, args) -> int:
         """Stop Docker services gracefully."""
         manager = self.get_manager(args.environment)
         
-        print(f"🛑 Stopping services: {args.services or 'all'}")
+        print(f"[U+1F6D1] Stopping services: {args.services or 'all'}")
         
         try:
             success = await manager.graceful_shutdown(
@@ -110,21 +110,21 @@ class UnifiedDockerCLI:
             )
             
             if success:
-                print("✅ Services stopped successfully")
+                print(" PASS:  Services stopped successfully")
                 return 0
             else:
-                print("❌ Failed to stop services gracefully")
+                print(" FAIL:  Failed to stop services gracefully")
                 return 1
                 
         except Exception as e:
-            print(f"❌ Error stopping services: {e}")
+            print(f" FAIL:  Error stopping services: {e}")
             return 1
     
     async def cmd_status(self, args) -> int:
         """Show detailed service status."""
         manager = self.get_manager(args.environment)
         
-        print("📊 Service Status:")
+        print(" CHART:  Service Status:")
         
         try:
             # Get container status
@@ -136,12 +136,12 @@ class UnifiedDockerCLI:
             
             for service, info in containers.items():
                 status_emoji = {
-                    "healthy": "✅",
-                    "running": "🟡", 
-                    "stopped": "❌",
-                    "starting": "🟠",
-                    "unhealthy": "🔴"
-                }.get(info.state.value, "❓")
+                    "healthy": " PASS: ",
+                    "running": "[U+1F7E1]", 
+                    "stopped": " FAIL: ",
+                    "starting": "[U+1F7E0]",
+                    "unhealthy": "[U+1F534]"
+                }.get(info.state.value, "[U+2753]")
                 
                 print(f"  {status_emoji} {service}: {info.state.value}")
                 if info.uptime:
@@ -152,7 +152,7 @@ class UnifiedDockerCLI:
             # Show statistics if requested
             if args.detailed:
                 stats = manager.get_statistics()
-                print(f"\\n📈 Statistics:")
+                print(f"\\n[U+1F4C8] Statistics:")
                 print(f"  Active environments: {stats['active_environments']}")
                 print(f"  Healthy services: {stats['health_summary']['healthy_services']}")
                 print(f"  Average response time: {stats['health_summary']['average_response_time']:.2f}ms")
@@ -160,14 +160,14 @@ class UnifiedDockerCLI:
             return 0
             
         except Exception as e:
-            print(f"❌ Error getting service status: {e}")
+            print(f" FAIL:  Error getting service status: {e}")
             return 1
     
     async def cmd_logs(self, args) -> int:
         """Analyze service logs with issue detection."""
         introspector = self.get_introspector(args.compose_file, args.project_name)
         
-        print(f"🔍 Analyzing logs for: {args.services or 'all services'}")
+        print(f" SEARCH:  Analyzing logs for: {args.services or 'all services'}")
         
         try:
             report = introspector.analyze_services(
@@ -177,51 +177,51 @@ class UnifiedDockerCLI:
             )
             
             # Print summary
-            print(f"\\n📊 Log Analysis Summary:")
+            print(f"\\n CHART:  Log Analysis Summary:")
             print(f"Services analyzed: {len(report.services_analyzed)}")
             print(f"Log lines processed: {report.total_log_lines}")
             print(f"Issues found: {len(report.issues_found)}")
             
             # Show critical issues
             if report.critical_issues:
-                print(f"\\n🚨 CRITICAL ISSUES ({len(report.critical_issues)}):")
+                print(f"\\n ALERT:  CRITICAL ISSUES ({len(report.critical_issues)}):")
                 for issue in report.critical_issues:
-                    print(f"  ❗ {issue.service}: {issue.title}")
+                    print(f"  [U+2757] {issue.service}: {issue.title}")
             
             # Show error issues
             error_issues = report.error_issues
             if error_issues and len(error_issues) <= 10:
-                print(f"\\n⚠️ ERROR ISSUES ({len(error_issues)}):")
+                print(f"\\n WARNING: [U+FE0F] ERROR ISSUES ({len(error_issues)}):")
                 for issue in error_issues:
-                    print(f"  ❌ {issue.service}: {issue.title}")
+                    print(f"   FAIL:  {issue.service}: {issue.title}")
             elif len(error_issues) > 10:
-                print(f"\\n⚠️ ERROR ISSUES ({len(error_issues)} total, showing first 5):")
+                print(f"\\n WARNING: [U+FE0F] ERROR ISSUES ({len(error_issues)} total, showing first 5):")
                 for issue in error_issues[:5]:
-                    print(f"  ❌ {issue.service}: {issue.title}")
+                    print(f"   FAIL:  {issue.service}: {issue.title}")
                 print(f"  ... and {len(error_issues) - 5} more")
             
             # Show recommendations
             if report.recommendations:
-                print(f"\\n💡 RECOMMENDATIONS:")
+                print(f"\\n IDEA:  RECOMMENDATIONS:")
                 for rec in report.recommendations[:5]:  # Top 5
                     print(f"  - {rec}")
             
             # Export detailed report if requested
             if args.output:
                 output_file = introspector.export_report(report, Path(args.output))
-                print(f"\\n📄 Detailed report exported to: {output_file}")
+                print(f"\\n[U+1F4C4] Detailed report exported to: {output_file}")
             
             return 0
             
         except Exception as e:
-            print(f"❌ Error analyzing logs: {e}")
+            print(f" FAIL:  Error analyzing logs: {e}")
             return 1
     
     async def cmd_health(self, args) -> int:
         """Perform comprehensive health check with auto-remediation."""
         manager = self.get_manager(args.environment)
         
-        print("🏥 Performing health analysis...")
+        print("[U+1F3E5] Performing health analysis...")
         
         try:
             results = await manager.detect_and_remediate_issues(
@@ -229,36 +229,36 @@ class UnifiedDockerCLI:
                 auto_fix=args.auto_fix
             )
             
-            print(f"\\n📊 Health Check Results:")
+            print(f"\\n CHART:  Health Check Results:")
             print(f"Services analyzed: {len(results['services_analyzed'])}")
             print(f"Issues detected: {results['issues_detected']}")
             print(f"Critical issues: {results['critical_issues']}")
             
             if results.get('remediation_attempted'):
-                print(f"\\n🔧 Auto-remediation Results:")
+                print(f"\\n[U+1F527] Auto-remediation Results:")
                 for result in results['remediation_results']:
-                    status_emoji = "✅" if result['remediation_success'] else "❌"
+                    status_emoji = " PASS: " if result['remediation_success'] else " FAIL: "
                     print(f"  {status_emoji} {result['service']}: {result['issue'][:80]}...")
                     if result['actions_taken']:
                         for action in result['actions_taken']:
-                            print(f"    → {action}")
+                            print(f"     ->  {action}")
             
             elif 'recommendations' in results:
-                print(f"\\n💡 Recommendations (run with --auto-fix to attempt remediation):")
+                print(f"\\n IDEA:  Recommendations (run with --auto-fix to attempt remediation):")
                 for rec in results['recommendations'][:5]:
                     print(f"  - {rec}")
             
             return 0
             
         except Exception as e:
-            print(f"❌ Error during health check: {e}")
+            print(f" FAIL:  Error during health check: {e}")
             return 1
     
     async def cmd_cleanup(self, args) -> int:
         """Clean up Docker resources."""
         manager = self.get_manager(args.environment)
         
-        print("🧹 Cleaning up Docker resources...")
+        print("[U+1F9F9] Cleaning up Docker resources...")
         
         try:
             # Clean up orphaned containers
@@ -269,25 +269,25 @@ class UnifiedDockerCLI:
                 introspector = self.get_introspector(args.compose_file, args.project_name)
                 cleanup_results = introspector.cleanup_docker_resources()
                 
-                print("🧹 Deep cleanup results:")
+                print("[U+1F9F9] Deep cleanup results:")
                 for resource_type, result in cleanup_results.items():
                     if resource_type != 'error':
-                        status = "✅" if result else "❌"
+                        status = " PASS: " if result else " FAIL: "
                         print(f"  {status} {resource_type.title()}")
                 
                 if 'disk_usage' in cleanup_results:
-                    print(f"\\n💾 Current disk usage:")
+                    print(f"\\n[U+1F4BE] Current disk usage:")
                     print(cleanup_results['disk_usage'])
             
             if success:
-                print("✅ Cleanup completed successfully")
+                print(" PASS:  Cleanup completed successfully")
                 return 0
             else:
-                print("⚠️ Cleanup completed with issues")
+                print(" WARNING: [U+FE0F] Cleanup completed with issues")
                 return 1
                 
         except Exception as e:
-            print(f"❌ Error during cleanup: {e}")
+            print(f" FAIL:  Error during cleanup: {e}")
             return 1
     
     async def cmd_reset_data(self, args) -> int:
@@ -295,20 +295,20 @@ class UnifiedDockerCLI:
         manager = self.get_manager(args.environment)
         
         services = args.services or ["postgres", "redis"]
-        print(f"🔄 Resetting test data for: {', '.join(services)}")
+        print(f" CYCLE:  Resetting test data for: {', '.join(services)}")
         
         try:
             success = await manager.reset_test_data(services)
             
             if success:
-                print("✅ Test data reset completed successfully")
+                print(" PASS:  Test data reset completed successfully")
                 return 0
             else:
-                print("❌ Test data reset failed")
+                print(" FAIL:  Test data reset failed")
                 return 1
                 
         except Exception as e:
-            print(f"❌ Error resetting test data: {e}")
+            print(f" FAIL:  Error resetting test data: {e}")
             return 1
 
 
@@ -410,14 +410,14 @@ Examples:
         if command_func:
             return asyncio.run(command_func(args))
         else:
-            print(f"❌ Unknown command: {args.command}")
+            print(f" FAIL:  Unknown command: {args.command}")
             return 1
             
     except KeyboardInterrupt:
-        print("\\n⚠️ Operation cancelled by user")
+        print("\\n WARNING: [U+FE0F] Operation cancelled by user")
         return 130
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print(f" FAIL:  Unexpected error: {e}")
         return 1
 
 

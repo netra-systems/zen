@@ -77,13 +77,13 @@ Asynchronous programming allows your code to handle multiple operations concurre
 
 ### Async Function Declaration
 ```python
-# ✅ CORRECT - Async function
+#  PASS:  CORRECT - Async function
 async def fetch_user_data(user_id: str) -> UserData:
     # This function can use await
     user = await database.get_user(user_id)
     return user
 
-# ❌ INCORRECT - Missing async keyword
+#  FAIL:  INCORRECT - Missing async keyword
 def fetch_user_data(user_id: str) -> UserData:
     user = await database.get_user(user_id)  # SyntaxError!
     return user
@@ -91,17 +91,17 @@ def fetch_user_data(user_id: str) -> UserData:
 
 ### Calling Async Functions
 ```python
-# ✅ CORRECT - Using await in async context
+#  PASS:  CORRECT - Using await in async context
 async def process_user_request(user_id: str):
     user_data = await fetch_user_data(user_id)
     return user_data
 
-# ❌ INCORRECT - Missing await keyword
+#  FAIL:  INCORRECT - Missing await keyword
 async def process_user_request(user_id: str):
     user_data = fetch_user_data(user_id)  # Returns coroutine object, not data!
     return user_data
 
-# ❌ INCORRECT - Using await in non-async function
+#  FAIL:  INCORRECT - Using await in non-async function
 def process_user_request(user_id: str):
     user_data = await fetch_user_data(user_id)  # SyntaxError!
     return user_data
@@ -112,12 +112,12 @@ def process_user_request(user_id: str):
 **GOLDEN RULE**: If you see `await`, the containing function MUST be `async`
 
 ```python
-# ✅ CORRECT
+#  PASS:  CORRECT
 async def my_function():
     result = await some_async_operation()
     return result
 
-# ❌ INCORRECT 
+#  FAIL:  INCORRECT 
 def my_function():
     result = await some_async_operation()  # Error!
     return result
@@ -127,12 +127,12 @@ def my_function():
 
 ### WebSocket Event Handling
 ```python
-# ✅ CORRECT - Async WebSocket handler
+#  PASS:  CORRECT - Async WebSocket handler
 async def handle_websocket_message(websocket, message):
     result = await process_agent_request(message)
     await websocket.send_json(result)
 
-# ❌ INCORRECT - Sync handler with async operations
+#  FAIL:  INCORRECT - Sync handler with async operations
 def handle_websocket_message(websocket, message):
     result = await process_agent_request(message)  # Error!
     websocket.send_json(result)
@@ -140,13 +140,13 @@ def handle_websocket_message(websocket, message):
 
 ### Agent Execution
 ```python
-# ✅ CORRECT - Async agent execution
+#  PASS:  CORRECT - Async agent execution
 async def execute_agent(context: UserExecutionContext) -> AgentResult:
     agent = await create_agent(context)
     result = await agent.run()
     return result
 
-# ❌ INCORRECT - Missing await on async operations
+#  FAIL:  INCORRECT - Missing await on async operations
 async def execute_agent(context: UserExecutionContext) -> AgentResult:
     agent = create_agent(context)  # Missing await!
     result = agent.run()           # Missing await!
@@ -253,7 +253,7 @@ async def execute_agent(context: UserExecutionContext) -> AgentResult:
 
 ### Correct Event Handler Patterns
 ```python
-# ✅ CORRECT - Full async WebSocket handler
+#  PASS:  CORRECT - Full async WebSocket handler
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     
@@ -276,7 +276,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 ### Anti-patterns to Avoid
 ```python
-# ❌ INCORRECT - Mixed sync/async patterns
+#  FAIL:  INCORRECT - Mixed sync/async patterns
 def websocket_endpoint(websocket: WebSocket):
     asyncio.run(websocket.accept())  # Bad: nested event loop
     
@@ -290,7 +290,7 @@ def websocket_endpoint(websocket: WebSocket):
 
 ### Proper Agent Orchestration
 ```python
-# ✅ CORRECT - Async agent execution with proper context
+#  PASS:  CORRECT - Async agent execution with proper context
 async def execute_agent_pipeline(user_context: UserExecutionContext) -> AgentResult:
     # Initialize agent asynchronously
     agent = await agent_factory.create_agent(user_context)
@@ -320,7 +320,7 @@ async def execute_agent_pipeline(user_context: UserExecutionContext) -> AgentRes
 
 ### Transaction Handling
 ```python
-# ✅ CORRECT - Async database transactions
+#  PASS:  CORRECT - Async database transactions
 async def save_agent_results(user_id: str, results: List[AgentResult]):
     async with database.transaction():
         # All operations in transaction
@@ -337,7 +337,7 @@ async def save_agent_results(user_id: str, results: List[AgentResult]):
 
 ### Proper Exception Handling
 ```python
-# ✅ CORRECT - Async exception handling
+#  PASS:  CORRECT - Async exception handling
 async def robust_agent_execution(context: UserExecutionContext):
     try:
         # Multiple async operations that might fail
@@ -367,7 +367,7 @@ async def robust_agent_execution(context: UserExecutionContext):
 
 ### Concurrent Execution
 ```python
-# ✅ CORRECT - Concurrent async operations
+#  PASS:  CORRECT - Concurrent async operations
 async def process_multiple_users(user_ids: List[str]):
     # Create tasks for concurrent execution
     tasks = [
@@ -391,13 +391,13 @@ async def process_multiple_users(user_ids: List[str]):
 
 ### Avoiding Blocking Operations
 ```python
-# ❌ INCORRECT - Blocking operations in async function
+#  FAIL:  INCORRECT - Blocking operations in async function
 async def bad_async_function():
     result = requests.get("https://api.example.com")  # Blocks!
     time.sleep(1)  # Blocks!
     return result.json()
 
-# ✅ CORRECT - Non-blocking alternatives
+#  PASS:  CORRECT - Non-blocking alternatives
 async def good_async_function():
     async with httpx.AsyncClient() as client:
         response = await client.get("https://api.example.com")
@@ -494,17 +494,17 @@ Use this checklist when reviewing code changes that involve async/await patterns
 
 ### Examples to Check:
 ```python
-# ✅ GOOD - Consistent async function
+#  PASS:  GOOD - Consistent async function
 async def process_data(data: Dict) -> ProcessResult:
     result = await database.save(data)
     return result
 
-# ❌ BAD - Missing async keyword
+#  FAIL:  BAD - Missing async keyword
 def process_data(data: Dict) -> ProcessResult:
     result = await database.save(data)  # Will cause SyntaxError
     return result
 
-# ❌ BAD - Wrong return type
+#  FAIL:  BAD - Wrong return type
 async def process_data(data: Dict) -> Coroutine[Any, Any, ProcessResult]:
     result = await database.save(data)
     return result  # Type mismatch - should just be ProcessResult
@@ -588,14 +588,14 @@ async def websocket_endpoint(websocket: WebSocket):
 
 ### Anti-patterns to Flag:
 ```python
-# ❌ BAD - Sync exception handling in async context
+#  FAIL:  BAD - Sync exception handling in async context
 async def bad_error_handling():
     try:
         await async_operation()
     except Exception as e:
         print(f"Error: {e}")  # Should be async logging
         
-# ✅ GOOD - Proper async error handling  
+#  PASS:  GOOD - Proper async error handling  
 async def good_error_handling():
     try:
         await async_operation()
@@ -709,8 +709,8 @@ Use this decision tree when implementing new functions or modifying existing one
 
 ```
 Does your function call any async operations?
-├── YES → Go to Step 2
-└── NO → Make function SYNC (regular function)
+[U+251C][U+2500][U+2500] YES  ->  Go to Step 2
+[U+2514][U+2500][U+2500] NO  ->  Make function SYNC (regular function)
 ```
 
 ### 2. Will your function be called from async contexts?
@@ -723,8 +723,8 @@ Does your function call any async operations?
 
 ```
 Will your function be called from async contexts?
-├── YES → Make function ASYNC
-└── NO → Go to Step 3
+[U+251C][U+2500][U+2500] YES  ->  Make function ASYNC
+[U+2514][U+2500][U+2500] NO  ->  Go to Step 3
 ```
 
 ### 3. Do you need the function to be awaitable for future extensibility?
@@ -736,8 +736,8 @@ Will your function be called from async contexts?
 
 ```
 Should function be awaitable for consistency/future?
-├── YES → Make function ASYNC
-└── NO → Make function SYNC
+[U+251C][U+2500][U+2500] YES  ->  Make function ASYNC
+[U+2514][U+2500][U+2500] NO  ->  Make function SYNC
 ```
 
 ## Implementation Patterns
@@ -803,13 +803,13 @@ result = await process_data(data, save_to_db=False)
 ### WebSocket Functions
 ```
 Creating a WebSocket handler?
-└── YES → ALWAYS make it async
-    └── WebSocket operations are inherently async
+[U+2514][U+2500][U+2500] YES  ->  ALWAYS make it async
+    [U+2514][U+2500][U+2500] WebSocket operations are inherently async
 ```
 
 **Example:**
 ```python
-# ✅ CORRECT
+#  PASS:  CORRECT
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     # ... rest of handler
@@ -818,14 +818,14 @@ async def websocket_endpoint(websocket: WebSocket):
 ### Database Functions
 ```
 Function accesses database?
-├── YES → Make function ASYNC
-│   └── Database operations should be awaitable
-└── NO → Can be SYNC
+[U+251C][U+2500][U+2500] YES  ->  Make function ASYNC
+[U+2502]   [U+2514][U+2500][U+2500] Database operations should be awaitable
+[U+2514][U+2500][U+2500] NO  ->  Can be SYNC
 ```
 
 **Example:**
 ```python
-# ✅ CORRECT
+#  PASS:  CORRECT
 async def get_user_profile(user_id: str) -> UserProfile:
     user = await database.get_user(user_id)
     profile = await database.get_profile(user.profile_id)
@@ -835,14 +835,14 @@ async def get_user_profile(user_id: str) -> UserProfile:
 ### Agent Functions
 ```
 Function involved in agent execution?
-├── YES → Make function ASYNC
-│   └── Agent operations are async by design
-└── NO → Can be SYNC
+[U+251C][U+2500][U+2500] YES  ->  Make function ASYNC
+[U+2502]   [U+2514][U+2500][U+2500] Agent operations are async by design
+[U+2514][U+2500][U+2500] NO  ->  Can be SYNC
 ```
 
 **Example:**
 ```python
-# ✅ CORRECT  
+#  PASS:  CORRECT  
 async def execute_agent(context: UserExecutionContext) -> AgentResult:
     agent = await agent_factory.create(context.agent_type)
     result = await agent.run(context)
@@ -852,14 +852,14 @@ async def execute_agent(context: UserExecutionContext) -> AgentResult:
 ### Utility Functions
 ```
 Pure utility function (no I/O, no external calls)?
-├── YES → Make function SYNC
-│   └── No async operations needed
-└── NO → Consider async needs
+[U+251C][U+2500][U+2500] YES  ->  Make function SYNC
+[U+2502]   [U+2514][U+2500][U+2500] No async operations needed
+[U+2514][U+2500][U+2500] NO  ->  Consider async needs
 ```
 
 **Example:**
 ```python
-# ✅ CORRECT - Pure utility, no I/O
+#  PASS:  CORRECT - Pure utility, no I/O
 def format_currency(amount: float, currency: str = "USD") -> str:
     return f"{amount:.2f} {currency}"
 
@@ -873,66 +873,66 @@ formatted = format_currency(123.45)  # No await
 **Diagnosis Tree:**
 ```
 Got "coroutine was never awaited" warning?
-├── Function call missing await?
-│   └── Solution: Add await keyword
-├── Function called from sync context?
-│   └── Solution: Use asyncio.run() or make caller async
-└── Function should be sync?
-    └── Solution: Remove async from function definition
+[U+251C][U+2500][U+2500] Function call missing await?
+[U+2502]   [U+2514][U+2500][U+2500] Solution: Add await keyword
+[U+251C][U+2500][U+2500] Function called from sync context?
+[U+2502]   [U+2514][U+2500][U+2500] Solution: Use asyncio.run() or make caller async
+[U+2514][U+2500][U+2500] Function should be sync?
+    [U+2514][U+2500][U+2500] Solution: Remove async from function definition
 ```
 
 ### Issue: "await outside async function"
 **Diagnosis Tree:**
 ```
 Got "await outside async function" error?
-├── Function needs to be async?
-│   └── Solution: Add async keyword to function definition
-├── Called from sync context?
-│   └── Solution: Use asyncio.run() to call async function
-└── Operation should be sync?
-    └── Solution: Remove await and use sync version
+[U+251C][U+2500][U+2500] Function needs to be async?
+[U+2502]   [U+2514][U+2500][U+2500] Solution: Add async keyword to function definition
+[U+251C][U+2500][U+2500] Called from sync context?
+[U+2502]   [U+2514][U+2500][U+2500] Solution: Use asyncio.run() to call async function
+[U+2514][U+2500][U+2500] Operation should be sync?
+    [U+2514][U+2500][U+2500] Solution: Remove await and use sync version
 ```
 
 ### Issue: Performance Problems
 **Diagnosis Tree:**
 ```
 Async function running slowly?
-├── Sequential awaits that could be concurrent?
-│   └── Solution: Use asyncio.gather() or create_task()
-├── Blocking operations in async function?
-│   └── Solution: Replace with async alternatives
-└── Too many context switches?
-    └── Solution: Batch operations or use sync approach
+[U+251C][U+2500][U+2500] Sequential awaits that could be concurrent?
+[U+2502]   [U+2514][U+2500][U+2500] Solution: Use asyncio.gather() or create_task()
+[U+251C][U+2500][U+2500] Blocking operations in async function?
+[U+2502]   [U+2514][U+2500][U+2500] Solution: Replace with async alternatives
+[U+2514][U+2500][U+2500] Too many context switches?
+    [U+2514][U+2500][U+2500] Solution: Batch operations or use sync approach
 ```
 
 ## Quick Reference
 
 ### Make Function ASYNC if:
-- ✅ Calls any async operations (database, HTTP, WebSocket, file I/O)
-- ✅ Called from async contexts (WebSocket handlers, other async functions)
-- ✅ Part of agent execution pipeline
-- ✅ Needs to be consistent with interface that has other async functions
+-  PASS:  Calls any async operations (database, HTTP, WebSocket, file I/O)
+-  PASS:  Called from async contexts (WebSocket handlers, other async functions)
+-  PASS:  Part of agent execution pipeline
+-  PASS:  Needs to be consistent with interface that has other async functions
 
 ### Keep Function SYNC if:
-- ✅ Pure computation, no I/O operations
-- ✅ Only called from sync contexts
-- ✅ Performance-critical code that doesn't need async
-- ✅ Simple utility functions
+-  PASS:  Pure computation, no I/O operations
+-  PASS:  Only called from sync contexts
+-  PASS:  Performance-critical code that doesn't need async
+-  PASS:  Simple utility functions
 
 ### Always Use ASYNC for:
-- ✅ WebSocket handlers and operations
-- ✅ Database queries and transactions  
-- ✅ Agent creation and execution
-- ✅ HTTP API calls
-- ✅ File I/O operations
-- ✅ Time-based operations (sleep, delays)
+-  PASS:  WebSocket handlers and operations
+-  PASS:  Database queries and transactions  
+-  PASS:  Agent creation and execution
+-  PASS:  HTTP API calls
+-  PASS:  File I/O operations
+-  PASS:  Time-based operations (sleep, delays)
 
 ### Red Flags (Always Wrong):
-- ❌ `await` in non-async function
-- ❌ Missing `await` on async function calls
-- ❌ `asyncio.run()` inside async function
-- ❌ Sync I/O operations in async functions
-- ❌ `time.sleep()` in async functions (use `asyncio.sleep()`)
+-  FAIL:  `await` in non-async function
+-  FAIL:  Missing `await` on async function calls
+-  FAIL:  `asyncio.run()` inside async function
+-  FAIL:  Sync I/O operations in async functions
+-  FAIL:  `time.sleep()` in async functions (use `asyncio.sleep()`)
 """
 
         return TrainingModule(
@@ -1192,11 +1192,11 @@ def run_module_assessment(module_data):
             print("Please enter A, B, C, or D")
         
         if answer_index == question['correct']:
-            print("✅ Correct!")
+            print(" PASS:  Correct!")
             correct += 1
         else:
             correct_answer = chr(ord('A') + question['correct'])
-            print(f"❌ Incorrect. The correct answer is {correct_answer}")
+            print(f" FAIL:  Incorrect. The correct answer is {correct_answer}")
             print(f"Explanation: {question['explanation']}")
         
         print()
@@ -1227,9 +1227,9 @@ def main():
         
         passing_score = data['passing_score']
         if score >= passing_score:
-            print(f"\\n🎉 PASSED! You scored {score:.1%} (required: {passing_score:.1%})")
+            print(f"\\n CELEBRATION:  PASSED! You scored {score:.1%} (required: {passing_score:.1%})")
         else:
-            print(f"\\n📚 Study more. You scored {score:.1%} (required: {passing_score:.1%})")
+            print(f"\\n[U+1F4DA] Study more. You scored {score:.1%} (required: {passing_score:.1%})")
     else:
         print("Invalid selection")
 
@@ -1285,10 +1285,10 @@ def main() -> int:
         print("Creating comprehensive developer training materials...")
         modules = generator.generate_all_training_materials()
         
-        print(f"✅ Generated {len(modules)} training modules")
-        print(f"📁 Output directory: {output_dir}")
-        print(f"📚 Total estimated training time: {sum(m.estimated_duration_minutes for m in modules)} minutes")
-        print(f"❓ Total assessment questions: {sum(len(m.assessment_questions) for m in modules)}")
+        print(f" PASS:  Generated {len(modules)} training modules")
+        print(f"[U+1F4C1] Output directory: {output_dir}")
+        print(f"[U+1F4DA] Total estimated training time: {sum(m.estimated_duration_minutes for m in modules)} minutes")
+        print(f"[U+2753] Total assessment questions: {sum(len(m.assessment_questions) for m in modules)}")
         
         if args.json_summary:
             summary = {
@@ -1328,7 +1328,7 @@ def main() -> int:
         for module in modules_to_generate:
             generator._save_module_to_file(module)
         
-        print(f"✅ Generated {len(modules_to_generate)} specific modules")
+        print(f" PASS:  Generated {len(modules_to_generate)} specific modules")
         return 0
     
     # Default: show help

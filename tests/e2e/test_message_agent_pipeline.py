@@ -1,7 +1,7 @@
 # REMOVED_SYNTAX_ERROR: '''Message Agent Pipeline Test - Complete End-to-End Message Processing
 
 # REMOVED_SYNTAX_ERROR: Business Value: $40K MRR - Core chat functionality validation
-# REMOVED_SYNTAX_ERROR: Tests: WebSocket → Auth → Agent → Response pipeline with WebSocket Events
+# REMOVED_SYNTAX_ERROR: Tests: WebSocket  ->  Auth  ->  Agent  ->  Response pipeline with WebSocket Events
 
 # REMOVED_SYNTAX_ERROR: Critical: <5s response time, message ordering, error handling, WebSocket agent events
 # REMOVED_SYNTAX_ERROR: Architecture: 450-line limit, 25-line functions (CLAUDE.md compliance)
@@ -103,7 +103,7 @@
 
     # REMOVED_SYNTAX_ERROR: for event in self.REQUIRED_EVENTS:
         # REMOVED_SYNTAX_ERROR: count = self.event_counts.get(event, 0)
-        # REMOVED_SYNTAX_ERROR: status = "✅" if count > 0 else "❌"
+        # REMOVED_SYNTAX_ERROR: status = " PASS: " if count > 0 else " FAIL: "
         # REMOVED_SYNTAX_ERROR: report.append("formatted_string")
 
         # REMOVED_SYNTAX_ERROR: if failures:
@@ -278,7 +278,7 @@
 
     # REMOVED_SYNTAX_ERROR: @pytest.mark.e2e
     # Removed problematic line: async def test_complete_message_pipeline_flow(self, pipeline_tester, real_websocket_url, real_services_setup):
-        # REMOVED_SYNTAX_ERROR: '''Test complete pipeline: WebSocket → Auth → Agent → Response with WebSocket Events
+        # REMOVED_SYNTAX_ERROR: '''Test complete pipeline: WebSocket  ->  Auth  ->  Agent  ->  Response with WebSocket Events
 
         # REMOVED_SYNTAX_ERROR: BVJ: Core value delivery test ensuring complete message processing works.
         # REMOVED_SYNTAX_ERROR: CLAUDE.md: Uses real WebSocket connection and agent service (no mocks).

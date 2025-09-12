@@ -4,7 +4,7 @@ Business Value: Protects $500K+ MRR by ensuring agent system works E2E
 
 Real service orchestration for Auth, Backend, Agent services with NO MOCKS.
 Proper startup sequencing, WebSocket management, database setup, and cleanup.
-All functions ≤8 lines as per SPEC/conventions.xml
+All functions  <= 8 lines as per SPEC/conventions.xml
 """
 
 import asyncio

@@ -138,7 +138,7 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
                 received_events.append(event)
                 
                 event_type = event.get("type", "unknown")
-                logger.info(f"📨 Received event: {event_type}")
+                logger.info(f"[U+1F4E8] Received event: {event_type}")
                 
                 # Stop on completion or failure
                 if event_type in ["agent_completed", "agent_failed", "error"]:
@@ -230,17 +230,17 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         3. Attempts recovery if possible
         4. Maintains user context throughout
         """
-        logger.info("🚀 Starting agent execution failure recovery test")
+        logger.info("[U+1F680] Starting agent execution failure recovery test")
         
         # Create authenticated session
         auth_user, websocket_connection, user_context = await self.create_authenticated_session(
             "agent_failure_test@example.com"
         )
         
-        logger.info(f"✅ Created authenticated session: {auth_user.email}")
+        logger.info(f" PASS:  Created authenticated session: {auth_user.email}")
         
         # Test 1: Agent execution error scenario
-        logger.info("🔥 Testing agent execution failure...")
+        logger.info(" FIRE:  Testing agent execution failure...")
         
         error_message = self.create_error_scenario_message("agent_execution_error", auth_user, user_context)
         error_events = await self.send_message_and_collect_events(
@@ -259,10 +259,10 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         assert any("error" in event_type or "failed" in event_type for event_type in event_types), \
             f"No error event received. Event types: {event_types}"
         
-        logger.info("✅ Agent execution failure properly detected and reported")
+        logger.info(" PASS:  Agent execution failure properly detected and reported")
         
         # Test 2: Recovery with valid request  
-        logger.info("🔄 Testing recovery with valid request...")
+        logger.info(" CYCLE:  Testing recovery with valid request...")
         
         recovery_message = {
             "type": "agent_request",
@@ -295,7 +295,7 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         assert "agent_completed" in recovery_event_types, \
             f"Agent recovery did not complete successfully. Events: {recovery_event_types}"
         
-        logger.info("✅ Agent execution recovery successful")
+        logger.info(" PASS:  Agent execution recovery successful")
         
         # Validate context preservation
         user_id_preserved = False
@@ -313,10 +313,10 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         if not thread_id_preserved:
             logger.warning("Thread context not preserved (acceptable but not optimal)")
         
-        logger.info("🎉 AGENT EXECUTION FAILURE RECOVERY TEST PASSED")
-        logger.info(f"   ❌ Failure Detection: VERIFIED")
-        logger.info(f"   🔄 Recovery Mechanism: VERIFIED")
-        logger.info(f"   👤 Context Preservation: VERIFIED")
+        logger.info(" CELEBRATION:  AGENT EXECUTION FAILURE RECOVERY TEST PASSED")
+        logger.info(f"    FAIL:  Failure Detection: VERIFIED")
+        logger.info(f"    CYCLE:  Recovery Mechanism: VERIFIED")
+        logger.info(f"   [U+1F464] Context Preservation: VERIFIED")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -327,14 +327,14 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         Validates that when tools fail, the system gracefully handles the failure
         and continues with alternative approaches or meaningful error messages.
         """
-        logger.info("🚀 Starting tool execution failure recovery test")
+        logger.info("[U+1F680] Starting tool execution failure recovery test")
         
         auth_user, websocket_connection, user_context = await self.create_authenticated_session(
             "tool_failure_test@example.com"
         )
         
         # Test tool execution error
-        logger.info("🔧 Testing tool execution failure...")
+        logger.info("[U+1F527] Testing tool execution failure...")
         
         tool_error_message = self.create_error_scenario_message("tool_execution_error", auth_user, user_context)
         tool_error_events = await self.send_message_and_collect_events(
@@ -359,10 +359,10 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         )
         assert has_error_event, f"Tool error not properly reported. Events: {event_types}"
         
-        logger.info("✅ Tool execution failure properly detected")
+        logger.info(" PASS:  Tool execution failure properly detected")
         
         # Test recovery with valid tool usage
-        logger.info("🔄 Testing tool execution recovery...")
+        logger.info(" CYCLE:  Testing tool execution recovery...")
         
         recovery_message = {
             "type": "agent_request",
@@ -390,11 +390,11 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         has_tool_success = "tool_executing" in recovery_event_types and "tool_completed" in recovery_event_types
         # Tool execution might be optional depending on the request
         if has_tool_success:
-            logger.info("✅ Tool execution recovery with actual tool usage verified")
+            logger.info(" PASS:  Tool execution recovery with actual tool usage verified")
         else:
-            logger.info("ℹ️ Tool execution recovery without tool usage (acceptable)")
+            logger.info("[U+2139][U+FE0F] Tool execution recovery without tool usage (acceptable)")
         
-        logger.info("🎉 TOOL EXECUTION FAILURE RECOVERY TEST PASSED")
+        logger.info(" CELEBRATION:  TOOL EXECUTION FAILURE RECOVERY TEST PASSED")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -405,14 +405,14 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         This test validates that the system can handle WebSocket disconnections
         gracefully and recover connection when possible.
         """
-        logger.info("🚀 Starting WebSocket connection failure recovery test")
+        logger.info("[U+1F680] Starting WebSocket connection failure recovery test")
         
         auth_user, websocket_connection, user_context = await self.create_authenticated_session(
             "websocket_failure_test@example.com"
         )
         
         # Send normal message first to establish baseline
-        logger.info("📤 Sending baseline message...")
+        logger.info("[U+1F4E4] Sending baseline message...")
         
         baseline_message = {
             "type": "agent_request",
@@ -434,10 +434,10 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         baseline_event_types = [event.get("type") for event in baseline_events]
         assert "agent_completed" in baseline_event_types, "Baseline request should complete"
         
-        logger.info("✅ Baseline WebSocket communication established")
+        logger.info(" PASS:  Baseline WebSocket communication established")
         
         # Test connection error scenario
-        logger.info("🔌 Testing connection error scenario...")
+        logger.info("[U+1F50C] Testing connection error scenario...")
         
         connection_error_message = self.create_error_scenario_message("connection_error", auth_user, user_context)
         
@@ -456,7 +456,7 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
             logger.info(f"Expected connection error occurred: {e}")
         
         # Test recovery with new connection
-        logger.info("🔄 Testing connection recovery...")
+        logger.info(" CYCLE:  Testing connection recovery...")
         
         # Create new WebSocket connection to simulate recovery
         websocket_url = "ws://localhost:8000/ws/chat"
@@ -496,9 +496,9 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         assert "agent_started" in recovery_event_types, "Recovery connection should allow agent execution"
         assert "agent_completed" in recovery_event_types, "Recovery should complete successfully"
         
-        logger.info("🎉 WEBSOCKET CONNECTION FAILURE RECOVERY TEST PASSED")
-        logger.info(f"   📡 Connection Recovery: VERIFIED")
-        logger.info(f"   🔄 Session Continuity: VERIFIED")
+        logger.info(" CELEBRATION:  WEBSOCKET CONNECTION FAILURE RECOVERY TEST PASSED")
+        logger.info(f"   [U+1F4E1] Connection Recovery: VERIFIED")
+        logger.info(f"    CYCLE:  Session Continuity: VERIFIED")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -509,7 +509,7 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         This comprehensive test validates that the system can handle multiple
         different types of failures and recover from each gracefully.
         """
-        logger.info("🚀 Starting multiple failure scenarios recovery test")
+        logger.info("[U+1F680] Starting multiple failure scenarios recovery test")
         
         auth_user, websocket_connection, user_context = await self.create_authenticated_session(
             "multiple_failure_test@example.com"
@@ -524,7 +524,7 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         recovery_count = 0
         
         for scenario_type, scenario_description in failure_scenarios:
-            logger.info(f"🔥 Testing {scenario_description}...")
+            logger.info(f" FIRE:  Testing {scenario_description}...")
             
             # Create and send error scenario
             error_message = self.create_error_scenario_message(scenario_type, auth_user, user_context)
@@ -542,15 +542,15 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
                     event_types = [event.get("type") for event in error_events]
                     has_error = any("error" in str(event_type).lower() for event_type in event_types)
                     if has_error:
-                        logger.info(f"✅ {scenario_description} properly detected")
+                        logger.info(f" PASS:  {scenario_description} properly detected")
                     else:
-                        logger.warning(f"⚠️ {scenario_description} may not have been detected properly")
+                        logger.warning(f" WARNING: [U+FE0F] {scenario_description} may not have been detected properly")
                 
             except Exception as e:
                 logger.info(f"Expected error for {scenario_description}: {e}")
             
             # Test recovery after each failure
-            logger.info(f"🔄 Testing recovery from {scenario_description}...")
+            logger.info(f" CYCLE:  Testing recovery from {scenario_description}...")
             
             recovery_message = {
                 "type": "agent_request",
@@ -575,15 +575,15 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
             assert "agent_started" in recovery_event_types, f"Recovery failed after {scenario_description}"
             
             recovery_count += 1
-            logger.info(f"✅ Recovery #{recovery_count} successful")
+            logger.info(f" PASS:  Recovery #{recovery_count} successful")
             
             # Brief pause between scenarios
             await asyncio.sleep(1.0)
         
-        logger.info("🎉 MULTIPLE FAILURE SCENARIOS RECOVERY TEST PASSED")
-        logger.info(f"   🔄 Scenarios Tested: {len(failure_scenarios)}")
-        logger.info(f"   ✅ Recoveries Successful: {recovery_count}")
-        logger.info(f"   🛡️ System Resilience: VERIFIED")
+        logger.info(" CELEBRATION:  MULTIPLE FAILURE SCENARIOS RECOVERY TEST PASSED")
+        logger.info(f"    CYCLE:  Scenarios Tested: {len(failure_scenarios)}")
+        logger.info(f"    PASS:  Recoveries Successful: {recovery_count}")
+        logger.info(f"   [U+1F6E1][U+FE0F] System Resilience: VERIFIED")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -594,7 +594,7 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         This test validates that when failures occur, users receive meaningful
         error messages that help them understand what happened and what to do next.
         """
-        logger.info("🚀 Starting failure user notification quality test")
+        logger.info("[U+1F680] Starting failure user notification quality test")
         
         auth_user, websocket_connection, user_context = await self.create_authenticated_session(
             "notification_quality_test@example.com"
@@ -608,7 +608,7 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
         ]
         
         for scenario_type, expected_keywords in scenarios:
-            logger.info(f"📢 Testing notification quality for {scenario_type}...")
+            logger.info(f"[U+1F4E2] Testing notification quality for {scenario_type}...")
             
             error_message = self.create_error_scenario_message(scenario_type, auth_user, user_context)
             
@@ -649,16 +649,16 @@ class TestAgentFailureRecoveryE2E(BaseE2ETest):
                     assert len(combined_message) >= 10, \
                         f"Error message too brief for {scenario_type}: {combined_message}"
                     
-                    logger.info(f"✅ {scenario_type} notification quality acceptable")
+                    logger.info(f" PASS:  {scenario_type} notification quality acceptable")
                 else:
-                    logger.warning(f"⚠️ No clear error messages found for {scenario_type}")
+                    logger.warning(f" WARNING: [U+FE0F] No clear error messages found for {scenario_type}")
                     
             except Exception as e:
                 logger.info(f"Expected error during {scenario_type}: {e}")
         
-        logger.info("🎉 FAILURE USER NOTIFICATION QUALITY TEST PASSED")
-        logger.info(f"   📢 Error Message Quality: VERIFIED")
-        logger.info(f"   📝 User-Friendly Notifications: VALIDATED")
+        logger.info(" CELEBRATION:  FAILURE USER NOTIFICATION QUALITY TEST PASSED")
+        logger.info(f"   [U+1F4E2] Error Message Quality: VERIFIED")
+        logger.info(f"   [U+1F4DD] User-Friendly Notifications: VALIDATED")
 
 
 if __name__ == "__main__":

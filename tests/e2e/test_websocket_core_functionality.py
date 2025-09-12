@@ -124,7 +124,7 @@ class MissionCriticalWebSocketValidator:
 " + "=" * 80,
             "MISSION CRITICAL WEBSOCKET VALIDATION REPORT",
             "=" * 80,
-            f"Status: {'✅ PASSED - WebSocket functionality operational' if is_valid else '❌ FAILED - WebSocket functionality BROKEN'}",
+            f"Status: {' PASS:  PASSED - WebSocket functionality operational' if is_valid else ' FAIL:  FAILED - WebSocket functionality BROKEN'}",
             f"Total Events: {len(self.events)}",
             f"Event Types: {len(self.event_counts)}",
             f"Duration: {self.event_timeline[-1][0] if self.event_timeline else 0:.2f}s",
@@ -135,7 +135,7 @@ class MissionCriticalWebSocketValidator:
         
         for event in self.REQUIRED_EVENTS:
             count = self.event_counts.get(event, 0)
-            status = "✅" if count > 0 else "❌ MISSING"
+            status = " PASS: " if count > 0 else " FAIL:  MISSING"
             report.append(f"  {status} {event}: {count}")
         
         if failures:
@@ -257,7 +257,7 @@ async def test_websocket_core_event_flow():
         env.set(key, value, source="core_websocket_test")
     
     try:
-        logger.info("🚀 Testing CORE WebSocket functionality - NO external dependencies")
+        logger.info("[U+1F680] Testing CORE WebSocket functionality - NO external dependencies")
         
         validator = MissionCriticalWebSocketValidator(strict_mode=True)
         
@@ -286,7 +286,7 @@ async def test_websocket_core_event_flow():
             )
             
             # Test complete WebSocket event flow
-            logger.info("📡 Sending all required WebSocket events...")
+            logger.info("[U+1F4E1] Sending all required WebSocket events...")
             
             # Send all required events per CLAUDE.md Section 6.1
             await notifier.send_agent_started(context)
@@ -353,9 +353,9 @@ Failures: {failures}"
         assert tool_executing_count == tool_completed_count, \
             f"Unpaired tool events: {tool_executing_count} executing, {tool_completed_count} completed"
         
-        logger.info("✅ CORE WEBSOCKET TEST PASSED - Mission-critical functionality verified!")
-        logger.info(f"   📊 Events: {len(received_events)}, Event Types: {len(set(event_types))}")
-        logger.info(f"   🎯 All required WebSocket events validated successfully")
+        logger.info(" PASS:  CORE WEBSOCKET TEST PASSED - Mission-critical functionality verified!")
+        logger.info(f"    CHART:  Events: {len(received_events)}, Event Types: {len(set(event_types))}")
+        logger.info(f"    TARGET:  All required WebSocket events validated successfully")
         
     finally:
         # Cleanup environment
@@ -412,7 +412,7 @@ async def test_websocket_manager_real_connection_handling():
             await ws_manager.disconnect_user(user_id, ws_conn, conn_id)
             await ws_conn.close()
         
-        logger.info("✅ WebSocket connection handling test PASSED")
+        logger.info(" PASS:  WebSocket connection handling test PASSED")
         
     finally:
         env.disable_isolation(restore_original=True)

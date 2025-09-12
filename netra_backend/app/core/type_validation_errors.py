@@ -28,7 +28,7 @@ def generate_validation_report(mismatches: list[TypeMismatch]) -> str:
     """Generate a human-readable validation report."""
     
     if not mismatches:
-        return "✅ All type validations passed! Frontend and backend schemas are consistent."
+        return " PASS:  All type validations passed! Frontend and backend schemas are consistent."
     
     # Group by severity
     by_severity = _group_mismatches_by_severity(mismatches)
@@ -87,12 +87,12 @@ def _create_severity_section(severity: TypeMismatchSeverity, mismatches: list[Ty
 def _get_severity_icon(severity_value: str) -> str:
     """Get icon for severity level."""
     icons = {
-        "critical": "🚨", 
-        "error": "❌", 
-        "warning": "⚠️", 
-        "info": "ℹ️"
+        "critical": " ALERT: ", 
+        "error": " FAIL: ", 
+        "warning": " WARNING: [U+FE0F]", 
+        "info": "[U+2139][U+FE0F]"
     }
-    return icons.get(severity_value, "❓")
+    return icons.get(severity_value, "[U+2753]")
 
 
 def _create_mismatch_entry(mismatch: TypeMismatch) -> list[str]:

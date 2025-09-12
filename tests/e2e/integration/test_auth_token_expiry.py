@@ -154,7 +154,7 @@ class TestAuthTokenExpiry:
                     await ws_result["websocket"].close()
             else:
                 # Refresh flow not implemented or not working - log for monitoring
-                print("⚠ Token refresh flow not available or not implemented")
+                print(" WARNING:  Token refresh flow not available or not implemented")
             
         except Exception as e:
             skip_if_services_unavailable(str(e))
@@ -211,7 +211,7 @@ class TestAuthTokenExpiry:
                     
                 except Exception as e:
                     # Individual scenario failures shouldn't fail the whole test
-                    print(f"⚠ Scenario {scenario_name} failed: {str(e)}")
+                    print(f" WARNING:  Scenario {scenario_name} failed: {str(e)}")
                     continue
             
         except Exception as e:
@@ -258,7 +258,7 @@ class TestAuthTokenExpiry:
             if total_tested > 0:
                 rejection_rate = rejection_count / total_tested
                 assert rejection_rate >= 0.8, \
-                    f"Expected ≥80% rejection rate for malformed tokens, got {rejection_rate:.1%}"
+                    f"Expected  >= 80% rejection rate for malformed tokens, got {rejection_rate:.1%}"
             
         except Exception as e:
             skip_if_services_unavailable(str(e))

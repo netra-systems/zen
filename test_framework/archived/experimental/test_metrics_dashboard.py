@@ -31,7 +31,7 @@ from shared.isolated_environment import IsolatedEnvironment
 
 @dataclass
 class TestMetrics:
-    """Strong typing for test metrics (≤8 lines per method)."""
+    """Strong typing for test metrics ( <= 8 lines per method)."""
     timestamp: datetime
     test_level: str
     total_tests: int
@@ -51,7 +51,7 @@ class TestMetrics:
 
 @dataclass
 class PerformanceMetrics:
-    """Performance metrics tracking (≤8 lines per method)."""
+    """Performance metrics tracking ( <= 8 lines per method)."""
     test_level: str
     execution_time: float
     target_time: float
@@ -70,7 +70,7 @@ class PerformanceMetrics:
         return max(0.0, 100.0 - ((self.execution_time - self.target_time) / self.target_time) * 50)
 
 class TestMetricsCollector:
-    """Collect and store test metrics (≤300 lines total)."""
+    """Collect and store test metrics ( <= 300 lines total)."""
     
     __test__ = False  # Tell pytest this is not a test class
     
@@ -135,7 +135,7 @@ class TestMetricsCollector:
             return {"error": f"Test execution failed: {e}"}
 
 class MetricsDashboard:
-    """Display test metrics dashboard (≤300 lines total)."""
+    """Display test metrics dashboard ( <= 300 lines total)."""
     
     def __init__(self, collector: TestMetricsCollector):
         """Initialize dashboard with metrics collector."""
@@ -161,7 +161,7 @@ class MetricsDashboard:
         for level in ["smoke", "unit", "integration"]:
             try:
                 metrics = self.collector.collect_metrics(level)
-                status = "✅ PASS" if metrics.meets_sla else "❌ FAIL"
+                status = " PASS:  PASS" if metrics.meets_sla else " FAIL:  FAIL"
                 print(f"{level:12} | {metrics.pass_rate:6.1f}% | {status}")
             except Exception as e:
                 print(f"{level:12} | ERROR: {e}")
@@ -175,7 +175,7 @@ class MetricsDashboard:
         for level, trend_data in trends.items():
             avg_time = trend_data.get('avg_execution_time', 0)
             target_time = self._get_target_time(level)
-            status = "✅" if avg_time <= target_time else "⚠️"
+            status = " PASS: " if avg_time <= target_time else " WARNING: [U+FE0F]"
             print(f"{level:12} | {avg_time:6.1f}s | Target: {target_time}s {status}")
     
     def _get_target_time(self, level: str) -> float:
@@ -190,7 +190,7 @@ class MetricsDashboard:
         return targets.get(level, 300.0)
 
 class FlakeyTestDetector:
-    """Detect and track flaky tests (≤300 lines total)."""
+    """Detect and track flaky tests ( <= 300 lines total)."""
     
     def __init__(self, db_path: Path):
         """Initialize flaky test detector."""
@@ -228,10 +228,10 @@ class FlakeyTestDetector:
         flaky_tests = self.detect_flaky_tests()
         
         if not flaky_tests:
-            print("✅ No flaky tests detected")
+            print(" PASS:  No flaky tests detected")
             return
         
-        print(f"\n⚠️  FLAKY TESTS DETECTED ({len(flaky_tests)})")
+        print(f"\n WARNING: [U+FE0F]  FLAKY TESTS DETECTED ({len(flaky_tests)})")
         print("-" * 60)
         print(f"{'Test Name':40} | {'Flake Rate':>10} | {'Runs':>5}")
         print("-" * 60)
@@ -252,10 +252,10 @@ def generate_daily_report():
     # Generate recommendations
     print("\nRECOMMENDations")
     print("-" * 40)
-    print("• Run 'python test_runner.py --level integration --real-llm' before releases")
-    print("• Address flaky tests to improve reliability")
-    print("• Monitor performance trends for SLA compliance")
-    print("• Maintain >95% pass rate for production readiness")
+    print("[U+2022] Run 'python test_runner.py --level integration --real-llm' before releases")
+    print("[U+2022] Address flaky tests to improve reliability")
+    print("[U+2022] Monitor performance trends for SLA compliance")
+    print("[U+2022] Maintain >95% pass rate for production readiness")
 
 def main():
     """Main entry point for metrics dashboard."""

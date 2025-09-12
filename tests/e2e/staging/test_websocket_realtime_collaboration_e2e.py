@@ -202,7 +202,7 @@ class TestStagingWebSocketCollaboration:
         cleanup_tasks = [client.disconnect() for client, _, _ in team_clients]
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
         
-        print(f"✅ Shared workspace coordination validated")
+        print(f" PASS:  Shared workspace coordination validated")
         print(f"   Team members connected: {len(team_clients)}")
         print(f"   Successful event collections: {len(successful_collections)}")
         print(f"   Shared event types: {[et.value for et in shared_event_types]}")
@@ -402,7 +402,7 @@ class TestStagingWebSocketCollaboration:
         await editor1_client.disconnect()
         await editor2_client.disconnect()
         
-        print(f"✅ Real-time collaborative editing validated")
+        print(f" PASS:  Real-time collaborative editing validated")
         print(f"   Editor 1 events: {editor1_event_count}")
         print(f"   Editor 2 events: {editor2_event_count}")
         print(f"   Cross-editor events: {cross_editor_events}")
@@ -569,7 +569,7 @@ class TestStagingWebSocketCollaboration:
         cleanup_tasks = [client.disconnect() for client, _, _, _ in team_connections]
         await asyncio.gather(*cleanup_tasks, return_exceptions=True)
         
-        print(f"✅ Team agent handoff coordination validated")
+        print(f" PASS:  Team agent handoff coordination validated")
         print(f"   Total workflow events: {total_workflow_events}")
         print(f"   Team members with events: {team_members_with_events}")
         print(f"   Event types: {[et.value for et in workflow_event_types]}")

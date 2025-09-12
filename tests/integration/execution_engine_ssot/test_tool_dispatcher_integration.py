@@ -69,7 +69,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         
     def test_tool_dispatcher_availability_and_integration(self):
         """Test that UserExecutionEngine integrates properly with tool dispatcher"""
-        print("\n🔍 Testing tool dispatcher availability and integration...")
+        print("\n SEARCH:  Testing tool dispatcher availability and integration...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -97,7 +97,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             if tool_dispatcher is None:
                 integration_violations.append("UserExecutionEngine tool_dispatcher is None")
             else:
-                print(f"  ✅ Tool dispatcher available: {type(tool_dispatcher).__name__}")
+                print(f"   PASS:  Tool dispatcher available: {type(tool_dispatcher).__name__}")
         
         # Test 2: Tool execution methods availability
         required_tool_methods = [
@@ -111,10 +111,10 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         for method_name in required_tool_methods:
             if hasattr(engine, method_name) and callable(getattr(engine, method_name)):
                 available_methods.append(method_name)
-                print(f"    ✅ {method_name} method available")
+                print(f"     PASS:  {method_name} method available")
             else:
                 missing_methods.append(method_name)
-                print(f"    ❌ {method_name} method missing or not callable")
+                print(f"     FAIL:  {method_name} method missing or not callable")
         
         if missing_methods:
             integration_violations.append(f"Missing tool execution methods: {missing_methods}")
@@ -124,7 +124,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             try:
                 # Test with a common tool name
                 validation_result = engine.validate_tool_access('test_tool')
-                print(f"  ✅ Tool access validation method works: {validation_result}")
+                print(f"   PASS:  Tool access validation method works: {validation_result}")
             except Exception as e:
                 integration_violations.append(f"Tool access validation failed: {e}")
         else:
@@ -141,7 +141,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
                     if missing_keys:
                         integration_violations.append(f"Execution context missing keys: {missing_keys}")
                     else:
-                        print(f"  ✅ Execution context includes tool access")
+                        print(f"   PASS:  Execution context includes tool access")
                 else:
                     integration_violations.append(f"Execution context is not dict: {type(exec_context)}")
             except Exception as e:
@@ -151,11 +151,11 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         if integration_violations:
             self.fail(f"Tool dispatcher integration violations: {integration_violations}")
         
-        print(f"  ✅ Tool dispatcher integration validated")
+        print(f"   PASS:  Tool dispatcher integration validated")
     
     async def test_real_tool_execution_flow(self):
         """Test real tool execution flow through UserExecutionEngine"""
-        print("\n🔍 Testing real tool execution flow...")
+        print("\n SEARCH:  Testing real tool execution flow...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -222,7 +222,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
                         'parameters': scenario['parameters']
                     })
                     
-                    print(f"    ✅ Tool execution events sent for {scenario['tool_name']}")
+                    print(f"     PASS:  Tool execution events sent for {scenario['tool_name']}")
                     
                 else:
                     execution_violations.append(f"Scenario {scenario['name']}: execute_tool method not available")
@@ -254,7 +254,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             except Exception as e:
                 execution_violations.append(f"Scenario {scenario['name']} failed: {e}")
         
-        print(f"  ✅ Tool execution scenarios completed")
+        print(f"   PASS:  Tool execution scenarios completed")
         
         # Test async tool execution if available
         if hasattr(engine, 'execute_tool_async'):
@@ -302,7 +302,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
                 if async_events != expected_async_flow:
                     execution_violations.append(f"Async tool execution flow incorrect: {async_events} != {expected_async_flow}")
                 else:
-                    print(f"    ✅ Async tool execution flow validated")
+                    print(f"     PASS:  Async tool execution flow validated")
                 
             except Exception as e:
                 execution_violations.append(f"Async tool execution test failed: {e}")
@@ -311,11 +311,11 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         if execution_violations:
             self.fail(f"Tool execution flow violations: {execution_violations}")
         
-        print(f"  ✅ Real tool execution flow validated")
+        print(f"   PASS:  Real tool execution flow validated")
     
     async def test_concurrent_tool_execution_isolation(self):
         """Test that concurrent tool executions are properly isolated between users"""
-        print("\n🔍 Testing concurrent tool execution isolation...")
+        print("\n SEARCH:  Testing concurrent tool execution isolation...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -393,14 +393,14 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
                 return f"error_{user_id}"
         
         # Execute tools concurrently for all users
-        print(f"  🔄 Executing tools concurrently for {len(concurrent_users)} users...")
+        print(f"   CYCLE:  Executing tools concurrently for {len(concurrent_users)} users...")
         
         concurrent_tasks = [execute_concurrent_tools(user_data) for user_data in concurrent_users]
         results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
         
         # Validate concurrent execution results
         successful_executions = sum(1 for result in results if isinstance(result, str) and result.startswith('success'))
-        print(f"  ✅ {successful_executions}/{len(concurrent_users)} concurrent tool executions successful")
+        print(f"   PASS:  {successful_executions}/{len(concurrent_users)} concurrent tool executions successful")
         
         if successful_executions != len(concurrent_users):
             isolation_violations.append(f"Not all concurrent tool executions succeeded: {successful_executions}/{len(concurrent_users)}")
@@ -411,7 +411,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             tool_capture = user_data['tool_capture']
             user_events = tool_capture.websocket_events
             
-            # Each user should have exactly 6 events (3 tools × 2 events each)
+            # Each user should have exactly 6 events (3 tools  x  2 events each)
             expected_events = 6
             if len(user_events) != expected_events:
                 isolation_violations.append(f"User {user_id} has {len(user_events)} events, expected {expected_events}")
@@ -444,17 +444,17 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             if event_user_id != source_user:
                 isolation_violations.append(f"Event from {source_user} contains data for {event_user_id}")
         
-        print(f"  ✅ Tool execution isolation validated for {len(concurrent_users)} concurrent users")
+        print(f"   PASS:  Tool execution isolation validated for {len(concurrent_users)} concurrent users")
         
         # CRITICAL: Tool execution isolation prevents data leaks and execution conflicts
         if isolation_violations:
             self.fail(f"Concurrent tool execution isolation violations: {isolation_violations}")
         
-        print(f"  ✅ Concurrent tool execution isolation validated")
+        print(f"   PASS:  Concurrent tool execution isolation validated")
     
     def test_tool_dispatcher_error_handling(self):
         """Test error handling in tool dispatcher integration"""
-        print("\n🔍 Testing tool dispatcher error handling...")
+        print("\n SEARCH:  Testing tool dispatcher error handling...")
         
         try:
             from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine
@@ -508,7 +508,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
                 # 2. Provide meaningful error information
                 # 3. Maintain system stability
                 
-                print(f"    ✅ Error scenario {scenario['name']} handled gracefully")
+                print(f"     PASS:  Error scenario {scenario['name']} handled gracefully")
                 
             except Exception as e:
                 # Check if this is expected error handling or a real failure
@@ -516,7 +516,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
                 expected_error_indicators = ['invalid', 'not found', 'missing', 'malformed', 'unsupported']
                 
                 if any(indicator in error_message for indicator in expected_error_indicators):
-                    print(f"    ✅ Error scenario {scenario['name']} properly rejected: {type(e).__name__}")
+                    print(f"     PASS:  Error scenario {scenario['name']} properly rejected: {type(e).__name__}")
                 else:
                     error_handling_violations.append(f"Unexpected error in {scenario['name']}: {e}")
         
@@ -537,10 +537,10 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
                     if result is True:
                         error_handling_violations.append(f"Tool validation incorrectly accepted: {test_name}")
                     else:
-                        print(f"    ✅ Tool validation correctly rejected: {test_name}")
+                        print(f"     PASS:  Tool validation correctly rejected: {test_name}")
                 except Exception as e:
                     # Expected for malformed inputs
-                    print(f"    ✅ Tool validation properly raised exception for: {test_name}")
+                    print(f"     PASS:  Tool validation properly raised exception for: {test_name}")
         
         # Test WebSocket event error handling
         async def test_websocket_error_handling():
@@ -555,10 +555,10 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
             for event_type, event_data in error_event_tests:
                 try:
                     await engine.send_websocket_event(event_type, event_data)
-                    print(f"    ✅ WebSocket error handling: {event_type} with {type(event_data).__name__}")
+                    print(f"     PASS:  WebSocket error handling: {event_type} with {type(event_data).__name__}")
                 except Exception as e:
                     # Expected for malformed events
-                    print(f"    ✅ WebSocket properly rejected: {event_type} with {type(event_data).__name__}")
+                    print(f"     PASS:  WebSocket properly rejected: {event_type} with {type(event_data).__name__}")
         
         # Run async error handling tests
         asyncio.run(test_websocket_error_handling())
@@ -570,7 +570,7 @@ class TestToolDispatcherIntegration(SSotAsyncTestCase):
         if serious_violations:
             self.fail(f"Serious tool dispatcher error handling violations: {serious_violations}")
         
-        print(f"  ✅ Tool dispatcher error handling validated")
+        print(f"   PASS:  Tool dispatcher error handling validated")
 
 
 if __name__ == '__main__':

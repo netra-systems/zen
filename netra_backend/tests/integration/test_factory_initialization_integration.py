@@ -187,7 +187,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                     test_row = result.fetchone()
                     assert test_row is not None, "Database session should be functional"
                     assert test_row[0] == 1, "Query should return expected value"
-                    logger.info("✅ Factory-created database session is functional")
+                    logger.info(" PASS:  Factory-created database session is functional")
                 except Exception as e:
                     logger.warning(f"Database session test failed: {e}")
                     # Continue test - session may be configured differently
@@ -203,14 +203,14 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
             if hasattr(user_context, 'store_context_data'):
                 try:
                     await user_context.store_context_data(context_data)
-                    logger.info("✅ Context data storage successful")
+                    logger.info(" PASS:  Context data storage successful")
                 except Exception as e:
                     logger.info(f"Context data storage method not available: {e}")
             
             factory_time = time.time() - start_time
             assert factory_time < 5.0, f"Factory creation took {factory_time:.2f}s (expected < 5s)"
             
-            logger.info(f"✅ User context factory with database completed in {factory_time:.2f}s")
+            logger.info(f" PASS:  User context factory with database completed in {factory_time:.2f}s")
             
         except Exception as e:
             pytest.fail(f"User context factory with database failed: {str(e)}")
@@ -277,13 +277,13 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                 assert retrieved_data["user_id"] == str(user_context.user_id), "Session data should match"
                 assert retrieved_data["factory_test"] is True, "Factory test data should be preserved"
                 
-                logger.info("✅ Session factory Redis operations successful")
+                logger.info(" PASS:  Session factory Redis operations successful")
                 
                 # Test session retrieval through factory
                 if hasattr(self.session_factory, 'get_session'):
                     retrieved_session = await self.session_factory.get_session(session_id)
                     if retrieved_session:
-                        logger.info("✅ Session retrieval through factory successful")
+                        logger.info(" PASS:  Session retrieval through factory successful")
                 
                 # Cleanup test session data
                 await self.redis_manager.delete(test_session_key)
@@ -295,7 +295,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
             factory_time = time.time() - start_time
             assert factory_time < 5.0, f"Session factory creation took {factory_time:.2f}s (expected < 5s)"
             
-            logger.info(f"✅ Session factory with Redis completed in {factory_time:.2f}s")
+            logger.info(f" PASS:  Session factory with Redis completed in {factory_time:.2f}s")
             
         except Exception as e:
             pytest.fail(f"Session factory with Redis failed: {str(e)}")
@@ -340,7 +340,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
             if hasattr(ws_manager, 'initialize'):
                 try:
                     await ws_manager.initialize()
-                    logger.info("✅ WebSocket manager initialization successful")
+                    logger.info(" PASS:  WebSocket manager initialization successful")
                 except Exception as e:
                     logger.info(f"Manager initialization method not available: {e}")
             
@@ -370,7 +370,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                 assert connection_info["user_id"] == str(user_context.user_id), "Connection should match user"
                 assert connection_info["factory_created"] is True, "Factory creation flag should be preserved"
                 
-                logger.info("✅ WebSocket manager connection tracking successful")
+                logger.info(" PASS:  WebSocket manager connection tracking successful")
                 
                 # Cleanup connection data
                 await self.redis_manager.delete(connection_key)
@@ -389,14 +389,14 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
             if hasattr(ws_manager, 'update_state'):
                 try:
                     await ws_manager.update_state(manager_state)
-                    logger.info("✅ WebSocket manager state management successful")
+                    logger.info(" PASS:  WebSocket manager state management successful")
                 except Exception as e:
                     logger.info(f"Manager state update method not available: {e}")
             
             factory_time = time.time() - start_time
             assert factory_time < 6.0, f"WebSocket factory creation took {factory_time:.2f}s (expected < 6s)"
             
-            logger.info(f"✅ WebSocket manager factory completed in {factory_time:.2f}s")
+            logger.info(f" PASS:  WebSocket manager factory completed in {factory_time:.2f}s")
             
         except Exception as e:
             pytest.fail(f"WebSocket manager factory failed: {str(e)}")
@@ -445,7 +445,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
             
             # User IDs should match between base context and factory context
             # (Note: exact matching depends on implementation details)
-            logger.info(f"✅ User {i} factory context created with user_id: {actual_user_id[:8] if actual_user_id else 'N/A'}...")
+            logger.info(f" PASS:  User {i} factory context created with user_id: {actual_user_id[:8] if actual_user_id else 'N/A'}...")
         
         # Test data isolation between factory contexts
         isolation_test_data = {}
@@ -498,12 +498,12 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
             assert len(unique_session_ids) == len(successful_sessions), \
                    f"Session IDs should be unique (got {len(unique_session_ids)} unique from {len(successful_sessions)} sessions)"
             
-            logger.info(f"✅ {len(successful_sessions)} user sessions created with unique isolation")
+            logger.info(f" PASS:  {len(successful_sessions)} user sessions created with unique isolation")
         
         factory_time = time.time() - start_time
         assert factory_time < 10.0, f"Multi-user factory isolation took {factory_time:.2f}s (expected < 10s)"
         
-        logger.info(f"✅ Multi-user factory isolation test completed in {factory_time:.2f}s")
+        logger.info(f" PASS:  Multi-user factory isolation test completed in {factory_time:.2f}s")
 
     async def test_005_factory_error_recovery_patterns(self):
         """
@@ -557,10 +557,10 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                 
                 if context is not None:
                     self.created_contexts.append(context)
-                    logger.info(f"✅ Factory handled {scenario['name']} gracefully")
+                    logger.info(f" PASS:  Factory handled {scenario['name']} gracefully")
                     successful_recoveries += 1
                 else:
-                    logger.info(f"✅ Factory returned None for {scenario['name']} (acceptable error handling)")
+                    logger.info(f" PASS:  Factory returned None for {scenario['name']} (acceptable error handling)")
                     successful_recoveries += 1
                 
             except Exception as e:
@@ -569,7 +569,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                 
                 # Check if error message is informative
                 if any(keyword in error_msg for keyword in ["invalid", "missing", "required", "format"]):
-                    logger.info(f"✅ Factory provided informative error for {scenario['name']}: {str(e)[:100]}")
+                    logger.info(f" PASS:  Factory provided informative error for {scenario['name']}: {str(e)[:100]}")
                     successful_recoveries += 1
                 else:
                     logger.warning(f"Factory error for {scenario['name']} may not be informative: {str(e)[:100]}")
@@ -597,16 +597,16 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                     )
                     
                     if context is not None:
-                        logger.info("✅ Factory created context despite database failure (using fallback)")
+                        logger.info(" PASS:  Factory created context despite database failure (using fallback)")
                         self.created_contexts.append(context)
                     else:
-                        logger.info("✅ Factory gracefully failed with database unavailable")
+                        logger.info(" PASS:  Factory gracefully failed with database unavailable")
                     
                     successful_recoveries += 1
                     
                 except Exception as e:
                     if "database" in str(e).lower() or "connection" in str(e).lower():
-                        logger.info(f"✅ Factory properly reported database connection failure: {str(e)[:100]}")
+                        logger.info(f" PASS:  Factory properly reported database connection failure: {str(e)[:100]}")
                         successful_recoveries += 1
                     else:
                         logger.warning(f"Unexpected error during database failure test: {str(e)[:100]}")
@@ -624,7 +624,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
         factory_time = time.time() - start_time
         assert factory_time < 8.0, f"Factory error recovery testing took {factory_time:.2f}s (expected < 8s)"
         
-        logger.info(f"✅ Factory error recovery patterns validated in {factory_time:.2f}s ({successful_recoveries} scenarios handled)")
+        logger.info(f" PASS:  Factory error recovery patterns validated in {factory_time:.2f}s ({successful_recoveries} scenarios handled)")
 
     async def test_006_factory_initialization_timing_performance(self):
         """
@@ -741,7 +741,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                 min_duration = min(durations)
                 max_duration = max(durations)
                 
-                logger.info(f"✅ {factory_type} performance:")
+                logger.info(f" PASS:  {factory_type} performance:")
                 logger.info(f"   Average: {avg_duration:.3f}s")
                 logger.info(f"   Min: {min_duration:.3f}s")
                 logger.info(f"   Max: {max_duration:.3f}s")
@@ -754,7 +754,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
         total_time = time.time() - start_time
         assert total_time < 20.0, f"Factory performance testing took {total_time:.2f}s (expected < 20s)"
         
-        logger.info(f"✅ Factory initialization performance validated in {total_time:.2f}s")
+        logger.info(f" PASS:  Factory initialization performance validated in {total_time:.2f}s")
 
     async def test_007_ssot_factory_pattern_compliance(self):
         """
@@ -806,7 +806,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                     "compliance_rate": len(found_attributes) / len(compliance_attributes)
                 })
                 
-                logger.info(f"✅ User context factory SSOT compliance: {found_attributes}")
+                logger.info(f" PASS:  User context factory SSOT compliance: {found_attributes}")
         
         except Exception as e:
             logger.warning(f"User context factory SSOT compliance test failed: {e}")
@@ -840,7 +840,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                     "compliance_rate": len(found_session_attrs) / len(session_attributes)
                 })
                 
-                logger.info(f"✅ Session factory SSOT compliance: {found_session_attrs}")
+                logger.info(f" PASS:  Session factory SSOT compliance: {found_session_attrs}")
         
         except Exception as e:
             logger.warning(f"Session factory SSOT compliance test failed: {e}")
@@ -874,7 +874,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
                     "compliance_rate": len(found_ws_attrs) / len(ws_attributes)
                 })
                 
-                logger.info(f"✅ WebSocket factory SSOT compliance: {found_ws_attrs}")
+                logger.info(f" PASS:  WebSocket factory SSOT compliance: {found_ws_attrs}")
         
         except Exception as e:
             logger.warning(f"WebSocket factory SSOT compliance test failed: {e}")
@@ -883,7 +883,7 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
         if factory_compliance_checks:
             overall_compliance = sum(check["compliance_rate"] for check in factory_compliance_checks) / len(factory_compliance_checks)
             
-            logger.info(f"✅ Overall SSOT factory compliance: {overall_compliance:.1%}")
+            logger.info(f" PASS:  Overall SSOT factory compliance: {overall_compliance:.1%}")
             
             # Should have reasonable compliance rate
             assert overall_compliance >= 0.4, f"SSOT compliance rate {overall_compliance:.1%} below 40% threshold"
@@ -896,4 +896,4 @@ class TestFactoryInitializationIntegration(BaseIntegrationTest):
         compliance_time = time.time() - start_time
         assert compliance_time < 8.0, f"SSOT compliance testing took {compliance_time:.2f}s (expected < 8s)"
         
-        logger.info(f"✅ SSOT factory pattern compliance validated in {compliance_time:.2f}s")
+        logger.info(f" PASS:  SSOT factory pattern compliance validated in {compliance_time:.2f}s")

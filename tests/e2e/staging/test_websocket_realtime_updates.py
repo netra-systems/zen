@@ -63,7 +63,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
             except asyncio.TimeoutError:
                 # Log timeout for debugging
                 elapsed = time.time() - start_time
-                self.logger.warning(f"⏱️ WebSocket receive timeout after {elapsed:.1f}s")
+                self.logger.warning(f"[U+23F1][U+FE0F] WebSocket receive timeout after {elapsed:.1f}s")
                 break
                 
         return events
@@ -74,7 +74,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
     @pytest.mark.staging
     async def test_complete_event_delivery_pipeline(self, real_services, real_llm):
         """Test complete WebSocket event delivery pipeline with all 5 critical events."""
-        self.logger.info("🚀 Starting Complete Event Delivery Pipeline E2E Test")
+        self.logger.info("[U+1F680] Starting Complete Event Delivery Pipeline E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -95,7 +95,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
                 timeout=25.0
             )
             
-            self.logger.info("✅ WebSocket connected for event pipeline test")
+            self.logger.info(" PASS:  WebSocket connected for event pipeline test")
             
             # Send agent request that will trigger all event types
             agent_request = {
@@ -113,7 +113,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
             
             request_sent_time = time.time()
             await websocket.send(json.dumps(agent_request))
-            self.logger.info("📤 Agent request sent for event pipeline test")
+            self.logger.info("[U+1F4E4] Agent request sent for event pipeline test")
             
             # Collect all events with timing
             events = await self.collect_events_with_timing(websocket, timeout=120.0)
@@ -155,10 +155,10 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
             assert "data" in agent_completed_event, "agent_completed should have data"
             assert "result" in agent_completed_event["data"], "agent_completed should have result"
             
-            self.logger.info(f"✅ Event Pipeline Test - All 5 events delivered in {last_event_time:.1f}s")
+            self.logger.info(f" PASS:  Event Pipeline Test - All 5 events delivered in {last_event_time:.1f}s")
             
         except Exception as e:
-            self.logger.error(f"❌ Event Delivery Pipeline test failed: {e}")
+            self.logger.error(f" FAIL:  Event Delivery Pipeline test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -166,7 +166,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
     @pytest.mark.staging
     async def test_websocket_connection_recovery(self, real_services):
         """Test WebSocket connection recovery and reconnection scenarios."""
-        self.logger.info("🚀 Starting WebSocket Connection Recovery E2E Test")
+        self.logger.info("[U+1F680] Starting WebSocket Connection Recovery E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -204,7 +204,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
         
         # Simulate connection drop
         await websocket1.close()
-        self.logger.info("🔄 Simulated connection drop")
+        self.logger.info(" CYCLE:  Simulated connection drop")
         
         # Wait brief moment
         await asyncio.sleep(2)
@@ -215,7 +215,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
             additional_headers=websocket_headers
         )
         
-        self.logger.info("✅ Reconnected after simulated drop")
+        self.logger.info(" PASS:  Reconnected after simulated drop")
         
         # Send new request after reconnection
         recovery_request = {
@@ -254,7 +254,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
         recovery_has_events = len(recovery_events) > 0
         assert initial_has_events and recovery_has_events, "Both sessions should have events"
         
-        self.logger.info("✅ WebSocket Connection Recovery Test completed")
+        self.logger.info(" PASS:  WebSocket Connection Recovery Test completed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -262,7 +262,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
     @pytest.mark.staging
     async def test_realtime_agent_status_updates(self, real_services, real_llm):
         """Test real-time agent status updates during execution."""
-        self.logger.info("🚀 Starting Real-Time Agent Status Updates E2E Test")
+        self.logger.info("[U+1F680] Starting Real-Time Agent Status Updates E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -335,10 +335,10 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
                 time_spread = last_thinking - first_thinking
                 assert time_spread > 5.0, "Status updates should be spread over time, not all at once"
             
-            self.logger.info(f"✅ Real-Time Status Updates - {len(thinking_events)} status events")
+            self.logger.info(f" PASS:  Real-Time Status Updates - {len(thinking_events)} status events")
             
         except Exception as e:
-            self.logger.error(f"❌ Real-Time Status Updates test failed: {e}")
+            self.logger.error(f" FAIL:  Real-Time Status Updates test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -346,7 +346,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
     @pytest.mark.staging
     async def test_message_ordering_and_consistency(self, real_services):
         """Test WebSocket message ordering and consistency."""
-        self.logger.info("🚀 Starting Message Ordering and Consistency E2E Test")
+        self.logger.info("[U+1F680] Starting Message Ordering and Consistency E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -383,7 +383,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
                 send_time = time.time()
                 await websocket.send(json.dumps(request))
                 request_times.append(send_time)
-                self.logger.info(f"📤 Sent request {i+1}")
+                self.logger.info(f"[U+1F4E4] Sent request {i+1}")
                 await asyncio.sleep(2)  # Small delay between requests
             
             # Collect all events maintaining order
@@ -433,10 +433,10 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
             for req_type in required_types:
                 assert req_type in event_types, f"Missing {req_type} in event sequence"
             
-            self.logger.info(f"✅ Message Ordering Test - {len(all_events)} events in correct order")
+            self.logger.info(f" PASS:  Message Ordering Test - {len(all_events)} events in correct order")
             
         except Exception as e:
-            self.logger.error(f"❌ Message Ordering test failed: {e}")
+            self.logger.error(f" FAIL:  Message Ordering test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -444,7 +444,7 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
     @pytest.mark.staging
     async def test_connection_scaling_under_load(self, real_services):
         """Test WebSocket connection scaling with multiple concurrent connections."""
-        self.logger.info("🚀 Starting Connection Scaling Under Load E2E Test")
+        self.logger.info("[U+1F680] Starting Connection Scaling Under Load E2E Test")
         
         # Create multiple users for load testing
         num_users = 3  # Conservative for staging environment
@@ -546,8 +546,8 @@ class TestWebSocketRealTimeUpdates(BaseE2ETest):
         
         total_events = sum(s["events"] for s in successful_sessions)
         
-        self.logger.info(f"✅ Connection Scaling Test - {len(successful_sessions)}/{num_users} sessions successful")
-        self.logger.info(f"📊 Load Test Stats - {total_events} total events, {avg_duration:.1f}s avg duration")
+        self.logger.info(f" PASS:  Connection Scaling Test - {len(successful_sessions)}/{num_users} sessions successful")
+        self.logger.info(f" CHART:  Load Test Stats - {total_events} total events, {avg_duration:.1f}s avg duration")
         
     async def teardown_method(self):
         """Cleanup after each test method."""

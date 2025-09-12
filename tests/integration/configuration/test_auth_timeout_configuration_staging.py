@@ -109,7 +109,7 @@ class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
         )
         
         # Document configuration issue
-        print(f"\n❌ IDENTICAL ENVIRONMENT CONFIGURATION DETECTED:")
+        print(f"\n FAIL:  IDENTICAL ENVIRONMENT CONFIGURATION DETECTED:")
         print(f"\n   STAGING Environment:")
         print(f"   - Timeout: {staging_config['timeout_seconds']}s (needs 8+ for cold start)")
         print(f"   - Retry count: {staging_config['retry_count']}")
@@ -122,7 +122,7 @@ class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
         print(f"   - Retry delay: {production_config['retry_delay']}s")
         print(f"   - Critical: {production_config['is_critical']}")
         
-        print(f"\n❌ CONFIGURATION ISSUES:")
+        print(f"\n FAIL:  CONFIGURATION ISSUES:")
         print(f"   - Both environments use identical timeout: {staging_config['timeout_seconds']}s")
         print(f"   - Staging cold starts need: 8+ seconds")
         print(f"   - Production optimized startup: 5s may be adequate")
@@ -171,7 +171,7 @@ class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
         database_config = service_criticality.get('database', {})
         
         # Document critical service analysis
-        print(f"\n❌ CRITICAL SERVICE BYPASS ANALYSIS:")
+        print(f"\n FAIL:  CRITICAL SERVICE BYPASS ANALYSIS:")
         print(f"\n   AUTH VALIDATION (blocking WebSocket):")
         print(f"   - Critical: {auth_config['is_critical']}")
         print(f"   - Timeout: {auth_config['timeout_seconds']}s")
@@ -190,7 +190,7 @@ class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
             print(f"   - Timeout: {database_config['timeout_seconds']}s")
             print(f"   - Bypass logic: {database_config['has_bypass_logic']}")
         
-        print(f"\n❌ GRACEFUL DEGRADATION ISSUES:")
+        print(f"\n FAIL:  GRACEFUL DEGRADATION ISSUES:")
         print(f"   - Auth validation: No bypass logic for staging cold starts")
         print(f"   - WebSocket impact: Hard failures reject connections")
         print(f"   - Golden Path impact: Cannot validate user flow in staging")
@@ -287,7 +287,7 @@ class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
             )
         
         # Document missing environment configuration
-        print(f"\n❌ MISSING ENVIRONMENT CONFIGURATION:")
+        print(f"\n FAIL:  MISSING ENVIRONMENT CONFIGURATION:")
         print(f"   - Expected environment variables: {len(expected_env_vars)}")
         print(f"   - Found timeout configurations: {len(found_timeout_configs)}")
         print(f"   - Environment variables tested: {expected_env_vars}")
@@ -295,7 +295,7 @@ class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
         print(f"   - Configuration test: AUTH_VALIDATION_TIMEOUT_STAGING=10.0 ignored")
         print(f"   - Actual timeout: {auth_check.timeout_seconds}s (hardcoded)")
         
-        print(f"\n❌ CONFIGURATION SYSTEM ISSUES:")
+        print(f"\n FAIL:  CONFIGURATION SYSTEM ISSUES:")
         print(f"   - No environment variable control for auth timeouts")
         print(f"   - Cannot tune staging timeouts without code changes")
         print(f"   - Hardcoded values prevent environment-specific optimization")
@@ -353,10 +353,10 @@ class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
         )
         
         # Document timeout configuration analysis
-        print(f"\n❌ TIMEOUT CONFIGURATION MISMATCH:")
+        print(f"\n FAIL:  TIMEOUT CONFIGURATION MISMATCH:")
         print(f"\n   AUTH VALIDATION:")
         print(f"   - Base timeout: {auth_base_timeout}s")
-        print(f"   - Retry time: {auth_retry_time}s ({auth_check.retry_count} × {auth_check.retry_delay}s)")
+        print(f"   - Retry time: {auth_retry_time}s ({auth_check.retry_count}  x  {auth_check.retry_delay}s)")
         print(f"   - Total auth time: {auth_total_time}s")
         print(f"   - Staging limit: {staging_websocket_readiness_limit}s")
         print(f"   - Mismatch: Auth time may exceed staging WebSocket limit")
@@ -372,7 +372,7 @@ class TestAuthTimeoutConfigurationStaging(SSotBaseTestCase):
         print(f"   - Reasonable staging limit: {reasonable_total_limit}s")
         print(f"   - WebSocket acceptance limit: {staging_websocket_readiness_limit}s")
         
-        print(f"\n❌ CONFIGURATION ISSUES:")
+        print(f"\n FAIL:  CONFIGURATION ISSUES:")
         print(f"   - Auth timeout doesn't consider WebSocket readiness needs")
         print(f"   - Cumulative timeouts may block WebSocket connections")
         print(f"   - No coordination between service and WebSocket timeouts")

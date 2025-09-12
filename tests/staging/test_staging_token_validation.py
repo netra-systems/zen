@@ -309,7 +309,7 @@ class StagingTokenValidationTestRunner:
         
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all token validation tests."""
-        print(f"🔐 Running Token Validation Tests")
+        print(f"[U+1F510] Running Token Validation Tests")
         print(f"Environment: {self.environment}")
         print(f"Auth URL: {StagingConfig.get_service_url('auth')}")
         print(f"Backend URL: {StagingConfig.get_service_url('netra_backend')}")
@@ -326,27 +326,27 @@ class StagingTokenValidationTestRunner:
         if token_gen_result["success"]:
             access_token = token_gen_result["tokens"]["access_token"]
             refresh_token = token_gen_result["tokens"]["refresh_token"]
-            print(f"     ✅ Token generated: {len(access_token) if access_token else 0} chars")
+            print(f"      PASS:  Token generated: {len(access_token) if access_token else 0} chars")
             
             # Test 7.2: Backend token validation
             backend_validation = await self.test_token_validation_backend(access_token)
             results["backend_validation"] = backend_validation
-            print(f"     ✅ Backend validation: {backend_validation['token_accepted']}")
-            print(f"     📋 JWT secret sync: {backend_validation['jwt_secret_sync']}")
+            print(f"      PASS:  Backend validation: {backend_validation['token_accepted']}")
+            print(f"     [U+1F4CB] JWT secret sync: {backend_validation['jwt_secret_sync']}")
             
             # Test 7.3: Auth service token validation
             auth_validation = await self.test_token_validation_auth(access_token)
             results["auth_validation"] = auth_validation
-            print(f"     ✅ Auth validation: {auth_validation['token_valid']}")
+            print(f"      PASS:  Auth validation: {auth_validation['token_valid']}")
             
         else:
-            print(f"     ❌ Token generation failed: {token_gen_result.get('error', 'Unknown error')}")
+            print(f"      FAIL:  Token generation failed: {token_gen_result.get('error', 'Unknown error')}")
             
         # Test 7.4: Token refresh
         refresh_result = await self.test_token_refresh(refresh_token)
         results["token_refresh"] = refresh_result
         refresh_working = refresh_result["success"] or refresh_result.get("skipped", False)
-        print(f"     ✅ Token refresh: {refresh_working}")
+        print(f"      PASS:  Token refresh: {refresh_working}")
         
         # Test 7.5: Token expiry handling
         expiry_results = await self.test_token_expiry_handling()
@@ -357,7 +357,7 @@ class StagingTokenValidationTestRunner:
             for key, result in expiry_results.items() 
             if key != "error"
         )
-        print(f"     ✅ Expiry handling: {expiry_handling_correct}")
+        print(f"      PASS:  Expiry handling: {expiry_handling_correct}")
         
         # Calculate summary
         core_token_functions = [
@@ -384,12 +384,12 @@ class StagingTokenValidationTestRunner:
         }
         
         print()
-        print(f"📊 Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed")
-        print(f"🔐 Token system: {'✅ Working' if results['summary']['core_token_system_working'] else '❌ Broken'}")
-        print(f"🔄 JWT secret sync: {'✅ Synchronized' if jwt_secret_synchronized else '❌ Mismatch'}")
+        print(f" CHART:  Summary: {results['summary']['passed_tests']}/{results['summary']['total_tests']} tests passed")
+        print(f"[U+1F510] Token system: {' PASS:  Working' if results['summary']['core_token_system_working'] else ' FAIL:  Broken'}")
+        print(f" CYCLE:  JWT secret sync: {' PASS:  Synchronized' if jwt_secret_synchronized else ' FAIL:  Mismatch'}")
         
         if results["summary"]["critical_token_failure"]:
-            print("🚨 CRITICAL: Token validation system failure detected!")
+            print(" ALERT:  CRITICAL: Token validation system failure detected!")
             
         return results
 

@@ -1,7 +1,7 @@
 """
 MISSION CRITICAL: WebSocket Critical Failure Reproduction Tests for Golden Path
 
-🚨 MISSION CRITICAL TEST 🚨
+ ALERT:  MISSION CRITICAL TEST  ALERT: 
 This test suite reproduces and validates fixes for the 3 P1 critical failures
 that have impacted $120K+ MRR functionality in the golden path user flow.
 
@@ -42,7 +42,7 @@ from shared.isolated_environment import get_env
 
 class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
     """
-    🚨 MISSION CRITICAL TEST SUITE 🚨
+     ALERT:  MISSION CRITICAL TEST SUITE  ALERT: 
     
     Reproduces the 3 P1 critical WebSocket failures that have caused business impact.
     These tests MUST fail before fixes and MUST pass after fixes are implemented.
@@ -94,10 +94,10 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
                     await WebSocketTestHelpers.close_test_connection(connection)
                 except Exception as cleanup_error:
                     # Log but don't fail on cleanup errors
-                    print(f"⚠️  Connection cleanup warning: {cleanup_error}")
+                    print(f" WARNING: [U+FE0F]  Connection cleanup warning: {cleanup_error}")
             
         except Exception as e:
-            print(f"⚠️  Critical test cleanup error: {e}")
+            print(f" WARNING: [U+FE0F]  Critical test cleanup error: {e}")
         
         await super().async_teardown_method(method)
     
@@ -107,7 +107,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_websocket_connection_timeout_failure_reproduction(self):
         """
-        🚨 P1 CRITICAL FAILURE REPRODUCTION: WebSocket Connection Timeouts
+         ALERT:  P1 CRITICAL FAILURE REPRODUCTION: WebSocket Connection Timeouts
         
         Reproduces the staging/production WebSocket connection timeout failures
         that have blocked users from accessing chat functionality.
@@ -147,7 +147,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
                 )
         except Exception as auth_error:
             # This is EXPECTED in failure reproduction - authentication should be challenging
-            print(f"📊 EXPECTED AUTH CHALLENGE (simulating failure): {auth_error}")
+            print(f" CHART:  EXPECTED AUTH CHALLENGE (simulating failure): {auth_error}")
             # Use fallback token for connection testing
             jwt_token = self.auth_helper.create_test_jwt_token()
         
@@ -255,7 +255,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
         if success_rate == 0:
             # TOTAL FAILURE - The P1 critical issue is ACTIVE
             pytest.fail(
-                f"🚨 P1 CRITICAL FAILURE ACTIVE: WebSocket connections completely failing\n"
+                f" ALERT:  P1 CRITICAL FAILURE ACTIVE: WebSocket connections completely failing\n"
                 f"Success Rate: {success_rate:.1%} (0% = system down)\n"
                 f"Timeout Failures: {timeout_failures}/{total_attempts}\n"
                 f"Auth Failures: {auth_failures}\n"
@@ -266,7 +266,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
         elif success_rate < 0.5:
             # PARTIAL FAILURE - The P1 critical issue is PARTIALLY ACTIVE
             pytest.fail(
-                f"🚨 P1 CRITICAL FAILURE PARTIALLY ACTIVE: High WebSocket failure rate\n"
+                f" ALERT:  P1 CRITICAL FAILURE PARTIALLY ACTIVE: High WebSocket failure rate\n"
                 f"Success Rate: {success_rate:.1%} (< 50% = unacceptable)\n"
                 f"Timeout Rate: {timeout_rate:.1%}\n"
                 f"This indicates the P1 connection issue is not fully resolved!\n"
@@ -276,18 +276,18 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
         elif timeout_rate > 0.3:
             # HIGH TIMEOUT RATE - Indicates connection instability
             pytest.fail(
-                f"🚨 P1 CONNECTION INSTABILITY DETECTED: High timeout rate\n"
+                f" ALERT:  P1 CONNECTION INSTABILITY DETECTED: High timeout rate\n"
                 f"Timeout Rate: {timeout_rate:.1%} (> 30% = unstable)\n"
                 f"Success Rate: {success_rate:.1%}\n"
                 f"This suggests the P1 timeout issue may regress under load!"
             )
         
         # SUCCESS CASE: P1 critical failure is RESOLVED
-        print(f"\n✅ P1 CRITICAL FAILURE PROTECTION: WebSocket Connection Test PASSED")
-        print(f"   🔗 Success Rate: {success_rate:.1%}")
-        print(f"   ⏱️  Timeout Rate: {timeout_rate:.1%}")
-        print(f"   🕒 Total Test Time: {total_test_time:.2f}s")
-        print(f"   💰 $120K+ MRR: PROTECTED from connection failures")
+        print(f"\n PASS:  P1 CRITICAL FAILURE PROTECTION: WebSocket Connection Test PASSED")
+        print(f"   [U+1F517] Success Rate: {success_rate:.1%}")
+        print(f"   [U+23F1][U+FE0F]  Timeout Rate: {timeout_rate:.1%}")
+        print(f"   [U+1F552] Total Test Time: {total_test_time:.2f}s")
+        print(f"   [U+1F4B0] $120K+ MRR: PROTECTED from connection failures")
         
         # Cleanup successful connections
         for attempt_data in connection_attempts:
@@ -301,7 +301,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_missing_websocket_events_failure_reproduction(self):
         """
-        🚨 P1 CRITICAL FAILURE REPRODUCTION: Missing WebSocket Events
+         ALERT:  P1 CRITICAL FAILURE REPRODUCTION: Missing WebSocket Events
         
         Reproduces the critical WebSocket event delivery failures that have
         caused chat experience degradation and user abandonment.
@@ -339,7 +339,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
                 self.active_connections.append(connection)
                 
         except Exception as conn_error:
-            pytest.fail(f"🚨 SETUP FAILURE: Cannot establish connection for event testing: {conn_error}")
+            pytest.fail(f" ALERT:  SETUP FAILURE: Cannot establish connection for event testing: {conn_error}")
         
         # Execute multiple message scenarios to test event delivery
         event_test_scenarios = [
@@ -490,7 +490,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
             ])
             
             pytest.fail(
-                f"🚨 P1 CRITICAL FAILURE ACTIVE: Missing WebSocket Events Detected\n"
+                f" ALERT:  P1 CRITICAL FAILURE ACTIVE: Missing WebSocket Events Detected\n"
                 f"Success Rate: {success_rate:.1%}\n"
                 f"Critical Failures: {len(critical_failures_detected)}\n"
                 f"Failure Details:\n{failure_summary}\n"
@@ -502,18 +502,18 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
         elif success_rate < 1.0:
             # PARTIAL EVENT DELIVERY FAILURE
             pytest.fail(
-                f"🚨 P1 EVENT DELIVERY INSTABILITY: Some scenarios failed\n"
+                f" ALERT:  P1 EVENT DELIVERY INSTABILITY: Some scenarios failed\n"
                 f"Success Rate: {success_rate:.1%} (must be 100%)\n"
                 f"Failed Scenarios: {total_scenarios - successful_scenarios}\n"
                 f"This indicates event delivery is not fully reliable!"
             )
         
         # SUCCESS CASE: P1 event delivery failure is RESOLVED
-        print(f"\n✅ P1 CRITICAL FAILURE PROTECTION: WebSocket Event Delivery Test PASSED")
-        print(f"   📡 Success Rate: {success_rate:.1%}")
-        print(f"   🎯 Scenarios Tested: {total_scenarios}")
-        print(f"   ⏱️  Total Test Time: {total_event_test_time:.2f}s")
-        print(f"   💰 $120K+ MRR: PROTECTED from event delivery failures")
+        print(f"\n PASS:  P1 CRITICAL FAILURE PROTECTION: WebSocket Event Delivery Test PASSED")
+        print(f"   [U+1F4E1] Success Rate: {success_rate:.1%}")
+        print(f"    TARGET:  Scenarios Tested: {total_scenarios}")
+        print(f"   [U+23F1][U+FE0F]  Total Test Time: {total_event_test_time:.2f}s")
+        print(f"   [U+1F4B0] $120K+ MRR: PROTECTED from event delivery failures")
         
         # Cleanup
         await WebSocketTestHelpers.close_test_connection(connection)
@@ -526,7 +526,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_race_condition_multi_user_failure_reproduction(self):
         """
-        🚨 P1 CRITICAL FAILURE REPRODUCTION: Multi-User Race Conditions
+         ALERT:  P1 CRITICAL FAILURE REPRODUCTION: Multi-User Race Conditions
         
         Reproduces the race condition failures that occur when multiple users
         access WebSocket functionality simultaneously, causing system instability.
@@ -543,7 +543,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
         # Configure multi-user race condition test
         concurrent_users = 5  # Enough to trigger race conditions
         
-        print(f"\n🏁 RACE CONDITION TEST: Starting {concurrent_users} concurrent users")
+        print(f"\n[U+1F3C1] RACE CONDITION TEST: Starting {concurrent_users} concurrent users")
         
         # Create user contexts for concurrent testing
         user_contexts = []
@@ -725,7 +725,7 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
             ])
             
             pytest.fail(
-                f"🚨 P1 CRITICAL FAILURE ACTIVE: Multi-User Race Conditions Detected\n"
+                f" ALERT:  P1 CRITICAL FAILURE ACTIVE: Multi-User Race Conditions Detected\n"
                 f"Success Rate: {success_rate:.1%}\n"
                 f"Failed Users: {failed_users}/{concurrent_users}\n"
                 f"Race Condition Indicators: {len(race_condition_indicators)}\n"
@@ -738,18 +738,18 @@ class TestWebSocketCriticalFailureReproduction(SSotAsyncTestCase):
         elif success_rate < 0.8:
             # HIGH FAILURE RATE INDICATES INSTABILITY
             pytest.fail(
-                f"🚨 P1 SYSTEM INSTABILITY: High failure rate under concurrent load\n"
+                f" ALERT:  P1 SYSTEM INSTABILITY: High failure rate under concurrent load\n"
                 f"Success Rate: {success_rate:.1%} (< 80% = unstable)\n"
                 f"Failed Users: {failed_users}/{concurrent_users}\n"
                 f"This indicates the system cannot handle multi-user scenarios reliably!"
             )
         
         # SUCCESS CASE: P1 race condition failure is RESOLVED
-        print(f"\n✅ P1 CRITICAL FAILURE PROTECTION: Multi-User Race Condition Test PASSED")
-        print(f"   👥 Success Rate: {success_rate:.1%}")
-        print(f"   🏁 Concurrent Users: {concurrent_users}")
-        print(f"   ⏱️  Total Test Time: {total_race_test_time:.2f}s")
-        print(f"   💰 $120K+ MRR: PROTECTED from race condition failures")
+        print(f"\n PASS:  P1 CRITICAL FAILURE PROTECTION: Multi-User Race Condition Test PASSED")
+        print(f"   [U+1F465] Success Rate: {success_rate:.1%}")
+        print(f"   [U+1F3C1] Concurrent Users: {concurrent_users}")
+        print(f"   [U+23F1][U+FE0F]  Total Test Time: {total_race_test_time:.2f}s")
+        print(f"   [U+1F4B0] $120K+ MRR: PROTECTED from race condition failures")
     
     async def _get_reliable_token(self, email: str) -> str:
         """Get a reliable authentication token for testing."""

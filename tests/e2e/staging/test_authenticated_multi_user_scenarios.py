@@ -16,7 +16,7 @@ This test suite validates multi-user authentication and isolation scenarios:
 5. Authorization boundary enforcement
 6. Session management and cleanup
 
-🚨 CRITICAL E2E REQUIREMENTS:
+ ALERT:  CRITICAL E2E REQUIREMENTS:
 - ALL tests use REAL authentication (JWT/OAuth) - NO EXCEPTIONS
 - Multi-user isolation must be perfect - NO data leakage
 - Real WebSocket connections for each user
@@ -131,7 +131,7 @@ class TestAuthenticatedMultiUserScenarios(BaseE2ETest):
             # Register cleanup for this session
             self.register_cleanup_task(user_session.cleanup)
         
-        self.logger.info(f"✅ Multi-user environment setup complete - {len(self.user_sessions)} authenticated users")
+        self.logger.info(f" PASS:  Multi-user environment setup complete - {len(self.user_sessions)} authenticated users")
         
     async def test_concurrent_authenticated_websocket_connections(self):
         """
@@ -221,10 +221,10 @@ class TestAuthenticatedMultiUserScenarios(BaseE2ETest):
         assert avg_connection_time <= 15.0, f"Average connection time too slow: {avg_connection_time:.1f}s"
         assert max_connection_time <= 30.0, f"Maximum connection time too slow: {max_connection_time:.1f}s"
         
-        self.logger.info(f"✅ Concurrent authenticated WebSocket connections validated")
-        self.logger.info(f"👥 Successful connections: {len(successful_connections)}")
-        self.logger.info(f"⏱️ Average connection time: {avg_connection_time:.1f}s")
-        self.logger.info(f"⏱️ Maximum connection time: {max_connection_time:.1f}s")
+        self.logger.info(f" PASS:  Concurrent authenticated WebSocket connections validated")
+        self.logger.info(f"[U+1F465] Successful connections: {len(successful_connections)}")
+        self.logger.info(f"[U+23F1][U+FE0F] Average connection time: {avg_connection_time:.1f}s")
+        self.logger.info(f"[U+23F1][U+FE0F] Maximum connection time: {max_connection_time:.1f}s")
         
     async def test_multi_user_agent_execution_isolation(self):
         """
@@ -365,9 +365,9 @@ class TestAuthenticatedMultiUserScenarios(BaseE2ETest):
                     assert user_a_secret not in user_b_all_data_str, f"USER ISOLATION BREACH: User {user_data_a['user_index']} secret found in User {user_data_b['user_index']} data"
                     assert user_a_api_key not in user_b_all_data_str, f"USER ISOLATION BREACH: User {user_data_a['user_index']} API key found in User {user_data_b['user_index']} data"
         
-        self.logger.info(f"✅ Multi-user agent execution isolation validated - NO DATA LEAKAGE")
-        self.logger.info(f"👥 Successful isolated executions: {len(successful_executions)}")
-        self.logger.info(f"🔒 Cross-contamination checks: {len(all_sensitive_data) * (len(all_sensitive_data) - 1)} validations passed")
+        self.logger.info(f" PASS:  Multi-user agent execution isolation validated - NO DATA LEAKAGE")
+        self.logger.info(f"[U+1F465] Successful isolated executions: {len(successful_executions)}")
+        self.logger.info(f"[U+1F512] Cross-contamination checks: {len(all_sensitive_data) * (len(all_sensitive_data) - 1)} validations passed")
         
     async def test_authentication_token_validation_and_refresh(self):
         """
@@ -487,9 +487,9 @@ class TestAuthenticatedMultiUserScenarios(BaseE2ETest):
             success_rate = sum(results) / len(results) if results else 0
             assert success_rate >= 0.9, f"Authentication test {test_name} has low success rate: {success_rate:.1%}"
         
-        self.logger.info(f"✅ Authentication token validation and refresh completed")
-        self.logger.info(f"👥 Users tested: {len(successful_auth_tests)}")
-        self.logger.info(f"🔑 Authentication tests: {list(all_test_results.keys())}")
+        self.logger.info(f" PASS:  Authentication token validation and refresh completed")
+        self.logger.info(f"[U+1F465] Users tested: {len(successful_auth_tests)}")
+        self.logger.info(f"[U+1F511] Authentication tests: {list(all_test_results.keys())}")
         
     async def test_session_management_and_cleanup(self):
         """
@@ -619,10 +619,10 @@ class TestAuthenticatedMultiUserScenarios(BaseE2ETest):
         for user_session in test_users:
             assert user_session.websocket is None or user_session.websocket.closed, f"WebSocket not properly cleaned up for user {user_session.user_context.user_id}"
         
-        self.logger.info(f"✅ Session management and cleanup validation completed")
-        self.logger.info(f"👥 Successful session lifecycles: {len(successful_lifecycles)}")
+        self.logger.info(f" PASS:  Session management and cleanup validation completed")
+        self.logger.info(f"[U+1F465] Successful session lifecycles: {len(successful_lifecycles)}")
         average_duration = sum(result["total_session_duration"] for result in successful_lifecycles) / len(successful_lifecycles)
-        self.logger.info(f"⏱️ Average session duration: {average_duration:.1f}s")
+        self.logger.info(f"[U+23F1][U+FE0F] Average session duration: {average_duration:.1f}s")
         
     async def test_concurrent_load_with_authentication(self):
         """
@@ -757,11 +757,11 @@ class TestAuthenticatedMultiUserScenarios(BaseE2ETest):
         average_user_duration = total_duration / len(successful_users) if successful_users else 0
         assert average_user_duration <= 60.0, f"Average user session too long: {average_user_duration:.1f}s"
         
-        self.logger.info(f"✅ Concurrent load test with authentication completed")
-        self.logger.info(f"👥 Successful concurrent users: {len(successful_users)}/{len(load_test_users)}")
-        self.logger.info(f"⚡ Total operations completed: {total_operations}")
-        self.logger.info(f"📊 Overall success rate: {overall_success_rate:.1%}")
-        self.logger.info(f"⏱️ Average session duration: {average_user_duration:.1f}s")
+        self.logger.info(f" PASS:  Concurrent load test with authentication completed")
+        self.logger.info(f"[U+1F465] Successful concurrent users: {len(successful_users)}/{len(load_test_users)}")
+        self.logger.info(f" LIGHTNING:  Total operations completed: {total_operations}")
+        self.logger.info(f" CHART:  Overall success rate: {overall_success_rate:.1%}")
+        self.logger.info(f"[U+23F1][U+FE0F] Average session duration: {average_user_duration:.1f}s")
 
 
 # Integration with pytest for automated test discovery

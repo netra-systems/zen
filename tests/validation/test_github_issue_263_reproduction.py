@@ -10,7 +10,7 @@ This test file reproduces the specific failing behavior described in GitHub issu
 These tests MUST FAIL before the fix and PASS after the fix is applied.
 
 Business Value: Platform/Internal - Validates test infrastructure reliability
-Critical Path: Test discovery → Test execution → Issue reproduction → Fix validation
+Critical Path: Test discovery  ->  Test execution  ->  Issue reproduction  ->  Fix validation
 """
 
 import asyncio

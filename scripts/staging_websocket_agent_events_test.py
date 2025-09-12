@@ -57,7 +57,7 @@ class WebSocketEventCapture:
         self.events.append(event_with_timestamp)
         self.event_types.add(event_type)
         
-        print(f"📨 Event captured: {event_type} (t+{event_with_timestamp['relative_time']:.3f}s)")
+        print(f"[U+1F4E8] Event captured: {event_type} (t+{event_with_timestamp['relative_time']:.3f}s)")
     
     def has_required_events(self) -> bool:
         """Check if all required events were received"""
@@ -82,7 +82,7 @@ class WebSocketEventCapture:
 
 async def test_websocket_connection_and_events():
     """Test WebSocket connection and event capture"""
-    print("\n🔌 Testing WebSocket Connection and Event Capture...")
+    print("\n[U+1F50C] Testing WebSocket Connection and Event Capture...")
     
     capture = WebSocketEventCapture()
     test_duration = 30  # seconds
@@ -96,10 +96,10 @@ async def test_websocket_connection_and_events():
             ping_timeout=10
         ) as websocket:
             capture.connected = True
-            print("✅ WebSocket connection established")
+            print(" PASS:  WebSocket connection established")
             
             # Listen for initial connection messages
-            print("🔄 Listening for WebSocket events...")
+            print(" CYCLE:  Listening for WebSocket events...")
             start_listening = time.time()
             
             try:
@@ -117,26 +117,26 @@ async def test_websocket_connection_and_events():
                             if (event_data.get("type") == "system_message" and 
                                 event_data.get("data", {}).get("event") == "connection_established"):
                                 capture.connection_ready = True
-                                print("✅ WebSocket connection confirmed ready")
+                                print(" PASS:  WebSocket connection confirmed ready")
                                 
                         except json.JSONDecodeError:
-                            print(f"📄 Non-JSON message received: {message[:100]}...")
+                            print(f"[U+1F4C4] Non-JSON message received: {message[:100]}...")
                             
                     except asyncio.TimeoutError:
-                        print("⏱️  No new messages (timeout)")
+                        print("[U+23F1][U+FE0F]  No new messages (timeout)")
                         # Send a ping to keep connection alive
                         await websocket.ping()
                         
             except websockets.exceptions.ConnectionClosed:
-                print("🔌 WebSocket connection closed by server")
+                print("[U+1F50C] WebSocket connection closed by server")
             except Exception as e:
-                print(f"⚠️  Error during message listening: {e}")
+                print(f" WARNING: [U+FE0F]  Error during message listening: {e}")
             
             elapsed = time.time() - start_listening
-            print(f"📊 Finished listening after {elapsed:.1f}s")
+            print(f" CHART:  Finished listening after {elapsed:.1f}s")
             
     except Exception as e:
-        print(f"❌ WebSocket connection failed: {e}")
+        print(f" FAIL:  WebSocket connection failed: {e}")
         return False
     
     return capture
@@ -144,7 +144,7 @@ async def test_websocket_connection_and_events():
 
 async def test_agent_event_simulation():
     """Simulate sending a message that should trigger agent events"""
-    print("\n🤖 Testing Agent Event Simulation...")
+    print("\n[U+1F916] Testing Agent Event Simulation...")
     
     capture = WebSocketEventCapture()
     
@@ -153,7 +153,7 @@ async def test_agent_event_simulation():
             STAGING_WEBSOCKET_URL,
             close_timeout=15
         ) as websocket:
-            print("✅ Connected for agent event testing")
+            print(" PASS:  Connected for agent event testing")
             
             # Wait for connection ready
             await asyncio.sleep(2)
@@ -169,11 +169,11 @@ async def test_agent_event_simulation():
                 }
             }
             
-            print(f"📤 Sending test message: {test_message['data']['message']}")
+            print(f"[U+1F4E4] Sending test message: {test_message['data']['message']}")
             await websocket.send(json.dumps(test_message))
             
             # Listen for agent events
-            print("🔄 Listening for agent events...")
+            print(" CYCLE:  Listening for agent events...")
             listen_duration = 60  # Give more time for agent processing
             start_time = time.time()
             
@@ -187,23 +187,23 @@ async def test_agent_event_simulation():
                         
                         # Check if we've received all required events
                         if capture.has_required_events():
-                            print("🎉 All required agent events received!")
+                            print(" CELEBRATION:  All required agent events received!")
                             break
                             
                     except json.JSONDecodeError:
-                        print(f"📄 Non-JSON response: {message[:100]}...")
+                        print(f"[U+1F4C4] Non-JSON response: {message[:100]}...")
                         
                 except asyncio.TimeoutError:
-                    print("⏱️  Waiting for more events...")
+                    print("[U+23F1][U+FE0F]  Waiting for more events...")
                 except websockets.exceptions.ConnectionClosed:
-                    print("🔌 Connection closed during agent test")
+                    print("[U+1F50C] Connection closed during agent test")
                     break
             
             elapsed = time.time() - start_time
-            print(f"📊 Agent event test completed after {elapsed:.1f}s")
+            print(f" CHART:  Agent event test completed after {elapsed:.1f}s")
             
     except Exception as e:
-        print(f"❌ Agent event simulation failed: {e}")
+        print(f" FAIL:  Agent event simulation failed: {e}")
         return None
     
     return capture
@@ -212,13 +212,13 @@ async def test_agent_event_simulation():
 async def main():
     """Run comprehensive WebSocket agent events test"""
     print("=" * 80)
-    print("🚨 MISSION CRITICAL: WebSocket Agent Events Test")
+    print(" ALERT:  MISSION CRITICAL: WebSocket Agent Events Test")
     print("Business Impact: $500K+ ARR - Core Chat Functionality")
     print("Environment: Staging")
     print(f"Timestamp: {datetime.now().isoformat()}")
     print("=" * 80)
     
-    print(f"🎯 Testing for {len(REQUIRED_EVENTS)} REQUIRED events:")
+    print(f" TARGET:  Testing for {len(REQUIRED_EVENTS)} REQUIRED events:")
     for i, event in enumerate(REQUIRED_EVENTS, 1):
         print(f"   {i}. {event}")
     
@@ -232,7 +232,7 @@ async def main():
     connection_capture = await test_websocket_connection_and_events()
     
     if not connection_capture:
-        print("❌ Connection test failed - aborting")
+        print(" FAIL:  Connection test failed - aborting")
         return
     
     # Test 2: Agent Event Simulation
@@ -246,34 +246,34 @@ async def main():
     
     # Results Analysis
     print(f"\n{'='*80}")
-    print("🏁 WEBSOCKET AGENT EVENTS TEST RESULTS")
+    print("[U+1F3C1] WEBSOCKET AGENT EVENTS TEST RESULTS")
     print(f"{'='*80}")
     
     # Connection Test Results
     if connection_capture:
         conn_summary = connection_capture.get_event_summary()
-        print(f"🔌 Connection Test:")
-        print(f"   Connected: ✅")
-        print(f"   Connection Ready: {'✅' if connection_capture.connection_ready else '❌'}")
+        print(f"[U+1F50C] Connection Test:")
+        print(f"   Connected:  PASS: ")
+        print(f"   Connection Ready: {' PASS: ' if connection_capture.connection_ready else ' FAIL: '}")
         print(f"   Events Captured: {conn_summary['total_events']}")
         print(f"   Event Types: {conn_summary['event_types']}")
     
     # Agent Test Results
     if agent_capture:
         agent_summary = agent_capture.get_event_summary()
-        print(f"\n🤖 Agent Event Test:")
+        print(f"\n[U+1F916] Agent Event Test:")
         print(f"   Events Captured: {agent_summary['total_events']}")
         print(f"   Required Events: {agent_summary['required_events_received']}/{agent_summary['required_events_total']}")
         print(f"   Event Types Received: {agent_summary['event_types']}")
         
         if agent_summary['missing_events']:
-            print(f"   ❌ Missing Events: {agent_summary['missing_events']}")
+            print(f"    FAIL:  Missing Events: {agent_summary['missing_events']}")
         else:
-            print(f"   ✅ All required events received!")
+            print(f"    PASS:  All required events received!")
     
     # Overall Assessment
-    print(f"\n📊 OVERALL ASSESSMENT:")
-    print(f"   Total Test Time: {total_time:.3f}s (Real test: {'✅' if total_time > 0.5 else '❌'})")
+    print(f"\n CHART:  OVERALL ASSESSMENT:")
+    print(f"   Total Test Time: {total_time:.3f}s (Real test: {' PASS: ' if total_time > 0.5 else ' FAIL: '})")
     
     # Success Criteria
     success_criteria = {
@@ -284,22 +284,22 @@ async def main():
         "real_execution_time": total_time > 0.5
     }
     
-    print(f"\n🎯 SUCCESS CRITERIA:")
+    print(f"\n TARGET:  SUCCESS CRITERIA:")
     for criterion, passed in success_criteria.items():
-        status = "✅" if passed else "❌"
+        status = " PASS: " if passed else " FAIL: "
         print(f"{status} {criterion}")
     
     all_passed = all(success_criteria.values())
     
-    print(f"\n{'🚀 GOLDEN PATH READY' if all_passed else '⚠️ ISSUES FOUND'}")
+    print(f"\n{'[U+1F680] GOLDEN PATH READY' if all_passed else ' WARNING: [U+FE0F] ISSUES FOUND'}")
     
     if agent_capture:
         missing = agent_capture.get_missing_events()
         if missing:
-            print(f"\n🚨 CRITICAL: Missing WebSocket events block chat value delivery:")
+            print(f"\n ALERT:  CRITICAL: Missing WebSocket events block chat value delivery:")
             for event in missing:
-                print(f"   ❌ {event}")
-            print(f"\n💡 These events are REQUIRED for substantive chat interactions!")
+                print(f"    FAIL:  {event}")
+            print(f"\n IDEA:  These events are REQUIRED for substantive chat interactions!")
     
     return {
         'connection_test': connection_capture.get_event_summary() if connection_capture else None,

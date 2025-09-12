@@ -39,7 +39,7 @@ from pathlib import Path
 
 # REMOVED_SYNTAX_ERROR: def main():
     # REMOVED_SYNTAX_ERROR: """Run all NACIS tests."""
-    # REMOVED_SYNTAX_ERROR: print("🚀 NACIS Test Suite Runner")
+    # REMOVED_SYNTAX_ERROR: print("[U+1F680] NACIS Test Suite Runner")
     # REMOVED_SYNTAX_ERROR: print("="*60)
 
     # REMOVED_SYNTAX_ERROR: tests = [ )
@@ -70,14 +70,14 @@ from pathlib import Path
         # Summary
         # REMOVED_SYNTAX_ERROR: print(" )
         # REMOVED_SYNTAX_ERROR: " + "="*60)
-        # REMOVED_SYNTAX_ERROR: print("📊 TEST SUMMARY")
+        # REMOVED_SYNTAX_ERROR: print(" CHART:  TEST SUMMARY")
         # REMOVED_SYNTAX_ERROR: print("="*60)
 
         # REMOVED_SYNTAX_ERROR: passed = 0
         # REMOVED_SYNTAX_ERROR: failed = 0
 
         # REMOVED_SYNTAX_ERROR: for test_name, success in results:
-            # REMOVED_SYNTAX_ERROR: status = "✅ PASSED" if success else "❌ FAILED"
+            # REMOVED_SYNTAX_ERROR: status = " PASS:  PASSED" if success else " FAIL:  FAILED"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: if success:
                 # REMOVED_SYNTAX_ERROR: passed += 1
@@ -91,7 +91,7 @@ from pathlib import Path
 
                     # REMOVED_SYNTAX_ERROR: if failed == 0:
                         # REMOVED_SYNTAX_ERROR: print(" )
-                        # REMOVED_SYNTAX_ERROR: 🎉 All tests passed! NACIS system is ready.")
+                        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  All tests passed! NACIS system is ready.")
                         # REMOVED_SYNTAX_ERROR: return 0
                         # REMOVED_SYNTAX_ERROR: else:
                             # REMOVED_SYNTAX_ERROR: print("formatted_string")

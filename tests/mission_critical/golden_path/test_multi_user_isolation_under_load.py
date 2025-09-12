@@ -1,7 +1,7 @@
 """
 MISSION CRITICAL: Multi-User Isolation Under Load Tests for Golden Path
 
-🚨 MISSION CRITICAL TEST 🚨
+ ALERT:  MISSION CRITICAL TEST  ALERT: 
 This test suite validates that user isolation is maintained under high load scenarios,
 preventing data leakage and ensuring enterprise-grade security at scale.
 
@@ -45,7 +45,7 @@ from shared.types.execution_types import StronglyTypedUserExecutionContext
 
 class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
     """
-    🚨 MISSION CRITICAL TEST SUITE 🚨
+     ALERT:  MISSION CRITICAL TEST SUITE  ALERT: 
     
     Validates that user isolation is maintained under high concurrent load,
     ensuring enterprise-grade security and data protection at scale.
@@ -106,7 +106,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
                 self.active_connections.clear()
             
         except Exception as e:
-            print(f"⚠️  Multi-user isolation cleanup error: {e}")
+            print(f" WARNING: [U+FE0F]  Multi-user isolation cleanup error: {e}")
         
         await super().async_teardown_method(method)
     
@@ -116,7 +116,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_user_context_isolation_under_concurrent_load(self):
         """
-        🚨 USER ISOLATION CRITICAL: User Context Separation Under Load
+         ALERT:  USER ISOLATION CRITICAL: User Context Separation Under Load
         
         Tests that user execution contexts remain completely isolated
         when multiple users access the system simultaneously.
@@ -133,7 +133,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
         user_contexts = []
         expected_user_data = {}
         
-        print(f"\n👥 USER ISOLATION TEST: Creating {self.concurrent_users} isolated user contexts")
+        print(f"\n[U+1F465] USER ISOLATION TEST: Creating {self.concurrent_users} isolated user contexts")
         
         for i in range(self.concurrent_users):
             user_email = f"isolation_test_user_{i}_{uuid.uuid4().hex[:8]}@example.com"
@@ -311,7 +311,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
                 }
         
         # Execute all users concurrently to test isolation under load
-        print(f"🚀 Executing {self.concurrent_users} concurrent users to test isolation...")
+        print(f"[U+1F680] Executing {self.concurrent_users} concurrent users to test isolation...")
         
         user_tasks = [
             execute_isolated_user_operations(context)
@@ -330,7 +330,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
         
         for result in user_results:
             if isinstance(result, Exception):
-                print(f"❌ User execution exception: {result}")
+                print(f" FAIL:  User execution exception: {result}")
                 continue
                 
             if result.get("success"):
@@ -373,7 +373,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
                 violation_summary += f"\nContamination Details:\n{contamination_details}"
             
             pytest.fail(
-                f"🚨 CRITICAL USER ISOLATION BREACH DETECTED\n"
+                f" ALERT:  CRITICAL USER ISOLATION BREACH DETECTED\n"
                 f"Success Rate: {success_rate:.1%}\n"
                 f"Isolation Rate: {isolation_rate:.1%}\n"
                 f"Total Violations: {total_isolation_violations}\n"
@@ -386,7 +386,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
         elif isolation_rate < 0.95:
             # INSUFFICIENT ISOLATION VALIDATION
             pytest.fail(
-                f"🚨 INSUFFICIENT USER ISOLATION VALIDATION\n"
+                f" ALERT:  INSUFFICIENT USER ISOLATION VALIDATION\n"
                 f"Isolation Rate: {isolation_rate:.1%} (< 95% required for enterprise)\n"
                 f"Success Rate: {success_rate:.1%}\n"
                 f"This indicates potential isolation weaknesses under load!"
@@ -395,20 +395,20 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
         elif success_rate < 0.9:
             # HIGH FAILURE RATE MAY INDICATE ISOLATION ISSUES
             pytest.fail(
-                f"🚨 HIGH FAILURE RATE IN ISOLATION TEST\n"
+                f" ALERT:  HIGH FAILURE RATE IN ISOLATION TEST\n"
                 f"Success Rate: {success_rate:.1%} (< 90% acceptable)\n"
                 f"This may indicate system instability affecting isolation!"
             )
         
         # SUCCESS CASE: Complete user isolation validated under load
-        print(f"\n✅ USER ISOLATION UNDER LOAD: Test PASSED")
-        print(f"   👥 Concurrent Users: {self.concurrent_users}")
-        print(f"   ✅ Success Rate: {success_rate:.1%}")
-        print(f"   🔒 Isolation Rate: {isolation_rate:.1%}")
-        print(f"   ⚠️  Total Violations: {total_isolation_violations}")
-        print(f"   🛡️  Cross-User Contamination: {len(cross_user_contamination)}")
-        print(f"   ⏱️  Test Duration: {total_isolation_test_time:.2f}s")
-        print(f"   💰 $500K+ Enterprise Revenue: PROTECTED")
+        print(f"\n PASS:  USER ISOLATION UNDER LOAD: Test PASSED")
+        print(f"   [U+1F465] Concurrent Users: {self.concurrent_users}")
+        print(f"    PASS:  Success Rate: {success_rate:.1%}")
+        print(f"   [U+1F512] Isolation Rate: {isolation_rate:.1%}")
+        print(f"    WARNING: [U+FE0F]  Total Violations: {total_isolation_violations}")
+        print(f"   [U+1F6E1][U+FE0F]  Cross-User Contamination: {len(cross_user_contamination)}")
+        print(f"   [U+23F1][U+FE0F]  Test Duration: {total_isolation_test_time:.2f}s")
+        print(f"   [U+1F4B0] $500K+ Enterprise Revenue: PROTECTED")
         
     def _detect_cross_user_contamination(self) -> List[str]:
         """Detect cross-user data contamination in collected messages."""
@@ -451,7 +451,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_database_session_isolation_under_load(self):
         """
-        🚨 DATABASE ISOLATION CRITICAL: Database Session Isolation Under Load
+         ALERT:  DATABASE ISOLATION CRITICAL: Database Session Isolation Under Load
         
         Tests that database sessions remain isolated per user under concurrent load,
         preventing data leakage through shared database connections.
@@ -527,7 +527,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
                         messages_sent += 1
                         await asyncio.sleep(0.2)  # Allow database processing
                     except Exception as msg_error:
-                        print(f"⚠️  DB message send error for user {user_id}: {msg_error}")
+                        print(f" WARNING: [U+FE0F]  DB message send error for user {user_id}: {msg_error}")
                 
                 # Collect responses to validate database isolation
                 responses_received = []
@@ -605,17 +605,17 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
         
         if db_isolation_violations > 0:
             pytest.fail(
-                f"🚨 CRITICAL DATABASE ISOLATION BREACH\n"
+                f" ALERT:  CRITICAL DATABASE ISOLATION BREACH\n"
                 f"Database Violations: {db_isolation_violations}\n"
                 f"This is a severe data leakage risk!\n"
                 f"Enterprise deployment BLOCKED"
             )
         
-        print(f"\n✅ DATABASE ISOLATION UNDER LOAD: Test PASSED")
-        print(f"   🗄️  Database Users Tested: {len(user_contexts)}")
-        print(f"   ✅ Success Rate: {successful_db_users / len(user_contexts):.1%}")
-        print(f"   🔒 DB Violations: {db_isolation_violations}")
-        print(f"   ⏱️  Test Duration: {db_test_time:.2f}s")
+        print(f"\n PASS:  DATABASE ISOLATION UNDER LOAD: Test PASSED")
+        print(f"   [U+1F5C4][U+FE0F]  Database Users Tested: {len(user_contexts)}")
+        print(f"    PASS:  Success Rate: {successful_db_users / len(user_contexts):.1%}")
+        print(f"   [U+1F512] DB Violations: {db_isolation_violations}")
+        print(f"   [U+23F1][U+FE0F]  Test Duration: {db_test_time:.2f}s")
         
     @pytest.mark.mission_critical
     @pytest.mark.user_isolation
@@ -623,7 +623,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
     @pytest.mark.asyncio
     async def test_agent_execution_isolation_under_concurrent_load(self):
         """
-        🚨 AGENT EXECUTION ISOLATION: Agent Context Isolation Under Load
+         ALERT:  AGENT EXECUTION ISOLATION: Agent Context Isolation Under Load
         
         Tests that agent execution contexts remain isolated when multiple users
         trigger agent operations simultaneously.
@@ -769,7 +769,7 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
         
         if agent_isolation_violations > 0:
             pytest.fail(
-                f"🚨 CRITICAL AGENT EXECUTION ISOLATION BREACH\n"
+                f" ALERT:  CRITICAL AGENT EXECUTION ISOLATION BREACH\n"
                 f"Agent Violations: {agent_isolation_violations}\n"
                 f"This compromises agent execution security!\n"
                 f"Enterprise deployment BLOCKED"
@@ -777,18 +777,18 @@ class TestMultiUserIsolationUnderLoad(SSotAsyncTestCase):
         
         if agent_isolation_validated / len(agent_user_contexts) < 0.9:
             pytest.fail(
-                f"🚨 INSUFFICIENT AGENT ISOLATION VALIDATION\n"
+                f" ALERT:  INSUFFICIENT AGENT ISOLATION VALIDATION\n"
                 f"Validated Rate: {agent_isolation_validated / len(agent_user_contexts):.1%}\n"
                 f"Agent isolation not sufficiently proven under load!"
             )
         
-        print(f"\n✅ AGENT EXECUTION ISOLATION UNDER LOAD: Test PASSED")
-        print(f"   🤖 Agent Users Tested: {len(agent_user_contexts)}")
-        print(f"   ✅ Success Rate: {successful_agent_users / len(agent_user_contexts):.1%}")
-        print(f"   🔒 Isolation Validated: {agent_isolation_validated / len(agent_user_contexts):.1%}")
-        print(f"   ⚠️  Agent Violations: {agent_isolation_violations}")
-        print(f"   ⏱️  Test Duration: {agent_test_time:.2f}s")
-        print(f"   🛡️  Enterprise Security: MAINTAINED")
+        print(f"\n PASS:  AGENT EXECUTION ISOLATION UNDER LOAD: Test PASSED")
+        print(f"   [U+1F916] Agent Users Tested: {len(agent_user_contexts)}")
+        print(f"    PASS:  Success Rate: {successful_agent_users / len(agent_user_contexts):.1%}")
+        print(f"   [U+1F512] Isolation Validated: {agent_isolation_validated / len(agent_user_contexts):.1%}")
+        print(f"    WARNING: [U+FE0F]  Agent Violations: {agent_isolation_violations}")
+        print(f"   [U+23F1][U+FE0F]  Test Duration: {agent_test_time:.2f}s")
+        print(f"   [U+1F6E1][U+FE0F]  Enterprise Security: MAINTAINED")
 
 
 if __name__ == "__main__":

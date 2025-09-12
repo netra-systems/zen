@@ -852,7 +852,7 @@ class TestWebSocketStateMultiUserIntegration(BaseIntegrationTest):
                 await websocket_manager.add_connection(conn)
         
         # Verify connection pooling structure
-        total_expected_connections = 5 * 3  # 5 users × 3 connections
+        total_expected_connections = 5 * 3  # 5 users  x  3 connections
         actual_connections = sum(
             len(websocket_manager.get_user_connections(f"user_{i}"))
             for i in range(5)

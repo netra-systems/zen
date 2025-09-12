@@ -549,9 +549,9 @@ class TestServiceDiscoveryIntegration:
         # Log results for debugging (in real tests, this would be part of monitoring)
         for service, result in health_results.items():
             if result["healthy"]:
-                print(f"✓ {service} is healthy")
+                print(f"[U+2713] {service} is healthy")
             else:
-                print(f"✗ {service} is not available (expected in test environment)")
+                print(f"[U+2717] {service} is not available (expected in test environment)")
 
 
 class TestCrossServiceErrorHandling:

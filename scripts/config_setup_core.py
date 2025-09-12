@@ -2,7 +2,7 @@
 """
 Core Configuration Setup for Netra AI Platform installer.
 Database initialization and environment file creation.
-CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
+CRITICAL: All functions MUST be  <= 8 lines, file  <= 300 lines.
 """
 
 import os

@@ -32,7 +32,7 @@ class WorkflowTester:
         
     def check_prerequisites(self) -> bool:
         """Check if ACT and Docker are available"""
-        print("🔍 Checking prerequisites...")
+        print(" SEARCH:  Checking prerequisites...")
         
         # Check ACT
         try:
@@ -43,12 +43,12 @@ class WorkflowTester:
                 timeout=5
             )
             if result.returncode == 0:
-                print(f"✅ ACT found: {result.stdout.strip()}")
+                print(f" PASS:  ACT found: {result.stdout.strip()}")
             else:
-                print("❌ ACT not found. Please install ACT first.")
+                print(" FAIL:  ACT not found. Please install ACT first.")
                 return False
         except Exception as e:
-            print(f"❌ Error checking ACT: {e}")
+            print(f" FAIL:  Error checking ACT: {e}")
             return False
             
         # Check Docker
@@ -60,18 +60,18 @@ class WorkflowTester:
                 timeout=5
             )
             if result.returncode == 0:
-                print(f"✅ Docker found: {result.stdout.strip()}")
+                print(f" PASS:  Docker found: {result.stdout.strip()}")
             else:
-                print("❌ Docker not found or not running.")
+                print(" FAIL:  Docker not found or not running.")
                 return False
         except Exception as e:
-            print(f"❌ Error checking Docker: {e}")
+            print(f" FAIL:  Error checking Docker: {e}")
             return False
             
         # Check secrets file
         secrets_file = self.root_dir / ".secrets"
         if not secrets_file.exists():
-            print("⚠️  .secrets file not found. Creating with mock values...")
+            print(" WARNING: [U+FE0F]  .secrets file not found. Creating with mock values...")
             self.create_mock_secrets()
             
         return True
@@ -90,7 +90,7 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
 """
         secrets_file = self.root_dir / ".secrets"
         secrets_file.write_text(secrets_content, encoding='utf-8')
-        print("✅ Created .secrets file with mock values")
+        print(" PASS:  Created .secrets file with mock values")
         
     def get_workflows(self) -> List[Path]:
         """Get all workflow files"""
@@ -108,7 +108,7 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
         
     def validate_workflow_syntax(self, workflow_path: Path) -> Tuple[bool, str]:
         """Validate workflow YAML syntax"""
-        print(f"\n📝 Validating syntax: {workflow_path.name}")
+        print(f"\n[U+1F4DD] Validating syntax: {workflow_path.name}")
         
         cmd = [
             "act", "-l",
@@ -126,23 +126,23 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
             )
             
             if result.returncode == 0:
-                print(f"  ✅ Syntax valid")
+                print(f"   PASS:  Syntax valid")
                 return True, ""
             else:
                 error_msg = result.stderr or result.stdout
-                print(f"  ❌ Syntax error: {error_msg[:200]}")
+                print(f"   FAIL:  Syntax error: {error_msg[:200]}")
                 return False, error_msg
                 
         except subprocess.TimeoutExpired:
-            print(f"  ⚠️  Validation timeout")
+            print(f"   WARNING: [U+FE0F]  Validation timeout")
             return False, "Timeout during validation"
         except Exception as e:
-            print(f"  ❌ Validation error: {e}")
+            print(f"   FAIL:  Validation error: {e}")
             return False, str(e)
             
     def test_workflow_dry_run(self, workflow_path: Path) -> Tuple[bool, str]:
         """Dry run a workflow with ACT"""
-        print(f"\n🧪 Testing workflow: {workflow_path.name}")
+        print(f"\n[U+1F9EA] Testing workflow: {workflow_path.name}")
         
         # Create event file for workflow_call workflows
         event_file = None
@@ -169,18 +169,18 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
             )
             
             if "Job failed" not in result.stdout and result.returncode == 0:
-                print(f"  ✅ Dry run successful")
+                print(f"   PASS:  Dry run successful")
                 return True, ""
             else:
                 error_msg = self.extract_error(result.stdout, result.stderr)
-                print(f"  ❌ Dry run failed: {error_msg[:200]}")
+                print(f"   FAIL:  Dry run failed: {error_msg[:200]}")
                 return False, error_msg
                 
         except subprocess.TimeoutExpired:
-            print(f"  ⚠️  Test timeout")
+            print(f"   WARNING: [U+FE0F]  Test timeout")
             return False, "Timeout during test"
         except Exception as e:
-            print(f"  ❌ Test error: {e}")
+            print(f"   FAIL:  Test error: {e}")
             return False, str(e)
             
     def create_event_file(self, workflow_path: Path) -> Path:
@@ -246,7 +246,7 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
         
     def fix_common_issues(self, workflow_path: Path) -> bool:
         """Attempt to fix common issues automatically"""
-        print(f"\n🔧 Attempting to fix issues in: {workflow_path.name}")
+        print(f"\n[U+1F527] Attempting to fix issues in: {workflow_path.name}")
         content = workflow_path.read_text(encoding='utf-8')
         original_content = content
         fixed = False
@@ -257,28 +257,28 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
                 "ACT: ${{ env.ACT }}",
                 "# ACT environment detection - ACT sets this automatically"
             )
-            print("  ✅ Fixed circular env.ACT reference")
+            print("   PASS:  Fixed circular env.ACT reference")
             fixed = True
             
         # Save if changes were made
         if fixed:
             workflow_path.write_text(content, encoding='utf-8')
-            print(f"  💾 Saved fixes to {workflow_path.name}")
+            print(f"  [U+1F4BE] Saved fixes to {workflow_path.name}")
             
         return fixed
         
     def run_tests(self):
         """Run all workflow tests"""
         print("\n" + "="*60)
-        print("🚀 Starting GitHub Workflows Testing with ACT")
+        print("[U+1F680] Starting GitHub Workflows Testing with ACT")
         print("="*60)
         
         if not self.check_prerequisites():
-            print("\n❌ Prerequisites check failed")
+            print("\n FAIL:  Prerequisites check failed")
             return False
             
         workflows = self.get_workflows()
-        print(f"\n📊 Found {len(workflows)} workflows to test")
+        print(f"\n CHART:  Found {len(workflows)} workflows to test")
         
         for workflow in workflows:
             # Skip certain workflows
@@ -288,7 +288,7 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
             # Check for common issues
             issues = self.check_common_issues(workflow)
             if issues:
-                print(f"\n⚠️  Issues found in {workflow.name}:")
+                print(f"\n WARNING: [U+FE0F]  Issues found in {workflow.name}:")
                 for issue in issues:
                     print(f"  - {issue}")
                     self.issues_found.append({
@@ -315,7 +315,7 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
                 if self.fix_common_issues(workflow):
                     valid, error = self.validate_workflow_syntax(workflow)
                     if valid:
-                        print(f"  ✅ Fixed and validated successfully")
+                        print(f"   PASS:  Fixed and validated successfully")
                         
         self.generate_report()
         return True
@@ -323,25 +323,25 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
     def generate_report(self):
         """Generate test report"""
         print("\n" + "="*60)
-        print("📋 Test Report")
+        print("[U+1F4CB] Test Report")
         print("="*60)
         
         total = len(self.results)
         passed = sum(1 for r in self.results if r["syntax_valid"])
         failed = total - passed
         
-        print(f"\n📊 Summary:")
+        print(f"\n CHART:  Summary:")
         print(f"  Total workflows: {total}")
-        print(f"  ✅ Passed: {passed}")
-        print(f"  ❌ Failed: {failed}")
+        print(f"   PASS:  Passed: {passed}")
+        print(f"   FAIL:  Failed: {failed}")
         
         if self.issues_found:
-            print(f"\n⚠️  Issues Found ({len(self.issues_found)}):")
+            print(f"\n WARNING: [U+FE0F]  Issues Found ({len(self.issues_found)}):")
             for issue in self.issues_found:
                 print(f"  - {issue['workflow']}: {issue['issue']}")
                 
         if failed > 0:
-            print(f"\n❌ Failed Workflows:")
+            print(f"\n FAIL:  Failed Workflows:")
             for result in self.results:
                 if not result["syntax_valid"]:
                     print(f"  - {result['workflow']}")
@@ -361,7 +361,7 @@ SLACK_WEBHOOK_URL=https://mock.webhook.url
                 "results": self.results
             }, f, indent=2)
             
-        print(f"\n💾 Report saved to: {report_file}")
+        print(f"\n[U+1F4BE] Report saved to: {report_file}")
 
 def main():
     """Main entry point"""

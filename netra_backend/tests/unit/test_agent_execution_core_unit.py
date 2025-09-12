@@ -2,7 +2,7 @@
 Agent Execution Core Unit Tests
 
 Business Value Justification (BVJ):
-- Segment: All (Free → Enterprise)
+- Segment: All (Free  ->  Enterprise)
 - Business Goal: Ensure core agent execution logic is reliable and performant
 - Value Impact: Unit tests validate critical execution paths that deliver AI insights to users
 - Strategic Impact: Foundation layer testing for the entire agent execution pipeline

@@ -71,7 +71,7 @@ class TestDataPipelinePersistence(BaseE2ETest):
     @pytest.mark.staging
     async def test_agent_results_persistence_complete_flow(self, real_services, real_llm):
         """Test complete agent results persistence and retrieval flow."""
-        self.logger.info("🚀 Starting Agent Results Persistence Complete Flow E2E Test")
+        self.logger.info("[U+1F680] Starting Agent Results Persistence Complete Flow E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -107,7 +107,7 @@ class TestDataPipelinePersistence(BaseE2ETest):
             }
             
             await websocket.send(json.dumps(agent_request))
-            self.logger.info("📤 Agent request sent for persistence test")
+            self.logger.info("[U+1F4E4] Agent request sent for persistence test")
             
             # Collect all events and extract results
             events = []
@@ -137,15 +137,15 @@ class TestDataPipelinePersistence(BaseE2ETest):
             assert thread_id is not None, "Agent should have created a thread"
             assert isinstance(agent_result, dict), "Agent result should be structured data"
             
-            self.logger.info(f"✅ Agent execution completed - Thread ID: {thread_id}")
+            self.logger.info(f" PASS:  Agent execution completed - Thread ID: {thread_id}")
             
             # Step 2: Verify thread persistence via API
             thread_exists = await self.verify_thread_exists(thread_id, user_data["id"], token)
             
             if thread_exists:
-                self.logger.info("✅ Thread successfully persisted to database")
+                self.logger.info(" PASS:  Thread successfully persisted to database")
             else:
-                self.logger.warning("⚠️ Could not verify thread persistence via API (may not be exposed)")
+                self.logger.warning(" WARNING: [U+FE0F] Could not verify thread persistence via API (may not be exposed)")
             
             # Step 3: Reconnect and verify session continuity
             await asyncio.sleep(2)  # Brief pause between connections
@@ -202,10 +202,10 @@ class TestDataPipelinePersistence(BaseE2ETest):
             # Results should be different (different conversations)
             assert followup_result != agent_result, "Follow-up should produce different results"
             
-            self.logger.info("✅ Agent Results Persistence Complete Flow E2E Test completed")
+            self.logger.info(" PASS:  Agent Results Persistence Complete Flow E2E Test completed")
             
         except Exception as e:
-            self.logger.error(f"❌ Agent Results Persistence test failed: {e}")
+            self.logger.error(f" FAIL:  Agent Results Persistence test failed: {e}")
             raise
     
     @pytest.mark.e2e
@@ -213,7 +213,7 @@ class TestDataPipelinePersistence(BaseE2ETest):
     @pytest.mark.staging
     async def test_configuration_consistency_across_environments(self, real_services):
         """Test configuration consistency and environment-specific settings."""
-        self.logger.info("🚀 Starting Configuration Consistency E2E Test")
+        self.logger.info("[U+1F680] Starting Configuration Consistency E2E Test")
         
         # MANDATORY: Authenticate user
         token, user_data = await create_authenticated_user(
@@ -262,7 +262,7 @@ class TestDataPipelinePersistence(BaseE2ETest):
             available_services = sum(1 for result in config_results.values() if result.get("available", False))
             assert available_services >= 2, f"Only {available_services}/3 services available: {config_results}"
             
-            self.logger.info(f"✅ Configuration validation - {available_services}/3 services available")
+            self.logger.info(f" PASS:  Configuration validation - {available_services}/3 services available")
             
             # Step 2: Test environment-specific configurations
             # Connect WebSocket to verify staging-specific settings
@@ -290,14 +290,14 @@ class TestDataPipelinePersistence(BaseE2ETest):
                 # Check for response (any response indicates proper config)
                 try:
                     response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
-                    self.logger.info("✅ WebSocket environment configuration working")
+                    self.logger.info(" PASS:  WebSocket environment configuration working")
                 except asyncio.TimeoutError:
-                    self.logger.info("✅ WebSocket connection established (no response expected)")
+                    self.logger.info(" PASS:  WebSocket connection established (no response expected)")
                 
                 await websocket.close()
                 
             except Exception as e:
-                self.logger.warning(f"⚠️ WebSocket environment test failed: {e}")
+                self.logger.warning(f" WARNING: [U+FE0F] WebSocket environment test failed: {e}")
             
             # Step 3: Validate staging-specific authentication configuration
             auth_headers = {"Authorization": f"Bearer {token}"}
@@ -314,18 +314,18 @@ class TestDataPipelinePersistence(BaseE2ETest):
                     if "environment" in validate_result:
                         assert validate_result["environment"].lower() in ["staging", "test"], "Should indicate staging environment"
                     
-                    self.logger.info("✅ Staging authentication configuration validated")
+                    self.logger.info(" PASS:  Staging authentication configuration validated")
                 else:
-                    self.logger.warning(f"⚠️ Auth validation response: {resp.status}")
+                    self.logger.warning(f" WARNING: [U+FE0F] Auth validation response: {resp.status}")
         
-        self.logger.info("✅ Configuration Consistency E2E Test completed")
+        self.logger.info(" PASS:  Configuration Consistency E2E Test completed")
     
     @pytest.mark.e2e
     @pytest.mark.real_services
     @pytest.mark.staging
     async def test_database_transaction_integrity(self, real_services):
         """Test database transaction integrity during concurrent operations."""
-        self.logger.info("🚀 Starting Database Transaction Integrity E2E Test")
+        self.logger.info("[U+1F680] Starting Database Transaction Integrity E2E Test")
         
         # Create multiple users for concurrent database operations
         users = []
@@ -435,7 +435,7 @@ class TestDataPipelinePersistence(BaseE2ETest):
         unique_thread_ids = set(all_thread_ids)
         assert len(unique_thread_ids) == len(all_thread_ids), "Thread IDs should be unique (no database collisions)"
         
-        self.logger.info(f"✅ Database Transaction Integrity Test - {total_operations} operations, {len(unique_thread_ids)} unique threads")
+        self.logger.info(f" PASS:  Database Transaction Integrity Test - {total_operations} operations, {len(unique_thread_ids)} unique threads")
         
     async def teardown_method(self):
         """Cleanup after each test method."""

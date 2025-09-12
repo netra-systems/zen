@@ -231,7 +231,7 @@ class TestWebSocketManagerSSotCompliance(SSotBaseTestCase, unittest.TestCase):
         # SSOT Requirement: Only 1 factory should exist (or 0 if factories are eliminated)
         self.assertLessEqual(
             total_factories, 1,
-            f"SSOT VIOLATION: Found {total_factories} WebSocket factory implementations, expected ≤1. "
+            f"SSOT VIOLATION: Found {total_factories} WebSocket factory implementations, expected  <= 1. "
             f"Factory files: {implementations['factories']}. "
             "Factory pattern should be consolidated or eliminated in favor of direct instantiation."
         )

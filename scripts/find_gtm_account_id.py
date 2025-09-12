@@ -98,7 +98,7 @@ def find_account_id(container_id='GTM-WKP28PNQ'):
                     print(f"  Found container: {container_name} ({container_public_id})")
                     
                     if container_public_id == container_id:
-                        print(f"\n✓ FOUND YOUR CONTAINER!")
+                        print(f"\n[U+2713] FOUND YOUR CONTAINER!")
                         print(f"  Account ID: {account_id}")
                         print(f"  Account Name: {account_name}")
                         print(f"  Container ID: {container_public_id}")
@@ -138,7 +138,7 @@ def update_config(account_id):
         with open(config_path, 'w') as f:
             json.dump(config, f, indent=2)
         
-        print(f"\n✓ Updated gtm_config.json with account ID: {account_id}")
+        print(f"\n[U+2713] Updated gtm_config.json with account ID: {account_id}")
 
 def main():
     print("="*50)

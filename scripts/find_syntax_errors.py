@@ -67,7 +67,7 @@ def print_results(results: Dict[Path, List[Tuple[int, str]]]) -> None:
     """Print syntax error results in a clear format."""
     
     if not results:
-        print("✓ No syntax errors found!")
+        print("[U+2713] No syntax errors found!")
         return
         
     print(f"\n! Found syntax errors in {len(results)} files:\n")
@@ -104,7 +104,7 @@ def main():
         print(f"X Found syntax errors in {len(results)} files")
         sys.exit(1)
     else:
-        print("✓ All files passed syntax check")
+        print("[U+2713] All files passed syntax check")
         sys.exit(0)
 
 

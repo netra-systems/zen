@@ -3,7 +3,7 @@
 BUSINESS VALUE JUSTIFICATION (BVJ):
 - Segment: All (Free/Early/Mid/Enterprise/Platform) - Revenue Critical
 - Business Goal: Validate complete $500K+ ARR golden path user journey from authentication to AI insights
-- Value Impact: Tests the complete triage → agent execution flow that delivers core business value
+- Value Impact: Tests the complete triage  ->  agent execution flow that delivers core business value
 - Strategic Impact: Mission-critical validation of revenue-generating user workflows
 - Revenue Protection: E2E failures directly translate to lost revenue and customer churn
 
@@ -22,7 +22,7 @@ KEY COVERAGE:
 
 GOLDEN PATH PROTECTION:
 This is the ultimate validation that the $500K+ ARR user journey works end-to-end:
-User Login → WebSocket Connection → Message Send → Triage → Agent Execution → AI Insights
+User Login  ->  WebSocket Connection  ->  Message Send  ->  Triage  ->  Agent Execution  ->  AI Insights
 
 These tests MUST pass for production deployment.
 """
@@ -339,7 +339,7 @@ class TestTriageGoldenPathE2E(SSotAsyncTestCase):
     """E2E tests for complete triage golden path with real services
     
     These tests validate the complete user journey that generates business value:
-    Authentication → WebSocket Connection → Triage Request → Agent Execution → AI Insights
+    Authentication  ->  WebSocket Connection  ->  Triage Request  ->  Agent Execution  ->  AI Insights
     
     CRITICAL: All tests use real services and real authentication.
     NO MOCKS are allowed in E2E tests.

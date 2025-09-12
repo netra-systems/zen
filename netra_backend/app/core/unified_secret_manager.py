@@ -145,7 +145,7 @@ class UnifiedSecretManager:
                 if secret_info and secret_info.length >= min_length:
                     # Cache the result
                     self._secret_cache[cache_key] = secret_info
-                    logger.info(f"✅ Secret loaded: {secret_name} (source: {secret_info.source.value}, "
+                    logger.info(f" PASS:  Secret loaded: {secret_name} (source: {secret_info.source.value}, "
                               f"length: {secret_info.length}, env: {self.environment})")
                     return secret_info
             except Exception as e:

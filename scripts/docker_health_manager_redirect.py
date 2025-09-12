@@ -16,7 +16,7 @@ def main():
     script_dir = Path(__file__).parent
     unified_cli = script_dir / "unified_docker_cli.py"
     
-    print("🔄 Redirecting to Unified Docker CLI for SSOT compliance...")
+    print(" CYCLE:  Redirecting to Unified Docker CLI for SSOT compliance...")
     print("   (Legacy docker_health_manager.py -> unified_docker_cli.py)")
     
     # Map legacy arguments to unified CLI

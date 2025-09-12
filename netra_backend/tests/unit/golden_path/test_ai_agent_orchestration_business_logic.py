@@ -8,7 +8,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Proper agent sequencing prevents customer-facing failures
 
 This test validates core agent orchestration algorithms that power:
-1. Agent execution order (Triage → Data Helper → UVS Optimizer → Reporter)  
+1. Agent execution order (Triage  ->  Data Helper  ->  UVS Optimizer  ->  Reporter)  
 2. Agent dependency resolution and execution planning
 3. Context passing between agents for coherent results
 4. Error recovery and graceful degradation patterns

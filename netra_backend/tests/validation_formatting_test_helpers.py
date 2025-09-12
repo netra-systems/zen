@@ -42,5 +42,5 @@ class FormattingTestHelpers:
     @staticmethod
     def assert_currency_formatting(formatted: str, currency: str):
         """Assert currency formatting includes symbol."""
-        symbols = {"USD": "$", "EUR": "€"}
+        symbols = {"USD": "$", "EUR": "[U+20AC]"}
         assert symbols[currency] in formatted

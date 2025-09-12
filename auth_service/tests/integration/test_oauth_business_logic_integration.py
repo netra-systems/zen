@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 
 CRITICAL REVENUE PROTECTION:
 These tests protect the tier assignment logic that directly impacts monetization.
-OAuth provider integration drives user conversion from FREE → EARLY → MID tiers.
+OAuth provider integration drives user conversion from FREE  ->  EARLY  ->  MID tiers.
 Business email detection upgrades FREE users to EARLY tier, increasing ARPU.
 
 REAL INTEGRATION REQUIREMENTS:
@@ -116,7 +116,7 @@ class TestOAuthBusinessLogicIntegration(SSotBaseTestCase):
         REVENUE CRITICAL: Complete OAuth flow with Google business email integration.
         
         Tests real OAuth provider integration with tier assignment for business emails.
-        Business email detection drives FREE → EARLY tier upgrades ($50/month revenue impact).
+        Business email detection drives FREE  ->  EARLY tier upgrades ($50/month revenue impact).
         """
         self.record_metric("test_category", "revenue_critical_oauth_flow")
         
@@ -585,7 +585,7 @@ class TestOAuthBusinessLogicIntegration(SSotBaseTestCase):
             assert linking_result["existing_user_id"] == base_user_id
             assert linking_result["enhanced_verification"] is True
         
-        # Verify tier progression: Google→Early, GitHub→Mid, LinkedIn→Mid
+        # Verify tier progression: Google -> Early, GitHub -> Mid, LinkedIn -> Mid
         expected_tiers = [SubscriptionTier.EARLY, SubscriptionTier.MID, SubscriptionTier.MID]
         assert tier_progression == expected_tiers, (
             f"Incorrect tier progression: expected {expected_tiers}, got {tier_progression}"

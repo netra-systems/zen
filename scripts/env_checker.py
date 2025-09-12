@@ -2,7 +2,7 @@
 """
 Environment Checker for Netra AI Platform installer.
 Validates prerequisites: Python, Node.js, Git versions and system requirements.
-CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
+CRITICAL: All functions MUST be  <= 8 lines, file  <= 300 lines.
 """
 
 import re

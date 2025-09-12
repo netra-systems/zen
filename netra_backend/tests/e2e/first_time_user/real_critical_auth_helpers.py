@@ -7,7 +7,7 @@ Real Critical User Journey Auth Helpers - OAuth, AI Providers, and Auth Services
 3. **Value Impact**: Modular auth helpers reduce test maintenance by 70%
 4. **Revenue Impact**: Faster auth testing = quicker iteration on conversion optimization
 
-**ARCHITECTURE**: ≤300 lines, ≤8 lines per function as per CLAUDE.md requirements
+**ARCHITECTURE**:  <= 300 lines,  <= 8 lines per function as per CLAUDE.md requirements
 Provides reusable helper methods for authentication and provider connection testing.
 """
 
@@ -23,7 +23,7 @@ from netra_backend.app.websocket_core import get_websocket_manager
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 
 class CriticalUserJourneyHelpers:
-    """Core helper methods for critical user journey validation (≤8 lines each)"""
+    """Core helper methods for critical user journey validation ( <= 8 lines each)"""
     
     @staticmethod
     async def create_real_user_context():
@@ -94,7 +94,7 @@ class CriticalUserJourneyHelpers:
         }
 
 class OAuthFlowHelpers:
-    """OAuth flow testing helpers (≤8 lines each)"""
+    """OAuth flow testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def initiate_oauth_flow():
@@ -147,7 +147,7 @@ class OAuthFlowHelpers:
         return welcome_data
 
 class AIProviderHelpers:
-    """AI provider connection testing helpers (≤8 lines each)"""
+    """AI provider connection testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def validate_ai_provider_keys():
@@ -200,7 +200,7 @@ class AIProviderHelpers:
         return tracking_config
 
 class WebSocketHelpers:
-    """WebSocket testing helpers (≤8 lines each)"""
+    """WebSocket testing helpers ( <= 8 lines each)"""
     
     @staticmethod
     async def establish_websocket_connection():

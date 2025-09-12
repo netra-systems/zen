@@ -581,9 +581,9 @@ class TestRepositoryFactory:
         output.append("=" * 45)
         
         if report.is_compliant:
-            output.append("✅ All repository access is compliant")
+            output.append(" PASS:  All repository access is compliant")
         else:
-            output.append("❌ Repository compliance violations detected")
+            output.append(" FAIL:  Repository compliance violations detected")
             
         if report.violations:
             output.append(f"\nViolations ({len(report.violations)}):")

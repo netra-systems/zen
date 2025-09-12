@@ -397,7 +397,7 @@ class TestActionsAgentSupervisorIntegration:
         assert execution_time < 45.0, \
             f"Registry integration too slow: {execution_time:.2f}s"
         
-        logger.info(f"✅ Registry integration: {integration_analysis['integration_score']:.2f} score, " \
+        logger.info(f" PASS:  Registry integration: {integration_analysis['integration_score']:.2f} score, " \
                    f"{execution_time:.2f}s duration")
     
     @pytest.mark.asyncio
@@ -447,7 +447,7 @@ class TestActionsAgentSupervisorIntegration:
         assert integration_analysis['total_events'] >= 2, \
             f"Insufficient WebSocket events from execution engine: {integration_analysis['total_events']}"
         
-        logger.info(f"✅ Execution engine coordination: {integration_analysis['integration_score']:.2f}")
+        logger.info(f" PASS:  Execution engine coordination: {integration_analysis['integration_score']:.2f}")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -501,7 +501,7 @@ class TestActionsAgentSupervisorIntegration:
             assert last_event in completion_events, \
                 f"Last event should be completion type, got {last_event}"
         
-        logger.info(f"✅ WebSocket propagation: {len(events)} events, " \
+        logger.info(f" PASS:  WebSocket propagation: {len(events)} events, " \
                    f"{integration_analysis['integration_score']:.2f} score")
 
 
@@ -589,7 +589,7 @@ class TestActionsAgentToolDispatcherIntegration:
             assert tool_executing_count <= tool_completed_count + 1, \
                 f"Unpaired tool events: {tool_executing_count} executing, {tool_completed_count} completed"
         
-        logger.info(f"✅ Tool dispatcher integration: {len(tool_events)} tool events")
+        logger.info(f" PASS:  Tool dispatcher integration: {len(tool_events)} tool events")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -644,7 +644,7 @@ class TestActionsAgentToolDispatcherIntegration:
             assert 'generated_from' in metadata or 'user_request' in metadata, \
                 "Action plan metadata should reference input sources"
         
-        logger.info("✅ State management comprehensive validation passed")
+        logger.info(" PASS:  State management comprehensive validation passed")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -698,7 +698,7 @@ class TestActionsAgentToolDispatcherIntegration:
             assert execution_time < 60.0, \
                 f"Scenario '{scenario['name']}' too slow: {execution_time:.2f}s"
             
-            logger.info(f"✅ {scenario['name']}: executed in {execution_time:.2f}s")
+            logger.info(f" PASS:  {scenario['name']}: executed in {execution_time:.2f}s")
 
 
 # ============================================================================
@@ -796,7 +796,7 @@ class TestActionsAgentErrorRecoveryIntegration:
             assert integration_analysis['total_events'] > 0, \
                 f"Scenario '{scenario['name']}' should send WebSocket events even with degraded input"
             
-            logger.info(f"✅ {scenario['name']}: graceful degradation in {execution_time:.2f}s")
+            logger.info(f" PASS:  {scenario['name']}: graceful degradation in {execution_time:.2f}s")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -849,7 +849,7 @@ class TestActionsAgentErrorRecoveryIntegration:
             assert normal_state.action_plan_result is not None, \
                 "Normal execution should produce results when circuit breaker allows"
         
-        logger.info(f"✅ Circuit breaker integration: {final_cb_status}")
+        logger.info(f" PASS:  Circuit breaker integration: {final_cb_status}")
     
     @pytest.mark.asyncio
     @pytest.mark.critical
@@ -925,12 +925,12 @@ class TestActionsAgentErrorRecoveryIntegration:
         recovery_rate = successful_recoveries / total_scenarios
         
         assert recovery_rate >= 0.67, \
-            f"Concurrent error recovery rate too low: {recovery_rate:.1%} (need ≥67%)"
+            f"Concurrent error recovery rate too low: {recovery_rate:.1%} (need  >= 67%)"
         
         assert total_time < 90.0, \
             f"Concurrent error recovery too slow: {total_time:.2f}s"
         
-        logger.info(f"✅ Concurrent error recovery: {recovery_rate:.1%} success rate in {total_time:.2f}s")
+        logger.info(f" PASS:  Concurrent error recovery: {recovery_rate:.1%} success rate in {total_time:.2f}s")
 
 
 # ============================================================================
@@ -1018,7 +1018,7 @@ class TestActionsAgentPerformanceIntegration:
         
         # Performance validations
         assert success_rate >= 0.8, \
-            f"Performance under load failed: {success_rate:.1%} success rate (need ≥80%)"
+            f"Performance under load failed: {success_rate:.1%} success rate (need  >= 80%)"
         
         assert total_execution_time < 100.0, \
             f"Realistic load performance too slow: {total_execution_time:.2f}s (need <100s)"
@@ -1034,7 +1034,7 @@ class TestActionsAgentPerformanceIntegration:
             assert max_execution_time < 60.0, \
                 f"Max execution time too high: {max_execution_time:.2f}s"
             
-            logger.info(f"✅ Performance metrics: {avg_execution_time:.2f}s avg, {max_execution_time:.2f}s max")
+            logger.info(f" PASS:  Performance metrics: {avg_execution_time:.2f}s avg, {max_execution_time:.2f}s max")
         
         # Analyze WebSocket event performance
         total_events = sum(r.get('websocket_events', 0) for r in successful_executions)
@@ -1043,7 +1043,7 @@ class TestActionsAgentPerformanceIntegration:
         assert events_per_second > 0.5, \
             f"WebSocket event rate too low: {events_per_second:.2f} events/s"
         
-        logger.info(f"✅ Load performance: {success_rate:.1%} success, {total_execution_time:.2f}s total, {events_per_second:.1f} events/s")
+        logger.info(f" PASS:  Load performance: {success_rate:.1%} success, {total_execution_time:.2f}s total, {events_per_second:.1f} events/s")
 
 
 # ============================================================================
@@ -1074,7 +1074,7 @@ class TestActionsAgentIntegrationComprehensive:
             # Initialize integration metrics
             metrics = IntegrationTestMetrics()
             
-            logger.info("🔍 Testing supervisor integration...")
+            logger.info(" SEARCH:  Testing supervisor integration...")
             # Test supervisor integration
             tool_dispatcher = ToolDispatcher()
             agent_registry = AgentRegistry()
@@ -1083,22 +1083,22 @@ class TestActionsAgentIntegrationComprehensive:
             
             if actions_agent is not None:
                 metrics.supervisor_interaction_score = 0.9
-                logger.info("✅ Supervisor integration passed")
+                logger.info(" PASS:  Supervisor integration passed")
             else:
                 metrics.supervisor_interaction_score = 0.0
-                logger.error("❌ Supervisor integration failed")
+                logger.error(" FAIL:  Supervisor integration failed")
             
-            logger.info("🔍 Testing tool dispatcher integration...")
+            logger.info(" SEARCH:  Testing tool dispatcher integration...")
             # Test tool dispatcher integration
             enhanced_executor = tool_dispatcher.executor
             if isinstance(enhanced_executor, UnifiedToolExecutionEngine):
                 metrics.tool_dispatcher_integration_score = 0.85
-                logger.info("✅ Tool dispatcher integration passed")
+                logger.info(" PASS:  Tool dispatcher integration passed")
             else:
                 metrics.tool_dispatcher_integration_score = 0.5
-                logger.warning("⚠️ Tool dispatcher integration partial")
+                logger.warning(" WARNING: [U+FE0F] Tool dispatcher integration partial")
             
-            logger.info("🔍 Testing state management...")
+            logger.info(" SEARCH:  Testing state management...")
             # Test state management
             state = DeepAgentState(
                 user_request="Integration compliance test",
@@ -1113,36 +1113,36 @@ class TestActionsAgentIntegrationComprehensive:
                 
                 if state.action_plan_result is not None:
                     metrics.state_management_score = 0.9
-                    logger.info("✅ State management passed")
+                    logger.info(" PASS:  State management passed")
                 else:
                     metrics.state_management_score = 0.6
-                    logger.warning("⚠️ State management partial")
+                    logger.warning(" WARNING: [U+FE0F] State management partial")
                     
             except Exception as e:
                 metrics.state_management_score = 0.3
-                logger.error(f"❌ State management error: {e}")
+                logger.error(f" FAIL:  State management error: {e}")
             
-            logger.info("🔍 Testing WebSocket propagation...")
+            logger.info(" SEARCH:  Testing WebSocket propagation...")
             # Test WebSocket propagation
             integration_analysis = websocket_capture.get_integration_analysis(thread_id)
             metrics.websocket_propagation_score = integration_analysis['integration_score']
             
             if metrics.websocket_propagation_score >= 0.7:
-                logger.info(f"✅ WebSocket propagation passed: {metrics.websocket_propagation_score:.2f}")
+                logger.info(f" PASS:  WebSocket propagation passed: {metrics.websocket_propagation_score:.2f}")
             else:
-                logger.warning(f"⚠️ WebSocket propagation partial: {metrics.websocket_propagation_score:.2f}")
+                logger.warning(f" WARNING: [U+FE0F] WebSocket propagation partial: {metrics.websocket_propagation_score:.2f}")
             
-            logger.info("🔍 Testing error recovery...")
+            logger.info(" SEARCH:  Testing error recovery...")
             # Test error recovery
             error_state = DeepAgentState(user_request="")  # Problematic input
             
             try:
                 await actions_agent.execute(error_state, f"error-{thread_id}", stream_updates=True)
                 metrics.error_recovery_score = 0.8
-                logger.info("✅ Error recovery passed")
+                logger.info(" PASS:  Error recovery passed")
             except Exception:
                 metrics.error_recovery_score = 0.4
-                logger.warning("⚠️ Error recovery partial")
+                logger.warning(" WARNING: [U+FE0F] Error recovery partial")
             
             # Set performance score based on execution
             metrics.performance_score = 0.75  # Based on timing observations
@@ -1167,9 +1167,9 @@ class TestActionsAgentIntegrationComprehensive:
             compliance_threshold = 0.7  # 70% integration compliance required
             
             if overall_score >= compliance_threshold:
-                logger.info("✅ INTEGRATION COMPLIANCE PASSED")
+                logger.info(" PASS:  INTEGRATION COMPLIANCE PASSED")
             else:
-                pytest.fail(f"❌ INTEGRATION COMPLIANCE FAILED: {overall_score:.1%} (need ≥{compliance_threshold:.1%})")
+                pytest.fail(f" FAIL:  INTEGRATION COMPLIANCE FAILED: {overall_score:.1%} (need  >= {compliance_threshold:.1%})")
             
         finally:
             websocket_capture.clear_events()

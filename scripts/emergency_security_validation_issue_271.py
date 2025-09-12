@@ -48,7 +48,7 @@ class EmergencySecurityValidator:
         Returns:
             Dict containing isolation test results and risk assessment
         """
-        logger.critical("🚨 EMERGENCY SECURITY VALIDATION: Testing User Isolation Vulnerability (Issue #271)")
+        logger.critical(" ALERT:  EMERGENCY SECURITY VALIDATION: Testing User Isolation Vulnerability (Issue #271)")
         
         results = {
             "test_timestamp": datetime.now(timezone.utc).isoformat(),
@@ -126,7 +126,7 @@ class EmergencySecurityValidator:
                 results["cross_contamination_risk"] = "LOW"
                 
         except Exception as e:
-            logger.critical(f"🚨 EMERGENCY VALIDATION FAILED: {e}")
+            logger.critical(f" ALERT:  EMERGENCY VALIDATION FAILED: {e}")
             results["vulnerability_detected"] = True
             results["cross_contamination_risk"] = "CRITICAL"
             results["tests_failed"].append(f"Validation system failure: {e}")
@@ -151,7 +151,7 @@ class EmergencySecurityValidator:
         Returns:
             Monitoring configuration and status
         """
-        logger.critical("🚨 ENABLING EMERGENCY MONITORING: Cross-user contamination detection")
+        logger.critical(" ALERT:  ENABLING EMERGENCY MONITORING: Cross-user contamination detection")
         
         monitoring_config = {
             "enabled": True,
@@ -189,7 +189,7 @@ class EmergencySecurityValidator:
         Returns:
             Protection measures implemented and their status
         """
-        logger.critical("🚨 IMPLEMENTING EMERGENCY PROTECTION: Issue #271 vulnerability mitigation")
+        logger.critical(" ALERT:  IMPLEMENTING EMERGENCY PROTECTION: Issue #271 vulnerability mitigation")
         
         protection_measures = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -241,10 +241,10 @@ class EmergencySecurityValidator:
                 "Alert on any DeepAgentState instantiation"
             ])
             
-            logger.critical("✅ EMERGENCY PROTECTION MEASURES IMPLEMENTED")
+            logger.critical(" PASS:  EMERGENCY PROTECTION MEASURES IMPLEMENTED")
             
         except Exception as e:
-            logger.critical(f"🚨 EMERGENCY PROTECTION FAILED: {e}")
+            logger.critical(f" ALERT:  EMERGENCY PROTECTION FAILED: {e}")
             protection_measures["implementation_error"] = str(e)
             protection_measures["escalation_required"] = True
             
@@ -270,7 +270,7 @@ async def main():
     
     args = parser.parse_args()
     
-    logger.critical("🚨 EMERGENCY SECURITY VALIDATION STARTING - Issue #271 Vulnerability Cluster")
+    logger.critical(" ALERT:  EMERGENCY SECURITY VALIDATION STARTING - Issue #271 Vulnerability Cluster")
     
     validator = EmergencySecurityValidator()
     results = {
@@ -288,15 +288,15 @@ async def main():
             
             # Print critical summary
             print("\n" + "="*80)
-            print("🚨 EMERGENCY SECURITY VALIDATION RESULTS")
+            print(" ALERT:  EMERGENCY SECURITY VALIDATION RESULTS")
             print("="*80)
-            print(f"Vulnerability Detected: {'❌ YES' if validation_results['vulnerability_detected'] else '✅ NO'}")
+            print(f"Vulnerability Detected: {' FAIL:  YES' if validation_results['vulnerability_detected'] else ' PASS:  NO'}")
             print(f"Cross-Contamination Risk: {validation_results['cross_contamination_risk']}")
             print(f"Tests Completed: {len(validation_results['tests_completed'])}")
             print(f"Tests Failed: {len(validation_results['tests_failed'])}")
             
             if validation_results["immediate_actions_required"]:
-                print("\n🚨 IMMEDIATE ACTIONS REQUIRED:")
+                print("\n ALERT:  IMMEDIATE ACTIONS REQUIRED:")
                 for action in validation_results["immediate_actions_required"]:
                     print(f"  - {action}")
                     
@@ -304,32 +304,32 @@ async def main():
             logger.critical("Enabling emergency monitoring...")
             monitoring_config = validator.enable_emergency_monitoring()
             results["monitoring"] = monitoring_config
-            print(f"\n✅ Emergency monitoring enabled: {monitoring_config['monitoring_level']}")
+            print(f"\n PASS:  Emergency monitoring enabled: {monitoring_config['monitoring_level']}")
             
         if args.mode in ["protect", "all"]:
             logger.critical("Implementing emergency protection measures...")
             protection_results = validator.implement_emergency_protection()
             results["protection"] = protection_results
-            print(f"\n✅ Emergency protection implemented: {len(protection_results['measures_implemented'])} measures")
+            print(f"\n PASS:  Emergency protection implemented: {len(protection_results['measures_implemented'])} measures")
             
         # Write results to file
         with open(args.output, "w") as f:
             json.dump(results, f, indent=2)
             
-        print(f"\n📄 Full results written to: {args.output}")
+        print(f"\n[U+1F4C4] Full results written to: {args.output}")
         
         # Return appropriate exit code
         if "validation" in results and results["validation"]["vulnerability_detected"]:
-            print("\n🚨 CRITICAL: SECURITY VULNERABILITY DETECTED - IMMEDIATE ACTION REQUIRED")
+            print("\n ALERT:  CRITICAL: SECURITY VULNERABILITY DETECTED - IMMEDIATE ACTION REQUIRED")
             return 1
         else:
-            print("\n✅ Emergency security validation completed successfully") 
+            print("\n PASS:  Emergency security validation completed successfully") 
             return 0
             
     except Exception as e:
-        logger.critical(f"🚨 EMERGENCY VALIDATION SYSTEM FAILURE: {e}")
-        print(f"\n💥 CRITICAL ERROR: {e}")
-        print("🚨 ESCALATE TO SECURITY TEAM IMMEDIATELY")
+        logger.critical(f" ALERT:  EMERGENCY VALIDATION SYSTEM FAILURE: {e}")
+        print(f"\n[U+1F4A5] CRITICAL ERROR: {e}")
+        print(" ALERT:  ESCALATE TO SECURITY TEAM IMMEDIATELY")
         return 2
 
 if __name__ == "__main__":

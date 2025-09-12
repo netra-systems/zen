@@ -787,7 +787,7 @@ CMD ["python", "/app/container_test.py"]
                 cls.logger.info(f"\n{category.replace('_', ' ').title()}:")
                 for test in tests:
                     success = test['test_results'].get('success', False)
-                    status = "✓ PASSED" if success else "✗ FAILED"
+                    status = "[U+2713] PASSED" if success else "[U+2717] FAILED"
                     cls.logger.info(f"  {test['test_name']}: {status}")
         
         super().tearDownClass()

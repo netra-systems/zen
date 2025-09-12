@@ -547,7 +547,7 @@
 
         # Verify all reads were successful and consistent
         # REMOVED_SYNTAX_ERROR: total_reads = sum(len(results) for results in all_results)
-        # REMOVED_SYNTAX_ERROR: assert total_reads == 20 * 100  # 20 readers × 100 reads each
+        # REMOVED_SYNTAX_ERROR: assert total_reads == 20 * 100  # 20 readers  x  100 reads each
 
         # REMOVED_SYNTAX_ERROR: for results in all_results:
             # REMOVED_SYNTAX_ERROR: for result in results:
@@ -892,7 +892,7 @@
                                                         # REMOVED_SYNTAX_ERROR: user_events = events_by_user[user_key]
                                                         # REMOVED_SYNTAX_ERROR: assert len(user_events) >= executions_per_user, "formatted_string"
 
-                                                        # REMOVED_SYNTAX_ERROR: logger.info("✅ Concurrent user stress test passed with proper isolation")
+                                                        # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Concurrent user stress test passed with proper isolation")
 
 
                                                         # ============================================================================
@@ -1162,7 +1162,7 @@
 
                                     # REMOVED_SYNTAX_ERROR: assert event["thread_id"] == expected_thread_id, "formatted_string"
 
-                                    # REMOVED_SYNTAX_ERROR: logger.info("✅ Complete end-to-end integration test passed with proper isolation")
+                                    # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Complete end-to-end integration test passed with proper isolation")
 
                                     # Removed problematic line: @pytest.mark.asyncio
                                     # Removed problematic line: async def test_memory_leak_prevention(self,
@@ -1254,7 +1254,7 @@
                                                 # REMOVED_SYNTAX_ERROR: assert alive_agents <= 10, "formatted_string"
                                                 # REMOVED_SYNTAX_ERROR: assert alive_emitters <= 10, "formatted_string"
 
-                                                # REMOVED_SYNTAX_ERROR: logger.info("✅ Memory leak prevention test passed")
+                                                # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  Memory leak prevention test passed")
 
 
                                                 # ============================================================================

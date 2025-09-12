@@ -1,7 +1,7 @@
 """
 Latency Optimization Test Helpers
 Shared utilities for latency optimization workflow tests.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 from netra_backend.app.agents.data_sub_agent import DataSubAgent

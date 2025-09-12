@@ -99,7 +99,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
             assert auth_headers["Authorization"].startswith("Bearer "), "CRITICAL: Bearer token format required"
             assert "Content-Type" in auth_headers, "CRITICAL: Content-Type header required"
             
-            logger.info(f"✅ Created authenticated user with headers: {list(auth_headers.keys())}")
+            logger.info(f" PASS:  Created authenticated user with headers: {list(auth_headers.keys())}")
             
             # Test header propagation through real HTTP connection
             backend_base_url = self.env.get("BACKEND_URL", "http://localhost:8000")
@@ -128,7 +128,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                         f"Header propagation may have failed."
                     )
                     
-                    logger.info(f"✅ Header propagation successful - backend health: {health_data.get('status')}")
+                    logger.info(f" PASS:  Header propagation successful - backend health: {health_data.get('status')}")
                     
                     # Verify authentication context preserved in response
                     if "user_authenticated" in health_data:
@@ -154,11 +154,11 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                                 f"Expected: {user.get_strongly_typed_user_id()}, Got: {user_id}"
                             )
                             
-                            logger.info(f"✅ User context preserved through header propagation: {user_id}")
+                            logger.info(f" PASS:  User context preserved through header propagation: {user_id}")
                         
                         elif ctx_resp.status == 404:
                             # Endpoint may not exist - log but don't fail
-                            logger.info("ℹ️ User context endpoint not available - skipping context validation")
+                            logger.info("[U+2139][U+FE0F] User context endpoint not available - skipping context validation")
                         
                         else:
                             # Authentication failure on user context endpoint
@@ -214,7 +214,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
             for header in required_headers:
                 assert header in ws_headers, f"CRITICAL: WebSocket header missing: {header}"
             
-            logger.info(f"✅ WebSocket headers prepared: {list(ws_headers.keys())}")
+            logger.info(f" PASS:  WebSocket headers prepared: {list(ws_headers.keys())}")
             
             # Connect to WebSocket with authentication headers
             websocket_url = self.env.get("WEBSOCKET_URL", "ws://localhost:8000/ws")
@@ -226,7 +226,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                 timeout=20,
                 max_size=2**16  # Smaller max size for faster handshake
             ) as websocket:
-                logger.info("✅ WebSocket connection established with authentication headers")
+                logger.info(" PASS:  WebSocket connection established with authentication headers")
                 
                 # Test header-dependent functionality: ping/pong
                 ping_message = {
@@ -253,7 +253,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                             f"Error: {error_msg}"
                         )
                     
-                    logger.info(f"✅ WebSocket authenticated response received: {response_data.get('type')}")
+                    logger.info(f" PASS:  WebSocket authenticated response received: {response_data.get('type')}")
                     
                     # Test authenticated operation: request user info
                     user_info_request = {
@@ -279,7 +279,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                             f"Expected: {user.user_id}, Got: {received_user_id}"
                         )
                         
-                        logger.info(f"✅ WebSocket user context preserved: {received_user_id}")
+                        logger.info(f" PASS:  WebSocket user context preserved: {received_user_id}")
                         
                 except asyncio.TimeoutError:
                     raise AssertionError(
@@ -348,7 +348,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                 )
                 auth_sessions.append(session)
                 
-                logger.info(f"✅ Created user {i}: {user.email}")
+                logger.info(f" PASS:  Created user {i}: {user.email}")
             
             # Test concurrent requests with different user headers
             backend_base_url = self.env.get("BACKEND_URL", "http://localhost:8000")
@@ -410,7 +410,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                 )
                 
                 successful_auths += 1
-                logger.info(f"✅ User {result['user_index']} isolated authentication successful")
+                logger.info(f" PASS:  User {result['user_index']} isolated authentication successful")
             
             # HARD FAIL: All users must authenticate successfully
             assert successful_auths == user_count, (
@@ -419,7 +419,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                 f"This indicates header cross-contamination or stripping."
             )
             
-            logger.info(f"✅ Multi-user header isolation validated for {user_count} users")
+            logger.info(f" PASS:  Multi-user header isolation validated for {user_count} users")
             
             # Clean up sessions
             for session in auth_sessions:
@@ -481,7 +481,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                 "X-Internal-API": "true"
             })
             
-            logger.info(f"✅ Service authentication headers prepared: {list(service_headers.keys())}")
+            logger.info(f" PASS:  Service authentication headers prepared: {list(service_headers.keys())}")
             
             # Test service-to-service health check
             async with aiohttp.ClientSession() as session:
@@ -500,7 +500,7 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                         )
                     
                     health_data = await resp.json()
-                    logger.info(f"✅ Service-to-service health check successful: {health_data.get('status')}")
+                    logger.info(f" PASS:  Service-to-service health check successful: {health_data.get('status')}")
                 
                 # Test internal API endpoint if available
                 validate_url = f"{auth_service_url}/internal/validate"
@@ -520,11 +520,11 @@ class TestLoadBalancerHeaderPropagation(WebSocketIntegrationTest):
                             "CRITICAL: Service token validation failed through headers"
                         )
                         
-                        logger.info("✅ Service-to-service token validation successful")
+                        logger.info(" PASS:  Service-to-service token validation successful")
                         
                     elif validate_resp.status == 404:
                         # Endpoint may not exist - log but don't fail
-                        logger.info("ℹ️ Internal validate endpoint not available - skipping validation")
+                        logger.info("[U+2139][U+FE0F] Internal validate endpoint not available - skipping validation")
                         
                     else:
                         # Service authentication failure

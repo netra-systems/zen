@@ -167,9 +167,9 @@ class TestQualityScoreCalculations(BaseTestCase):
         4. Set up Redis Cluster for horizontal scaling
         
         Expected Impact:
-        - Latency reduction: 150ms → 50ms (67% improvement)
-        - Throughput increase: 500 QPS → 1500 QPS (3x improvement)
-        - Memory efficiency gain: 35% → 15% fragmentation
+        - Latency reduction: 150ms  ->  50ms (67% improvement)
+        - Throughput increase: 500 QPS  ->  1500 QPS (3x improvement)
+        - Memory efficiency gain: 35%  ->  15% fragmentation
         
         Implementation Timeline: 2-week phased rollout with performance monitoring.
         """

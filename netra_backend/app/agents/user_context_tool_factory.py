@@ -60,14 +60,14 @@ class UserContextToolFactory:
             }
         """
         correlation_id = context.get_correlation_id()
-        logger.info(f"🏭 Creating isolated tool system for {correlation_id}")
+        logger.info(f"[U+1F3ED] Creating isolated tool system for {correlation_id}")
         
         # Create user-specific registry ID
         registry_id = f"user_{context.user_id}_{context.run_id}_{int(time.time()*1000)}"
         
         # CRITICAL FIX: Create isolated tool registry with proper scoping
         registry = ToolRegistry(scope_id=registry_id)
-        logger.info(f"🗃️ Created isolated registry {registry_id} for {correlation_id}")
+        logger.info(f"[U+1F5C3][U+FE0F] Created isolated registry {registry_id} for {correlation_id}")
         
         # Create isolated tool instances for this user
         user_tools = []
@@ -77,25 +77,25 @@ class UserContextToolFactory:
                 
                 # Validate tool has required attributes
                 if not hasattr(tool_instance, 'name'):
-                    logger.warning(f"⚠️ Tool {tool_class.__name__} missing 'name' attribute - will use fallback naming")
+                    logger.warning(f" WARNING: [U+FE0F] Tool {tool_class.__name__} missing 'name' attribute - will use fallback naming")
                 
                 user_tools.append(tool_instance)
-                logger.debug(f"✅ Created tool {tool_class.__name__} for {correlation_id}")
+                logger.debug(f" PASS:  Created tool {tool_class.__name__} for {correlation_id}")
             except Exception as e:
-                logger.error(f"❌ Failed to create tool {tool_class.__name__} for {correlation_id}: {e}")
+                logger.error(f" FAIL:  Failed to create tool {tool_class.__name__} for {correlation_id}: {e}")
                 logger.error(f"   Tool class: {tool_class}, Error type: {type(e).__name__}")
                 # Continue with other tools - partial tool availability is better than total failure
                 
-        logger.info(f"🔧 Created {len(user_tools)} isolated tools for {correlation_id}")
+        logger.info(f"[U+1F527] Created {len(user_tools)} isolated tools for {correlation_id}")
         
         # Create isolated WebSocket bridge for this user
         bridge = None
         if websocket_bridge_factory:
             try:
                 bridge = websocket_bridge_factory()
-                logger.info(f"🌐 Created isolated WebSocket bridge for {correlation_id}")
+                logger.info(f"[U+1F310] Created isolated WebSocket bridge for {correlation_id}")
             except Exception as e:
-                logger.error(f"❌ Failed to create WebSocket bridge for {correlation_id}: {e}")
+                logger.error(f" FAIL:  Failed to create WebSocket bridge for {correlation_id}: {e}")
         
         # Create isolated tool dispatcher for this user using factory with pre-created registry
         dispatcher = UnifiedToolDispatcherFactory.create_for_request(
@@ -111,30 +111,30 @@ class UserContextToolFactory:
                 # CRITICAL FIX: Check if tool has name attribute before accessing it
                 if hasattr(tool, 'name') and tool.name:
                     registry.register(tool.name, tool)
-                    logger.debug(f"✅ Registered tool {tool.name} in isolated registry for {correlation_id}")
+                    logger.debug(f" PASS:  Registered tool {tool.name} in isolated registry for {correlation_id}")
                 else:
                     # Use the registry's safe tool name generation instead of dangerous fallback
                     tool_name = registry._generate_safe_tool_name(tool)
-                    logger.warning(f"⚠️ Tool {tool.__class__.__name__} missing 'name' attribute, using safe fallback: {tool_name}")
+                    logger.warning(f" WARNING: [U+FE0F] Tool {tool.__class__.__name__} missing 'name' attribute, using safe fallback: {tool_name}")
                     registry.register(tool_name, tool)
             except ValueError as e:
                 # CRITICAL FIX: Handle duplicate registration and validation failures gracefully
                 if "already registered" in str(e):
-                    logger.warning(f"⚠️ Tool {tool.__class__.__name__} already registered in registry for {correlation_id} - skipping duplicate")
+                    logger.warning(f" WARNING: [U+FE0F] Tool {tool.__class__.__name__} already registered in registry for {correlation_id} - skipping duplicate")
                 elif "BaseModel" in str(e) or "validation failed" in str(e).lower():
-                    logger.error(f"❌ Tool {tool.__class__.__name__} failed validation for {correlation_id}: {e}")
+                    logger.error(f" FAIL:  Tool {tool.__class__.__name__} failed validation for {correlation_id}: {e}")
                     logger.error(f"   This tool appears to be a BaseModel data schema, not an executable tool")
                 else:
-                    logger.error(f"❌ Failed to register tool {tool.__class__.__name__} for {correlation_id}: {e}")
+                    logger.error(f" FAIL:  Failed to register tool {tool.__class__.__name__} for {correlation_id}: {e}")
                 # Continue with other tools - partial functionality is better than complete failure
             except Exception as e:
-                logger.error(f"❌ Unexpected error registering tool {tool.__class__.__name__} for {correlation_id}: {e}")
+                logger.error(f" FAIL:  Unexpected error registering tool {tool.__class__.__name__} for {correlation_id}: {e}")
                 # Continue with other tools
         
-        logger.info(f"🚀 Completed isolated tool system for {correlation_id}")
+        logger.info(f"[U+1F680] Completed isolated tool system for {correlation_id}")
         logger.info(f"   - Registry: {registry_id} ({len(user_tools)} tools)")  
         logger.info(f"   - Dispatcher: {dispatcher.dispatcher_id}")
-        logger.info(f"   - Bridge: {'✓ Available' if bridge else '✗ None'}")
+        logger.info(f"   - Bridge: {'[U+2713] Available' if bridge else '[U+2717] None'}")
         
         return {
             'registry': registry,
@@ -178,22 +178,22 @@ class UserContextToolFactory:
         """
         # Handle None input gracefully
         if tool_system is None:
-            logger.error("❌ Tool system is None")
+            logger.error(" FAIL:  Tool system is None")
             return False
             
         required_keys = ['registry', 'dispatcher', 'tools', 'correlation_id']
         
         for key in required_keys:
             if key not in tool_system:
-                logger.error(f"❌ Tool system missing required key: {key}")
+                logger.error(f" FAIL:  Tool system missing required key: {key}")
                 return False
                 
         if not isinstance(tool_system['tools'], list):
-            logger.error("❌ Tool system 'tools' must be a list")
+            logger.error(" FAIL:  Tool system 'tools' must be a list")
             return False
             
         if len(tool_system['tools']) == 0:
-            logger.warning("⚠️ Tool system has no tools - this may limit functionality")
+            logger.warning(" WARNING: [U+FE0F] Tool system has no tools - this may limit functionality")
             
         return True
 

@@ -178,9 +178,9 @@ class UserContextManagerStagingValidator:
     
     async def run_comprehensive_validation(self) -> Dict[str, Any]:
         """Run all validation tests and return comprehensive report."""
-        print(f"🧪 Running UserContextManager Staging Validation")
-        print(f"🎯 Target: {self.staging_url}")
-        print(f"📋 Testing P0 CRITICAL SECURITY ISSUE #269 resolution\n")
+        print(f"[U+1F9EA] Running UserContextManager Staging Validation")
+        print(f" TARGET:  Target: {self.staging_url}")
+        print(f"[U+1F4CB] Testing P0 CRITICAL SECURITY ISSUE #269 resolution\n")
         
         # Run all validation tests
         health_result = await self.validate_health_endpoint()
@@ -245,43 +245,43 @@ async def main():
     # Print summary
     summary = report["summary"]
     print(f"\n{'='*60}")
-    print(f"📊 VALIDATION SUMMARY")
+    print(f" CHART:  VALIDATION SUMMARY")
     print(f"{'='*60}")
-    print(f"🎯 Total Tests: {summary['total_tests']}")
-    print(f"✅ Passed Tests: {summary['passed_tests']}")
-    print(f"📈 Success Rate: {summary['success_rate']:.1f}%")
-    print(f"🏆 Overall Success: {'YES' if summary['overall_success'] else 'NO'}")
+    print(f" TARGET:  Total Tests: {summary['total_tests']}")
+    print(f" PASS:  Passed Tests: {summary['passed_tests']}")
+    print(f"[U+1F4C8] Success Rate: {summary['success_rate']:.1f}%")
+    print(f" TROPHY:  Overall Success: {'YES' if summary['overall_success'] else 'NO'}")
     
     if not summary['overall_success']:
-        print(f"\n🚨 ISSUES DETECTED:")
+        print(f"\n ALERT:  ISSUES DETECTED:")
         
         # Show health issues
         if not report["health_validation"]["success"]:
-            print(f"❌ Health Check: {report['health_validation']['error']}")
+            print(f" FAIL:  Health Check: {report['health_validation']['error']}")
             
         # Show import issues  
         for test in report["import_validation"]["endpoint_tests"]:
             if not test["success"]:
-                print(f"❌ {test['description']}: Status {test['status_code']} - {test.get('error', 'Unexpected status')}")
+                print(f" FAIL:  {test['description']}: Status {test['status_code']} - {test.get('error', 'Unexpected status')}")
                 
         # Show golden path issues
         for test in report["golden_path_validation"]["golden_path_tests"]:
             if not test["validation_success"]:
-                print(f"❌ {test['test_name']}: {test.get('error', 'Status ' + str(test.get('status_code')))}")
+                print(f" FAIL:  {test['test_name']}: {test.get('error', 'Status ' + str(test.get('status_code')))}")
                 
         # Show breaking change issues
         for test in report["breaking_change_validation"]["breaking_change_tests"]:
             if not test["no_breaking_change"]:
-                print(f"❌ Breaking Change in {test['path']}: Expected working={test['should_work']}, Actual working={test['actually_works']}")
+                print(f" FAIL:  Breaking Change in {test['path']}: Expected working={test['should_work']}, Actual working={test['actually_works']}")
     
-    print(f"\n🎯 UserContextManager Implementation: {'✅ VALIDATED' if summary['overall_success'] else '❌ ISSUES DETECTED'}")
-    print(f"🔒 P0 CRITICAL SECURITY ISSUE #269: {'✅ RESOLVED' if summary['overall_success'] else '❌ NEEDS ATTENTION'}")
+    print(f"\n TARGET:  UserContextManager Implementation: {' PASS:  VALIDATED' if summary['overall_success'] else ' FAIL:  ISSUES DETECTED'}")
+    print(f"[U+1F512] P0 CRITICAL SECURITY ISSUE #269: {' PASS:  RESOLVED' if summary['overall_success'] else ' FAIL:  NEEDS ATTENTION'}")
     
     # Save detailed report
     with open('/Users/anthony/Desktop/netra-apex/staging_validation_report.json', 'w') as f:
         json.dump(report, f, indent=2)
     
-    print(f"📋 Detailed report saved to: staging_validation_report.json")
+    print(f"[U+1F4CB] Detailed report saved to: staging_validation_report.json")
     
     return 0 if summary['overall_success'] else 1
 

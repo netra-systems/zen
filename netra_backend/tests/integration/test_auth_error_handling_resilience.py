@@ -199,7 +199,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
             }
         
         # Execute concurrent high-load operations
-        print(f"🚀 Starting high-load test with {num_users} concurrent users...")
+        print(f"[U+1F680] Starting high-load test with {num_users} concurrent users...")
         start_time = time.time()
         
         concurrent_tasks = [perform_concurrent_auth_operations(user) for user in load_test_users]
@@ -258,12 +258,12 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
             f"got {max_response_time:.2f}s"
         )
         
-        print(f"✅ High-load test completed successfully:")
-        print(f"   👥 {successful_users}/{num_users} users succeeded ({user_success_rate:.1%})")
-        print(f"   🔄 {successful_operations}/{total_operations} operations succeeded ({success_rate:.1%})")
-        print(f"   ⏱️  Average response time: {avg_response_time:.2f}s")
-        print(f"   📊 Max response time: {max_response_time:.2f}s")
-        print(f"   🕒 Total test time: {total_test_time:.2f}s")
+        print(f" PASS:  High-load test completed successfully:")
+        print(f"   [U+1F465] {successful_users}/{num_users} users succeeded ({user_success_rate:.1%})")
+        print(f"    CYCLE:  {successful_operations}/{total_operations} operations succeeded ({success_rate:.1%})")
+        print(f"   [U+23F1][U+FE0F]  Average response time: {avg_response_time:.2f}s")
+        print(f"    CHART:  Max response time: {max_response_time:.2f}s")
+        print(f"   [U+1F552] Total test time: {total_test_time:.2f}s")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -295,7 +295,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         )
         
         # Act: Simulate Redis unavailability
-        print("🔧 Simulating Redis unavailability...")
+        print("[U+1F527] Simulating Redis unavailability...")
         
         # Temporarily disable Redis by connecting to wrong port
         degraded_redis = redis.Redis(host='localhost', port=6999, db=0, decode_responses=True, socket_timeout=1)
@@ -382,11 +382,11 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
                     f"got {result['response_time']:.2f}s"
                 )
         
-        print("✅ Graceful degradation verified:")
+        print(" PASS:  Graceful degradation verified:")
         for result in degradation_test_results:
             test_name = result["test"] 
             response_time = result.get("response_time", 0)
-            print(f"   🔄 {test_name}: ✅ Success ({response_time:.2f}s)")
+            print(f"    CYCLE:  {test_name}:  PASS:  Success ({response_time:.2f}s)")
     
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -415,7 +415,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
             })
         
         # Establish pre-restart state
-        print("🔧 Establishing pre-restart authentication state...")
+        print("[U+1F527] Establishing pre-restart authentication state...")
         
         pre_restart_results = []
         
@@ -449,7 +449,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         )
         
         # Act: Simulate service restart (flush Redis auth cache but keep session data)
-        print("🔄 Simulating service restart and cache flush...")
+        print(" CYCLE:  Simulating service restart and cache flush...")
         
         # Flush auth-specific cache keys (simulate restart cache clearing)
         try:
@@ -465,15 +465,15 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
             if blacklist_keys:
                 self.redis_client.delete(*blacklist_keys)
                 
-            print(f"   🗑️ Cleared {len(auth_cache_keys + circuit_breaker_keys + blacklist_keys)} cache keys")
+            print(f"   [U+1F5D1][U+FE0F] Cleared {len(auth_cache_keys + circuit_breaker_keys + blacklist_keys)} cache keys")
         except Exception as e:
-            print(f"   ⚠️ Cache clearing failed (simulating unclean restart): {e}")
+            print(f"    WARNING: [U+FE0F] Cache clearing failed (simulating unclean restart): {e}")
         
         # Simulate brief downtime
         await asyncio.sleep(2)
         
         # Test system recovery
-        print("🔧 Testing auth system recovery after restart...")
+        print("[U+1F527] Testing auth system recovery after restart...")
         
         post_restart_results = []
         
@@ -566,12 +566,12 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
             # User recovery successful if all operations succeeded
             if user_successful_operations == len(operations):
                 successful_recoveries += 1
-                print(f"   ✅ User {user_id}: Full recovery")
+                print(f"    PASS:  User {user_id}: Full recovery")
             else:
-                print(f"   ⚠️ User {user_id}: Partial recovery ({user_successful_operations}/{len(operations)})")
+                print(f"    WARNING: [U+FE0F] User {user_id}: Partial recovery ({user_successful_operations}/{len(operations)})")
                 for op in operations:
                     if not op["success"]:
-                        print(f"      ❌ {op['operation']}: {op.get('error', 'failed')}")
+                        print(f"       FAIL:  {op['operation']}: {op.get('error', 'failed')}")
         
         recovery_success_rate = successful_recoveries / num_users
         operation_success_rate = successful_recovery_operations / total_recovery_operations if total_recovery_operations > 0 else 0
@@ -587,9 +587,9 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
             f"got {operation_success_rate:.1%} ({successful_recovery_operations}/{total_recovery_operations})"
         )
         
-        print(f"🎉 Auth system recovery test completed:")
-        print(f"   👥 {successful_recoveries}/{num_users} users fully recovered ({recovery_success_rate:.1%})")
-        print(f"   🔄 {successful_recovery_operations}/{total_recovery_operations} operations succeeded ({operation_success_rate:.1%})")
+        print(f" CELEBRATION:  Auth system recovery test completed:")
+        print(f"   [U+1F465] {successful_recoveries}/{num_users} users fully recovered ({recovery_success_rate:.1%})")
+        print(f"    CYCLE:  {successful_recovery_operations}/{total_recovery_operations} operations succeeded ({operation_success_rate:.1%})")
         
         # Cleanup recovery test data
         for user_data in recovery_test_users:

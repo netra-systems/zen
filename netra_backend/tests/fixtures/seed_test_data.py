@@ -1,7 +1,7 @@
 """
 Test Database Seeding Script
 Populates test databases with small, fast-loading datasets.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import asyncio
@@ -198,7 +198,7 @@ async def main():
     
     print("\nSeeding Results:")
     for db, success in results.items():
-        status = "✓ SUCCESS" if success else "✗ FAILED"
+        status = "[U+2713] SUCCESS" if success else "[U+2717] FAILED"
         print(f"  {db}: {status}")
     
     stats = seeder.get_seed_performance_stats()
@@ -206,7 +206,7 @@ async def main():
     print(f"  Total time: {stats['total_time_seconds']}s")
     print(f"  Total records: {stats['total_records']}")
     print(f"  Speed: {stats['records_per_second']} records/sec")
-    print(f"  Target met (<1s): {'✓' if stats['performance_target_met'] else '✗'}")
+    print(f"  Target met (<1s): {'[U+2713]' if stats['performance_target_met'] else '[U+2717]'}")
 
 # Export instances
 test_seeder = TestDataSeeder()

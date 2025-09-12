@@ -156,7 +156,7 @@ class TestWebSocketMessageStructure:
                 {
                     "type": "start_agent",
                     "payload": {
-                        "query": "Query with unicode: 🚀 测试 العربية",
+                        "query": "Query with unicode: [U+1F680] [U+6D4B][U+8BD5] [U+0627][U+0644][U+0639][U+0631][U+0628][U+064A][U+0629]",
                         "user_id": user_id,
                         "context": {"numbers": [1, 2, 3], "boolean": True, "null_value": None}
                     }

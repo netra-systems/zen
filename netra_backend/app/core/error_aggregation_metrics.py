@@ -348,12 +348,12 @@ class AlertEngine:
     def _add_spike_info(self, parts: List[str], trend: ErrorTrend) -> None:
         """Add spike information to parts."""
         if trend.is_spike:
-            parts.append("⚠️ Error spike detected")
+            parts.append(" WARNING: [U+FE0F] Error spike detected")
     
     def _add_sustained_info(self, parts: List[str], trend: ErrorTrend) -> None:
         """Add sustained pattern information to parts."""
         if trend.is_sustained:
-            parts.append("📈 Sustained error pattern")
+            parts.append("[U+1F4C8] Sustained error pattern")
     
     def _add_projection_info(self, parts: List[str], trend: ErrorTrend) -> None:
         """Add projection information to parts."""

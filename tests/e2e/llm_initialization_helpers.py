@@ -24,7 +24,7 @@
     # REMOVED_SYNTAX_ERROR: '''LLM Initialization Test Helpers - Supporting classes and utilities
 
     # REMOVED_SYNTAX_ERROR: Separated from main test file to comply with 450-line limit
-    # REMOVED_SYNTAX_ERROR: All functions ≤8 lines following CLAUDE.md requirements
+    # REMOVED_SYNTAX_ERROR: All functions  <= 8 lines following CLAUDE.md requirements
     # REMOVED_SYNTAX_ERROR: '''
 
     # REMOVED_SYNTAX_ERROR: import asyncio

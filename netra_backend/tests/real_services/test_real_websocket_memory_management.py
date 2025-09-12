@@ -813,7 +813,7 @@ class TestRealWebSocketResourceManagement:
         connections_per_user = 3
         total_expected = users_count * connections_per_user
         
-        logger.info(f"Extreme load test - {users_count} users × {connections_per_user} connections = {total_expected} total")
+        logger.info(f"Extreme load test - {users_count} users  x  {connections_per_user} connections = {total_expected} total")
         
         all_clients = []
         

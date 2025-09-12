@@ -18,17 +18,17 @@ Every test validates that environment detection, validation patterns, and config
 utilities exist in EXACTLY ONE PLACE and work consistently across all scenarios.
 
 Testing Coverage Goals:
-✓ Environment detection across 8+ environment variables
-✓ Priority order handling for multiple environment variables
-✓ Cloud Run K_SERVICE detection logic
-✓ Pattern matching with case insensitivity 
-✓ Environment variable utilities (bool, int, list parsing)
-✓ Validation framework for required fields and constraints
-✓ Logging and security (credential masking)
-✓ IsolatedEnvironment integration
-✓ Thread safety and performance under load
-✓ Abstract method enforcement
-✓ Debug information generation
+[U+2713] Environment detection across 8+ environment variables
+[U+2713] Priority order handling for multiple environment variables
+[U+2713] Cloud Run K_SERVICE detection logic
+[U+2713] Pattern matching with case insensitivity 
+[U+2713] Environment variable utilities (bool, int, list parsing)
+[U+2713] Validation framework for required fields and constraints
+[U+2713] Logging and security (credential masking)
+[U+2713] IsolatedEnvironment integration
+[U+2713] Thread safety and performance under load
+[U+2713] Abstract method enforcement
+[U+2713] Debug information generation
 """
 
 import pytest
@@ -1174,15 +1174,15 @@ class TestEdgeCasesAndErrorHandling:
     def test_unicode_environment_values(self):
         """Test handling of Unicode characters in environment values."""
         test_env = {
-            'UNICODE_VAR': 'değer_with_unicode_çharacters',
-            'EMOJI_VAR': '🚀 rocket emoji',
+            'UNICODE_VAR': 'de[U+011F]er_with_unicode_[U+00E7]haracters',
+            'EMOJI_VAR': '[U+1F680] rocket emoji',
             'ENVIRONMENT': 'development'
         }
         
         config = TestConfigImplementation(env_vars=test_env)
         
-        assert config.get_env_var('UNICODE_VAR') == 'değer_with_unicode_çharacters'
-        assert config.get_env_var('EMOJI_VAR') == '🚀 rocket emoji'
+        assert config.get_env_var('UNICODE_VAR') == 'de[U+011F]er_with_unicode_[U+00E7]haracters'
+        assert config.get_env_var('EMOJI_VAR') == '[U+1F680] rocket emoji'
         assert config.environment == 'development'
 
     def test_very_long_environment_values(self):

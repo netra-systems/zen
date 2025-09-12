@@ -30,7 +30,7 @@ class AdaptiveWorkflowTester:
         """Check if the API is healthy."""
         async with self.session.get(f"{self.base_url}/health") as response:
             data = await response.json()
-            print(f"✓ Health check: {data}")
+            print(f"[U+2713] Health check: {data}")
             return response.status == 200
     
     async def test_workflow(self, scenario: str, user_request: str, expected_sufficiency: str):
@@ -60,15 +60,15 @@ class AdaptiveWorkflowTester:
             ) as response:
                 if response.status == 200:
                     result = await response.json()
-                    print(f"✓ Thread created: {json.dumps(result, indent=2)}")
+                    print(f"[U+2713] Thread created: {json.dumps(result, indent=2)}")
                     return result
                 else:
                     error_text = await response.text()
-                    print(f"✗ Failed to create thread: {response.status}")
+                    print(f"[U+2717] Failed to create thread: {response.status}")
                     print(f"  Error: {error_text}")
                     return None
         except Exception as e:
-            print(f"✗ Error testing workflow: {e}")
+            print(f"[U+2717] Error testing workflow: {e}")
             return None
     
     async def run_all_tests(self):
@@ -79,7 +79,7 @@ class AdaptiveWorkflowTester:
         
         # First check health
         if not await self.health_check():
-            print("✗ API is not healthy. Exiting.")
+            print("[U+2717] API is not healthy. Exiting.")
             return
         
         # Test scenarios
@@ -129,7 +129,7 @@ class AdaptiveWorkflowTester:
         print("TEST SUMMARY")
         print("="*70)
         for r in results:
-            status = "✓" if r["result"] else "✗"
+            status = "[U+2713]" if r["result"] else "[U+2717]"
             print(f"{status} {r['scenario']}: Expected {r['expected']}")
             if r["result"] and "thread_id" in r["result"]:
                 print(f"  Thread ID: {r['result']['thread_id']}")

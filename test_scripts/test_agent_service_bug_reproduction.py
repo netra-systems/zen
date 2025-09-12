@@ -32,7 +32,7 @@ def test_agent_service_missing_attribute_error():
     
     # Verify the error message
     assert "'State' object has no attribute 'agent_service'" in str(exc_info.value)
-    print(f"✓ Successfully reproduced bug: {exc_info.value}")
+    print(f"[U+2713] Successfully reproduced bug: {exc_info.value}")
 
 
 def test_agent_service_with_proper_initialization():
@@ -57,7 +57,7 @@ def test_agent_service_with_proper_initialization():
     
     # Should return the mock service without error
     assert service == mock_agent_service
-    print("✓ Agent service accessible when properly initialized")
+    print("[U+2713] Agent service accessible when properly initialized")
 
 
 def test_startup_sequence_validation():
@@ -86,12 +86,12 @@ def test_startup_sequence_validation():
     
     # This test should find agent_service is missing
     assert 'agent_service' in missing_services
-    print(f"✓ Detected missing critical services: {missing_services}")
+    print(f"[U+2713] Detected missing critical services: {missing_services}")
     
     # In a proper startup, this should cause startup failure
     if missing_services:
         error_msg = f"CRITICAL: Startup incomplete - missing services: {missing_services}"
-        print(f"✗ {error_msg}")
+        print(f"[U+2717] {error_msg}")
         # In real code, this would raise DeterministicStartupError
 
 
@@ -108,13 +108,13 @@ async def test_graceful_vs_deterministic_startup():
         raise Exception("Database connection failed")
     except Exception as e:
         # Graceful mode: log and continue
-        print(f"⚠ Warning: {e} - continuing in graceful mode")
+        print(f" WARNING:  Warning: {e} - continuing in graceful mode")
         # Agent service never gets initialized
         pass
     
     # App starts without agent_service
     assert not hasattr(app_graceful.state, 'agent_service')
-    print("✗ App started in degraded state without agent_service")
+    print("[U+2717] App started in degraded state without agent_service")
     
     # Deterministic startup (proper behavior)
     print("\n=== DETERMINISTIC STARTUP (CORRECT) ===")
@@ -130,10 +130,10 @@ async def test_graceful_vs_deterministic_startup():
             raise Exception("Database connection failed")
         except Exception as e:
             # Deterministic mode: fail immediately
-            print(f"✗ Critical failure: {e}")
+            print(f"[U+2717] Critical failure: {e}")
             raise DeterministicStartupError(f"STARTUP HALTED: {e}")
     
-    print("✓ App startup correctly halted on critical failure")
+    print("[U+2713] App startup correctly halted on critical failure")
 
 
 if __name__ == "__main__":
@@ -147,6 +147,6 @@ if __name__ == "__main__":
     # Run async test
     asyncio.run(test_graceful_vs_deterministic_startup())
     
-    print("\n✅ All bug reproduction tests completed!")
+    print("\n PASS:  All bug reproduction tests completed!")
     print("\nSUMMARY: The bug occurs when startup fails before agent_service initialization")
     print("but the app continues running in 'graceful' mode, causing runtime AttributeError.")

@@ -101,7 +101,7 @@ class QualityMessageHandler:
         """Handle unknown message type."""
         logger.warning(f"Unknown message type: {message_type}")
         try:
-            # ✅ CORRECT - Maintains session continuity
+            #  PASS:  CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs
@@ -123,7 +123,7 @@ class QualityMessageHandler:
         try:
             message = self._build_update_message(update)
             
-            # ✅ CORRECT - Maintains session continuity
+            #  PASS:  CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs
@@ -149,7 +149,7 @@ class QualityMessageHandler:
         try:
             alert_message = self._build_alert_message(alert)
             
-            # ✅ CORRECT - Maintains session continuity
+            #  PASS:  CORRECT - Maintains session continuity
             user_context = get_user_execution_context(
                 user_id=user_id,
                 thread_id=None,  # Let session manager handle missing IDs

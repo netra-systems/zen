@@ -26,7 +26,7 @@ class UpdateSender:
         if stream_updates:
             await self.send_update_callback(run_id, {
                 "status": "generating",
-                "message": f"🔄 Generating {profile.volume:,} synthetic records...",
+                "message": f" CYCLE:  Generating {profile.volume:,} synthetic records...",
                 "progress": 0
             })
     
@@ -44,7 +44,7 @@ class UpdateSender:
         if stream_updates:
             await self.send_update_callback(run_id, {
                 "status": "error",
-                "message": f"❌ Synthetic data generation failed: {str(error)}",
+                "message": f" FAIL:  Synthetic data generation failed: {str(error)}",
                 "error": str(error)
             })
     
@@ -70,22 +70,22 @@ class MessageFormatter:
         workload_type = profile.workload_type.value.replace('_', ' ').title()
         base_info = f"{workload_type}, {profile.volume:,} records"
         timing_info = f"{profile.time_range_days} days, {profile.distribution} distribution"
-        return f"📊 Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
+        return f" CHART:  Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
     
     @staticmethod
     def format_completion_message(records_count: int, duration: int) -> str:
         """Format completion message"""
-        return f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms"
+        return f" PASS:  Successfully generated {records_count:,} synthetic records in {duration}ms"
     
     @staticmethod
     def format_generation_start_message(volume: int) -> str:
         """Format generation start message"""
-        return f"🔄 Generating {volume:,} synthetic records..."
+        return f" CYCLE:  Generating {volume:,} synthetic records..."
     
     @staticmethod
     def format_error_message(error: Exception) -> str:
         """Format error message"""
-        return f"❌ Synthetic data generation failed: {str(error)}"
+        return f" FAIL:  Synthetic data generation failed: {str(error)}"
 
 
 class CompletionDataBuilder:

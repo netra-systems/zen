@@ -56,7 +56,7 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
         
     def test_unified_import_pattern(self):
         """Test the new unified import pattern works correctly."""
-        logger.info("🧪 Testing unified import pattern")
+        logger.info("[U+1F9EA] Testing unified import pattern")
         
         try:
             # NEW PATTERN: Import from unified SSOT location
@@ -98,7 +98,7 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
             validation_result = validate_agent_events(mock_events)
             self.assertTrue(validation_result.is_valid)
             
-            logger.success("✅ Unified import pattern test passed")
+            logger.success(" PASS:  Unified import pattern test passed")
             
         except ImportError as e:
             self.fail(f"Unified import pattern failed: {e}")
@@ -107,7 +107,7 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
             
     def test_backward_compatibility_aliases(self):
         """Test that backward compatibility aliases work."""
-        logger.info("🧪 Testing backward compatibility aliases")
+        logger.info("[U+1F9EA] Testing backward compatibility aliases")
         
         try:
             # Test that old class names still work as aliases
@@ -132,7 +132,7 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
             result = ws_validator.validate_event(self.sample_event, self.test_user_id, self.test_connection_id)
             self.assertIsNotNone(result)
             
-            logger.success("✅ Backward compatibility aliases test passed")
+            logger.success(" PASS:  Backward compatibility aliases test passed")
             
         except ImportError as e:
             logger.warning(f"Backward compatibility aliases not available: {e}")
@@ -142,7 +142,7 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
             
     def test_production_import_compatibility(self):
         """Test compatibility with production import patterns."""
-        logger.info("🧪 Testing production import compatibility")
+        logger.info("[U+1F9EA] Testing production import compatibility")
         
         # Test that production imports still work
         compatibility_results = {}
@@ -202,11 +202,11 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
         self.assertGreater(len(working_patterns), 0, 
                          f"No production import patterns working: {compatibility_results}")
         
-        logger.success("✅ Production import compatibility test passed")
+        logger.success(" PASS:  Production import compatibility test passed")
         
     def test_import_migration_guidance(self):
         """Test that provides migration guidance for developers."""
-        logger.info("🧪 Testing import migration guidance")
+        logger.info("[U+1F9EA] Testing import migration guidance")
         
         migration_guidance = {
             "preferred_imports": [],
@@ -249,11 +249,11 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
         self.assertGreater(len(migration_guidance["preferred_imports"]) + len(migration_guidance["deprecated_imports"]), 0,
                          "No working import patterns found for EventValidator")
         
-        logger.success("✅ Import migration guidance test passed")
+        logger.success(" PASS:  Import migration guidance test passed")
         
     def test_functionality_equivalence_across_imports(self):
         """Test that different import patterns provide equivalent functionality."""
-        logger.info("🧪 Testing functionality equivalence across imports")
+        logger.info("[U+1F9EA] Testing functionality equivalence across imports")
         
         validators = {}
         
@@ -318,11 +318,11 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
             self.assertEqual(len(set(validity_values)), 1, 
                            f"Validators disagree on event validity: {validation_results}")
             
-        logger.success("✅ Functionality equivalence test passed")
+        logger.success(" PASS:  Functionality equivalence test passed")
         
     def test_migration_safety_checks(self):
         """Test safety checks for migration process."""
-        logger.info("🧪 Testing migration safety checks")
+        logger.info("[U+1F9EA] Testing migration safety checks")
         
         safety_report = {
             "critical_functions_available": [],
@@ -367,9 +367,9 @@ class TestEventValidatorImportMigration(SSotBaseTestCase):
                          "No critical functions available in unified implementation")
         
         if not safety_report["backward_compatibility"]:
-            logger.warning("⚠️ Backward compatibility may be broken - migration risk detected")
+            logger.warning(" WARNING: [U+FE0F] Backward compatibility may be broken - migration risk detected")
             
-        logger.success("✅ Migration safety checks passed")
+        logger.success(" PASS:  Migration safety checks passed")
 
 
 if __name__ == "__main__":
@@ -382,8 +382,8 @@ if __name__ == "__main__":
     result = runner.run(suite)
     
     if result.wasSuccessful():
-        print("✅ SUCCESS: Import migration patterns validated")
+        print(" PASS:  SUCCESS: Import migration patterns validated")
         print("Migration should be safe for EventValidator SSOT consolidation")
     else:
-        print("❌ FAILURE: Import migration has issues")
+        print(" FAIL:  FAILURE: Import migration has issues")
         print("Review migration strategy before proceeding with SSOT consolidation")

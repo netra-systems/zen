@@ -252,14 +252,14 @@
     # Check it's async format
     # REMOVED_SYNTAX_ERROR: assert "postgresql+asyncpg://" in url_from_config
     # REMOVED_SYNTAX_ERROR: assert "dev-postgres" in url_from_config
-    # REMOVED_SYNTAX_ERROR: print("✓ Database URL correctly formatted")
+    # REMOVED_SYNTAX_ERROR: print("[U+2713] Database URL correctly formatted")
     # REMOVED_SYNTAX_ERROR: '''],
     # REMOVED_SYNTAX_ERROR: capture_output=True,
     # REMOVED_SYNTAX_ERROR: text=True
     
 
     # REMOVED_SYNTAX_ERROR: assert result.returncode == 0, "formatted_string"
-    # REMOVED_SYNTAX_ERROR: assert "✓ Database URL correctly formatted" in result.stdout
+    # REMOVED_SYNTAX_ERROR: assert "[U+2713] Database URL correctly formatted" in result.stdout
 
 
 # REMOVED_SYNTAX_ERROR: class TestDockerComposeConfiguration:

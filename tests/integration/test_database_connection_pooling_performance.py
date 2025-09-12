@@ -202,7 +202,7 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         assert connection_metrics.pool_exhaustion_events == 0, f"Pool exhaustion events detected: {connection_metrics.pool_exhaustion_events}"
         assert connection_metrics.timeout_events <= 2, f"Too many timeout events: {connection_metrics.timeout_events}"
         
-        print(f"✅ Database Connection Pool Performance Results:")
+        print(f" PASS:  Database Connection Pool Performance Results:")
         print(f"   Concurrent operations: {concurrent_operations}")
         print(f"   Total operations: {connection_metrics.total_operations}")
         print(f"   Successful operations: {connection_metrics.successful_operations}")
@@ -301,7 +301,7 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
             return result
         
         # Run stress test
-        print(f"🔥 Starting database stress test for {stress_duration}s...")
+        print(f" FIRE:  Starting database stress test for {stress_duration}s...")
         stress_start = time.time()
         end_time = stress_start + stress_duration
         operation_counter = 0
@@ -358,7 +358,7 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         assert recovery_success_rate >= 0.90, f"Recovery success rate {recovery_success_rate:.3f} below 90% threshold"
         assert recovery_time < 5.0, f"Recovery time {recovery_time:.2f}s exceeds 5s limit"
         
-        print(f"✅ Database Connection Pool Stress Test Results:")
+        print(f" PASS:  Database Connection Pool Stress Test Results:")
         print(f"   Stress duration: {actual_stress_duration:.2f}s")
         print(f"   Total operations: {stress_metrics['total_operations']}")
         print(f"   Successful operations: {stress_metrics['successful_operations']}")
@@ -395,7 +395,7 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         pattern_results = []
         
         for pattern in patterns:
-            print(f"🔄 Testing {pattern['name']} usage pattern...")
+            print(f" CYCLE:  Testing {pattern['name']} usage pattern...")
             
             pattern_start = time.time()
             operation_times = []
@@ -485,7 +485,7 @@ class TestDatabaseConnectionPoolingPerformance(BaseIntegrationTest):
         assert success_rate_variance < 0.1, f"Success rate variance {success_rate_variance:.3f} too high across patterns"
         assert avg_time_variance < 0.05, f"Average time variance {avg_time_variance:.3f}s too high across patterns"
         
-        print(f"✅ Connection Pool Efficiency Pattern Results:")
+        print(f" PASS:  Connection Pool Efficiency Pattern Results:")
         for pattern_metrics in pattern_results:
             print(f"   {pattern_metrics['name'].title()} Pattern:")
             print(f"     Operations: {pattern_metrics['successful_operations']}/{pattern_metrics['total_operations']}")

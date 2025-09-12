@@ -133,7 +133,7 @@ class DockerSSOTEnforcer:
 
     def validate_ssot_compliance(self) -> Dict[str, List[str]]:
         """Validate current Docker configuration against SSOT matrix"""
-        logger.info("🔍 Validating Docker SSOT compliance...")
+        logger.info(" SEARCH:  Validating Docker SSOT compliance...")
         
         violations = {
             'missing_required': [],
@@ -254,30 +254,30 @@ class DockerSSOTEnforcer:
         has_violations = any(len(v) > 0 for v in violations.values())
         
         if has_violations:
-            logger.error("🚨 DOCKER SSOT VIOLATIONS DETECTED")
+            logger.error(" ALERT:  DOCKER SSOT VIOLATIONS DETECTED")
             logger.error("=" * 50)
             
             if violations['missing_required']:
-                logger.error("❌ MISSING REQUIRED SSOT FILES:")
+                logger.error(" FAIL:  MISSING REQUIRED SSOT FILES:")
                 for missing in violations['missing_required']:
                     logger.error(f"   {missing}")
                 logger.error("   Solution: Restore files from SSOT matrix")
                 logger.error("   See: docker/DOCKER_SSOT_MATRIX.md")
             
             if violations['obsolete_present']:
-                logger.error("❌ OBSOLETE FILES PRESENT (MUST DELETE):")
+                logger.error(" FAIL:  OBSOLETE FILES PRESENT (MUST DELETE):")
                 for obsolete in violations['obsolete_present']:
                     logger.error(f"   {obsolete}")
                 logger.error("   Solution: python scripts/docker_ssot_enforcer.py cleanup")
             
             if violations['fallback_logic']:
-                logger.error("❌ FORBIDDEN FALLBACK LOGIC DETECTED:")
+                logger.error(" FAIL:  FORBIDDEN FALLBACK LOGIC DETECTED:")
                 for fallback in violations['fallback_logic']:
                     logger.error(f"   {fallback}")
                 logger.error("   Solution: Replace with hard fail logic")
             
             if violations['unauthorized_configs']:
-                logger.error("❌ UNAUTHORIZED DOCKER CONFIGS:")
+                logger.error(" FAIL:  UNAUTHORIZED DOCKER CONFIGS:")
                 for unauthorized in violations['unauthorized_configs']:
                     logger.error(f"   {unauthorized}")
                 logger.error("   Solution: Add to SSOT matrix or obsolete list")
@@ -286,7 +286,7 @@ class DockerSSOTEnforcer:
             logger.error("DOCKER SSOT ENFORCEMENT FAILED")
             return False
         
-        logger.info("✅ Docker SSOT compliance validated successfully")
+        logger.info(" PASS:  Docker SSOT compliance validated successfully")
         return True
 
     def generate_report(self) -> Dict:
@@ -313,19 +313,19 @@ def main():
     enforcer = DockerSSOTEnforcer()
     
     if command == 'validate':
-        logger.info("🔍 Validating Docker SSOT compliance...")
+        logger.info(" SEARCH:  Validating Docker SSOT compliance...")
         violations = enforcer.validate_ssot_compliance()
         
         if any(len(v) > 0 for v in violations.values()):
-            logger.warning("⚠️ SSOT violations found:")
+            logger.warning(" WARNING: [U+FE0F] SSOT violations found:")
             for category, items in violations.items():
                 if items:
                     logger.warning(f"  {category}: {len(items)} violations")
         else:
-            logger.info("✅ All Docker configurations are SSOT compliant")
+            logger.info(" PASS:  All Docker configurations are SSOT compliant")
     
     elif command == 'cleanup':
-        logger.info("🧹 Listing obsolete Docker files to delete...")
+        logger.info("[U+1F9F9] Listing obsolete Docker files to delete...")
         files_to_delete = enforcer.list_files_to_delete()
         
         if files_to_delete:
@@ -335,17 +335,17 @@ def main():
             logger.warning(f"\nTotal: {len(files_to_delete)} obsolete files")
             logger.warning("Run: rm " + " ".join(files_to_delete))
         else:
-            logger.info("✅ No obsolete Docker files found")
+            logger.info(" PASS:  No obsolete Docker files found")
     
     elif command == 'enforce':
-        logger.info("🚨 Enforcing Docker SSOT compliance...")
+        logger.info(" ALERT:  Enforcing Docker SSOT compliance...")
         if not enforcer.enforce_ssot_compliance():
             logger.error("SSOT enforcement failed - see violations above")
             sys.exit(1)
-        logger.info("✅ Docker SSOT enforcement passed")
+        logger.info(" PASS:  Docker SSOT enforcement passed")
     
     elif command == 'report':
-        logger.info("📊 Generating Docker SSOT compliance report...")
+        logger.info(" CHART:  Generating Docker SSOT compliance report...")
         report = enforcer.generate_report()
         print(json.dumps(report, indent=2))
     

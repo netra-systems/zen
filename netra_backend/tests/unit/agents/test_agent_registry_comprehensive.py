@@ -1,5 +1,5 @@
 """
-🚀 Comprehensive AgentRegistry Unit Tests - SSOT Business Logic Focus
+[U+1F680] Comprehensive AgentRegistry Unit Tests - SSOT Business Logic Focus
 
 Business Value Justification (BVJ):
 - Segment: All (Free, Early, Mid, Enterprise)

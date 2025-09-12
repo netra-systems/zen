@@ -1,7 +1,7 @@
 """
 Small, Fast-Loading Test Datasets for Unit Tests
 Provides realistic test data matching production schemas.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 import uuid

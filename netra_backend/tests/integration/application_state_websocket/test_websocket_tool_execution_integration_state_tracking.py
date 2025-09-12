@@ -783,7 +783,7 @@ class TestWebSocketToolExecutionIntegrationStateTracking(BaseIntegrationTest):
                 assert tool_execution_record["success"] is True
                 
         self.logger.info(
-            f"✅ Comprehensive tool execution test PASSED - "
+            f" PASS:  Comprehensive tool execution test PASSED - "
             f"{expected_tools} tools executed, "
             f"${business_value['total_savings_identified']:,} savings identified, "
             f"{len(self.event_collector.all_events)} WebSocket events, "
@@ -855,7 +855,7 @@ class TestWebSocketToolExecutionIntegrationStateTracking(BaseIntegrationTest):
         assert len(progress_events) >= 3, "Should have progress percentage updates"
         
         self.logger.info(
-            f"✅ Tool execution state tracking test PASSED - "
+            f" PASS:  Tool execution state tracking test PASSED - "
             f"{len(tool_states)} tools tracked, "
             f"{len(thinking_events)} progress updates"
         )
@@ -961,7 +961,7 @@ class TestWebSocketToolExecutionIntegrationStateTracking(BaseIntegrationTest):
                 if state["status"] == "failed":
                     assert "error" in state, "Failed tool state should include error details"
                     
-        self.logger.info("✅ Tool execution error handling test PASSED")
+        self.logger.info(" PASS:  Tool execution error handling test PASSED")
 
 
 if __name__ == "__main__":

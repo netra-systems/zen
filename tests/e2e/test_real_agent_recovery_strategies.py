@@ -482,9 +482,9 @@ class RealAgentRecoveryStrategiesTester:
             # Check for REQUIRED WebSocket events during recovery
             missing_events = self.REQUIRED_EVENTS - val.event_types_seen
             if missing_events:
-                report.append(f"⚠️ MISSING REQUIRED EVENTS: {missing_events}")
+                report.append(f" WARNING: [U+FE0F] MISSING REQUIRED EVENTS: {missing_events}")
             else:
-                report.append("✓ All required WebSocket events received during recovery")
+                report.append("[U+2713] All required WebSocket events received during recovery")
                 
             # Error and recovery analysis
             report.append(f"\nError and Recovery Analysis:")
@@ -506,7 +506,7 @@ class RealAgentRecoveryStrategiesTester:
                 
                 # Individual recovery details
                 for j, recovery in enumerate(val.recovery_attempts, 1):
-                    status_symbol = "✓" if recovery.success else "✗"
+                    status_symbol = "[U+2713]" if recovery.success else "[U+2717]"
                     duration_str = f"{recovery.duration:.2f}s" if recovery.duration else "N/A"
                     report.append(f"    {j}. {status_symbol} {recovery.recovery_type.value} ({duration_str})")
                     
@@ -518,10 +518,10 @@ class RealAgentRecoveryStrategiesTester:
             
             # Business logic validation
             report.append("\nBusiness Logic Validation:")
-            report.append(f"  ✓ Recovery successful: {val.recovery_successful}")
-            report.append(f"  ✓ System stability maintained: {val.system_stability_maintained}")
-            report.append(f"  ✓ Graceful degradation achieved: {val.graceful_degradation_achieved}")
-            report.append(f"  ✓ User experience preserved: {val.user_experience_preserved}")
+            report.append(f"  [U+2713] Recovery successful: {val.recovery_successful}")
+            report.append(f"  [U+2713] System stability maintained: {val.system_stability_maintained}")
+            report.append(f"  [U+2713] Graceful degradation achieved: {val.graceful_degradation_achieved}")
+            report.append(f"  [U+2713] User experience preserved: {val.user_experience_preserved}")
             
             # Final state analysis
             if val.final_recovery_state:

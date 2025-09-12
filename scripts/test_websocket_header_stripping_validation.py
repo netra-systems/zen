@@ -68,8 +68,8 @@ class WebSocketHeaderStrippingValidator:
             # CRITICAL: NO "authorization" header - simulates Load Balancer stripping
         }
         
-        logger.info("🔍 Testing missing Authorization header scenario")
-        logger.info(f"📋 Headers without auth: {list(stripped_headers.keys())}")
+        logger.info(" SEARCH:  Testing missing Authorization header scenario")
+        logger.info(f"[U+1F4CB] Headers without auth: {list(stripped_headers.keys())}")
         
         try:
             # Attempt WebSocket connection without authentication headers
@@ -83,8 +83,8 @@ class WebSocketHeaderStrippingValidator:
                 result["issue_detected"] = False
                 result["error_details"] = "CRITICAL: WebSocket connected without auth headers!"
                 
-                logger.error("❌ SECURITY ISSUE: WebSocket connection succeeded without auth!")
-                logger.error("❌ This indicates auth bypass is possible!")
+                logger.error(" FAIL:  SECURITY ISSUE: WebSocket connection succeeded without auth!")
+                logger.error(" FAIL:  This indicates auth bypass is possible!")
                 
                 # Try to send a message to see if we can interact
                 test_message = {
@@ -94,31 +94,31 @@ class WebSocketHeaderStrippingValidator:
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                logger.error("❌ CRITICAL: Successfully sent message without auth!")
+                logger.error(" FAIL:  CRITICAL: Successfully sent message without auth!")
                 
         except websockets.exceptions.ConnectionClosedError as e:
             result["actual_outcome"] = "CONNECTION_CLOSED"
             result["issue_detected"] = True
             result["error_details"] = f"Connection properly rejected: {e}"
-            logger.info("✅ GOOD: Connection rejected due to missing auth")
+            logger.info(" PASS:  GOOD: Connection rejected due to missing auth")
             
         except websockets.exceptions.InvalidHandshake as e:
             result["actual_outcome"] = "HANDSHAKE_FAILED"
             result["issue_detected"] = True
             result["error_details"] = f"Handshake failed (proper auth rejection): {e}"
-            logger.info("✅ GOOD: Handshake failed due to missing auth")
+            logger.info(" PASS:  GOOD: Handshake failed due to missing auth")
             
         except ConnectionRefusedError as e:
             result["actual_outcome"] = "SERVICE_UNAVAILABLE"
             result["issue_detected"] = None  # Cannot test due to service unavailable
             result["error_details"] = f"WebSocket service not available: {e}"
-            logger.warning("⚠️ Cannot test: WebSocket service unavailable")
+            logger.warning(" WARNING: [U+FE0F] Cannot test: WebSocket service unavailable")
             
         except Exception as e:
             result["actual_outcome"] = "UNEXPECTED_ERROR"
             result["issue_detected"] = None
             result["error_details"] = f"Unexpected error: {e}"
-            logger.error(f"❌ Unexpected error during test: {e}")
+            logger.error(f" FAIL:  Unexpected error during test: {e}")
             
         return result
     
@@ -146,10 +146,10 @@ class WebSocketHeaderStrippingValidator:
             {"authorization": "token.without.bearer"},  # Missing Bearer prefix
         ]
         
-        logger.info("🔍 Testing malformed Authorization header scenarios")
+        logger.info(" SEARCH:  Testing malformed Authorization header scenarios")
         
         for i, headers in enumerate(malformed_scenarios):
-            logger.info(f"📋 Testing malformed scenario {i+1}: {headers['authorization']}")
+            logger.info(f"[U+1F4CB] Testing malformed scenario {i+1}: {headers['authorization']}")
             
             try:
                 async with websockets.connect(
@@ -161,7 +161,7 @@ class WebSocketHeaderStrippingValidator:
                     result["actual_outcome"] = f"SCENARIO_{i+1}_SUCCEEDED"
                     result["issue_detected"] = False
                     result["error_details"] = f"CRITICAL: Malformed auth accepted: {headers['authorization']}"
-                    logger.error(f"❌ SECURITY ISSUE: Malformed auth scenario {i+1} succeeded!")
+                    logger.error(f" FAIL:  SECURITY ISSUE: Malformed auth scenario {i+1} succeeded!")
                     break
                     
             except (websockets.exceptions.ConnectionClosedError, 
@@ -169,16 +169,16 @@ class WebSocketHeaderStrippingValidator:
                 result["actual_outcome"] = f"SCENARIO_{i+1}_REJECTED" 
                 result["issue_detected"] = True
                 result["error_details"] = f"Properly rejected malformed auth: {e}"
-                logger.info(f"✅ GOOD: Malformed scenario {i+1} properly rejected")
+                logger.info(f" PASS:  GOOD: Malformed scenario {i+1} properly rejected")
                 
             except ConnectionRefusedError:
                 result["actual_outcome"] = "SERVICE_UNAVAILABLE"
                 result["issue_detected"] = None
-                logger.warning("⚠️ Cannot test: WebSocket service unavailable")
+                logger.warning(" WARNING: [U+FE0F] Cannot test: WebSocket service unavailable")
                 break
                 
             except Exception as e:
-                logger.error(f"❌ Unexpected error in scenario {i+1}: {e}")
+                logger.error(f" FAIL:  Unexpected error in scenario {i+1}: {e}")
                 continue
         
         return result
@@ -213,8 +213,8 @@ class WebSocketHeaderStrippingValidator:
             
             proper_headers = self.e2e_helper.get_websocket_headers(auth_user.jwt_token)
             
-            logger.info("🔍 Testing proper Authorization header scenario")
-            logger.info(f"📋 Headers with auth: {list(proper_headers.keys())}")
+            logger.info(" SEARCH:  Testing proper Authorization header scenario")
+            logger.info(f"[U+1F4CB] Headers with auth: {list(proper_headers.keys())}")
             
             async with websockets.connect(
                 self.test_websocket_url,
@@ -224,7 +224,7 @@ class WebSocketHeaderStrippingValidator:
                 result["actual_outcome"] = "CONNECTION_SUCCEEDED"
                 result["issue_detected"] = True  # This is the expected good outcome
                 result["error_details"] = "Proper auth headers accepted successfully"
-                logger.info("✅ GOOD: Proper auth headers accepted")
+                logger.info(" PASS:  GOOD: Proper auth headers accepted")
                 
                 # Send a test message to validate full functionality
                 test_message = {
@@ -235,19 +235,19 @@ class WebSocketHeaderStrippingValidator:
                 }
                 
                 await websocket.send(json.dumps(test_message))
-                logger.info("✅ Successfully sent authenticated message")
+                logger.info(" PASS:  Successfully sent authenticated message")
                 
         except ConnectionRefusedError as e:
             result["actual_outcome"] = "SERVICE_UNAVAILABLE"
             result["issue_detected"] = None
             result["error_details"] = f"WebSocket service not available: {e}"
-            logger.warning("⚠️ Cannot test: WebSocket service unavailable")
+            logger.warning(" WARNING: [U+FE0F] Cannot test: WebSocket service unavailable")
             
         except Exception as e:
             result["actual_outcome"] = "UNEXPECTED_ERROR"
             result["issue_detected"] = False
             result["error_details"] = f"Unexpected error with proper auth: {e}"
-            logger.error(f"❌ Unexpected error with proper auth: {e}")
+            logger.error(f" FAIL:  Unexpected error with proper auth: {e}")
             
         return result
     
@@ -255,8 +255,8 @@ class WebSocketHeaderStrippingValidator:
         """
         Run all WebSocket header stripping validation scenarios.
         """
-        logger.info("🚀 Starting GitHub Issue #113 WebSocket Header Stripping Validation")
-        logger.info(f"🌐 Testing against WebSocket URL: {self.test_websocket_url}")
+        logger.info("[U+1F680] Starting GitHub Issue #113 WebSocket Header Stripping Validation")
+        logger.info(f"[U+1F310] Testing against WebSocket URL: {self.test_websocket_url}")
         
         validations = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -289,7 +289,7 @@ class WebSocketHeaderStrippingValidator:
                     "issue_detected": False,
                     "error_details": f"Test execution error: {e}"
                 }
-                logger.error(f"❌ Test execution error in {scenario_name}: {e}")
+                logger.error(f" FAIL:  Test execution error in {scenario_name}: {e}")
         
         # Analyze overall results
         validations["analysis"] = self._analyze_results(validations["results"])
@@ -352,44 +352,44 @@ async def main():
         print("GITHUB ISSUE #113 WEBSOCKET HEADER STRIPPING VALIDATION SUMMARY")
         print("="*80)
         
-        print(f"📅 Test Date: {results['timestamp']}")
-        print(f"🌐 WebSocket URL: {results['websocket_url']}")
-        print(f"🎯 Purpose: {results['test_purpose']}")
+        print(f"[U+1F4C5] Test Date: {results['timestamp']}")
+        print(f"[U+1F310] WebSocket URL: {results['websocket_url']}")
+        print(f" TARGET:  Purpose: {results['test_purpose']}")
         
-        print(f"\n📊 SCENARIO RESULTS:")
+        print(f"\n CHART:  SCENARIO RESULTS:")
         for scenario_name, result in results["results"].items():
-            status_emoji = "✅" if result.get("issue_detected") else "❌"
+            status_emoji = " PASS: " if result.get("issue_detected") else " FAIL: "
             if result.get("issue_detected") is None:
-                status_emoji = "⚠️"
+                status_emoji = " WARNING: [U+FE0F]"
                 
             print(f"  {status_emoji} {scenario_name}: {result.get('actual_outcome', 'Unknown')}")
             if result.get("error_details"):
-                print(f"      💬 {result['error_details']}")
+                print(f"      [U+1F4AC] {result['error_details']}")
         
-        print(f"\n🔍 ANALYSIS:")
+        print(f"\n SEARCH:  ANALYSIS:")
         analysis = results["analysis"]
-        print(f"  📈 Test Effectiveness: {analysis['test_effectiveness']}")
-        print(f"  🚨 Critical Security Issues: {len(analysis['critical_security_issues'])}")
-        print(f"  ⚠️ Scenarios Unavailable: {analysis['scenarios_unavailable']}")
+        print(f"  [U+1F4C8] Test Effectiveness: {analysis['test_effectiveness']}")
+        print(f"   ALERT:  Critical Security Issues: {len(analysis['critical_security_issues'])}")
+        print(f"   WARNING: [U+FE0F] Scenarios Unavailable: {analysis['scenarios_unavailable']}")
         
         if analysis["critical_security_issues"]:
-            print(f"\n🚨 CRITICAL SECURITY ISSUES DETECTED:")
+            print(f"\n ALERT:  CRITICAL SECURITY ISSUES DETECTED:")
             for issue in analysis["critical_security_issues"]:
-                print(f"  ❌ {issue['scenario']}: {issue['issue']}")
+                print(f"   FAIL:  {issue['scenario']}: {issue['issue']}")
                 
-        print(f"\n💡 RECOMMENDATIONS:")
+        print(f"\n IDEA:  RECOMMENDATIONS:")
         for rec in analysis["recommendations"]:
-            print(f"  🔧 {rec}")
+            print(f"  [U+1F527] {rec}")
             
         # Save results to file for documentation
         results_file = f"websocket_header_stripping_validation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(results_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
             
-        print(f"\n📄 Full results saved to: {results_file}")
+        print(f"\n[U+1F4C4] Full results saved to: {results_file}")
         
     except Exception as e:
-        logger.error(f"❌ Validation execution failed: {e}")
+        logger.error(f" FAIL:  Validation execution failed: {e}")
         raise
 
 

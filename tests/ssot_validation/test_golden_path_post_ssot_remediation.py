@@ -4,7 +4,7 @@ SSOT Validation Test: Golden Path Post-SSOT Remediation
 PHASE 2: CREATE PASSING TEST - Validate Golden Path with SSOT
 
 Purpose: This test MUST PASS after SSOT remediation to validate that the
-complete Golden Path (users login → get AI responses) works reliably
+complete Golden Path (users login  ->  get AI responses) works reliably
 with centralized SERVICE_ID constant.
 
 Business Value: Platform/Critical - Validates end-to-end Golden Path 
@@ -15,7 +15,7 @@ Expected Behavior:
 - FAIL: Initially with Golden Path broken by SERVICE_ID inconsistencies
 - PASS: After SSOT remediation ensures complete Golden Path functionality
 
-CRITICAL: This test validates the core business flow: users login → get AI responses
+CRITICAL: This test validates the core business flow: users login  ->  get AI responses
 """
 
 import asyncio
@@ -235,7 +235,7 @@ class TestGoldenPathPostSsotRemediation(SSotAsyncTestCase):
         
         assert response_delivery_result["response_quality"] >= 0.8, (
             f"AI response quality insufficient: {response_delivery_result['response_quality']} "
-            f"(required: ≥0.8)"
+            f"(required:  >= 0.8)"
         )
         
         assert response_delivery_result["delivery_time"] <= 6.0, (
@@ -282,7 +282,7 @@ class TestGoldenPathPostSsotRemediation(SSotAsyncTestCase):
         # This should PASS after SSOT remediation (high resilience)
         assert resilience_score >= 0.8, (
             f"Golden Path resilience insufficient: {resilience_score:.3f} "
-            f"(required: ≥0.8). Failed scenarios: "
+            f"(required:  >= 0.8). Failed scenarios: "
             f"{[r['scenario'] for r in resilience_results if not r['golden_path_success']]}"
         )
     

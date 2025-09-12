@@ -535,7 +535,7 @@ class TestAgentLifecycle(BaseIntegrationTest):
         assert manager_stats["state_transitions_recorded"] >= 6
         assert manager_stats["cleanups_completed"] >= 1
         
-        logger.info(f"✅ Complete lifecycle test passed - {final_summary['lifecycle_events']} events, {final_summary['resource_efficiency']:.2f} efficiency")
+        logger.info(f" PASS:  Complete lifecycle test passed - {final_summary['lifecycle_events']} events, {final_summary['resource_efficiency']:.2f} efficiency")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -575,7 +575,7 @@ class TestAgentLifecycle(BaseIntegrationTest):
         assert result["business_value"]["lifecycle_managed"] is True
         assert result["business_value"]["consistent_behavior"] is True
         
-        logger.info(f"✅ Lifecycle state transitions test passed - {len(stages_visited)} transitions")
+        logger.info(f" PASS:  Lifecycle state transitions test passed - {len(stages_visited)} transitions")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -616,7 +616,7 @@ class TestAgentLifecycle(BaseIntegrationTest):
         final_summary = lifecycle_agent.get_lifecycle_summary()
         assert final_summary["active_resources"] == 0  # Still clean
         
-        logger.info(f"✅ Resource management test passed - {pre_cleanup_resources} resources cleaned up in {cleanup_time:.3f}s")
+        logger.info(f" PASS:  Resource management test passed - {pre_cleanup_resources} resources cleaned up in {cleanup_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -669,7 +669,7 @@ class TestAgentLifecycle(BaseIntegrationTest):
         assert session2_stats["total_operations"] > session1_stats["total_operations"]
         assert session2_stats["state_transitions_recorded"] > session1_stats["state_transitions_recorded"]
         
-        logger.info("✅ Lifecycle persistence across sessions test passed")
+        logger.info(" PASS:  Lifecycle persistence across sessions test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -725,7 +725,7 @@ class TestAgentLifecycle(BaseIntegrationTest):
         # Validate performance with concurrent lifecycles
         assert execution_time < 1.0  # Should handle concurrent lifecycles efficiently
         
-        logger.info(f"✅ Concurrent lifecycle isolation test passed - 3 agents in {execution_time:.3f}s")
+        logger.info(f" PASS:  Concurrent lifecycle isolation test passed - 3 agents in {execution_time:.3f}s")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -772,7 +772,7 @@ class TestAgentLifecycle(BaseIntegrationTest):
         recovery_summary = success_agent.get_lifecycle_summary()
         assert recovery_summary["current_state"] == "completed"
         
-        logger.info("✅ Lifecycle error handling and recovery test passed")
+        logger.info(" PASS:  Lifecycle error handling and recovery test passed")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -821,7 +821,7 @@ class TestAgentLifecycle(BaseIntegrationTest):
         assert final_summary["total_executions"] == 5
         assert final_summary["resource_efficiency"] > 0
         
-        logger.info(f"✅ Lifecycle performance optimization test passed - {avg_execution_time:.3f}s avg, {final_summary['resource_efficiency']:.2f} efficiency")
+        logger.info(f" PASS:  Lifecycle performance optimization test passed - {avg_execution_time:.3f}s avg, {final_summary['resource_efficiency']:.2f} efficiency")
 
 
 if __name__ == "__main__":

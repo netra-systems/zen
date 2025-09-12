@@ -58,7 +58,7 @@ class RealServicesEnforcer:
         for pattern in cls.FORBIDDEN_PATTERNS:
             if pattern in source:
                 raise MockDetectionError(
-                    f"🚨 MOCK DETECTED in {test_function.__name__}: '{pattern}'\n"
+                    f" ALERT:  MOCK DETECTED in {test_function.__name__}: '{pattern}'\n"
                     f"Per CLAUDE.md: 'MOCKS are FORBIDDEN in E2E tests'\n"
                     f"Use real services with Docker or staging environment."
                 )
@@ -73,7 +73,7 @@ class RealServicesEnforcer:
         for forbidden in cls.FORBIDDEN_IMPORTS:
             if f"import {forbidden}" in module_source or f"from {forbidden}" in module_source:
                 raise MockDetectionError(
-                    f"🚨 FORBIDDEN IMPORT in {module.__name__}: '{forbidden}'\n"
+                    f" ALERT:  FORBIDDEN IMPORT in {module.__name__}: '{forbidden}'\n"
                     f"Per CLAUDE.md: 'MOCKS are FORBIDDEN in E2E tests'\n"
                     f"Remove all mock imports and use real services."
                 )
@@ -114,7 +114,7 @@ def validate_real_network_timing(start_time: float, end_time: float, min_time: f
     duration = end_time - start_time
     if duration < min_time:
         raise MockDetectionError(
-            f"🚨 FAKE NETWORK CALL DETECTED: Completed in {duration:.3f}s (min: {min_time}s)\n"
+            f" ALERT:  FAKE NETWORK CALL DETECTED: Completed in {duration:.3f}s (min: {min_time}s)\n"
             f"Per CLAUDE.md: All E2E tests must use real network calls.\n"
             f"This response was too fast to be a real network call."
         )

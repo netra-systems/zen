@@ -467,9 +467,9 @@
                                             # REMOVED_SYNTAX_ERROR: all_valid = False
 
                                             # REMOVED_SYNTAX_ERROR: if all_valid:
-                                                # REMOVED_SYNTAX_ERROR: logger.info("✓ All service URLs are properly aligned!")
+                                                # REMOVED_SYNTAX_ERROR: logger.info("[U+2713] All service URLs are properly aligned!")
                                                 # REMOVED_SYNTAX_ERROR: else:
-                                                    # REMOVED_SYNTAX_ERROR: logger.error("✗ Service URL misalignment detected!")
+                                                    # REMOVED_SYNTAX_ERROR: logger.error("[U+2717] Service URL misalignment detected!")
                                                     # REMOVED_SYNTAX_ERROR: raise AssertionError("Service URLs are not properly aligned")
 
                                                     # REMOVED_SYNTAX_ERROR: logger.info("="*60)

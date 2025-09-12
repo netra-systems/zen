@@ -472,7 +472,7 @@ class TestCacheContentionSuite:
         # Assertions
         assert len(successful_results) >= num_workers * 0.95, "Too many failed requests"
         # Allow more computations due to race conditions in test environment
-        assert computation_count <= max(10, num_workers * 0.15), f"Too many computations: {computation_count} (expected ≤{max(10, num_workers * 0.15)})"
+        assert computation_count <= max(10, num_workers * 0.15), f"Too many computations: {computation_count} (expected  <= {max(10, num_workers * 0.15)})"
         
         # Performance assertions
         avg_response_time = self.suite.metrics.get_latency_percentile("cache_miss_computed", 50)
@@ -960,7 +960,7 @@ async def test_comprehensive_cache_contention_validation():
                     "duration_sec": duration,
                     "error": None
                 }
-                logger.info(f"✅ {scenario_name} passed in {duration:.2f}s")
+                logger.info(f" PASS:  {scenario_name} passed in {duration:.2f}s")
                 
             except Exception as e:
                 duration = time.time() - start_time
@@ -969,7 +969,7 @@ async def test_comprehensive_cache_contention_validation():
                     "duration_sec": duration,
                     "error": str(e)
                 }
-                logger.error(f"❌ {scenario_name} failed in {duration:.2f}s: {e}")
+                logger.error(f" FAIL:  {scenario_name} failed in {duration:.2f}s: {e}")
                 
         # Generate comprehensive report
         performance_report = suite.metrics.generate_report()

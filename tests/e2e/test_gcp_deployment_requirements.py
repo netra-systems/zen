@@ -146,7 +146,7 @@ class TestBackendProtocolHTTPS(GCPDeploymentRequirementsTestBase):
                             f"{service_name} redirect should be to HTTPS: {location}"
                         )
                         
-                        print(f"[OK] {service_name}: HTTP→HTTPS redirect verified ({response.status} → {location})")
+                        print(f"[OK] {service_name}: HTTP -> HTTPS redirect verified ({response.status}  ->  {location})")
                         
                 except aiohttp.ClientError:
                     # Some load balancers might not respond to HTTP at all, which is also acceptable

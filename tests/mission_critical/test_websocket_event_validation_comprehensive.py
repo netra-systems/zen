@@ -205,7 +205,7 @@ class ComprehensiveEventValidator:
         
         if failures:
             error_message = (
-                "🚨 COMPREHENSIVE VALIDATION FAILURE - WebSocket events failed business value requirements!\n\n"
+                " ALERT:  COMPREHENSIVE VALIDATION FAILURE - WebSocket events failed business value requirements!\n\n"
                 + "\n".join(failures) + "\n\n"
                 "This indicates the chat system will NOT deliver substantive AI value to users."
             )
@@ -283,7 +283,7 @@ class TestComprehensiveWebSocketEventValidation:
     
     async def test_complete_event_sequence_validation(self, authenticated_websocket_client):
         """Test complete event sequence validation with all 5 critical events."""
-        logger.info("🚀 Testing complete event sequence validation...")
+        logger.info("[U+1F680] Testing complete event sequence validation...")
         
         client = authenticated_websocket_client
         user_id = client.authenticated_user.user_id
@@ -387,11 +387,11 @@ class TestComprehensiveWebSocketEventValidation:
         business_info = summary["validation_summary"]["business"]
         assert business_info["conversion_probability"] >= 0.2, f"Conversion probability {business_info['conversion_probability']:.1%} too low"
         
-        logger.info(f"✅ Complete event sequence validation passed: {len(validation_results)} events validated")
+        logger.info(f" PASS:  Complete event sequence validation passed: {len(validation_results)} events validated")
     
     async def test_business_value_compromise_detection(self, authenticated_websocket_client):
         """Test that validation detects when business value is compromised."""
-        logger.info("🚀 Testing business value compromise detection...")
+        logger.info("[U+1F680] Testing business value compromise detection...")
         
         client = authenticated_websocket_client
         user_id = client.authenticated_user.user_id
@@ -450,11 +450,11 @@ class TestComprehensiveWebSocketEventValidation:
         summary = validator.get_comprehensive_summary()
         assert not summary["overall_business_value_preserved"], "Should have detected business value compromise"
         
-        logger.info("✅ Business value compromise detection working correctly")
+        logger.info(" PASS:  Business value compromise detection working correctly")
     
     async def test_timing_performance_validation(self, authenticated_websocket_client):
         """Test timing performance validation for user engagement preservation."""
-        logger.info("🚀 Testing timing performance validation...")
+        logger.info("[U+1F680] Testing timing performance validation...")
         
         client = authenticated_websocket_client
         user_id = client.authenticated_user.user_id
@@ -522,11 +522,11 @@ class TestComprehensiveWebSocketEventValidation:
         
         assert "TIMING PERFORMANCE FAILURE" in str(excinfo.value), "Should detect timing performance issues"
         
-        logger.info("✅ Timing performance validation working correctly")
+        logger.info(" PASS:  Timing performance validation working correctly")
     
     async def test_content_quality_validation(self, authenticated_websocket_client):
         """Test content quality validation for business value."""
-        logger.info("🚀 Testing content quality validation...")
+        logger.info("[U+1F680] Testing content quality validation...")
         
         client = authenticated_websocket_client
         user_id = client.authenticated_user.user_id
@@ -613,11 +613,11 @@ class TestComprehensiveWebSocketEventValidation:
         with pytest.raises(AssertionError):
             low_quality_validator.content_validator.assert_business_value_preserved()
         
-        logger.info("✅ Content quality validation working correctly")
+        logger.info(" PASS:  Content quality validation working correctly")
     
     async def test_multi_user_isolation_validation(self, backend_url):
         """Test that event validation preserves multi-user isolation."""
-        logger.info("🚀 Testing multi-user isolation validation...")
+        logger.info("[U+1F680] Testing multi-user isolation validation...")
         
         # Create two authenticated clients for different users
         client1 = await create_authenticated_websocket_client(backend_url=backend_url, environment="test")
@@ -672,7 +672,7 @@ class TestComprehensiveWebSocketEventValidation:
             assert summary1["user_id"] != summary2["user_id"], "Users should have different IDs"
             assert summary1["session_id"] != summary2["session_id"], "Sessions should be isolated"
             
-            logger.info("✅ Multi-user isolation validation working correctly")
+            logger.info(" PASS:  Multi-user isolation validation working correctly")
             
         finally:
             await client1.close()
@@ -680,7 +680,7 @@ class TestComprehensiveWebSocketEventValidation:
     
     async def test_zero_second_execution_prevention(self, authenticated_websocket_client):
         """Test that zero-second execution is detected and prevented."""
-        logger.info("🚀 Testing zero-second execution prevention...")
+        logger.info("[U+1F680] Testing zero-second execution prevention...")
         
         # Record test start time
         test_start_time = time.time()
@@ -722,11 +722,11 @@ class TestComprehensiveWebSocketEventValidation:
         summary = validator.get_comprehensive_summary()
         assert summary["validation_summary"]["sequence"]["total_sequences"] > 0, "Validator should have processed events"
         
-        logger.info(f"✅ Zero-second execution prevention working - test took {final_elapsed:.3f}s")
+        logger.info(f" PASS:  Zero-second execution prevention working - test took {final_elapsed:.3f}s")
     
     async def test_performance_under_concurrent_load(self, backend_url):
         """Test event validation performance under concurrent load."""
-        logger.info("🚀 Testing performance under concurrent load...")
+        logger.info("[U+1F680] Testing performance under concurrent load...")
         
         # Create multiple concurrent clients
         num_clients = 3  # Reduced for CI/testing
@@ -805,7 +805,7 @@ class TestComprehensiveWebSocketEventValidation:
             user_ids = {v.user_id for v in updated_validators}
             assert len(user_ids) == num_clients, f"Expected {num_clients} unique users, got {len(user_ids)}"
             
-            logger.info(f"✅ Performance under concurrent load test passed - {num_clients} clients in {load_duration:.1f}s")
+            logger.info(f" PASS:  Performance under concurrent load test passed - {num_clients} clients in {load_duration:.1f}s")
             
         finally:
             # Clean up all clients

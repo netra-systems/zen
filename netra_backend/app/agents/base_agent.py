@@ -188,8 +188,8 @@ class BaseAgent(ABC):
                 DeprecationWarning,
                 stacklevel=2
             )
-            self.logger.warning(f"🚨 DEPRECATED: {name} initialized with global tool_dispatcher")
-            self.logger.warning("📋 MIGRATION: Use BaseAgent.create_agent_with_context() factory instead")
+            self.logger.warning(f" ALERT:  DEPRECATED: {name} initialized with global tool_dispatcher")
+            self.logger.warning("[U+1F4CB] MIGRATION: Use BaseAgent.create_agent_with_context() factory instead")
         
         self.tool_dispatcher = tool_dispatcher
         self.redis_manager = redis_manager
@@ -419,7 +419,7 @@ class BaseAgent(ABC):
         )
         
         self.logger.debug(
-            f"✅ Tracked token usage for {self.name}: "
+            f" PASS:  Tracked token usage for {self.name}: "
             f"{input_tokens} input + {output_tokens} output tokens ({model})"
         )
         
@@ -453,7 +453,7 @@ class BaseAgent(ABC):
         if optimizations:
             latest_optimization = optimizations[-1]
             self.logger.info(
-                f"✅ Prompt optimized for {self.name}: "
+                f" PASS:  Prompt optimized for {self.name}: "
                 f"{latest_optimization['tokens_saved']} tokens saved "
                 f"({latest_optimization['reduction_percent']}% reduction)"
             )
@@ -618,13 +618,13 @@ class BaseAgent(ABC):
         
         # Agent must implement modern pattern
         raise NotImplementedError(
-            f"🚨 MIGRATION REQUIRED: Agent '{self.name}' must implement '_execute_with_user_context(context, stream_updates)' method.\n"
-            f"\n📋 REQUIRED IMPLEMENTATION:"
+            f" ALERT:  MIGRATION REQUIRED: Agent '{self.name}' must implement '_execute_with_user_context(context, stream_updates)' method.\n"
+            f"\n[U+1F4CB] REQUIRED IMPLEMENTATION:"
             f"\n1. Add 'async def _execute_with_user_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:' method"
             f"\n2. Use 'context.agent_context.get(\"user_request\", \"\")' for user request data"
             f"\n3. Use 'context.db_session' for database operations"
             f"\n4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers"
-            f"\n\n📖 Migration Guide: See reports/archived/USER_CONTEXT_ARCHITECTURE.md"
+            f"\n\n[U+1F4D6] Migration Guide: See reports/archived/USER_CONTEXT_ARCHITECTURE.md"
         )
     
     async def execute_with_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:
@@ -716,13 +716,13 @@ class BaseAgent(ABC):
                     await self.emit_error(error_message, "NotImplementedError")
                     
                     raise NotImplementedError(
-                        f"🚨 MIGRATION REQUIRED: {error_message}\n"
-                        f"\n📋 REQUIRED IMPLEMENTATION:"
+                        f" ALERT:  MIGRATION REQUIRED: {error_message}\n"
+                        f"\n[U+1F4CB] REQUIRED IMPLEMENTATION:"
                         f"\n1. Add 'async def _execute_with_user_context(self, context: UserExecutionContext, stream_updates: bool = False) -> Any:' method"
                         f"\n2. Use 'context.agent_context.get(\"user_request\", \"\")' for user request data"
                         f"\n3. Use 'context.db_session' for database operations"
                         f"\n4. Use 'context.user_id', 'context.thread_id', 'context.run_id' for identifiers"
-                        f"\n\n📖 Migration Guide: See reports/archived/USER_CONTEXT_ARCHITECTURE.md"
+                        f"\n\n[U+1F4D6] Migration Guide: See reports/archived/USER_CONTEXT_ARCHITECTURE.md"
                     )
                 
             except Exception as e:
@@ -901,11 +901,11 @@ class BaseAgent(ABC):
             except Exception as e:
                 self.logger.warning(f"Session isolation validation failed after reset: {e}")
             
-            self.logger.info(f"✅ Agent state reset completed successfully for {self.name}")
+            self.logger.info(f" PASS:  Agent state reset completed successfully for {self.name}")
             
         except Exception as e:
             # If reset fails, log the error but don't raise - agent should still be usable
-            self.logger.error(f"❌ Critical error during agent state reset for {self.name}: {e}")
+            self.logger.error(f" FAIL:  Critical error during agent state reset for {self.name}: {e}")
             self.logger.error(f"Agent may be in inconsistent state - consider creating new instance")
             # Still set state to PENDING to allow retry attempts
             self.state = SubAgentLifecycle.PENDING
@@ -1210,7 +1210,7 @@ class BaseAgent(ABC):
                 recovery_timeout=10,
                 half_open_max_calls=2
             )
-            self.logger.info("✅ Created fallback ReliabilityManager instance for testing compatibility")
+            self.logger.info(" PASS:  Created fallback ReliabilityManager instance for testing compatibility")
         
         return self._reliability_manager_instance
     
@@ -1784,7 +1784,7 @@ class BaseAgent(ABC):
             DeprecationWarning: Always - this pattern is deprecated
         """
         warnings.warn(
-            f"🚨 DEPRECATED: BaseAgent.create_legacy_with_warnings() creates global state risks. "
+            f" ALERT:  DEPRECATED: BaseAgent.create_legacy_with_warnings() creates global state risks. "
             f"Use BaseAgent.create_with_context() instead. "
             f"Legacy support will be removed in v3.0.0 (Q1 2025).",
             DeprecationWarning,
@@ -1857,7 +1857,7 @@ class BaseAgent(ABC):
             validation_result["pattern"] = "legacy_bridge"
             validation_result["compliant"] = False
             validation_result["warnings"].append(
-                "🚨 DEPRECATED: Agent uses legacy 'execute_core_logic()' pattern. "
+                " ALERT:  DEPRECATED: Agent uses legacy 'execute_core_logic()' pattern. "
                 "This creates user isolation risks and will be removed in v3.0.0."
             )
             validation_result["recommendations"].extend([
@@ -1922,13 +1922,13 @@ class BaseAgent(ABC):
         
         # Log compliance status
         if validation["compliant"]:
-            self.logger.info(f"✅ Agent '{self.name}' complies with UserExecutionContext pattern")
+            self.logger.info(f" PASS:  Agent '{self.name}' complies with UserExecutionContext pattern")
         else:
-            self.logger.warning(f"⚠️ Agent '{self.name}' needs migration to UserExecutionContext pattern")
+            self.logger.warning(f" WARNING: [U+FE0F] Agent '{self.name}' needs migration to UserExecutionContext pattern")
             
             if validation["recommendations"]:
                 rec_details = "\n".join([f"  {rec}" for rec in validation["recommendations"]])
-                self.logger.info(f"📋 Migration recommendations for '{self.name}':\n{rec_details}")
+                self.logger.info(f"[U+1F4CB] Migration recommendations for '{self.name}':\n{rec_details}")
     
     def get_migration_status(self) -> Dict[str, Any]:
         """Get detailed migration status for monitoring and reporting.
@@ -1990,7 +1990,7 @@ class BaseAgent(ABC):
         # Set user context for WebSocket integration
         agent.set_user_context(context)
         
-        logger.info(f"✅ Created {cls.__name__} with UserExecutionContext: "
+        logger.info(f" PASS:  Created {cls.__name__} with UserExecutionContext: "
                    f"user={context.user_id[:8]}..., thread={context.thread_id}, "
                    f"run={context.run_id}, request={context.request_id[:8]}...")
         
@@ -2057,17 +2057,17 @@ class BaseAgent(ABC):
         
         # Log results
         if validation_result["migration_complete"]:
-            self.logger.info(f"✅ Agent '{self.name}' migration validation passed")
+            self.logger.info(f" PASS:  Agent '{self.name}' migration validation passed")
         else:
             violation_details = "\n".join([f"  - {v}" for v in validation_result["violations"]])
             self.logger.error(
-                f"❌ Agent '{self.name}' migration validation failed:\n{violation_details}"
+                f" FAIL:  Agent '{self.name}' migration validation failed:\n{violation_details}"
             )
             
         if validation_result["warnings"]:
             warning_details = "\n".join([f"  - {w}" for w in validation_result["warnings"]])
             self.logger.warning(
-                f"⚠️ Agent '{self.name}' migration warnings:\n{warning_details}"
+                f" WARNING: [U+FE0F] Agent '{self.name}' migration warnings:\n{warning_details}"
             )
         
         return validation_result

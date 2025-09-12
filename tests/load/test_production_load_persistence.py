@@ -523,10 +523,10 @@ async def test_100_concurrent_agents_baseline(load_test_suite):
     
     # Performance Assertions for Enterprise SLA
     assert metrics.agents_succeeded >= 95, f"At least 95% success rate required, got {metrics.agents_succeeded}/{metrics.agents_executed}"
-    assert metrics.availability_percent >= 95.0, f"Availability must be ≥95%, got {metrics.availability_percent:.1f}%"
-    assert metrics.p50_latency_ms <= 50.0, f"P50 latency must be ≤50ms, got {metrics.p50_latency_ms:.1f}ms"
-    assert metrics.p99_latency_ms <= 200.0, f"P99 latency must be ≤200ms, got {metrics.p99_latency_ms:.1f}ms"
-    assert metrics.peak_memory_mb <= 2048, f"Peak memory must be ≤2GB, got {metrics.peak_memory_mb:.0f}MB"
+    assert metrics.availability_percent >= 95.0, f"Availability must be  >= 95%, got {metrics.availability_percent:.1f}%"
+    assert metrics.p50_latency_ms <= 50.0, f"P50 latency must be  <= 50ms, got {metrics.p50_latency_ms:.1f}ms"
+    assert metrics.p99_latency_ms <= 200.0, f"P99 latency must be  <= 200ms, got {metrics.p99_latency_ms:.1f}ms"
+    assert metrics.peak_memory_mb <= 2048, f"Peak memory must be  <= 2GB, got {metrics.peak_memory_mb:.0f}MB"
     
     # Data integrity assertions
     assert metrics.data_corruption_count == 0, "No data corruption allowed in production load"
@@ -534,9 +534,9 @@ async def test_100_concurrent_agents_baseline(load_test_suite):
     # Business performance requirements
     total_duration = end_execution - start_execution
     throughput = metrics.agents_succeeded / total_duration
-    assert throughput >= 10.0, f"Throughput must be ≥10 agents/sec, got {throughput:.1f}"
+    assert throughput >= 10.0, f"Throughput must be  >= 10 agents/sec, got {throughput:.1f}"
     
-    logger.info(f"✓ Baseline load test completed: {metrics.agents_succeeded}/{metrics.agents_executed} success, "
+    logger.info(f"[U+2713] Baseline load test completed: {metrics.agents_succeeded}/{metrics.agents_executed} success, "
                 f"P50: {metrics.p50_latency_ms:.1f}ms, P99: {metrics.p99_latency_ms:.1f}ms, "
                 f"Throughput: {throughput:.1f} agents/sec")
     
@@ -664,10 +664,10 @@ async def test_mixed_workload_read_write_patterns(load_test_suite):
     metrics.finalize_metrics()
     
     # Mixed workload assertions
-    assert metrics.availability_percent >= 90.0, f"Mixed workload availability must be ≥90%, got {metrics.availability_percent:.1f}%"
+    assert metrics.availability_percent >= 90.0, f"Mixed workload availability must be  >= 90%, got {metrics.availability_percent:.1f}%"
     assert read_successes >= 25, f"At least 25/30 read operations should succeed, got {read_successes}"
     assert write_successes >= 16, f"At least 16/20 write operations should succeed, got {write_successes}"
-    assert metrics.p95_latency_ms <= 150.0, f"P95 latency for mixed workload must be ≤150ms, got {metrics.p95_latency_ms:.1f}ms"
+    assert metrics.p95_latency_ms <= 150.0, f"P95 latency for mixed workload must be  <= 150ms, got {metrics.p95_latency_ms:.1f}ms"
     
     # Read operations should be faster than writes
     read_times = []
@@ -687,7 +687,7 @@ async def test_mixed_workload_read_write_patterns(load_test_suite):
     total_duration = end_execution - start_execution
     throughput = metrics.agents_succeeded / total_duration
     
-    logger.info(f"✓ Mixed workload test completed: {read_successes}/{read_count} reads, {write_successes}/{write_count} writes, "
+    logger.info(f"[U+2713] Mixed workload test completed: {read_successes}/{read_count} reads, {write_successes}/{write_count} writes, "
                 f"Overall P95: {metrics.p95_latency_ms:.1f}ms, Throughput: {throughput:.1f} ops/sec")
     
     suite._save_load_test_report(test_name, metrics, {
@@ -771,8 +771,8 @@ async def test_state_size_scalability(load_test_suite):
             }
             
             # Validate performance scales appropriately
-            assert size_successes >= agent_count * 0.95, f"{size_name} state size should have ≥95% success rate"
-            assert size_p95 <= expected_p95, f"{size_name} P95 should be ≤{expected_p95}ms, got {size_p95:.1f}ms"
+            assert size_successes >= agent_count * 0.95, f"{size_name} state size should have  >= 95% success rate"
+            assert size_p95 <= expected_p95, f"{size_name} P95 should be  <= {expected_p95}ms, got {size_p95:.1f}ms"
             
             logger.info(f"{size_name} state results: {size_successes}/{agent_count} success, "
                        f"avg: {size_avg:.1f}ms, p95: {size_p95:.1f}ms, throughput: {size_throughput:.1f}/sec")
@@ -786,7 +786,7 @@ async def test_state_size_scalability(load_test_suite):
     metrics.finalize_metrics()
     
     # Scalability assertions
-    assert metrics.availability_percent >= 95.0, f"Overall scalability test availability must be ≥95%"
+    assert metrics.availability_percent >= 95.0, f"Overall scalability test availability must be  >= 95%"
     
     # Validate performance scales predictably
     small_p95 = size_performance_results["small"]["p95_response_ms"]
@@ -804,7 +804,7 @@ async def test_state_size_scalability(load_test_suite):
         throughput_ratio = small_throughput / enterprise_throughput
         assert throughput_ratio <= 5.0, f"Throughput degradation should be reasonable, got {throughput_ratio:.1f}x"
     
-    logger.info(f"✓ State size scalability test completed: {metrics.agents_succeeded}/{metrics.agents_executed} overall success, "
+    logger.info(f"[U+2713] State size scalability test completed: {metrics.agents_succeeded}/{metrics.agents_executed} overall success, "
                 f"scalability factor: {scalability_factor:.1f}x")
     
     suite._save_load_test_report(test_name, metrics, {
@@ -921,10 +921,10 @@ async def test_sustained_load_24_hours_simulation(load_test_suite):
     performance_degradation = (first_hour_success - last_hour_success) / first_hour_success if first_hour_success > 0 else 0
     
     # Sustained load assertions
-    assert avg_hourly_success_rate >= 0.9, f"Sustained load success rate must be ≥90%, got {avg_hourly_success_rate:.1%}"
-    assert metrics.availability_percent >= 90.0, f"Overall availability must be ≥90% for sustained load"
-    assert performance_degradation <= 0.2, f"Performance degradation must be ≤20%, got {performance_degradation:.1%}"
-    assert avg_hourly_response_time <= 100.0, f"Sustained load avg response time must be ≤100ms, got {avg_hourly_response_time:.1f}ms"
+    assert avg_hourly_success_rate >= 0.9, f"Sustained load success rate must be  >= 90%, got {avg_hourly_success_rate:.1%}"
+    assert metrics.availability_percent >= 90.0, f"Overall availability must be  >= 90% for sustained load"
+    assert performance_degradation <= 0.2, f"Performance degradation must be  <= 20%, got {performance_degradation:.1%}"
+    assert avg_hourly_response_time <= 100.0, f"Sustained load avg response time must be  <= 100ms, got {avg_hourly_response_time:.1f}ms"
     
     # Memory leak detection (approximate)
     if len(hourly_performance) >= 6:
@@ -934,7 +934,7 @@ async def test_sustained_load_24_hours_simulation(load_test_suite):
         
         assert throughput_degradation <= 0.3, f"Throughput degradation suggests memory leak, got {throughput_degradation:.1%}"
     
-    logger.info(f"✓ Sustained load simulation completed: {total_checkpoints} checkpoints, "
+    logger.info(f"[U+2713] Sustained load simulation completed: {total_checkpoints} checkpoints, "
                 f"{sustained_agents_succeeded}/{sustained_agents_executed} overall success, "
                 f"avg success rate: {avg_hourly_success_rate:.1%}, "
                 f"performance degradation: {performance_degradation:.1%}")
@@ -962,12 +962,12 @@ async def test_burst_traffic_handling(load_test_suite):
     test_name = "burst_traffic_handling"
     metrics = LoadTestMetrics(test_name=test_name, start_time=time.time())
     
-    # Define burst pattern: baseline → spike → recovery
+    # Define burst pattern: baseline  ->  spike  ->  recovery
     baseline_agents = 20
     spike_agents = 80  # 4x spike
     recovery_agents = 30
     
-    logger.info(f"Testing burst traffic: {baseline_agents} baseline → {spike_agents} spike → {recovery_agents} recovery")
+    logger.info(f"Testing burst traffic: {baseline_agents} baseline  ->  {spike_agents} spike  ->  {recovery_agents} recovery")
     
     burst_phases = []
     
@@ -1072,22 +1072,22 @@ async def test_burst_traffic_handling(load_test_suite):
     spike_success_rate = spike_successes / spike_agents  
     recovery_success_rate = recovery_successes / recovery_agents
     
-    assert baseline_success_rate >= 0.95, f"Baseline success rate must be ≥95%, got {baseline_success_rate:.1%}"
-    assert spike_success_rate >= 0.80, f"Spike handling success rate must be ≥80%, got {spike_success_rate:.1%}"
-    assert recovery_success_rate >= 0.90, f"Recovery success rate must be ≥90%, got {recovery_success_rate:.1%}"
+    assert baseline_success_rate >= 0.95, f"Baseline success rate must be  >= 95%, got {baseline_success_rate:.1%}"
+    assert spike_success_rate >= 0.80, f"Spike handling success rate must be  >= 80%, got {spike_success_rate:.1%}"
+    assert recovery_success_rate >= 0.90, f"Recovery success rate must be  >= 90%, got {recovery_success_rate:.1%}"
     
     # Performance degradation during spike should be reasonable
     performance_degradation = (spike_avg - baseline_avg) / baseline_avg if baseline_avg > 0 else 0
-    assert performance_degradation <= 3.0, f"Spike performance degradation must be ≤300%, got {performance_degradation:.1%}"
+    assert performance_degradation <= 3.0, f"Spike performance degradation must be  <= 300%, got {performance_degradation:.1%}"
     
     # Recovery should return to near-baseline performance
     recovery_performance_ratio = recovery_avg / baseline_avg if baseline_avg > 0 else 1
     assert recovery_performance_ratio <= 1.5, f"Recovery performance should be within 150% of baseline, got {recovery_performance_ratio:.1f}x"
     
     # Spike P95 should meet SLA even under stress
-    assert spike_p95 <= 500.0, f"Spike P95 should be ≤500ms under stress, got {spike_p95:.1f}ms"
+    assert spike_p95 <= 500.0, f"Spike P95 should be  <= 500ms under stress, got {spike_p95:.1f}ms"
     
-    logger.info(f"✓ Burst traffic test completed:")
+    logger.info(f"[U+2713] Burst traffic test completed:")
     for phase in burst_phases:
         logger.info(f"  {phase['phase']}: {phase['successes']}/{phase['agents']} success, "
                    f"avg: {phase['avg_response_ms']:.1f}ms")
@@ -1228,12 +1228,12 @@ async def test_redis_connection_pool_exhaustion(load_test_suite):
     error_rate = total_errors / metrics.agents_executed if metrics.agents_executed > 0 else 0
     
     # Under extreme load, some connection errors are acceptable, but system should remain stable
-    assert error_rate <= 0.3, f"Connection error rate should be ≤30% under extreme load, got {error_rate:.1%}"
+    assert error_rate <= 0.3, f"Connection error rate should be  <= 30% under extreme load, got {error_rate:.1%}"
     assert successful_operations >= metrics.agents_executed * 0.7, f"At least 70% operations should succeed despite connection pressure"
     
     # Response times for successful operations should still be reasonable
     if metrics.response_times_ms:
-        assert metrics.p95_latency_ms <= 1000.0, f"P95 latency should be ≤1s even under connection stress, got {metrics.p95_latency_ms:.1f}ms"
+        assert metrics.p95_latency_ms <= 1000.0, f"P95 latency should be  <= 1s even under connection stress, got {metrics.p95_latency_ms:.1f}ms"
     
     # System should not crash or become completely unresponsive
     total_duration = end_execution - start_execution
@@ -1241,9 +1241,9 @@ async def test_redis_connection_pool_exhaustion(load_test_suite):
     
     # Verify graceful degradation rather than complete failure
     success_rate = successful_operations / metrics.agents_executed
-    assert success_rate >= 0.5, f"Success rate should be ≥50% showing graceful degradation, got {success_rate:.1%}"
+    assert success_rate >= 0.5, f"Success rate should be  >= 50% showing graceful degradation, got {success_rate:.1%}"
     
-    logger.info(f"✓ Connection pool exhaustion test completed: {successful_operations}/{metrics.agents_executed} success")
+    logger.info(f"[U+2713] Connection pool exhaustion test completed: {successful_operations}/{metrics.agents_executed} success")
     logger.info(f"Error breakdown: {dict(error_types)}")
     logger.info(f"Connection errors: {connection_errors}, Timeout errors: {timeout_errors}")
     
@@ -1406,7 +1406,7 @@ async def test_postgres_checkpoint_under_load(load_test_suite):
     # PostgreSQL checkpoint assertions
     checkpoint_success_rate = checkpoint_successes / total_checkpoint_operations if total_checkpoint_operations > 0 else 0
     
-    assert checkpoint_success_rate >= 0.90, f"Checkpoint success rate must be ≥90% for disaster recovery, got {checkpoint_success_rate:.1%}"
+    assert checkpoint_success_rate >= 0.90, f"Checkpoint success rate must be  >= 90% for disaster recovery, got {checkpoint_success_rate:.1%}"
     assert checkpoint_successes >= wave_count * checkpoint_agents * 0.9, f"Minimum checkpoint count required for compliance"
     
     # Checkpoint performance should remain reasonable under load
@@ -1414,13 +1414,13 @@ async def test_postgres_checkpoint_under_load(load_test_suite):
         avg_checkpoint_time = statistics.mean(checkpoint_response_times)
         p95_checkpoint_time = sorted(checkpoint_response_times)[int(0.95 * len(checkpoint_response_times))]
         
-        assert avg_checkpoint_time <= 500.0, f"Average checkpoint time should be ≤500ms, got {avg_checkpoint_time:.1f}ms"
-        assert p95_checkpoint_time <= 1000.0, f"P95 checkpoint time should be ≤1s, got {p95_checkpoint_time:.1f}ms"
+        assert avg_checkpoint_time <= 500.0, f"Average checkpoint time should be  <= 500ms, got {avg_checkpoint_time:.1f}ms"
+        assert p95_checkpoint_time <= 1000.0, f"P95 checkpoint time should be  <= 1s, got {p95_checkpoint_time:.1f}ms"
     
     # Validate no data loss during checkpoint operations
     assert metrics.data_corruption_count == 0, "No data corruption allowed during checkpoint operations"
     
-    logger.info(f"✓ PostgreSQL checkpoint under load test completed: {checkpoint_successes}/{total_checkpoint_operations} success")
+    logger.info(f"[U+2713] PostgreSQL checkpoint under load test completed: {checkpoint_successes}/{total_checkpoint_operations} success")
     logger.info(f"Checkpoint success rate: {checkpoint_success_rate:.1%}")
     if checkpoint_response_times:
         logger.info(f"Checkpoint performance: avg {statistics.mean(checkpoint_response_times):.1f}ms, "
@@ -1591,15 +1591,15 @@ async def test_memory_usage_under_load(load_test_suite):
         memory_leak_detected = memory_growth_percent > 50  # >50% growth suggests leak
         
         # Memory usage assertions
-        assert peak_memory <= 2048, f"Peak memory must be ≤2GB, got {peak_memory:.1f}MB"
-        assert memory_growth_percent <= 100, f"Memory growth should be ≤100%, got {memory_growth_percent:.1f}%"
+        assert peak_memory <= 2048, f"Peak memory must be  <= 2GB, got {peak_memory:.1f}MB"
+        assert memory_growth_percent <= 100, f"Memory growth should be  <= 100%, got {memory_growth_percent:.1f}%"
         assert not memory_leak_detected, f"Memory leak detected: {memory_growth_percent:.1f}% growth"
         
         # Performance should remain stable despite memory usage
         success_rate = agent_successes / agent_operations if agent_operations > 0 else 0
-        assert success_rate >= 0.85, f"Success rate should be ≥85% despite memory pressure, got {success_rate:.1%}"
+        assert success_rate >= 0.85, f"Success rate should be  >= 85% despite memory pressure, got {success_rate:.1%}"
         
-        logger.info(f"✓ Memory usage test completed: {agent_successes}/{agent_operations} operations")
+        logger.info(f"[U+2713] Memory usage test completed: {agent_successes}/{agent_operations} operations")
         logger.info(f"Memory usage: initial {initial_memory:.1f}MB, peak {peak_memory:.1f}MB, final {final_memory:.1f}MB")
         logger.info(f"Memory growth: {memory_growth:.1f}MB ({memory_growth_percent:.1f}%)")
         
@@ -1766,11 +1766,11 @@ async def test_latency_sla_compliance(load_test_suite):
         overall_availability = statistics.mean([m["availability_percent"] for m in sla_measurements])
         
         # SLA compliance assertions
-        assert sla_compliance_rate >= 0.9, f"SLA compliance rate must be ≥90%, got {sla_compliance_rate:.1%}"
-        assert overall_availability >= sla_requirements["availability_percent"], f"Overall availability must be ≥{sla_requirements['availability_percent']}%, got {overall_availability:.1f}%"
-        assert overall_p50 <= sla_requirements["p50_ms"], f"Overall P50 must be ≤{sla_requirements['p50_ms']}ms, got {overall_p50:.1f}ms"
-        assert overall_p95 <= sla_requirements["p95_ms"], f"Overall P95 must be ≤{sla_requirements['p95_ms']}ms, got {overall_p95:.1f}ms"
-        assert overall_p99 <= sla_requirements["p99_ms"], f"Overall P99 must be ≤{sla_requirements['p99_ms']}ms, got {overall_p99:.1f}ms"
+        assert sla_compliance_rate >= 0.9, f"SLA compliance rate must be  >= 90%, got {sla_compliance_rate:.1%}"
+        assert overall_availability >= sla_requirements["availability_percent"], f"Overall availability must be  >= {sla_requirements['availability_percent']}%, got {overall_availability:.1f}%"
+        assert overall_p50 <= sla_requirements["p50_ms"], f"Overall P50 must be  <= {sla_requirements['p50_ms']}ms, got {overall_p50:.1f}ms"
+        assert overall_p95 <= sla_requirements["p95_ms"], f"Overall P95 must be  <= {sla_requirements['p95_ms']}ms, got {overall_p95:.1f}ms"
+        assert overall_p99 <= sla_requirements["p99_ms"], f"Overall P99 must be  <= {sla_requirements['p99_ms']}ms, got {overall_p99:.1f}ms"
         
         # Consistency check - SLA metrics should not vary wildly between measurements
         p50_variance = statistics.stdev([m["p50_ms"] for m in sla_measurements]) if len(sla_measurements) > 1 else 0
@@ -1779,7 +1779,7 @@ async def test_latency_sla_compliance(load_test_suite):
         assert p50_variance <= overall_p50 * 0.5, f"P50 variance too high, indicates unstable performance: {p50_variance:.1f}ms"
         assert p95_variance <= overall_p95 * 0.5, f"P95 variance too high, indicates unstable performance: {p95_variance:.1f}ms"
         
-        logger.info(f"✓ SLA compliance test completed: {compliant_measurements}/{len(sla_measurements)} measurements compliant ({sla_compliance_rate:.1%})")
+        logger.info(f"[U+2713] SLA compliance test completed: {compliant_measurements}/{len(sla_measurements)} measurements compliant ({sla_compliance_rate:.1%})")
         logger.info(f"Overall SLA metrics: P50={overall_p50:.1f}ms, P95={overall_p95:.1f}ms, P99={overall_p99:.1f}ms, Availability={overall_availability:.1f}%")
         
         suite._save_load_test_report(test_name, metrics, {
@@ -2060,13 +2060,13 @@ async def test_failure_recovery_under_load(load_test_suite):
     post_recovery_success_rate = recovery_results["post_recovery"]["successes"] / recovery_results["post_recovery"]["attempts"] if recovery_results["post_recovery"]["attempts"] > 0 else 0
     
     # Baseline performance before failure should be good
-    assert pre_failure_success_rate >= 0.95, f"Pre-failure success rate should be ≥95%, got {pre_failure_success_rate:.1%}"
+    assert pre_failure_success_rate >= 0.95, f"Pre-failure success rate should be  >= 95%, got {pre_failure_success_rate:.1%}"
     
     # During failure, system should maintain some level of service (graceful degradation)
-    assert during_failure_success_rate >= 0.6, f"During failure success rate should be ≥60% (graceful degradation), got {during_failure_success_rate:.1%}"
+    assert during_failure_success_rate >= 0.6, f"During failure success rate should be  >= 60% (graceful degradation), got {during_failure_success_rate:.1%}"
     
     # Post-recovery should return to near-baseline performance
-    assert post_recovery_success_rate >= 0.9, f"Post-recovery success rate should be ≥90%, got {post_recovery_success_rate:.1%}"
+    assert post_recovery_success_rate >= 0.9, f"Post-recovery success rate should be  >= 90%, got {post_recovery_success_rate:.1%}"
     
     # Recovery should not cause permanent performance degradation
     performance_recovery_ratio = recovery_results["post_recovery"]["avg_latency"] / recovery_results["pre_failure"]["avg_latency"] if recovery_results["pre_failure"]["avg_latency"] > 0 else 1
@@ -2076,7 +2076,7 @@ async def test_failure_recovery_under_load(load_test_suite):
     avg_retries_per_operation = total_retries / recovery_results["during_failure"]["attempts"] if recovery_results["during_failure"]["attempts"] > 0 else 0
     assert avg_retries_per_operation <= 2.0, f"Average retries should be reasonable, got {avg_retries_per_operation:.1f}"
     
-    logger.info(f"✓ Failure recovery test completed:")
+    logger.info(f"[U+2713] Failure recovery test completed:")
     logger.info(f"  Pre-failure: {pre_failure_success_rate:.1%} success, {recovery_results['pre_failure']['avg_latency']:.1f}ms avg")
     logger.info(f"  During failure: {during_failure_success_rate:.1%} success, {recovery_results['during_failure']['avg_latency']:.1f}ms avg")
     logger.info(f"  Post-recovery: {post_recovery_success_rate:.1%} success, {recovery_results['post_recovery']['avg_latency']:.1f}ms avg")

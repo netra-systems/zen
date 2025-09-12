@@ -207,7 +207,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
         Test complete isolation between concurrent users processing sensitive business data.
         
         CRITICAL: This validates the CORE enterprise security promise:
-        User A Sensitive Data + User B Sensitive Data → ZERO Cross-Contamination → Enterprise Trust
+        User A Sensitive Data + User B Sensitive Data  ->  ZERO Cross-Contamination  ->  Enterprise Trust
         
         Business Value: Validates enterprise-grade isolation that justifies premium pricing.
         """
@@ -249,7 +249,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
             connection_tasks.append(connection_task)
             
         await asyncio.gather(*connection_tasks)
-        self.logger.info(f"🔌 Established {len(user_sessions)} concurrent authenticated connections")
+        self.logger.info(f"[U+1F50C] Established {len(user_sessions)} concurrent authenticated connections")
         
         # Act - Send concurrent chat messages with sensitive business data
         message_tasks = []
@@ -266,7 +266,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
         
         # Send all messages concurrently to test isolation under load
         await asyncio.gather(*message_tasks)
-        self.logger.info(f"📤 Sent {len(message_tasks)} concurrent messages with sensitive data")
+        self.logger.info(f"[U+1F4E4] Sent {len(message_tasks)} concurrent messages with sensitive data")
         
         # Collect events from all users concurrently
         collection_tasks = []
@@ -288,7 +288,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
             
             if contamination["has_contamination"]:
                 isolation_violations.extend(contamination["contamination_details"])
-                self.logger.error(f"❌ User {i} has contamination: {contamination['contamination_details']}")
+                self.logger.error(f" FAIL:  User {i} has contamination: {contamination['contamination_details']}")
         
         # CRITICAL: ZERO cross-user contamination is required for enterprise trust
         self.assertEqual(len(isolation_violations), 0,
@@ -323,7 +323,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
         self.record_metric("enterprise_isolation_validated", True)
         self.record_metric("total_events_all_users", total_events)
         
-        self.logger.info(f"✅ Enterprise isolation validated: {len(user_sessions)} concurrent users, "
+        self.logger.info(f" PASS:  Enterprise isolation validated: {len(user_sessions)} concurrent users, "
                         f"ZERO isolation violations, {total_events} total isolated events")
     
     @pytest.mark.asyncio
@@ -332,7 +332,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
         Test user session state remains isolated during concurrent agent execution workflows.
         
         CRITICAL: This validates agent execution isolation:
-        User A Agent State + User B Agent State → ZERO State Cross-Contamination → Reliable Results
+        User A Agent State + User B Agent State  ->  ZERO State Cross-Contamination  ->  Reliable Results
         
         Business Value: Ensures agent results are never mixed between users (data integrity).
         """
@@ -363,7 +363,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
         for session in user_sessions:
             await session.connect(websocket_url)
             
-        self.logger.info(f"🔌 Connected {len(user_sessions)} users for agent workflow isolation testing")
+        self.logger.info(f"[U+1F50C] Connected {len(user_sessions)} users for agent workflow isolation testing")
         
         # Act - Execute different agent workflows concurrently
         workflow_tasks = []
@@ -381,7 +381,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
         
         # Execute workflows concurrently
         await asyncio.gather(*workflow_tasks)
-        self.logger.info(f"📤 Started {len(workflow_tasks)} concurrent agent workflows")
+        self.logger.info(f"[U+1F4E4] Started {len(workflow_tasks)} concurrent agent workflows")
         
         # Allow sufficient time for agent execution
         collection_tasks = []
@@ -450,7 +450,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
         self.record_metric("successful_workflow_completions", completed_users)
         self.record_metric("agent_execution_isolation_validated", True)
         
-        self.logger.info(f"✅ Agent execution isolation validated: {len(user_sessions)} concurrent workflows, "
+        self.logger.info(f" PASS:  Agent execution isolation validated: {len(user_sessions)} concurrent workflows, "
                         f"ZERO state contamination, {completed_users} successful completions")
     
     # Helper Methods and Cleanup
@@ -482,7 +482,7 @@ class TestMultiUserConcurrentChatIsolation(SSotAsyncTestCase):
         # Clear user sessions
         self._user_sessions.clear()
         
-        self.logger.info(f"✅ Multi-user concurrent chat isolation test completed successfully")
+        self.logger.info(f" PASS:  Multi-user concurrent chat isolation test completed successfully")
 
 
 if __name__ == "__main__":

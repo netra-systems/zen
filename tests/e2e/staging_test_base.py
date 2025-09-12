@@ -37,7 +37,7 @@ def track_test_timing(test_func: Callable) -> Callable:
             if execution_time < 0.01:
                 pytest.fail(
                     f"\n{'='*60}\n"
-                    f"🚨 E2E TEST FAILED: ZERO-SECOND EXECUTION\n"
+                    f" ALERT:  E2E TEST FAILED: ZERO-SECOND EXECUTION\n"
                     f"{'='*60}\n"
                     f"Test: {test_name}\n"
                     f"Execution Time: {execution_time:.4f}s\n\n"
@@ -58,20 +58,20 @@ def track_test_timing(test_func: Callable) -> Callable:
             # Warn if test is suspiciously fast (under 0.1 seconds)
             elif execution_time < 0.1:
                 print(
-                    f"\n⚠️  WARNING: Test '{test_name}' executed in {execution_time:.3f}s\n"
+                    f"\n WARNING: [U+FE0F]  WARNING: Test '{test_name}' executed in {execution_time:.3f}s\n"
                     f"   This is suspiciously fast for an e2e test connecting to staging.\n"
                     f"   Verify the test is actually performing real operations.\n"
                 )
             
             # Log normal execution time
             else:
-                print(f"[✓] Test '{test_name}' completed in {execution_time:.2f}s")
+                print(f"[[U+2713]] Test '{test_name}' completed in {execution_time:.2f}s")
             
             return result
             
         except Exception as e:
             execution_time = time.perf_counter() - start_time
-            print(f"[✗] Test '{test_name}' failed after {execution_time:.2f}s: {e}")
+            print(f"[[U+2717]] Test '{test_name}' failed after {execution_time:.2f}s: {e}")
             raise
     
     return wrapper

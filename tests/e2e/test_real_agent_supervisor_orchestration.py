@@ -117,7 +117,7 @@ class TestRealAgentSupervisorOrchestration(BaseE2ETest):
         self._assert_orchestration_performance(total_time)
         
         self.logger.info(
-            f"✅ Complete supervisor orchestration test passed in {total_time:.2f}s "
+            f" PASS:  Complete supervisor orchestration test passed in {total_time:.2f}s "
             f"with {self.orchestration_metrics['total_agents_executed']} agents"
         )
 
@@ -160,7 +160,7 @@ class TestRealAgentSupervisorOrchestration(BaseE2ETest):
         # Validate failure notifications sent via WebSocket
         self._assert_failure_notifications_sent()
         
-        self.logger.info(f"✅ Supervisor failure recovery test passed in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Supervisor failure recovery test passed in {execution_time:.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -220,7 +220,7 @@ class TestRealAgentSupervisorOrchestration(BaseE2ETest):
             # Reset for next scenario
             self._reset_orchestration_state()
         
-        self.logger.info("✅ Dynamic agent selection test completed for all scenarios")
+        self.logger.info(" PASS:  Dynamic agent selection test completed for all scenarios")
 
     @pytest.mark.e2e
     @pytest.mark.real_services
@@ -281,7 +281,7 @@ class TestRealAgentSupervisorOrchestration(BaseE2ETest):
         # Validate performance under concurrent load
         self._assert_concurrent_performance(execution_time, len(concurrent_requests))
         
-        self.logger.info(f"✅ Concurrent orchestration test passed with {len(concurrent_requests)} users in {execution_time:.2f}s")
+        self.logger.info(f" PASS:  Concurrent orchestration test passed with {len(concurrent_requests)} users in {execution_time:.2f}s")
 
     # =============================================================================
     # HELPER METHODS
@@ -765,7 +765,7 @@ actionable insights through intelligent agent orchestration.
         response_length = len(orchestration_result["comprehensive_response"])
         assert response_length > 100, f"Response too brief ({response_length} chars) - lacks substance"
         
-        self.logger.info(f"✅ Orchestration completed with {len(orchestration_result['sub_agents_executed'])} agents")
+        self.logger.info(f" PASS:  Orchestration completed with {len(orchestration_result['sub_agents_executed'])} agents")
 
     def _assert_proper_sub_agent_coordination(self):
         """Assert proper coordination between supervisor and sub-agents."""
@@ -788,7 +788,7 @@ actionable insights through intelligent agent orchestration.
         first_event = min(self.orchestration_events, key=lambda x: x.get("orchestration_timestamp", 0))
         assert first_event.get("agent_name") == "supervisor_agent", "Supervisor should coordinate first"
         
-        self.logger.info(f"✅ Proper coordination validated with {len(agent_names)} agents")
+        self.logger.info(f" PASS:  Proper coordination validated with {len(agent_names)} agents")
 
     def _assert_result_synthesis_quality(self, orchestration_result: Dict[str, Any]):
         """Assert quality of result synthesis from multiple sub-agents."""
@@ -812,7 +812,7 @@ actionable insights through intelligent agent orchestration.
             if isinstance(rec, dict):
                 assert "area" in rec or "implementation" in rec, f"Recommendation lacks detail: {rec}"
         
-        self.logger.info(f"✅ Result synthesis quality validated with {len(recommendations)} recommendations")
+        self.logger.info(f" PASS:  Result synthesis quality validated with {len(recommendations)} recommendations")
 
     def _assert_coordinated_websocket_events(self):
         """Assert WebSocket events properly coordinated during orchestration."""
@@ -832,7 +832,7 @@ actionable insights through intelligent agent orchestration.
         orchestration_events = [e for e in self.orchestration_events if e.get("orchestration_context")]
         assert len(orchestration_events) > 0, "No orchestration context events found"
         
-        self.logger.info(f"✅ Coordinated WebSocket events validated: {len(self.orchestration_events)} total events")
+        self.logger.info(f" PASS:  Coordinated WebSocket events validated: {len(self.orchestration_events)} total events")
 
     def _assert_orchestration_performance(self, total_time: float):
         """Assert orchestration performance within acceptable limits."""
@@ -852,7 +852,7 @@ actionable insights through intelligent agent orchestration.
                 f"Coordination overhead may be excessive."
             )
         
-        self.logger.info(f"✅ Orchestration performance validated: {total_time:.2f}s for {agents_executed} agents")
+        self.logger.info(f" PASS:  Orchestration performance validated: {total_time:.2f}s for {agents_executed} agents")
 
     def _assert_correct_agents_selected(self, result: Dict[str, Any], expected_agents: List[str]):
         """Assert correct agents were selected for the scenario."""
@@ -864,7 +864,7 @@ actionable insights through intelligent agent orchestration.
                 f"Executed: {executed_agents}"
             )
         
-        self.logger.info(f"✅ Correct agents selected: {executed_agents}")
+        self.logger.info(f" PASS:  Correct agents selected: {executed_agents}")
 
     def _assert_graceful_failure_recovery(self, orchestration_result: Dict[str, Any]):
         """Assert graceful recovery occurred during sub-agent failures."""
@@ -883,7 +883,7 @@ actionable insights through intelligent agent orchestration.
         successful_agents = [a for a in sub_agents if not a.endswith("_failed")]
         assert len(successful_agents) > 0, "No successful sub-agents despite recovery"
         
-        self.logger.info(f"✅ Graceful failure recovery validated with {len(successful_agents)} successful agents")
+        self.logger.info(f" PASS:  Graceful failure recovery validated with {len(successful_agents)} successful agents")
 
     def _assert_partial_value_delivery(self, orchestration_result: Dict[str, Any]):
         """Assert partial value was still delivered despite failures."""
@@ -895,7 +895,7 @@ actionable insights through intelligent agent orchestration.
         business_impact = orchestration_result.get("business_impact", {})
         assert len(business_impact) > 0, "No business impact despite partial results"
         
-        self.logger.info("✅ Partial value delivery validated")
+        self.logger.info(" PASS:  Partial value delivery validated")
 
     def _assert_failure_notifications_sent(self):
         """Assert proper notifications were sent about failures."""
@@ -907,7 +907,7 @@ actionable insights through intelligent agent orchestration.
             assert "error_message" in error_event, "Error event missing error message"
             assert "recovery_action" in error_event, "Error event missing recovery action"
         
-        self.logger.info(f"✅ Failure notifications validated: {len(error_events)} error events")
+        self.logger.info(f" PASS:  Failure notifications validated: {len(error_events)} error events")
 
     def _assert_concurrent_user_isolation(self, expected_user_count: int):
         """Assert user isolation during concurrent orchestration."""
@@ -926,7 +926,7 @@ actionable insights through intelligent agent orchestration.
             assert "agent_started" in user_event_types, f"User {user_id} missing agent_started events"
             assert "agent_completed" in user_event_types, f"User {user_id} missing agent_completed events"
         
-        self.logger.info(f"✅ Concurrent user isolation validated for {expected_user_count} users")
+        self.logger.info(f" PASS:  Concurrent user isolation validated for {expected_user_count} users")
 
     def _assert_concurrent_performance(self, execution_time: float, user_count: int):
         """Assert performance under concurrent load."""
@@ -943,7 +943,7 @@ actionable insights through intelligent agent orchestration.
             f"Time per user {time_per_user:.2f}s too high for concurrent execution"
         )
         
-        self.logger.info(f"✅ Concurrent performance validated: {execution_time:.2f}s for {user_count} users")
+        self.logger.info(f" PASS:  Concurrent performance validated: {execution_time:.2f}s for {user_count} users")
 
     async def cleanup_resources(self):
         """Clean up orchestration test resources."""

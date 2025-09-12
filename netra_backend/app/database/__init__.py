@@ -65,7 +65,7 @@ def get_engine():
             }
         )
         logger.info(
-            f"📊 DATABASE ENGINE: Created with pool_size=20, max_overflow=30, "
+            f" CHART:  DATABASE ENGINE: Created with pool_size=20, max_overflow=30, "
             f"pool_timeout=10s for race condition prevention"
         )
     return _engine
@@ -84,7 +84,7 @@ def get_sessionmaker():
             # RACE CONDITION FIX: Additional session configuration
             info={'connection_isolation': True}  # Tag sessions for isolation tracking
         )
-        logger.info("📊 SESSION MAKER: Configured with race condition prevention settings")
+        logger.info(" CHART:  SESSION MAKER: Configured with race condition prevention settings")
     return _sessionmaker
 
 @asynccontextmanager

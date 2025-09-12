@@ -17,7 +17,7 @@ class MockLanguageDetector:
         if 'import ' in text or 'def ' in text or 'class ' in text:
             return 'python'
         # Simple heuristic for demonstration
-        if any(char in '你好' for char in text):
+        if any(char in '[U+4F60][U+597D]' for char in text):
             return 'zh'
         return 'en'
 

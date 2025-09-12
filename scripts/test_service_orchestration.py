@@ -43,7 +43,7 @@ async def test_service_orchestration(cleanup: bool = False, verbose: bool = Fals
         logging.getLogger('test_framework.service_orchestrator').setLevel(logging.DEBUG)
         logging.getLogger('test_framework.docker_port_discovery').setLevel(logging.DEBUG)
     
-    logger.info("🚀 Testing E2E Service Orchestration System")
+    logger.info("[U+1F680] Testing E2E Service Orchestration System")
     
     # Configure orchestration for testing
     config = OrchestrationConfig(
@@ -65,7 +65,7 @@ async def test_service_orchestration(cleanup: bool = False, verbose: bool = Fals
         success, health_report = await orchestrator.orchestrate_services()
         
         if success:
-            logger.info("✅ Service orchestration PASSED")
+            logger.info(" PASS:  Service orchestration PASSED")
             logger.info(orchestrator.get_health_report())
             
             logger.info("=" * 60)
@@ -76,25 +76,25 @@ async def test_service_orchestration(cleanup: bool = False, verbose: bool = Fals
             connectivity_passed = await test_service_connectivity(orchestrator)
             
             if connectivity_passed:
-                logger.info("✅ Service connectivity PASSED")
-                logger.info("🎉 All E2E service orchestration tests PASSED")
+                logger.info(" PASS:  Service connectivity PASSED")
+                logger.info(" CELEBRATION:  All E2E service orchestration tests PASSED")
                 return True
             else:
-                logger.error("❌ Service connectivity FAILED")
+                logger.error(" FAIL:  Service connectivity FAILED")
                 return False
         else:
-            logger.error("❌ Service orchestration FAILED")
+            logger.error(" FAIL:  Service orchestration FAILED")
             logger.error(orchestrator.get_health_report())
             return False
             
     except Exception as e:
-        logger.error(f"❌ Service orchestration test failed: {e}")
+        logger.error(f" FAIL:  Service orchestration test failed: {e}")
         return False
     finally:
         if cleanup and orchestrator.started_services:
-            logger.info("🧹 Cleaning up test services...")
+            logger.info("[U+1F9F9] Cleaning up test services...")
             await orchestrator.cleanup_services()
-            logger.info("✅ Cleanup completed")
+            logger.info(" PASS:  Cleanup completed")
 
 
 async def test_service_connectivity(orchestrator: ServiceOrchestrator) -> bool:
@@ -108,10 +108,10 @@ async def test_service_connectivity(orchestrator: ServiceOrchestrator) -> bool:
     
     for service_name, health in orchestrator.service_health.items():
         if not health.is_healthy:
-            logger.warning(f"⚠️  Skipping connectivity test for unhealthy service: {service_name}")
+            logger.warning(f" WARNING: [U+FE0F]  Skipping connectivity test for unhealthy service: {service_name}")
             continue
         
-        logger.info(f"🔌 Testing connectivity to {service_name}:{health.port}")
+        logger.info(f"[U+1F50C] Testing connectivity to {service_name}:{health.port}")
         
         try:
             if service_name in ["postgres", "redis"]:
@@ -120,9 +120,9 @@ async def test_service_connectivity(orchestrator: ServiceOrchestrator) -> bool:
                 connectivity_results.append(connected)
                 
                 if connected:
-                    logger.info(f"✅ {service_name} port {health.port} is connectable")
+                    logger.info(f" PASS:  {service_name} port {health.port} is connectable")
                 else:
-                    logger.error(f"❌ {service_name} port {health.port} is not connectable")
+                    logger.error(f" FAIL:  {service_name} port {health.port} is not connectable")
                     
             elif service_name in ["backend", "auth"]:
                 # Test HTTP connectivity for web services
@@ -130,12 +130,12 @@ async def test_service_connectivity(orchestrator: ServiceOrchestrator) -> bool:
                 connectivity_results.append(connected)
                 
                 if connected:
-                    logger.info(f"✅ {service_name} HTTP port {health.port} is responsive")
+                    logger.info(f" PASS:  {service_name} HTTP port {health.port} is responsive")
                 else:
-                    logger.error(f"❌ {service_name} HTTP port {health.port} is not responsive")
+                    logger.error(f" FAIL:  {service_name} HTTP port {health.port} is not responsive")
                     
         except Exception as e:
-            logger.error(f"❌ Connectivity test failed for {service_name}: {e}")
+            logger.error(f" FAIL:  Connectivity test failed for {service_name}: {e}")
             connectivity_results.append(False)
     
     return all(connectivity_results) if connectivity_results else False
@@ -179,7 +179,7 @@ async def test_http_connectivity(port: int, host: str = "localhost", timeout: fl
 
 async def quick_health_check():
     """Quick health check of the orchestration system."""
-    logger.info("🏥 Running Quick Health Check")
+    logger.info("[U+1F3E5] Running Quick Health Check")
     
     try:
         success, orchestrator = await orchestrate_e2e_services(
@@ -188,16 +188,16 @@ async def quick_health_check():
         )
         
         if success:
-            logger.info("✅ Quick health check PASSED")
+            logger.info(" PASS:  Quick health check PASSED")
             logger.info(orchestrator.get_health_report())
             return True
         else:
-            logger.error("❌ Quick health check FAILED")
+            logger.error(" FAIL:  Quick health check FAILED")
             logger.error(orchestrator.get_health_report())
             return False
             
     except Exception as e:
-        logger.error(f"❌ Quick health check failed: {e}")
+        logger.error(f" FAIL:  Quick health check failed: {e}")
         return False
 
 
@@ -223,10 +223,10 @@ def main():
             )
         
         if success:
-            logger.info("🎉 Service orchestration test completed successfully")
+            logger.info(" CELEBRATION:  Service orchestration test completed successfully")
             return 0
         else:
-            logger.error("❌ Service orchestration test failed")
+            logger.error(" FAIL:  Service orchestration test failed")
             return 1
     
     try:

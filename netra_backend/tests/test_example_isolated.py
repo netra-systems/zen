@@ -9,7 +9,7 @@ Shows patterns for reliable, fast, isolated testing.
 - Value Impact: Reference implementation for all test development
 - Revenue Impact: Faster development cycles, zero test pollution issues
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 import asyncio

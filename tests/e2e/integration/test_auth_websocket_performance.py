@@ -120,7 +120,7 @@ class TestAuthWebSocketPerformance:
             ]
             
             assert len(successful_connections) >= 2, \
-                f"Expected ≥2 concurrent connections, got {len(successful_connections)}"
+                f"Expected  >= 2 concurrent connections, got {len(successful_connections)}"
             
             # Test message sending to each connection
             message_tasks = []
@@ -205,7 +205,7 @@ class TestAuthWebSocketPerformance:
                 f"Average validation time {avg_validation_time:.3f}s exceeds {AuthTestConfig.TOKEN_VALIDATION_LIMIT}s"
             
             assert len(successful_cycles) >= cycle_count * 0.8, \
-                f"Expected ≥80% success rate, got {len(successful_cycles)}/{cycle_count}"
+                f"Expected  >= 80% success rate, got {len(successful_cycles)}/{cycle_count}"
             
             print(f"High-frequency test: {cycle_count} cycles in {total_time:.2f}s, "
                   f"avg cycle: {avg_cycle_time:.3f}s, success rate: {len(successful_cycles)}/{cycle_count}")
@@ -321,10 +321,10 @@ class TestAuthWebSocketPerformance:
             
             # Throughput assertions
             assert success_rate >= 0.8, \
-                f"Expected ≥80% message success rate, got {success_rate:.1%}"
+                f"Expected  >= 80% message success rate, got {success_rate:.1%}"
             
             assert messages_per_second >= 5.0, \
-                f"Expected ≥5 messages/second throughput, got {messages_per_second:.1f}"
+                f"Expected  >= 5 messages/second throughput, got {messages_per_second:.1f}"
             
             print(f"Message throughput: {len(successful_messages)}/{total_attempted} messages "
                   f"in {total_time:.2f}s = {messages_per_second:.1f} msg/s")

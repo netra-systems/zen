@@ -12,11 +12,11 @@ This test validates that execution states propagate correctly through the entire
 Golden Path user flow, ensuring SSOT compliance across all execution tracking modules.
 
 GOLDEN PATH FLOW:
-1. User sends message → WebSocket receives request
-2. Agent execution starts → ExecutionState.PENDING
-3. Agent processes → ExecutionState.RUNNING  
-4. Agent completes → ExecutionState.COMPLETED
-5. Response sent to user → WebSocket events delivered
+1. User sends message  ->  WebSocket receives request
+2. Agent execution starts  ->  ExecutionState.PENDING
+3. Agent processes  ->  ExecutionState.RUNNING  
+4. Agent completes  ->  ExecutionState.COMPLETED
+5. Response sent to user  ->  WebSocket events delivered
 
 CRITICAL SSOT ISSUES:
 - Multiple ExecutionState enums with different values
@@ -633,11 +633,11 @@ class TestGoldenPathSSotReadiness:
         print(f"\n=== GOLDEN PATH COMPONENT INVENTORY ===")
         print(f"Working components: {len(working_components)}")
         for module_path, name, _ in working_components:
-            print(f"  ✅ {module_path}.{name}")
+            print(f"   PASS:  {module_path}.{name}")
         
         print(f"Missing components: {len(missing_components)}")
         for module_path, name, error in missing_components:
-            print(f"  ❌ {module_path}.{name} - {error}")
+            print(f"   FAIL:  {module_path}.{name} - {error}")
         
         # CRITICAL: Golden Path requires core execution components
         essential_components = [
@@ -701,13 +701,13 @@ class TestGoldenPathSSotReadiness:
         if fragmentation_issues:
             print(f"\n=== GOLDEN PATH SSOT FRAGMENTATION IMPACT ===")
             for issue in fragmentation_issues:
-                print(f"  ⚠️  {issue}")
+                print(f"   WARNING: [U+FE0F]  {issue}")
             
             print(f"\nConsolidation will fix {len(fragmentation_issues)} fragmentation issues")
             print(f"Expected Golden Path improvement: Enhanced reliability and consistency")
         else:
             print(f"\n=== GOLDEN PATH SSOT STATUS ===")
-            print(f"  ✅ No fragmentation detected - SSOT compliance achieved")
+            print(f"   PASS:  No fragmentation detected - SSOT compliance achieved")
 
 
 if __name__ == "__main__":

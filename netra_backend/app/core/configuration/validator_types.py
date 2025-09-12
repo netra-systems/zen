@@ -5,7 +5,7 @@
 Shared types and constants for configuration validation.
 Business Value: Ensures type consistency across validation modules.
 
-Each function ≤8 lines, file ≤300 lines.
+Each function  <= 8 lines, file  <= 300 lines.
 """
 
 from typing import List, NamedTuple

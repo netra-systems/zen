@@ -80,7 +80,7 @@ class AgentSupervisorRaceConditionSimulator:
                 AgentRegistry._instance = None
                 self.race_condition_active = True
                 
-                logger.warning("🚨 RACE CONDITION: Agent supervisor set to None - simulating initialization race")
+                logger.warning(" ALERT:  RACE CONDITION: Agent supervisor set to None - simulating initialization race")
     
     def resolve_supervisor_race_condition(self, delay_seconds: float = 5.0) -> None:
         """
@@ -103,7 +103,7 @@ class AgentSupervisorRaceConditionSimulator:
                         AgentRegistry._instance = AgentRegistry()
                     
                     self.race_condition_active = False
-                    logger.info(f"✅ RACE RESOLVED: Agent supervisor restored after {delay_seconds}s delay")
+                    logger.info(f" PASS:  RACE RESOLVED: Agent supervisor restored after {delay_seconds}s delay")
         
         # Run resolution in background
         asyncio.create_task(delayed_resolution())
@@ -118,7 +118,7 @@ class AgentSupervisorRaceConditionSimulator:
                     AgentRegistry._instance = AgentRegistry()
                 
                 self.race_condition_active = False
-                logger.info("🧹 CLEANUP: Agent supervisor race condition simulation cleaned up")
+                logger.info("[U+1F9F9] CLEANUP: Agent supervisor race condition simulation cleaned up")
 
 
 @pytest.mark.integration
@@ -169,7 +169,7 @@ class TestAgentSupervisorRaceCondition:
         - Mock responses delivered to users
         - System doesn't wait for proper supervisor initialization
         """
-        logger.info("🧪 INTEGRATION TEST: Supervisor race condition - wait not fallback")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Supervisor race condition - wait not fallback")
         
         # Step 1: Create supervisor race condition
         self.race_simulator.setup_supervisor_race_condition()
@@ -178,7 +178,7 @@ class TestAgentSupervisorRaceCondition:
         self.race_simulator.resolve_supervisor_race_condition(delay_seconds=5.0)
         
         # Step 3: Attempt WebSocket connection during race condition
-        logger.info("🔌 Attempting WebSocket connection during supervisor race condition")
+        logger.info("[U+1F50C] Attempting WebSocket connection during supervisor race condition")
         
         try:
             # Connect WebSocket - should wait for supervisor or fail appropriately
@@ -193,7 +193,7 @@ class TestAgentSupervisorRaceCondition:
             }
             
             await websocket.send(json.dumps(test_request))
-            logger.info("📤 Sent test request during race condition resolution")
+            logger.info("[U+1F4E4] Sent test request during race condition resolution")
             
             # Step 5: Receive and validate events - should be real agent events
             events = []
@@ -212,14 +212,14 @@ class TestAgentSupervisorRaceCondition:
                     
                     if has_fallback:
                         raise AssertionError(
-                            f"🚨 RACE CONDITION FAILURE: FALLBACK PATTERNS DETECTED\n"
+                            f" ALERT:  RACE CONDITION FAILURE: FALLBACK PATTERNS DETECTED\n"
                             f"Event type: {event.get('type', 'unknown')}\n"
                             f"Fallback patterns: {fallback_patterns}\n"
                             f"Event content: {event_content[:200]}...\n"
                             f"BUSINESS IMPACT: Mock response during supervisor race condition"
                         )
                     
-                    logger.info(f"✅ Event {len(events)}/5 - {event.get('type')} (real agent, no fallback)")
+                    logger.info(f" PASS:  Event {len(events)}/5 - {event.get('type')} (real agent, no fallback)")
                     
                 except asyncio.TimeoutError:
                     continue
@@ -229,7 +229,7 @@ class TestAgentSupervisorRaceCondition:
             
             # Step 6: Validate complete real agent workflow
             assert len(events) >= 5, (
-                f"🚨 INSUFFICIENT EVENTS: {len(events)}/5 - race condition may have prevented full workflow"
+                f" ALERT:  INSUFFICIENT EVENTS: {len(events)}/5 - race condition may have prevented full workflow"
             )
             
             # Validate required events present
@@ -238,7 +238,7 @@ class TestAgentSupervisorRaceCondition:
             missing_events = [et for et in required_events if et not in received_types]
             
             assert len(missing_events) == 0, (
-                f"🚨 MISSING REQUIRED EVENTS: {missing_events}\n"
+                f" ALERT:  MISSING REQUIRED EVENTS: {missing_events}\n"
                 f"Received: {received_types}\n"
                 f"Race condition may have caused incomplete agent workflow"
             )
@@ -251,28 +251,28 @@ class TestAgentSupervisorRaceCondition:
             has_business_value, _ = self.validator.validate_response_for_business_value(final_response)
             
             assert has_business_value, (
-                f"🚨 NO BUSINESS VALUE: Final response lacks authentic insights\n"
+                f" ALERT:  NO BUSINESS VALUE: Final response lacks authentic insights\n"
                 f"Response: '{final_response[:100]}...'\n"
                 f"Race condition may have caused degraded response quality"
             )
             
             await websocket.close()
-            logger.success("✅ RACE CONDITION TEST PASSED: Real agents used, no fallbacks during supervisor race")
+            logger.success(" PASS:  RACE CONDITION TEST PASSED: Real agents used, no fallbacks during supervisor race")
         
         except Exception as e:
             error_msg = str(e)
             
             # Check if error indicates fallback creation
             if any(word in error_msg.lower() for word in ['fallback', 'mock', 'degraded']):
-                raise AssertionError(f"🚨 RACE CONDITION FAILURE: {error_msg}")
+                raise AssertionError(f" ALERT:  RACE CONDITION FAILURE: {error_msg}")
             
             # Check if it's an appropriate failure (waiting for supervisor)
             if any(phrase in error_msg.lower() for phrase in ['supervisor', 'initialization', 'timeout', 'connection']):
-                logger.info(f"✅ EXPECTED BEHAVIOR: System appropriately waited/failed during race condition: {error_msg}")
+                logger.info(f" PASS:  EXPECTED BEHAVIOR: System appropriately waited/failed during race condition: {error_msg}")
                 return
             
             # Unexpected error
-            raise AssertionError(f"🚨 UNEXPECTED ERROR during race condition test: {error_msg}")
+            raise AssertionError(f" ALERT:  UNEXPECTED ERROR during race condition test: {error_msg}")
     
     async def test_supervisor_available_after_race_resolution(self):
         """
@@ -286,7 +286,7 @@ class TestAgentSupervisorRaceCondition:
         - Normal agent workflow functions correctly
         - No residual fallback patterns from previous race condition
         """
-        logger.info("🧪 INTEGRATION TEST: Normal operation after supervisor race resolution")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Normal operation after supervisor race resolution")
         
         # Step 1: Simulate and immediately resolve race condition
         self.race_simulator.setup_supervisor_race_condition()
@@ -331,7 +331,7 @@ class TestAgentSupervisorRaceCondition:
             assert not has_fallback, f"Fallback patterns in post-race operation: {patterns}"
         
         await websocket.close()
-        logger.success("✅ POST-RACE TEST PASSED: Normal operation resumed successfully")
+        logger.success(" PASS:  POST-RACE TEST PASSED: Normal operation resumed successfully")
     
     async def test_multiple_concurrent_connections_during_race(self):
         """
@@ -346,7 +346,7 @@ class TestAgentSupervisorRaceCondition:
         - No fallback handlers created for any connection
         - Once resolved, all connections function normally
         """
-        logger.info("🧪 INTEGRATION TEST: Multiple concurrent connections during supervisor race")
+        logger.info("[U+1F9EA] INTEGRATION TEST: Multiple concurrent connections during supervisor race")
         
         # Create race condition
         self.race_simulator.setup_supervisor_race_condition()
@@ -397,9 +397,9 @@ class TestAgentSupervisorRaceCondition:
             if isinstance(result, AssertionError):
                 raise result
             
-            logger.info(f"✅ {result}")
+            logger.info(f" PASS:  {result}")
         
-        logger.success("✅ CONCURRENT RACE TEST PASSED: All connections handled appropriately")
+        logger.success(" PASS:  CONCURRENT RACE TEST PASSED: All connections handled appropriately")
 
 
 if __name__ == "__main__":
@@ -415,9 +415,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--pytest":
         pytest.main([__file__, "-v", "--tb=short"])
     else:
-        print("🧪 INTEGRATION: Agent Supervisor Race Condition Prevention Tests")
-        print("📋 These tests prevent supervisor race conditions from creating fallback handlers")
-        print("🚀 Starting test execution...")
+        print("[U+1F9EA] INTEGRATION: Agent Supervisor Race Condition Prevention Tests")
+        print("[U+1F4CB] These tests prevent supervisor race conditions from creating fallback handlers")
+        print("[U+1F680] Starting test execution...")
         
         exit_code = pytest.main([
             __file__,
@@ -429,8 +429,8 @@ if __name__ == "__main__":
         ])
         
         if exit_code == 0:
-            print("✅ ALL TESTS PASSED: Supervisor race conditions handled correctly")
+            print(" PASS:  ALL TESTS PASSED: Supervisor race conditions handled correctly")
         else:
-            print("🚨 TEST FAILURES: Supervisor race condition issues detected")
+            print(" ALERT:  TEST FAILURES: Supervisor race condition issues detected")
             
         sys.exit(exit_code)

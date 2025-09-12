@@ -66,7 +66,7 @@ class DockerForceViolation:
     
     def __str__(self):
         return (
-            f"🚨 CRITICAL SECURITY VIOLATION in {self.file_path}:{self.line_num}\n"
+            f" ALERT:  CRITICAL SECURITY VIOLATION in {self.file_path}:{self.line_num}\n"
             f"   Type: {self.violation_type}\n"
             f"   Line: {self.line_content}\n"
             f"   Pattern: {self.pattern}"
@@ -141,7 +141,7 @@ class DockerForceProhibitionEnforcer:
                 violations.extend(line_violations)
         
         except Exception as e:
-            print(f"⚠️  Warning: Could not check file {file_path}: {e}")
+            print(f" WARNING: [U+FE0F]  Warning: Could not check file {file_path}: {e}")
         
         return violations
     
@@ -185,14 +185,14 @@ class DockerForceProhibitionEnforcer:
     def print_violations_report(self) -> None:
         """Print detailed violations report."""
         if not self.violations:
-            print("✅ DOCKER SECURITY SCAN COMPLETE: No force flag violations detected")
-            print(f"   📊 Scanned {self.checked_files} files, {self.total_lines_checked:,} lines")
+            print(" PASS:  DOCKER SECURITY SCAN COMPLETE: No force flag violations detected")
+            print(f"    CHART:  Scanned {self.checked_files} files, {self.total_lines_checked:,} lines")
             return
         
-        print("🚨" * 50)
+        print(" ALERT: " * 50)
         print("CRITICAL SECURITY VIOLATIONS DETECTED")
         print("Docker Force Flag Prohibition Enforcement")
-        print("🚨" * 50)
+        print(" ALERT: " * 50)
         print()
         
         # Group violations by file
@@ -203,8 +203,8 @@ class DockerForceProhibitionEnforcer:
             violations_by_file[violation.file_path].append(violation)
         
         for file_path, file_violations in violations_by_file.items():
-            print(f"📁 FILE: {file_path}")
-            print(f"   🚨 {len(file_violations)} violation(s) detected")
+            print(f"[U+1F4C1] FILE: {file_path}")
+            print(f"    ALERT:  {len(file_violations)} violation(s) detected")
             print()
             
             for violation in file_violations:
@@ -213,20 +213,20 @@ class DockerForceProhibitionEnforcer:
                 print(f"   Pattern: {violation.pattern}")
                 print()
         
-        print("💰 BUSINESS IMPACT:")
-        print("   • Docker force flags cause daemon crashes")
-        print("   • Each crash = 4-8 hours developer downtime")
-        print(f"   • Risk to $2M+ ARR from {len(self.violations)} violation(s)")
+        print("[U+1F4B0] BUSINESS IMPACT:")
+        print("   [U+2022] Docker force flags cause daemon crashes")
+        print("   [U+2022] Each crash = 4-8 hours developer downtime")
+        print(f"   [U+2022] Risk to $2M+ ARR from {len(self.violations)} violation(s)")
         print()
         
-        print("🛠️  REMEDIATION REQUIRED:")
+        print("[U+1F6E0][U+FE0F]  REMEDIATION REQUIRED:")
         print("   1. Replace 'docker rm -f' with 'docker stop && docker rm'")
         print("   2. Replace 'docker system prune -f' with interactive confirmation")
         print("   3. Use safe alternatives documented in docker_force_flag_guardian.py")
         print()
         
-        print("❌ COMMIT BLOCKED - Fix violations before proceeding")
-        print("🚨" * 50)
+        print(" FAIL:  COMMIT BLOCKED - Fix violations before proceeding")
+        print(" ALERT: " * 50)
     
     def get_safe_alternatives(self) -> Dict[str, str]:
         """Get safe alternatives for common dangerous patterns."""
@@ -272,7 +272,7 @@ def main():
     
     # If no files provided via args, this is likely a full scan
     if not files_to_check:
-        print("⚠️  No files provided - this enforcer is designed for pre-commit hooks")
+        print(" WARNING: [U+FE0F]  No files provided - this enforcer is designed for pre-commit hooks")
         return 0
     
     # Check files

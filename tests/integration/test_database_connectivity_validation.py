@@ -531,7 +531,7 @@
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: print("formatted_string")
                                 # REMOVED_SYNTAX_ERROR: else:
-                                    # REMOVED_SYNTAX_ERROR: print(f"ClickHouse: ⏭️ SKIPPED (not configured)")
+                                    # REMOVED_SYNTAX_ERROR: print(f"ClickHouse: [U+23ED][U+FE0F] SKIPPED (not configured)")
 
                                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
 

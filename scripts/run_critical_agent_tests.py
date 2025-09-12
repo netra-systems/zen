@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-🚨 CRITICAL: Run Top 5 Agent Tests with Enhanced Memory Management
+ ALERT:  CRITICAL: Run Top 5 Agent Tests with Enhanced Memory Management
 
 BUSINESS CRITICAL: These tests protect $500K+ ARR by validating core agent functionality.
 Each test requires ~850MB memory during agent operations and MUST run sequentially
@@ -45,7 +45,7 @@ try:
     from test_framework.memory_guardian import MemoryGuardian, TestProfile
     from shared.isolated_environment import get_env
 except ImportError as e:
-    print(f"❌ CRITICAL: Failed to import required modules: {e}")
+    print(f" FAIL:  CRITICAL: Failed to import required modules: {e}")
     print("Ensure you're running from project root with proper Python path")
     sys.exit(1)
 
@@ -188,20 +188,20 @@ class CriticalTestRunner:
         
         # Color coding based on memory usage
         if mem['percent'] > 85:
-            icon = "🔴"
+            icon = "[U+1F534]"
         elif mem['percent'] > 70:
-            icon = "🟡"
+            icon = "[U+1F7E1]"
         else:
-            icon = "🟢"
+            icon = "[U+1F7E2]"
             
         print(f"{icon} {status}")
         
         if self.verbose:
-            print(f"   └─ Available MB: {mem['available_mb']:.0f}, Used MB: {mem['used_mb']:.0f}")
+            print(f"   [U+2514][U+2500] Available MB: {mem['available_mb']:.0f}, Used MB: {mem['used_mb']:.0f}")
     
     def perform_memory_preflight_check(self) -> bool:
         """Perform comprehensive memory check before starting tests."""
-        print("\n🔍 Performing Memory Pre-flight Check...")
+        print("\n SEARCH:  Performing Memory Pre-flight Check...")
         
         mem = self.get_memory_usage()
         self.print_memory_status("Pre-flight")
@@ -209,11 +209,11 @@ class CriticalTestRunner:
         # Check if we have enough memory for critical tests
         min_required_gb = self.memory_limit_gb
         if mem['available_gb'] < min_required_gb:
-            print(f"❌ INSUFFICIENT MEMORY: Available {mem['available_gb']:.1f}GB < Required {min_required_gb:.1f}GB")
-            print("\n💡 Recommendations:")
-            print("   • Close other applications to free memory")
-            print("   • Use --memory-limit to lower threshold")
-            print("   • Run tests individually instead of in sequence")
+            print(f" FAIL:  INSUFFICIENT MEMORY: Available {mem['available_gb']:.1f}GB < Required {min_required_gb:.1f}GB")
+            print("\n IDEA:  Recommendations:")
+            print("   [U+2022] Close other applications to free memory")
+            print("   [U+2022] Use --memory-limit to lower threshold")
+            print("   [U+2022] Run tests individually instead of in sequence")
             return False
         
         # Use MemoryGuardian for detailed analysis
@@ -221,19 +221,19 @@ class CriticalTestRunner:
         total_required_mb = 4096  # Estimated total for all services
         can_run, reason = self.memory_guardian.check_memory_available(total_required_mb)
         if not can_run:
-            print(f"❌ MEMORY GUARDIAN FAILURE: {reason}")
+            print(f" FAIL:  MEMORY GUARDIAN FAILURE: {reason}")
             return False
         
-        print(f"✅ Memory Pre-flight Check PASSED - {mem['available_gb']:.1f}GB available")
+        print(f" PASS:  Memory Pre-flight Check PASSED - {mem['available_gb']:.1f}GB available")
         return True
     
     def cleanup_docker_environment(self) -> bool:
         """Enhanced Docker cleanup using UnifiedDockerManager."""
         if self.skip_cleanup:
-            print("⏸️ Skipping Docker cleanup (--skip-cleanup flag)")
+            print("[U+23F8][U+FE0F] Skipping Docker cleanup (--skip-cleanup flag)")
             return True
             
-        print("\n🧹 Enhanced Docker Cleanup...")
+        print("\n[U+1F9F9] Enhanced Docker Cleanup...")
         
         try:
             # Create a temporary UnifiedDockerManager for cleanup
@@ -247,24 +247,24 @@ class CriticalTestRunner:
             cleanup_success = temp_manager.cleanup()
             
             if cleanup_success:
-                print("✅ Docker cleanup completed successfully")
+                print(" PASS:  Docker cleanup completed successfully")
                 self.print_memory_status("After cleanup")
                 return True
             else:
-                print("⚠️ Docker cleanup had issues but continuing...")
+                print(" WARNING: [U+FE0F] Docker cleanup had issues but continuing...")
                 return False
                 
         except Exception as e:
             self.logger.error(f"Docker cleanup failed: {e}")
-            print(f"❌ Docker cleanup error: {e}")
+            print(f" FAIL:  Docker cleanup error: {e}")
             return False
     
     def start_docker_services(self, test: CriticalTest) -> Tuple[bool, str, Optional[UnifiedDockerManager]]:
         """Start Docker services using UnifiedDockerManager with memory optimization."""
-        print(f"\n🚀 Starting Docker services for: {test.name}")
+        print(f"\n[U+1F680] Starting Docker services for: {test.name}")
         
         if self.dry_run:
-            print("🔍 DRY RUN: Would start Docker services")
+            print(" SEARCH:  DRY RUN: Would start Docker services")
             return True, "dry-run-project", None
         
         try:
@@ -290,7 +290,7 @@ class CriticalTestRunner:
             required_mb = test.expected_memory_mb + 1024  # Add 1GB buffer
             
             if mem_before['available_mb'] < required_mb:
-                print(f"❌ Insufficient memory for test: {mem_before['available_mb']:.0f}MB < {required_mb}MB")
+                print(f" FAIL:  Insufficient memory for test: {mem_before['available_mb']:.0f}MB < {required_mb}MB")
                 return False, project_name, None
             
             # Start services with enhanced monitoring
@@ -301,7 +301,7 @@ class CriticalTestRunner:
             )
             
             if not success:
-                print("❌ Failed to start Docker services")
+                print(" FAIL:  Failed to start Docker services")
                 return False, project_name, self.docker_manager
             
             # Verify services are healthy
@@ -309,10 +309,10 @@ class CriticalTestRunner:
             unhealthy_services = [s for s in health_report if not health_report[s].is_healthy]
             
             if unhealthy_services:
-                print(f"❌ Unhealthy services: {unhealthy_services}")
+                print(f" FAIL:  Unhealthy services: {unhealthy_services}")
                 return False, project_name, self.docker_manager
             
-            print("✅ All services started and healthy!")
+            print(" PASS:  All services started and healthy!")
             self.print_memory_status("After Docker startup")
             
             # Store service ports for test execution
@@ -323,7 +323,7 @@ class CriticalTestRunner:
             
         except Exception as e:
             self.logger.error(f"Failed to start Docker services: {e}")
-            print(f"❌ Error starting Docker services: {e}")
+            print(f" FAIL:  Error starting Docker services: {e}")
             return False, project_name if 'project_name' in locals() else "", self.docker_manager
     
     def stop_docker_services(self, project_name: str, manager: Optional[UnifiedDockerManager] = None):
@@ -331,10 +331,10 @@ class CriticalTestRunner:
         if not project_name or self.skip_cleanup:
             return
         
-        print(f"\n🛑 Stopping Docker services for {project_name}...")
+        print(f"\n[U+1F6D1] Stopping Docker services for {project_name}...")
         
         if self.dry_run:
-            print("🔍 DRY RUN: Would stop Docker services")
+            print(" SEARCH:  DRY RUN: Would stop Docker services")
             return
         
         try:
@@ -342,24 +342,24 @@ class CriticalTestRunner:
                 # Use the existing manager for clean shutdown
                 success = manager.stop_services(timeout=30, remove_containers=True)
                 if success:
-                    print("✅ Docker services stopped cleanly")
+                    print(" PASS:  Docker services stopped cleanly")
                 else:
-                    print("⚠️ Docker services stopped with warnings")
+                    print(" WARNING: [U+FE0F] Docker services stopped with warnings")
             else:
                 # Fallback to cleanup
                 self.cleanup_docker_environment()
                 
         except Exception as e:
             self.logger.error(f"Failed to stop Docker services: {e}")
-            print(f"❌ Error stopping Docker services: {e}")
+            print(f" FAIL:  Error stopping Docker services: {e}")
     
     def run_single_test(self, test: CriticalTest, attempt: int = 1) -> TestResult:
         """Run a single critical test with enhanced monitoring and reporting."""
         print(f"\n{'='*80}")
-        print(f"🎯 Running: {test.name} (Attempt {attempt})")
-        print(f"📊 Business Value: {test.business_value}")
-        print(f"📝 Description: {test.description}")
-        print(f"⏱️  Timeout: {test.timeout}s | Expected Memory: {test.expected_memory_mb}MB")
+        print(f" TARGET:  Running: {test.name} (Attempt {attempt})")
+        print(f" CHART:  Business Value: {test.business_value}")
+        print(f"[U+1F4DD] Description: {test.description}")
+        print(f"[U+23F1][U+FE0F]  Timeout: {test.timeout}s | Expected Memory: {test.expected_memory_mb}MB")
         print(f"{'='*80}")
         
         # Pre-test memory snapshot
@@ -368,7 +368,7 @@ class CriticalTestRunner:
         
         if not test.full_path.exists():
             error_msg = f"Test file not found: {test.full_path}"
-            print(f"❌ {error_msg}")
+            print(f" FAIL:  {error_msg}")
             return TestResult(
                 test=test,
                 passed=False,
@@ -381,7 +381,7 @@ class CriticalTestRunner:
             )
         
         if self.dry_run:
-            print("🔍 DRY RUN: Would execute test")
+            print(" SEARCH:  DRY RUN: Would execute test")
             return TestResult(
                 test=test,
                 passed=True,
@@ -449,12 +449,12 @@ class CriticalTestRunner:
             passed = result.returncode == 0
             
             if passed:
-                print(f"✅ PASSED in {execution_time:.1f}s")
+                print(f" PASS:  PASSED in {execution_time:.1f}s")
                 if self.verbose:
                     print(f"   Memory Delta: {mem_after['used_mb'] - mem_before['used_mb']:+.0f}MB")
                     print(f"   Peak Memory: {peak_memory_mb:.0f}MB")
             else:
-                print(f"❌ FAILED after {execution_time:.1f}s (Exit Code: {result.returncode})")
+                print(f" FAIL:  FAILED after {execution_time:.1f}s (Exit Code: {result.returncode})")
                 
                 # Capture error details
                 if result.stdout:
@@ -496,7 +496,7 @@ class CriticalTestRunner:
             mem_after = self.get_memory_usage()
             error_message = f"Test timeout after {test.timeout}s"
             
-            print(f"⏱️ TIMEOUT after {test.timeout}s")
+            print(f"[U+23F1][U+FE0F] TIMEOUT after {test.timeout}s")
             self.print_memory_status("After test (TIMEOUT)")
             
             return TestResult(
@@ -516,7 +516,7 @@ class CriticalTestRunner:
             mem_after = self.get_memory_usage()
             error_message = f"Unexpected error: {str(e)}"
             
-            print(f"❌ UNEXPECTED ERROR: {e}")
+            print(f" FAIL:  UNEXPECTED ERROR: {e}")
             self.print_memory_status("After test (ERROR)")
             
             return TestResult(
@@ -541,7 +541,7 @@ class CriticalTestRunner:
         
         for attempt in range(1, test.retry_count + 1):
             if attempt > 1:
-                print(f"\n🔄 RETRY {attempt}/{test.retry_count} for {test.name}")
+                print(f"\n CYCLE:  RETRY {attempt}/{test.retry_count} for {test.name}")
                 # Extra cleanup before retry
                 self.cleanup_docker_environment()
                 time.sleep(10)  # Longer pause for retries
@@ -551,7 +551,7 @@ class CriticalTestRunner:
             
             if not docker_started:
                 error_msg = "Docker startup failed"
-                print(f"⚠️ Skipping test attempt due to Docker failure")
+                print(f" WARNING: [U+FE0F] Skipping test attempt due to Docker failure")
                 
                 result = TestResult(
                     test=test,
@@ -605,7 +605,7 @@ class CriticalTestRunner:
                 
                 # Brief pause between attempts
                 if attempt < test.retry_count:
-                    print(f"\n⏸️  Pausing 15 seconds before retry...")
+                    print(f"\n[U+23F8][U+FE0F]  Pausing 15 seconds before retry...")
                     time.sleep(15)
         
         return best_result
@@ -668,13 +668,13 @@ class CriticalTestRunner:
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2, default=str)
         
-        print(f"📄 Comprehensive report saved: {report_path}")
+        print(f"[U+1F4C4] Comprehensive report saved: {report_path}")
         return report_path
     
     def print_summary(self):
         """Print detailed test summary."""
         print("\n" + "="*80)
-        print("📊 CRITICAL AGENT TESTS - FINAL SUMMARY")
+        print(" CHART:  CRITICAL AGENT TESTS - FINAL SUMMARY")
         print("="*80)
         
         total_tests = len(self.results)
@@ -683,7 +683,7 @@ class CriticalTestRunner:
         
         # Results table
         for result in self.results:
-            icon = "✅" if result.passed else "❌"
+            icon = " PASS: " if result.passed else " FAIL: "
             time_str = f"{result.execution_time:.1f}s"
             memory_str = f"{result.memory_peak_mb:.0f}MB"
             retry_str = f"(retry {result.retry_attempt})" if result.retry_attempt > 1 else ""
@@ -693,46 +693,46 @@ class CriticalTestRunner:
             if not result.passed and result.error_message:
                 # Show first line of error for quick diagnosis
                 first_error_line = result.error_message.split('\n')[0].strip()
-                print(f"   └─ {first_error_line[:80]}{'...' if len(first_error_line) > 80 else ''}")
+                print(f"   [U+2514][U+2500] {first_error_line[:80]}{'...' if len(first_error_line) > 80 else ''}")
         
         # Summary statistics
-        print(f"\n📈 Results: {passed_tests}/{total_tests} passed ({(passed_tests/max(total_tests,1)*100):.1f}%)")
+        print(f"\n[U+1F4C8] Results: {passed_tests}/{total_tests} passed ({(passed_tests/max(total_tests,1)*100):.1f}%)")
         
         total_time = sum(r.execution_time for r in self.results)
         peak_memory = max((r.memory_peak_mb for r in self.results), default=0)
         
-        print(f"⏱️  Total Time: {total_time:.1f}s | Peak Memory: {peak_memory:.0f}MB")
+        print(f"[U+23F1][U+FE0F]  Total Time: {total_time:.1f}s | Peak Memory: {peak_memory:.0f}MB")
         
         # Business impact
         if passed_tests == total_tests:
-            print("\n🎉 SUCCESS! All critical tests passed!")
-            print("✅ The product is ready - $500K+ ARR protected!")
+            print("\n CELEBRATION:  SUCCESS! All critical tests passed!")
+            print(" PASS:  The product is ready - $500K+ ARR protected!")
         else:
-            print(f"\n🚨 FAILURE! {failed_tests} critical tests failed!")
-            print("❌ IMMEDIATE ACTION REQUIRED - $500K+ ARR at risk!")
+            print(f"\n ALERT:  FAILURE! {failed_tests} critical tests failed!")
+            print(" FAIL:  IMMEDIATE ACTION REQUIRED - $500K+ ARR at risk!")
             
             # Show which business values are at risk
-            print("\n💰 Business Impact:")
+            print("\n[U+1F4B0] Business Impact:")
             for result in self.results:
                 if not result.passed:
-                    print(f"   • {result.test.business_value} - {result.test.name}")
+                    print(f"   [U+2022] {result.test.business_value} - {result.test.name}")
     
     def run_all_tests(self) -> int:
         """Main execution method - run all critical tests."""
         print("\n" + "="*80)
-        print("🚨 CRITICAL AGENT TESTS - BUSINESS CRITICAL EXECUTION")
-        print(f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(" ALERT:  CRITICAL AGENT TESTS - BUSINESS CRITICAL EXECUTION")
+        print(f"[U+1F4C5] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         if self.dry_run:
-            print("🔍 DRY RUN MODE - No actual execution")
+            print(" SEARCH:  DRY RUN MODE - No actual execution")
         print("="*80)
         
         # Pre-flight checks
         if not self.perform_memory_preflight_check():
-            print("\n❌ Pre-flight check failed. Aborting test execution.")
+            print("\n FAIL:  Pre-flight check failed. Aborting test execution.")
             return 1
         
         # Initial cleanup
-        print("\n🧹 Initial environment cleanup...")
+        print("\n[U+1F9F9] Initial environment cleanup...")
         self.cleanup_docker_environment()
         time.sleep(5)
         
@@ -746,20 +746,20 @@ class CriticalTestRunner:
             # Memory check after each test
             mem_after_test = self.get_memory_usage()
             if mem_after_test['percent'] > 90:
-                print(f"⚠️ HIGH MEMORY USAGE: {mem_after_test['percent']:.1f}% - Performing extra cleanup")
+                print(f" WARNING: [U+FE0F] HIGH MEMORY USAGE: {mem_after_test['percent']:.1f}% - Performing extra cleanup")
                 self.cleanup_docker_environment()
                 time.sleep(10)
             
             # Brief pause between tests
             if i < len(CRITICAL_TESTS):
                 pause_time = 15 if result.passed else 30  # Longer pause after failures
-                print(f"\n⏸️  Pausing {pause_time} seconds before next test...")
+                print(f"\n[U+23F8][U+FE0F]  Pausing {pause_time} seconds before next test...")
                 if not self.dry_run:
                     time.sleep(pause_time)
         
         # Final cleanup
         if not self.skip_cleanup:
-            print("\n🧹 Final environment cleanup...")
+            print("\n[U+1F9F9] Final environment cleanup...")
             self.cleanup_docker_environment()
         
         # Generate and save report
@@ -814,13 +814,13 @@ This script protects $500K+ ARR by validating core agent functionality.
     try:
         return runner.run_all_tests()
     except KeyboardInterrupt:
-        print("\n⏹️ Test execution interrupted by user")
+        print("\n[U+23F9][U+FE0F] Test execution interrupted by user")
         if not args.skip_cleanup:
-            print("🧹 Performing cleanup...")
+            print("[U+1F9F9] Performing cleanup...")
             runner.cleanup_docker_environment()
         return 130
     except Exception as e:
-        print(f"\n❌ CRITICAL ERROR: {e}")
+        print(f"\n FAIL:  CRITICAL ERROR: {e}")
         runner.logger.exception("Critical test runner failed")
         return 1
 

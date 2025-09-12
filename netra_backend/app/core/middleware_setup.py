@@ -465,9 +465,9 @@ def _validate_session_middleware_installation(app: FastAPI) -> None:
                     break
         
         if session_middleware_found:
-            logger.info("✅ SessionMiddleware installation validated successfully")
+            logger.info(" PASS:  SessionMiddleware installation validated successfully")
         else:
-            logger.error("❌ SessionMiddleware not found in middleware stack - this will cause request.session errors")
+            logger.error(" FAIL:  SessionMiddleware not found in middleware stack - this will cause request.session errors")
             
             # Log all installed middleware for debugging
             middleware_list = []

@@ -44,23 +44,23 @@ def print_header(text: str):
 def print_success(text: str):
     """Print success message."""
     if RICH_AVAILABLE:
-        console.print(f"[green]✅ {text}[/green]")
+        console.print(f"[green] PASS:  {text}[/green]")
     else:
-        print(f"✅ {text}")
+        print(f" PASS:  {text}")
 
 def print_error(text: str):
     """Print error message."""
     if RICH_AVAILABLE:
-        console.print(f"[red]❌ {text}[/red]")
+        console.print(f"[red] FAIL:  {text}[/red]")
     else:
-        print(f"❌ {text}")
+        print(f" FAIL:  {text}")
 
 def print_info(text: str):
     """Print info message."""
     if RICH_AVAILABLE:
-        console.print(f"[cyan]ℹ️  {text}[/cyan]")
+        console.print(f"[cyan][U+2139][U+FE0F]  {text}[/cyan]")
     else:
-        print(f"ℹ️  {text}")
+        print(f"[U+2139][U+FE0F]  {text}")
 
 class AdaptiveWorkflowTester:
     """Main test class for adaptive workflow."""
@@ -210,7 +210,7 @@ class AdaptiveWorkflowTester:
     
     def test_workflow_scenario(self, name: str, request: str, expected_behavior: str) -> bool:
         """Test a specific workflow scenario."""
-        print(f"\n📊 Testing: {name}")
+        print(f"\n CHART:  Testing: {name}")
         print(f"   Request: {request[:80]}...")
         print(f"   Expected: {expected_behavior}")
         
@@ -290,7 +290,7 @@ class AdaptiveWorkflowTester:
     
     def run_all_tests(self, interactive=True):
         """Run complete test suite."""
-        print_header("🚀 NETRA ADAPTIVE WORKFLOW TEST SUITE")
+        print_header("[U+1F680] NETRA ADAPTIVE WORKFLOW TEST SUITE")
         
         if RICH_AVAILABLE:
             console.print(Markdown("""
@@ -346,7 +346,7 @@ This comprehensive test suite validates the adaptive workflow system:
         results["Direct Tests"] = self.run_direct_test()
         
         # Display summary
-        print_header("📊 TEST SUMMARY")
+        print_header(" CHART:  TEST SUMMARY")
         
         if RICH_AVAILABLE:
             table = Table(show_header=True, header_style="bold cyan")
@@ -354,13 +354,13 @@ This comprehensive test suite validates the adaptive workflow system:
             table.add_column("Status", style="green")
             
             for test, passed in results.items():
-                status = "✅ PASSED" if passed else "❌ FAILED"
+                status = " PASS:  PASSED" if passed else " FAIL:  FAILED"
                 table.add_row(test, status)
             
             console.print(table)
         else:
             for test, passed in results.items():
-                status = "✅" if passed else "❌"
+                status = " PASS: " if passed else " FAIL: "
                 print(f"{status} {test}")
         
         # Overall result
@@ -376,7 +376,7 @@ This comprehensive test suite validates the adaptive workflow system:
         
         # Show usage instructions
         if results["Authentication"]:
-            print_header("🔑 Authentication Details")
+            print_header("[U+1F511] Authentication Details")
             print("Successfully authenticated!")
             if self.token:
                 print(f"Token: {self.token[:30]}...")

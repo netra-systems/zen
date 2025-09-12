@@ -240,7 +240,7 @@ class TestClickHouseLoggingLevelUnit:
         Test Case 3: Context propagation from service to connection layer
         
         SETUP: Mock environment with varying optionality settings
-        ACTION: Call ClickHouseService.initialize() → get_clickhouse_client()
+        ACTION: Call ClickHouseService.initialize()  ->  get_clickhouse_client()
         EXPECTED: Service-level context (optional/required) reaches connection layer
         VALIDATION: Connection layer logs reflect service-level requirements
         

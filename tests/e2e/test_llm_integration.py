@@ -162,7 +162,7 @@ class TestNetraException(Exception):
 
 @pytest.mark.e2e
 class TestLLMFallbackChain:
-    """Test LLM fallback chain: Primary → Fallback model switching"""
+    """Test LLM fallback chain: Primary  ->  Fallback model switching"""
     
     @pytest.mark.e2e
     async def test_llm_fallback_chain_success_primary(self, llm_tester):
@@ -182,7 +182,7 @@ class TestLLMFallbackChain:
     
     @pytest.mark.e2e
     async def test_llm_fallback_chain_full_sequence(self, llm_tester):
-        """Test full fallback sequence: GPT → Gemini → Claude"""
+        """Test full fallback sequence: GPT  ->  Gemini  ->  Claude"""
         providers = self._create_failing_providers(llm_tester)
         providers["claude"].should_fail = False  # Claude succeeds
         result = await self._execute_full_fallback(providers)

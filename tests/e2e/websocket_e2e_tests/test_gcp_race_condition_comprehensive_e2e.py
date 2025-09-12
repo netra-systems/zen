@@ -119,7 +119,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         self.connection_timeout = 15.0 if self.test_environment == "staging" else 10.0
         self.message_timeout = 10.0
         
-        print(f"🚀 E2E RACE CONDITION TEST SETUP:")
+        print(f"[U+1F680] E2E RACE CONDITION TEST SETUP:")
         print(f"   Environment: {self.test_environment}")
         print(f"   Backend URL: {self.auth_config.backend_url}")
         print(f"   WebSocket URL: {self.auth_config.websocket_url}")
@@ -133,7 +133,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         This test validates that WebSocket connections work reliably with
         the race condition fix applied, using real services and authentication.
         """
-        print("🧪 TESTING: WebSocket Connection with Race Condition Fix")
+        print("[U+1F9EA] TESTING: WebSocket Connection with Race Condition Fix")
         
         # Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -187,12 +187,12 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
                     environment=self.test_environment
                 ))
                 
-                print(f"     ✅ Connection {attempt + 1} successful in {connection_time:.3f}s")
+                print(f"      PASS:  Connection {attempt + 1} successful in {connection_time:.3f}s")
                 
             except asyncio.TimeoutError as e:
                 connection_time = time.time() - start_time
                 errors.append(f"Connection timeout after {connection_time:.3f}s: {e}")
-                print(f"     ❌ Connection {attempt + 1} failed: timeout")
+                print(f"      FAIL:  Connection {attempt + 1} failed: timeout")
                 
                 connection_results.append(WebSocketTestResult(
                     success=False,
@@ -207,10 +207,10 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
             except InvalidStatusCode as e:
                 if e.status_code == 1011:
                     errors.append(f"WebSocket 1011 error - RACE CONDITION NOT FIXED: {e}")
-                    print(f"     🚨 Connection {attempt + 1} failed: WebSocket 1011 (RACE CONDITION)")
+                    print(f"      ALERT:  Connection {attempt + 1} failed: WebSocket 1011 (RACE CONDITION)")
                 else:
                     errors.append(f"WebSocket status code {e.status_code}: {e}")
-                    print(f"     ❌ Connection {attempt + 1} failed: status {e.status_code}")
+                    print(f"      FAIL:  Connection {attempt + 1} failed: status {e.status_code}")
                 
                 connection_results.append(WebSocketTestResult(
                     success=False,
@@ -224,7 +224,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
                 
             except Exception as e:
                 errors.append(f"Unexpected error: {e}")
-                print(f"     ❌ Connection {attempt + 1} failed: {e}")
+                print(f"      FAIL:  Connection {attempt + 1} failed: {e}")
                 
                 connection_results.append(WebSocketTestResult(
                     success=False,
@@ -244,7 +244,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         successful_connections = [r for r in connection_results if r.success]
         failed_connections = [r for r in connection_results if not r.success]
         
-        print(f"📊 CONNECTION TEST RESULTS:")
+        print(f" CHART:  CONNECTION TEST RESULTS:")
         print(f"   Successful: {len(successful_connections)}/3")
         print(f"   Failed: {len(failed_connections)}/3")
         
@@ -269,7 +269,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
             f"Errors: {[r.errors for r in failed_connections]}"
         )
         
-        print("✅ WEBSOCKET CONNECTION WITH RACE CONDITION FIX VALIDATED")
+        print(" PASS:  WEBSOCKET CONNECTION WITH RACE CONDITION FIX VALIDATED")
     
     @pytest.mark.asyncio
     async def test_message_routing_with_agent_events(self):
@@ -279,7 +279,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         This test validates that complete MESSAGE ROUTING works correctly
         with the race condition fix, including agent event delivery.
         """
-        print("🧪 TESTING: Message Routing with Agent Events")
+        print("[U+1F9EA] TESTING: Message Routing with Agent Events")
         
         # Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -341,7 +341,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
                                 event_type = response_data["type"]
                                 if event_type in ["agent_started", "agent_thinking", "tool_executing", "tool_completed", "agent_completed"]:
                                     agent_events_received.append(event_type)
-                                    print(f"     📨 Agent event: {event_type}")
+                                    print(f"     [U+1F4E8] Agent event: {event_type}")
                             
                             # Break if we got a completion response
                             if response_data.get("type") in ["pong", "agent_completed", "chat_response"]:
@@ -361,11 +361,11 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
                         errors=errors
                     ))
                     
-                    print(f"     ✅ Message {msg_idx + 1} routing: {routing_time:.3f}s, events: {len(agent_events_received)}")
+                    print(f"      PASS:  Message {msg_idx + 1} routing: {routing_time:.3f}s, events: {len(agent_events_received)}")
                     
                 except Exception as e:
                     errors.append(f"Message routing error: {e}")
-                    print(f"     ❌ Message {msg_idx + 1} routing failed: {e}")
+                    print(f"      FAIL:  Message {msg_idx + 1} routing failed: {e}")
                     
                     routing_results.append(MessageRoutingTestResult(
                         message_sent=False,
@@ -383,7 +383,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         successful_routing = [r for r in routing_results if r.message_sent and r.response_received]
         failed_routing = [r for r in routing_results if not (r.message_sent and r.response_received)]
         
-        print(f"📊 MESSAGE ROUTING RESULTS:")
+        print(f" CHART:  MESSAGE ROUTING RESULTS:")
         print(f"   Successful routing: {len(successful_routing)}/{len(routing_results)}")
         print(f"   Failed routing: {len(failed_routing)}")
         
@@ -399,7 +399,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
             f"Errors: {[r.errors for r in failed_routing]}"
         )
         
-        print("✅ MESSAGE ROUTING WITH AGENT EVENTS VALIDATED")
+        print(" PASS:  MESSAGE ROUTING WITH AGENT EVENTS VALIDATED")
     
     @pytest.mark.asyncio
     async def test_gcp_staging_environment_simulation(self):
@@ -409,7 +409,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         This test simulates GCP staging environment conditions to validate
         the race condition fix works in production-like GCP scenarios.
         """
-        print("🧪 TESTING: GCP Staging Environment Simulation")
+        print("[U+1F9EA] TESTING: GCP Staging Environment Simulation")
         
         # Force staging environment configuration
         staging_config = E2EAuthConfig.for_staging()
@@ -499,7 +499,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
                     "response_received": True
                 })
                 
-                print(f"       ✅ Staging connection {attempt + 1} successful in {connection_time:.3f}s")
+                print(f"        PASS:  Staging connection {attempt + 1} successful in {connection_time:.3f}s")
                 
             except Exception as e:
                 connection_time = time.time() - start_time
@@ -517,7 +517,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
                     "is_race_condition": is_race_condition
                 })
                 
-                print(f"       ❌ Staging connection {attempt + 1} failed: {error_msg}")
+                print(f"        FAIL:  Staging connection {attempt + 1} failed: {error_msg}")
                 
             finally:
                 if websocket:
@@ -531,7 +531,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
             r for r in failed_staging if r.get("is_race_condition", False)
         ]
         
-        print(f"📊 GCP STAGING SIMULATION RESULTS:")
+        print(f" CHART:  GCP STAGING SIMULATION RESULTS:")
         print(f"   Successful connections: {len(successful_staging)}/2")
         print(f"   Failed connections: {len(failed_staging)}")
         print(f"   Race condition failures: {len(race_condition_failures)}")
@@ -547,7 +547,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
             f"No successful staging connections: {[r.get('error') for r in failed_staging]}"
         )
         
-        print("✅ GCP STAGING ENVIRONMENT SIMULATION VALIDATED")
+        print(" PASS:  GCP STAGING ENVIRONMENT SIMULATION VALIDATED")
     
     @pytest.mark.asyncio
     async def test_concurrent_websocket_connections_stress_test(self):
@@ -557,7 +557,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         This test validates that the race condition fix works under load
         with multiple concurrent WebSocket connections.
         """
-        print("🧪 TESTING: Concurrent WebSocket Connections Stress Test")
+        print("[U+1F9EA] TESTING: Concurrent WebSocket Connections Stress Test")
         
         # Create multiple user contexts
         concurrent_users = 3  # Moderate load for E2E testing
@@ -652,7 +652,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
             else:
                 failed_concurrent.append(result)
         
-        print(f"📊 CONCURRENT CONNECTION RESULTS:")
+        print(f" CHART:  CONCURRENT CONNECTION RESULTS:")
         print(f"   Total test time: {concurrent_elapsed:.3f}s")
         print(f"   Successful: {len(successful_concurrent)}/{concurrent_users}")
         print(f"   Failed: {len(failed_concurrent)}")
@@ -682,7 +682,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
             f"Errors: {[r.get('error') for r in failed_concurrent]}"
         )
         
-        print(f"✅ CONCURRENT WEBSOCKET STRESS TEST VALIDATED: {success_rate:.1%} success rate")
+        print(f" PASS:  CONCURRENT WEBSOCKET STRESS TEST VALIDATED: {success_rate:.1%} success rate")
     
     @pytest.mark.asyncio
     async def test_websocket_reconnection_with_race_condition_fix(self):
@@ -692,7 +692,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         This test validates that WebSocket reconnections work correctly
         with the race condition fix, ensuring reliability over time.
         """
-        print("🧪 TESTING: WebSocket Reconnection with Race Condition Fix")
+        print("[U+1F9EA] TESTING: WebSocket Reconnection with Race Condition Fix")
         
         # Create authenticated user context
         user_context = await create_authenticated_user_context(
@@ -777,7 +777,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
                     "error": None
                 })
                 
-                print(f"     ✅ Cycle {cycle + 1} successful: {total_cycle_time:.3f}s total")
+                print(f"      PASS:  Cycle {cycle + 1} successful: {total_cycle_time:.3f}s total")
                 
             except Exception as e:
                 total_cycle_time = time.time() - cycle_start
@@ -790,7 +790,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
                     "error": error_msg
                 })
                 
-                print(f"     ❌ Cycle {cycle + 1} failed: {error_msg}")
+                print(f"      FAIL:  Cycle {cycle + 1} failed: {error_msg}")
                 
             finally:
                 if websocket:
@@ -800,7 +800,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
         successful_reconnections = [r for r in reconnection_results if r["success"]]
         failed_reconnections = [r for r in reconnection_results if not r["success"]]
         
-        print(f"📊 RECONNECTION TEST RESULTS:")
+        print(f" CHART:  RECONNECTION TEST RESULTS:")
         print(f"   Successful cycles: {len(successful_reconnections)}/2")
         print(f"   Failed cycles: {len(failed_reconnections)}")
         
@@ -813,7 +813,7 @@ class TestGCPRaceConditionComprehensiveE2E(SSotBaseTestCase):
             f"No successful reconnections: {[r['error'] for r in failed_reconnections]}"
         )
         
-        print("✅ WEBSOCKET RECONNECTION WITH RACE CONDITION FIX VALIDATED")
+        print(" PASS:  WEBSOCKET RECONNECTION WITH RACE CONDITION FIX VALIDATED")
 
 
 class TestWebSocketRaceConditionPerformanceE2E:
@@ -832,7 +832,7 @@ class TestWebSocketRaceConditionPerformanceE2E:
         This test provides detailed timing benchmarks for WebSocket connections
         with the race condition fix applied.
         """
-        print("📊 PERFORMANCE BENCHMARK: WebSocket Connection Timing")
+        print(" CHART:  PERFORMANCE BENCHMARK: WebSocket Connection Timing")
         
         # Setup auth helper
         auth_helper = E2EWebSocketAuthHelper(environment="test")
@@ -887,7 +887,7 @@ class TestWebSocketRaceConditionPerformanceE2E:
                 
                 print(f"     Results: avg={avg_time:.3f}s, min={min_time:.3f}s, max={max_time:.3f}s")
         
-        print("📊 CONNECTION TIMING BENCHMARK RESULTS:")
+        print(" CHART:  CONNECTION TIMING BENCHMARK RESULTS:")
         for result in benchmark_results:
             print(f"   {result['scenario']}:")
             print(f"     Success rate: {result['success_rate']:.1%}")
@@ -899,7 +899,7 @@ class TestWebSocketRaceConditionPerformanceE2E:
             assert result["success_rate"] >= 0.8, f"Poor success rate for {result['scenario']}: {result['success_rate']:.1%}"
             assert result["average_time"] <= 5.0, f"Slow connections for {result['scenario']}: {result['average_time']:.3f}s"
         
-        print("✅ WEBSOCKET CONNECTION TIMING BENCHMARKS COMPLETED")
+        print(" PASS:  WEBSOCKET CONNECTION TIMING BENCHMARKS COMPLETED")
 
 
 if __name__ == "__main__":

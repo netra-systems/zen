@@ -21,7 +21,7 @@ EXECUTION PHASES:
 
 BUSINESS CONTEXT:
 - Chat functionality represents 90% of platform value
-- WebSocket authentication enables user → AI interactions
+- WebSocket authentication enables user  ->  AI interactions
 - 1011 errors break the user experience
 - Enterprise customers depend on reliable chat
 """
@@ -79,7 +79,7 @@ class WebSocketHandshakeTestRunner:
         Returns:
             Comprehensive results including business impact analysis
         """
-        logger.info("🚀 Starting WebSocket Authentication Handshake Test Suite")
+        logger.info("[U+1F680] Starting WebSocket Authentication Handshake Test Suite")
         logger.info("=" * 70)
         
         # Test execution phases
@@ -120,7 +120,7 @@ class WebSocketHandshakeTestRunner:
         
         These tests should FAIL, proving that the issue exists.
         """
-        logger.info("📋 Phase 1: Issue Demonstration (tests should FAIL)")
+        logger.info("[U+1F4CB] Phase 1: Issue Demonstration (tests should FAIL)")
         
         start_time = time.time()
         
@@ -153,7 +153,7 @@ class WebSocketHandshakeTestRunner:
         
         These tests validate proper WebSocket subprotocol negotiation.
         """
-        logger.info("📋 Phase 2: RFC 6455 Compliance Validation")
+        logger.info("[U+1F4CB] Phase 2: RFC 6455 Compliance Validation")
         
         start_time = time.time()
         
@@ -185,7 +185,7 @@ class WebSocketHandshakeTestRunner:
         
         These tests should PASS after the handshake fix is implemented.
         """
-        logger.info("📋 Phase 3: Remediation Validation (tests should PASS post-fix)")
+        logger.info("[U+1F4CB] Phase 3: Remediation Validation (tests should PASS post-fix)")
         
         start_time = time.time()
         
@@ -217,7 +217,7 @@ class WebSocketHandshakeTestRunner:
         
         These tests ensure the fix doesn't break Golden Path functionality.
         """
-        logger.info("📋 Phase 4: Business Value Preservation (Golden Path protection)")
+        logger.info("[U+1F4CB] Phase 4: Business Value Preservation (Golden Path protection)")
         
         start_time = time.time()
         
@@ -250,7 +250,7 @@ class WebSocketHandshakeTestRunner:
         
         These tests ensure the fix doesn't introduce performance issues.
         """
-        logger.info("📋 Phase 5: Performance Regression Testing")
+        logger.info("[U+1F4CB] Phase 5: Performance Regression Testing")
         
         start_time = time.time()
         
@@ -376,7 +376,7 @@ class WebSocketHandshakeTestRunner:
     
     def _log_phase_result(self, result: TestPhaseResult):
         """Log the results of a test phase."""
-        status_emoji = "✅" if result.expected_to_pass and result.failed == 0 else "❌" if not result.expected_to_pass and result.passed > 0 else "⚠️"
+        status_emoji = " PASS: " if result.expected_to_pass and result.failed == 0 else " FAIL: " if not result.expected_to_pass and result.passed > 0 else " WARNING: [U+FE0F]"
         
         logger.info(f"{status_emoji} {result.phase_name}: {result.passed} passed, {result.failed} failed, {result.skipped} skipped")
         logger.info(f"   Execution time: {result.execution_time:.2f}s")
@@ -485,28 +485,28 @@ class WebSocketHandshakeTestRunner:
         # Check each phase for issues
         for result in self.results:
             if "Issue Demonstration" in result.phase_name and result.failed == 0:
-                recommendations.append("⚠️ Issue demonstration tests are not failing - the handshake issue may already be fixed or tests need adjustment")
+                recommendations.append(" WARNING: [U+FE0F] Issue demonstration tests are not failing - the handshake issue may already be fixed or tests need adjustment")
             
             elif "RFC 6455" in result.phase_name and result.failed > 0:
-                recommendations.append("🔧 RFC 6455 compliance issues detected - review subprotocol negotiation implementation")
+                recommendations.append("[U+1F527] RFC 6455 compliance issues detected - review subprotocol negotiation implementation")
             
             elif "Remediation" in result.phase_name and result.failed > 0:
-                recommendations.append("🚨 Remediation validation failing - handshake fix may not be working correctly")
+                recommendations.append(" ALERT:  Remediation validation failing - handshake fix may not be working correctly")
             
             elif "Business Value" in result.phase_name and result.failed > 0:
-                recommendations.append("💰 CRITICAL: Business value preservation failing - Golden Path functionality at risk")
+                recommendations.append("[U+1F4B0] CRITICAL: Business value preservation failing - Golden Path functionality at risk")
             
             elif "Performance" in result.phase_name and result.failed > 0:
-                recommendations.append("⚡ Performance regression detected - optimize handshake implementation")
+                recommendations.append(" LIGHTNING:  Performance regression detected - optimize handshake implementation")
         
         # General recommendations
         if not recommendations:
-            recommendations.append("✅ All test phases completed successfully - handshake implementation appears correct")
+            recommendations.append(" PASS:  All test phases completed successfully - handshake implementation appears correct")
         
         recommendations.extend([
-            "📊 Monitor business metrics after deploying handshake fixes",
-            "🔍 Validate with real user scenarios in staging environment",
-            "📋 Update documentation with new handshake requirements"
+            " CHART:  Monitor business metrics after deploying handshake fixes",
+            " SEARCH:  Validate with real user scenarios in staging environment",
+            "[U+1F4CB] Update documentation with new handshake requirements"
         ])
         
         return recommendations
@@ -521,7 +521,7 @@ async def main():
         report = await runner.run_comprehensive_test_suite()
         
         # Display final report
-        logger.info("🎯 FINAL REPORT")
+        logger.info(" TARGET:  FINAL REPORT")
         logger.info("=" * 70)
         logger.info(f"Overall Status: {report['overall_status']}")
         logger.info(f"Tests: {report['summary']['total_passed']} passed, {report['summary']['total_failed']} failed, {report['summary']['total_skipped']} skipped")
@@ -529,7 +529,7 @@ async def main():
         logger.info(f"Business Health: {report['business_impact_analysis']['business_health']}")
         logger.info(f"Revenue Risk: {report['business_impact_analysis']['revenue_at_risk']}")
         
-        logger.info("\n📋 RECOMMENDATIONS:")
+        logger.info("\n[U+1F4CB] RECOMMENDATIONS:")
         for rec in report['recommendations']:
             logger.info(f"  {rec}")
         
@@ -540,7 +540,7 @@ async def main():
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2)
         
-        logger.info(f"\n📄 Detailed report saved to: {report_path}")
+        logger.info(f"\n[U+1F4C4] Detailed report saved to: {report_path}")
         
         # Exit with appropriate code
         if report['business_impact_analysis']['business_health'] == "HEALTHY":

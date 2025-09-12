@@ -38,7 +38,7 @@ async def test_orchestrator_initialization():
         assert agent_id in orchestrator.communication.agents, f"Agent {agent_id} should be registered"
     
     await orchestrator.shutdown()
-    print("✅ Orchestrator initialization test passed")
+    print(" PASS:  Orchestrator initialization test passed")
 
 
 async def test_layer_configuration():
@@ -61,12 +61,12 @@ async def test_layer_configuration():
                 assert "name" in config, f"Layer {layer_name} should have name"
                 assert "categories" in config, f"Layer {layer_name} should have categories"
                 assert "execution_mode" in config, f"Layer {layer_name} should have execution mode"
-                print(f"   ✅ Layer {layer_name}: {len(config['categories'])} categories")
+                print(f"    PASS:  Layer {layer_name}: {len(config['categories'])} categories")
         
     finally:
         await orchestrator.shutdown()
     
-    print("✅ Layer configuration test passed")
+    print(" PASS:  Layer configuration test passed")
 
 
 async def test_execution_modes():
@@ -88,12 +88,12 @@ async def test_execution_modes():
             
             layers = orchestrator._determine_layers(config)
             assert len(layers) > 0, f"Mode {mode} should determine some layers"
-            print(f"   ✅ Mode {mode.value}: {len(layers)} layers - {layers}")
+            print(f"    PASS:  Mode {mode.value}: {len(layers)} layers - {layers}")
             
     finally:
         await orchestrator.shutdown()
     
-    print("✅ Execution modes test passed")
+    print(" PASS:  Execution modes test passed")
 
 
 async def test_orchestration_config():
@@ -115,7 +115,7 @@ async def test_orchestration_config():
     assert config.environment == "staging", "Environment should be staging"
     assert config.use_background_e2e == True, "Background E2E should be enabled"
     
-    print("✅ Orchestration configuration test passed")
+    print(" PASS:  Orchestration configuration test passed")
 
 
 def test_cli_integration():
@@ -142,9 +142,9 @@ def test_cli_integration():
         
         for arg in orchestrator_args:
             if arg in help_output:
-                print(f"   ✅ Found argument: {arg}")
+                print(f"    PASS:  Found argument: {arg}")
             else:
-                print(f"   ⚠️  Missing argument: {arg} (may be conditional)")
+                print(f"    WARNING: [U+FE0F]  Missing argument: {arg} (may be conditional)")
         
         # Test show layers command (if orchestrator is available)
         try:
@@ -153,20 +153,20 @@ def test_cli_integration():
             ], capture_output=True, text=True, cwd=PROJECT_ROOT, timeout=10)
             
             if result.returncode == 0:
-                print("   ✅ --show-layers command works")
+                print("    PASS:  --show-layers command works")
             else:
-                print(f"   ⚠️  --show-layers failed: {result.stderr}")
+                print(f"    WARNING: [U+FE0F]  --show-layers failed: {result.stderr}")
                 
         except subprocess.TimeoutExpired:
-            print("   ⚠️  --show-layers command timed out")
+            print("    WARNING: [U+FE0F]  --show-layers command timed out")
         except Exception as e:
-            print(f"   ⚠️  --show-layers test error: {e}")
+            print(f"    WARNING: [U+FE0F]  --show-layers test error: {e}")
         
     except Exception as e:
-        print(f"   ❌ CLI integration test error: {e}")
+        print(f"    FAIL:  CLI integration test error: {e}")
         return False
     
-    print("✅ CLI integration test completed")
+    print(" PASS:  CLI integration test completed")
     return True
 
 
@@ -193,7 +193,7 @@ async def run_all_tests():
             await test_func()
             tests_passed += 1
         except Exception as e:
-            print(f"❌ Test {test_func.__name__} failed: {e}")
+            print(f" FAIL:  Test {test_func.__name__} failed: {e}")
             import traceback
             traceback.print_exc()
     
@@ -208,7 +208,7 @@ async def run_all_tests():
             if test_func():
                 tests_passed += 1
         except Exception as e:
-            print(f"❌ Test {test_func.__name__} failed: {e}")
+            print(f" FAIL:  Test {test_func.__name__} failed: {e}")
             import traceback
             traceback.print_exc()
     
@@ -218,11 +218,11 @@ async def run_all_tests():
     print(f"Tests Passed: {tests_passed}/{total_tests}")
     
     if tests_passed == total_tests:
-        print("🎉 ALL INTEGRATION TESTS PASSED!")
+        print(" CELEBRATION:  ALL INTEGRATION TESTS PASSED!")
         print("\nTest Orchestrator Agent is ready for production use.")
         return 0
     else:
-        print(f"❌ {total_tests - tests_passed} tests failed")
+        print(f" FAIL:  {total_tests - tests_passed} tests failed")
         return 1
 
 

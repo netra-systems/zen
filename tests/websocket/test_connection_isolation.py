@@ -79,11 +79,11 @@ class WebSocketIsolationValidator:
             # Start listening for events in background
             asyncio.create_task(self._listen_for_events(connection_id))
             
-            print(f"✅ Created isolated connection for user {user_id}: {connection_id}")
+            print(f" PASS:  Created isolated connection for user {user_id}: {connection_id}")
             return connection_id
             
         except Exception as e:
-            print(f"❌ Failed to create connection for user {user_id}: {e}")
+            print(f" FAIL:  Failed to create connection for user {user_id}: {e}")
             raise
     
     async def _listen_for_events(self, connection_id: str):
@@ -120,13 +120,13 @@ class WebSocketIsolationValidator:
                         }
                         
                         self.isolation_violations.append(violation)
-                        print(f"🚨 ISOLATION VIOLATION: Event for user {event_user_id} "
+                        print(f" ALERT:  ISOLATION VIOLATION: Event for user {event_user_id} "
                               f"received by user {user_id}")
                 
         except ConnectionClosed:
-            print(f"🔌 Connection {connection_id} closed")
+            print(f"[U+1F50C] Connection {connection_id} closed")
         except Exception as e:
-            print(f"❌ Error listening on connection {connection_id}: {e}")
+            print(f" FAIL:  Error listening on connection {connection_id}: {e}")
     
     async def send_user_specific_event(self, target_user_id: str, event_type: str, 
                                      payload: Dict[str, Any]) -> bool:
@@ -148,7 +148,7 @@ class WebSocketIsolationValidator:
                 break
         
         if not target_connection:
-            print(f"❌ No connection found for user {target_user_id}")
+            print(f" FAIL:  No connection found for user {target_user_id}")
             return False
         
         event = {
@@ -163,11 +163,11 @@ class WebSocketIsolationValidator:
             websocket = target_connection["websocket"]
             await websocket.send(json.dumps(event))
             
-            print(f"📤 Sent {event_type} event to user {target_user_id}")
+            print(f"[U+1F4E4] Sent {event_type} event to user {target_user_id}")
             return True
             
         except Exception as e:
-            print(f"❌ Failed to send event to user {target_user_id}: {e}")
+            print(f" FAIL:  Failed to send event to user {target_user_id}: {e}")
             return False
     
     async def trigger_agent_execution(self, user_id: str, agent_name: str) -> Optional[str]:
@@ -179,7 +179,7 @@ class WebSocketIsolationValidator:
                 break
         
         if not connection:
-            print(f"❌ No connection found for user {user_id}")
+            print(f" FAIL:  No connection found for user {user_id}")
             return None
         
         run_id = f"run_{uuid.uuid4().hex[:12]}"
@@ -200,11 +200,11 @@ class WebSocketIsolationValidator:
             websocket = connection["websocket"]
             await websocket.send(json.dumps(agent_request))
             
-            print(f"🤖 Triggered {agent_name} execution for user {user_id}, run_id: {run_id}")
+            print(f"[U+1F916] Triggered {agent_name} execution for user {user_id}, run_id: {run_id}")
             return run_id
             
         except Exception as e:
-            print(f"❌ Failed to trigger agent execution for user {user_id}: {e}")
+            print(f" FAIL:  Failed to trigger agent execution for user {user_id}: {e}")
             return None
     
     def get_events_for_user(self, user_id: str) -> List[Dict]:
@@ -229,9 +229,9 @@ class WebSocketIsolationValidator:
             try:
                 websocket = conn_info["websocket"]
                 await websocket.close()
-                print(f"🔌 Closed connection {conn_id}")
+                print(f"[U+1F50C] Closed connection {conn_id}")
             except Exception as e:
-                print(f"⚠️  Error closing connection {conn_id}: {e}")
+                print(f" WARNING: [U+FE0F]  Error closing connection {conn_id}: {e}")
         
         self.connections.clear()
         self.received_events.clear()
@@ -258,7 +258,7 @@ class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
     @pytest.mark.asyncio
     async def test_no_cross_user_event_leakage(self, isolation_validator, test_users):
         """Test that events for User A never reach User B, C, D, or E."""
-        print("\n🔒 Testing cross-user event isolation...")
+        print("\n[U+1F512] Testing cross-user event isolation...")
         
         # Create connections for all users
         connections = []
@@ -313,12 +313,12 @@ class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
                 f"{len(leaked_events)} events intended for {target_user}: {leaked_events}"
             )
         
-        print(f"✅ No cross-user event leakage detected across {len(test_users)} users")
+        print(f" PASS:  No cross-user event leakage detected across {len(test_users)} users")
     
     @pytest.mark.asyncio
     async def test_concurrent_agent_executions_isolated(self, isolation_validator, test_users):
         """Test that concurrent agent executions remain isolated between users."""
-        print("\n🤖 Testing concurrent agent execution isolation...")
+        print("\n[U+1F916] Testing concurrent agent execution isolation...")
         
         # Create connections
         for user in test_users:
@@ -378,12 +378,12 @@ class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
                         f"for run_id {event_run_id}, expected {expected_run_id}"
                     )
         
-        print(f"✅ Concurrent agent executions isolated across {len(test_users)} users")
+        print(f" PASS:  Concurrent agent executions isolated across {len(test_users)} users")
     
     @pytest.mark.asyncio  
     async def test_connection_cleanup_isolation(self, isolation_validator, test_users):
         """Test that connection cleanup doesn't affect other user connections."""
-        print("\n🧹 Testing connection cleanup isolation...")
+        print("\n[U+1F9F9] Testing connection cleanup isolation...")
         
         # Create all connections
         for user in test_users:
@@ -406,7 +406,7 @@ class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
         
         # Close user 1's connection
         await user_1_connection["websocket"].close()
-        print(f"🔌 Closed connection for user {user_1_id}")
+        print(f"[U+1F50C] Closed connection for user {user_1_id}")
         
         # Wait for cleanup to process
         await asyncio.sleep(2)
@@ -445,12 +445,12 @@ class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
             f"Connection cleanup caused isolation violations: {violations}"
         )
         
-        print("✅ Connection cleanup properly isolated - other connections unaffected")
+        print(" PASS:  Connection cleanup properly isolated - other connections unaffected")
     
     @pytest.mark.asyncio
     async def test_event_filtering_by_user_id(self, isolation_validator, test_users):
         """Test that events are filtered by user_id at the connection level."""
-        print("\n🔍 Testing user_id event filtering...")
+        print("\n SEARCH:  Testing user_id event filtering...")
         
         # Create connections for first 3 users
         active_users = test_users[:3]
@@ -489,9 +489,9 @@ class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
             try:
                 websocket = user_connection["websocket"]
                 await websocket.send(json.dumps(malicious_event))
-                print(f"📤 Attempted to send event for {other_user_id} through {user_id} connection")
+                print(f"[U+1F4E4] Attempted to send event for {other_user_id} through {user_id} connection")
             except Exception as e:
-                print(f"⚠️  Failed to send malicious event: {e}")
+                print(f" WARNING: [U+FE0F]  Failed to send malicious event: {e}")
         
         # Wait for processing
         await asyncio.sleep(3)
@@ -500,7 +500,7 @@ class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
         violations = isolation_validator.get_isolation_violations()
         
         # We expect violations to be DETECTED and BLOCKED
-        print(f"🛡️  Detected and blocked {len(violations)} isolation attempts")
+        print(f"[U+1F6E1][U+FE0F]  Detected and blocked {len(violations)} isolation attempts")
         
         # Verify no user actually received events intended for others
         for user in active_users:
@@ -519,7 +519,7 @@ class TestWebSocketConnectionIsolation(RealWebSocketTestBase):
                 f"malicious events intended for other users: {malicious_events}"
             )
         
-        print("✅ User ID filtering successfully blocked cross-user event injection")
+        print(" PASS:  User ID filtering successfully blocked cross-user event injection")
 
 
 if __name__ == "__main__":

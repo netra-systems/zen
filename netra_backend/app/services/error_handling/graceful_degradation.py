@@ -2,7 +2,7 @@
 Graceful Degradation Manager - SSOT for Service Degradation Management
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Maintain service availability during partial system failures
 - Value Impact: Ensures user experience continues even during infrastructure issues
 - Strategic Impact: Critical for service reliability and customer retention
@@ -227,7 +227,7 @@ class GracefulDegradationManager:
             
             logger.warning(
                 f"Service {service_name} degradation changed: "
-                f"{old_status.value}({old_level.value}) → {new_status.value}({new_level.value})"
+                f"{old_status.value}({old_level.value})  ->  {new_status.value}({new_level.value})"
             )
             
             # Activate/deactivate fallback based on degradation

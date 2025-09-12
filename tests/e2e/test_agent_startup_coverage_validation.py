@@ -10,8 +10,8 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Protects entire $200K+ MRR by ensuring bulletproof startup validation
 
 ARCHITECTURAL COMPLIANCE:
-    - File size: ≤300 lines (enforced through modular validation)
-- Function size: ≤8 lines each (enforced through composition)
+    - File size:  <= 300 lines (enforced through modular validation)
+- Function size:  <= 8 lines each (enforced through composition)
 - Real coverage validation, not mock analysis
 # - Performance metrics tracking with baseline validation # Possibly broken comprehension
 """

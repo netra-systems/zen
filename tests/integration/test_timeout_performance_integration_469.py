@@ -76,7 +76,7 @@ class RealisticLoadSimulator:
         }
         
         base_latency = latency_conditions.get(condition, latency_conditions['normal'])
-        # Add some realistic variance (±30%)
+        # Add some realistic variance ( +/- 30%)
         actual_latency = base_latency * (0.7 + random.random() * 0.6)
         
         await asyncio.sleep(actual_latency)
@@ -294,24 +294,24 @@ class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
                         if p95_response_time <= scenario['expected_p95_max'] and mean_success_rate >= 90.0:
                             scenario_results[scenario['name']]['performance_met_expectations'] = True
                             scenario_results[scenario['name']]['analysis'].append(
-                                f"✓ Performance met expectations: P95={p95_response_time:.1f}ms ≤ {scenario['expected_p95_max']}ms"
+                                f"[U+2713] Performance met expectations: P95={p95_response_time:.1f}ms  <=  {scenario['expected_p95_max']}ms"
                             )
                         else:
                             scenario_results[scenario['name']]['analysis'].append(
-                                f"❌ Performance below expectations: P95={p95_response_time:.1f}ms vs {scenario['expected_p95_max']}ms expected"
+                                f" FAIL:  Performance below expectations: P95={p95_response_time:.1f}ms vs {scenario['expected_p95_max']}ms expected"
                             )
                         
                         if mean_success_rate >= 95.0:
                             scenario_results[scenario['name']]['analysis'].append(
-                                f"✓ Excellent success rate: {mean_success_rate:.1f}%"
+                                f"[U+2713] Excellent success rate: {mean_success_rate:.1f}%"
                             )
                         elif mean_success_rate >= 90.0:
                             scenario_results[scenario['name']]['analysis'].append(
-                                f"✓ Good success rate: {mean_success_rate:.1f}%"
+                                f"[U+2713] Good success rate: {mean_success_rate:.1f}%"
                             )
                         else:
                             scenario_results[scenario['name']]['analysis'].append(
-                                f"⚠️ Low success rate: {mean_success_rate:.1f}%"
+                                f" WARNING: [U+FE0F] Low success rate: {mean_success_rate:.1f}%"
                             )
                     
             finally:
@@ -338,7 +338,7 @@ class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
                 for analysis in results['analysis']:
                     print(f"    {analysis}")
             else:
-                print(f"  ❌ No successful operations completed")
+                print(f"   FAIL:  No successful operations completed")
         
         # INTEGRATION ASSERTION: Realistic scenarios should perform within expectations
         for scenario_name, results in scenario_results.items():
@@ -353,7 +353,7 @@ class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
             if results['load_results']['response_times']:
                 success_rate = results['load_results']['success_rates']['mean']
                 self.assertGreaterEqual(success_rate, 80.0,
-                                      f"Scenario '{scenario_name}' should have ≥80% success rate, got {success_rate:.1f}%")
+                                      f"Scenario '{scenario_name}' should have  >= 80% success rate, got {success_rate:.1f}%")
             
             # Response times should be reasonable even under load
             if results['load_results']['response_times']:
@@ -529,7 +529,7 @@ class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
                 print(f"  Min Timeout Buffer: {metrics['min_timeout_buffer']:.3f}s")
                 print(f"  Coordination Reliable: {metrics['coordination_reliability']}")
             else:
-                print(f"  ❌ No successful coordinations achieved")
+                print(f"   FAIL:  No successful coordinations achieved")
         
         # INTEGRATION ASSERTION: Coordination should work as expected per scenario
         for scenario_name, results in coordination_results.items():
@@ -540,7 +540,7 @@ class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
                 # Should have high success rate for expected coordination scenarios
                 if 'success_rate' in metrics:
                     self.assertGreaterEqual(metrics['success_rate'], 80.0,
-                                          f"Scenario '{scenario_name}' should have ≥80% coordination success rate")
+                                          f"Scenario '{scenario_name}' should have  >= 80% coordination success rate")
                     
                     # Should have reasonable timeout buffer
                     if 'mean_timeout_buffer' in metrics:
@@ -747,7 +747,7 @@ class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
                 
                 # Should have reasonable success rate (some failures expected due to injected failures)
                 self.assertGreaterEqual(metrics['success_rate'], 50.0,
-                                      f"Aligned scenario '{scenario_name}' should have ≥50% success rate")
+                                      f"Aligned scenario '{scenario_name}' should have  >= 50% success rate")
                 
                 # Should have some circuit breaker activations (proving it's working)
                 self.assertGreater(metrics['circuit_breaker_activation_rate'], 0.0,
@@ -768,43 +768,43 @@ class TestTimeoutPerformanceIntegration(SSotAsyncTestCase):
         print("ISSUE #469: INTEGRATION TIMEOUT PERFORMANCE RECOMMENDATIONS")
         print(f"{'='*70}")
         
-        print("\\n🎯 INTEGRATION TESTING FINDINGS:")
-        print("   ✓ Auth client timeout behavior validated under realistic load conditions")
-        print("   ✓ WebSocket authentication timeout coordination prevents race conditions")
-        print("   ✓ Circuit breaker timeout alignment provides proper failure protection")
-        print("   ✓ System-wide timeout coordination maintains performance under load")
-        print("   ✓ Degraded service conditions handled gracefully with timeout scaling")
+        print("\\n TARGET:  INTEGRATION TESTING FINDINGS:")
+        print("   [U+2713] Auth client timeout behavior validated under realistic load conditions")
+        print("   [U+2713] WebSocket authentication timeout coordination prevents race conditions")
+        print("   [U+2713] Circuit breaker timeout alignment provides proper failure protection")
+        print("   [U+2713] System-wide timeout coordination maintains performance under load")
+        print("   [U+2713] Degraded service conditions handled gracefully with timeout scaling")
         
-        print("\\n💡 PERFORMANCE OPTIMIZATION INSIGHTS:")
-        print("\\n   📊 LOAD PATTERN ANALYSIS:")
-        print("      - Normal load (≤5 users): P95 response times should be <500ms")
-        print("      - Moderate load (≤10 users): P95 response times should be <800ms")  
-        print("      - Burst load (≤15 users): P95 response times should be <1200ms")
+        print("\\n IDEA:  PERFORMANCE OPTIMIZATION INSIGHTS:")
+        print("\\n    CHART:  LOAD PATTERN ANALYSIS:")
+        print("      - Normal load ( <= 5 users): P95 response times should be <500ms")
+        print("      - Moderate load ( <= 10 users): P95 response times should be <800ms")  
+        print("      - Burst load ( <= 15 users): P95 response times should be <1200ms")
         print("      - Network degradation: Timeouts should scale 2-5x automatically")
         
-        print("\\n   🔗 COORDINATION REQUIREMENTS:")
+        print("\\n   [U+1F517] COORDINATION REQUIREMENTS:")
         print("      - WebSocket timeout should be >2x auth timeout for reliable coordination")
         print("      - Circuit breaker timeout should be 1.5-2x auth timeout for proper protection")
         print("      - Minimum 0.1s timeout buffer required for race condition prevention")
         print("      - Success rates should maintain >90% under normal load conditions")
         
-        print("\\n   🏗️ INTEGRATION ARCHITECTURE RECOMMENDATIONS:")
+        print("\\n   [U+1F3D7][U+FE0F] INTEGRATION ARCHITECTURE RECOMMENDATIONS:")
         print("      - Implement adaptive timeout scaling based on network conditions")
         print("      - Add circuit breaker integration with timeout configuration")
         print("      - Create timeout coordination validation in integration tests")
         print("      - Implement load-based timeout adjustment for realistic scenarios")
         
-        print("\\n🚀 DEPLOYMENT READINESS CRITERIA:")
+        print("\\n[U+1F680] DEPLOYMENT READINESS CRITERIA:")
         print("      - Integration tests pass at 95% success rate under moderate load")
         print("      - WebSocket-Auth coordination maintains >90% success rate")
         print("      - Circuit breaker protection activates appropriately during failures")
         print("      - System performance degrades gracefully under network issues")
         
-        print("\\n📈 EXPECTED INTEGRATION IMPROVEMENTS:")
-        print("      ⚡ Load Handling: 3-5x better performance under concurrent load")
-        print("      🔗 Coordination: 95%+ coordination success vs previous race conditions")
-        print("      🛡️ Protection: Circuit breaker prevents cascade failures")
-        print("      📊 Monitoring: Real-time visibility into timeout performance under load")
+        print("\\n[U+1F4C8] EXPECTED INTEGRATION IMPROVEMENTS:")
+        print("       LIGHTNING:  Load Handling: 3-5x better performance under concurrent load")
+        print("      [U+1F517] Coordination: 95%+ coordination success vs previous race conditions")
+        print("      [U+1F6E1][U+FE0F] Protection: Circuit breaker prevents cascade failures")
+        print("       CHART:  Monitoring: Real-time visibility into timeout performance under load")
         
         print(f"\\n{'='*70}")
         print("END ANALYSIS: Integration Timeout Performance Optimization Complete")

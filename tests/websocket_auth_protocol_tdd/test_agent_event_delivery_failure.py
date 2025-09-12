@@ -21,7 +21,7 @@ Business Impact:
 - User engagement and retention severely impacted
 
 Root Cause Chain:
-WebSocket connection fails (Error 1006) → No event delivery channel → All agent events lost
+WebSocket connection fails (Error 1006)  ->  No event delivery channel  ->  All agent events lost
 
 TDD Strategy:
 1. Create tests showing agent events cannot be delivered due to connection failure
@@ -162,7 +162,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
             
         except Exception as e:
             # Expected: Event delivery fails due to WebSocket connection failure
-            logger.error(f"🚨 BUSINESS IMPACT: agent_started event FAILED to deliver")
+            logger.error(f" ALERT:  BUSINESS IMPACT: agent_started event FAILED to deliver")
             logger.error(f"   Error: {str(e)}")
             logger.error(f"   User Impact: No feedback that AI began processing request")
             logger.error(f"   Business Impact: Poor user experience, perceived latency")
@@ -199,7 +199,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
             assert False, "UNEXPECTED: agent_thinking event should fail to deliver"
             
         except Exception as e:
-            logger.error(f"🚨 BUSINESS IMPACT: agent_thinking event FAILED to deliver")
+            logger.error(f" ALERT:  BUSINESS IMPACT: agent_thinking event FAILED to deliver")
             logger.error(f"   Thinking content: {thinking_data['reasoning'][:100]}...")
             logger.error(f"   Progress: {thinking_data['progress'] * 100}%")
             logger.error(f"   User Impact: No real-time AI transparency")
@@ -239,7 +239,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
             assert False, "UNEXPECTED: tool_executing event should fail to deliver"
             
         except Exception as e:
-            logger.error(f"🚨 BUSINESS IMPACT: tool_executing event FAILED to deliver")
+            logger.error(f" ALERT:  BUSINESS IMPACT: tool_executing event FAILED to deliver")
             logger.error(f"   Tool: {tool_execution_data['tool_name']}")
             logger.error(f"   Business Value: {tool_execution_data['business_value']}")
             logger.error(f"   User Impact: Hidden AI capabilities")
@@ -284,7 +284,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
             assert False, "UNEXPECTED: tool_completed event should fail to deliver"
             
         except Exception as e:
-            logger.error(f"🚨 BUSINESS IMPACT: tool_completed event FAILED to deliver")
+            logger.error(f" ALERT:  BUSINESS IMPACT: tool_completed event FAILED to deliver")
             logger.error(f"   Tool Results: {json.dumps(tool_results_data['results'], indent=2)}")
             logger.error(f"   Business Impact: {json.dumps(tool_results_data['business_impact'], indent=2)}")
             logger.error(f"   User Impact: No visibility into concrete value delivered")
@@ -327,7 +327,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
             assert False, "UNEXPECTED: agent_completed event should fail to deliver"
             
         except Exception as e:
-            logger.error(f"🚨 BUSINESS IMPACT: agent_completed event FAILED to deliver")
+            logger.error(f" ALERT:  BUSINESS IMPACT: agent_completed event FAILED to deliver")
             logger.error(f"   Completion Summary: {completion_data['business_summary']['value_delivered']}")
             logger.error(f"   Time Saved: {completion_data['business_summary']['time_saved']}")
             logger.error(f"   Potential Impact: {completion_data['business_summary']['potential_impact']}")
@@ -377,14 +377,14 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
             except Exception as e:
                 failed_events.append(event_name)
                 business_value_lost.append(business_description)
-                logger.debug(f"❌ {event_name}: {business_description} - FAILED")
+                logger.debug(f" FAIL:  {event_name}: {business_description} - FAILED")
         
         # Assert: All critical events failed to deliver
         assert len(failed_events) == 5, \
             f"All 5 critical events should fail. Failed: {len(failed_events)}"
         
         # Document complete business impact
-        logger.error(f"🚨 COMPLETE BUSINESS VALUE LOSS - RFC 6455 VIOLATION IMPACT:")
+        logger.error(f" ALERT:  COMPLETE BUSINESS VALUE LOSS - RFC 6455 VIOLATION IMPACT:")
         logger.error(f"   Failed Events: {len(failed_events)}/5 critical events")
         logger.error(f"   Revenue at Risk: $500K+ ARR")
         logger.error(f"   User Experience: Complete chat functionality failure")
@@ -393,7 +393,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
         
         logger.error(f"   DETAILED BUSINESS VALUE LOST:")
         for event, value in zip(failed_events, business_value_lost):
-            logger.error(f"     ❌ {event}: {value}")
+            logger.error(f"      FAIL:  {event}: {value}")
         
         # This complete failure demonstrates the critical nature of the RFC 6455 fix
         assert len(failed_events) == len(self.critical_events), \
@@ -403,7 +403,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
         """
         Test: WebSocket connection state directly impacts event delivery
         
-        Demonstrates the causal relationship: RFC 6455 violation → Connection failure → Event loss
+        Demonstrates the causal relationship: RFC 6455 violation  ->  Connection failure  ->  Event loss
         """
         # Test different connection states
         connection_states = [
@@ -423,7 +423,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
                     assert False, f"Event should fail with connection state: {state}"
                     
                 except Exception as e:
-                    logger.info(f"✅ Expected failure with state {state}: {description}")
+                    logger.info(f" PASS:  Expected failure with state {state}: {description}")
                     logger.info(f"   Error: {str(e)}")
                     
                     # Validate the connection state caused the failure
@@ -458,11 +458,11 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
         ]
         
         # Log comprehensive impact analysis
-        logger.error(f"🚨 RFC 6455 VIOLATION - COMPLETE BUSINESS IMPACT ANALYSIS:")
+        logger.error(f" ALERT:  RFC 6455 VIOLATION - COMPLETE BUSINESS IMPACT ANALYSIS:")
         logger.error(f"")
         logger.error(f"   BUSINESS METRICS AFFECTED:")
         for metric, impact in business_metrics.items():
-            logger.error(f"     • {metric.replace('_', ' ').title()}: {impact}")
+            logger.error(f"     [U+2022] {metric.replace('_', ' ').title()}: {impact}")
         
         logger.error(f"")
         logger.error(f"   TECHNICAL ROOT CAUSE CHAIN:")
@@ -472,16 +472,16 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
         logger.error(f"")
         logger.error(f"   CRITICAL EVENTS BLOCKED (100% Business Value Loss):")
         for event in self.critical_events:
-            logger.error(f"     ❌ {event['name']}: {event['business_value']}")
+            logger.error(f"      FAIL:  {event['name']}: {event['business_value']}")
             logger.error(f"        User Impact: {event['user_experience']}")
         
         logger.error(f"")
         logger.error(f"   REQUIRED FIX:")
         logger.error(f"     Add subprotocol='jwt-auth' parameter to 4 websocket.accept() calls:")
-        logger.error(f"     • websocket_ssot.py:298 (main mode)")
-        logger.error(f"     • websocket_ssot.py:393 (factory mode)")  
-        logger.error(f"     • websocket_ssot.py:461 (isolated mode)")
-        logger.error(f"     • websocket_ssot.py:539 (legacy mode)")
+        logger.error(f"     [U+2022] websocket_ssot.py:298 (main mode)")
+        logger.error(f"     [U+2022] websocket_ssot.py:393 (factory mode)")  
+        logger.error(f"     [U+2022] websocket_ssot.py:461 (isolated mode)")
+        logger.error(f"     [U+2022] websocket_ssot.py:539 (legacy mode)")
         
         # Test validation
         assert len(self.critical_events) == 5, "Must track all 5 critical events"
@@ -492,7 +492,7 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
         """
         Test: RFC 6455 violation completely blocks Golden Path user flow
         
-        The Golden Path (login → get AI responses) represents the core $500K+ ARR
+        The Golden Path (login  ->  get AI responses) represents the core $500K+ ARR
         user journey. This test validates that the subprotocol issue blocks it entirely.
         """
         # Golden Path steps and their WebSocket event dependencies
@@ -500,50 +500,50 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
             {
                 "step": "1. User logs in successfully",
                 "websocket_dependency": None,
-                "status": "✅ WORKING"
+                "status": " PASS:  WORKING"
             },
             {
                 "step": "2. User opens chat interface",
                 "websocket_dependency": None, 
-                "status": "✅ WORKING"
+                "status": " PASS:  WORKING"
             },
             {
                 "step": "3. User sends message to AI",
                 "websocket_dependency": None,
-                "status": "✅ WORKING"
+                "status": " PASS:  WORKING"
             },
             {
                 "step": "4. WebSocket connection establishes",
                 "websocket_dependency": "RFC 6455 subprotocol negotiation",
-                "status": "❌ BLOCKED - Missing subprotocol parameter"
+                "status": " FAIL:  BLOCKED - Missing subprotocol parameter"
             },
             {
                 "step": "5. AI agent starts processing",
                 "websocket_dependency": "agent_started event",
-                "status": "❌ BLOCKED - No WebSocket connection"
+                "status": " FAIL:  BLOCKED - No WebSocket connection"
             },
             {
                 "step": "6. User sees real-time AI progress",
                 "websocket_dependency": "agent_thinking events",
-                "status": "❌ BLOCKED - No WebSocket connection"
+                "status": " FAIL:  BLOCKED - No WebSocket connection"
             },
             {
                 "step": "7. User sees AI using tools",
                 "websocket_dependency": "tool_executing/completed events",
-                "status": "❌ BLOCKED - No WebSocket connection"
+                "status": " FAIL:  BLOCKED - No WebSocket connection"
             },
             {
                 "step": "8. User receives final AI response",
                 "websocket_dependency": "agent_completed event",
-                "status": "❌ BLOCKED - No WebSocket connection"
+                "status": " FAIL:  BLOCKED - No WebSocket connection"
             }
         ]
         
         # Count blocked steps
-        working_steps = [step for step in golden_path_steps if "✅" in step["status"]]
-        blocked_steps = [step for step in golden_path_steps if "❌" in step["status"]]
+        working_steps = [step for step in golden_path_steps if " PASS: " in step["status"]]
+        blocked_steps = [step for step in golden_path_steps if " FAIL: " in step["status"]]
         
-        logger.error(f"🚨 GOLDEN PATH ANALYSIS - RFC 6455 VIOLATION IMPACT:")
+        logger.error(f" ALERT:  GOLDEN PATH ANALYSIS - RFC 6455 VIOLATION IMPACT:")
         logger.error(f"   Total Steps: {len(golden_path_steps)}")
         logger.error(f"   Working Steps: {len(working_steps)}/8 ({len(working_steps)/8*100:.0f}%)")
         logger.error(f"   Blocked Steps: {len(blocked_steps)}/8 ({len(blocked_steps)/8*100:.0f}%)")
@@ -562,10 +562,10 @@ class AgentEventDeliveryFailureTest(SSotAsyncTestCase):
         blocked_percentage = len(blocked_steps) / len(golden_path_steps) * 100
         logger.error(f"")
         logger.error(f"   BUSINESS IMPACT:")
-        logger.error(f"   • Golden Path: {blocked_percentage:.0f}% blocked")
-        logger.error(f"   • Revenue Risk: $500K+ ARR completely at risk")
-        logger.error(f"   • User Experience: Severely degraded after step 3")
-        logger.error(f"   • Core Value Prop: Non-functional (real-time AI interaction)")
+        logger.error(f"   [U+2022] Golden Path: {blocked_percentage:.0f}% blocked")
+        logger.error(f"   [U+2022] Revenue Risk: $500K+ ARR completely at risk")
+        logger.error(f"   [U+2022] User Experience: Severely degraded after step 3")
+        logger.error(f"   [U+2022] Core Value Prop: Non-functional (real-time AI interaction)")
         
         assert blocked_percentage >= 62.5, "At least 62.5% of Golden Path must be blocked"
 
@@ -584,7 +584,7 @@ if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(AgentEventDeliveryFailureTest)
     runner = unittest.TextTestRunner(verbosity=2)
     
-    print("💼 Agent Event Delivery Failure Test Suite - Business Impact Analysis")
+    print("[U+1F4BC] Agent Event Delivery Failure Test Suite - Business Impact Analysis")
     print("Issue #280: WebSocket authentication failure - P0 CRITICAL affecting $500K+ ARR")
     print("Focus: Demonstrate complete blockage of critical business value delivery")
     print("=" * 80)
@@ -593,10 +593,10 @@ if __name__ == "__main__":
     
     print("=" * 80)
     if result.failures or result.errors:
-        print("🚨 BUSINESS IMPACT CONFIRMED: Critical agent events cannot be delivered")
-        print("💰 REVENUE RISK: $500K+ ARR Golden Path completely blocked")
-        print("🔧 ROOT CAUSE: RFC 6455 violation in websocket.accept() calls")
-        print("⏱️ URGENCY: P0 CRITICAL - Immediate fix required")
+        print(" ALERT:  BUSINESS IMPACT CONFIRMED: Critical agent events cannot be delivered")
+        print("[U+1F4B0] REVENUE RISK: $500K+ ARR Golden Path completely blocked")
+        print("[U+1F527] ROOT CAUSE: RFC 6455 violation in websocket.accept() calls")
+        print("[U+23F1][U+FE0F] URGENCY: P0 CRITICAL - Immediate fix required")
     else:
-        print("⚠️ UNEXPECTED: Tests passed - business impact may not be reproduced")
-        print("🔍 Investigate: WebSocket connection may be working unexpectedly")
+        print(" WARNING: [U+FE0F] UNEXPECTED: Tests passed - business impact may not be reproduced")
+        print(" SEARCH:  Investigate: WebSocket connection may be working unexpectedly")

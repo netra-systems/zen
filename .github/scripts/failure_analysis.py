@@ -56,7 +56,7 @@ def main():
     unified_runner = project_root / "tests" / "unified_test_runner.py"
     
     if not unified_runner.exists():
-        print(f"❌ ERROR: UnifiedTestRunner not found at {unified_runner}")
+        print(f" FAIL:  ERROR: UnifiedTestRunner not found at {unified_runner}")
         print("Please check your installation and try again.")
         sys.exit(1)
     

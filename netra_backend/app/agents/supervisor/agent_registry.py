@@ -1,4 +1,4 @@
-"""🚨 ENHANCED Agent Registry with mandatory user isolation patterns.
+""" ALERT:  ENHANCED Agent Registry with mandatory user isolation patterns.
 
 CRITICAL SECURITY UPGRADE: This module implements hardened user isolation 
 patterns to prevent concurrent execution contamination and memory leaks.
@@ -181,7 +181,7 @@ class UserAgentSession:
         self._created_at = datetime.now(timezone.utc)
         self._access_lock = asyncio.Lock()
         
-        logger.info(f"✅ Created isolated UserAgentSession for user {user_id}")
+        logger.info(f" PASS:  Created isolated UserAgentSession for user {user_id}")
         
     async def set_websocket_manager(self, manager, user_context: Optional['UserExecutionContext'] = None):
         """Set user-specific WebSocket bridge using factory pattern.
@@ -269,7 +269,7 @@ class UserAgentSession:
             self._execution_contexts.clear()
             self._websocket_bridge = None
             
-            logger.info(f"✅ Cleaned up {cleanup_count} agents for user {self.user_id}")
+            logger.info(f" PASS:  Cleaned up {cleanup_count} agents for user {self.user_id}")
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get user session metrics."""
@@ -372,9 +372,9 @@ class AgentLifecycleManager:
                 logger.debug(f"Removed user session {user_id} from registry")
                 
             if cleanup_success:
-                logger.info(f"✅ Emergency cleanup completed for user {user_id}")
+                logger.info(f" PASS:  Emergency cleanup completed for user {user_id}")
             else:
-                logger.warning(f"⚠️ Emergency cleanup completed with errors for user {user_id}, but session was removed from registry")
+                logger.warning(f" WARNING: [U+FE0F] Emergency cleanup completed with errors for user {user_id}, but session was removed from registry")
 
 
 class AgentRegistry(BaseAgentRegistry):
@@ -436,10 +436,10 @@ class AgentRegistry(BaseAgentRegistry):
         # SSOT COMPLIANCE VALIDATION
         self._validate_ssot_compliance()
         
-        logger.info("🔄 Enhanced AgentRegistry initialized with CanonicalToolDispatcher SSOT pattern")
-        logger.info("✅ All agents will receive properly isolated tool dispatchers per user context")
-        logger.info("🚨 User isolation and memory leak prevention enabled")
-        logger.info("🎯 SSOT compliance validated - BaseAgentRegistry interface properly implemented")
+        logger.info(" CYCLE:  Enhanced AgentRegistry initialized with CanonicalToolDispatcher SSOT pattern")
+        logger.info(" PASS:  All agents will receive properly isolated tool dispatchers per user context")
+        logger.info(" ALERT:  User isolation and memory leak prevention enabled")
+        logger.info(" TARGET:  SSOT compliance validated - BaseAgentRegistry interface properly implemented")
     
     def _validate_ssot_compliance(self) -> None:
         """Validate SSOT compliance with BaseAgentRegistry interface.
@@ -483,10 +483,10 @@ class AgentRegistry(BaseAgentRegistry):
             if not hasattr(super(), 'set_websocket_bridge'):
                 raise RuntimeError("Parent BaseAgentRegistry missing set_websocket_bridge method")
             
-            logger.debug("✅ SSOT compliance validation passed")
+            logger.debug(" PASS:  SSOT compliance validation passed")
             
         except Exception as e:
-            logger.error(f"❌ SSOT compliance validation failed: {e}")
+            logger.error(f" FAIL:  SSOT compliance validation failed: {e}")
             raise RuntimeError(f"AgentRegistry SSOT compliance validation failed: {e}")
     
     def set_tool_dispatcher_factory(self, factory):
@@ -532,7 +532,7 @@ class AgentRegistry(BaseAgentRegistry):
             
             # SSOT: No legacy state to clear - using factory patterns
             
-        logger.info("✅ AgentRegistry cleanup complete")
+        logger.info(" PASS:  AgentRegistry cleanup complete")
     
     # ===================== USER ISOLATION HARDENING FEATURES =====================
     
@@ -573,7 +573,7 @@ class AgentRegistry(BaseAgentRegistry):
                     logger.debug(f"No WebSocket manager to set for new session. hasattr: {hasattr(self, 'websocket_manager')}, value: {getattr(self, 'websocket_manager', None)}")
                 
                 self._user_sessions[user_id] = user_session
-                logger.info(f"🔐 Created isolated session for user {user_id}")
+                logger.info(f"[U+1F510] Created isolated session for user {user_id}")
             return self._user_sessions[user_id]
     
     async def _cleanup_user_session_unlocked(self, user_id: str) -> Dict[str, Any]:
@@ -602,7 +602,7 @@ class AgentRegistry(BaseAgentRegistry):
             del self._user_sessions[user_id]
             
             cleanup_metrics['status'] = 'cleaned'
-            logger.info(f"🧹 Cleaned up user session for {user_id}")
+            logger.info(f"[U+1F9F9] Cleaned up user session for {user_id}")
         
         return cleanup_metrics
     
@@ -662,19 +662,19 @@ class AgentRegistry(BaseAgentRegistry):
         if hasattr(user_session, '_websocket_bridge') and user_session._websocket_bridge:
             if hasattr(agent, 'set_websocket_bridge'):
                 agent.set_websocket_bridge(user_session._websocket_bridge, user_context.run_id, agent_type)
-                logger.debug(f"✅ Set WebSocket bridge on agent {agent_type} for user {user_id}")
+                logger.debug(f" PASS:  Set WebSocket bridge on agent {agent_type} for user {user_id}")
             elif hasattr(agent, '_websocket_bridge'):
                 agent._websocket_bridge = user_session._websocket_bridge
                 agent._run_id = user_context.run_id
                 agent._agent_name = agent_type
-                logger.debug(f"✅ Set WebSocket bridge attributes on agent {agent_type} for user {user_id}")
+                logger.debug(f" PASS:  Set WebSocket bridge attributes on agent {agent_type} for user {user_id}")
         else:
-            logger.warning(f"❌ No WebSocket bridge available for agent {agent_type} user {user_id}")
+            logger.warning(f" FAIL:  No WebSocket bridge available for agent {agent_type} user {user_id}")
         
         # Register agent with user session
         await user_session.register_agent(agent_type, agent)
         
-        logger.info(f"🔐 Created isolated {agent_type} agent for user {user_id}")
+        logger.info(f"[U+1F510] Created isolated {agent_type} agent for user {user_id}")
         return agent
     
     async def get_user_agent(self, user_id: str, agent_type: str) -> Optional[Any]:
@@ -811,7 +811,7 @@ class AgentRegistry(BaseAgentRegistry):
                 except Exception as e:
                     cleanup_report['errors'].append(f"User {user_id}: {str(e)}")
             
-            logger.warning(f"🚨 Emergency cleanup completed: {cleanup_report}")
+            logger.warning(f" ALERT:  Emergency cleanup completed: {cleanup_report}")
             return cleanup_report
     
     # ===================== WEBSOCKET INTEGRATION =====================
@@ -906,7 +906,7 @@ class AgentRegistry(BaseAgentRegistry):
                 # No event loop exists
                 logger.warning("No event loop available - user sessions will get WebSocket manager on next access")
         
-        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support and SSOT compliance")
+        logger.info(f" PASS:  WebSocket manager set on AgentRegistry with user isolation support and SSOT compliance")
     
     async def set_websocket_manager_async(self, manager: 'WebSocketManager') -> None:
         """Async version of set_websocket_manager for async contexts.
@@ -963,7 +963,7 @@ class AgentRegistry(BaseAgentRegistry):
                 except Exception as e:
                     logger.error(f"Failed to update WebSocket manager for user {user_id}: {e}")
         
-        logger.info(f"✅ WebSocket manager set on AgentRegistry with user isolation support (async) - SSOT compliant adapter")
+        logger.info(f" PASS:  WebSocket manager set on AgentRegistry with user isolation support (async) - SSOT compliant adapter")
     
     def set_websocket_bridge(self, bridge: 'AgentWebSocketBridge') -> None:
         """Override parent method to maintain SSOT interface contract.
@@ -989,10 +989,10 @@ class AgentRegistry(BaseAgentRegistry):
         # If this is our adapter, extract the WebSocketManager for internal use
         if isinstance(bridge, WebSocketManagerAdapter):
             self.websocket_manager = bridge._websocket_manager
-            logger.info("✅ WebSocket bridge set via adapter - SSOT interface compliance maintained")
+            logger.info(" PASS:  WebSocket bridge set via adapter - SSOT interface compliance maintained")
         else:
             # For direct AgentWebSocketBridge instances, store and create backwards adapter if needed
-            logger.info("✅ WebSocket bridge set directly - SSOT interface compliance maintained")
+            logger.info(" PASS:  WebSocket bridge set directly - SSOT interface compliance maintained")
         
         # Propagate to user sessions if they exist (safely handle no event loop)
         try:
@@ -1164,7 +1164,7 @@ class AgentRegistry(BaseAgentRegistry):
         New code should use create_tool_dispatcher_for_user() for proper isolation.
         """
         logger.warning(
-            "⚠️ DEPRECATED: Accessing tool_dispatcher property is deprecated.\n"
+            " WARNING: [U+FE0F] DEPRECATED: Accessing tool_dispatcher property is deprecated.\n"
             "Use create_tool_dispatcher_for_user(user_context) for proper user isolation."
         )
         return None
@@ -1173,7 +1173,7 @@ class AgentRegistry(BaseAgentRegistry):
     def tool_dispatcher(self, value):
         """DEPRECATED: Legacy setter for backward compatibility."""
         logger.warning(
-            "⚠️ DEPRECATED: Setting tool_dispatcher is deprecated.\n"
+            " WARNING: [U+FE0F] DEPRECATED: Setting tool_dispatcher is deprecated.\n"
             "Use tool_dispatcher_factory parameter in constructor for custom factories."
         )
         # BACKWARD COMPATIBILITY: Store value for legacy tests, but getter still returns None
@@ -1256,7 +1256,7 @@ class AgentRegistry(BaseAgentRegistry):
         self._register_auxiliary_agents()
         self._agents_registered = True
         
-        logger.info(f"✅ Registered {len(self.list_keys())} default agents using UniversalRegistry")
+        logger.info(f" PASS:  Registered {len(self.list_keys())} default agents using UniversalRegistry")
     
     def _register_core_agents(self) -> None:
         """Register core workflow agents with CanonicalToolDispatcher integration."""
@@ -1781,7 +1781,7 @@ class AgentRegistry(BaseAgentRegistry):
         self.prerequisite_validation_level = level
         self.prerequisites_validator = AgentExecutionPrerequisites(level)
         logger.info(
-            f"🔍 PREREQUISITES_CONFIG: Validation level changed to {level.value}. "
+            f" SEARCH:  PREREQUISITES_CONFIG: Validation level changed to {level.value}. "
             f"Business_impact: {level.value} mode affects early validation behavior."
         )
     

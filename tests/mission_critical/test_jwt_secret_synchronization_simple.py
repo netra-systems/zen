@@ -7,7 +7,7 @@
 # REMOVED_SYNTAX_ERROR: and user value delivery across all authentication scenarios.
 
 # REMOVED_SYNTAX_ERROR: AUTHENTICATION FLOW VALIDATION:
-    # REMOVED_SYNTAX_ERROR: - Complete signup → login → chat flow
+    # REMOVED_SYNTAX_ERROR: - Complete signup  ->  login  ->  chat flow
     # REMOVED_SYNTAX_ERROR: - JWT token generation and validation
     # REMOVED_SYNTAX_ERROR: - Token refresh during active chat
     # REMOVED_SYNTAX_ERROR: - Cross-service authentication
@@ -136,7 +136,7 @@
     # AUTHENTICATION FLOW VALIDATION TESTS (10 tests minimum)
 
 # REMOVED_SYNTAX_ERROR: def test_complete_signup_login_chat_flow(self, tier: str = "free") -> bool:
-    # REMOVED_SYNTAX_ERROR: """Test complete signup → login → chat flow with revenue tracking."""
+    # REMOVED_SYNTAX_ERROR: """Test complete signup  ->  login  ->  chat flow with revenue tracking."""
     # REMOVED_SYNTAX_ERROR: user_id = "formatted_string"
     # REMOVED_SYNTAX_ERROR: metrics = UserJourneyMetrics(user_id=user_id, journey_type="complete_flow",
     # REMOVED_SYNTAX_ERROR: start_time=time.time(), tier=tier)
@@ -1191,7 +1191,7 @@
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: result = test_func()
             # REMOVED_SYNTAX_ERROR: results[test_name] = result
-            # REMOVED_SYNTAX_ERROR: status = "✓ PASSED" if result else "✗ FAILED"
+            # REMOVED_SYNTAX_ERROR: status = "[U+2713] PASSED" if result else "[U+2717] FAILED"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: except Exception as e:
                 # REMOVED_SYNTAX_ERROR: results[test_name] = False
@@ -1225,7 +1225,7 @@
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: result = test_func()
             # REMOVED_SYNTAX_ERROR: results[test_name] = result
-            # REMOVED_SYNTAX_ERROR: status = "✓ PASSED" if result else "✗ FAILED"
+            # REMOVED_SYNTAX_ERROR: status = "[U+2713] PASSED" if result else "[U+2717] FAILED"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: except Exception as e:
                 # REMOVED_SYNTAX_ERROR: results[test_name] = False
@@ -1255,7 +1255,7 @@
             # REMOVED_SYNTAX_ERROR: result = test_func()
             # REMOVED_SYNTAX_ERROR: duration = time.time() - start_time
             # REMOVED_SYNTAX_ERROR: results[test_name] = result
-            # REMOVED_SYNTAX_ERROR: status = "✓ PASSED" if result else "✗ FAILED"
+            # REMOVED_SYNTAX_ERROR: status = "[U+2713] PASSED" if result else "[U+2717] FAILED"
             # REMOVED_SYNTAX_ERROR: print("formatted_string")
             # REMOVED_SYNTAX_ERROR: except Exception as e:
                 # REMOVED_SYNTAX_ERROR: results[test_name] = False
@@ -1325,14 +1325,14 @@
 
             # REMOVED_SYNTAX_ERROR: if overall_success_rate >= 0.8 and critical_tests_passed:
                 # REMOVED_SYNTAX_ERROR: print(" )
-                # REMOVED_SYNTAX_ERROR: 🎉 COMPREHENSIVE TEST SUITE: SUCCESS")
+                # REMOVED_SYNTAX_ERROR:  CELEBRATION:  COMPREHENSIVE TEST SUITE: SUCCESS")
                 # REMOVED_SYNTAX_ERROR: print("   JWT synchronization and authentication flows are robust")
                 # REMOVED_SYNTAX_ERROR: print("   User journeys deliver business value effectively")
                 # REMOVED_SYNTAX_ERROR: print("   System performs well under load")
                 # REMOVED_SYNTAX_ERROR: return True
                 # REMOVED_SYNTAX_ERROR: else:
                     # REMOVED_SYNTAX_ERROR: print(" )
-                    # REMOVED_SYNTAX_ERROR: ⚠️  COMPREHENSIVE TEST SUITE: ISSUES DETECTED")
+                    # REMOVED_SYNTAX_ERROR:  WARNING: [U+FE0F]  COMPREHENSIVE TEST SUITE: ISSUES DETECTED")
                     # REMOVED_SYNTAX_ERROR: print("   Some critical authentication or user journey issues found")
                     # REMOVED_SYNTAX_ERROR: print("   Review failed tests and fix before production deployment")
                     # REMOVED_SYNTAX_ERROR: return False

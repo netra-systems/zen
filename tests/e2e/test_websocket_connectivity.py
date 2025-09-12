@@ -97,11 +97,11 @@ class TestWebSocketConnectivityAuthenticated:
         """Test authenticated WebSocket connectivity with real services.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Uses E2EAuthHelper for authentication
-        ✅ NO mocks - real WebSocket connections  
-        ✅ Real execution timing validation
-        ✅ Hard error raising on failures
-        ✅ Multi-user isolation tested
+         PASS:  Uses E2EAuthHelper for authentication
+         PASS:  NO mocks - real WebSocket connections  
+         PASS:  Real execution timing validation
+         PASS:  Hard error raising on failures
+         PASS:  Multi-user isolation tested
         
         Business Impact: Core chat functionality - $500K+ ARR protection
         """
@@ -122,7 +122,7 @@ class TestWebSocketConnectivityAuthenticated:
             env.set(key, value, source="websocket_connectivity_test")
         
         try:
-            logger.info("🚀 Testing AUTHENTICATED WebSocket connectivity - real services")
+            logger.info("[U+1F680] Testing AUTHENTICATED WebSocket connectivity - real services")
             
             # CRITICAL: Create authenticated users using SSOT patterns
             auth_helper = E2EAuthHelper()
@@ -160,7 +160,7 @@ class TestWebSocketConnectivityAuthenticated:
                 notifier = WebSocketNotifier.create_for_user(ws_manager)
                 
                 # Test authenticated WebSocket messaging for user1
-                logger.info("📡 Testing authenticated WebSocket messaging...")
+                logger.info("[U+1F4E1] Testing authenticated WebSocket messaging...")
                 
                 # Send authenticated agent events
                 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
@@ -247,10 +247,10 @@ class TestWebSocketConnectivityAuthenticated:
                 if "user_id" in event.get("payload", {}):
                     assert event["payload"]["user_id"] == user2_data.user_id, f"User2 isolation violated - wrong user_id in event: {event}"
             
-            logger.info("✅ AUTHENTICATED WebSocket connectivity test PASSED")
-            logger.info(f"   📊 User1: {len(user1_events)} events, User2: {len(user2_events)} events")
-            logger.info(f"   🎯 Multi-user isolation validated successfully")
-            logger.info(f"   ⏱️  Execution time: {execution_time:.3f}s (real services confirmed)")
+            logger.info(" PASS:  AUTHENTICATED WebSocket connectivity test PASSED")
+            logger.info(f"    CHART:  User1: {len(user1_events)} events, User2: {len(user2_events)} events")
+            logger.info(f"    TARGET:  Multi-user isolation validated successfully")
+            logger.info(f"   [U+23F1][U+FE0F]  Execution time: {execution_time:.3f}s (real services confirmed)")
             
         finally:
             # Cleanup environment
@@ -262,11 +262,11 @@ class TestWebSocketConnectivityAuthenticated:
         """Test WebSocket message sequence validation with authenticated users.
         
         CLAUDE.md COMPLIANCE:
-        ✅ Uses E2EAuthHelper for authentication
-        ✅ NO mocks - real WebSocket message sequences
-        ✅ Real execution timing validation
-        ✅ Hard error raising on failures
-        ✅ Validates message ordering and integrity
+         PASS:  Uses E2EAuthHelper for authentication
+         PASS:  NO mocks - real WebSocket message sequences
+         PASS:  Real execution timing validation
+         PASS:  Hard error raising on failures
+         PASS:  Validates message ordering and integrity
         
         Business Impact: Message reliability - prevents data loss and corruption
         """
@@ -287,7 +287,7 @@ class TestWebSocketConnectivityAuthenticated:
             env.set(key, value, source="websocket_message_sequence_test")
         
         try:
-            logger.info("🚀 Testing AUTHENTICATED WebSocket message sequences")
+            logger.info("[U+1F680] Testing AUTHENTICATED WebSocket message sequences")
             
             # Create authenticated user using SSOT patterns
             auth_helper = E2EAuthHelper()
@@ -321,7 +321,7 @@ class TestWebSocketConnectivityAuthenticated:
                 )
                 
                 # Send a complex message sequence with multiple tools
-                logger.info("📡 Testing complex message sequence...")
+                logger.info("[U+1F4E1] Testing complex message sequence...")
                 
                 # Start agent
                 await notifier.send_agent_started(context)
@@ -423,10 +423,10 @@ class TestWebSocketConnectivityAuthenticated:
                 assert isinstance(tool_result, dict), f"Tool result should be dict, got {type(tool_result)}"
                 assert len(tool_result) > 0, f"Tool result should not be empty: {tool_result}"
             
-            logger.info("✅ AUTHENTICATED WebSocket message sequence test PASSED")
-            logger.info(f"   📊 Total events: {len(events)}")
-            logger.info(f"   🔧 Tool sequences: {len(tool_executing_indices)}")
-            logger.info(f"   ⏱️  Execution time: {execution_time:.3f}s (real services confirmed)")
+            logger.info(" PASS:  AUTHENTICATED WebSocket message sequence test PASSED")
+            logger.info(f"    CHART:  Total events: {len(events)}")
+            logger.info(f"   [U+1F527] Tool sequences: {len(tool_executing_indices)}")
+            logger.info(f"   [U+23F1][U+FE0F]  Execution time: {execution_time:.3f}s (real services confirmed)")
             
         finally:
             # Cleanup environment

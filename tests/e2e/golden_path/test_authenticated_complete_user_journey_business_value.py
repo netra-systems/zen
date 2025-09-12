@@ -27,8 +27,8 @@ CRITICAL REQUIREMENTS (per CLAUDE.md Section 3.4):
 
 GOLDEN PATH FLOW TESTED WITH AUTHENTICATION:
 ```
-User Authentication → JWT Token → WebSocket Auth → Agent Execution →
-WebSocket Events (authenticated) → Business Value → Persistence → Success
+User Authentication  ->  JWT Token  ->  WebSocket Auth  ->  Agent Execution  -> 
+WebSocket Events (authenticated)  ->  Business Value  ->  Persistence  ->  Success
 ```
 """
 
@@ -382,14 +382,14 @@ class TestAuthenticatedCompleteUserJourneyBusinessValue(SSotAsyncTestCase):
         self.record_metric("websocket_events_authenticated", len(collected_events))
         
         # Log authentication compliance success
-        print(f"\n✅ PHASE 1 AUTHENTICATION COMPLIANCE SUCCESS:")
-        print(f"   🔐 User authentication: VALIDATED")
-        print(f"   📡 WebSocket auth headers: VALIDATED")
-        print(f"   🎯 Authenticated events: {authenticated_events}/{len(collected_events)}")
-        print(f"   💰 Authenticated business value: DELIVERED")
-        print(f"   ⏱️  Total authenticated time: {total_execution_time:.2f}s")
-        print(f"   🛡️  Authentication bypass prevention: CONFIRMED")
-        print(f"   📈 $500K+ ARR protection: VALIDATED")
+        print(f"\n PASS:  PHASE 1 AUTHENTICATION COMPLIANCE SUCCESS:")
+        print(f"   [U+1F510] User authentication: VALIDATED")
+        print(f"   [U+1F4E1] WebSocket auth headers: VALIDATED")
+        print(f"    TARGET:  Authenticated events: {authenticated_events}/{len(collected_events)}")
+        print(f"   [U+1F4B0] Authenticated business value: DELIVERED")
+        print(f"   [U+23F1][U+FE0F]  Total authenticated time: {total_execution_time:.2f}s")
+        print(f"   [U+1F6E1][U+FE0F]  Authentication bypass prevention: CONFIRMED")
+        print(f"   [U+1F4C8] $500K+ ARR protection: VALIDATED")
 
     @pytest.mark.asyncio
     async def test_authentication_failure_prevention(self, real_services_fixture):
@@ -463,11 +463,11 @@ class TestAuthenticatedCompleteUserJourneyBusinessValue(SSotAsyncTestCase):
         self.record_metric("api_auth_enforced", True)
         self.record_metric("invalid_token_rejected", True)
         
-        print(f"\n✅ AUTHENTICATION FAILURE PREVENTION VALIDATED:")
-        print(f"   🚫 Unauthenticated WebSocket: BLOCKED")
-        print(f"   🚫 Unauthenticated API calls: BLOCKED")
-        print(f"   🚫 Invalid tokens: REJECTED")
-        print(f"   🛡️  Authentication bypass prevention: CONFIRMED")
+        print(f"\n PASS:  AUTHENTICATION FAILURE PREVENTION VALIDATED:")
+        print(f"   [U+1F6AB] Unauthenticated WebSocket: BLOCKED")
+        print(f"   [U+1F6AB] Unauthenticated API calls: BLOCKED")
+        print(f"   [U+1F6AB] Invalid tokens: REJECTED")
+        print(f"   [U+1F6E1][U+FE0F]  Authentication bypass prevention: CONFIRMED")
 
     async def async_teardown_method(self, method=None):
         """Authenticated cleanup with connection closure."""

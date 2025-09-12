@@ -60,7 +60,7 @@
                 # REMOVED_SYNTAX_ERROR: await validator._validate_websocket(mock_app)
 
                 # Should log as INFO, not WARNING
-                # REMOVED_SYNTAX_ERROR: mock_info.assert_any_call("ℹ️ WebSocket handlers will be created per-user (factory pattern)")
+                # REMOVED_SYNTAX_ERROR: mock_info.assert_any_call("[U+2139][U+FE0F] WebSocket handlers will be created per-user (factory pattern)")
 
                 # Should NOT have any warning about zero handlers
                 # REMOVED_SYNTAX_ERROR: for call in mock_warning.call_args_list:
@@ -98,7 +98,7 @@
                                     # REMOVED_SYNTAX_ERROR: await validator._validate_agents(mock_app)
 
                                     # Should log as INFO about legacy pattern
-                                    # REMOVED_SYNTAX_ERROR: mock_info.assert_any_call("ℹ️ Legacy registry empty - agents will be created per-request (factory pattern)")
+                                    # REMOVED_SYNTAX_ERROR: mock_info.assert_any_call("[U+2139][U+FE0F] Legacy registry empty - agents will be created per-request (factory pattern)")
 
                                     # Should NOT have warning about zero agents
                                     # REMOVED_SYNTAX_ERROR: for call in mock_warning.call_args_list:
@@ -111,5 +111,5 @@
                                             # REMOVED_SYNTAX_ERROR: asyncio.run(test.test_websocket_handler_warning_is_info_level())
                                             # REMOVED_SYNTAX_ERROR: asyncio.run(test.test_agent_registry_not_error_in_factory_pattern())
                                             # REMOVED_SYNTAX_ERROR: asyncio.run(test.test_zero_agents_registered_is_info_level())
-                                            # REMOVED_SYNTAX_ERROR: print("✅ All WebSocket warning fix tests passed!")
+                                            # REMOVED_SYNTAX_ERROR: print(" PASS:  All WebSocket warning fix tests passed!")
                                             # REMOVED_SYNTAX_ERROR: pass

@@ -218,7 +218,7 @@ class DatabaseConnector:
         if self.use_emoji:
             try:
                 # Try to print with emoji
-                print(f"🔍 DISCOVER | {db_type.value.upper()}: {masked_url}")
+                print(f" SEARCH:  DISCOVER | {db_type.value.upper()}: {masked_url}")
             except UnicodeEncodeError:
                 # Fall back to non-emoji version on Windows
                 print(f"[DISCOVER] | {db_type.value.upper()}: {masked_url}")
@@ -287,26 +287,26 @@ class DatabaseConnector:
         """Handle validation exception during startup."""
         connection.status = ConnectionStatus.FAILED
         connection.last_error = str(exception)
-        emoji = "❌" if self.use_emoji else ""
+        emoji = " FAIL: " if self.use_emoji else ""
         print(f"{emoji} ERROR | {connection.name}: Validation failed - {str(exception)}")
     
     def _print_no_databases(self) -> None:
         """Print message when no databases are configured."""
-        emoji = "ℹ️" if self.use_emoji else ""
+        emoji = "[U+2139][U+FE0F]" if self.use_emoji else ""
         print(f"{emoji} DATABASE | No database connections configured")
     
     def _print_validation_start(self) -> None:
         """Print validation start message."""
-        emoji = "🔄" if self.use_emoji else ""
+        emoji = " CYCLE: " if self.use_emoji else ""
         print(f"{emoji} DATABASE | Validating {len(self.connections)} database connections...")
     
     def _print_validation_summary(self, all_healthy: bool) -> None:
         """Print validation summary."""
         if all_healthy:
-            emoji = "✅" if self.use_emoji else ""
+            emoji = " PASS: " if self.use_emoji else ""
             print(f"{emoji} DATABASE | All database connections validated successfully")
         else:
-            emoji = "❌" if self.use_emoji else ""
+            emoji = " FAIL: " if self.use_emoji else ""
             print(f"{emoji} DATABASE | Database validation failed - check logs for details")
     
     async def _validate_connection_with_retry(self, connection: DatabaseConnection) -> bool:
@@ -366,29 +366,29 @@ class DatabaseConnector:
     
     def _print_connection_attempt(self, connection: DatabaseConnection, attempt: int) -> None:
         """Print connection attempt message."""
-        emoji = "🔄" if self.use_emoji else ""
+        emoji = " CYCLE: " if self.use_emoji else ""
         print(f"{emoji} CONNECT | {connection.name}: Attempt {attempt}/{self.retry_config.max_attempts}")
     
     def _print_connection_success(self, connection: DatabaseConnection) -> None:
         """Print connection success message."""
-        emoji = "✅" if self.use_emoji else ""
+        emoji = " PASS: " if self.use_emoji else ""
         print(f"{emoji} CONNECT | {connection.name}: Connected successfully")
     
     def _print_connection_failed(self, connection: DatabaseConnection) -> None:
         """Print connection failure message."""
-        emoji = "❌" if self.use_emoji else ""
+        emoji = " FAIL: " if self.use_emoji else ""
         error_msg = connection.last_error or "Connection failed"
         print(f"{emoji} CONNECT | {connection.name}: Failed after {self.retry_config.max_attempts} attempts - {error_msg}")
     
     def _print_connection_failed_with_fallback_info(self, connection: DatabaseConnection) -> None:
         """Print connection failure message with fallback behavior information."""
-        emoji = "❌" if self.use_emoji else ""
+        emoji = " FAIL: " if self.use_emoji else ""
         error_msg = connection.last_error or "Connection failed"
         print(f"{emoji} CONNECT | {connection.name}: Failed after {self.retry_config.max_attempts} attempts - {error_msg}")
         
         # Provide fallback communication for ClickHouse
         if connection.db_type == DatabaseType.CLICKHOUSE:
-            fallback_emoji = "🔄" if self.use_emoji else ""
+            fallback_emoji = " CYCLE: " if self.use_emoji else ""
             print(f"{fallback_emoji} FALLBACK | ClickHouse unavailable - system will continue with mock/local mode")
             print(f"{fallback_emoji} FALLBACK | Application startup will proceed normally with reduced analytics capabilities")
     
@@ -406,7 +406,7 @@ class DatabaseConnector:
         connection.last_error = str(exception)
         
         if attempt == self.retry_config.max_attempts - 1:
-            emoji = "⚠️" if self.use_emoji else ""
+            emoji = " WARNING: [U+FE0F]" if self.use_emoji else ""
             print(f"{emoji} ERROR | {connection.name}: {str(exception)}")
     
     def _calculate_retry_delay(self, attempt: int) -> float:
@@ -652,7 +652,7 @@ class DatabaseConnector:
             return
         
         self._monitoring_task = asyncio.create_task(self._health_monitoring_loop())
-        emoji = "🔄" if self.use_emoji else ""
+        emoji = " CYCLE: " if self.use_emoji else ""
         print(f"{emoji} MONITOR | Started database health monitoring")
     
     async def stop_health_monitoring(self) -> None:
@@ -667,7 +667,7 @@ class DatabaseConnector:
                 pass
         
         await self._cleanup_all_connections()
-        emoji = "🛑" if self.use_emoji else ""
+        emoji = "[U+1F6D1]" if self.use_emoji else ""
         print(f"{emoji} MONITOR | Stopped database health monitoring")
     
     async def _health_monitoring_loop(self) -> None:
@@ -697,13 +697,13 @@ class DatabaseConnector:
                 if connection.status != ConnectionStatus.CONNECTED:
                     connection.status = ConnectionStatus.CONNECTED
                     connection.failure_count = 0
-                    emoji = "✅" if self.use_emoji else ""
+                    emoji = " PASS: " if self.use_emoji else ""
                     print(f"{emoji} HEALTH | {connection.name}: Recovered")
             else:
                 connection.failure_count += 1
                 if connection.failure_count >= 3:
                     connection.status = ConnectionStatus.FAILED
-                    emoji = "❌" if self.use_emoji else ""
+                    emoji = " FAIL: " if self.use_emoji else ""
                     print(f"{emoji} HEALTH | {connection.name}: Unhealthy (failures: {connection.failure_count})")
                     
             connection.last_check = datetime.now()

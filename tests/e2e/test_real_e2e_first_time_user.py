@@ -3,7 +3,7 @@
 COMPREHENSIVE E2E TEST: First-Time User Experience Journey with REAL Services
 
 Business Value Justification (BVJ):
-1. Segment: ALL customer segments (Free → Enterprise) - direct revenue impact
+1. Segment: ALL customer segments (Free  ->  Enterprise) - direct revenue impact
 2. Business Goal: Protect $500K+ ARR pipeline by validating THE critical user onboarding journey
 3. Value Impact: Ensures seamless first-time user experience from signup to AI-powered value delivery
 4. Strategic Impact: This IS the conversion pipeline - 95%+ journey completion required for paying customers
@@ -13,7 +13,7 @@ Business Value Justification (BVJ):
 
 CRITICAL REQUIREMENTS per CLAUDE.md:
 - Uses REAL Auth service, Backend service, PostgreSQL, Redis (NO MOCKS for internal services)
-- Tests complete business value delivery: signup → login → welcome → chat with agent
+- Tests complete business value delivery: signup  ->  login  ->  welcome  ->  chat with agent
 - Validates ALL 5 required WebSocket events (agent_started, agent_thinking, tool_executing, tool_completed, agent_completed)
 - Delivers REAL business value through actual AI-powered chat interaction
 - Must complete in <30 seconds for business UX requirements
@@ -27,14 +27,14 @@ FLOW TESTED:
 6. User sees clear value proposition through AI response
 
 IMPLEMENTATION STANDARDS:
-✅ Real Auth service integration via HTTP calls
-✅ Real Backend WebSocket connection with JWT authentication
-✅ Real PostgreSQL and Redis for data persistence
-✅ Complete user creation → authentication → onboarding → value delivery pipeline
-✅ Business-critical validations at each revenue checkpoint
-✅ Performance validation for user experience (<30s total)
-✅ Error handling for production-level reliability
-✅ WebSocket event validation per mission-critical requirements
+ PASS:  Real Auth service integration via HTTP calls
+ PASS:  Real Backend WebSocket connection with JWT authentication
+ PASS:  Real PostgreSQL and Redis for data persistence
+ PASS:  Complete user creation  ->  authentication  ->  onboarding  ->  value delivery pipeline
+ PASS:  Business-critical validations at each revenue checkpoint
+ PASS:  Performance validation for user experience (<30s total)
+ PASS:  Error handling for production-level reliability
+ PASS:  WebSocket event validation per mission-critical requirements
 """
 
 import asyncio
@@ -165,9 +165,9 @@ class RealFirstTimeUserTester(BaseE2ETest):
                 response = await self.http_client.get(health_url, timeout=5.0)
                 if response.status_code != 200:
                     raise RuntimeError(f"{service_name} not healthy: {response.status_code}")
-                logger.info(f"✓ {service_name} is ready")
+                logger.info(f"[U+2713] {service_name} is ready")
             except Exception as e:
-                logger.warning(f"⚠️ {service_name} check failed: {e} - will use fallback")
+                logger.warning(f" WARNING: [U+FE0F] {service_name} check failed: {e} - will use fallback")
                 
     async def cleanup_test_environment(self):
         """Clean up test resources."""
@@ -240,7 +240,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                     "platform_info": platform_info,
                     "duration": time.time() - step_start
                 })
-                logger.info("✓ User discovered platform successfully")
+                logger.info("[U+2713] User discovered platform successfully")
             else:
                 raise RuntimeError(f"Platform not available: {response.status_code}")
                 
@@ -284,7 +284,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                     "duration": journey.signup_duration
                 })
                 
-                logger.info(f"✓ User signed up successfully: {journey.email}")
+                logger.info(f"[U+2713] User signed up successfully: {journey.email}")
             else:
                 raise RuntimeError(f"Signup failed: {signup_response.status_code}")
                 
@@ -329,7 +329,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                     "duration": journey.login_duration
                 })
                 
-                logger.info("✓ User logged in successfully")
+                logger.info("[U+2713] User logged in successfully")
             else:
                 raise RuntimeError(f"Login failed: {login_response.status_code}")
                 
@@ -403,7 +403,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                     "duration": time.time() - welcome_start
                 })
                 
-                logger.info("✓ User received welcome experience")
+                logger.info("[U+2713] User received welcome experience")
                 
             except asyncio.TimeoutError:
                 # Consider connection successful even without immediate welcome
@@ -415,7 +415,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                     "welcome_message": "Connection established (no immediate message)",
                     "duration": time.time() - welcome_start
                 })
-                logger.info("✓ User connected to WebSocket (welcome timeout acceptable)")
+                logger.info("[U+2713] User connected to WebSocket (welcome timeout acceptable)")
                 
         except Exception as e:
             journey.journey_steps.append({
@@ -442,7 +442,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                 "duration": time.time() - profile_start
             })
             
-            logger.info("✓ User completed profile setup")
+            logger.info("[U+2713] User completed profile setup")
             
         except Exception as e:
             journey.journey_steps.append({
@@ -476,9 +476,9 @@ class RealFirstTimeUserTester(BaseE2ETest):
                     # For mock connection - ensure it has send method
                     await self.websocket_connection.send(json.dumps(first_message))
                     
-                logger.info(f"✓ Message sent successfully: {first_message['message'][:50]}...")
+                logger.info(f"[U+2713] Message sent successfully: {first_message['message'][:50]}...")
             except Exception as send_error:
-                logger.error(f"🚨 Failed to send WebSocket message: {send_error}")
+                logger.error(f" ALERT:  Failed to send WebSocket message: {send_error}")
                 raise RuntimeError(f"WebSocket communication failed: {send_error}")
             
             journey.first_chat_successful = True
@@ -492,7 +492,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                 "duration": journey.first_chat_duration
             })
             
-            logger.info("✓ User sent first chat message")
+            logger.info("[U+2713] User sent first chat message")
             
         except Exception as e:
             journey.first_chat_duration = time.time() - chat_start
@@ -561,7 +561,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                                 "duration": time.time() - ai_response_start
                             })
                             
-                            logger.success("✓ User received AI response with business value")
+                            logger.success("[U+2713] User received AI response with business value")
                             break
                         
                 except asyncio.TimeoutError:
@@ -582,7 +582,7 @@ class RealFirstTimeUserTester(BaseE2ETest):
                         "note": "Partial response - events received",
                         "duration": time.time() - ai_response_start
                     })
-                    logger.info("✓ User received WebSocket events (partial AI response)")
+                    logger.info("[U+2713] User received WebSocket events (partial AI response)")
                 else:
                     raise RuntimeError("No AI response or events received")
             
@@ -625,18 +625,18 @@ class RealFirstTimeUserTester(BaseE2ETest):
         
         if len(critical_found) == 2:  # Both critical events found
             journey.all_websocket_events_received = True
-            logger.success(f"✓ Critical WebSocket events validated: {critical_found}")
+            logger.success(f"[U+2713] Critical WebSocket events validated: {critical_found}")
             if len(required_found) >= 3:
-                logger.success(f"✓ Additional events received: {required_found}")
+                logger.success(f"[U+2713] Additional events received: {required_found}")
         elif len(required_found) >= 3:  # At least 3 of 5 required events
             journey.all_websocket_events_received = True
-            logger.info(f"✓ Sufficient WebSocket events: {required_found}")
+            logger.info(f"[U+2713] Sufficient WebSocket events: {required_found}")
         else:
             # For real testing: warn but don't fail if we got any events
-            logger.warning(f"⚠️ Limited WebSocket events: {events_found}")
+            logger.warning(f" WARNING: [U+FE0F] Limited WebSocket events: {events_found}")
             if len(events_found) > 0:
                 journey.all_websocket_events_received = True
-                logger.info("ℹ️ Accepting partial events for real environment testing")
+                logger.info("[U+2139][U+FE0F] Accepting partial events for real environment testing")
                 
     def _validate_business_requirements(self, journey: FirstTimeUserExperience):
         """Validate business requirements for first-time user experience."""
@@ -659,25 +659,25 @@ class RealFirstTimeUserTester(BaseE2ETest):
         
         # BUSINESS CRITICAL: AI Value Delivery Assessment
         if journey.received_ai_response:
-            logger.success("🎉 AI VALUE DELIVERED: Customer sees tangible AI capability")
-            logger.success("💰 CONVERSION PROBABILITY: HIGH - Customer experienced real value")
+            logger.success(" CELEBRATION:  AI VALUE DELIVERED: Customer sees tangible AI capability")
+            logger.success("[U+1F4B0] CONVERSION PROBABILITY: HIGH - Customer experienced real value")
         elif len(journey.websocket_events) > 0:
-            logger.warning("⚠️ PARTIAL VALUE: WebSocket communication but unclear AI response")
-            logger.warning("📉 CONVERSION RISK: Medium - Customer saw activity but may question AI quality")
+            logger.warning(" WARNING: [U+FE0F] PARTIAL VALUE: WebSocket communication but unclear AI response")
+            logger.warning("[U+1F4C9] CONVERSION RISK: Medium - Customer saw activity but may question AI quality")
         else:
-            logger.error("🚨 ZERO VALUE DELIVERED: No AI interaction visible to customer")
-            logger.error("💰 BUSINESS IMPACT: Customer will likely abandon platform - $2K+ loss")
-            logger.error("🎯 ACTION REQUIRED: System appears broken to end users")
+            logger.error(" ALERT:  ZERO VALUE DELIVERED: No AI interaction visible to customer")
+            logger.error("[U+1F4B0] BUSINESS IMPACT: Customer will likely abandon platform - $2K+ loss")
+            logger.error(" TARGET:  ACTION REQUIRED: System appears broken to end users")
             
         # Final business validation summary
         if (journey.signup_successful and journey.login_successful and 
             journey.welcome_received and journey.first_chat_successful):
-            logger.success("💰 REVENUE PIPELINE PROTECTED: All critical checkpoints passed")
-            logger.success("🎯 BUSINESS VALUE DELIVERED: Customer onboarding successful")
+            logger.success("[U+1F4B0] REVENUE PIPELINE PROTECTED: All critical checkpoints passed")
+            logger.success(" TARGET:  BUSINESS VALUE DELIVERED: Customer onboarding successful")
         else:
-            logger.error("🚨 REVENUE RISK: Some critical checkpoints failed")
+            logger.error(" ALERT:  REVENUE RISK: Some critical checkpoints failed")
             
-        logger.success("✅ All critical business requirements validated")
+        logger.success(" PASS:  All critical business requirements validated")
 
 
 # =============================================================================
@@ -718,7 +718,7 @@ class TestRealFirstTimeUserExperience:
         BVJ: This IS the conversion pipeline - protects revenue from all customer segments.
         
         Tests complete journey:
-        1. Platform discovery → 2. Signup → 3. Login → 4. Welcome → 5. Profile → 6. Chat → 7. AI Value
+        1. Platform discovery  ->  2. Signup  ->  3. Login  ->  4. Welcome  ->  5. Profile  ->  6. Chat  ->  7. AI Value
         
         SUCCESS CRITERIA:
         - User successfully signs up and logs in
@@ -777,17 +777,17 @@ class TestRealFirstTimeUserExperience:
             logger.success(f"WebSocket communication successful: {len(journey.websocket_events)} events, types: {journey.events_received}")
         
         # Success metrics for monitoring
-        logger.success("🎉 FIRST-TIME USER JOURNEY SUCCESSFUL")
-        logger.info(f"📊 Journey Metrics:")
-        logger.info(f"   • Total time: {journey.total_journey_duration:.2f}s")
-        logger.info(f"   • Signup time: {journey.signup_duration:.2f}s" if journey.signup_duration else "   • Signup time: N/A")
-        logger.info(f"   • Login time: {journey.login_duration:.2f}s" if journey.login_duration else "   • Login time: N/A") 
-        logger.info(f"   • Steps completed: {len(journey.journey_steps)}")
-        logger.info(f"   • WebSocket events: {len(journey.websocket_events)}")
-        logger.info(f"   • User: {journey.email}")
-        logger.info(f"   • Thread: {journey.thread_id}")
+        logger.success(" CELEBRATION:  FIRST-TIME USER JOURNEY SUCCESSFUL")
+        logger.info(f" CHART:  Journey Metrics:")
+        logger.info(f"   [U+2022] Total time: {journey.total_journey_duration:.2f}s")
+        logger.info(f"   [U+2022] Signup time: {journey.signup_duration:.2f}s" if journey.signup_duration else "   [U+2022] Signup time: N/A")
+        logger.info(f"   [U+2022] Login time: {journey.login_duration:.2f}s" if journey.login_duration else "   [U+2022] Login time: N/A") 
+        logger.info(f"   [U+2022] Steps completed: {len(journey.journey_steps)}")
+        logger.info(f"   [U+2022] WebSocket events: {len(journey.websocket_events)}")
+        logger.info(f"   [U+2022] User: {journey.email}")
+        logger.info(f"   [U+2022] Thread: {journey.thread_id}")
         
-        logger.success("💰 REVENUE PIPELINE PROTECTED: Complete onboarding → value delivery validated")
+        logger.success("[U+1F4B0] REVENUE PIPELINE PROTECTED: Complete onboarding  ->  value delivery validated")
 
     async def test_first_time_user_performance_requirements(self, first_time_user_tester):
         """
@@ -802,29 +802,29 @@ class TestRealFirstTimeUserExperience:
         # Validate timing requirements (relaxed for real environment)
         if journey.signup_duration:
             if journey.signup_duration <= first_time_user_tester.MAX_SIGNUP_TIME:
-                logger.success(f"✓ Signup performance: {journey.signup_duration:.2f}s <= {first_time_user_tester.MAX_SIGNUP_TIME}s")
+                logger.success(f"[U+2713] Signup performance: {journey.signup_duration:.2f}s <= {first_time_user_tester.MAX_SIGNUP_TIME}s")
             else:
-                logger.warning(f"⚠️ Signup slower than target: {journey.signup_duration:.2f}s > {first_time_user_tester.MAX_SIGNUP_TIME}s")
+                logger.warning(f" WARNING: [U+FE0F] Signup slower than target: {journey.signup_duration:.2f}s > {first_time_user_tester.MAX_SIGNUP_TIME}s")
                 
         if journey.login_duration:
             if journey.login_duration <= first_time_user_tester.MAX_LOGIN_TIME:
-                logger.success(f"✓ Login performance: {journey.login_duration:.2f}s <= {first_time_user_tester.MAX_LOGIN_TIME}s")
+                logger.success(f"[U+2713] Login performance: {journey.login_duration:.2f}s <= {first_time_user_tester.MAX_LOGIN_TIME}s")
             else:
-                logger.warning(f"⚠️ Login slower than target: {journey.login_duration:.2f}s > {first_time_user_tester.MAX_LOGIN_TIME}s")
+                logger.warning(f" WARNING: [U+FE0F] Login slower than target: {journey.login_duration:.2f}s > {first_time_user_tester.MAX_LOGIN_TIME}s")
         
         # Overall journey time check
         if journey.total_journey_duration:
             if journey.total_journey_duration <= first_time_user_tester.MAX_JOURNEY_TIME:
-                logger.success(f"✓ Overall journey performance: {journey.total_journey_duration:.2f}s <= {first_time_user_tester.MAX_JOURNEY_TIME}s")
+                logger.success(f"[U+2713] Overall journey performance: {journey.total_journey_duration:.2f}s <= {first_time_user_tester.MAX_JOURNEY_TIME}s")
             else:
-                logger.info(f"ℹ️ Journey time acceptable for real environment: {journey.total_journey_duration:.2f}s")
+                logger.info(f"[U+2139][U+FE0F] Journey time acceptable for real environment: {journey.total_journey_duration:.2f}s")
                 
         # Performance success criteria (must complete, time is secondary in real environment)
         assert journey.signup_successful, "Signup must complete regardless of time"
         assert journey.login_successful, "Login must complete regardless of time" 
         assert journey.total_journey_duration is not None, "Journey must complete"
         
-        logger.success("📈 PERFORMANCE VALIDATION COMPLETE")
+        logger.success("[U+1F4C8] PERFORMANCE VALIDATION COMPLETE")
 
     async def test_first_time_user_websocket_events_validation(self, first_time_user_tester):
         """
@@ -838,17 +838,17 @@ class TestRealFirstTimeUserExperience:
         # CHECKPOINT 1: WebSocket connection established
         welcome_step = next((s for s in journey.journey_steps if s["step"] == "welcome_experience"), None)
         assert welcome_step and welcome_step["success"], "WebSocket connection required for AI communication"
-        logger.success("✓ WebSocket connection established - customer can receive AI updates")
+        logger.success("[U+2713] WebSocket connection established - customer can receive AI updates")
         
         # CHECKPOINT 2: Chat message transmission
         chat_step = next((s for s in journey.journey_steps if s["step"] == "first_chat"), None)
         assert chat_step and chat_step["success"], "Chat message must be sent for AI interaction"
-        logger.success("✓ Chat message sent - customer initiated AI interaction")
+        logger.success("[U+2713] Chat message sent - customer initiated AI interaction")
         
         # CHECKPOINT 3: WebSocket event reception and validation
         if len(journey.websocket_events) > 0:
-            logger.success(f"✅ WebSocket events received: {len(journey.websocket_events)} total")
-            logger.info(f"📊 Event types captured: {sorted(journey.events_received)}")
+            logger.success(f" PASS:  WebSocket events received: {len(journey.websocket_events)} total")
+            logger.info(f" CHART:  Event types captured: {sorted(journey.events_received)}")
             
             # BUSINESS CRITICAL: Validate agent workflow visibility
             required_events = journey.required_events
@@ -859,41 +859,41 @@ class TestRealFirstTimeUserExperience:
             critical_found = received_events.intersection(critical_events)
             
             if len(critical_found) == 2:
-                logger.success("🎉 PERFECT: Both agent_started and agent_completed received")
-                logger.success("💰 MAXIMUM CONVERSION POTENTIAL: Customer sees complete AI workflow")
+                logger.success(" CELEBRATION:  PERFECT: Both agent_started and agent_completed received")
+                logger.success("[U+1F4B0] MAXIMUM CONVERSION POTENTIAL: Customer sees complete AI workflow")
             elif len(critical_found) == 1:
-                logger.success(f"✓ GOOD: Critical event received: {critical_found}")
-                logger.info("📈 Customer can see AI is active - good conversion signal")
+                logger.success(f"[U+2713] GOOD: Critical event received: {critical_found}")
+                logger.info("[U+1F4C8] Customer can see AI is active - good conversion signal")
             else:
                 # Check for any workflow events
                 workflow_events = received_events.intersection(required_events)
                 if len(workflow_events) > 0:
-                    logger.warning(f"⚠️ PARTIAL: Workflow events but missing critical ones: {workflow_events}")
-                    logger.warning("📉 Customer may be confused about AI status")
+                    logger.warning(f" WARNING: [U+FE0F] PARTIAL: Workflow events but missing critical ones: {workflow_events}")
+                    logger.warning("[U+1F4C9] Customer may be confused about AI status")
                 else:
-                    logger.warning(f"⚠️ UNKNOWN EVENTS: {received_events}")
-                    logger.warning("📉 Non-standard events may not clearly show AI value")
+                    logger.warning(f" WARNING: [U+FE0F] UNKNOWN EVENTS: {received_events}")
+                    logger.warning("[U+1F4C9] Non-standard events may not clearly show AI value")
             
             # Success criteria for business value
             if len(critical_found) >= 1 or len(received_events.intersection(required_events)) >= 2:
-                logger.success("🎯 BUSINESS SUCCESS: Sufficient AI workflow visibility")
+                logger.success(" TARGET:  BUSINESS SUCCESS: Sufficient AI workflow visibility")
             else:
-                logger.warning("📉 BUSINESS CONCERN: Limited AI workflow visibility")
+                logger.warning("[U+1F4C9] BUSINESS CONCERN: Limited AI workflow visibility")
                 
         else:
-            logger.error("🚨 ZERO WEBSOCKET EVENTS: Complete communication failure")
-            logger.error("💰 BUSINESS DISASTER: Customer sees no AI activity = immediate abandonment")
-            logger.error("🎯 REVENUE IMPACT: $2K+ customer loss highly likely")
+            logger.error(" ALERT:  ZERO WEBSOCKET EVENTS: Complete communication failure")
+            logger.error("[U+1F4B0] BUSINESS DISASTER: Customer sees no AI activity = immediate abandonment")
+            logger.error(" TARGET:  REVENUE IMPACT: $2K+ customer loss highly likely")
             # Still don't fail in real environment, but make the risk very clear
             
         # CHECKPOINT 4: AI value delivery attempt
         ai_step = next((s for s in journey.journey_steps if s["step"] == "ai_value_delivery"), None)
         if ai_step and ai_step["success"]:
-            logger.success("✓ AI value delivery step completed")
+            logger.success("[U+2713] AI value delivery step completed")
         else:
-            logger.warning("⚠️ AI value delivery step had issues")
+            logger.warning(" WARNING: [U+FE0F] AI value delivery step had issues")
             
-        logger.success("🔌 WEBSOCKET VALIDATION COMPLETE")
+        logger.success("[U+1F50C] WEBSOCKET VALIDATION COMPLETE")
 
     async def test_first_time_user_error_handling(self, first_time_user_tester):
         """
@@ -915,7 +915,7 @@ class TestRealFirstTimeUserExperience:
         
         assert success_rate >= 0.8, f"At least 80% of steps must succeed (got {success_rate:.1%})"
         
-        logger.success(f"🛡️ ERROR RESILIENCE VALIDATED: {successful_steps}/{total_steps} steps successful ({success_rate:.1%})")
+        logger.success(f"[U+1F6E1][U+FE0F] ERROR RESILIENCE VALIDATED: {successful_steps}/{total_steps} steps successful ({success_rate:.1%})")
 
 
 if __name__ == "__main__":
@@ -934,24 +934,24 @@ if __name__ == "__main__":
     ]
     
     print("\n" + "="*80)
-    print("🚀 RUNNING CRITICAL FIRST-TIME USER E2E TEST")
-    print("💰 BUSINESS IMPACT: Validates $500K+ revenue pipeline")
-    print("🎯 SUCCESS CRITERIA: Complete user journey with AI value delivery")
+    print("[U+1F680] RUNNING CRITICAL FIRST-TIME USER E2E TEST")
+    print("[U+1F4B0] BUSINESS IMPACT: Validates $500K+ revenue pipeline")
+    print(" TARGET:  SUCCESS CRITERIA: Complete user journey with AI value delivery")
     print("="*80 + "\n")
     
     exit_code = pytest.main(args)
     
     if exit_code == 0:
         print("\n" + "="*80)
-        print("✅ SUCCESS: First-time user experience VALIDATED")
-        print("💰 REVENUE PROTECTED: Customer onboarding pipeline operational")
-        print("🎉 BUSINESS VALUE: Platform ready for customer acquisition")
+        print(" PASS:  SUCCESS: First-time user experience VALIDATED")
+        print("[U+1F4B0] REVENUE PROTECTED: Customer onboarding pipeline operational")
+        print(" CELEBRATION:  BUSINESS VALUE: Platform ready for customer acquisition")
         print("="*80)
     else:
         print("\n" + "="*80)
-        print("❌ FAILURE: First-time user experience BROKEN")
-        print("🚨 REVENUE AT RISK: Customer onboarding pipeline compromised")
-        print("🔧 ACTION REQUIRED: Fix critical issues before customer deployment")
+        print(" FAIL:  FAILURE: First-time user experience BROKEN")
+        print(" ALERT:  REVENUE AT RISK: Customer onboarding pipeline compromised")
+        print("[U+1F527] ACTION REQUIRED: Fix critical issues before customer deployment")
         print("="*80)
     
     sys.exit(exit_code)

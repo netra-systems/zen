@@ -9,7 +9,7 @@ This module provides comprehensive session management capabilities including:
 - Recovery scenarios and cleanup
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise)
+- Segment: ALL (Free  ->  Enterprise)
 - Business Goal: Provide robust session management for auth infrastructure
 - Value Impact: Enable secure, scalable session handling with 99.9% uptime
 - Revenue Impact: Support auth system reliability and user retention

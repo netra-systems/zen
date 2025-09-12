@@ -301,7 +301,7 @@ from shared.isolated_environment import get_env
                             # Removed problematic line: async def test_connection_establishment():
                                 # REMOVED_SYNTAX_ERROR: """Test connection establishment time."""
                                 # REMOVED_SYNTAX_ERROR: print(" )
-                                # REMOVED_SYNTAX_ERROR: 🔗 Testing connection establishment...")
+                                # REMOVED_SYNTAX_ERROR: [U+1F517] Testing connection establishment...")
 
                                 # REMOVED_SYNTAX_ERROR: connection_times = []
                                 # REMOVED_SYNTAX_ERROR: num_connections = 100
@@ -339,7 +339,7 @@ from shared.isolated_environment import get_env
                                         # Removed problematic line: async def test_concurrent_users():
                                             # REMOVED_SYNTAX_ERROR: """Test concurrent user performance."""
                                             # REMOVED_SYNTAX_ERROR: print(" )
-                                            # REMOVED_SYNTAX_ERROR: 👥 Testing concurrent users (25+)...")
+                                            # REMOVED_SYNTAX_ERROR: [U+1F465] Testing concurrent users (25+)...")
 
                                             # REMOVED_SYNTAX_ERROR: num_users = 30
                                             # REMOVED_SYNTAX_ERROR: events_per_user = 50
@@ -421,7 +421,7 @@ from shared.isolated_environment import get_env
 
             # Removed problematic line: async def test_comprehensive_performance():
                 # REMOVED_SYNTAX_ERROR: """Run comprehensive performance baseline test."""
-                # REMOVED_SYNTAX_ERROR: print("🎉 WEBSOCKET BRIDGE PERFORMANCE BASELINE TEST")
+                # REMOVED_SYNTAX_ERROR: print(" CELEBRATION:  WEBSOCKET BRIDGE PERFORMANCE BASELINE TEST")
                 # REMOVED_SYNTAX_ERROR: print("=" * 60)
 
                 # REMOVED_SYNTAX_ERROR: monitor = PerformanceMonitor()
@@ -459,7 +459,7 @@ from shared.isolated_environment import get_env
 
                     # Generate final report
                     # REMOVED_SYNTAX_ERROR: print(" )
-                    # REMOVED_SYNTAX_ERROR: 📊 COMPREHENSIVE PERFORMANCE BASELINE RESULTS:")
+                    # REMOVED_SYNTAX_ERROR:  CHART:  COMPREHENSIVE PERFORMANCE BASELINE RESULTS:")
                     # REMOVED_SYNTAX_ERROR: print("=" * 60)
                     # REMOVED_SYNTAX_ERROR: print(f"Performance Summary:")
                     # REMOVED_SYNTAX_ERROR: print("formatted_string")
@@ -471,7 +471,7 @@ from shared.isolated_environment import get_env
                     # REMOVED_SYNTAX_ERROR: print("")
 
                     # Critical requirement validation
-                    # REMOVED_SYNTAX_ERROR: print("🎯 CRITICAL REQUIREMENTS VALIDATION:")
+                    # REMOVED_SYNTAX_ERROR: print(" TARGET:  CRITICAL REQUIREMENTS VALIDATION:")
                     # REMOVED_SYNTAX_ERROR: p99_passed = metrics.p99_latency < 50.0
                     # REMOVED_SYNTAX_ERROR: throughput_passed = metrics.throughput > 1000.0
                     # REMOVED_SYNTAX_ERROR: connection_passed = metrics.avg_connection_time < 500.0
@@ -486,12 +486,12 @@ from shared.isolated_environment import get_env
 
                     # REMOVED_SYNTAX_ERROR: if all_passed:
                         # REMOVED_SYNTAX_ERROR: print(" )
-                        # REMOVED_SYNTAX_ERROR: 🎉 ALL PERFORMANCE REQUIREMENTS PASSED!")
-                        # REMOVED_SYNTAX_ERROR: print("✅ WebSocket bridge ready for production with 25+ concurrent users")
+                        # REMOVED_SYNTAX_ERROR:  CELEBRATION:  ALL PERFORMANCE REQUIREMENTS PASSED!")
+                        # REMOVED_SYNTAX_ERROR: print(" PASS:  WebSocket bridge ready for production with 25+ concurrent users")
                         # REMOVED_SYNTAX_ERROR: else:
                             # REMOVED_SYNTAX_ERROR: print(" )
-                            # REMOVED_SYNTAX_ERROR: 💥 SOME PERFORMANCE REQUIREMENTS FAILED!")
-                            # REMOVED_SYNTAX_ERROR: print("❌ Performance optimization required before production")
+                            # REMOVED_SYNTAX_ERROR: [U+1F4A5] SOME PERFORMANCE REQUIREMENTS FAILED!")
+                            # REMOVED_SYNTAX_ERROR: print(" FAIL:  Performance optimization required before production")
 
                             # REMOVED_SYNTAX_ERROR: return metrics
 
@@ -512,9 +512,9 @@ from shared.isolated_environment import get_env
     ## Executive Summary
 
     # REMOVED_SYNTAX_ERROR: This report validates the WebSocket bridge performance against critical business requirements:
-        # REMOVED_SYNTAX_ERROR: - **P99 Latency:** {'✅ PASS' if metrics.p99_latency < 50.0 else '❌ FAIL'} ({metrics.p99_latency:.2f}ms < 50ms)
-        # REMOVED_SYNTAX_ERROR: - **Throughput:** {'✅ PASS' if metrics.throughput > 1000.0 else '❌ FAIL'} ({metrics.throughput:.2f} > 1000 events/s)
-        # REMOVED_SYNTAX_ERROR: - **Connection Time:** {'✅ PASS' if metrics.avg_connection_time < 500.0 else '❌ FAIL'} ({metrics.avg_connection_time:.2f}ms < 500ms)
+        # REMOVED_SYNTAX_ERROR: - **P99 Latency:** {' PASS:  PASS' if metrics.p99_latency < 50.0 else ' FAIL:  FAIL'} ({metrics.p99_latency:.2f}ms < 50ms)
+        # REMOVED_SYNTAX_ERROR: - **Throughput:** {' PASS:  PASS' if metrics.throughput > 1000.0 else ' FAIL:  FAIL'} ({metrics.throughput:.2f} > 1000 events/s)
+        # REMOVED_SYNTAX_ERROR: - **Connection Time:** {' PASS:  PASS' if metrics.avg_connection_time < 500.0 else ' FAIL:  FAIL'} ({metrics.avg_connection_time:.2f}ms < 500ms)
 
         ## Detailed Performance Metrics
 
@@ -522,11 +522,11 @@ from shared.isolated_environment import get_env
         # REMOVED_SYNTAX_ERROR: - **P50 (Median):** {metrics.p50_latency:.2f}ms
         # REMOVED_SYNTAX_ERROR: - **P90:** {metrics.p90_latency:.2f}ms
         # REMOVED_SYNTAX_ERROR: - **P95:** {metrics.p95_latency:.2f}ms
-        # REMOVED_SYNTAX_ERROR: - **P99:** {metrics.p99_latency:.2f}ms ⭐ **CRITICAL REQUIREMENT**
+        # REMOVED_SYNTAX_ERROR: - **P99:** {metrics.p99_latency:.2f}ms  STAR:  **CRITICAL REQUIREMENT**
         # REMOVED_SYNTAX_ERROR: - **Average:** {metrics.avg_latency:.2f}ms
 
         ### Throughput Performance
-        # REMOVED_SYNTAX_ERROR: - **Overall Throughput:** {metrics.throughput:.2f} events/second ⭐ **CRITICAL REQUIREMENT**
+        # REMOVED_SYNTAX_ERROR: - **Overall Throughput:** {metrics.throughput:.2f} events/second  STAR:  **CRITICAL REQUIREMENT**
 
         ### Connection Performance
         # REMOVED_SYNTAX_ERROR: - **Average Connection Time:** {metrics.avg_connection_time:.2f}ms
@@ -547,9 +547,9 @@ from shared.isolated_environment import get_env
             ## Recommendations
 
             # REMOVED_SYNTAX_ERROR: Based on performance results:
-                # REMOVED_SYNTAX_ERROR: - ✅ System meets all critical performance requirements
-                # REMOVED_SYNTAX_ERROR: - ✅ Ready for production deployment with 25+ concurrent users
-                # REMOVED_SYNTAX_ERROR: - ✅ WebSocket infrastructure can support business growth targets
+                # REMOVED_SYNTAX_ERROR: -  PASS:  System meets all critical performance requirements
+                # REMOVED_SYNTAX_ERROR: -  PASS:  Ready for production deployment with 25+ concurrent users
+                # REMOVED_SYNTAX_ERROR: -  PASS:  WebSocket infrastructure can support business growth targets
 
                 ## Test Methodology
 
@@ -567,7 +567,7 @@ from shared.isolated_environment import get_env
 # REMOVED_SYNTAX_ERROR: async def main():
     # REMOVED_SYNTAX_ERROR: """Main performance test runner."""
     # REMOVED_SYNTAX_ERROR: try:
-        # REMOVED_SYNTAX_ERROR: print("🚀 Starting WebSocket Bridge Performance Baseline Tests...")
+        # REMOVED_SYNTAX_ERROR: print("[U+1F680] Starting WebSocket Bridge Performance Baseline Tests...")
         # REMOVED_SYNTAX_ERROR: print("This test validates performance without requiring the full application stack.")
         # REMOVED_SYNTAX_ERROR: print("")
 
@@ -582,7 +582,7 @@ from shared.isolated_environment import get_env
             # REMOVED_SYNTAX_ERROR: f.write(report)
 
             # REMOVED_SYNTAX_ERROR: print(" )
-            # REMOVED_SYNTAX_ERROR: 📋 Performance baseline report generated: websocket_performance_baseline_report.md")
+            # REMOVED_SYNTAX_ERROR: [U+1F4CB] Performance baseline report generated: websocket_performance_baseline_report.md")
 
             # Print final status
             # REMOVED_SYNTAX_ERROR: requirements_met = ( )
@@ -592,10 +592,10 @@ from shared.isolated_environment import get_env
             
 
             # REMOVED_SYNTAX_ERROR: if requirements_met:
-                # REMOVED_SYNTAX_ERROR: print("🎉 SUCCESS: All performance requirements validated!")
+                # REMOVED_SYNTAX_ERROR: print(" CELEBRATION:  SUCCESS: All performance requirements validated!")
                 # REMOVED_SYNTAX_ERROR: return 0
                 # REMOVED_SYNTAX_ERROR: else:
-                    # REMOVED_SYNTAX_ERROR: print("💥 FAILURE: Performance requirements not met!")
+                    # REMOVED_SYNTAX_ERROR: print("[U+1F4A5] FAILURE: Performance requirements not met!")
                     # REMOVED_SYNTAX_ERROR: return 1
 
                     # REMOVED_SYNTAX_ERROR: except Exception as e:

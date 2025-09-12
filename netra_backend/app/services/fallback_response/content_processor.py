@@ -69,35 +69,35 @@ class ContentProcessor:
         """Check and add specificity-related feedback"""
         if metrics.specificity_score < 0.5:
             feedback_parts.append(
-                "📊 **Specificity Issue**: The response lacked specific details and metrics."
+                " CHART:  **Specificity Issue**: The response lacked specific details and metrics."
             )
     
     def _check_actionability_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
         """Check and add actionability-related feedback"""
         if metrics.actionability_score < 0.5:
             feedback_parts.append(
-                "🎯 **Actionability Issue**: The response didn't provide clear action steps."
+                " TARGET:  **Actionability Issue**: The response didn't provide clear action steps."
             )
     
     def _check_quantification_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
         """Check and add quantification-related feedback"""
         if metrics.quantification_score < 0.5:
             feedback_parts.append(
-                "📈 **Quantification Issue**: Missing numerical values and measurements."
+                "[U+1F4C8] **Quantification Issue**: Missing numerical values and measurements."
             )
     
     def _check_logic_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
         """Check and add logic-related feedback"""
         if metrics.circular_reasoning_detected:
             feedback_parts.append(
-                "🔄 **Logic Issue**: Circular reasoning detected in the response."
+                " CYCLE:  **Logic Issue**: Circular reasoning detected in the response."
             )
     
     def _check_generic_content_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
         """Check and add generic content feedback"""
         if metrics.generic_phrase_count > 3:
             feedback_parts.append(
-                f"📝 **Generic Content**: Found {metrics.generic_phrase_count} generic phrases."
+                f"[U+1F4DD] **Generic Content**: Found {metrics.generic_phrase_count} generic phrases."
             )
     
     def _format_quality_feedback(self, feedback_parts: list) -> str:
@@ -110,25 +110,25 @@ class ContentProcessor:
     def extract_useful_content(self, raw_response: str) -> str:
         """Extract useful content from a malformed response"""
         # Try to find bullet points or numbered lists
-        list_pattern = r'[•\-\*\d+\.]\s+(.+)'
+        list_pattern = r'[[U+2022]\-\*\d+\.]\s+(.+)'
         matches = re.findall(list_pattern, raw_response)
         
         if matches:
-            return "\n".join(f"• {match}" for match in matches[:5])
+            return "\n".join(f"[U+2022] {match}" for match in matches[:5])
         
         # Try to find key-value pairs
         kv_pattern = r'(\w+):\s*([^\n]+)'
         kv_matches = re.findall(kv_pattern, raw_response)
         
         if kv_matches:
-            return "\n".join(f"• {k}: {v}" for k, v in kv_matches[:5])
+            return "\n".join(f"[U+2022] {k}: {v}" for k, v in kv_matches[:5])
         
         # Return first few sentences as fallback
         sentences = re.split(r'[.!?]+', raw_response)
         useful_sentences = [s.strip() for s in sentences if len(s.strip()) > 20][:3]
         
         if useful_sentences:
-            return "\n".join(f"• {s}" for s in useful_sentences)
+            return "\n".join(f"[U+2022] {s}" for s in useful_sentences)
         
         return "Unable to extract structured information. Please rephrase your request."
     

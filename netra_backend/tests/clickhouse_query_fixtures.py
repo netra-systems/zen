@@ -1,6 +1,6 @@
 """
 ClickHouse query test fixtures.
-All functions ≤8 lines per requirements.
+All functions  <= 8 lines per requirements.
 """
 
 from typing import Dict

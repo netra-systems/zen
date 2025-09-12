@@ -47,7 +47,7 @@ class LoggingCoverageValidator:
     def run_test_suite(self, test_path, suite_name):
         """Run a specific test suite and capture results."""
         print(f"\n{'='*60}")
-        print(f"🔍 VALIDATING: {suite_name}")
+        print(f" SEARCH:  VALIDATING: {suite_name}")
         print(f"{'='*60}")
         
         try:
@@ -66,17 +66,17 @@ class LoggingCoverageValidator:
             }
             
             if result.returncode == 0:
-                print(f"✅ {suite_name}: PASSED")
+                print(f" PASS:  {suite_name}: PASSED")
                 if self.detailed:
                     print(f"Output:\n{result.stdout}")
             else:
-                print(f"❌ {suite_name}: FAILED")
+                print(f" FAIL:  {suite_name}: FAILED")
                 print(f"Error Output:\n{result.stderr}")
                 if self.detailed:
                     print(f"Full Output:\n{result.stdout}")
                     
         except subprocess.TimeoutExpired:
-            print(f"⏰ {suite_name}: TIMEOUT (5 minutes)")
+            print(f"[U+23F0] {suite_name}: TIMEOUT (5 minutes)")
             self.results[suite_name] = {
                 "return_code": -1,
                 "stdout": "",
@@ -84,7 +84,7 @@ class LoggingCoverageValidator:
                 "passed": False
             }
         except Exception as e:
-            print(f"💥 {suite_name}: EXCEPTION - {str(e)}")
+            print(f"[U+1F4A5] {suite_name}: EXCEPTION - {str(e)}")
             self.results[suite_name] = {
                 "return_code": -2,
                 "stdout": "",
@@ -94,9 +94,9 @@ class LoggingCoverageValidator:
     
     def validate_logging_coverage(self):
         """Run comprehensive logging coverage validation."""
-        print("🚨 CRITICAL BUSINESS MISSION: Golden Path Logging Coverage Validation")
-        print("📊 Business Impact: Protecting $500K+ ARR through DevOps visibility")
-        print(f"⏰ Started: {self.start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(" ALERT:  CRITICAL BUSINESS MISSION: Golden Path Logging Coverage Validation")
+        print(" CHART:  Business Impact: Protecting $500K+ ARR through DevOps visibility")
+        print(f"[U+23F0] Started: {self.start_time.strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Test suites in order of business priority
         test_suites = [
@@ -121,15 +121,15 @@ class LoggingCoverageValidator:
         ]
         
         for suite in test_suites:
-            print(f"\n📋 {suite['name']}")
-            print(f"🎯 Priority: {suite['priority']}")  
-            print(f"💼 Business Impact: {suite['business_impact']}")
+            print(f"\n[U+1F4CB] {suite['name']}")
+            print(f" TARGET:  Priority: {suite['priority']}")  
+            print(f"[U+1F4BC] Business Impact: {suite['business_impact']}")
             
             test_path = Path(suite['path'])
             if test_path.exists():
                 self.run_test_suite(test_path, suite['name'])
             else:
-                print(f"⚠️  Test file not found: {test_path}")
+                print(f" WARNING: [U+FE0F]  Test file not found: {test_path}")
                 self.results[suite['name']] = {
                     "return_code": -3,
                     "stdout": "",
@@ -147,44 +147,44 @@ class LoggingCoverageValidator:
         pass_rate = (passed_count / total_count * 100) if total_count > 0 else 0
         
         print(f"\n{'='*80}")
-        print("📊 LOGGING COVERAGE VALIDATION REPORT")
+        print(" CHART:  LOGGING COVERAGE VALIDATION REPORT")
         print(f"{'='*80}")
-        print(f"⏰ Duration: {duration.total_seconds():.2f} seconds")
-        print(f"📈 Pass Rate: {pass_rate:.1f}% ({passed_count}/{total_count})")
+        print(f"[U+23F0] Duration: {duration.total_seconds():.2f} seconds")
+        print(f"[U+1F4C8] Pass Rate: {pass_rate:.1f}% ({passed_count}/{total_count})")
         
         if pass_rate >= 100:
-            print("🎉 STATUS: GOLDEN PATH FULLY PROTECTED")
-            print("✅ All critical logging gaps have been remediated")
-            print("🛡️  DevOps teams have complete visibility into failures")
+            print(" CELEBRATION:  STATUS: GOLDEN PATH FULLY PROTECTED")
+            print(" PASS:  All critical logging gaps have been remediated")
+            print("[U+1F6E1][U+FE0F]  DevOps teams have complete visibility into failures")
         elif pass_rate >= 67:
-            print("⚠️  STATUS: PARTIAL PROTECTION - IMMEDIATE ACTION REQUIRED")
-            print("🔧 Some critical logging gaps remain")
+            print(" WARNING: [U+FE0F]  STATUS: PARTIAL PROTECTION - IMMEDIATE ACTION REQUIRED")
+            print("[U+1F527] Some critical logging gaps remain")
         else:
-            print("🚨 STATUS: CRITICAL GAPS REMAIN - BUSINESS AT RISK")
-            print("💥 $500K+ ARR Golden Path inadequately protected")
+            print(" ALERT:  STATUS: CRITICAL GAPS REMAIN - BUSINESS AT RISK")
+            print("[U+1F4A5] $500K+ ARR Golden Path inadequately protected")
         
-        print(f"\n📋 DETAILED RESULTS:")
+        print(f"\n[U+1F4CB] DETAILED RESULTS:")
         for suite_name, result in self.results.items():
-            status = "✅ PASS" if result['passed'] else "❌ FAIL"
+            status = " PASS:  PASS" if result['passed'] else " FAIL:  FAIL"
             print(f"  {status} {suite_name}")
             if not result['passed'] and not self.ci_mode:
                 print(f"    Error: {result['stderr'][:200]}...")
         
         # Business value analysis
-        print(f"\n💼 BUSINESS VALUE ANALYSIS:")
+        print(f"\n[U+1F4BC] BUSINESS VALUE ANALYSIS:")
         critical_failures = [name for name, result in self.results.items() if not result['passed']]
         
         if not critical_failures:
-            print("✅ All critical business workflows protected")
-            print("✅ User authentication failures will be immediately visible")
-            print("✅ Database connection issues will trigger alerts")
-            print("✅ Agent execution failures will be comprehensively logged")
+            print(" PASS:  All critical business workflows protected")
+            print(" PASS:  User authentication failures will be immediately visible")
+            print(" PASS:  Database connection issues will trigger alerts")
+            print(" PASS:  Agent execution failures will be comprehensively logged")
         else:
-            print(f"🚨 {len(critical_failures)} critical gaps remain:")
+            print(f" ALERT:  {len(critical_failures)} critical gaps remain:")
             for failure in critical_failures:
                 print(f"   - {failure}")
-            print("⚠️  Business risk: DevOps teams may miss critical failures")
-            print("⚠️  Customer impact: Silent failures affecting user experience")
+            print(" WARNING: [U+FE0F]  Business risk: DevOps teams may miss critical failures")
+            print(" WARNING: [U+FE0F]  Customer impact: Silent failures affecting user experience")
         
         # CI/CD integration
         if self.ci_mode:
@@ -201,7 +201,7 @@ class LoggingCoverageValidator:
             with open("logging_coverage_validation_report.json", "w") as f:
                 json.dump(report_data, f, indent=2)
             
-            print(f"\n📄 Report saved: logging_coverage_validation_report.json")
+            print(f"\n[U+1F4C4] Report saved: logging_coverage_validation_report.json")
         
         return pass_rate >= 100
     
@@ -213,10 +213,10 @@ class LoggingCoverageValidator:
             return 0 if success else 1
             
         except KeyboardInterrupt:
-            print(f"\n⏹️  Validation interrupted by user")
+            print(f"\n[U+23F9][U+FE0F]  Validation interrupted by user")
             return 2
         except Exception as e:
-            print(f"\n💥 Validation failed with exception: {str(e)}")
+            print(f"\n[U+1F4A5] Validation failed with exception: {str(e)}")
             return 3
 
 

@@ -399,7 +399,7 @@ class TestHighVolumeEventIngestion:
     
     async def test_burst_traffic_handling(self, perf_harness):
         """Test handling of burst traffic patterns"""
-        # Simulate realistic burst pattern: quiet → burst → quiet
+        # Simulate realistic burst pattern: quiet  ->  burst  ->  quiet
         user_id = perf_harness.generate_test_user()
         
         # Phase 1: Baseline load

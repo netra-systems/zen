@@ -305,7 +305,7 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
     
     async def _handle_agent_death(self, execution_record) -> None:
         """Handle agent death detection (copied from parent class)."""
-        logger.critical(f"💀 AGENT DEATH DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
+        logger.critical(f"[U+1F480] AGENT DEATH DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
         
         # Send death notification via WebSocket
         if hasattr(self.websocket_bridge, 'notify_agent_error'):
@@ -317,7 +317,7 @@ class MCPEnhancedExecutionEngine(ExecutionEngine):
     
     async def _handle_agent_timeout(self, execution_record) -> None:
         """Handle agent timeout detection (copied from parent class)."""
-        logger.warning(f"⏱️ AGENT TIMEOUT DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
+        logger.warning(f"[U+23F1][U+FE0F] AGENT TIMEOUT DETECTED: {execution_record.agent_name} (execution_id={execution_record.execution_id})")
         
         # Send timeout notification via WebSocket  
         if hasattr(self.websocket_bridge, 'notify_agent_error'):

@@ -16,7 +16,7 @@ class DashboardTableRenderers:
         """Render file size violations table"""
         file_violations = violations.get('file_size_violations', [])[:20]
         if not file_violations:
-            return "<p>🎉 No file size violations found! All files are under 300 lines.</p>"
+            return "<p> CELEBRATION:  No file size violations found! All files are under 300 lines.</p>"
         
         rows = DashboardTableRenderers._generate_file_violation_rows(file_violations)
         return DashboardTableRenderers._build_violations_table(['File', 'Lines', 'Excess Lines', 'Severity', 'Recommendation'], rows)
@@ -42,7 +42,7 @@ class DashboardTableRenderers:
         """Render function complexity violations table"""
         func_violations = violations.get('function_complexity_violations', [])[:20]
         if not func_violations:
-            return "<p>🎉 No function complexity violations found! All functions are under 8 lines.</p>"
+            return "<p> CELEBRATION:  No function complexity violations found! All functions are under 8 lines.</p>"
         
         rows = DashboardTableRenderers._generate_function_violation_rows(func_violations)
         return DashboardTableRenderers._build_violations_table(['File', 'Function', 'Lines', 'Excess Lines', 'Severity', 'Recommendation'], rows)
@@ -69,7 +69,7 @@ class DashboardTableRenderers:
         """Render duplicate types table"""
         duplicates = violations.get('duplicate_types', {})
         if not duplicates:
-            return "<p>🎉 No duplicate type definitions found!</p>"
+            return "<p> CELEBRATION:  No duplicate type definitions found!</p>"
         
         rows = DashboardTableRenderers._generate_duplicate_rows(duplicates)
         return DashboardTableRenderers._build_violations_table(['Type Name', 'Duplicates', 'Files', 'Severity', 'Recommendation'], rows)
@@ -104,7 +104,7 @@ class DashboardTableRenderers:
         """Render worst offenders table"""
         file_violations = violations.get('file_size_violations', [])[:10]
         if not file_violations:
-            return "<p>🎉 No major offenders found!</p>"
+            return "<p> CELEBRATION:  No major offenders found!</p>"
         
         rows = DashboardTableRenderers._generate_offender_rows(file_violations)
         return DashboardTableRenderers._build_violations_table(['File', 'Violation Type', 'Details', 'Severity'], rows)

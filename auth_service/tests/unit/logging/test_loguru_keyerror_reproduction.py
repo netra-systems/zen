@@ -92,14 +92,14 @@ class TestLoguruKeyErrorFixValidation:
         try:
             ssot_logger.info("Test message for KeyError fix validation")
             # If we get here, the fix is working correctly
-            print("✅ JSON logging completed without KeyError - fix validated")
+            print(" PASS:  JSON logging completed without KeyError - fix validated")
         except KeyError as ke:
             if "timestamp" in str(ke):
-                pytest.fail("❌ KeyError: 'timestamp' still occurring - fix may have regressed")
+                pytest.fail(" FAIL:  KeyError: 'timestamp' still occurring - fix may have regressed")
             else:
-                pytest.fail(f"❌ Unexpected KeyError occurred: {ke}")
+                pytest.fail(f" FAIL:  Unexpected KeyError occurred: {ke}")
         except Exception as e:
-            pytest.fail(f"❌ Unexpected error in logging: {type(e).__name__}: {e}")
+            pytest.fail(f" FAIL:  Unexpected error in logging: {type(e).__name__}: {e}")
         
         # Assert: If we reach here, the test passed successfully
         assert True, "JSON logging completed without KeyError"

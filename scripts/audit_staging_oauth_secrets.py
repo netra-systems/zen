@@ -83,7 +83,7 @@ def validate_oauth_client_secret(secret: str) -> Tuple[bool, str]:
 def audit_oauth_secrets(project_id: str) -> Dict[str, Dict]:
     """Audit OAuth secrets in GCP."""
     logger.info(f"\n{'='*60}")
-    logger.info(f"🔍 AUDITING OAUTH SECRETS IN PROJECT: {project_id}")
+    logger.info(f" SEARCH:  AUDITING OAUTH SECRETS IN PROJECT: {project_id}")
     logger.info(f"{'='*60}\n")
     
     secrets_to_check = {
@@ -111,7 +111,7 @@ def audit_oauth_secrets(project_id: str) -> Dict[str, Dict]:
     
     # Check main OAuth secrets
     for secret_name, config in secrets_to_check.items():
-        logger.info(f"\n📋 Checking: {secret_name}")
+        logger.info(f"\n[U+1F4CB] Checking: {secret_name}")
         logger.info(f"   Description: {config['description']}")
         
         result = {
@@ -125,7 +125,7 @@ def audit_oauth_secrets(project_id: str) -> Dict[str, Dict]:
         # Check if secret exists
         if check_secret_exists(project_id, secret_name):
             result["exists"] = True
-            logger.info(f"   ✅ Secret exists in GCP")
+            logger.info(f"    PASS:  Secret exists in GCP")
             
             # Get and validate secret value
             value = get_secret_value(project_id, secret_name)
@@ -136,51 +136,51 @@ def audit_oauth_secrets(project_id: str) -> Dict[str, Dict]:
                 result["validation_message"] = message
                 
                 if valid:
-                    logger.info(f"   ✅ Secret format is valid: {message}")
+                    logger.info(f"    PASS:  Secret format is valid: {message}")
                     # Show partial value for verification
                     if "client-id" in secret_name:
-                        logger.info(f"   📝 Client ID starts with: {value[:30]}...")
+                        logger.info(f"   [U+1F4DD] Client ID starts with: {value[:30]}...")
                     else:
-                        logger.info(f"   📝 Secret length: {len(value)} chars")
+                        logger.info(f"   [U+1F4DD] Secret length: {len(value)} chars")
                 else:
-                    logger.error(f"   ❌ Invalid secret: {message}")
+                    logger.error(f"    FAIL:  Invalid secret: {message}")
                     if "placeholder" in message.lower():
-                        logger.error(f"   ⚠️  Current value: {value}")
+                        logger.error(f"    WARNING: [U+FE0F]  Current value: {value}")
             else:
-                logger.error(f"   ❌ Could not retrieve secret value")
+                logger.error(f"    FAIL:  Could not retrieve secret value")
         else:
-            logger.error(f"   ❌ Secret does NOT exist in GCP")
-            logger.info(f"   💡 Create it with: gcloud secrets create {secret_name} --project={project_id}")
+            logger.error(f"    FAIL:  Secret does NOT exist in GCP")
+            logger.info(f"    IDEA:  Create it with: gcloud secrets create {secret_name} --project={project_id}")
         
         results[secret_name] = result
     
     # Check for legacy secrets
     logger.info(f"\n{'='*60}")
-    logger.info("🔍 CHECKING FOR LEGACY/DUPLICATE SECRETS")
+    logger.info(" SEARCH:  CHECKING FOR LEGACY/DUPLICATE SECRETS")
     logger.info(f"{'='*60}")
     
     for legacy_secret in legacy_secrets:
         if check_secret_exists(project_id, legacy_secret):
-            logger.warning(f"   ⚠️  Found legacy secret: {legacy_secret}")
+            logger.warning(f"    WARNING: [U+FE0F]  Found legacy secret: {legacy_secret}")
             logger.warning(f"      This should be removed to avoid confusion")
     
     # Check environment variables
     logger.info(f"\n{'='*60}")
-    logger.info("🔍 CHECKING LOCAL ENVIRONMENT VARIABLES")
+    logger.info(" SEARCH:  CHECKING LOCAL ENVIRONMENT VARIABLES")
     logger.info(f"{'='*60}\n")
     
     for secret_name, result in results.items():
         env_var = result["env_var"]
         env_value = os.environ.get(env_var)
         if env_value:
-            logger.info(f"   ✅ {env_var} is set locally")
+            logger.info(f"    PASS:  {env_var} is set locally")
             valid, message = secrets_to_check[secret_name]['validator'](env_value)
             if valid:
                 logger.info(f"      Valid format: {message}")
             else:
-                logger.warning(f"      ⚠️  Invalid: {message}")
+                logger.warning(f"       WARNING: [U+FE0F]  Invalid: {message}")
         else:
-            logger.warning(f"   ⚠️  {env_var} is NOT set locally")
+            logger.warning(f"    WARNING: [U+FE0F]  {env_var} is NOT set locally")
     
     return results
 
@@ -201,9 +201,9 @@ def update_secret(project_id: str, secret_name: str, value: str) -> bool:
     cmd = f'echo -n "{value}" | gcloud secrets versions add {secret_name} --data-file=- --project={project_id}'
     success, output = run_gcloud_command(cmd)
     if success:
-        logger.info(f"✅ Successfully updated {secret_name}")
+        logger.info(f" PASS:  Successfully updated {secret_name}")
     else:
-        logger.error(f"❌ Failed to update {secret_name}: {output}")
+        logger.error(f" FAIL:  Failed to update {secret_name}: {output}")
     return success
 
 def main():
@@ -220,12 +220,12 @@ def main():
     
     # Summary
     logger.info(f"\n{'='*60}")
-    logger.info("📊 SUMMARY")
+    logger.info(" CHART:  SUMMARY")
     logger.info(f"{'='*60}\n")
     
     all_valid = True
     for secret_name, result in results.items():
-        status = "✅" if result["valid"] else "❌"
+        status = " PASS: " if result["valid"] else " FAIL: "
         logger.info(f"{status} {secret_name}: {'Valid' if result['valid'] else 'Invalid'}")
         if not result["valid"]:
             all_valid = False
@@ -234,7 +234,7 @@ def main():
     # Update if requested
     if args.update or args.client_id or args.client_secret:
         logger.info(f"\n{'='*60}")
-        logger.info("🔧 UPDATING SECRETS")
+        logger.info("[U+1F527] UPDATING SECRETS")
         logger.info(f"{'='*60}\n")
         
         updates = {}
@@ -260,18 +260,18 @@ def main():
             if config:
                 valid, message = config(value)
                 if not valid:
-                    logger.error(f"❌ Cannot update {secret_name}: {message}")
+                    logger.error(f" FAIL:  Cannot update {secret_name}: {message}")
                     continue
                 
                 if update_secret(args.project, secret_name, value):
-                    logger.info(f"✅ Updated {secret_name}")
+                    logger.info(f" PASS:  Updated {secret_name}")
                 else:
-                    logger.error(f"❌ Failed to update {secret_name}")
+                    logger.error(f" FAIL:  Failed to update {secret_name}")
     
     # Final recommendations
     if not all_valid:
         logger.info(f"\n{'='*60}")
-        logger.info("⚠️  ACTION REQUIRED")
+        logger.info(" WARNING: [U+FE0F]  ACTION REQUIRED")
         logger.info(f"{'='*60}\n")
         logger.info("To fix OAuth in staging:")
         logger.info("1. Get your OAuth credentials from Google Cloud Console")
@@ -284,7 +284,7 @@ def main():
         
         return 1
     else:
-        logger.info(f"\n✅ All OAuth secrets are properly configured!")
+        logger.info(f"\n PASS:  All OAuth secrets are properly configured!")
         return 0
 
 if __name__ == "__main__":

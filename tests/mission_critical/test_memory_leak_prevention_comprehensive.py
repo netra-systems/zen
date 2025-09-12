@@ -2218,7 +2218,7 @@ class TestAuthenticationPerformanceUnderLoad:
             # Success rate should be high
             success_rate = len(successful_journeys) / concurrent_users
             assert success_rate >= 0.9, \
-                f"Load test success rate too low: {success_rate*100:.1f}% (need ≥90%)"
+                f"Load test success rate too low: {success_rate*100:.1f}% (need  >= 90%)"
             
             # Average completion time should meet target
             if successful_journeys:

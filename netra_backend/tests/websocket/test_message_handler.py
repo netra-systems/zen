@@ -277,7 +277,7 @@ class TestMessageHandlerRealConnections:
             {"type": "valid_message", "data": "test"},
             {"type": "empty_message"},
             {"type": "large_message", "data": "x" * 1000},  # Large message
-            {"type": "special_chars", "data": "Special: üñíçödé & symbols!@#$%"},
+            {"type": "special_chars", "data": "Special: [U+00FC][U+00F1][U+00ED][U+00E7][U+00F6]d[U+00E9] & symbols!@#$%"},
             {"type": "json_in_data", "data": {"nested": {"json": "value"}}},
             {"type": "array_data", "data": [1, 2, 3, "mixed", {"types": True}]},
         ]

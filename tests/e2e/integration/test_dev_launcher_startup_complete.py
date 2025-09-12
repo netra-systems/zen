@@ -487,10 +487,10 @@ class TestDevLauncherStartupComplete:
         # Assert service discovery is working
         assert result["service_discovery_working"], "Service discovery mechanism failed"
         
-        logger.info("✓ CRITICAL dev launcher startup test PASSED")
-        logger.info(f"✓ Total startup time: {result['total_startup_time_seconds']:.1f}s")
-        logger.info(f"✓ Services validated: {len(services)}")
-        logger.info(f"✓ All services healthy: {result['all_services_healthy']}")
+        logger.info("[U+2713] CRITICAL dev launcher startup test PASSED")
+        logger.info(f"[U+2713] Total startup time: {result['total_startup_time_seconds']:.1f}s")
+        logger.info(f"[U+2713] Services validated: {len(services)}")
+        logger.info(f"[U+2713] All services healthy: {result['all_services_healthy']}")
 
 
 async def run_dev_launcher_startup_test():

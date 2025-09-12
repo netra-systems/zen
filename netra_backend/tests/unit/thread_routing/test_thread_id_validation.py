@@ -236,10 +236,10 @@ class TestThreadIDValidation(SSotBaseTestCase):
         """Test handling of special characters in thread IDs."""
         # BUSINESS VALUE: Prevents encoding/decoding issues in routing
         special_chars = [
-            "thread_123_café",     # Unicode characters
-            "thread_123_José",     # Accented characters  
-            "thread_123_файл",     # Cyrillic characters
-            "thread_123_测试",      # Chinese characters
+            "thread_123_caf[U+00E9]",     # Unicode characters
+            "thread_123_Jos[U+00E9]",     # Accented characters  
+            "thread_123_[U+0444]a[U+0439][U+043B]",     # Cyrillic characters
+            "thread_123_[U+6D4B][U+8BD5]",      # Chinese characters
         ]
         
         for special_id in special_chars:

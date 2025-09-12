@@ -92,7 +92,7 @@ class SyntheticDataMetricsHandler:
         """Build error update data dictionary"""
         return {
             "status": "error",
-            "message": f"❌ Synthetic data generation failed: {str(error)}",
+            "message": f" FAIL:  Synthetic data generation failed: {str(error)}",
             "error": str(error)
         }
     
@@ -173,7 +173,7 @@ class SyntheticDataMetricsHandler:
     def _format_completion_message(self, records_count: int, duration_ms: int) -> str:
         """Format human-readable completion message"""
         return (
-            f"✅ Successfully generated {records_count:,} "
+            f" PASS:  Successfully generated {records_count:,} "
             f"synthetic records in {duration_ms}ms"
         )
     

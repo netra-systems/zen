@@ -726,7 +726,7 @@ class TestWebSocketCrossUserDataLeakagePrevention(BaseIntegrationTest):
                         f"User {user.user_id} received event from {event['source_user']} - data leakage!"
             
             # Performance validation
-            assert concurrent_results["events_processed"] == 12  # 4 users × 3 events
+            assert concurrent_results["events_processed"] == 12  # 4 users  x  3 events
             assert concurrent_results["security_violations"] == 0, \
                 "Concurrent broadcasting should not generate security violations"
             

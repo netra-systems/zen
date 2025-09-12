@@ -86,7 +86,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
         self.auth_headers = self.auth_helper.get_auth_headers(self.staging_token)
         self.websocket_headers = self.auth_helper.get_websocket_headers(self.staging_token)
         
-        self.logger.info("✅ Staging authentication setup complete - ready for authenticated E2E testing")
+        self.logger.info(" PASS:  Staging authentication setup complete - ready for authenticated E2E testing")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -114,9 +114,9 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
             websocket_enabled=True
         )
         
-        self.logger.info(f"🚀 Starting complete thread lifecycle test for user: {user_context.user_id}")
-        self.logger.info(f"📋 Thread ID: {user_context.thread_id}")
-        self.logger.info(f"🔧 Run ID: {user_context.run_id}")
+        self.logger.info(f"[U+1F680] Starting complete thread lifecycle test for user: {user_context.user_id}")
+        self.logger.info(f"[U+1F4CB] Thread ID: {user_context.thread_id}")
+        self.logger.info(f"[U+1F527] Run ID: {user_context.run_id}")
         
         # Track WebSocket events for validation
         websocket_events = []
@@ -138,7 +138,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                 close_timeout=5.0
             ) as websocket:
                 
-                self.logger.info("✅ WebSocket connection established with staging authentication")
+                self.logger.info(" PASS:  WebSocket connection established with staging authentication")
                 
                 # Send thread creation request with business context
                 thread_creation_message = {
@@ -157,7 +157,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                 }
                 
                 await websocket.send(json.dumps(thread_creation_message))
-                self.logger.info(f"📤 Sent thread creation request for {user_context.thread_id}")
+                self.logger.info(f"[U+1F4E4] Sent thread creation request for {user_context.thread_id}")
                 
                 # Wait for thread creation confirmation
                 response = await asyncio.wait_for(websocket.recv(), timeout=10.0)
@@ -167,7 +167,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                 assert thread_response["type"] == "thread_created", f"Expected thread_created, got {thread_response['type']}"
                 assert thread_response["thread_id"] == str(user_context.thread_id), "Thread ID mismatch in creation response"
                 
-                self.logger.info(f"✅ Thread created successfully: {thread_response['thread_id']}")
+                self.logger.info(f" PASS:  Thread created successfully: {thread_response['thread_id']}")
                 
                 # PHASE 2: Send Business-Critical Agent Request
                 optimization_request = {
@@ -189,7 +189,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                 }
                 
                 await websocket.send(json.dumps(optimization_request))
-                self.logger.info("📤 Sent cost optimization request to agent")
+                self.logger.info("[U+1F4E4] Sent cost optimization request to agent")
                 
                 # PHASE 3: Collect ALL 5 CRITICAL WebSocket Events
                 agent_events = []
@@ -215,7 +215,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                         event_type = event.get("type")
                         if event_type in event_tracker:
                             event_tracker[event_type] += 1
-                            self.logger.info(f"📨 Received {event_type} event ({event_tracker[event_type]})")
+                            self.logger.info(f"[U+1F4E8] Received {event_type} event ({event_tracker[event_type]})")
                         
                         # Track business value metrics from events
                         if event_type == "agent_thinking":
@@ -239,24 +239,24 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                                     business_value_metrics["actionable_recommendations"] += response_text.count("recommend")
                             
                             business_value_metrics["agent_response_time"] = time.time() - start_agent_time
-                            self.logger.info(f"🎯 Agent completed in {business_value_metrics['agent_response_time']:.2f}s")
+                            self.logger.info(f" TARGET:  Agent completed in {business_value_metrics['agent_response_time']:.2f}s")
                             break
                             
                     except asyncio.TimeoutError:
-                        self.logger.warning(f"⏰ Event timeout - continuing to wait for completion")
+                        self.logger.warning(f"[U+23F0] Event timeout - continuing to wait for completion")
                         continue
                     except json.JSONDecodeError as e:
-                        self.logger.warning(f"⚠️ JSON decode error: {e}")
+                        self.logger.warning(f" WARNING: [U+FE0F] JSON decode error: {e}")
                         continue
                 
                 # CRITICAL VALIDATION: ALL 5 WebSocket Events MUST be present
                 missing_events = [event_type for event_type, count in event_tracker.items() if count == 0]
                 if missing_events:
-                    self.logger.error(f"❌ CRITICAL: Missing required WebSocket events: {missing_events}")
-                    self.logger.error(f"📊 Event counts: {event_tracker}")
+                    self.logger.error(f" FAIL:  CRITICAL: Missing required WebSocket events: {missing_events}")
+                    self.logger.error(f" CHART:  Event counts: {event_tracker}")
                     raise AssertionError(f"CRITICAL: Missing required WebSocket events: {missing_events}. All 5 events are mandatory for business value delivery!")
                 
-                self.logger.info(f"✅ ALL 5 critical WebSocket events received: {event_tracker}")
+                self.logger.info(f" PASS:  ALL 5 critical WebSocket events received: {event_tracker}")
                 
                 # PHASE 4: Validate Business Value Delivery
                 total_lifecycle_time = time.time() - start_time
@@ -293,21 +293,21 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                 message_count = len(status_data["data"]["messages"])
                 assert message_count >= 2, f"Expected at least 2 messages (user + agent), got {message_count}"
                 
-                self.logger.info(f"✅ Thread persistence validated: {message_count} messages preserved")
+                self.logger.info(f" PASS:  Thread persistence validated: {message_count} messages preserved")
                 
         except Exception as e:
-            self.logger.error(f"❌ Complete thread lifecycle test failed: {e}")
-            self.logger.error(f"📊 WebSocket events collected: {len(websocket_events)}")
-            self.logger.error(f"📈 Business value metrics: {business_value_metrics}")
+            self.logger.error(f" FAIL:  Complete thread lifecycle test failed: {e}")
+            self.logger.error(f" CHART:  WebSocket events collected: {len(websocket_events)}")
+            self.logger.error(f"[U+1F4C8] Business value metrics: {business_value_metrics}")
             raise
         
         # SUCCESS METRICS REPORTING
-        self.logger.info("🎉 COMPLETE THREAD LIFECYCLE TEST SUCCESS")
-        self.logger.info(f"⏱️  Total lifecycle time: {total_lifecycle_time:.2f}s")
-        self.logger.info(f"📊 WebSocket events: {len(websocket_events)} total")
-        self.logger.info(f"🎯 Business insights delivered: {business_value_metrics['insights_delivered']}")
-        self.logger.info(f"💡 Actionable recommendations: {business_value_metrics['actionable_recommendations']}")
-        self.logger.info(f"💰 Cost savings opportunities identified: {business_value_metrics['cost_savings_identified']}")
+        self.logger.info(" CELEBRATION:  COMPLETE THREAD LIFECYCLE TEST SUCCESS")
+        self.logger.info(f"[U+23F1][U+FE0F]  Total lifecycle time: {total_lifecycle_time:.2f}s")
+        self.logger.info(f" CHART:  WebSocket events: {len(websocket_events)} total")
+        self.logger.info(f" TARGET:  Business insights delivered: {business_value_metrics['insights_delivered']}")
+        self.logger.info(f" IDEA:  Actionable recommendations: {business_value_metrics['actionable_recommendations']}")
+        self.logger.info(f"[U+1F4B0] Cost savings opportunities identified: {business_value_metrics['cost_savings_identified']}")
         
         # Validate minimum business value thresholds
         assert business_value_metrics["insights_delivered"] >= 1, "Insufficient business insights delivered"
@@ -335,7 +335,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
         reconnect_messages = []
         
         # SESSION 1: Create thread and add initial messages
-        self.logger.info("🔗 SESSION 1: Creating thread with initial messages")
+        self.logger.info("[U+1F517] SESSION 1: Creating thread with initial messages")
         
         async with websockets.connect(
             self.staging_config.urls.websocket_url,
@@ -382,14 +382,14 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
             assert any(e.get("type") == "agent_completed" for e in session1_events), \
                 "Initial session did not receive complete agent response"
             
-            self.logger.info(f"✅ Session 1 completed with {len(initial_messages)} messages")
+            self.logger.info(f" PASS:  Session 1 completed with {len(initial_messages)} messages")
         
         # DISCONNECT PERIOD: Simulate user disconnect (WebSocket closed automatically)
         await asyncio.sleep(2.0)  # Brief disconnect period
-        self.logger.info("🔌 Simulated user disconnect and reconnection")
+        self.logger.info("[U+1F50C] Simulated user disconnect and reconnection")
         
         # SESSION 2: Reconnect and verify thread persistence
-        self.logger.info("🔗 SESSION 2: Reconnecting and verifying thread persistence")
+        self.logger.info("[U+1F517] SESSION 2: Reconnecting and verifying thread persistence")
         
         async with websockets.connect(
             self.staging_config.urls.websocket_url, 
@@ -442,16 +442,16 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
             followup_response = await asyncio.wait_for(ws2.recv(), timeout=10.0)
             reconnect_messages.append(json.loads(followup_response))
             
-            self.logger.info(f"✅ Session 2 completed with {len(reconnect_messages)} new messages")
+            self.logger.info(f" PASS:  Session 2 completed with {len(reconnect_messages)} new messages")
         
         # Business Value Validation
         total_messages = len(initial_messages) + len(reconnect_messages)
         assert total_messages >= 3, f"Insufficient conversation continuity: {total_messages} total messages"
         
-        self.logger.info("🎉 THREAD PERSISTENCE TEST SUCCESS")
-        self.logger.info(f"📊 Session 1 messages: {len(initial_messages)}")
-        self.logger.info(f"📊 Session 2 messages: {len(reconnect_messages)}")
-        self.logger.info(f"💡 Business Value: User maintained conversation context across sessions")
+        self.logger.info(" CELEBRATION:  THREAD PERSISTENCE TEST SUCCESS")
+        self.logger.info(f" CHART:  Session 1 messages: {len(initial_messages)}")
+        self.logger.info(f" CHART:  Session 2 messages: {len(reconnect_messages)}")
+        self.logger.info(f" IDEA:  Business Value: User maintained conversation context across sessions")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -634,11 +634,11 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
         assert context_references >= 1, \
             "Agent responses show no context continuity - business value compromised"
         
-        self.logger.info("🎉 MESSAGE ORDERING AND CONTINUITY TEST SUCCESS")
-        self.logger.info(f"📊 Total conversation events: {len(conversation_log)}")
-        self.logger.info(f"🔗 Message sequence: {' -> '.join(message_sequence[:10])}")
-        self.logger.info(f"💡 Context references found: {context_references}")
-        self.logger.info(f"⏱️  Conversation spanned {len(timestamps)} timestamped events")
+        self.logger.info(" CELEBRATION:  MESSAGE ORDERING AND CONTINUITY TEST SUCCESS")
+        self.logger.info(f" CHART:  Total conversation events: {len(conversation_log)}")
+        self.logger.info(f"[U+1F517] Message sequence: {' -> '.join(message_sequence[:10])}")
+        self.logger.info(f" IDEA:  Context references found: {context_references}")
+        self.logger.info(f"[U+23F1][U+FE0F]  Conversation spanned {len(timestamps)} timestamped events")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -827,11 +827,11 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
         assert avg_response_length > 100, \
             f"Agent responses too brief for business value: {avg_response_length} chars average"
         
-        self.logger.info("🎉 AGENT CONTEXT PRESERVATION TEST SUCCESS")
-        self.logger.info(f"📊 Completed interactions: {len(execution_contexts)}")
-        self.logger.info(f"🧠 Context indicators met: {agent_memory_test}")
-        self.logger.info(f"📈 Average response length: {avg_response_length:.0f} characters")
-        self.logger.info(f"💡 Business Value: Agent demonstrated memory and context continuity")
+        self.logger.info(" CELEBRATION:  AGENT CONTEXT PRESERVATION TEST SUCCESS")
+        self.logger.info(f" CHART:  Completed interactions: {len(execution_contexts)}")
+        self.logger.info(f"[U+1F9E0] Context indicators met: {agent_memory_test}")
+        self.logger.info(f"[U+1F4C8] Average response length: {avg_response_length:.0f} characters")
+        self.logger.info(f" IDEA:  Business Value: Agent demonstrated memory and context continuity")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -937,7 +937,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                 return False
         
         # Execute concurrent thread lifecycles
-        self.logger.info(f"🚀 Starting load test with {concurrent_users} concurrent users")
+        self.logger.info(f"[U+1F680] Starting load test with {concurrent_users} concurrent users")
         load_test_start = time.time()
         
         results = await asyncio.gather(*[
@@ -965,17 +965,17 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
             assert avg_agent_time < 25.0, \
                 f"Agent response too slow under load: {avg_agent_time:.2f}s average"
         
-        self.logger.info("🎉 THREAD LIFECYCLE LOAD TEST SUCCESS")
-        self.logger.info(f"👥 Concurrent users: {concurrent_users}")
-        self.logger.info(f"✅ Success rate: {performance_metrics['concurrent_success_rate']:.1%}")
-        self.logger.info(f"⏱️  Total load test time: {total_load_time:.2f}s")
-        self.logger.info(f"📊 Events processed: {performance_metrics['total_events_processed']}")
+        self.logger.info(" CELEBRATION:  THREAD LIFECYCLE LOAD TEST SUCCESS")
+        self.logger.info(f"[U+1F465] Concurrent users: {concurrent_users}")
+        self.logger.info(f" PASS:  Success rate: {performance_metrics['concurrent_success_rate']:.1%}")
+        self.logger.info(f"[U+23F1][U+FE0F]  Total load test time: {total_load_time:.2f}s")
+        self.logger.info(f" CHART:  Events processed: {performance_metrics['total_events_processed']}")
         
         if performance_metrics["thread_creation_times"]:
-            self.logger.info(f"🏗️  Avg thread creation: {sum(performance_metrics['thread_creation_times'])/len(performance_metrics['thread_creation_times']):.2f}s")
+            self.logger.info(f"[U+1F3D7][U+FE0F]  Avg thread creation: {sum(performance_metrics['thread_creation_times'])/len(performance_metrics['thread_creation_times']):.2f}s")
         
         if performance_metrics["agent_response_times"]:
-            self.logger.info(f"🤖 Avg agent response: {sum(performance_metrics['agent_response_times'])/len(performance_metrics['agent_response_times']):.2f}s")
+            self.logger.info(f"[U+1F916] Avg agent response: {sum(performance_metrics['agent_response_times'])/len(performance_metrics['agent_response_times']):.2f}s")
 
     @pytest.mark.e2e
     @pytest.mark.staging
@@ -1007,7 +1007,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
         ) as websocket:
             
             # SCENARIO 1: Invalid Agent Request Recovery
-            self.logger.info("🔧 Testing invalid agent request recovery")
+            self.logger.info("[U+1F527] Testing invalid agent request recovery")
             
             invalid_request = {
                 "type": "agent_request",
@@ -1032,7 +1032,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
                 error_handling_metrics["graceful_degradation"] += 1
             
             # SCENARIO 2: Recovery with Valid Request
-            self.logger.info("🔧 Testing recovery with valid agent request")
+            self.logger.info("[U+1F527] Testing recovery with valid agent request")
             
             recovery_request = {
                 "type": "agent_request",
@@ -1069,7 +1069,7 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
             })
             
             # SCENARIO 3: Network Interruption Simulation
-            self.logger.info("🔧 Testing network interruption handling")
+            self.logger.info("[U+1F527] Testing network interruption handling")
             
             # Send message and then test rapid succession (stress test)
             stress_messages = [
@@ -1114,8 +1114,8 @@ class TestCompleteThreadLifecycleStaging(BaseIntegrationTest):
         assert error_handling_metrics["user_experience_maintained"] >= 1, \
             "User experience not maintained during error scenarios - business value compromised"
         
-        self.logger.info("🎉 THREAD RECOVERY AND ERROR HANDLING TEST SUCCESS")
-        self.logger.info(f"📊 Recovery scenarios tested: {len(recovery_scenarios)}")
-        self.logger.info(f"✅ Successful scenarios: {successful_scenarios}")
-        self.logger.info(f"🛡️  Error handling metrics: {error_handling_metrics}")
-        self.logger.info(f"💡 Business Value: Platform maintains reliability during error conditions")
+        self.logger.info(" CELEBRATION:  THREAD RECOVERY AND ERROR HANDLING TEST SUCCESS")
+        self.logger.info(f" CHART:  Recovery scenarios tested: {len(recovery_scenarios)}")
+        self.logger.info(f" PASS:  Successful scenarios: {successful_scenarios}")
+        self.logger.info(f"[U+1F6E1][U+FE0F]  Error handling metrics: {error_handling_metrics}")
+        self.logger.info(f" IDEA:  Business Value: Platform maintains reliability during error conditions")

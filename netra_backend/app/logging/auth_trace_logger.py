@@ -92,7 +92,7 @@ class AuthTraceLogger:
             ])
         
         logger.info(
-            f"🚀 AUTH_TRACE_START: {operation} for user_id='{user_id}' | "
+            f"[U+1F680] AUTH_TRACE_START: {operation} for user_id='{user_id}' | "
             f"Request: {request_id} | Correlation: {correlation_id} | "
             f"Context: {asdict(context)}"
         )
@@ -117,7 +117,7 @@ class AuthTraceLogger:
             context.session_info.update(additional_info)
         
         logger.info(
-            f"✅ AUTH_TRACE_SUCCESS: {context.operation} completed for user_id='{context.user_id}' | "
+            f" PASS:  AUTH_TRACE_SUCCESS: {context.operation} completed for user_id='{context.user_id}' | "
             f"Duration: {context.performance_metrics.get('duration_seconds', 'unknown')}s | "
             f"Request: {context.request_id} | Correlation: {context.correlation_id} | "
             f"Context: {asdict(context)}"
@@ -126,7 +126,7 @@ class AuthTraceLogger:
         # Special logging for system user successes
         if context.user_id == "system":
             logger.info(
-                f"🔧 SYSTEM_AUTH_SUCCESS: Service-to-service authentication succeeded for operation '{context.operation}' | "
+                f"[U+1F527] SYSTEM_AUTH_SUCCESS: Service-to-service authentication succeeded for operation '{context.operation}' | "
                 f"This indicates proper inter-service configuration | "
                 f"Request: {context.request_id}"
             )
@@ -381,7 +381,7 @@ class AuthTraceLogger:
             comprehensive_dump = self.dump_all_context_safely(context, error, additional_context)
             
             logger.error(
-                f"❌ AUTH_TRACE_FAILURE: {getattr(context, 'operation', 'unknown')} failed for user_id='{getattr(context, 'user_id', 'unknown')}' | "
+                f" FAIL:  AUTH_TRACE_FAILURE: {getattr(context, 'operation', 'unknown')} failed for user_id='{getattr(context, 'user_id', 'unknown')}' | "
                 f"Error: {error} | Duration: {context.performance_metrics.get('duration_seconds', 'unknown') if hasattr(context, 'performance_metrics') else 'unknown'}s | "
                 f"Request: {getattr(context, 'request_id', 'unknown')} | Correlation: {getattr(context, 'correlation_id', 'unknown')} | "
                 f"COMPREHENSIVE_CONTEXT_DUMP: {comprehensive_dump}"
@@ -390,7 +390,7 @@ class AuthTraceLogger:
         except Exception as log_error:
             # Fallback logging if comprehensive dump fails
             logger.error(
-                f"❌ AUTH_TRACE_FAILURE: Operation failed | Error: {error} | "
+                f" FAIL:  AUTH_TRACE_FAILURE: Operation failed | Error: {error} | "
                 f"Context dump failed: {log_error} | "
                 f"Basic context: user_id={getattr(context, 'user_id', 'unknown')}, "
                 f"operation={getattr(context, 'operation', 'unknown')}"
@@ -403,7 +403,7 @@ class AuthTraceLogger:
                 comprehensive_dump = self.dump_all_context_safely(context, error, additional_context)
                 
                 logger.error(
-                    f"🔴 CRITICAL_AUTH_FAILURE: 403 'Not authenticated' error detected! | "
+                    f"[U+1F534] CRITICAL_AUTH_FAILURE: 403 'Not authenticated' error detected! | "
                     f"User: '{getattr(context, 'user_id', 'unknown')}' | Operation: '{getattr(context, 'operation', 'unknown')}' | "
                     f"This is the exact error you're debugging! | "
                     f"Request: {getattr(context, 'request_id', 'unknown')} | Correlation: {getattr(context, 'correlation_id', 'unknown')} | "
@@ -412,7 +412,7 @@ class AuthTraceLogger:
                 
                 if getattr(context, 'user_id', None) == "system":
                     logger.error(
-                        f"🚨 SYSTEM_USER_AUTH_FAILURE: The 'system' user failed authentication! | "
+                        f" ALERT:  SYSTEM_USER_AUTH_FAILURE: The 'system' user failed authentication! | "
                         f"This indicates a service-to-service authentication problem. | "
                         f"Check: SERVICE_SECRET, JWT_SECRET, authentication middleware, inter-service config | "
                         f"Request: {getattr(context, 'request_id', 'unknown')} | "
@@ -420,7 +420,7 @@ class AuthTraceLogger:
                     )
         except Exception as critical_error:
             logger.error(
-                f"🔴 CRITICAL_AUTH_FAILURE: 403 error detected but failed to log details: {critical_error} | "
+                f"[U+1F534] CRITICAL_AUTH_FAILURE: 403 error detected but failed to log details: {critical_error} | "
                 f"Original error: {error}"
             )
     
@@ -442,7 +442,7 @@ class AuthTraceLogger:
             context.session_info.update(details)
         
         logger.debug(
-            f"🔄 AUTH_STATE_CHANGE: {context.operation} state changed from '{old_state}' to '{new_state}' | "
+            f" CYCLE:  AUTH_STATE_CHANGE: {context.operation} state changed from '{old_state}' to '{new_state}' | "
             f"User: '{context.user_id}' | Request: {context.request_id} | "
             f"Details: {details or 'none'}"
         )
@@ -554,7 +554,7 @@ def log_authentication_context_dump(user_id: str,
         else:
             comprehensive_dump = auth_tracer.dump_all_context_safely(context, None, additional_context)
             logger.info(
-                f"🔍 AUTH_CONTEXT_DUMP: {operation} for user '{user_id}' | "
+                f" SEARCH:  AUTH_CONTEXT_DUMP: {operation} for user '{user_id}' | "
                 f"Request: {request_id} | Correlation: {correlation_id} | "
                 f"FULL_CONTEXT: {comprehensive_dump}"
             )

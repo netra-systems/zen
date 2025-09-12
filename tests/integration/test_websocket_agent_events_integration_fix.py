@@ -47,7 +47,7 @@ class MockWebSocketEventCapture:
         }
         self.events.append(event)
         self.event_types.append(event_type)
-        print(f"🔔 WebSocket Event: {event_type} - {data.get('tool_name', data.get('agent_name', 'unknown'))}")
+        print(f"[U+1F514] WebSocket Event: {event_type} - {data.get('tool_name', data.get('agent_name', 'unknown'))}")
         return True
         
     def get_events_by_type(self, event_type: str) -> List[Dict]:
@@ -256,7 +256,7 @@ async def test_complete_websocket_event_flow(
     assert result.success, f"Agent execution should succeed: {result.error if hasattr(result, 'error') else 'Unknown error'}"
     
     # CRITICAL VALIDATION: All 5 events must be present
-    print(f"\n🔍 Captured {len(websocket_event_capture.events)} WebSocket events:")
+    print(f"\n SEARCH:  Captured {len(websocket_event_capture.events)} WebSocket events:")
     for event in websocket_event_capture.events:
         print(f"  - {event['type']}: {event['data'].get('agent_name', event['data'].get('tool_name', 'unknown'))}")
     
@@ -280,7 +280,7 @@ async def test_complete_websocket_event_flow(
     assert websocket_event_capture.has_all_critical_events(), \
         f"Missing critical events. Received: {set(websocket_event_capture.event_types)}"
     
-    print("✅ SUCCESS: All 5 critical WebSocket events validated!")
+    print(" PASS:  SUCCESS: All 5 critical WebSocket events validated!")
     print(f"   Events sent: {', '.join(sorted(set(websocket_event_capture.event_types)))}")
 
 
@@ -340,7 +340,7 @@ async def test_websocket_events_with_tool_dispatcher_integration(
     assert completed_event["data"]["tool_name"] == "integration_test_tool"
     assert completed_event["data"]["status"] == "success"
     
-    print("✅ Tool dispatcher WebSocket integration validated!")
+    print(" PASS:  Tool dispatcher WebSocket integration validated!")
 
 
 if __name__ == "__main__":

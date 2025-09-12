@@ -1,7 +1,7 @@
 """
 Scaling Edge Cases Tests
 Tests edge cases in scaling analysis workflows.
-Maximum 300 lines, functions ≤8 lines.
+Maximum 300 lines, functions  <= 8 lines.
 """
 
 # Add project root to path

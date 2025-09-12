@@ -1,7 +1,7 @@
 """Supervisor flow observability module.
 
 Provides SupervisorFlowLogger for tracking TODO lists and flow state.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 import time

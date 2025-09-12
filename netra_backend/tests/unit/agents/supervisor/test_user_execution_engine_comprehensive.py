@@ -12,14 +12,14 @@ CRITICAL REQUIREMENTS from CLAUDE.md:
 5. Tests error handling, recovery, and graceful degradation
 
 Business Value Justification (BVJ):
-- Segment: ALL (Free → Enterprise) - Core chat functionality 
+- Segment: ALL (Free  ->  Enterprise) - Core chat functionality 
 - Business Goal: Ensure reliable agent execution and real-time user experience
-- Value Impact: UserExecutionEngine orchestrates SupervisorAgent → Sub-Agents workflow that delivers $500K+ ARR
+- Value Impact: UserExecutionEngine orchestrates SupervisorAgent  ->  Sub-Agents workflow that delivers $500K+ ARR
 - Strategic Impact: This is the core of Golden Path user flow that provides substantive AI value
 - Revenue Impact: Without working UserExecutionEngine, chat has NO business value
 
 This UserExecutionEngine is MISSION CRITICAL because it:
-- Orchestrates the complete agent execution pipeline (SupervisorAgent → Data → Optimization → Report agents)
+- Orchestrates the complete agent execution pipeline (SupervisorAgent  ->  Data  ->  Optimization  ->  Report agents)
 - Ensures all 5 WebSocket events are sent to provide user experience
 - Manages user context isolation for multi-user concurrent execution
 - Delivers the complete business value through agent orchestration
@@ -1339,7 +1339,7 @@ class TestUserExecutionEngineComprehensive:
 
     @pytest.mark.unit
     async def test_golden_path_agent_orchestration(self, user_execution_engine, test_user_context, mock_websocket_emitter):
-        """Test Golden Path agent orchestration: SupervisorAgent → Data → Optimization → Report.
+        """Test Golden Path agent orchestration: SupervisorAgent  ->  Data  ->  Optimization  ->  Report.
         
         This test validates the complete business value delivery pipeline that generates $500K+ ARR.
         """

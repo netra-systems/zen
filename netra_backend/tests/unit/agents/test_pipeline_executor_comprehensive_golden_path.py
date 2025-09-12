@@ -199,7 +199,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         Test the golden path pipeline step execution.
         
         BVJ: Validates core pipeline step-by-step execution (foundation of agent workflows)
-        Critical Path: Pipeline steps → Sequential execution → Success results
+        Critical Path: Pipeline steps  ->  Sequential execution  ->  Success results
         """
         # Arrange: Create PipelineExecutor with real business logic
         pipeline_executor = PipelineExecutor(
@@ -247,7 +247,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         Test state persistence and checkpointing during pipeline execution.
         
         BVJ: System reliability - enables recovery from failures and resumption
-        Critical Path: Step execution → State checkpoint → Recovery capability
+        Critical Path: Step execution  ->  State checkpoint  ->  Recovery capability
         """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
@@ -291,7 +291,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         Test flow logging and observability tracking during pipeline execution.
         
         BVJ: Platform monitoring - enables debugging and performance optimization
-        Critical Path: Pipeline start → Step tracking → Flow completion
+        Critical Path: Pipeline start  ->  Step tracking  ->  Flow completion
         """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
@@ -338,7 +338,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         Test proper database session management without global state storage.
         
         BVJ: Architecture compliance - prevents session leakage and concurrency issues
-        Critical Path: Session passing → No global storage → Proper cleanup
+        Critical Path: Session passing  ->  No global storage  ->  Proper cleanup
         """
         # Arrange: Create PipelineExecutor
         pipeline_executor = PipelineExecutor(
@@ -380,7 +380,7 @@ class TestPipelineExecutorComprehensiveGoldenPath(SSotAsyncTestCase):
         Test user context isolation using factory pattern for pipeline execution.
         
         BVJ: Enterprise security - ensures pipeline execution is user-isolated
-        Critical Path: User context → Factory pattern → Isolated execution
+        Critical Path: User context  ->  Factory pattern  ->  Isolated execution
         """
         # Arrange: Create PipelineExecutor with user context
         pipeline_executor_with_context = PipelineExecutor(

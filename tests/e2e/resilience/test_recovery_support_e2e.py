@@ -2,7 +2,7 @@
 Recovery & Support E2E Tests - Abandonment recovery and error handling
 
 **BUSINESS VALUE JUSTIFICATION (BVJ):**
-1. **Segment**: Free users → Paid conversions (10,000+ potential users)
+1. **Segment**: Free users  ->  Paid conversions (10,000+ potential users)
 2. **Business Goal**: 60-80% abandon onboarding - recovery can convert 15-25%
 # 3. **Value Impact**: Great error UX maintains 15%+ conversion vs <1% for poor UX # Possibly broken comprehension
 4. **Revenue Impact**: Recovery systems = +$300K ARR from abandonment capture
@@ -37,7 +37,7 @@ class TestRecoverySupportE2E:
     # async def test_9_onboarding_abandonment_recovery_e2e(, self, conversion_environment
     # ):
 # """
-# CRITICAL: Onboarding abandonment → recovery → re-engagement → conversion
+# CRITICAL: Onboarding abandonment  ->  recovery  ->  re-engagement  ->  conversion
 
     # BVJ: 60-80% of users abandon onboarding. Effective recovery can convert
 # 15-25% of abandoners, representing massive revenue recovery opportunity.
@@ -56,7 +56,7 @@ class TestRecoverySupportE2E:
     # async def test_10_first_time_error_experience_and_support_e2e(, self, conversion_environment
     # ):
 # """
-# CRITICAL: Error handling → support experience → trust preservation
+# CRITICAL: Error handling  ->  support experience  ->  trust preservation
 
     # BVJ: First-time users who experience errors convert at <1% unless the
 # error experience builds confidence. Great error UX can maintain 15%+ conversion.
@@ -72,7 +72,7 @@ class TestRecoverySupportE2E:
     # # Phase 3: Convert error into confidence
 # await self._convert_error_into_confidence(env, support_result)
 
-    # # Helper methods (each ≤8 lines as required)
+    # # Helper methods (each  <= 8 lines as required)
 
     # async def _simulate_onboarding_abandonment(self, env):
     # """Simulate realistic onboarding abandonment scenario"""

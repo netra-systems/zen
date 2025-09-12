@@ -150,7 +150,7 @@ class TestMessageLifecycleRealServicesIntegration(SSotBaseTestCase):
         assert thread_messages[0]["context"]["priority"] == "high"
         assert thread_messages[1]["agent_context"]["confidence"] == 0.95
         
-        print("✅ Complete message lifecycle user to agent test passed")
+        print(" PASS:  Complete message lifecycle user to agent test passed")
 
     @pytest.mark.asyncio
     async def test_message_persistence_and_history_retrieval(self):
@@ -261,7 +261,7 @@ class TestMessageLifecycleRealServicesIntegration(SSotBaseTestCase):
         all_thread_ids = [msg["thread_id"] for msg in retrieved_history]
         assert all(tid == thread_id for tid in all_thread_ids), "All messages should belong to same thread"
         
-        print("✅ Message persistence and history retrieval test passed")
+        print(" PASS:  Message persistence and history retrieval test passed")
 
     @pytest.mark.asyncio
     async def test_message_delivery_with_offline_users(self):
@@ -386,7 +386,7 @@ class TestMessageLifecycleRealServicesIntegration(SSotBaseTestCase):
         assert delivery_status["delivered"] is True
         assert delivery_status["delivered_at"] is not None
         
-        print("✅ Message delivery with offline users test passed")
+        print(" PASS:  Message delivery with offline users test passed")
 
     @pytest.mark.asyncio
     async def test_message_threading_and_context_preservation(self):
@@ -524,7 +524,7 @@ class TestMessageLifecycleRealServicesIntegration(SSotBaseTestCase):
         assert followup_topic == "product_search_optimization"
         assert followup_conversation[0]["conversation_context"]["derived_from"] == main_topic
         
-        print("✅ Message threading and context preservation test passed")
+        print(" PASS:  Message threading and context preservation test passed")
 
     @pytest.mark.asyncio
     async def test_message_search_and_filtering_real_database(self):
@@ -647,7 +647,7 @@ class TestMessageLifecycleRealServicesIntegration(SSotBaseTestCase):
         db_search_relevance = await self._analyze_search_relevance(database_messages, "database")
         assert db_search_relevance["average_relevance"] > 0.8, "Database search should be highly relevant"
         
-        print("✅ Message search and filtering real database test passed")
+        print(" PASS:  Message search and filtering real database test passed")
 
     # Helper methods for real service integration
 

@@ -204,7 +204,7 @@ class TestCircuitBreakerCompatibilityRegression:
     
     def test_unified_to_legacy_mapping_regression(self):
         """
-        PASSING TEST: Validates that unified → legacy mappings have not regressed.
+        PASSING TEST: Validates that unified  ->  legacy mappings have not regressed.
         """
         from netra_backend.app.core.circuit_breaker import (
             # Legacy aliases
@@ -224,7 +224,7 @@ class TestCircuitBreakerCompatibilityRegression:
         assert callable(CircuitBreaker), "CircuitBreaker alias should be callable"
         assert callable(CircuitBreakerRegistry), "CircuitBreakerRegistry alias should be callable"
         
-        print("MAPPING REGRESSION: Unified → Legacy mappings working correctly")
+        print("MAPPING REGRESSION: Unified  ->  Legacy mappings working correctly")
     
     def test_config_conversion_regression(self):
         """

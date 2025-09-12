@@ -171,7 +171,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             # Verify auth service was called correctly
             mock_auth.assert_called_once_with(websocket, e2e_context=None)
             
-            logger.info("✅ Valid JWT authentication succeeded with correct user context")
+            logger.info(" PASS:  Valid JWT authentication succeeded with correct user context")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -217,7 +217,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             # Verify auth service was called
             mock_auth.assert_called_once()
             
-            logger.info("✅ Malformed JWT authentication correctly rejected")
+            logger.info(" PASS:  Malformed JWT authentication correctly rejected")
 
     @pytest.mark.integration  
     @pytest.mark.real_services
@@ -260,7 +260,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             # Verify proper statistics tracking
             assert self.authenticator._websocket_auth_failures > 0, "Failure count should increment"
             
-            logger.info("✅ Missing token authentication correctly rejected")
+            logger.info(" PASS:  Missing token authentication correctly rejected")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -306,7 +306,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             # Verify statistics tracking
             assert self.authenticator._websocket_auth_attempts > 0, "Attempts should be tracked"
             
-            logger.info("✅ Expired token authentication correctly rejected with proper error")
+            logger.info(" PASS:  Expired token authentication correctly rejected with proper error")
 
     @pytest.mark.integration
     @pytest.mark.real_services  
@@ -353,7 +353,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             failure_stats = self.authenticator.get_websocket_auth_stats()
             assert failure_stats["websocket_auth_statistics"]["failed_authentications"] > 0
             
-            logger.info("✅ Invalid signature authentication correctly rejected with security focus")
+            logger.info(" PASS:  Invalid signature authentication correctly rejected with security focus")
 
     # =============================================================================
     # SSOT COMPLIANCE TESTS (5 tests)
@@ -412,7 +412,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             assert stats["ssot_compliance"]["ssot_compliant"] is True
             assert stats["ssot_compliance"]["authentication_service"] == "UnifiedAuthenticationService"
             
-            logger.info("✅ SSOT authentication service integration validated successfully")
+            logger.info(" PASS:  SSOT authentication service integration validated successfully")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -472,7 +472,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             assert len(context.user_id) > 10, "User ID should be sufficiently unique"
             assert len(context.websocket_client_id) > 15, "WebSocket client ID should be unique"
             
-            logger.info("✅ Factory pattern user context creation validated successfully")
+            logger.info(" PASS:  Factory pattern user context creation validated successfully")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -512,7 +512,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             # Verify service was attempted
             mock_auth.assert_called_once()
             
-            logger.info("✅ Auth service error handling validated with graceful degradation")
+            logger.info(" PASS:  Auth service error handling validated with graceful degradation")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -556,7 +556,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             stats = self.authenticator.get_websocket_auth_stats()
             assert stats["websocket_auth_statistics"]["failed_authentications"] > 0
             
-            logger.info(f"✅ Authentication timeout handling validated (duration: {duration:.2f}s)")
+            logger.info(f" PASS:  Authentication timeout handling validated (duration: {duration:.2f}s)")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -615,7 +615,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
         # Validate connection state tracking
         assert "connection_states_seen" in final_stats, "Connection states should be tracked"
         
-        logger.info("✅ SSOT authentication statistics tracking validated comprehensively")
+        logger.info(" PASS:  SSOT authentication statistics tracking validated comprehensively")
 
     # =============================================================================
     # WEBSOCKET STATE VALIDATION TESTS (5 tests)
@@ -667,7 +667,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             
             mock_auth.assert_called_once()
             
-            logger.info("✅ Connected WebSocket state authentication validated successfully")
+            logger.info(" PASS:  Connected WebSocket state authentication validated successfully")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -700,7 +700,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
         stats = self.authenticator.get_websocket_auth_stats()
         assert "disconnected" in stats["connection_states_seen"], "Disconnected state should be tracked"
         
-        logger.info("✅ Disconnected WebSocket state correctly rejected")
+        logger.info(" PASS:  Disconnected WebSocket state correctly rejected")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -732,7 +732,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
         # Verify failure tracking
         assert self.authenticator._websocket_auth_failures > 0, "Failure should be tracked"
         
-        logger.info("✅ Missing headers validation handled gracefully")
+        logger.info(" PASS:  Missing headers validation handled gracefully")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -783,7 +783,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             states_seen = stats["connection_states_seen"]
             assert len(states_seen) >= 1, "State transitions should be tracked"
             
-            logger.info("✅ WebSocket state transition during authentication handled properly")
+            logger.info(" PASS:  WebSocket state transition during authentication handled properly")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -834,7 +834,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             close_call_args = websocket.close.call_args
             assert close_call_args[1]['code'] == 1008, "Should close with policy violation code"
             
-            logger.info("✅ WebSocket connection cleanup after auth failure validated")
+            logger.info(" PASS:  WebSocket connection cleanup after auth failure validated")
 
     # =============================================================================
     # E2E CONTEXT HANDLING TESTS (5 tests) 
@@ -875,7 +875,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
         assert len(e2e_context["e2e_headers"]) > 0, "E2E headers should be captured"
         assert "x-test-environment" in e2e_context["e2e_headers"], "Test environment header should be captured"
         
-        logger.info("✅ E2E context detection via WebSocket headers validated")
+        logger.info(" PASS:  E2E context detection via WebSocket headers validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -916,7 +916,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             env.unset("E2E_TESTING")
             env.unset("PYTEST_RUNNING")
         
-        logger.info("✅ E2E context detection via environment variables validated")
+        logger.info(" PASS:  E2E context detection via environment variables validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -975,7 +975,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             # Verify E2E context was passed to auth service
             mock_auth.assert_called_once_with(websocket, e2e_context=e2e_context)
             
-            logger.info("✅ E2E authentication bypass scenarios validated")
+            logger.info(" PASS:  E2E authentication bypass scenarios validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1042,7 +1042,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             call_args = mock_auth.call_args
             assert call_args[1]['e2e_context'] == comprehensive_e2e_context, "Full context should propagate"
             
-            logger.info("✅ E2E context propagation through authentication chain validated")
+            logger.info(" PASS:  E2E context propagation through authentication chain validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1135,7 +1135,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
                 else:
                     assert result.user_context is None, f"Failed scenario {scenario['name']} should not create context"
             
-            logger.info(f"✅ E2E scenario '{scenario['name']}' validated successfully")
+            logger.info(f" PASS:  E2E scenario '{scenario['name']}' validated successfully")
 
     # =============================================================================
     # ERROR SCENARIOS & RECOVERY TESTS (5 tests)
@@ -1183,7 +1183,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
                 # Verify failure tracking
                 assert self.authenticator._websocket_auth_failures > 0, "Network failures should be tracked"
         
-        logger.info("✅ Network failure recovery patterns validated")
+        logger.info(" PASS:  Network failure recovery patterns validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1221,7 +1221,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             stats = self.authenticator.get_websocket_auth_stats()
             assert stats["websocket_auth_statistics"]["failed_authentications"] > 0, "Service unavailability should be tracked"
             
-            logger.info("✅ Service unavailability graceful handling validated")
+            logger.info(" PASS:  Service unavailability graceful handling validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1264,7 +1264,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             # Verify partial failure tracking
             assert result.auth_result.user_id == "partial_failure_user", "Auth result should be preserved"
             
-            logger.info("✅ Partial authentication failure recovery validated")
+            logger.info(" PASS:  Partial authentication failure recovery validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1321,7 +1321,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             # Verify timeout tracking
             assert self.authenticator._websocket_auth_failures > 0, "Timeout should increment failures"
             
-            logger.info("✅ Authentication timeout recovery mechanisms validated")
+            logger.info(" PASS:  Authentication timeout recovery mechanisms validated")
 
     @pytest.mark.integration
     @pytest.mark.real_services
@@ -1381,7 +1381,7 @@ class TestWebSocketAuthenticationFlowsComprehensive(BaseIntegrationTest):
             stats = self.authenticator.get_websocket_auth_stats()
             assert stats["websocket_auth_statistics"]["failed_authentications"] > 0, "Retry failures should be tracked"
             
-            logger.info("✅ Authentication retry with backoff strategy validated")
+            logger.info(" PASS:  Authentication retry with backoff strategy validated")
 
     async def async_teardown(self):
         """Async teardown for comprehensive test suite."""
@@ -1456,7 +1456,7 @@ def test_comprehensive_suite_coverage():
         actual_count = category_counts[category]
         assert actual_count == expected_count, f"Category {category}: expected {expected_count} tests, found {actual_count}"
     
-    logger.info("✅ Comprehensive test suite coverage validation passed")
+    logger.info(" PASS:  Comprehensive test suite coverage validation passed")
 
 
 if __name__ == "__main__":

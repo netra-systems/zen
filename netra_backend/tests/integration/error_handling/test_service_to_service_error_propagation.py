@@ -45,7 +45,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
     Tests that errors propagate properly between services without being lost,
     corrupted, or silently swallowed. This is critical for multi-service reliability.
     
-    Service Chain Tested: Auth Service → Backend Service → Database → Error Handling
+    Service Chain Tested: Auth Service  ->  Backend Service  ->  Database  ->  Error Handling
     Business Impact: Prevents silent failures that damage user trust and data integrity
     """
     
@@ -96,12 +96,12 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
         Prevents silent auth failures that leave users confused about access issues.
         
         Tests:
-        1. Auth service authentication failure → Backend service error handling
-        2. Auth service JWT validation failure → Backend service response
-        3. Auth service timeout → Backend service timeout handling
+        1. Auth service authentication failure  ->  Backend service error handling
+        2. Auth service JWT validation failure  ->  Backend service response
+        3. Auth service timeout  ->  Backend service timeout handling
         4. Error context preservation across service boundary
         """
-        print("\n🔐 AUTH SERVICE → BACKEND SERVICE ERROR PROPAGATION")
+        print("\n[U+1F510] AUTH SERVICE  ->  BACKEND SERVICE ERROR PROPAGATION")
         print("=" * 60)
         
         context = await self.setup_cross_service_context()
@@ -109,31 +109,31 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
         
         try:
             # Test 1: Authentication failure propagation
-            print("\n🚫 Test 1: Authentication Failure Propagation")
+            print("\n[U+1F6AB] Test 1: Authentication Failure Propagation")
             
             auth_error_propagated = await self._test_authentication_failure_propagation(context)
             
             # Test 2: JWT validation failure propagation
-            print("\n🎫 Test 2: JWT Validation Failure Propagation")
+            print("\n[U+1F3AB] Test 2: JWT Validation Failure Propagation")
             
             jwt_error_propagated = await self._test_jwt_validation_failure_propagation(context)
             
             # Test 3: Auth service timeout propagation
-            print("\n⏰ Test 3: Auth Service Timeout Propagation")
+            print("\n[U+23F0] Test 3: Auth Service Timeout Propagation")
             
             timeout_error_propagated = await self._test_auth_timeout_propagation(context)
             
             # Test 4: Error context preservation
-            print("\n🔗 Test 4: Error Context Preservation")
+            print("\n[U+1F517] Test 4: Error Context Preservation")
             
             context_preserved = await self.validate_auth_backend_context_preservation()
             
             # Results Summary
-            print(f"\n📊 AUTH → BACKEND ERROR PROPAGATION RESULTS")
-            print(f"Authentication Failure: {'✅' if auth_error_propagated else '❌'}")
-            print(f"JWT Validation Failure: {'✅' if jwt_error_propagated else '❌'}")
-            print(f"Timeout Propagation: {'✅' if timeout_error_propagated else '❌'}")
-            print(f"Context Preservation: {'✅' if context_preserved else '❌'}")
+            print(f"\n CHART:  AUTH  ->  BACKEND ERROR PROPAGATION RESULTS")
+            print(f"Authentication Failure: {' PASS: ' if auth_error_propagated else ' FAIL: '}")
+            print(f"JWT Validation Failure: {' PASS: ' if jwt_error_propagated else ' FAIL: '}")
+            print(f"Timeout Propagation: {' PASS: ' if timeout_error_propagated else ' FAIL: '}")
+            print(f"Context Preservation: {' PASS: ' if context_preserved else ' FAIL: '}")
             print(f"Error Chain Length: {len(self.error_propagation_chain)}")
             
             # Business validation
@@ -145,7 +145,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
             )
             
             if not auth_backend_propagation_working:
-                print("\n🚨 CRITICAL: Auth → Backend error propagation gaps detected")
+                print("\n ALERT:  CRITICAL: Auth  ->  Backend error propagation gaps detected")
                 print("This can cause silent auth failures and user confusion")
                 
                 missing_propagation = []
@@ -161,13 +161,13 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 print(f"Missing propagation: {', '.join(missing_propagation)}")
                 
                 # This may be expected initially
-                pytest.fail(f"Auth → Backend error propagation gaps: {missing_propagation}")
+                pytest.fail(f"Auth  ->  Backend error propagation gaps: {missing_propagation}")
             
             else:
-                print("\n✅ SUCCESS: Auth → Backend error propagation working correctly")
+                print("\n PASS:  SUCCESS: Auth  ->  Backend error propagation working correctly")
                 
         except Exception as e:
-            print(f"\n❌ Auth → Backend error propagation test failed: {e}")
+            print(f"\n FAIL:  Auth  ->  Backend error propagation test failed: {e}")
             logger.error(f"Auth-Backend error propagation failure: {e}", extra={
                 "user_id": self.test_user_id,
                 "test_type": "auth_backend_propagation"
@@ -198,7 +198,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     print(f"Auth service response: {auth_response.status_code}")
                     
                 except httpx.ConnectError:
-                    print("⚠️ Auth service not available - testing with mock error")
+                    print(" WARNING: [U+FE0F] Auth service not available - testing with mock error")
                     
                     # Mock auth service error response for pattern testing
                     auth_response = Mock()
@@ -230,14 +230,14 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                                 "propagated": True
                             })
                             
-                            print("✅ Authentication failure propagated to backend")
+                            print(" PASS:  Authentication failure propagated to backend")
                             return True
                         else:
-                            print(f"❌ Backend did not handle auth failure properly: {backend_response.status_code}")
+                            print(f" FAIL:  Backend did not handle auth failure properly: {backend_response.status_code}")
                             return False
                             
                     except httpx.ConnectError:
-                        print("⚠️ Backend service not available - assuming error propagation works")
+                        print(" WARNING: [U+FE0F] Backend service not available - assuming error propagation works")
                         
                         # Mock successful error propagation
                         self.error_propagation_chain.append({
@@ -251,11 +251,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                         return True
                         
                 else:
-                    print("❌ Auth service did not return expected authentication failure")
+                    print(" FAIL:  Auth service did not return expected authentication failure")
                     return False
                     
         except Exception as e:
-            print(f"❌ Authentication failure propagation test failed: {e}")
+            print(f" FAIL:  Authentication failure propagation test failed: {e}")
             return False
     
     async def _test_jwt_validation_failure_propagation(self, context: StronglyTypedUserExecutionContext) -> bool:
@@ -301,17 +301,17 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                                 "error_detected": True
                             })
                             
-                            print("✅ JWT validation failure properly handled by backend")
+                            print(" PASS:  JWT validation failure properly handled by backend")
                             return True
                         else:
-                            print("❌ Backend error response doesn't indicate JWT issue")
+                            print(" FAIL:  Backend error response doesn't indicate JWT issue")
                             return False
                     else:
-                        print(f"❌ Backend accepted malformed JWT: {response.status_code}")
+                        print(f" FAIL:  Backend accepted malformed JWT: {response.status_code}")
                         return False
                         
                 except httpx.ConnectError:
-                    print("⚠️ Backend service not available - assuming JWT validation works")
+                    print(" WARNING: [U+FE0F] Backend service not available - assuming JWT validation works")
                     
                     # Mock successful JWT validation error propagation
                     self.error_propagation_chain.append({
@@ -325,7 +325,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     return True
                     
         except Exception as e:
-            print(f"❌ JWT validation propagation test failed: {e}")
+            print(f" FAIL:  JWT validation propagation test failed: {e}")
             return False
     
     async def _test_auth_timeout_propagation(self, context: StronglyTypedUserExecutionContext) -> bool:
@@ -353,7 +353,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     )
                     
                     # If we get here, no timeout occurred
-                    print(f"✅ No timeout - backend responded: {response.status_code}")
+                    print(f" PASS:  No timeout - backend responded: {response.status_code}")
                     
                     # Even without timeout, we can test the timeout handling pattern
                     self.error_propagation_chain.append({
@@ -368,7 +368,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     return True
                     
                 except httpx.TimeoutException:
-                    print("✅ Timeout detected - testing timeout error propagation")
+                    print(" PASS:  Timeout detected - testing timeout error propagation")
                     
                     # This is actually good - shows timeout is being detected
                     self.error_propagation_chain.append({
@@ -382,7 +382,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     return True
                     
                 except httpx.ConnectError:
-                    print("⚠️ Services not available - assuming timeout handling works")
+                    print(" WARNING: [U+FE0F] Services not available - assuming timeout handling works")
                     
                     # Mock timeout error propagation
                     self.error_propagation_chain.append({
@@ -397,11 +397,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     return True
                     
         except Exception as e:
-            print(f"❌ Auth timeout propagation test failed: {e}")
+            print(f" FAIL:  Auth timeout propagation test failed: {e}")
             return False
     
     async def validate_auth_backend_context_preservation(self) -> bool:
-        """Validate that error context is preserved across auth → backend service boundary."""
+        """Validate that error context is preserved across auth  ->  backend service boundary."""
         print("Validating error context preservation across service boundary...")
         
         try:
@@ -413,28 +413,28 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 
                 for field in required_fields:
                     if field not in error_entry:
-                        print(f"❌ Missing required field in error chain: {field}")
+                        print(f" FAIL:  Missing required field in error chain: {field}")
                         context_preserved = False
                 
                 # Check that user context can be traced
                 if "user_id" not in str(error_entry) and not error_entry.get("mock"):
-                    print("⚠️ User context may not be preserved in error chain")
+                    print(" WARNING: [U+FE0F] User context may not be preserved in error chain")
                     # This is a warning, not a failure
             
             if len(self.error_propagation_chain) == 0:
-                print("❌ No error propagation chain recorded")
+                print(" FAIL:  No error propagation chain recorded")
                 context_preserved = False
             else:
-                print(f"✅ Error propagation chain recorded: {len(self.error_propagation_chain)} entries")
+                print(f" PASS:  Error propagation chain recorded: {len(self.error_propagation_chain)} entries")
                 
                 # Print chain for debugging
                 for i, entry in enumerate(self.error_propagation_chain):
-                    print(f"  {i+1}. {entry['source']} → {entry['destination']}: {entry['error_type']}")
+                    print(f"  {i+1}. {entry['source']}  ->  {entry['destination']}: {entry['error_type']}")
             
             return context_preserved
             
         except Exception as e:
-            print(f"❌ Context preservation validation failed: {e}")
+            print(f" FAIL:  Context preservation validation failed: {e}")
             return False
     
     @pytest.mark.integration
@@ -447,12 +447,12 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
         Prevents silent database failures that cause data inconsistency.
         
         Tests:
-        1. Database connection failure → Backend service error response
-        2. SQL query error → Backend service error handling
-        3. Database timeout → Backend service timeout response
-        4. Transaction failure → Backend service rollback and error
+        1. Database connection failure  ->  Backend service error response
+        2. SQL query error  ->  Backend service error handling
+        3. Database timeout  ->  Backend service timeout response
+        4. Transaction failure  ->  Backend service rollback and error
         """
-        print("\n🗄️ BACKEND SERVICE → DATABASE ERROR PROPAGATION")
+        print("\n[U+1F5C4][U+FE0F] BACKEND SERVICE  ->  DATABASE ERROR PROPAGATION")
         print("=" * 60)
         
         context = await self.setup_cross_service_context()
@@ -460,31 +460,31 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
         
         try:
             # Test 1: Database connection failure propagation
-            print("\n🔌 Test 1: Database Connection Failure Propagation")
+            print("\n[U+1F50C] Test 1: Database Connection Failure Propagation")
             
             db_connection_error_propagated = await self._test_database_connection_failure_propagation(context)
             
             # Test 2: SQL query error propagation
-            print("\n📝 Test 2: SQL Query Error Propagation")
+            print("\n[U+1F4DD] Test 2: SQL Query Error Propagation")
             
             sql_error_propagated = await self._test_sql_query_error_propagation(context)
             
             # Test 3: Database timeout propagation
-            print("\n⏱️ Test 3: Database Timeout Propagation")
+            print("\n[U+23F1][U+FE0F] Test 3: Database Timeout Propagation")
             
             db_timeout_propagated = await self._test_database_timeout_propagation(context)
             
             # Test 4: Transaction failure propagation
-            print("\n🔄 Test 4: Transaction Failure Propagation")
+            print("\n CYCLE:  Test 4: Transaction Failure Propagation")
             
             transaction_error_propagated = await self._test_transaction_failure_propagation(context)
             
             # Results Summary
-            print(f"\n📊 BACKEND → DATABASE ERROR PROPAGATION RESULTS")
-            print(f"DB Connection Failure: {'✅' if db_connection_error_propagated else '❌'}")
-            print(f"SQL Query Error: {'✅' if sql_error_propagated else '❌'}")
-            print(f"DB Timeout: {'✅' if db_timeout_propagated else '❌'}")
-            print(f"Transaction Failure: {'✅' if transaction_error_propagated else '❌'}")
+            print(f"\n CHART:  BACKEND  ->  DATABASE ERROR PROPAGATION RESULTS")
+            print(f"DB Connection Failure: {' PASS: ' if db_connection_error_propagated else ' FAIL: '}")
+            print(f"SQL Query Error: {' PASS: ' if sql_error_propagated else ' FAIL: '}")
+            print(f"DB Timeout: {' PASS: ' if db_timeout_propagated else ' FAIL: '}")
+            print(f"Transaction Failure: {' PASS: ' if transaction_error_propagated else ' FAIL: '}")
             print(f"Total Error Chain: {len(self.error_propagation_chain)}")
             
             # Business validation
@@ -496,7 +496,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
             )
             
             if not backend_db_propagation_working:
-                print("\n🚨 CRITICAL: Backend → Database error propagation gaps detected")
+                print("\n ALERT:  CRITICAL: Backend  ->  Database error propagation gaps detected")
                 print("This can cause silent database failures and data corruption")
                 
                 missing_propagation = []
@@ -512,13 +512,13 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 print(f"Missing propagation: {', '.join(missing_propagation)}")
                 
                 # This may be expected initially
-                pytest.fail(f"Backend → Database error propagation gaps: {missing_propagation}")
+                pytest.fail(f"Backend  ->  Database error propagation gaps: {missing_propagation}")
             
             else:
-                print("\n✅ SUCCESS: Backend → Database error propagation working correctly")
+                print("\n PASS:  SUCCESS: Backend  ->  Database error propagation working correctly")
                 
         except Exception as e:
-            print(f"\n❌ Backend → Database error propagation test failed: {e}")
+            print(f"\n FAIL:  Backend  ->  Database error propagation test failed: {e}")
             logger.error(f"Backend-Database error propagation failure: {e}", extra={
                 "user_id": self.test_user_id,
                 "test_type": "backend_database_propagation"
@@ -540,11 +540,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     # This should fail with connection error
                     conn.execute(text("SELECT 1"))
                     
-                print("❌ Expected database connection to fail")
+                print(" FAIL:  Expected database connection to fail")
                 return False
                 
             except Exception as db_error:
-                print(f"✅ Database connection error detected: {type(db_error).__name__}")
+                print(f" PASS:  Database connection error detected: {type(db_error).__name__}")
                 
                 # Test that this error would propagate to API response
                 auth_helper = E2EAuthHelper(environment="test")
@@ -569,14 +569,14 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                                 "propagated": True
                             })
                             
-                            print("✅ Database connection error propagated to backend API")
+                            print(" PASS:  Database connection error propagated to backend API")
                             return True
                         else:
-                            print(f"❌ Backend didn't return database error: {response.status_code}")
+                            print(f" FAIL:  Backend didn't return database error: {response.status_code}")
                             return False
                             
                 except httpx.ConnectError:
-                    print("⚠️ Backend service not available - assuming DB error propagation works")
+                    print(" WARNING: [U+FE0F] Backend service not available - assuming DB error propagation works")
                     
                     # Mock successful database error propagation
                     self.error_propagation_chain.append({
@@ -590,7 +590,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     return True
                     
         except Exception as e:
-            print(f"❌ Database connection failure test failed: {e}")
+            print(f" FAIL:  Database connection failure test failed: {e}")
             return False
     
     async def _test_sql_query_error_propagation(self, context: StronglyTypedUserExecutionContext) -> bool:
@@ -610,7 +610,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                         conn.execute(text("SELECT * FROM non_existent_table_for_error_test"))
                     
                     sql_error = exc_info.value
-                    print(f"✅ SQL error detected: {type(sql_error).__name__}")
+                    print(f" PASS:  SQL error detected: {type(sql_error).__name__}")
                     
                     # Record error propagation
                     self.error_propagation_chain.append({
@@ -624,7 +624,7 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     return True
                     
             except Exception as db_setup_error:
-                print(f"⚠️ Database not available: {db_setup_error}")
+                print(f" WARNING: [U+FE0F] Database not available: {db_setup_error}")
                 
                 # Mock SQL error for pattern testing
                 mock_sql_error = SQLAlchemyError("Mock SQL error for propagation test")
@@ -638,11 +638,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                     "mock": True
                 })
                 
-                print("✅ SQL error propagation pattern tested")
+                print(" PASS:  SQL error propagation pattern tested")
                 return True
                 
         except Exception as e:
-            print(f"❌ SQL error propagation test failed: {e}")
+            print(f" FAIL:  SQL error propagation test failed: {e}")
             return False
     
     async def _test_database_timeout_propagation(self, context: StronglyTypedUserExecutionContext) -> bool:
@@ -662,11 +662,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 "pattern_tested": True
             })
             
-            print("✅ Database timeout propagation pattern validated")
+            print(" PASS:  Database timeout propagation pattern validated")
             return True
             
         except Exception as e:
-            print(f"❌ Database timeout propagation test failed: {e}")
+            print(f" FAIL:  Database timeout propagation test failed: {e}")
             return False
     
     async def _test_transaction_failure_propagation(self, context: StronglyTypedUserExecutionContext) -> bool:
@@ -686,23 +686,23 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 "pattern_tested": True
             })
             
-            print("✅ Transaction failure propagation pattern validated")
+            print(" PASS:  Transaction failure propagation pattern validated")
             return True
             
         except Exception as e:
-            print(f"❌ Transaction failure propagation test failed: {e}")
+            print(f" FAIL:  Transaction failure propagation test failed: {e}")
             return False
     
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_end_to_end_error_propagation_chain(self):
         """
-        Test complete end-to-end error propagation: Auth → Backend → Database → User.
+        Test complete end-to-end error propagation: Auth  ->  Backend  ->  Database  ->  User.
         
         Business Value: Complete error visibility ensures users get proper feedback.
         This tests the entire error chain to prevent any silent failure points.
         """
-        print("\n🔗 END-TO-END ERROR PROPAGATION CHAIN TEST")
+        print("\n[U+1F517] END-TO-END ERROR PROPAGATION CHAIN TEST")
         print("=" * 60)
         
         context = await self.setup_cross_service_context()
@@ -711,34 +711,34 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
         error_chain_successful = []
         
         try:
-            # Step 1: Auth error → Backend
-            print("\n1️⃣ Auth Error → Backend Service")
+            # Step 1: Auth error  ->  Backend
+            print("\n1[U+FE0F][U+20E3] Auth Error  ->  Backend Service")
             auth_to_backend = await self.simulate_auth_error_propagation(context)
             error_chain_successful.append(("auth_to_backend", auth_to_backend))
             
-            # Step 2: Backend error → Database 
-            print("\n2️⃣ Backend Service → Database Error")
+            # Step 2: Backend error  ->  Database 
+            print("\n2[U+FE0F][U+20E3] Backend Service  ->  Database Error")
             backend_to_db = await self.simulate_backend_database_error(context)
             error_chain_successful.append(("backend_to_db", backend_to_db))
             
-            # Step 3: Database error → User response
-            print("\n3️⃣ Database Error → User Response")
+            # Step 3: Database error  ->  User response
+            print("\n3[U+FE0F][U+20E3] Database Error  ->  User Response")
             db_to_user = await self.simulate_database_to_user_error(context)
             error_chain_successful.append(("db_to_user", db_to_user))
             
             # Step 4: Validate complete chain
-            print("\n4️⃣ Complete Chain Validation")
+            print("\n4[U+FE0F][U+20E3] Complete Chain Validation")
             complete_chain_working = all(success for _, success in error_chain_successful)
             
-            print(f"\n🔗 ERROR PROPAGATION CHAIN RESULTS:")
+            print(f"\n[U+1F517] ERROR PROPAGATION CHAIN RESULTS:")
             for step_name, success in error_chain_successful:
-                print(f"{step_name}: {'✅' if success else '❌'}")
+                print(f"{step_name}: {' PASS: ' if success else ' FAIL: '}")
             
-            print(f"Complete Chain: {'✅' if complete_chain_working else '❌'}")
+            print(f"Complete Chain: {' PASS: ' if complete_chain_working else ' FAIL: '}")
             print(f"Total Propagation Events: {len(self.error_propagation_chain)}")
             
             if not complete_chain_working:
-                print("\n🚨 CRITICAL: End-to-end error propagation chain broken")
+                print("\n ALERT:  CRITICAL: End-to-end error propagation chain broken")
                 print("This means users may not receive proper error feedback")
                 
                 failed_steps = [step for step, success in error_chain_successful if not success]
@@ -748,11 +748,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 pytest.fail(f"End-to-end error propagation chain broken: {failed_steps}")
                 
             else:
-                print("\n✅ SUCCESS: Complete error propagation chain working")
-                print("✅ Users will receive proper error feedback across all services")
+                print("\n PASS:  SUCCESS: Complete error propagation chain working")
+                print(" PASS:  Users will receive proper error feedback across all services")
                 
         except Exception as e:
-            print(f"\n❌ End-to-end error propagation test failed: {e}")
+            print(f"\n FAIL:  End-to-end error propagation test failed: {e}")
             logger.error(f"E2E error propagation failure: {e}", extra={
                 "user_id": self.test_user_id,
                 "test_type": "e2e_error_propagation"
@@ -779,11 +779,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 "propagated": True
             })
             
-            print("✅ Auth error propagation simulated")
+            print(" PASS:  Auth error propagation simulated")
             return True
             
         except Exception as e:
-            print(f"❌ Auth error propagation simulation failed: {e}")
+            print(f" FAIL:  Auth error propagation simulation failed: {e}")
             return False
     
     async def simulate_backend_database_error(self, context: StronglyTypedUserExecutionContext) -> bool:
@@ -799,11 +799,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 "propagated": True
             })
             
-            print("✅ Backend → Database error propagation simulated")
+            print(" PASS:  Backend  ->  Database error propagation simulated")
             return True
             
         except Exception as e:
-            print(f"❌ Backend → Database error simulation failed: {e}")
+            print(f" FAIL:  Backend  ->  Database error simulation failed: {e}")
             return False
     
     async def simulate_database_to_user_error(self, context: StronglyTypedUserExecutionContext) -> bool:
@@ -820,11 +820,11 @@ class TestServiceToServiceErrorPropagation(SSotBaseTestCase):
                 "propagated": True
             })
             
-            print("✅ Database → User error propagation simulated")
+            print(" PASS:  Database  ->  User error propagation simulated")
             return True
             
         except Exception as e:
-            print(f"❌ Database → User error simulation failed: {e}")
+            print(f" FAIL:  Database  ->  User error simulation failed: {e}")
             return False
     
     def teardown_method(self):

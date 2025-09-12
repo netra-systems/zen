@@ -126,11 +126,11 @@ class SSotDatabaseOperationsTestSuite:
                 result = await conn.execute(text("SELECT 1 as connection_test"))
                 assert result.fetchone()[0] == 1
                 
-            logger.info("✅ SSOT database engine created successfully")
+            logger.info(" PASS:  SSOT database engine created successfully")
             yield engine
             
         except Exception as e:
-            logger.error(f"❌ SSOT database engine creation failed: {e}")
+            logger.error(f" FAIL:  SSOT database engine creation failed: {e}")
             pytest.skip(f"Database connection failed: {e}")
         finally:
             await engine.dispose()
@@ -158,11 +158,11 @@ class SSotDatabaseOperationsTestSuite:
         try:
             # Test connection with proper error handling
             await asyncio.wait_for(redis_conn.ping(), timeout=5.0)
-            logger.info("✅ SSOT Redis connection established")
+            logger.info(" PASS:  SSOT Redis connection established")
             yield redis_conn
             
         except Exception as e:
-            logger.error(f"❌ SSOT Redis connection failed: {e}")
+            logger.error(f" FAIL:  SSOT Redis connection failed: {e}")
             pytest.skip(f"Redis connection failed: {e}")
         finally:
             await redis_conn.aclose()
@@ -218,9 +218,9 @@ class SSotDatabaseOperationsTestSuite:
             assert env_config["config"]["POSTGRES_HOST"] in db_url, f"Host should be in URL for {env_config['name']}"
             assert str(env_config["config"]["POSTGRES_PORT"]) in db_url, f"Port should be in URL for {env_config['name']}"
             
-            logger.info(f"✅ SSOT URL construction verified for {env_config['name']}: {db_url[:50]}...")
+            logger.info(f" PASS:  SSOT URL construction verified for {env_config['name']}: {db_url[:50]}...")
         
-        logger.info("✅ SSOT DatabaseURLBuilder usage patterns validated")
+        logger.info(" PASS:  SSOT DatabaseURLBuilder usage patterns validated")
     
     @pytest.mark.asyncio
     async def test_ssot_strongly_typed_database_operations(self, ssot_database_engine):
@@ -285,9 +285,9 @@ class SSotDatabaseOperationsTestSuite:
             rows = result.fetchall()
             
             # Should get results (even if no tables, query should execute)
-            logger.info(f"✅ Complex query returned {len(rows)} schema columns")
+            logger.info(f" PASS:  Complex query returned {len(rows)} schema columns")
             
-        logger.info("✅ SSOT strongly typed database operations validated")
+        logger.info(" PASS:  SSOT strongly typed database operations validated")
     
     @pytest.mark.asyncio
     async def test_ssot_redis_operations_with_correct_parameters(self, ssot_redis_connection):
@@ -376,7 +376,7 @@ class SSotDatabaseOperationsTestSuite:
         cleanup_keys = [key1] + batch_keys + [key3]
         await ssot_redis_connection.delete(*cleanup_keys)
         
-        logger.info("✅ SSOT Redis operations with correct parameters validated")
+        logger.info(" PASS:  SSOT Redis operations with correct parameters validated")
     
     @pytest.mark.asyncio
     async def test_ssot_transaction_management_patterns(self, ssot_database_engine):
@@ -432,7 +432,7 @@ class SSotDatabaseOperationsTestSuite:
                 
                 # Transaction will auto-commit due to successful completion
                 
-            logger.info("✅ Successful transaction pattern validated")
+            logger.info(" PASS:  Successful transaction pattern validated")
             
         except Exception as e:
             pytest.fail(f"Transaction management test failed: {e}")
@@ -472,7 +472,7 @@ class SSotDatabaseOperationsTestSuite:
                 pytest.fail("Transaction should have been rolled back")
         except Exception:
             # Expected - table doesn't exist due to rollback
-            logger.info("✅ Transaction rollback pattern validated")
+            logger.info(" PASS:  Transaction rollback pattern validated")
     
     @pytest.mark.asyncio 
     async def test_ssot_error_handling_patterns(self, ssot_database_engine, ssot_redis_connection):
@@ -496,7 +496,7 @@ class SSotDatabaseOperationsTestSuite:
             error_msg = str(db_error).lower()
             assert any(keyword in error_msg for keyword in ["table", "relation", "exist"]), \
                 f"Should get table-related error: {error_msg}"
-            logger.info(f"✅ Database error handled correctly: {type(db_error).__name__}")
+            logger.info(f" PASS:  Database error handled correctly: {type(db_error).__name__}")
         
         # Test 2: Redis error handling with wrong parameter
         try:
@@ -509,7 +509,7 @@ class SSotDatabaseOperationsTestSuite:
             error_msg = str(redis_error).lower()
             assert "expire_seconds" in error_msg or "unexpected" in error_msg, \
                 f"Should get parameter error: {error_msg}"
-            logger.info(f"✅ Redis parameter error handled correctly: {redis_error}")
+            logger.info(f" PASS:  Redis parameter error handled correctly: {redis_error}")
         
         # Test 3: Proper Redis usage (should work)
         try:
@@ -520,7 +520,7 @@ class SSotDatabaseOperationsTestSuite:
             assert value == "test_value", "Correct Redis parameter should work"
             
             await ssot_redis_connection.delete(test_key)
-            logger.info("✅ Correct Redis parameter usage validated")
+            logger.info(" PASS:  Correct Redis parameter usage validated")
             
         except Exception as e:
             pytest.fail(f"Correct Redis usage should work: {e}")
@@ -537,7 +537,7 @@ class SSotDatabaseOperationsTestSuite:
                 
                 # Input should be safely escaped
                 assert row.safe_value == malicious_input, "Parameterized queries should be safe"
-                logger.info("✅ SQL injection protection validated")
+                logger.info(" PASS:  SQL injection protection validated")
                 
         except Exception as e:
             pytest.fail(f"Safe parameterized query failed: {e}")
@@ -595,7 +595,7 @@ class SSotDatabaseOperationsTestSuite:
         assert isinstance(test_user_id, UserID), "Should return strongly typed UserID"
         assert str(test_user_id) == "test_user_123", "UserID string representation should match"
         
-        logger.info("✅ SSOT ID generation and validation patterns validated")
+        logger.info(" PASS:  SSOT ID generation and validation patterns validated")
     
     def test_ssot_pattern_compliance_metadata(self):
         """
@@ -626,15 +626,15 @@ class SSotDatabaseOperationsTestSuite:
         assert compliance_score == total_requirements, \
             f"SSOT compliance: {compliance_score}/{total_requirements} requirements met"
         
-        logger.info(f"✅ SSOT pattern compliance: {compliance_score}/{total_requirements} requirements met")
-        logger.info("   ✅ DatabaseURLBuilder usage")
-        logger.info("   ✅ Strongly typed ID usage") 
-        logger.info("   ✅ text() wrapper for SQL")
-        logger.info("   ✅ Redis 'ex' parameter")
-        logger.info("   ✅ Async/await patterns")
-        logger.info("   ✅ Error handling")
-        logger.info("   ✅ Transaction management")
-        logger.info("   ✅ Resource cleanup")
+        logger.info(f" PASS:  SSOT pattern compliance: {compliance_score}/{total_requirements} requirements met")
+        logger.info("    PASS:  DatabaseURLBuilder usage")
+        logger.info("    PASS:  Strongly typed ID usage") 
+        logger.info("    PASS:  text() wrapper for SQL")
+        logger.info("    PASS:  Redis 'ex' parameter")
+        logger.info("    PASS:  Async/await patterns")
+        logger.info("    PASS:  Error handling")
+        logger.info("    PASS:  Transaction management")
+        logger.info("    PASS:  Resource cleanup")
         
         assert True, "SSOT pattern compliance validated"
 

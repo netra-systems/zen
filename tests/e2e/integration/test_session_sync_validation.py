@@ -243,37 +243,37 @@ class SessionSyncValidator:
         print("[1/6] Testing backend health...")
         backend_ok, backend_msg = await self.test_backend_health()
         results["test_results"]["backend_health"] = {"success": backend_ok, "message": backend_msg}
-        print(f"  {'✓' if backend_ok else '✗'} {backend_msg}")
+        print(f"  {'[U+2713]' if backend_ok else '[U+2717]'} {backend_msg}")
         
         # Test 2: Redis Setup
         print("[2/6] Testing Redis connection...")
         redis_ok, redis_msg = await self.setup_redis()
         results["test_results"]["redis_connection"] = {"success": redis_ok, "message": redis_msg}
-        print(f"  {'✓' if redis_ok else '✗'} {redis_msg}")
+        print(f"  {'[U+2713]' if redis_ok else '[U+2717]'} {redis_msg}")
         
         # Test 3: Redis Operations
         print("[3/6] Testing Redis session operations...")
         redis_ops_ok, redis_ops_msg = await self.test_redis_session_operations()
         results["test_results"]["redis_operations"] = {"success": redis_ops_ok, "message": redis_ops_msg}
-        print(f"  {'✓' if redis_ops_ok else '✗'} {redis_ops_msg}")
+        print(f"  {'[U+2713]' if redis_ops_ok else '[U+2717]'} {redis_ops_msg}")
         
         # Test 4: JWT Token Creation
         print("[4/6] Testing JWT token creation...")
         jwt_ok, jwt_msg = await self.test_jwt_token_creation()
         results["test_results"]["jwt_creation"] = {"success": jwt_ok, "message": jwt_msg}
-        print(f"  {'✓' if jwt_ok else '✗'} {jwt_msg}")
+        print(f"  {'[U+2713]' if jwt_ok else '[U+2717]'} {jwt_msg}")
         
         # Test 5: WebSocket Connectivity
         print("[5/6] Testing WebSocket connectivity...")
         ws_ok, ws_msg = await self.test_websocket_connectivity()
         results["test_results"]["websocket_connectivity"] = {"success": ws_ok, "message": ws_msg}
-        print(f"  {'✓' if ws_ok else '✗'} {ws_msg}")
+        print(f"  {'[U+2713]' if ws_ok else '[U+2717]'} {ws_msg}")
         
         # Test 6: Component Integration
         print("[6/6] Testing session component integration...")
         integration_ok, integration_msg = await self.test_session_component_integration()
         results["test_results"]["component_integration"] = {"success": integration_ok, "message": integration_msg}
-        print(f"  {'✓' if integration_ok else '✗'} {integration_msg}")
+        print(f"  {'[U+2713]' if integration_ok else '[U+2717]'} {integration_msg}")
         
         # Evaluate overall success
         critical_tests = ["backend_health", "jwt_creation", "websocket_connectivity", "component_integration"]
@@ -288,13 +288,13 @@ class SessionSyncValidator:
         print("VALIDATION RESULTS SUMMARY")
         print("="*60)
         print(f"Critical Tests Passed: {critical_passed}/{total_critical} ({success_rate:.1%})")
-        print(f"Overall Success: {'✓' if results['overall_success'] else '✗'}")
-        print(f"Business Value Protected: {'✓' if results['business_value_protected'] else '✗'}")
+        print(f"Overall Success: {'[U+2713]' if results['overall_success'] else '[U+2717]'}")
+        print(f"Business Value Protected: {'[U+2713]' if results['business_value_protected'] else '[U+2717]'}")
         
         if results["business_value_protected"]:
-            print(f"💰 $7K MRR protection validated through session management")
+            print(f"[U+1F4B0] $7K MRR protection validated through session management")
         else:
-            print(f"⚠️  Session management issues detected - MRR protection at risk")
+            print(f" WARNING: [U+FE0F]  Session management issues detected - MRR protection at risk")
         
         results["summary"] = f"Session validation: {critical_passed}/{total_critical} critical tests passed"
         

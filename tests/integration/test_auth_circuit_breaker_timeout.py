@@ -517,7 +517,7 @@ class TestAuthCircuitBreakerTimeout(SSotAsyncTestCase):
         circuit_breaker_blocks = len([p for p in cascade_timeline["circuit_breaker_phase"] if "blocked" in p["result"]])
         business_systems_affected = len(cascade_timeline["business_impact"])
         
-        print(f"\n🚨 Cascading Failure Analysis:")
+        print(f"\n ALERT:  Cascading Failure Analysis:")
         print(f"   Timeout failures: {timeout_failures}")
         print(f"   Circuit breaker blocks: {circuit_breaker_blocks}")
         print(f"   Business systems affected: {business_systems_affected}")
@@ -579,7 +579,7 @@ class TestAuthCircuitBreakerTimeout(SSotAsyncTestCase):
                            staging_timeouts.write + staging_timeouts.pool)
         })
         
-        print(f"\n🔧 Circuit Breaker Configuration Analysis:")
+        print(f"\n[U+1F527] Circuit Breaker Configuration Analysis:")
         print(f"Circuit Breaker Settings:")
         for key, value in config_analysis["circuit_breaker_config"].items():
             print(f"  {key}: {value}")
@@ -618,7 +618,7 @@ class TestAuthCircuitBreakerTimeout(SSotAsyncTestCase):
                 "impact": "Circuit breaker opens too quickly due to natural staging timeout variations"
             })
         
-        print(f"\n⚠️  Configuration Compatibility Issues Found: {len(config_analysis['compatibility_issues'])}")
+        print(f"\n WARNING: [U+FE0F]  Configuration Compatibility Issues Found: {len(config_analysis['compatibility_issues'])}")
         for issue in config_analysis["compatibility_issues"]:
             print(f"\n  Issue: {issue['issue']}")
             print(f"  Description: {issue['description']}")
@@ -633,7 +633,7 @@ class TestAuthCircuitBreakerTimeout(SSotAsyncTestCase):
                 "Set circuit breaker recovery timeout to 2x total HTTP timeout for proper recovery"
             ])
             
-        print(f"\n💡 Recommendations:")
+        print(f"\n IDEA:  Recommendations:")
         for i, rec in enumerate(config_analysis["recommendations"], 1):
             print(f"  {i}. {rec}")
         

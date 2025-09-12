@@ -2,7 +2,7 @@
 Assertion helpers for agent orchestration tests.
 
 Provides reusable assertion functions to verify agent service behavior,
-orchestration metrics, and test outcomes with ≤8 lines per function.
+orchestration metrics, and test outcomes with  <= 8 lines per function.
 """
 
 import sys

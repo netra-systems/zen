@@ -24,12 +24,12 @@ async def test_corpus_admin_init():
         print("Creating LLM config...")
         llm_config = RealLLMConfig()
         llm_manager = await llm_config.create_llm_manager()
-        print("✓ LLM manager created")
+        print("[U+2713] LLM manager created")
         
         # Create tool dispatcher
         print("Creating tool dispatcher...")
         tool_dispatcher = ToolDispatcher()
-        print("✓ Tool dispatcher created")
+        print("[U+2713] Tool dispatcher created")
         
         # Create corpus admin agent
         print("Creating corpus admin agent...")
@@ -37,7 +37,7 @@ async def test_corpus_admin_init():
             llm_manager=llm_manager,
             tool_dispatcher=tool_dispatcher,
         )
-        print("✓ Corpus admin agent created")
+        print("[U+2713] Corpus admin agent created")
         
         # Test basic properties
         print(f"Agent name: {corpus_admin_agent.name}")
@@ -55,7 +55,7 @@ async def test_corpus_admin_init():
             chat_thread_id="test_thread",
             user_id="test_user"
         )
-        print("✓ Deep state created")
+        print("[U+2713] Deep state created")
         
         # Test entry conditions
         print("Testing entry conditions...")
@@ -64,11 +64,11 @@ async def test_corpus_admin_init():
         )
         print(f"Entry check result: {entry_check}")
         
-        print("✅ All tests completed successfully!")
+        print(" PASS:  All tests completed successfully!")
         return True
         
     except Exception as e:
-        print(f"❌ Error during test: {e}")
+        print(f" FAIL:  Error during test: {e}")
         import traceback
         traceback.print_exc()
         return False

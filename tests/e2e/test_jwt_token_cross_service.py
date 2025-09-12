@@ -2,7 +2,7 @@
 JWT Token Cross-Service Validation Tests - Enterprise Security Testing
 
 Business Value: $30K MRR - Prevents authentication failures across all services
-Tests complete token flow: Auth service → Backend → WebSocket → Agent context
+Tests complete token flow: Auth service  ->  Backend  ->  WebSocket  ->  Agent context
 
 CRITICAL: NO MOCKING of internal services - uses real HTTP calls and WebSocket connections
 Maximum 300 lines enforced - core tests only, see jwt_token_helpers.py for utilities

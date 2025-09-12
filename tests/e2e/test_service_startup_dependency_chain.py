@@ -8,7 +8,7 @@ BVJ (Business Value Justification):
 - Revenue Impact: Each startup failure prevented saves potential $10K+ revenue loss
 
 Test Coverage:
-1. Services start in correct dependency order (Auth → Backend → Frontend)
+1. Services start in correct dependency order (Auth  ->  Backend  ->  Frontend)
 2. Health checks wait for dependencies before reporting ready
 3. Graceful degradation on partial service failures
 4. Recovery from dependency outages and restart scenarios
@@ -376,7 +376,7 @@ class TestServiceStartupDependencyChain:
             service_result = result["service_results"][service]
             assert service_result.dependencies_ready, f"{service} dependencies not ready"
             
-        logger.info("✓ Dependency startup order validated")
+        logger.info("[U+2713] Dependency startup order validated")
     
     @pytest.mark.e2e
     async def test_health_check_dependency_wait(self, dependency_validator):
@@ -385,7 +385,7 @@ class TestServiceStartupDependencyChain:
         
         assert result["all_services_wait_for_deps"], f"Services not waiting for deps: {result['dependency_checks']}"
         
-        logger.info("✓ Health check dependency waiting validated")
+        logger.info("[U+2713] Health check dependency waiting validated")
     
     @pytest.mark.e2e
     async def test_graceful_degradation(self, dependency_validator):
@@ -395,7 +395,7 @@ class TestServiceStartupDependencyChain:
         assert result["graceful_degradation_working"], f"Graceful degradation failed: {result['degradation_scenarios']}"
         assert result["core_functionality_maintained"], "Core functionality not maintained during degradation"
         
-        logger.info("✓ Graceful degradation validated")
+        logger.info("[U+2713] Graceful degradation validated")
     
     @pytest.mark.e2e
     async def test_dependency_outage_recovery(self, dependency_validator):
@@ -405,7 +405,7 @@ class TestServiceStartupDependencyChain:
         assert result["recovery_successful"], f"Recovery failed: {result['recovery_tests']}"
         assert result["average_recovery_time"] < 5000, f"Recovery too slow: {result['average_recovery_time']:.0f}ms"
         
-        logger.info(f"✓ Dependency outage recovery validated (avg: {result['average_recovery_time']:.0f}ms)")
+        logger.info(f"[U+2713] Dependency outage recovery validated (avg: {result['average_recovery_time']:.0f}ms)")
     
     @pytest.mark.e2e
     async def test_startup_performance(self, dependency_validator):
@@ -414,7 +414,7 @@ class TestServiceStartupDependencyChain:
         
         assert result["startup_under_30s"], f"Startup too slow: {result['total_startup_time_ms']:.0f}ms"
         
-        logger.info(f"✓ Startup performance validated: {result['total_startup_time_ms']:.0f}ms ({result['performance_rating']})")
+        logger.info(f"[U+2713] Startup performance validated: {result['total_startup_time_ms']:.0f}ms ({result['performance_rating']})")
     
     @pytest.mark.e2e
     async def test_concurrent_startup_safety(self, dependency_validator):
@@ -424,7 +424,7 @@ class TestServiceStartupDependencyChain:
         assert result["concurrent_startup_safe"], f"Concurrent startup unsafe: {result['successful_concurrent_checks']}/5"
         assert result["race_conditions_prevented"], "Race conditions detected in concurrent startup"
         
-        logger.info("✓ Concurrent startup safety validated")
+        logger.info("[U+2713] Concurrent startup safety validated")
 
 
 # Standalone execution for development testing

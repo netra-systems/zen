@@ -105,7 +105,7 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
         CRITICAL: This test should FAIL in current state if BaseModel classes
         are being registered as tools, causing the "modelmetaclass" error.
         """
-        logger.info("🧪 Testing BaseModel detection and exclusion")
+        logger.info("[U+1F9EA] Testing BaseModel detection and exclusion")
         
         # Create tool classes list mixing proper tools and BaseModel classes
         tool_classes = [
@@ -150,7 +150,7 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
         self.registry.register = tracking_register
         
         # Attempt to create tools and register them (simulating current broken behavior)
-        logger.info("📝 Attempting to register mixed tool classes...")
+        logger.info("[U+1F4DD] Attempting to register mixed tool classes...")
         
         created_tools = []
         registration_errors = []
@@ -176,7 +176,7 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
                 })
                 
         # Analyze results
-        logger.info(f"📊 Registration analysis:")
+        logger.info(f" CHART:  Registration analysis:")
         logger.info(f"   Total attempts: {len(registration_attempts)}")
         logger.info(f"   Successful: {len(successful_registrations)}")
         logger.info(f"   BaseModel attempts: {len(basemodel_registration_attempts)}")
@@ -186,7 +186,7 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
         
         # 1. BaseModel classes should NOT be registered as tools
         if basemodel_registration_attempts:
-            logger.error(f"❌ BaseModel classes were registered as tools: {basemodel_registration_attempts}")
+            logger.error(f" FAIL:  BaseModel classes were registered as tools: {basemodel_registration_attempts}")
             
             # Check for the specific "modelmetaclass" issue
             modelmetaclass_attempts = [
@@ -220,7 +220,7 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
         if len(proper_tool_registrations) < 2:  # Should have ProperToolClass and ToolWithoutName
             pytest.fail("Proper tool classes were not registered correctly")
             
-        logger.info("✅ BaseModel detection and exclusion test passed")
+        logger.info(" PASS:  BaseModel detection and exclusion test passed")
         
     def test_tool_interface_contract_validation(self):
         """
@@ -229,7 +229,7 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
         
         CRITICAL: This test validates that tools must have both 'name' and 'execute'.
         """
-        logger.info("🧪 Testing tool interface contract validation")
+        logger.info("[U+1F9EA] Testing tool interface contract validation")
         
         # Define various tool-like classes with different interface compliance
         class ToolWithNameOnly:
@@ -339,16 +339,16 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
         ]
         
         if basemodel_accepted:
-            logger.error(f"❌ BaseModel tools incorrectly accepted: {basemodel_accepted}")
+            logger.error(f" FAIL:  BaseModel tools incorrectly accepted: {basemodel_accepted}")
             pytest.fail(f"REPRODUCED BUG: BaseModel classes passed tool interface validation: {basemodel_accepted}")
             
-        logger.info(f"📊 Interface validation results: {len(validation_failures)} failures out of {len(validation_results)} tests")
+        logger.info(f" CHART:  Interface validation results: {len(validation_failures)} failures out of {len(validation_results)} tests")
         
         if validation_failures:
             failure_details = [f"{r['tool_class']}: {r['validation_error']}" for r in validation_failures]
-            logger.warning(f"⚠️ Interface validation failures: {failure_details}")
+            logger.warning(f" WARNING: [U+FE0F] Interface validation failures: {failure_details}")
             
-        logger.info("✅ Tool interface contract validation test passed")
+        logger.info(" PASS:  Tool interface contract validation test passed")
         
     def test_metaclass_name_fallback_prevention(self):
         """
@@ -357,7 +357,7 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
         
         CRITICAL: This test reproduces the exact "modelmetaclass" naming issue.
         """
-        logger.info("🧪 Testing metaclass name fallback prevention")
+        logger.info("[U+1F9EA] Testing metaclass name fallback prevention")
         
         # Create BaseModel instance and test the fallback naming logic
         basemodel_instance = ProblematicBaseModelTool()
@@ -369,17 +369,17 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
             # CRITICAL: This line causes "modelmetaclass" for BaseModel instances
             tool_name = getattr(basemodel_instance, '__class__', type(basemodel_instance)).__name__.lower()
             
-        logger.info(f"🔍 Fallback tool name generated: '{tool_name}'")
+        logger.info(f" SEARCH:  Fallback tool name generated: '{tool_name}'")
         
         # CRITICAL VALIDATION: Check if we generated the problematic name
         if tool_name == "modelmetaclass":
-            logger.error("❌ REPRODUCED: Metaclass fallback generated 'modelmetaclass' name")
+            logger.error(" FAIL:  REPRODUCED: Metaclass fallback generated 'modelmetaclass' name")
             pytest.fail("REPRODUCED STAGING BUG: BaseModel fallback naming generated 'modelmetaclass'")
             
         # Check for other problematic metaclass names
         problematic_names = ["modelmetaclass", "basemodel", "metaclass"]
         if tool_name.lower() in problematic_names:
-            logger.error(f"❌ Problematic fallback name generated: '{tool_name}'")
+            logger.error(f" FAIL:  Problematic fallback name generated: '{tool_name}'")
             pytest.fail(f"REPRODUCED BUG: Problematic metaclass fallback name: '{tool_name}'")
             
         # Test with multiple BaseModel classes to see if they all get the same name
@@ -393,20 +393,20 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
         else:
             another_tool_name = getattr(another_instance, '__class__', type(another_instance)).__name__.lower()
             
-        logger.info(f"🔍 Second BaseModel tool name: '{another_tool_name}'")
+        logger.info(f" SEARCH:  Second BaseModel tool name: '{another_tool_name}'")
         
         # If multiple BaseModel classes generate the same fallback name, that's the duplicate registration issue
         if tool_name == another_tool_name and tool_name != "problematicbasemodeltool":
-            logger.error(f"❌ REPRODUCED: Multiple BaseModel classes generate same fallback name: '{tool_name}'")
+            logger.error(f" FAIL:  REPRODUCED: Multiple BaseModel classes generate same fallback name: '{tool_name}'")
             pytest.fail(f"REPRODUCED BUG: Multiple BaseModel classes generate duplicate fallback name: '{tool_name}'")
             
         # Test the actual registration to see if duplicates are rejected
-        logger.info("📝 Testing duplicate registration prevention...")
+        logger.info("[U+1F4DD] Testing duplicate registration prevention...")
         
         try:
             # First registration
             self.registry.register(tool_name, basemodel_instance)
-            logger.info(f"✅ First registration of '{tool_name}' succeeded")
+            logger.info(f" PASS:  First registration of '{tool_name}' succeeded")
             
             # Second registration with same name - should fail
             try:
@@ -418,14 +418,14 @@ class TestToolDiscoveryBaseModelFiltering(SSotBaseTestCase):
                     
             except Exception as e:
                 if "already registered" in str(e) and tool_name == another_tool_name:
-                    logger.error(f"❌ REPRODUCED: Duplicate registration error for metaclass name: {e}")
+                    logger.error(f" FAIL:  REPRODUCED: Duplicate registration error for metaclass name: {e}")
                     pytest.fail(f"REPRODUCED STAGING BUG: Duplicate registration error: {e}")
                     
         except Exception as e:
-            logger.error(f"❌ Registration error: {e}")
+            logger.error(f" FAIL:  Registration error: {e}")
             # This might be expected if BaseModel registration is properly prevented
             
-        logger.info("✅ Metaclass name fallback prevention test completed")
+        logger.info(" PASS:  Metaclass name fallback prevention test completed")
 
 
 @pytest.mark.unit
@@ -443,7 +443,7 @@ class TestUniversalRegistryDuplicatePrevention(SSotBaseTestCase):
         Test that UniversalRegistry properly rejects duplicate registrations.
         Should validate the allow_override=False behavior.
         """
-        logger.info("🧪 Testing UniversalRegistry duplicate registration rejection")
+        logger.info("[U+1F9EA] Testing UniversalRegistry duplicate registration rejection")
         
         # Create registry with strict duplicate prevention
         registry = UniversalRegistry(allow_override=False)
@@ -467,14 +467,14 @@ class TestUniversalRegistryDuplicatePrevention(SSotBaseTestCase):
         still_registered = registry.get_tool("test_tool")
         assert still_registered is tool1, "Original tool should remain registered"
         
-        logger.info("✅ Duplicate registration rejection test passed")
+        logger.info(" PASS:  Duplicate registration rejection test passed")
         
     def test_universal_registry_singleton_enforcement(self):
         """
         Test singleton pattern enforcement in UniversalRegistry.
         Should catch multiple instance creation issues.
         """
-        logger.info("🧪 Testing UniversalRegistry singleton enforcement")
+        logger.info("[U+1F9EA] Testing UniversalRegistry singleton enforcement")
         
         # The registry itself might not be a singleton, but shared registrations should be consistent
         registry1 = UniversalRegistry()
@@ -496,7 +496,7 @@ class TestUniversalRegistryDuplicatePrevention(SSotBaseTestCase):
         assert registry1.get_tool("singleton_test_tool") is tool
         assert registry2.get_tool("singleton_test_tool") is tool2
         
-        logger.info("✅ Registry independence test passed")
+        logger.info(" PASS:  Registry independence test passed")
 
 
 @pytest.mark.unit
@@ -514,7 +514,7 @@ class TestToolRegistryValidationHelpers(SSotBaseTestCase):
         Test validation helper that should identify valid tool classes.
         This represents the validation logic that SHOULD exist but currently doesn't.
         """
-        logger.info("🧪 Testing tool class validation logic")
+        logger.info("[U+1F9EA] Testing tool class validation logic")
         
         # Define validation function that SHOULD exist
         def is_valid_tool_class(tool_class: Type) -> Dict[str, Any]:
@@ -570,7 +570,7 @@ class TestToolRegistryValidationHelpers(SSotBaseTestCase):
                     'description': description
                 })
                 
-            logger.info(f"🔍 {tool_class.__name__}: {'✅' if result['is_valid'] == expected_valid else '❌'} "
+            logger.info(f" SEARCH:  {tool_class.__name__}: {' PASS: ' if result['is_valid'] == expected_valid else ' FAIL: '} "
                        f"(Expected: {expected_valid}, Got: {result['is_valid']})")
                        
         # Report validation failures
@@ -579,7 +579,7 @@ class TestToolRegistryValidationHelpers(SSotBaseTestCase):
                 f"{f['tool_class']}: expected {f['expected']}, got {f['actual']} - {f['reasons']}"
                 for f in validation_failures
             ]
-            logger.error(f"❌ Tool validation failures: {failure_details}")
+            logger.error(f" FAIL:  Tool validation failures: {failure_details}")
             
             # Check specifically for BaseModel validation failure
             basemodel_failures = [
@@ -590,14 +590,14 @@ class TestToolRegistryValidationHelpers(SSotBaseTestCase):
             if basemodel_failures:
                 pytest.fail(f"CRITICAL: Tool validation failed to reject BaseModel classes: {basemodel_failures}")
                 
-        logger.info("✅ Tool class validation test passed")
+        logger.info(" PASS:  Tool class validation test passed")
         
     def test_tool_name_generation_safety(self):
         """
         Test safe tool name generation that prevents problematic fallbacks.
         This represents the logic that SHOULD exist to prevent "modelmetaclass" names.
         """
-        logger.info("🧪 Testing safe tool name generation")
+        logger.info("[U+1F9EA] Testing safe tool name generation")
         
         def generate_safe_tool_name(tool_instance) -> str:
             """Generate safe tool name, avoiding problematic fallbacks."""
@@ -641,11 +641,11 @@ class TestToolRegistryValidationHelpers(SSotBaseTestCase):
                     'issue': 'Generated problematic name'
                 })
                 
-            logger.info(f"🏷️ {tool_instance.__class__.__name__} -> '{generated_name}'")
+            logger.info(f"[U+1F3F7][U+FE0F] {tool_instance.__class__.__name__} -> '{generated_name}'")
             
         # Report issues
         if name_generation_issues:
-            logger.error(f"❌ Problematic name generation: {name_generation_issues}")
+            logger.error(f" FAIL:  Problematic name generation: {name_generation_issues}")
             pytest.fail(f"Safe name generation failed: {name_generation_issues}")
             
-        logger.info("✅ Safe tool name generation test passed")
+        logger.info(" PASS:  Safe tool name generation test passed")

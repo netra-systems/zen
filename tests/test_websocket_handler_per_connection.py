@@ -245,5 +245,5 @@
                     # REMOVED_SYNTAX_ERROR: asyncio.run(TestWebSocketHandlerPerConnection().test_each_connection_gets_own_handler())
                     # REMOVED_SYNTAX_ERROR: asyncio.run(TestWebSocketHandlerPerConnection().test_handler_cleanup_on_disconnect())
                     # REMOVED_SYNTAX_ERROR: asyncio.run(TestWebSocketHandlerPerConnection().test_no_handler_accumulation())
-                    # REMOVED_SYNTAX_ERROR: print("✅ All WebSocket handler per-connection tests passed!")
+                    # REMOVED_SYNTAX_ERROR: print(" PASS:  All WebSocket handler per-connection tests passed!")
                     # REMOVED_SYNTAX_ERROR: pass

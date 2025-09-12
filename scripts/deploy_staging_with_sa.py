@@ -84,21 +84,21 @@ Examples:
     if args.key:
         key_path = Path(args.key)
         if not key_path.exists():
-            print(f"❌ Service account key not found: {key_path}")
+            print(f" FAIL:  Service account key not found: {key_path}")
             sys.exit(1)
     else:
         key_path = find_service_account_key()
         if not key_path:
-            print("❌ No service account key found!")
-            print("\n📋 Please provide a service account key using one of these methods:")
+            print(" FAIL:  No service account key found!")
+            print("\n[U+1F4CB] Please provide a service account key using one of these methods:")
             print("  1. Set GOOGLE_APPLICATION_CREDENTIALS environment variable")
             print("  2. Place key file in current directory as 'service-account.json'")
             print("  3. Use --key flag to specify the path")
-            print("\n🔐 To create a new service account:")
+            print("\n[U+1F510] To create a new service account:")
             print("  python scripts/setup_gcp_service_account.py")
             sys.exit(1)
     
-    print(f"🔐 Using service account key: {key_path}")
+    print(f"[U+1F510] Using service account key: {key_path}")
     
     # Build deployment command
     command = [
@@ -119,7 +119,7 @@ Examples:
         if not args.no_checks:
             command.append("--run-checks")
     
-    print(f"\n🚀 Deploying to GCP Staging...")
+    print(f"\n[U+1F680] Deploying to GCP Staging...")
     print(f"   Command: {' '.join(command)}\n")
     
     # Execute deployment
@@ -127,10 +127,10 @@ Examples:
         result = subprocess.run(command, check=False)
         sys.exit(result.returncode)
     except KeyboardInterrupt:
-        print("\n⚠️ Deployment interrupted")
+        print("\n WARNING: [U+FE0F] Deployment interrupted")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Deployment failed: {e}")
+        print(f" FAIL:  Deployment failed: {e}")
         sys.exit(1)
 
 

@@ -1,7 +1,7 @@
 """TODO tracker module for supervisor observability.
 
 Handles TODO task state tracking and data building.
-Each function must be ≤8 lines as per architecture requirements.
+Each function must be  <= 8 lines as per architecture requirements.
 """
 
 import time

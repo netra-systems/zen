@@ -2,7 +2,7 @@
 Comprehensive UVS Error Handling and Edge Cases Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: Platform/Internal (supporting all user tiers Free → Enterprise)
+- Segment: Platform/Internal (supporting all user tiers Free  ->  Enterprise)
 - Business Goal: Ensure system resilience and error recovery under edge conditions
 - Value Impact: Prevents system failures, maintains user experience, prevents data loss
 - Strategic Impact: Core infrastructure reliability that supports $500K+ ARR by ensuring platform stability
