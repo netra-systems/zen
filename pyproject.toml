@@ -50,6 +50,7 @@ norecursedirs = [
 markers = [
     # Environment markers
     "env: Environment-specific tests",
+    "env_test: Environment-specific test compatibility validation",
     "test: Tests for test environment only",
     "dev: Tests for dev environment only",
     "staging: Tests for staging environment only",
