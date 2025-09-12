@@ -691,7 +691,8 @@ class DatabaseInitializer:
     async def _initialize_redis(self, config: DatabaseConfig) -> bool:
         """Initialize Redis connection and test basic operations"""
         try:
-            client = redis.Redis(
+            client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(
                 host=config.host,
                 port=config.port,
                 password=config.password if config.password else None,
@@ -969,7 +970,8 @@ class DatabaseInitializer:
                 return True, details
                 
             elif db_type == DatabaseType.REDIS:
-                client = redis.Redis(
+                client = # MIGRATION NEEDED: redis.Redis( -> await get_redis_client() - requires async context
+    redis.Redis(
                     host=config.host,
                     port=config.port,
                     password=config.password if config.password else None,

@@ -3,8 +3,7 @@
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional
 
-import redis
-
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.tool_permission import ToolExecutionContext
 

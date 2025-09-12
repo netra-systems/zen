@@ -8,8 +8,7 @@ All functionality has been split into focused modules ≤300 lines with function
 # Import all modular components for backward compatibility
 from typing import Any, Dict, List, Optional
 
-import redis
-
+from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 from netra_backend.app.schemas.tool_permission import (
     BusinessRequirement,
     PermissionCheckResult,
