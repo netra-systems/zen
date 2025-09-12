@@ -82,7 +82,8 @@
       "Bash(ENVIRONMENT=staging python tests/mission_critical/test_websocket_agent_events_suite.py)",
       "Bash(time python:*)",
       "Bash(gcloud auth configure-docker:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(gcloud run services update-traffic:*)"
     ],
     "deny": [],
     "ask": []
