@@ -52,7 +52,7 @@ except ImportError as e:
 
 # Import for deprecated detection
 try:
-    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as DeprecatedExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as DeprecatedExecutionEngine
     DEPRECATED_ENGINE_STILL_EXISTS = True
 except ImportError:
     DEPRECATED_ENGINE_STILL_EXISTS = False

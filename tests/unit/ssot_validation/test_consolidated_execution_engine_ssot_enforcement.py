@@ -48,7 +48,7 @@ from test_framework.ssot.base_test_case import SSotAsyncTestCase
 
 # Import all execution engine implementations to detect SSOT violations
 try:
-    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as SupervisorExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as SupervisorExecutionEngine
 except ImportError as e:
     logger.warning(f"Could not import SupervisorExecutionEngine: {e}")
     SupervisorExecutionEngine = None
@@ -66,7 +66,7 @@ except ImportError as e:
     ConsolidatedFactory = None
 
 try:
-    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as CoreExecutionEngine
+    from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as CoreExecutionEngine
 except ImportError as e:
     logger.warning(f"Could not import CoreExecutionEngine: {e}")
     CoreExecutionEngine = None
