@@ -5,12 +5,6 @@ import os
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-
-try:
-    import asyncpg
-    ASYNCPG_AVAILABLE = True
-except ImportError:
-    ASYNCPG_AVAILABLE = False
     
 from netra_backend.app.logging_config import central_logger
 
@@ -26,7 +20,10 @@ class DemoSessionManager:
         
     async def _get_connection(self):
         """Get database connection from pool."""
-        if not ASYNCPG_AVAILABLE:
+        # Try to import asyncpg only when needed
+        try:
+            import asyncpg
+        except ImportError:
             logger.warning("asyncpg not available, using in-memory storage only")
             return None
             
@@ -78,20 +75,16 @@ class DemoSessionManager:
                 database = os.environ.get("DB_NAME", "netra")
             
             try:
-                if ASYNCPG_AVAILABLE:
-                    self._pool = await asyncpg.create_pool(
-                        host=host,
-                        port=port,
-                        user=user,
-                        password=password,
-                        database=database,
-                        min_size=1,
-                        max_size=10,
-                        command_timeout=60
-                    )
-                else:
-                    logger.warning("asyncpg not available, cannot create database pool")
-                    return None
+                self._pool = await asyncpg.create_pool(
+                    host=host,
+                    port=port,
+                    user=user,
+                    password=password,
+                    database=database,
+                    min_size=1,
+                    max_size=10,
+                    command_timeout=60
+                )
             except Exception as e:
                 logger.error(f"Failed to create database pool: {str(e)}")
                 # Return None to allow fallback behavior
