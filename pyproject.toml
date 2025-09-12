@@ -184,7 +184,16 @@ markers = [
     "migration: Migration tests",
     "models: Model tests",
     "ssot_validation: SSOT validation tests",
-    "toolregistry: Tool registry tests"
+    "toolregistry: Tool registry tests",
+    "docker_required: Tests that require Docker services",
+    
+    # Final batch of missing markers
+    "context_building: Context building tests",
+    "environment: Environment tests", 
+    "performance_monitoring: Performance monitoring tests",
+    "pipeline_execution: Pipeline execution tests",
+    "protocol_parsing: Protocol parsing tests",
+    "workflow_execution: Workflow execution tests"
 ]
 
 # Coverage settings
