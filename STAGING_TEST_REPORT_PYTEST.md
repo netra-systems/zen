@@ -1,6 +1,6 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-09-12 15:46:32
+**Generated:** 2025-09-12 16:13:39
 **Environment:** Staging
 **Test Framework:** Pytest
 
@@ -10,7 +10,7 @@
 - **Passed:** 0 (0.0%)
 - **Failed:** 1 (100.0%)
 - **Skipped:** 0
-- **Duration:** 4.36 seconds
+- **Duration:** 1.29 seconds
 - **Pass Rate:** 0.0%
 
 ## Test Results by Priority
@@ -19,30 +19,25 @@
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_websocket_event_flow_real | FAIL failed | 0.722s | test_1_websocket_events_staging.py |
+| test_reproduce_http_403_websocket_handshake | FAIL failed | 0.017s | test_websocket_403_reproduction_staging.py |
 
 ## Failed Tests Details
 
-### FAILED: test_websocket_event_flow_real
-- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\test_1_websocket_events_staging.py
-- **Duration:** 0.722s
-- **Error:** tests\e2e\staging_test_base.py:322: in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\e2e\staging\test_1_websocket_events_staging.py:222: in test_websocket_event_flow_real
-    async with websockets.connect(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:587: in __aenter__
-    return await self
-           ^^^^^^^^^^
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\websockets\asyncio\client.py:543: in _...
+### FAILED: test_reproduce_http_403_websocket_handshake
+- **File:** C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py
+- **Duration:** 0.017s
+- **Error:** tests\e2e\staging\issue_631\test_websocket_403_reproduction_staging.py:141: in test_reproduce_http_403_websocket_handshake
+    self.fail(
+    ^^^^^^^^^
+E   AttributeError: 'TestWebSocket403ReproductionStaging' object has no attribute 'fail'...
 
 ## Pytest Output Format
 
 ```
-test_1_websocket_events_staging.py::test_websocket_event_flow_real FAILED
+test_websocket_403_reproduction_staging.py::test_reproduce_http_403_websocket_handshake FAILED
 
 ==================================================
-0 passed, 1 failed in 4.36s
+0 passed, 1 failed in 1.29s
 ```
 
 ## Test Coverage Matrix
