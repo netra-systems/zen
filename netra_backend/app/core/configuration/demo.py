@@ -5,7 +5,7 @@ Follows SSOT compliance for environment variable access.
 """
 
 from typing import Dict, Any, Optional
-from dev_launcher.isolated_environment import IsolatedEnvironment
+from shared.isolated_environment import IsolatedEnvironment
 
 
 def get_backend_demo_config() -> Dict[str, Any]:
