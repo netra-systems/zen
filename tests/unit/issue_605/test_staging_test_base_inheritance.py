@@ -473,12 +473,27 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             logger.info(f"Unified base class compatibility analysis: {compatibility_analysis}")
             
             # Check that unified class provides all critical staging methods
-            staging_critical_methods = {"setup_class", "track_test_timing", "_load_staging_environment"}
+            # Note: track_test_timing is a module-level function, not a class method
+            staging_critical_methods = {"setup_class", "_load_staging_environment"}
             unified_has_critical = staging_critical_methods <= unified_methods
+            
+            # Check that track_test_timing function is available in the unified module
+            import test_framework.unified_e2e_test_base as unified_module
+            has_track_test_timing = hasattr(unified_module, 'track_test_timing')
+            unified_has_critical = unified_has_critical and has_track_test_timing
             
             # Check that unified class provides all critical base e2e methods
             base_e2e_critical_methods = {"setup_method", "teardown_method", "initialize_test_environment"}
             unified_has_base_critical = base_e2e_critical_methods <= unified_methods
+            
+            # Debug logging
+            logger.info(f"unified_has_critical: {unified_has_critical}")
+            logger.info(f"unified_has_base_critical: {unified_has_base_critical}")
+            logger.info(f"has_track_test_timing: {has_track_test_timing}")
+            logger.info(f"staging_critical_methods in unified: {staging_critical_methods <= unified_methods}")
+            logger.info(f"staging_critical_methods: {staging_critical_methods}")
+            logger.info(f"missing staging methods: {staging_critical_methods - unified_methods}")
+            logger.info(f"unified methods: {sorted(unified_methods)}")
             
             if unified_has_critical and unified_has_base_critical:
                 logger.info("✅ UnifiedE2ETestBase successfully provides all critical methods")
@@ -486,7 +501,7 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
             else:
                 missing_critical = []
                 if not unified_has_critical:
-                    missing_critical.append("staging methods")
+                    missing_critical.append(f"staging methods (has_track_test_timing: {has_track_test_timing}, staging_methods_check: {staging_critical_methods <= unified_methods})")
                 if not unified_has_base_critical:
                     missing_critical.append("base E2E methods")
                 
@@ -494,6 +509,7 @@ class TestStagingTestBaseInheritance(SSotBaseTestCase):
                     f"UnifiedE2ETestBase is missing critical methods!\n"
                     f"Missing: {missing_critical}\n"
                     f"Analysis: {compatibility_analysis}\n"
+                    f"Debug: unified_has_critical={unified_has_critical}, unified_has_base_critical={unified_has_base_critical}\n"
                     f"This indicates the unified class needs additional methods."
                 )
             
