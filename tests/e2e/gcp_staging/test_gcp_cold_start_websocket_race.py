@@ -42,7 +42,6 @@ class TestGCPColdStartWebSocketRace(BaseE2ETest):
     @classmethod
     def setup_class(cls):
         """Setup for GCP staging environment tests."""
-        super().setup_class()
         cls.logger = logging.getLogger(__name__)
         
         # GCP staging configuration
