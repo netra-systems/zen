@@ -714,3 +714,34 @@ def enhance_websocket_auth_tester():
 
 # Initialize the enhanced methods
 enhance_websocket_auth_tester()
+
+
+# Missing functions required by test files
+async def create_test_user_with_jwt(user_id: str, email: str) -> str:
+    """Create a test user with JWT token for testing purposes.
+    
+    This is an async version of create_test_jwt_token for compatibility
+    with existing test files that expect this function.
+    
+    Args:
+        user_id: User ID for the token
+        email: Email address for the user
+        
+    Returns:
+        Test JWT token
+    """
+    return create_test_jwt_token(user_id=user_id, email=email)
+
+
+def get_test_frontend_url() -> str:
+    """Get the test frontend URL.
+    
+    Returns the frontend URL for testing purposes.
+    
+    Returns:
+        Frontend URL string
+    """
+    # Default test frontend URL - can be overridden by environment variables
+    from shared.isolated_environment import IsolatedEnvironment
+    env = IsolatedEnvironment()
+    return env.get_env_var("FRONTEND_URL", "http://localhost:3000")

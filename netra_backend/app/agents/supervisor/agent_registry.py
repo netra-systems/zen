@@ -1,6 +1,4 @@
 """ ALERT:  ENHANCED Agent Registry with mandatory user isolation patterns.
-from shared.id_generation.unified_id_generator import UnifiedIdGenerator
-
 
 CRITICAL SECURITY UPGRADE: This module implements hardened user isolation 
 patterns to prevent concurrent execution contamination and memory leaks.
@@ -23,6 +21,9 @@ import weakref
 import time
 from datetime import datetime, timezone
 from collections import defaultdict
+
+# SSOT COMPLIANCE: UnifiedIdGenerator for consistent ID generation
+from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 
 # SSOT: Import from UniversalRegistry - avoid name collision
 from netra_backend.app.core.registry.universal_registry import (

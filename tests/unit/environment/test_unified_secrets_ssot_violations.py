@@ -20,9 +20,9 @@ from unittest.mock import patch
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from netra_backend.app.core.configuration.unified_secrets import UnifiedSecrets
+from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretsManager
 from shared.isolated_environment import get_env
-from test_framework.base_unit_test import BaseUnitTest
+from netra_backend.tests.unit.test_base import BaseUnitTest
 
 
 class TestUnifiedSecretsSSOTViolations(BaseUnitTest):
@@ -69,7 +69,7 @@ class TestUnifiedSecretsSSOTViolations(BaseUnitTest):
                 assert os.environ.get(secret_key) == secret_value
                 
                 # Create UnifiedSecrets instance  
-                secrets = UnifiedSecrets()
+                secrets = UnifiedSecretsManager()
                 
                 # This should NOT find the secret if using SSOT properly
                 # But if it does, it proves direct os.getenv() usage
@@ -114,7 +114,7 @@ class TestUnifiedSecretsSSOTViolations(BaseUnitTest):
             secret_key = "TEST_SET_SECRET_VIOLATION"
             secret_value = "set-via-direct-os-environ"
             
-            secrets = UnifiedSecrets()
+            secrets = UnifiedSecretsManager()
             
             # Set secret using UnifiedSecrets.set_secret()
             secrets.set_secret(secret_key, secret_value)
@@ -237,7 +237,7 @@ class TestUnifiedSecretsSSOTViolations(BaseUnitTest):
             if secret_key in os.environ:
                 del os.environ[secret_key]
             
-            secrets = UnifiedSecrets()
+            secrets = UnifiedSecretsManager()
             
             # Call get_secret with a default value
             result = secrets.get_secret(secret_key, default=default_value)

@@ -28,7 +28,7 @@ from netra_backend.app.admin.corpus.unified_corpus_admin import (
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from shared.types import UserID
 from shared.isolated_environment import get_env
-from test_framework.base_unit_test import BaseUnitTest
+from netra_backend.tests.unit.test_base import BaseUnitTest
 
 
 class TestUnifiedCorpusAdminSSOTViolations(BaseUnitTest):

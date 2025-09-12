@@ -128,13 +128,13 @@ class RequestScopedExecutionEngine:
         # Validate user context immediately
         self.user_context = validate_user_context(user_context)
         
-        if not registry:
+        if registry is None:
             logger.error(
                 f" FAIL:  VALIDATION FAILURE: AgentRegistry cannot be None for RequestScopedExecutionEngine. "
                 f"User: {user_context.user_id[:8]}..., Engine initialization failed."
             )
             raise ValueError("AgentRegistry cannot be None")
-        if not websocket_bridge:
+        if websocket_bridge is None:
             logger.error(
                 f" FAIL:  VALIDATION FAILURE: AgentWebSocketBridge cannot be None for RequestScopedExecutionEngine. "
                 f"User: {user_context.user_id[:8]}..., Engine initialization failed."
@@ -159,13 +159,13 @@ class RequestScopedExecutionEngine:
             'timeout_executions': 0
         }
         
-        # Initialize components with request context
-        self._init_components()
-        
         # Engine metadata
         self.engine_id = f"{user_context.user_id}_{user_context.run_id}_{int(time.time()*1000)}"
         self.created_at = datetime.now(timezone.utc)
         self._is_active = True
+        
+        # Initialize components with request context
+        self._init_components()
         
         logger.info(f" PASS:  Created RequestScopedExecutionEngine {self.engine_id} for user {user_context.user_id} "
                    f"(run_id: {user_context.run_id})")
@@ -173,9 +173,9 @@ class RequestScopedExecutionEngine:
     def _init_components(self) -> None:
         """Initialize execution components with request context."""
         # All components get request-scoped WebSocket bridge
-        self.periodic_update_manager = PeriodicUpdateManager(self.websocket_bridge)
+        self.periodic_update_manager = PeriodicUpdateManager()
         self.agent_core = AgentExecutionCore(self.registry, self.websocket_bridge)
-        self.fallback_manager = FallbackManager(self.websocket_bridge)
+        self.fallback_manager = FallbackManager()
         self.flow_logger = get_supervisor_flow_logger()
         self.execution_tracker = get_execution_tracker()
         

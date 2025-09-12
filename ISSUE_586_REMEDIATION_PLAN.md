@@ -1,446 +1,296 @@
-# Issue #586 Environment Detection Enhancement - Detailed Remediation Plan
+# Issue #586 Comprehensive Remediation Plan
 
-**Date:** 2025-09-12  
-**Issue:** P0 CRITICAL: GCP Environment Detection & Timeout Configuration Enhancement  
-**Status:** REMEDIATION PLAN COMPLETE - Ready for Implementation
+**Status:** Ready for Implementation  
+**Created:** 2025-09-12  
+**Priority:** P1 - Critical Business Impact ($500K+ ARR protection)  
+**Test Failure Rate:** 70% (confirms environment detection gaps)
 
 ## Executive Summary
 
-This remediation plan addresses the test failures identified in Issue #586 environment detection enhancement. The primary issues discovered are:
+Issue #586 represents critical timeout configuration and environment detection failures causing WebSocket 1011 errors in GCP Cloud Run deployments. Test results confirm that development timeouts (1.2s) are incorrectly applied in staging environments, causing systematic failures during cold start conditions.
 
-1. **Environment Detection Issue**: System defaults to 'testing' instead of proper environment detection  
-2. **Timeout Configuration Issue**: Development environment returning 0.5 multiplier instead of expected 0.3
-3. **Missing SSOT Methods**: Test infrastructure needs `assertAlmostEqual` method
-4. **GCP Detection Gap**: Cloud Run environment detection working but timeout calculation misaligned
+**Root Cause Analysis:**
+1. **Environment Detection Gaps:** Missing GCP Cloud Run markers (`K_SERVICE`, `GCP_PROJECT_ID`) detection logic
+2. **Timeout Hierarchy Failures:** Development timeout (1.2s) applied instead of staging timeout (1.5s+) 
+3. **Cold Start Buffer Missing:** No cold start overhead calculations for GCP deployment patterns
+4. **WebSocket Startup Race Conditions:** app_state initialization timing issues
+5. **Missing Graceful Degradation:** No fallback handling when services unavailable
 
-## Business Impact Protection
+## Business Impact Assessment
 
-- **$500K+ ARR Protection**: All changes maintain WebSocket race condition prevention
-- **Performance Optimization**: Validates promised speed improvements (up to 97% in development)
-- **Golden Path Reliability**: Ensures complete user journey works across all environments
-- **Platform Stability**: Environment-aware system adapts optimally to deployment context
+- **Revenue at Risk:** $500K+ ARR from WebSocket connection failures
+- **Customer Impact:** Chat functionality failures during service deployments/restarts
+- **Service Reliability:** 70% test failure rate indicates systematic issues
+- **Golden Path Impact:** Core user flow (login → AI responses) compromised
 
----
+## Phase 1: Environment Detection Enhancement (Priority 1)
 
-## Phase 1: Test Infrastructure Fix (Immediate - Priority 1)
+### 1.1 Fix GCP Cloud Run Environment Detection
 
-### Problem
-Tests are failing because the SSOT BaseTestCase is missing the `assertAlmostEqual` method needed for timeout multiplier precision validation.
+**Current Problem:** Environment detection logic in `timeout_configuration.py` missing proper GCP markers validation.
 
-### Solution
-**File:** `/test_framework/ssot/base_test_case.py`
-
-**Add missing assertion methods to SSotBaseTestCase:**
-
+**Solution:**
 ```python
-def assertAlmostEqual(self, first, second, places=7, msg=None, delta=None):
-    """Assert that first and second are approximately equal."""
-    import unittest
-    tc = unittest.TestCase()
-    return tc.assertAlmostEqual(first, second, places, msg, delta)
-
-def assertAlmostEqualFloat(self, first, second, tolerance=0.001, msg=None):
-    """Assert that two float values are almost equal within tolerance."""
-    if abs(first - second) > tolerance:
-        if msg is None:
-            msg = f"{first} != {second} within {tolerance} tolerance"
-        raise AssertionError(msg)
-
-def assertBetween(self, value, min_val, max_val, msg=None):
-    """Assert that value is between min_val and max_val (inclusive)."""
-    if not (min_val <= value <= max_val):
-        if msg is None:
-            msg = f"{value} is not between {min_val} and {max_val}"
-        raise AssertionError(msg)
+def _detect_gcp_environment_markers(self) -> Dict[str, Any]:
+    """Enhanced GCP Cloud Run detection with redundant markers."""
+    
+    # PRIORITY FIX: Add comprehensive marker detection
+    gcp_markers = {
+        'K_SERVICE': self._env.get("K_SERVICE") or os.environ.get("K_SERVICE"),
+        'K_REVISION': self._env.get("K_REVISION") or os.environ.get("K_REVISION"), 
+        'GCP_PROJECT_ID': (self._env.get("GCP_PROJECT_ID") or 
+                          os.environ.get("GCP_PROJECT_ID") or
+                          self._env.get("GOOGLE_CLOUD_PROJECT") or 
+                          os.environ.get("GOOGLE_CLOUD_PROJECT")),
+        'CLOUD_RUN_SERVICE': self._env.get("CLOUD_RUN_SERVICE"),
+        'GAE_ENV': self._env.get("GAE_ENV")
+    }
+    
+    # CRITICAL: Cloud Run detection logic
+    is_cloud_run = bool(gcp_markers['K_SERVICE'])
+    
+    # ENHANCEMENT: Environment inference from markers
+    if is_cloud_run:
+        project_id = gcp_markers['GCP_PROJECT_ID']
+        if project_id:
+            if 'staging' in project_id:
+                return 'staging'
+            elif 'production' in project_id:
+                return 'production'
+        
+        # Fallback to service name analysis
+        service_name = gcp_markers['K_SERVICE']
+        if service_name and 'staging' in service_name:
+            return 'staging'
+    
+    return 'development'  # Safe fallback
 ```
 
-**Business Value:**
-- Enables accurate validation of timeout multiplier calculations
-- Ensures test infrastructure supports all needed assertion patterns
-- Prevents test framework gaps from blocking environment optimization validation
+**Implementation Files:**
+- `netra_backend/app/core/timeout_configuration.py` (lines 187-243)
+- Add validation tests in `tests/unit/environment/test_gcp_environment_detection_unit.py`
 
----
+### 1.2 Enhanced Environment Detection Precedence
 
-## Phase 2: Core Environment Detection Logic Fix (Primary - Priority 1)
+**Current Problem:** Conflicting environment indicators (K_SERVICE vs ENVIRONMENT) cause wrong environment selection.
 
-### Problem Analysis
-Based on test failures, the core issue is that `EnvironmentDetector.get_environment()` in `/netra_backend/app/core/environment_constants.py` is defaulting to 'testing' when it should detect proper environments.
+**Solution:** Implement strict precedence hierarchy:
+1. GCP Cloud Run markers (K_SERVICE + GCP_PROJECT_ID) - HIGHEST
+2. Explicit ENVIRONMENT variable - MEDIUM  
+3. Default inference - LOWEST
 
-### Root Cause
-The current environment detection logic has these issues:
+**Implementation:**
+- Update `_detect_environment()` method with precedence logic
+- Add comprehensive logging for debugging environment detection issues
+- Implement consistency validation across multiple detection attempts
 
-1. **Testing Detection Too Aggressive**: The method checks for testing context too early in the priority chain
-2. **GCP Detection Missing**: Cloud Run detection via `K_SERVICE` and `GCP_PROJECT_ID` not working properly
-3. **Fallback Logic Incorrect**: Should default to 'development' but may be returning 'testing'
+## Phase 2: Timeout Configuration Fixes (Priority 1)
 
-### Solution
-**File:** `/netra_backend/app/core/environment_constants.py`
+### 2.1 Fix Staging vs Development Timeout Application
 
-**Update `EnvironmentDetector.get_environment()` method:**
+**Current Problem:** Development timeout (1.2s) applied in Cloud Run staging instead of staging timeout (1.5s+).
 
+**Solution:**
 ```python
-@staticmethod
-def get_environment() -> str:
-    """Get the current environment using standardized detection logic.
-    
-    FIXED Priority order:
-    1. Explicit ENVIRONMENT variable (highest priority)
-    2. Cloud platform detection (GCP, AWS, K8s)
-    3. Testing environment detection (TESTING variable or pytest context)  
-    4. Default to development
-    
-    Returns:
-        str: The detected environment (guaranteed to be a valid Environment value)
-    """
-    # BOOTSTRAP ONLY: Direct env access required for initial config loading
-    # Check explicit environment variable first (highest priority)
-    env_var = get_env().get(EnvironmentVariables.ENVIRONMENT, "").strip().lower()
-    if Environment.is_valid(env_var):
-        return env_var
-    
-    # Check for cloud environments BEFORE testing detection
-    # This prevents GCP staging from being detected as testing
-    cloud_env = EnvironmentDetector.detect_cloud_environment()
-    if cloud_env:
-        return cloud_env
-    
-    # Check for testing environment AFTER cloud detection (only if ENVIRONMENT not explicitly set)
-    # This ensures GCP environments aren't overridden by testing detection
-    if EnvironmentDetector._is_explicit_testing_context():
-        return Environment.TESTING.value
+def _get_base_staging_config(self, tier: TimeoutTier) -> TimeoutConfig:
+    """Enhanced staging configuration with Cloud Run optimizations."""
+    return TimeoutConfig(
+        # CRITICAL FIX: Staging timeouts must exceed cold start requirements
+        websocket_connection_timeout=60,  # Cold start buffer
+        websocket_recv_timeout=15,        # INCREASED from 1.2s to 15s  
+        websocket_send_timeout=12,
+        websocket_heartbeat_timeout=90,
         
-    # Default to development
-    return Environment.DEVELOPMENT.value
-
-@staticmethod
-def _is_explicit_testing_context() -> bool:
-    """Check if running in explicit testing context (not just pytest imports).
-    
-    This method is more restrictive than is_testing_context() to prevent
-    false positives in GCP environments that may have pytest as a dependency.
-    """
-    # Only detect testing if explicitly set, not just from pytest imports
-    testing_flag = get_env().get(EnvironmentVariables.TESTING, "").lower()
-    if testing_flag in ['true', '1', 'yes', 'on']:
-        return True
-    
-    # Check for active pytest execution (not just import)
-    pytest_test = get_env().get(EnvironmentVariables.PYTEST_CURRENT_TEST)
-    if pytest_test and pytest_test.strip():
-        return True
-    
-    return False
-```
-
-**Add GCP Project ID Detection:**
-
-```python
-@staticmethod
-def detect_cloud_environment() -> Optional[str]:
-    """Detect cloud platform environment with enhanced GCP detection.
-    
-    Returns:
-        Optional[str]: Environment name if cloud platform detected
-    """
-    # Google Cloud Run detection (enhanced)
-    if EnvironmentDetector.is_cloud_run():
-        return EnvironmentDetector.get_cloud_run_environment()
-    
-    # GCP detection via project ID
-    gcp_project_id = get_env().get(EnvironmentVariables.GOOGLE_CLOUD_PROJECT) or get_env().get("GCP_PROJECT_ID")
-    if gcp_project_id:
-        # Staging project ID: 701982941522
-        if gcp_project_id == "701982941522":
-            return Environment.STAGING.value
-        # Production project ID: 304612253870  
-        elif gcp_project_id == "304612253870":
-            return Environment.PRODUCTION.value
-        # Any other GCP project defaults to staging for safety
-        else:
-            return Environment.STAGING.value
-            
-    # Google App Engine detection
-    if EnvironmentDetector.is_app_engine():
-        return EnvironmentDetector.get_app_engine_environment()
+        # Agent timeouts (must be < WebSocket timeouts for hierarchy)
+        agent_execution_timeout=12,       # INCREASED for Cloud Run
+        agent_thinking_timeout=10,
+        agent_tool_timeout=8,
+        agent_completion_timeout=6,
         
-    # AWS detection
-    if EnvironmentDetector.is_aws():
-        return EnvironmentDetector.get_aws_environment()
+        # Test timeouts
+        test_default_timeout=30,          # INCREASED for Cloud Run tests
+        test_integration_timeout=45,
+        test_e2e_timeout=60,
         
-    # Kubernetes detection
-    if EnvironmentDetector.is_kubernetes():
-        return Environment.PRODUCTION.value
-        
-    return None
-```
-
-**Business Value:**
-- Ensures proper environment detection across all deployment contexts
-- Prevents staging environments from being misclassified as testing
-- Provides reliable foundation for environment-aware timeout optimization
-
----
-
-## Phase 3: Timeout Configuration Enhancement (Primary - Priority 1)
-
-### Problem
-The development environment is returning 0.5 multiplier instead of the expected 0.3 multiplier for optimal development speed.
-
-### Root Cause Analysis
-In `/netra_backend/app/websocket_core/gcp_initialization_validator.py`, the `_initialize_environment_timeout_configuration()` method has incorrect timeout multiplier values:
-
-- **Current**: Development uses `0.5` (50% of production)
-- **Expected**: Development should use `0.3` (70% faster, up to 97% improvement)
-
-### Solution
-**File:** `/netra_backend/app/websocket_core/gcp_initialization_validator.py`
-
-**Update `_initialize_environment_timeout_configuration()` method:**
-
-```python
-def _initialize_environment_timeout_configuration(self) -> None:
-    """
-    Initialize environment-aware timeout configuration for optimal performance.
-    
-    PERFORMANCE OPTIMIZATION: Different environments have different performance
-    characteristics and safety requirements. This method configures timeout
-    multipliers to balance speed vs reliability per environment.
-    
-    FIXED MULTIPLIERS - Issue #586:
-    - Production: 1.0x (baseline reliability)
-    - Staging: 0.7x (30% faster than production)  
-    - Development: 0.3x (70% faster - up to 97% improvement)
-    - Local/Test: 0.3x (same as development for consistency)
-    """
-    if self.environment == 'production':
-        # Production: Conservative timeouts for maximum reliability
-        self.timeout_multiplier = 1.0
-        self.safety_margin = 1.2  # 20% safety margin
-        self.max_total_timeout = 8.0  # Conservative max timeout
-    elif self.environment == 'staging':
-        # Staging: Balanced timeouts - faster than prod, safer than dev
-        self.timeout_multiplier = 0.7  # 30% faster than production
-        self.safety_margin = 1.1  # 10% safety margin
-        self.max_total_timeout = 5.0  # Moderate max timeout
-    elif self.environment in ['development', 'dev']:
-        # Development: Very fast timeouts for rapid development cycles
-        self.timeout_multiplier = 0.3  # 70% faster than production (FIXED from 0.5)
-        self.safety_margin = 1.0  # No safety margin for speed
-        self.max_total_timeout = 3.0  # Fast max timeout
-    else:
-        # Local/test: Same as development for consistency
-        self.timeout_multiplier = 0.3  # 70% faster than production (FIXED)
-        self.safety_margin = 1.0  # No safety margin
-        self.max_total_timeout = 2.0  # Very fast max timeout
-    
-    # Cloud Run specific adjustments - maintain race condition protection
-    if self.is_cloud_run:
-        # Ensure minimum timeout to prevent race conditions in Cloud Run
-        self.min_cloud_run_timeout = 0.5  # Absolute minimum for Cloud Run safety
-        
-    self.logger.debug(
-        f"Environment timeout configuration: {self.environment} "
-        f"(multiplier: {self.timeout_multiplier}, safety: {self.safety_margin}, "
-        f"max: {self.max_total_timeout}s, cloud_run: {self.is_cloud_run})"
+        tier=tier
     )
 ```
 
-**Business Value:**
-- Delivers promised 97% improvement in development environment WebSocket connections
-- Maintains perfect balance between speed and safety across environments
-- Provides immediate developer productivity improvements
+### 2.2 Add Cold Start Buffer Calculations
 
----
+**Current Problem:** No cold start overhead calculations causing systematic timeout failures.
 
-## Phase 4: Environment Detection Integration (Supporting - Priority 2)
-
-### Problem
-The GCP WebSocket validator may not be properly detecting environment changes or initializing with correct environment context.
-
-### Solution
-**File:** `/netra_backend/app/websocket_core/gcp_initialization_validator.py`
-
-**Enhance environment detection in constructor:**
-
+**Solution:**
 ```python
-def __init__(self, app_state: Optional[Any] = None):
-    self.app_state = app_state
-    self.logger = central_logger.get_logger(__name__)
-    self.env_manager = get_env()
+def _calculate_cold_start_buffer(self, environment: str, gcp_markers: Dict[str, Any]) -> float:
+    """Calculate cold start buffer for Cloud Run deployments."""
     
-    # GCP-specific configuration with enhanced detection
-    self.environment = self._detect_environment_comprehensive()
-    self.is_gcp_environment = self.environment in ['staging', 'production']
-    self.is_cloud_run = self.env_manager.get('K_SERVICE') is not None
+    if not gcp_markers.get('is_gcp_cloud_run'):
+        return 0.0  # No buffer needed for non-Cloud Run
     
-    # Readiness tracking
-    self.current_state = GCPReadinessState.UNKNOWN
-    self.readiness_checks: Dict[str, ServiceReadinessCheck] = {}
-    self.validation_start_time = 0.0
+    base_buffers = {
+        'staging': 3.0,     # Staging cold start overhead
+        'production': 5.0,  # Production cold start overhead (more conservative)
+        'development': 2.0  # Local development with Cloud Run
+    }
     
-    # PERFORMANCE OPTIMIZATION: Environment-aware timeout multipliers
-    self._initialize_environment_timeout_configuration()
+    base_buffer = base_buffers.get(environment, 2.0)
     
-    self._register_critical_service_checks()
-
-def _detect_environment_comprehensive(self) -> str:
-    """
-    Comprehensive environment detection with fallback chain.
+    # Additional buffer for complex services
+    if 'backend' in gcp_markers.get('service_name', ''):
+        base_buffer += 1.0  # Backend services need more time
     
-    Uses multiple detection methods to ensure accurate environment identification:
-    1. EnvironmentDetector from environment_constants (primary)
-    2. IsolatedEnvironment get_environment_name() (fallback)
-    3. Direct environment variable check (final fallback)
-    """
-    try:
-        # Primary: Use EnvironmentDetector for consistency
-        from netra_backend.app.core.environment_constants import EnvironmentDetector
-        detected_env = EnvironmentDetector.get_environment()
-        if detected_env:
-            self.logger.debug(f"Environment detected via EnvironmentDetector: {detected_env}")
-            return detected_env.lower()
-    except Exception as e:
-        self.logger.warning(f"EnvironmentDetector failed: {e}")
-    
-    try:
-        # Fallback: Use IsolatedEnvironment method
-        env_name = self.env_manager.get_environment_name()
-        if env_name:
-            self.logger.debug(f"Environment detected via IsolatedEnvironment: {env_name}")
-            return env_name.lower()
-    except Exception as e:
-        self.logger.warning(f"IsolatedEnvironment get_environment_name failed: {e}")
-    
-    # Final fallback: Direct environment variable
-    direct_env = self.env_manager.get('ENVIRONMENT', 'development').lower()
-    self.logger.debug(f"Environment detected via direct ENVIRONMENT variable: {direct_env}")
-    return direct_env
+    return base_buffer
 ```
 
-**Business Value:**
-- Provides robust environment detection with multiple fallback methods
-- Ensures WebSocket validator always has accurate environment context
-- Prevents configuration mismatches that could impact performance optimization
+**Implementation Files:**
+- Update `timeout_configuration.py` with cold start calculations
+- Integrate cold start buffer into timeout selection logic
 
----
+## Phase 3: WebSocket Startup Coordination (Priority 2)
 
-## Phase 5: Integration Validation and Testing (Verification - Priority 2)
+### 3.1 Fix WebSocket/app_state Race Condition
 
-### Test Execution Plan
+**Current Problem:** WebSocket validation runs before app_state initialization, causing 1011 timeouts.
 
-**Phase 5.1: Unit Test Validation**
-```bash
-# Run the specific environment detection tests
-python tests/unified_test_runner.py --category unit \
-  --test-file tests/unit/core/environment_detection/test_environment_detector_enhancement_unit.py
+**Solution:**
+- Implement startup phase coordination
+- Add app_state readiness checks before WebSocket validation
+- Implement graceful degradation when app_state unavailable
 
-# Validate timeout configuration unit tests  
-python tests/unified_test_runner.py --category unit \
-  --test-file tests/unit/core/environment_detection/test_timeout_configuration_logic_unit.py
+**Key Implementation:**
+```python
+async def _wait_for_app_state_ready(self, timeout: float = 10.0) -> bool:
+    """Wait for app_state to be ready before WebSocket validation."""
+    
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            # Check if app_state is available and initialized
+            if hasattr(app, 'state') and app.state is not None:
+                return True
+        except Exception:
+            pass
+        
+        await asyncio.sleep(0.1)  # Check every 100ms
+    
+    return False  # Timeout waiting for app_state
 ```
 
-**Phase 5.2: Integration Testing**
-```bash
-# Test environment-aware service startup
-python tests/unified_test_runner.py --category integration \
-  --test-file tests/integration/environment_detection/test_environment_aware_service_startup_integration.py
+### 3.2 Implement Graceful Degradation
+
+**Solution:**
+- Add retry logic with exponential backoff
+- Implement connection queueing during startup windows
+- Add health check endpoints for startup status
+
+## Phase 4: Test Infrastructure Updates (Priority 2)
+
+### 4.1 Update Test Timeout Values
+
+**Current Problem:** Tests use hardcoded development timeouts (1.2s) even in staging contexts.
+
+**Solution:** Replace all hardcoded timeouts with environment-aware values:
+
+**Files to Update:**
+```
+tests/unit/environment/test_timeout_configuration_unit.py
+tests/integration/websocket/test_websocket_startup_timing_integration.py  
+tests/e2e/staging/test_gcp_startup_race_condition_e2e.py
+tests/unit/websocket_core/test_startup_phase_coordination_unit.py
 ```
 
-**Phase 5.3: E2E GCP Validation**
-```bash
-# GCP environment detection E2E tests (requires GCP staging deployment)  
-python tests/unified_test_runner.py --category e2e \
-  --test-file tests/e2e/gcp_staging_environment/test_gcp_environment_detection_e2e.py
+**Implementation:**
+```python
+# Replace hardcoded timeouts
+websocket_timeout = get_websocket_recv_timeout()  # Environment-aware
+agent_timeout = get_agent_execution_timeout()     # Environment-aware
+
+# Instead of:
+websocket_timeout = 1.2  # Hardcoded development timeout
 ```
 
-**Expected Results After Fixes:**
+### 4.2 Add Comprehensive Environment Detection Tests
 
-1. **Environment Detection Tests**: Should pass with proper environment identification
-2. **Timeout Configuration Tests**: Should validate 0.3x multiplier for development
-3. **GCP Detection Tests**: Should properly identify staging/production environments  
-4. **Integration Tests**: Should demonstrate environment-aware timeout optimization
+**New Test Files:**
+- `test_gcp_cloud_run_environment_detection.py` - GCP marker validation
+- `test_timeout_precedence_logic.py` - Environment precedence testing  
+- `test_cold_start_timeout_calculation.py` - Cold start buffer validation
 
----
+## Phase 5: Deployment and Validation (Priority 3)
 
-## Implementation Priority and Sequence
+### 5.1 Staging Environment Validation
 
-### Immediate (Day 1) - MUST FIX
-1. **Phase 1**: Add missing assertion methods to SSOT BaseTestCase
-2. **Phase 2**: Fix environment detection priority order in EnvironmentDetector
-3. **Phase 3**: Correct timeout multipliers (0.5 → 0.3 for development)
+**Validation Steps:**
+1. Deploy updated timeout configuration to staging
+2. Run comprehensive test suite with real GCP environment
+3. Validate WebSocket connection success rates >95%
+4. Confirm environment detection consistency across requests
 
-### Short Term (Day 2) - SHOULD FIX  
-4. **Phase 4**: Enhance environment detection in GCP WebSocket validator
-5. **Phase 5**: Run comprehensive test validation
+### 5.2 Production Deployment
 
-### Success Criteria
-- [ ] All unit tests pass for environment detection
-- [ ] Development environment returns 0.3x timeout multiplier
-- [ ] GCP staging/production environments properly detected
-- [ ] WebSocket race condition prevention maintained
-- [ ] Performance improvements validated (up to 97% in development)
+**Prerequisites:**
+- All staging tests passing
+- Environment detection validated in staging
+- WebSocket connection success rates >99% in staging
 
----
+**Rollback Plan:**
+- Automated rollback triggers if WebSocket success rate drops below 90%
+- Immediate revert to previous timeout configuration
+- Emergency scaling of timeout values as temporary mitigation
 
-## Risk Mitigation
+## Implementation Timeline
 
-### Business Value Protection
-- **WebSocket Safety**: All changes maintain minimum 0.5s timeout in Cloud Run
-- **Backward Compatibility**: Fallback detection methods prevent service disruption
-- **Gradual Rollout**: Can deploy environment detection fixes without timeout changes
+### Week 1: Core Fixes
+- [ ] **Day 1-2:** Environment detection enhancement (Phase 1)
+- [ ] **Day 3-4:** Timeout configuration fixes (Phase 2.1-2.2)  
+- [ ] **Day 5:** Initial testing and validation
 
-### Rollback Plan
-```bash
-# If issues arise, revert specific changes:
-git checkout HEAD~1 -- netra_backend/app/core/environment_constants.py
-git checkout HEAD~1 -- netra_backend/app/websocket_core/gcp_initialization_validator.py
-git checkout HEAD~1 -- test_framework/ssot/base_test_case.py
-```
+### Week 2: Coordination & Testing
+- [ ] **Day 1-2:** WebSocket startup coordination (Phase 3)
+- [ ] **Day 3-4:** Test infrastructure updates (Phase 4)
+- [ ] **Day 5:** Comprehensive testing
 
-### Monitoring Plan
-- Monitor WebSocket connection success rates across all environments
-- Track timeout values being applied in different environments
-- Validate environment detection accuracy via application logs
+### Week 3: Deployment
+- [ ] **Day 1-2:** Staging deployment and validation
+- [ ] **Day 3-4:** Production deployment preparation
+- [ ] **Day 5:** Production deployment and monitoring
 
----
+## Success Metrics
 
-## SSOT Compliance Verification
+### Primary Metrics (Must Achieve)
+- **Test Pass Rate:** >95% (up from current 30%)
+- **WebSocket Connection Success:** >99% in production
+- **Environment Detection Accuracy:** 100% consistency
+- **Cold Start Handling:** <5% timeout failures during cold starts
 
-### Required Checks
-- [ ] All changes use `shared.isolated_environment.get_env()` for environment access
-- [ ] No direct `os.environ` access added
-- [ ] Integration with existing SSOT patterns maintained  
-- [ ] Test framework changes follow SSOT BaseTestCase patterns
+### Secondary Metrics
+- **Average Connection Time:** <2s in staging, <3s in production
+- **Startup Race Condition:** 0% occurrences
+- **Timeout Hierarchy Violations:** 0% occurrences
 
-### Architecture Standards
-- [ ] Functions under 25 lines (exception: environment detection logic complexity)
-- [ ] Clear error handling and logging
-- [ ] Backward compatibility maintained
-- [ ] Integration points documented
+## Risk Assessment
 
----
+### High Risk Items
+1. **Staging Environment Impact:** Timeout changes may affect existing connections
+2. **Production Rollout:** Conservative approach required for $500K+ ARR protection
+3. **Test Coverage Gaps:** Some edge cases may not be covered by current tests
 
-## Performance Validation Targets
+### Mitigation Strategies
+1. **Gradual Rollout:** Deploy to staging first with extensive monitoring
+2. **Automated Rollback:** Trigger rollback on connection failure rate >10%
+3. **Extended Monitoring:** 48-hour monitoring period post-deployment
 
-### Development Environment (Post-Fix)
-- **Timeout Multiplier**: 0.3x (70% faster than production)
-- **WebSocket Connection Time**: Up to 97% improvement vs current
-- **Service Startup**: Sub-1 second validation times
+## Conclusion
 
-### Staging Environment
-- **Timeout Multiplier**: 0.7x (30% faster than production)  
-- **Balance**: Performance improvement with safety margin
-- **GCP Detection**: Accurate identification via K_SERVICE and project ID
+This remediation plan addresses all identified issues in Issue #586 through systematic environment detection enhancement, timeout configuration fixes, and WebSocket startup coordination improvements. The 70% test failure rate will be reduced to <5% through comprehensive implementation of environment-aware timeout management and GCP Cloud Run optimization.
 
-### Production Environment
-- **Timeout Multiplier**: 1.0x (baseline reliability)
-- **Safety**: Maximum race condition protection maintained
-- **Stability**: Conservative timeouts for $500K+ ARR protection
+**Implementation Priority:** Immediate start required to protect $500K+ ARR and restore Golden Path reliability.
 
 ---
 
-**Implementation Status:** 🚀 **READY FOR IMMEDIATE EXECUTION**  
-**Business Impact:** 🎯 **PERFORMANCE OPTIMIZATION & ENVIRONMENT RELIABILITY**  
-**Risk Level:** ⚡ **LOW** (Focused fixes with comprehensive fallback protection)
-
-**Next Action:** Execute Phase 1 and Phase 2 immediately to resolve core test failures and deliver promised performance improvements.
+**Next Steps:**
+1. Review and approve remediation plan
+2. Begin Phase 1 implementation (environment detection)
+3. Set up staging environment monitoring
+4. Execute comprehensive test validation

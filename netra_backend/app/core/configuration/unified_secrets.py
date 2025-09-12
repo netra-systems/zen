@@ -10,6 +10,8 @@ from typing import Dict, Optional, Any
 from dataclasses import dataclass
 import logging
 
+from shared.isolated_environment import get_env
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,6 +34,7 @@ class UnifiedSecretsManager:
     def __init__(self, config: Optional[SecretConfig] = None):
         self.config = config or SecretConfig()
         self._cache: Dict[str, Any] = {}
+        self.env = get_env()
         logger.info("UnifiedSecretsManager initialized")
     
     def get_secret(self, key: str, default: Optional[str] = None) -> Optional[str]:
@@ -48,8 +51,8 @@ class UnifiedSecretsManager:
         if self.config.cache_secrets and key in self._cache:
             return self._cache[key]
         
-        # Try environment variable first
-        value = os.getenv(key, default)
+        # Try environment variable first using SSOT environment access
+        value = self.env.get(key, default)
         
         if self.config.cache_secrets and value is not None:
             self._cache[key] = value
@@ -66,7 +69,7 @@ class UnifiedSecretsManager:
         """
         if self.config.cache_secrets:
             self._cache[key] = value
-        os.environ[key] = value
+        self.env.set(key, value)
     
     def clear_cache(self) -> None:
         """Clear the secrets cache"""

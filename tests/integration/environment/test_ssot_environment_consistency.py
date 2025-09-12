@@ -25,7 +25,7 @@ from netra_backend.app.core.auth_startup_validator import (
     AuthStartupValidator,
     AuthComponent
 )
-from netra_backend.app.core.configuration.unified_secrets import UnifiedSecrets
+from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretsManager
 from shared.jwt_secret_manager import get_jwt_secret_manager
 from shared.isolated_environment import get_env
 from test_framework.base_integration_test import BaseIntegrationTest
@@ -77,7 +77,7 @@ class TestSSOTEnvironmentConsistency(BaseIntegrationTest):
                 
                 # Test multiple components that should all use the same secret
                 auth_validator = AuthStartupValidator()
-                secrets_manager = UnifiedSecrets()
+                secrets_manager = UnifiedSecretsManager()
                 jwt_manager = get_jwt_secret_manager()
                 
                 # Get JWT secrets from different components
@@ -140,7 +140,7 @@ class TestSSOTEnvironmentConsistency(BaseIntegrationTest):
                 
                 # Test components that need auth service URL
                 auth_validator = AuthStartupValidator()
-                secrets_manager = UnifiedSecrets()
+                secrets_manager = UnifiedSecretsManager()
                 
                 # Get auth URLs from different sources
                 validator_url = auth_validator._get_env_with_fallback('AUTH_SERVICE_URL')
@@ -195,7 +195,7 @@ class TestSSOTEnvironmentConsistency(BaseIntegrationTest):
                 # when they should only see the isolated environment value
                 
                 auth_validator = AuthStartupValidator()
-                secrets_manager = UnifiedSecrets()
+                secrets_manager = UnifiedSecretsManager()
                 
                 # Get values from components with SSOT violations
                 validator_value = auth_validator._get_env_with_fallback(sensitive_key)
@@ -299,7 +299,7 @@ class TestSSOTEnvironmentConsistency(BaseIntegrationTest):
                 
                 # Test secrets management with inconsistencies
                 try:
-                    secrets_manager = UnifiedSecrets()
+                    secrets_manager = UnifiedSecretsManager()
                     
                     for var_name in inconsistent_vars.keys():
                         secret_value = secrets_manager.get_secret(var_name)

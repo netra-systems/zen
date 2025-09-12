@@ -363,6 +363,22 @@ class TestStartupPhaseValidationLogic(SSotBaseTestCase):
 class TestServiceReadinessValidationLogic(SSotBaseTestCase):
     """Unit tests for individual service readiness checks with startup awareness."""
     
+    def setup_method(self, method=None):
+        """Set up test fixtures with SSOT patterns."""
+        super().setup_method(method)
+        self.test_metrics = SsotTestMetrics()
+        self.test_metrics.start_timing()
+        
+        # Configure test environment as GCP staging
+        self.env_patch = patch.dict('os.environ', {
+            'ENVIRONMENT': 'staging',
+            'K_SERVICE': 'netra-backend-staging',
+            'K_REVISION': 'netra-backend-staging-00042'
+        })
+        self.env_patch.start()
+        
+        self.logger = logging.getLogger(__name__)
+    
     def tearDown(self):
         """Clean up test fixtures."""
         self.env_patch.stop()
@@ -466,6 +482,22 @@ class TestServiceReadinessValidationLogic(SSotBaseTestCase):
 
 class TestRetryAndTimingLogic(SSotBaseTestCase):
     """Unit tests for retry mechanisms and timeout handling in GCP environment."""
+    
+    def setup_method(self, method=None):
+        """Set up test fixtures with SSOT patterns."""
+        super().setup_method(method)
+        self.test_metrics = SsotTestMetrics()
+        self.test_metrics.start_timing()
+        
+        # Configure test environment as GCP staging
+        self.env_patch = patch.dict('os.environ', {
+            'ENVIRONMENT': 'staging',
+            'K_SERVICE': 'netra-backend-staging',
+            'K_REVISION': 'netra-backend-staging-00042'
+        })
+        self.env_patch.start()
+        
+        self.logger = logging.getLogger(__name__)
     
     def tearDown(self):
         """Clean up test fixtures."""
@@ -616,6 +648,14 @@ class TestRetryAndTimingLogic(SSotBaseTestCase):
 
 class TestStartupPhaseTransitions(SSotBaseTestCase):
     """Unit tests for startup phase transition edge cases."""
+    
+    def setup_method(self, method=None):
+        """Set up test fixtures with SSOT patterns."""
+        super().setup_method(method)
+        self.test_metrics = SsotTestMetrics()
+        self.test_metrics.start_timing()
+        
+        self.logger = logging.getLogger(__name__)
     
     def tearDown(self):
         """Clean up test fixtures."""
