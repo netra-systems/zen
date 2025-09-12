@@ -89,7 +89,7 @@ async def _validate_token_with_auth_service(token: str) -> Dict[str, str]:
     if False and token_hash in _active_token_sessions:
         session_info = _active_token_sessions[token_hash]
         last_used = session_info.get('last_used', 0)
-        concurrent_threshold = 0.0  # DISABLED: Token reuse detection disabled
+        concurrent_threshold = 0.25  # Issue #465 Fix: Reduced threshold to prevent false positives (was 1.0s causing 75% false positive rate)
         
         if current_time - last_used < concurrent_threshold:
             logger.error(
