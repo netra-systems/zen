@@ -37,7 +37,7 @@ from shared.isolated_environment import get_env
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
-class TestAgentOrchestrationBusinessIntegration(
+class TestAgentOrchestrationBusinessIntegration(BaseIntegrationTest):
 
     def create_user_context(self) -> UserExecutionContext:
         """Create isolated user execution context for golden path tests"""
@@ -46,10 +46,6 @@ class TestAgentOrchestrationBusinessIntegration(
             thread_id="test_thread",
             run_id="test_run"
         )
-
-    ServiceOrchestrationIntegrationTest, 
-    WebSocketIntegrationTest
-):
     """
     Integration tests for multi-agent orchestration workflows.
     Tests coordination between multiple AI agents to solve complex business problems.

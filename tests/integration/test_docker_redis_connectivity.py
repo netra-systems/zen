@@ -412,20 +412,10 @@ class TestDockerRedisConnectivity:
         try:
             # Test different databases
             # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
-            redis_db0 = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=backend_env.get_redis_host(),
-                port=backend_env.get_redis_port(),
-                db=0,
-                socket_timeout=5
-            )
+            redis_db0 = await get_redis_client()
             
             # MIGRATION NEEDED: await get_redis_client()  # MIGRATED: was redis.Redis( -> await get_redis_client() - requires async context
-            redis_db1 = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=backend_env.get_redis_host(),
-                port=backend_env.get_redis_port(),
-                db=1,
-                socket_timeout=5
-            )
+            redis_db1 = await get_redis_client()
             
             test_key = f"db_isolation_test_{int(time.time())}"
             

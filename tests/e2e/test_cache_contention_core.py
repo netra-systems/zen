@@ -839,7 +839,7 @@ class TestCacheContentionSuite:
             keys_created.append(key)
             
             if counter % 100 == 0:
-                current_memory = await self.suite.await redis_client.get_memory_usage()
+                current_memory = await redis_client.info("memory")["used_memory"]
                 
             counter += 1
             
@@ -898,7 +898,8 @@ class TestCacheContentionSuite:
         successful_operations = sum(r for r in results if isinstance(r, int))
         expected_operations = num_workers * operations_per_worker
         
-        final_memory = await self.suite.await redis_client.get_memory_usage()
+        final_memory_info = await redis_client.info("memory")
+        final_memory = final_memory_info["used_memory"]
         
         # Check cache hit ratio under pressure
         cache_hit_ratio = self.suite.metrics.get_cache_hit_ratio()

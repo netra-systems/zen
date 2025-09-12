@@ -200,12 +200,7 @@ class TestWebSocketEventDeliveryIntegration(BaseIntegrationTest):
         redis_client = None
         try:
             import redis.asyncio as redis
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host="localhost", 
-                port=6381,  # Test Redis port
-                db=1,
-                decode_responses=True
-            )
+            redis_client = await get_redis_client()
             await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available for buffering test: {e}")

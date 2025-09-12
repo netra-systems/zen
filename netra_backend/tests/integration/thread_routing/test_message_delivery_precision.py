@@ -433,9 +433,7 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
         
         # Setup Redis connection
         env = get_env()
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=env.get("REDIS_HOST", "localhost"), 
-                                 port=int(env.get("REDIS_PORT", "6381")), 
-                                 decode_responses=True)
+        redis_client = await get_redis_client()
         try:
             await redis_client.ping()
         except Exception as e:
@@ -710,9 +708,7 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
         
         # Setup Redis connection
         env = get_env()
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=env.get("REDIS_HOST", "localhost"), 
-                                 port=int(env.get("REDIS_PORT", "6381")), 
-                                 decode_responses=True)
+        redis_client = await get_redis_client()
         try:
             await redis_client.ping()
         except Exception as e:

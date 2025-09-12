@@ -99,21 +99,21 @@ from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.base_test_case import SSotAsyncTestCase
 # CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import create_authenticated_user_context
-# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import (
-    E2EAuthHelper, 
-    E2EWebSocketAuthHelper,
-    AuthenticatedUser
-)
+# CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import (
+#     E2EAuthHelper,
+#     E2EWebSocketAuthHelper,
+#     AuthenticatedUser
+# )
 from shared.isolated_environment import get_env
 from shared.types.core_types import UserID, ThreadID, RunID, ensure_user_id
 
 # No-Docker fixtures for service-independent testing
-# CONSOLIDATED: # CONSOLIDATED: from test_framework.fixtures.no_docker_golden_path_fixtures import (
-    no_docker_golden_path_services, 
-    golden_path_services,
-    mock_authenticated_user,
-    skip_if_docker_required
-)
+# CONSOLIDATED: from test_framework.fixtures.no_docker_golden_path_fixtures import (
+#     no_docker_golden_path_services,
+#     golden_path_services,
+#     mock_authenticated_user,
+#     skip_if_docker_required
+# )
 
 # Production System Imports for Real Service Testing
 from netra_backend.app.core.unified_id_manager import generate_user_id, generate_thread_id, UnifiedIDManager

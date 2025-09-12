@@ -20,9 +20,10 @@ from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.tests.test_agent_orchestration_fixtures import (
+    AgentOrchestrator,
+    MockSupervisorAgent
+)
 from netra_backend.app.services.user_execution_context import UserExecutionContext
-AgentOrchestrator,
-MockSupervisorAgent)
 
 @pytest.fixture
 def real_supervisor():

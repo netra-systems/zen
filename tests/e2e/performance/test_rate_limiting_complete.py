@@ -86,14 +86,8 @@ class TestComprehensiveRateLimiter:
         """Setup test environment with Redis and mock users."""
         # Setup Redis connection for rate limit coordination
         try:
-            self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host='localhost', 
-                port=6379, 
-                db=0, 
-                decode_responses=True,
-                socket_connect_timeout=2
-            )
-            await redis_client.ping()
+            self.redis_client = await get_redis_client()
+            await self.redis_client.ping()
         except Exception:
             # Use None to indicate Redis unavailable - tests will simulate
             self.redis_client = None

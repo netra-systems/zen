@@ -356,13 +356,7 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 redis_db = 0
             
             # Attempt Redis connection
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=redis_host,
-                port=redis_port,
-                db=redis_db,
-                socket_timeout=10.0,
-                socket_connect_timeout=10.0
-            )
+            redis_client = await get_redis_client()
             
             # Test basic Redis operation
             await redis_client.ping()
@@ -642,13 +636,7 @@ class TestWebSocketInfrastructureDependenciesE2E(SSotAsyncTestCase):
                 redis_port = 6381
                 redis_db = 0
             
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=redis_host,
-                port=redis_port,
-                db=redis_db,
-                socket_timeout=5.0,
-                socket_connect_timeout=5.0
-            )
+            redis_client = await get_redis_client()
             
             await redis_client.ping()
             await redis_client.close()

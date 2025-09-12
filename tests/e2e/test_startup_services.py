@@ -275,14 +275,7 @@ class TestServiceStartup:
         redis_client = None
         try:
             # Create Redis connection
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host='localhost',
-                port=6379,
-                db=0,
-                decode_responses=True,
-                socket_connect_timeout=5,
-                socket_timeout=5
-            )
+            redis_client = await get_redis_client()
             
             # Test basic connectivity
             pong = await redis_client.ping()

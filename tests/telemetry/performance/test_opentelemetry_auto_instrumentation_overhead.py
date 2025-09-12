@@ -369,12 +369,7 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
                     
             # Create Redis client
             import redis
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=self.get_env_var('REDIS_HOST', 'localhost'),
-                port=int(self.get_env_var('REDIS_PORT', '6379')),
-                db=0,
-                decode_responses=True
-            )
+            redis_client = await get_redis_client()
             
             # Warmup iterations
             for _ in range(self.warmup_iterations):
@@ -786,12 +781,7 @@ class TestAutoInstrumentationSystemWideOverhead(SSotAsyncTestCase):
         try:
             import redis
             
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=self.get_env_var('REDIS_HOST', 'localhost'),
-                port=int(self.get_env_var('REDIS_PORT', '6379')),
-                db=0,
-                decode_responses=True
-            )
+            redis_client = await get_redis_client()
             
             key = f"system_test_{test_iteration}"
             await redis_client.set(key, "test_value", ex=30)

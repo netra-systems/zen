@@ -271,12 +271,7 @@ class TestAutoInstrumentationFrameworkDiscovery(SSotAsyncTestCase):
             )
             
             # Test instrumented Redis operations
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=self.get_env_var('REDIS_HOST', 'localhost'),
-                port=int(self.get_env_var('REDIS_PORT', '6379')),
-                db=0,
-                decode_responses=True
-            )
+            redis_client = await get_redis_client()
             
             # Perform instrumented operations
             test_key = "auto_instrumentation_test"

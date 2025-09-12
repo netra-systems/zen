@@ -57,13 +57,13 @@ from shared.isolated_environment import get_env
 from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 # CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.e2e_auth_helper import E2EWebSocketAuthHelper, create_authenticated_user_context
-# CONSOLIDATED: # CONSOLIDATED: from test_framework.ssot.websocket_golden_path_helpers import (
-    WebSocketGoldenPathHelper,
-    GoldenPathTestConfig,
-    GoldenPathTestResult,
-    test_websocket_golden_path,
-    assert_golden_path_success
-)
+# CONSOLIDATED: from test_framework.ssot.websocket_golden_path_helpers import (
+#     WebSocketGoldenPathHelper,
+#     GoldenPathTestConfig,
+#     GoldenPathTestResult,
+#     test_websocket_golden_path,
+#     assert_golden_path_success
+# )
 from netra_backend.app.websocket_core.event_validator import (
     AgentEventValidator,
     CriticalAgentEventType,

@@ -570,13 +570,7 @@ class TestConfigurationManagementIntegration(BaseIntegrationTest):
         try:
             import redis.asyncio as redis
             
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=redis_config["REDIS_HOST"],
-                port=int(redis_config["REDIS_PORT"]),
-                db=int(redis_config["REDIS_DB"]),
-                decode_responses=True,
-                socket_timeout=2.0
-            )
+            redis_client = await get_redis_client()
             
             # Test ping
             ping_result = await redis_client.ping()
@@ -617,17 +611,17 @@ class TestConfigurationManagementIntegration(BaseIntegrationTest):
             fake_redis_client = fake_redis.FakeRedis(decode_responses=True)
             
             # Test fake Redis operations
-            ping_result = await fake_await redis_client.ping()
+            ping_result = fake_redis_client.ping()
             
             test_key = f"fallback_test_{uuid.uuid4().hex[:8]}"
             test_value = f"fallback_value_{time.time()}"
             
-            await fake_await redis_client.set(test_key, test_value)
-            retrieved_value = await fake_await redis_client.get(test_key)
+            fake_redis_client.set(test_key, test_value)
+            retrieved_value = fake_redis_client.get(test_key)
             
             fallback_successful = retrieved_value == test_value and ping_result
             
-            await fake_await redis_client.aclose()
+            # fake_redis_client.close()  # FakeRedis doesn't need async close
             
             return {
                 "fallback_successful": fallback_successful

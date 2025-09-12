@@ -41,12 +41,7 @@ class TestUnifiedStateManagerGCPStaging(SSotAsyncTestCase):
         cls.id_manager = UnifiedIDManager()
         
         # Real GCP Redis Cloud connection
-        cls.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host=cls.env.get("REDIS_HOST", "redis-cloud.googleapis.com"),
-            port=int(cls.env.get("REDIS_PORT", 6379)),
-            db=0,
-            decode_responses=True
-        )
+        cls.redis_client = await get_redis_client()
         
         # Real state manager with production configuration
         cls.config = StateManagerConfig(
