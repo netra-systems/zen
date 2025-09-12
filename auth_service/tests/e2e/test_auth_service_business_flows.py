@@ -93,7 +93,7 @@ class TestAuthServiceBusinessFlows(BaseE2ETest):
         
         if self.docker_manager:
             try:
-                await self.docker_manager.release_environment("test")
+                await self.docker_manager.stop_services_smart(["postgres", "redis", "auth"])
                 self.logger.info(" PASS:  Docker services and test data cleaned up successfully")
             except Exception as e:
                 self.logger.error(f" FAIL:  Error cleaning up Docker services: {e}")
