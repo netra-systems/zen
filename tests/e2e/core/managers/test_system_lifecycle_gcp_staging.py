@@ -45,10 +45,27 @@ from netra_backend.app.core.managers.unified_lifecycle_manager import (
     setup_application_lifecycle
 )
 
-# GCP and production service imports
-import google.cloud.monitoring_v3 as monitoring
-import google.cloud.logging as logging_client
-from google.cloud import storage
+# GCP and production service imports (conditional for staging environment)
+try:
+    import google.cloud.monitoring_v3 as monitoring
+    MONITORING_AVAILABLE = True
+except ImportError:
+    monitoring = None
+    MONITORING_AVAILABLE = False
+
+try:
+    import google.cloud.logging as logging_client
+    LOGGING_AVAILABLE = True
+except ImportError:
+    logging_client = None
+    LOGGING_AVAILABLE = False
+
+try:
+    from google.cloud import storage
+    STORAGE_AVAILABLE = True
+except ImportError:
+    storage = None
+    STORAGE_AVAILABLE = False
 
 
 class TestSystemLifecycleGCPCloudRunDeployment(SSotAsyncTestCase):
@@ -315,6 +332,7 @@ class TestSystemLifecycleGCPMonitoringIntegration(SSotAsyncTestCase):
         
         self.lifecycle = SystemLifecycle(user_id=f"monitoring_test_{uuid.uuid4().hex[:8]}")
     
+    @pytest.mark.skipif(not MONITORING_AVAILABLE, reason="google.cloud.monitoring_v3 not available")
     async def test_gcp_monitoring_metrics_integration(self):
         """Test integration with GCP Cloud Monitoring."""
         try:
@@ -401,6 +419,7 @@ class TestSystemLifecycleGCPMonitoringIntegration(SSotAsyncTestCase):
             # GCP monitoring may not be available in all test environments
             pytest.skip(f"GCP monitoring test environment issue: {e}")
     
+    @pytest.mark.skipif(not LOGGING_AVAILABLE, reason="google.cloud.logging not available")
     async def test_gcp_logging_integration(self):
         """Test integration with GCP Cloud Logging."""
         try:
@@ -514,6 +533,7 @@ class TestSystemLifecycleGCPStorageIntegration(SSotAsyncTestCase):
         
         self.lifecycle = SystemLifecycle(user_id=f"storage_test_{uuid.uuid4().hex[:8]}")
     
+    @pytest.mark.skipif(not STORAGE_AVAILABLE, reason="google.cloud.storage not available")
     async def test_storage_backup_during_shutdown(self):
         """Test storage backup coordination during graceful shutdown."""
         try:

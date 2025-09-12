@@ -1,0 +1,1 @@
+# Unit tests for environment detection and configuration

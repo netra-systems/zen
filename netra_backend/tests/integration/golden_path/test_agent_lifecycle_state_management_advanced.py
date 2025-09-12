@@ -40,9 +40,11 @@ from test_framework.real_services_test_fixtures import real_services_fixture
 from test_framework.ssot.e2e_auth_helper import E2EAuthHelper, create_authenticated_user_context
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from netra_backend.app.models.agent_execution import AgentExecution
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
 from shared.types import UserID, ThreadID, RunID, RequestID
@@ -95,7 +97,17 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Initialize agent registry and execution engine
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
         
         # Set up WebSocket manager for event tracking
         websocket_manager = WebSocketManager()
@@ -153,7 +165,17 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # "Restart" components - reinitialize
         agent_registry_restarted = AgentRegistry()
-        execution_engine_restarted = ExecutionEngine()
+        
+        # Create WebSocket bridge for restarted ExecutionEngine
+        websocket_bridge_restarted = create_agent_websocket_bridge()
+        
+        # Use factory method for restarted ExecutionEngine (SSOT compliance)
+        execution_engine_restarted = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry_restarted, 
+            websocket_bridge=websocket_bridge_restarted,
+            max_concurrent_executions=3
+        )
         
         # Reconnect WebSocket manager
         websocket_manager_restarted = WebSocketManager()
@@ -220,9 +242,19 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Initialize components
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine()
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
         
         websocket_events = []
         def capture_event(event):
@@ -375,9 +407,19 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Initialize components
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine()
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
         
         memory_snapshots = []
         websocket_events = []
@@ -509,9 +551,19 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Initialize shared components
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine()
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=None,  # Will be provided per user context
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
         
         # Track all events per user
         user_events = {ctx["user_id"]: [] for ctx in user_contexts}
@@ -671,9 +723,19 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Initialize components
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine()
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
         
         failure_scenarios = []
         recovery_results = []
@@ -866,9 +928,19 @@ class TestAdvancedAgentLifecycleStateManagement(BaseIntegrationTest):
         
         # Initialize components
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine()
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
         
         consistency_checks = []
         state_snapshots = []

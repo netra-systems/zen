@@ -192,7 +192,7 @@ class TestStartupValidation:
         mock_app.state.websocket_manager = None  # Factory mode
         
         # Mock factory availability check
-        with patch('netra_backend.app.core.startup_validation.create_websocket_manager') as mock_factory:
+        with patch('netra_backend.app.websocket_core.websocket_manager_factory.create_websocket_manager') as mock_factory:
             mock_factory.return_value = "factory_available"
             
             success, report = await validator.validate_startup(mock_app)
@@ -265,11 +265,23 @@ class TestStartupValidation:
         mock_app.state.thread_service = MagicMock()
         mock_app.state.agent_service = MagicMock()
         
-        # Setup database
-        mock_app.state.db_session_factory = MagicMock()
+        # Setup database with proper async context manager mock
+        mock_session = AsyncMock()
+        mock_result = MagicMock()
+        mock_result.scalar_one.return_value = 15  # Expected table count
+        mock_session.execute.return_value = mock_result
+        
+        # Create async context manager mock
+        async_context = AsyncMock()
+        async_context.__aenter__.return_value = mock_session
+        async_context.__aexit__.return_value = None
+        
+        mock_session_factory = MagicMock()
+        mock_session_factory.return_value = async_context
+        mock_app.state.db_session_factory = mock_session_factory
         
         # Mock WebSocket factory
-        with patch('netra_backend.app.core.startup_validation.create_websocket_manager'):
+        with patch('netra_backend.app.websocket_core.websocket_manager_factory.create_websocket_manager'):
             success, report = await validator.validate_startup(mock_app)
         
         # Should be successful
@@ -399,13 +411,25 @@ class TestServiceDependencyResolution:
         app.state = MagicMock()
         
         # Setup dependency chain: DB -> Redis -> LLM -> WebSocket -> Tools
-        app.state.db_session_factory = MagicMock()
+        mock_session = AsyncMock()
+        mock_result = MagicMock()
+        mock_result.scalar_one.return_value = 15
+        mock_session.execute.return_value = mock_result
+        
+        # Create async context manager mock
+        async_context = AsyncMock()
+        async_context.__aenter__.return_value = mock_session
+        async_context.__aexit__.return_value = None
+        
+        mock_session_factory = MagicMock()
+        mock_session_factory.return_value = async_context
+        app.state.db_session_factory = mock_session_factory
         app.state.redis_manager = MagicMock()
         app.state.llm_manager = MagicMock()
         app.state.websocket_manager = None  # Factory pattern
         
         # Mock WebSocket factory
-        with patch('netra_backend.app.core.startup_validation.create_websocket_manager'):
+        with patch('netra_backend.app.websocket_core.websocket_manager_factory.create_websocket_manager'):
             # Mock tool configuration
             app.state.tool_classes = [MagicMock(), MagicMock()]
             app.state.websocket_bridge_factory = MagicMock()
@@ -464,7 +488,7 @@ class TestRaceConditionPrevention:
         app.state.websocket_bridge_factory = MagicMock()
         
         # Mock WebSocket factory
-        with patch('netra_backend.app.core.startup_validation.create_websocket_manager'):
+        with patch('netra_backend.app.websocket_core.websocket_manager_factory.create_websocket_manager'):
             # Run multiple concurrent validations
             tasks = [
                 validator.validate_startup(app)

@@ -227,9 +227,9 @@ class StartupValidator:
             # Validate tool configuration and factories instead
             
             # Check for tool_classes configuration (REQUIRED)
-            if hasattr(app.state, 'tool_classes') and app.state.tool_classes:
-                tool_classes = app.state.tool_classes
-                tool_count = len(tool_classes) if tool_classes else 0
+            if hasattr(app.state, 'tool_classes'):
+                tool_classes = app.state.tool_classes or []  # Handle None case
+                tool_count = len(tool_classes)
                 
                 self.logger.info(f" SEARCH:  UserContext mode: {tool_count} tool classes configured")
                 
@@ -361,7 +361,7 @@ class StartupValidator:
             ws_manager = None
             
             # Try to get WebSocket manager
-            if hasattr(app.state, 'websocket_manager'):
+            if hasattr(app.state, 'websocket_manager') and app.state.websocket_manager is not None:
                 ws_manager = app.state.websocket_manager
             else:
                 # In factory pattern, WebSocket managers are created per-user

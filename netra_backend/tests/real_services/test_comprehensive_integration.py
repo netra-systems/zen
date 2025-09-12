@@ -37,7 +37,7 @@ import uvicorn
 
 from test_framework.environment_isolation import get_test_env_manager
 from test_framework.llm_config_manager import configure_llm_testing, LLMTestMode
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.state import DeepAgentState

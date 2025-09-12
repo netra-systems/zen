@@ -18,7 +18,7 @@ Critical issues have been identified with pytest test collection causing Docker 
 from test_framework.conftest_real_services import *
 
 # Lines 31-59: Phase 0 migration components with fallback mocks
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.dependencies import (...)
 from netra_backend.app.services.memory_optimization_service import (...)
 from netra_backend.app.services.session_memory_manager import (...)

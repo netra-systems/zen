@@ -30,7 +30,7 @@ from netra_backend.app.agents.supervisor.user_execution_engine import UserExecut
 from netra_backend.app.agents.supervisor.execution_engine_factory import get_execution_engine_factory
 from netra_backend.app.db.postgres_session import get_async_db
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.models.agent_execution import AgentExecution
 from shared.types import UserID, ThreadID, RunID, RequestID
 

@@ -43,6 +43,7 @@ from netra_backend.app.services.agent_websocket_bridge import create_agent_webso
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 from netra_backend.app.tools.tool_dispatcher import ToolDispatcher
 from netra_backend.app.tools.enhanced_tool_execution_engine import EnhancedToolExecutionEngine
 from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
@@ -117,11 +118,22 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        tool_dispatcher = ToolDispatcher()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        tool_dispatcher = ToolDispatcher()
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track tool executions and pipeline progress
         tool_executions = []
@@ -468,10 +480,21 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track error scenarios and recovery attempts
         error_scenarios = []
@@ -789,10 +812,21 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track parallel execution metrics
         parallel_executions = []
@@ -1132,10 +1166,21 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track dynamic selection decisions
         selection_decisions = []
@@ -1455,10 +1500,21 @@ class TestAdvancedToolPipelineIntegration(BaseIntegrationTest):
         # Initialize components with SSOT patterns
         llm_manager = LLMManager()  # SSOT: Create LLM manager for agent registry
         agent_registry = AgentRegistry(llm_manager)
-        execution_engine = ExecutionEngine()
-        enhanced_tool_engine = EnhancedToolExecutionEngine()
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
         websocket_manager = WebSocketManager()
         agent_registry.set_websocket_manager(websocket_manager)
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
+        
+        enhanced_tool_engine = EnhancedToolExecutionEngine()
         
         # Track timeout and circuit breaker events
         timeout_events = []
