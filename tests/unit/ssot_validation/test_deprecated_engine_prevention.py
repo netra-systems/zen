@@ -47,7 +47,7 @@ class TestDeprecatedEnginePrevention(SSotBaseTestCase):
         self.record_metric("test_name", "execution_engine_deprecation_warnings")
         
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             with warnings.catch_warnings(record=True) as w:
                 # Enable all warnings 
@@ -532,7 +532,7 @@ class TestSSotConsolidationReadiness(SSotBaseTestCase):
         
         # 3. Legacy ExecutionEngine deprecated/removed (+2 points)
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             # If available, check if properly deprecated
             consolidation_score += 1  # Partial credit during transition
         except ImportError:
@@ -542,7 +542,7 @@ class TestSSotConsolidationReadiness(SSotBaseTestCase):
         # 4. Import redirections working (+2 points)
         import_redirections_working = 0
         try:
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             import_redirections_working += 1
         except:
             pass

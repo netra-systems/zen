@@ -865,7 +865,7 @@
                     # Removed problematic line: async def test_user_execution_engine_vs_legacy_isolation(self, configured_system):
                         # REMOVED_SYNTAX_ERROR: """Test isolation comparison between UserExecutionEngine and legacy ExecutionEngine."""
                         # REMOVED_SYNTAX_ERROR: pass
-                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
 
                         # REMOVED_SYNTAX_ERROR: user_context = UserExecutionContext( )
                         # REMOVED_SYNTAX_ERROR: user_id="isolation_test_user",

@@ -59,7 +59,7 @@
 
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.tool_dispatcher_core import ToolDispatcher
         # REMOVED_SYNTAX_ERROR: from netra_backend.app.dependencies import get_db_dependency, get_agent_supervisor
@@ -311,7 +311,7 @@
 
                                         # Test proper factory-based creation instead
                                         # REMOVED_SYNTAX_ERROR: try:
-                                            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as EE
+                                            # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as EE
                                             # This should be the proper way to create execution engines
                                             # REMOVED_SYNTAX_ERROR: if hasattr(EE, 'create_request_scoped_engine'):
                                                 # REMOVED_SYNTAX_ERROR: logger.info(" PASS:  ExecutionEngine provides proper factory method for request-scoped instances")
@@ -809,7 +809,7 @@
                                                                     # REMOVED_SYNTAX_ERROR: pass  # Module may not be available in test context
 
                                                                     # REMOVED_SYNTAX_ERROR: try:
-                                                                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine as EE2
+                                                                        # REMOVED_SYNTAX_ERROR: from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine as EE2
                                                                         # REMOVED_SYNTAX_ERROR: EE2()
                                                                         # REMOVED_SYNTAX_ERROR: verification_passed = False  # Should not reach here
                                                                         # REMOVED_SYNTAX_ERROR: except (TypeError, RuntimeError):

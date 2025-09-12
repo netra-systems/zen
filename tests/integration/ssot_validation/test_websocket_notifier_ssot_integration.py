@@ -268,7 +268,7 @@ class TestWebSocketNotifierSSOTServiceCoordination(SSotAsyncTestCase):
         """Test PASSES: WebSocket bridge coordinates properly with execution engine."""
         try:
             from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-            from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+            from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
             
             bridge = AgentWebSocketBridge()
             

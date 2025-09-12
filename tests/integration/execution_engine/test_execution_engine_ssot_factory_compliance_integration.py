@@ -348,7 +348,7 @@ class TestExecutionEngineSSotFactoryComplianceIntegration(SSotAsyncTestCase):
             
             # Test 2: Direct ExecutionEngine instantiation should be discouraged/fail
             try:
-                from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+                from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
                 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
                 
                 # Create minimal dependencies for direct instantiation test
