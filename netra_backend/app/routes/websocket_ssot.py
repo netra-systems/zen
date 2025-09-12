@@ -1151,12 +1151,12 @@ class WebSocketSSOTRouter:
                 # Fix: create_agent_websocket_bridge is synchronous, not async
                 agent_bridge = create_agent_websocket_bridge(user_context)
                 
-                # Register handler with router
-                async def agent_handler(user_id: str, websocket: WebSocket, message: Dict[str, Any]):
-                    return await agent_bridge.handle_message(message)
+                # CRITICAL FIX: Create proper handler class implementing MessageHandler protocol
+                # BUG WAS: Raw async function lacking 'can_handle' method caused routing failures
+                handler = AgentBridgeHandler(agent_bridge, user_context)
                 
-                message_router.add_handler(agent_handler)
-                logger.info("Agent handlers registered successfully")
+                message_router.add_handler(handler)
+                logger.info(f"Agent handlers registered successfully: {handler.__class__.__name__}")
         except Exception as e:
             logger.error(f"Agent handler setup failed: {e}")
     
