@@ -48,7 +48,6 @@ import asyncio
 from fastapi import FastAPI
 
 from netra_backend.app.core.service_dependencies import (
-from netra_backend.app.services.user_execution_context import UserExecutionContext
     ServiceDependencyChecker,
     GoldenPathValidator,
     HealthCheckValidator,
@@ -58,6 +57,7 @@ from netra_backend.app.services.user_execution_context import UserExecutionConte
     EnvironmentType,
     DEFAULT_SERVICE_DEPENDENCIES
 )
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 @pytest.mark.asyncio

@@ -69,10 +69,10 @@ from test_framework.ssot.e2e_auth_helper import (
 from test_framework.ssot.docker_test_manager import ensure_services_running
 
 from netra_backend.app.core.unified.jwt_validator import (
-from netra_backend.app.services.user_execution_context import UserExecutionContext
     UnifiedJWTValidator,
     TokenValidationResult
 )
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathJWTAuthFlow(E2EAuthenticatedTestCase):

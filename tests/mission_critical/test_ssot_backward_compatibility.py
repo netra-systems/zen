@@ -108,7 +108,7 @@ class TestSSOTBackwardCompatibility:
         """Clean up backward compatibility test and REAL service connections."""
         # Clean up compatibility test data
         try:
-            await redis_client.flushdb()
+            asyncio.get_event_loop().run_until_complete(redis_client.flushdb())
         except:
             pass
             
@@ -124,7 +124,7 @@ class TestSSOTBackwardCompatibility:
         operations_per_context = 15
         compatibility_failures = []
         
-        def legacy_pattern_operations(context_id):
+        async def legacy_pattern_operations(context_id):
             """Simulate legacy pattern operations that should still maintain isolation."""
             failures = []
             
@@ -191,7 +191,7 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
-        def modern_pattern_operations(context_id):
+        async def modern_pattern_operations(context_id):
             """Simulate modern pattern operations with strict isolation."""
             failures = []
             
@@ -259,17 +259,24 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
+        # Create wrapper functions for ThreadPoolExecutor since it can't handle async functions directly
+        def run_legacy_operations(context_id):
+            return asyncio.run(legacy_pattern_operations(context_id))
+            
+        def run_modern_operations(context_id):
+            return asyncio.run(modern_pattern_operations(context_id))
+        
         # Execute concurrent legacy and modern operations
         with ThreadPoolExecutor(max_workers=num_legacy_contexts + num_modern_contexts) as executor:
             # Submit legacy operations
             legacy_futures = {
-                executor.submit(legacy_pattern_operations, context_id): f"legacy_{context_id}"
+                executor.submit(run_legacy_operations, context_id): f"legacy_{context_id}"
                 for context_id in range(num_legacy_contexts)
             }
             
             # Submit modern operations
             modern_futures = {
-                executor.submit(modern_pattern_operations, context_id): f"modern_{context_id}"
+                executor.submit(run_modern_operations, context_id): f"modern_{context_id}"
                 for context_id in range(num_modern_contexts)
             }
             
@@ -306,7 +313,7 @@ class TestSSOTBackwardCompatibility:
         num_concurrent_executions = 20
         mixed_execution_failures = []
         
-        def mixed_pattern_execution(execution_id):
+        async def mixed_pattern_execution(execution_id):
             """Execute both legacy and modern patterns concurrently."""
             failures = []
             
@@ -403,10 +410,14 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_mixed_execution(execution_id):
+            return asyncio.run(mixed_pattern_execution(execution_id))
+            
         # Execute mixed patterns concurrently
         with ThreadPoolExecutor(max_workers=num_concurrent_executions) as executor:
             future_to_execution = {
-                executor.submit(mixed_pattern_execution, execution_id): execution_id
+                executor.submit(run_mixed_execution, execution_id): execution_id
                 for execution_id in range(num_concurrent_executions)
             }
             
@@ -927,7 +938,7 @@ class TestSSOTLegacyMigrationHelpers:
     These tests validate tools that help migrate legacy code to SSOT patterns.
     """
     
-    def setUp(self):
+    async def setUp(self):
         """Set up migration helper test environment with REAL services."""
         self.test_id = uuid.uuid4().hex[:8]
         
@@ -939,10 +950,10 @@ class TestSSOTLegacyMigrationHelpers:
         
         logger.info(f"Starting migration helper test with REAL services: {self._testMethodName} (ID: {self.test_id})")
     
-    def tearDown(self):
+    async def tearDown(self):
         """Clean up migration helper test and REAL service connections."""
         try:
-            await redis_client.flushdb()
+            await self.redis_client.flushdb()
         except:
             pass
             

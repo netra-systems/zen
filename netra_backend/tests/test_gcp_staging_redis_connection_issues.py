@@ -220,11 +220,11 @@ class TestRedisConnectionIssues:
                 
                 # Test basic operations that should fail
                 operations = [
-                    ("ping", lambda: await redis_client.ping()),
-                    ("set", lambda: await redis_client.set("test_key", "test_value")),
-                    ("get", lambda: await redis_client.get("test_key")),
-                    ("delete", lambda: await redis_client.delete("test_key")),
-                    ("exists", lambda: await redis_client.exists("test_key")),
+                    ("ping", lambda: redis_client.ping()),
+                    ("set", lambda: redis_client.set("test_key", "test_value")),
+                    ("get", lambda: redis_client.get("test_key")),
+                    ("delete", lambda: redis_client.delete("test_key")),
+                    ("exists", lambda: redis_client.exists("test_key")),
                 ]
                 
                 for op_name, operation in operations:

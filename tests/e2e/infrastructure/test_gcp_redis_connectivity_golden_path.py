@@ -129,16 +129,7 @@ async def real_redis_client():
     logger.info(f"Connecting to Redis: {redis_host}:{redis_port}/{redis_db}")
     
     # Create real Redis client with same settings as application
-    client = await get_redis_client()  # MIGRATED: was redis.Redis(
-        host=redis_host,
-        port=redis_port,
-        db=redis_db,
-        decode_responses=True,
-        socket_connect_timeout=5.0,
-        socket_timeout=5.0,
-        retry_on_timeout=True,
-        health_check_interval=30
-    )
+    client = await get_redis_client()
     
     yield client
     
@@ -202,7 +193,7 @@ class TestGCPRedisConnectivityGoldenPath:
         # Test 1: Basic Redis connectivity (MUST work for chat)
         try:
             # Real Redis ping - this MUST succeed for chat functionality
-            ping_result = await real_await redis_client.ping()
+            ping_result = await redis_client.ping()
             assert ping_result is True, f"Redis ping failed: {ping_result}"
             logger.info(" PASS:  Redis ping successful")
         except Exception as e:
@@ -216,15 +207,15 @@ class TestGCPRedisConnectivityGoldenPath:
         
         try:
             # Set operation (required for session management)
-            set_result = await real_await redis_client.set(test_key, test_value, ex=60)
+            set_result = await redis_client.set(test_key, test_value, ex=60)
             assert set_result is True, f"Redis SET operation failed: {set_result}"
             
             # Get operation (required for session retrieval)
-            get_result = await real_await redis_client.get(test_key)
+            get_result = await redis_client.get(test_key)
             assert get_result == test_value, f"Redis GET mismatch: expected {test_value}, got {get_result}"
             
             # Delete operation (required for session cleanup)
-            del_result = await real_await redis_client.delete(test_key)
+            del_result = await redis_client.delete(test_key)
             assert del_result == 1, f"Redis DELETE failed: {del_result}"
             
             logger.info(" PASS:  Redis operations successful - chat session management working")
@@ -276,13 +267,13 @@ class TestGCPRedisConnectivityGoldenPath:
             })
             
             # Redis MUST be working for WebSocket session management
-            await real_await redis_client.set(session_key, session_data, ex=3600)
-            retrieved_data = await real_await redis_client.get(session_key)
+            await redis_client.set(session_key, session_data, ex=3600)
+            retrieved_data = await redis_client.get(session_key)
             
             assert retrieved_data == session_data, f"Redis session data corruption: {retrieved_data}"
             
             # Cleanup test session
-            await real_await redis_client.delete(session_key)
+            await redis_client.delete(session_key)
             
             logger.info(" PASS:  Redis session management operations successful")
             
@@ -377,21 +368,21 @@ class TestGCPRedisConnectivityGoldenPath:
             })
             
             # Chat REQUIRES Redis for thread state management
-            await real_await redis_client.set(thread_state_key, thread_state, ex=3600)
-            retrieved_state = await real_await redis_client.get(thread_state_key)
+            await redis_client.set(thread_state_key, thread_state, ex=3600)
+            retrieved_state = await redis_client.get(thread_state_key)
             assert retrieved_state == thread_state, f"Thread state corruption in Redis: {retrieved_state}"
             
             # Test message routing keys that chat uses
             message_routing_key = f"chat_routing:{user_id}"
             routing_data = json.dumps({"active_thread": thread_id, "websocket_session": "active"})
             
-            await real_await redis_client.set(message_routing_key, routing_data, ex=1800)
-            retrieved_routing = await real_await redis_client.get(message_routing_key)
+            await redis_client.set(message_routing_key, routing_data, ex=1800)
+            retrieved_routing = await redis_client.get(message_routing_key)
             assert retrieved_routing == routing_data, f"Message routing corruption in Redis: {retrieved_routing}"
             
             # Cleanup test data
-            await real_await redis_client.delete(thread_state_key)
-            await real_await redis_client.delete(message_routing_key)
+            await redis_client.delete(thread_state_key)
+            await redis_client.delete(message_routing_key)
             
             logger.info(" PASS:  Redis operations for chat functionality successful")
             
@@ -488,20 +479,20 @@ class TestGCPRedisConnectivityGoldenPath:
             # Measure SET operation latency
             start_time = time.time()
             try:
-                result = await real_await redis_client.set(test_key, test_value, ex=60)
+                result = await redis_client.set(test_key, test_value, ex=60)
                 set_latency = (time.time() - start_time) * 1000  # Convert to ms
                 
                 assert result is True, f"Redis SET operation failed: {result}"
                 
                 # Measure GET operation latency
                 get_start = time.time()
-                retrieved = await real_await redis_client.get(test_key)
+                retrieved = await redis_client.get(test_key)
                 get_latency = (time.time() - get_start) * 1000  # Convert to ms
                 
                 assert retrieved == test_value, f"Redis GET mismatch: expected {test_value}, got {retrieved}"
                 
                 # Cleanup
-                await real_await redis_client.delete(test_key)
+                await redis_client.delete(test_key)
                 
                 total_latency = set_latency + get_latency
                 operation_times.append(total_latency)
@@ -542,9 +533,9 @@ class TestGCPRedisConnectivityGoldenPath:
             value = f"concurrent_chat_data_{index}"
             
             start = time.time()
-            await real_await redis_client.set(key, value, ex=60)
-            retrieved = await real_await redis_client.get(key)
-            await real_await redis_client.delete(key)
+            await redis_client.set(key, value, ex=60)
+            retrieved = await redis_client.get(key)
+            await redis_client.delete(key)
             latency = (time.time() - start) * 1000
             
             assert retrieved == value, f"Concurrent operation {index} data corruption"
@@ -595,7 +586,7 @@ class TestGCPRedisConnectivityGoldenPath:
             
             for i in range(5):
                 health_start = time.time()
-                ping_result = await real_await redis_client.ping()
+                ping_result = await redis_client.ping()
                 health_time = (time.time() - health_start) * 1000
                 
                 assert ping_result is True, f"Redis health check {i+1} failed: {ping_result}"
@@ -633,14 +624,14 @@ class TestGCPRedisConnectivityGoldenPath:
             })
             
             # Set with 5 second expiration
-            await real_await redis_client.set(session_key, session_data, ex=5)
+            await redis_client.set(session_key, session_data, ex=5)
             
             # Verify immediate retrieval
-            immediate_result = await real_await redis_client.get(session_key)
+            immediate_result = await redis_client.get(session_key)
             assert immediate_result == session_data, f"Session data corruption: {immediate_result}"
             
             # Check TTL is set correctly
-            ttl = await real_await redis_client.ttl(session_key)
+            ttl = await redis_client.ttl(session_key)
             assert 1 <= ttl <= 5, f"TTL not set correctly: {ttl}"
             
             logger.info(f" PASS:  Session key created with TTL: {ttl}s remaining")
@@ -650,7 +641,7 @@ class TestGCPRedisConnectivityGoldenPath:
             await asyncio.sleep(6)
             
             # Verify expiration worked
-            expired_result = await real_await redis_client.get(session_key)
+            expired_result = await redis_client.get(session_key)
             if expired_result is not None:
                 logger.error(f" FAIL:  REDIS EXPIRATION FAILURE: Key should have expired but still exists: {expired_result}")
                 raise AssertionError(f"Redis expiration test FAILED - session cleanup not working: {expired_result}")
@@ -669,7 +660,7 @@ class TestGCPRedisConnectivityGoldenPath:
             message_count_key = f"message_count:{user_id}"
             
             # Use pipeline for atomic operations (like chat does)
-            pipe = real_await redis_client.pipeline()
+            pipe = redis_client.pipeline()
             pipe.multi()
             
             # Atomic operations for chat state
@@ -691,8 +682,8 @@ class TestGCPRedisConnectivityGoldenPath:
             logger.info(f" PASS:  Redis transaction successful: {results}")
             
             # Cleanup
-            await real_await redis_client.delete(thread_key)
-            await real_await redis_client.delete(message_count_key)
+            await redis_client.delete(thread_key)
+            await redis_client.delete(message_count_key)
             
         except Exception as e:
             logger.error(f" FAIL:  REDIS TRANSACTION FAILURE: {e}")
@@ -736,13 +727,13 @@ class TestGCPRedisConnectivityGoldenPath:
         
         try:
             # Store conversation data with long TTL
-            set_result = await real_await redis_client.set(persistence_key, test_value, ex=3600)
+            set_result = await redis_client.set(persistence_key, test_value, ex=3600)
             assert set_result is True, f"Failed to store chat data: {set_result}"
             
             logger.info(" PASS:  Chat data stored successfully")
             
             # Verify immediate retrieval
-            immediate_data = await real_await redis_client.get(persistence_key)
+            immediate_data = await redis_client.get(persistence_key)
             assert immediate_data == test_value, f"Data corruption on immediate read: {immediate_data}"
             
             logger.info(" PASS:  Chat data retrieved successfully after storage")
@@ -753,16 +744,7 @@ class TestGCPRedisConnectivityGoldenPath:
             redis_port = int(env.get("REDIS_PORT", "6379"))
             redis_db = int(env.get("REDIS_DB", "0"))
             
-            new_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host=redis_host,
-                port=redis_port,
-                db=redis_db,
-                decode_responses=True,
-                socket_connect_timeout=5.0,
-                socket_timeout=5.0,
-                retry_on_timeout=True,
-                health_check_interval=30
-            )
+            new_client = await get_redis_client()
             
             # Test data persistence across connection
             try:
@@ -789,13 +771,13 @@ class TestGCPRedisConnectivityGoldenPath:
                 await new_client.close()
             
             # Cleanup test data
-            await real_await redis_client.delete(persistence_key)
+            await redis_client.delete(persistence_key)
             
         except Exception as e:
             logger.error(f" FAIL:  REDIS PERSISTENCE FAILURE: {e}")
             # Cleanup on failure
             try:
-                await real_await redis_client.delete(persistence_key)
+                await redis_client.delete(persistence_key)
             except:
                 pass
             raise AssertionError(f"Redis persistence test FAILED - chat data reliability compromised: {e}")
@@ -817,7 +799,7 @@ class TestGCPRedisConnectivityGoldenPath:
             for i, conv in enumerate(conversations):
                 key = f"multi_chat_test:{conv['conversation_id']}"
                 value = json.dumps(conv)
-                result = await real_await redis_client.set(key, value, ex=1800)
+                result = await redis_client.set(key, value, ex=1800)
                 assert result is True, f"Failed to store conversation {i}: {result}"
             
             logger.info(f" PASS:  Stored {len(conversations)} separate conversations")
@@ -825,7 +807,7 @@ class TestGCPRedisConnectivityGoldenPath:
             # Verify data isolation - each conversation should be intact
             for i, conv in enumerate(conversations):
                 key = f"multi_chat_test:{conv['conversation_id']}"
-                retrieved = await real_await redis_client.get(key)
+                retrieved = await redis_client.get(key)
                 
                 if retrieved is None:
                     logger.error(f" FAIL:  REDIS ISOLATION FAILURE: Conversation {i} data lost")
@@ -841,7 +823,7 @@ class TestGCPRedisConnectivityGoldenPath:
             # Cleanup all test conversations
             for conv in conversations:
                 key = f"multi_chat_test:{conv['conversation_id']}"
-                await real_await redis_client.delete(key)
+                await redis_client.delete(key)
             
         except Exception as e:
             logger.error(f" FAIL:  REDIS ISOLATION FAILURE: {e}")
@@ -849,7 +831,7 @@ class TestGCPRedisConnectivityGoldenPath:
             try:
                 for conv in conversations:
                     key = f"multi_chat_test:{conv['conversation_id']}"
-                    await real_await redis_client.delete(key)
+                    await redis_client.delete(key)
             except:
                 pass
             raise AssertionError(f"Redis isolation test FAILED - multi-user chat data integrity compromised: {e}")

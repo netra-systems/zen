@@ -96,7 +96,7 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
             # This should fail if user_sessions table is missing
             auth_user = await auth_helper.create_authenticated_user(
                 email="golden_path_test@example.com",
-                username="golden_path_user"
+                full_name="Golden Path User"
             )
             
             # If we get here, authentication worked
@@ -187,7 +187,7 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
             # Create authenticated user for WebSocket connection
             auth_user = await auth_helper.create_authenticated_user(
                 email="websocket_test@example.com",
-                username="websocket_user"
+                full_name="WebSocket User"
             )
             
             # Get WebSocket authentication headers
@@ -272,7 +272,7 @@ class TestAuthenticationGoldenPathComplete(BaseE2ETest):
             # Create authenticated user
             auth_user = await auth_helper.create_authenticated_user(
                 email="chat_test@example.com",
-                username="chat_user"
+                full_name="Chat User"
             )
             
             print(f"[U+1F510] User authenticated for chat access: {auth_user.user_id}")

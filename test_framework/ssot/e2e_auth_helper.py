@@ -431,6 +431,22 @@ class E2EAuthHelper:
             async with session.get(validate_url, headers=headers) as resp:
                 return resp.status == 200
     
+    async def verify_token(self, token: str) -> Dict[str, Any]:
+        """
+        Verify JWT token and return detailed result (compatibility method).
+        
+        This is a compatibility method that some tests expect.
+        It returns a dict with 'valid' boolean and token details.
+        
+        Args:
+            token: JWT token to verify
+            
+        Returns:
+            Dict with validation result and token details
+        """
+        # Use the validate_jwt_token method which provides detailed results
+        return await self.validate_jwt_token(token)
+    
     def _get_valid_token(self) -> str:
         """Get a valid token, creating new if needed."""
         if self._cached_token and self._is_token_valid():
@@ -907,6 +923,51 @@ class E2EAuthHelper:
             
             print(f"[ERROR] authenticate_test_user failed completely: {e}")
             return error_result
+
+    async def refresh_user_session(self, auth_user: 'AuthenticatedUser') -> 'AuthenticatedUser':
+        """
+        Refresh user session by creating a new JWT token.
+        
+        Args:
+            auth_user: Current authenticated user
+            
+        Returns:
+            Updated AuthenticatedUser with new JWT token
+        """
+        # Create new JWT token for the same user
+        new_token = self.create_test_jwt_token(
+            user_id=auth_user.user_id,
+            email=auth_user.email,
+            permissions=auth_user.permissions
+        )
+        
+        # Return updated user with new token
+        refreshed_user = AuthenticatedUser(
+            user_id=auth_user.user_id,
+            email=auth_user.email,
+            full_name=auth_user.full_name,
+            jwt_token=new_token,
+            permissions=auth_user.permissions,
+            created_at=auth_user.created_at,
+            is_test_user=True
+        )
+        
+        return refreshed_user
+    
+    async def cleanup_user_session(self, user_id: str) -> bool:
+        """
+        Cleanup user session - for E2E tests this is always successful.
+        
+        Args:
+            user_id: User ID to cleanup
+            
+        Returns:
+            True indicating successful cleanup (test mode)
+        """
+        # In test mode, cleanup is always successful
+        # This could be extended to call actual cleanup endpoints if needed
+        logger.info(f"E2E test cleanup for user {user_id} - test mode cleanup always succeeds")
+        return True
 
     async def validate_jwt_token(self, token: str) -> Dict[str, Any]:
         """

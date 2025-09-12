@@ -161,12 +161,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         self.logger.info("Testing Redis connection establishment")
         
         # Test direct Redis connection
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,  # Test Redis port
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test basic connectivity
@@ -229,12 +224,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing Redis health checks and connectivity")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test ping health check
@@ -271,12 +261,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing session storage capabilities")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test session data storage
@@ -328,12 +313,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing WebSocket connection caching")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test WebSocket connection metadata storage
@@ -396,12 +376,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing agent state caching")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test agent state storage
@@ -472,12 +447,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache performance requirements")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test basic operation performance
@@ -544,12 +514,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache expiration policies")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test various TTL scenarios
@@ -604,14 +569,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         self.logger.info("Testing Redis failover and error handling")
         
         # Test connection with invalid configuration (should handle gracefully)
-        invalid_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,  # Valid port for this test
-            db=0,
-            decode_responses=True,
-            socket_connect_timeout=1,  # Short timeout
-            socket_timeout=1
-        )
+        invalid_client = await get_redis_client()
         self.redis_clients.append(invalid_client)
         
         # Test that client handles connection properly
@@ -623,12 +581,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
             self.logger.info(f"Redis connection failed as expected: {e}")
         
         # Test error handling for invalid operations
-        valid_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        valid_client = await get_redis_client()
         self.redis_clients.append(valid_client)
         
         try:
@@ -664,12 +617,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache consistency for multi-user scenarios")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test concurrent user operations
@@ -744,12 +692,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache memory management")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Get initial memory usage
@@ -819,12 +762,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache data serialization")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test complex data structures
@@ -919,12 +857,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache readiness for chat operations")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Simulate complete chat session caching workflow

@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_domain_staging",
-    "generated_at": "2025-09-11T10:15:35.862571",
+    "generated_at": "2025-09-11T22:48:29.969770",
     "root_directory": "/Users/anthony/Desktop/netra-apex",
     "total_literals": 4
   },
@@ -45,10 +45,9 @@
       "value": "wss://api.staging.netrasystems.ai",
       "category": "critical_domain_staging",
       "locations": [
-        "netra_backend/app/monitoring/configuration_drift_monitor.py:622",
-        "scripts/deploy_to_gcp_actual.py:179",
+        "netra_backend/app/monitoring/configuration_drift_monitor.py:544",
         "scripts/deploy_to_gcp_actual.py:180",
-        "scripts/deploy_to_gcp_actual.py:1029",
+        "scripts/deploy_to_gcp_actual.py:1028",
         "scripts/scan_string_literals.py:82",
         "scripts/staging_validation_part2_user_flows.py:76",
         "scripts/validate_staging_urls.py:157",

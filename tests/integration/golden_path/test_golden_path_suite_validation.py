@@ -82,11 +82,11 @@ from test_framework.common_imports import *  # PERFORMANCE: Consolidated imports
 
 # No-Docker fixtures for service-independent testing
 # CONSOLIDATED: from test_framework.fixtures.no_docker_golden_path_fixtures import (
-    no_docker_golden_path_services, 
-    golden_path_services,
-    mock_authenticated_user,
-    skip_if_docker_required
-)
+#     no_docker_golden_path_services,
+#     golden_path_services,
+#     mock_authenticated_user,
+#     skip_if_docker_required
+# )
 
 # Core system imports
 from shared.isolated_environment import get_env

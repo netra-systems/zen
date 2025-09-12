@@ -42,6 +42,7 @@ from netra_backend.app.services.unified_authentication_service import (
     AuthenticationContext,
     AuthenticationMethod
 )
+from netra_backend.app.clients.auth_client_core import auth_client
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket_core.unified_manager import _serialize_message_safely
@@ -276,8 +277,9 @@ class UnifiedWebSocketAuthenticator:
     
     def __init__(self):
         """Initialize SSOT-compliant WebSocket authenticator."""
-        # Use SSOT authentication service - NO direct auth client access
+        # SSOT COMPLIANCE: Direct auth service client usage
         self._auth_service = get_unified_auth_service()
+        self._auth_client = auth_client
         
         # Statistics for monitoring
         self._websocket_auth_attempts = 0
@@ -407,14 +409,11 @@ class UnifiedWebSocketAuthenticator:
                 self._websocket_auth_successes += 1
                 return cached_result
             
-            # PHASE 1 FIX: Use SSOT authentication service with retry mechanism
-            # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
-            auth_result, user_context = await self._authenticate_with_retry(
+            # SSOT COMPLIANCE: Pure delegation to auth service
+            auth_result, user_context = await self._authenticate_with_ssot_delegation(
                 websocket, 
                 e2e_context=e2e_context,
-                preliminary_connection_id=preliminary_connection_id,
-                max_retries=3,  # Allow up to 3 retries for transient failures
-                retry_delays=[0.1, 0.2, 0.5]  # Progressive delays
+                preliminary_connection_id=preliminary_connection_id
             )
             
             if not auth_result.success:
@@ -915,106 +914,55 @@ class UnifiedWebSocketAuthenticator:
         except Exception as e:
             logger.error(f"PHASE 1 FIX: Error applying handshake timing fix: {e}")
     
-    async def _authenticate_with_retry(
+    async def _authenticate_with_ssot_delegation(
         self, 
         websocket: WebSocket, 
         e2e_context: Optional[Dict[str, Any]] = None,
-        preliminary_connection_id: Optional[str] = None,
-        max_retries: int = 5,  # Increased for Cloud Run race conditions
-        retry_delays: List[float] = [0.1, 0.2, 0.5, 1.0, 2.0]  # Progressive backoff
+        preliminary_connection_id: Optional[str] = None
     ) -> Tuple[Any, Optional[UserExecutionContext]]:
         """
-        PHASE 1 FIX: Authenticate WebSocket with retry mechanism for race condition protection.
+        SSOT COMPLIANCE: Pure delegation to auth service for WebSocket authentication.
         
-        This method implements retry logic to handle transient authentication failures
-        that occur due to race conditions in Cloud Run environments.
+        This method provides simple, direct delegation to the auth service without
+        complex retry logic or fallback paths. All authentication logic is consolidated
+        in the auth service SSOT.
         
         Args:
             websocket: WebSocket connection object
             e2e_context: Optional E2E testing context
-            max_retries: Maximum number of retry attempts
-            retry_delays: Delay in seconds between retries
+            preliminary_connection_id: Optional connection ID for state continuity
             
         Returns:
             Tuple of (auth_result, user_context)
         """
-        last_error = None
-        retry_count = 0
-        
-        for attempt in range(max_retries + 1):  # +1 for initial attempt
-            try:
-                logger.debug(f"PHASE 1 FIX: Authentication attempt {attempt + 1}/{max_retries + 1}")
+        try:
+            logger.debug("SSOT AUTH: Delegating WebSocket authentication to auth service")
+            
+            # SSOT COMPLIANCE: Pure delegation to auth service
+            auth_result, user_context = await self._auth_service.authenticate_websocket(
+                websocket, 
+                e2e_context=e2e_context,
+                preliminary_connection_id=preliminary_connection_id
+            )
+            
+            if auth_result.success:
+                logger.info(f"SSOT AUTH: Authentication succeeded for user {auth_result.user_id[:8] if auth_result.user_id else '[NO_USER]'}...")
+            else:
+                logger.warning(f"SSOT AUTH: Authentication failed - {auth_result.error}")
                 
-                # Use SSOT authentication service
-                # PASS-THROUGH FIX: Pass preliminary connection ID to preserve state machine continuity
-                auth_result, user_context = await self._auth_service.authenticate_websocket(
-                    websocket, 
-                    e2e_context=e2e_context,
-                    preliminary_connection_id=preliminary_connection_id
-                )
-                
-                # If successful, return immediately
-                if auth_result.success:
-                    if attempt > 0:
-                        logger.info(f"PHASE 1 FIX: Authentication succeeded on retry attempt {attempt + 1}")
-                    return auth_result, user_context
-                
-                # If not successful, check if retry is appropriate
-                if attempt < max_retries and self._should_retry_auth_failure(auth_result):
-                    retry_count += 1
-                    delay = retry_delays[min(attempt, len(retry_delays) - 1)]
-                    
-                    logger.warning(f"PHASE 1 FIX: Authentication failed (attempt {attempt + 1}), retrying in {delay}s: {auth_result.error}")
-                    
-                    # Import Windows-safe sleep
-                    from netra_backend.app.core.windows_asyncio_safe import windows_safe_sleep
-                    await windows_safe_sleep(delay)
-                    
-                    # Re-validate handshake before retry
-                    handshake_valid = await self._validate_websocket_handshake_timing(websocket)
-                    if not handshake_valid:
-                        await self._apply_handshake_timing_fix(websocket)
-                    
-                    last_error = auth_result
-                    continue
-                else:
-                    # Final failure or non-retryable error
-                    logger.error(f"PHASE 1 FIX: Authentication failed after {attempt + 1} attempts: {auth_result.error}")
-                    return auth_result, user_context
-                    
-            except Exception as e:
-                logger.error(f"PHASE 1 FIX: Exception during authentication attempt {attempt + 1}: {e}")
-                
-                # Check if we should retry for exceptions
-                if attempt < max_retries and self._should_retry_auth_exception(e):
-                    retry_count += 1
-                    delay = retry_delays[min(attempt, len(retry_delays) - 1)]
-                    logger.warning(f"PHASE 1 FIX: Retrying after exception in {delay}s")
-                    
-                    from netra_backend.app.core.windows_asyncio_safe import windows_safe_sleep
-                    await windows_safe_sleep(delay)
-                    
-                    last_error = e
-                    continue
-                else:
-                    # Create failure result for non-retryable exceptions
-                    from netra_backend.app.services.unified_authentication_service import AuthResult
-                    auth_result = AuthResult(
-                        success=False,
-                        error=f"Authentication exception after {attempt + 1} attempts: {str(e)}",
-                        error_code="AUTH_RETRY_EXHAUSTED"
-                    )
-                    return auth_result, None
-        
-        # Should not reach here, but handle gracefully
-        logger.error("PHASE 1 FIX: Authentication retry logic reached unexpected state")
-        from netra_backend.app.services.unified_authentication_service import AuthResult
-        auth_result = AuthResult(
-            success=False,
-            error="Authentication retry logic error",
-            error_code="AUTH_RETRY_ERROR"
-        )
-        return auth_result, None
+            return auth_result, user_context
+            
+        except Exception as e:
+            logger.error(f"SSOT AUTH: Authentication exception - {e} (type: {type(e).__name__})")
+            
+            # Create failure result for exceptions
+            from netra_backend.app.services.unified_authentication_service import AuthResult
+            auth_result = AuthResult(
+                success=False,
+                error=f"Authentication service error: {str(e)}",
+                error_code="AUTH_SERVICE_ERROR"
+            )
+            return auth_result, None
     
     def _should_retry_auth_failure(self, auth_result: Any) -> bool:
         """
@@ -1585,13 +1533,13 @@ def _validate_critical_environment_configuration() -> Dict[str, Any]:
         if not database_url:
             validation_result["warnings"].append("DATABASE_URL not configured - may cause service failures")
         
-        # Check 5: JWT/Authentication secrets
+        # Check 5: JWT/Authentication secrets - SSOT compliance: Delegate to auth service
         validation_result["checks_performed"].append("auth_secrets")
-        jwt_secret = env.get("JWT_SECRET")
+        # SSOT REMEDIATION: JWT secrets managed by auth service, no direct access required
         service_secret = env.get("SERVICE_SECRET")
         
-        if not jwt_secret and not service_secret:
-            validation_result["warnings"].append("No JWT_SECRET or SERVICE_SECRET configured - auth may fail")
+        if not service_secret:
+            validation_result["warnings"].append("No SERVICE_SECRET configured - service auth may fail")
         
         # Check 6: Redis configuration for production environments
         current_env = env.get("ENVIRONMENT", "unknown").lower()
