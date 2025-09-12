@@ -172,7 +172,7 @@ class CircuitBreaker:
                 if self._half_open_calls >= self.config.half_open_max_calls:
                     if self.fallback:
                         return await self._execute_fallback(*args, **kwargs)
-                    raise CircuitBreakerOpen(f"Circuit breaker '{self.name}' is HALF_OPEN with max calls")
+                    raise CircuitBreakerHalfOpen(f"Circuit breaker '{self.name}' is HALF_OPEN with max calls exceeded")
                 self._half_open_calls += 1
         
         try:
@@ -205,6 +205,8 @@ class CircuitBreaker:
             except Exception as e:
                 logger.error(f"Fallback for '{self.name}' failed: {e}")
                 raise
+        if self._state == CircuitState.HALF_OPEN:
+            raise CircuitBreakerHalfOpen(f"No fallback available for '{self.name}' in HALF_OPEN state")
         raise CircuitBreakerOpen(f"No fallback available for '{self.name}'")
     
     async def _on_success(self):
@@ -365,6 +367,11 @@ class CircuitBreakerOpen(Exception):
 
 class CircuitBreakerTimeout(Exception):
     """Raised when a call through circuit breaker times out."""
+    pass
+
+
+class CircuitBreakerHalfOpen(Exception):
+    """Raised when circuit breaker is in half-open state and max calls exceeded."""
     pass
 
 

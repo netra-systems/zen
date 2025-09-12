@@ -30,7 +30,6 @@ import asyncio
 import gc
 import pytest
 import psutil
-import resource
 import statistics
 import time
 import uuid

@@ -64,7 +64,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         mock_app.state.db_session_factory = real_services_fixture["db_session_factory"]
         
         # Initialize Golden Path Validator
-        validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        validator = GoldenPathValidator()
         
         # Run validation specifically for DATABASE_POSTGRES service
         services_to_validate = [ServiceType.DATABASE_POSTGRES]
@@ -144,7 +144,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         mock_app = MagicMock()
         mock_app.state.db_session_factory = real_services_fixture["db_session_factory"]
         
-        validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        validator = GoldenPathValidator()
         
         # Test the specific user auth tables validation function
         try:
@@ -219,7 +219,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         mock_app = MagicMock()
         mock_app.state.db_session_factory = real_services_fixture["db_session_factory"]
         
-        validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        validator = GoldenPathValidator()
         
         # Get the user authentication requirement definition
         auth_requirement = None
@@ -275,7 +275,7 @@ class TestUserSessionsGoldenPathValidation(BaseIntegrationTest):
         mock_app = MagicMock()
         mock_app.state.db_session_factory = real_services_fixture["db_session_factory"]
         
-        validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        validator = GoldenPathValidator()
         
         # Run validation multiple times to check for consistency
         validation_runs = []
@@ -382,7 +382,7 @@ class TestGoldenPathValidatorIntegrationWithMissingTable(BaseIntegrationTest):
         mock_app.state.db_session_factory = mock_session_factory
         
         # Initialize validator
-        validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        validator = GoldenPathValidator()
         
         # Run validation - should detect missing user_sessions table
         try:
@@ -462,7 +462,7 @@ class TestGoldenPathValidatorIntegrationWithMissingTable(BaseIntegrationTest):
         mock_app.state.db_session_factory = mock_session_factory
         
         # Initialize validator 
-        validator = GoldenPathValidator(environment=EnvironmentType.TESTING)
+        validator = GoldenPathValidator()
         
         # Run FULL Golden Path validation
         try:

@@ -30,7 +30,7 @@ from typing import Any, Dict, List, Optional, TYPE_CHECKING
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
-from netra_backend.app.agents.state import DeepAgentState
+# DeepAgentState import removed - using UserExecutionContext pattern only
 from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
@@ -193,7 +193,7 @@ class RequestScopedAgentExecutor:
     async def execute_agent(
         self,
         agent_name: str,
-        state: DeepAgentState,
+        user_context: Optional[UserExecutionContext] = None,
         metadata: Optional[Dict[str, Any]] = None,
         timeout: Optional[float] = None
     ) -> AgentExecutionResult:
@@ -205,7 +205,7 @@ class RequestScopedAgentExecutor:
         
         Args:
             agent_name: Name of the agent to execute
-            state: Agent state for execution
+            user_context: Optional override user context (defaults to executor's context)
             metadata: Optional metadata for the execution
             timeout: Optional timeout override
             
@@ -216,6 +216,9 @@ class RequestScopedAgentExecutor:
             AgentExecutorError: If execution fails or validation errors occur
         """
         self._ensure_not_disposed()
+        
+        # Use user_context override or executor's context
+        effective_user_context = user_context or self._user_context
         
         # Create execution context from user context
         execution_context = self._create_execution_context(agent_name, metadata)
@@ -267,7 +270,7 @@ class RequestScopedAgentExecutor:
             try:
                 # Execute with timeout and monitoring
                 result = await asyncio.wait_for(
-                    self._execute_with_monitoring(execution_context, state, execution_id),
+                    self._execute_with_monitoring(execution_context, effective_user_context, execution_id),
                     timeout=execution_timeout
                 )
                 
@@ -285,7 +288,7 @@ class RequestScopedAgentExecutor:
                     )
                     
                     # Send completion notification
-                    await self._send_success_completion(execution_context, result, state)
+                    await self._send_success_completion(execution_context, result, effective_user_context)
                 else:
                     self._metrics['failed_executions'] += 1
                     # Mark execution as failed
@@ -294,7 +297,7 @@ class RequestScopedAgentExecutor:
                     )
                     
                     # Send failure completion notification
-                    await self._send_failure_completion(execution_context, result, state)
+                    await self._send_failure_completion(execution_context, result, effective_user_context)
                 
                 return result
                 
@@ -317,7 +320,7 @@ class RequestScopedAgentExecutor:
                 
                 # Create timeout result
                 timeout_result = self._create_timeout_result(execution_context, execution_timeout)
-                await self._send_failure_completion(execution_context, timeout_result, state)
+                await self._send_failure_completion(execution_context, timeout_result, effective_user_context)
                 
                 return timeout_result
                 
@@ -339,31 +342,32 @@ class RequestScopedAgentExecutor:
             
             # Create error result
             error_result = self._create_error_result(execution_context, e)
-            await self._send_failure_completion(execution_context, error_result, state)
+            await self._send_failure_completion(execution_context, error_result, effective_user_context)
             
             return error_result
     
     async def _execute_with_monitoring(
         self,
         context: AgentExecutionContext,
-        state: DeepAgentState,
+        user_context: UserExecutionContext,
         execution_id: str
     ) -> AgentExecutionResult:
         """Execute agent with monitoring and error handling."""
         try:
-            # Send progress update
+            # Send progress update  
+            user_request = user_context.get_metadata('user_request', 'Task')
             await self._event_emitter.notify_agent_thinking(
                 context.run_id,
                 context.agent_name,
-                f"Processing request: {getattr(state, 'user_request', 'Task')[:100]}...",
+                f"Processing request: {str(user_request)[:100]}...",
                 step_number=2
             )
             
             # Heartbeat before execution
             self._execution_tracker.heartbeat(execution_id)
             
-            # Execute via agent core
-            result = await self._agent_core.execute_agent(context, state)
+            # Execute via agent core with user context
+            result = await self._agent_core.execute_agent(context, user_context)
             
             # Final heartbeat after execution
             self._execution_tracker.heartbeat(execution_id)
@@ -444,18 +448,22 @@ class RequestScopedAgentExecutor:
         self,
         context: AgentExecutionContext,
         result: AgentExecutionResult,
-        state: DeepAgentState
+        user_context: UserExecutionContext
     ) -> None:
         """Send completion notification for successful execution."""
         try:
-            # Build comprehensive success report
+            # Build comprehensive success report using user context
+            user_request = user_context.get_metadata('user_request', 'N/A')
+            final_report = user_context.get_state('final_report', 'Completed')
+            step_count = user_context.get_metadata('step_count', 0)
+            
             report = {
                 "agent_name": context.agent_name,
                 "success": True,
                 "duration_ms": result.duration * 1000 if result.duration else 0,
-                "user_request": getattr(state, 'user_request', 'N/A'),
-                "final_report": getattr(state, 'final_report', 'Completed'),
-                "step_count": getattr(state, 'step_count', 0),
+                "user_request": str(user_request),
+                "final_report": str(final_report),
+                "step_count": int(step_count) if isinstance(step_count, (int, float)) else 0,
                 "status": "completed"
             }
             
@@ -476,7 +484,7 @@ class RequestScopedAgentExecutor:
         self,
         context: AgentExecutionContext,
         result: AgentExecutionResult,
-        state: DeepAgentState
+        user_context: UserExecutionContext
     ) -> None:
         """Send completion notification for failed execution."""
         try:

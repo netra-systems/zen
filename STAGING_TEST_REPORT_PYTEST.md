@@ -1,82 +1,73 @@
 # Staging E2E Test Report - Pytest Results
 
-**Generated:** 2025-12-11 (Merge resolution - keeping superior test results)
+**Generated:** 2025-09-11 15:19:05
 **Environment:** Staging
 **Test Framework:** Pytest
 
 ## Executive Summary
 
-- **Total Tests:** 7
-- **Passed:** 6 (85.7%)
-- **Failed:** 1 (14.3%)
+- **Total Tests:** 4
+- **Passed:** 1 (25.0%)
+- **Failed:** 3 (75.0%)
 - **Skipped:** 0
-- **Duration:** 12.61 seconds
-- **Pass Rate:** 85.7%
+- **Duration:** 0.36 seconds
+- **Pass Rate:** 25.0%
 
 ## Test Results by Priority
 
-### CRITICAL Priority Tests
+### NORMAL Priority Tests
 
 | Test Name | Status | Duration | File |
 |-----------|--------|----------|------|
-| test_001_unified_data_agent_real_execution | PASS passed | 0.745s | test_real_agent_execution_staging.py |
-| test_002_optimization_agent_real_execution | PASS passed | 0.743s | test_real_agent_execution_staging.py |
-| test_003_multi_agent_coordination_real | PASS passed | 0.728s | test_real_agent_execution_staging.py |
-| test_004_concurrent_user_isolation | PASS passed | 0.905s | test_real_agent_execution_staging.py |
-| test_005_error_recovery_resilience | FAIL failed | 0.709s | test_real_agent_execution_staging.py |
-| test_006_performance_benchmarks | PASS passed | 6.241s | test_real_agent_execution_staging.py |
-| test_007_business_value_validation | PASS passed | 2.170s | test_real_agent_execution_staging.py |
+| test_staging_gcp_auth_timeout_performance_baseline_measurement | FAIL failed | 0.001s | test_gcp_timeout_optimization_e2e_469.py |
+| test_staging_gcp_multi_user_timeout_performance_validation | FAIL failed | 0.001s | test_gcp_timeout_optimization_e2e_469.py |
+| test_staging_gcp_timeout_optimization_validation | FAIL failed | 0.001s | test_gcp_timeout_optimization_e2e_469.py |
+| test_staging_gcp_timeout_optimization_e2e_recommendations_summary | PASS passed | 0.000s | test_gcp_timeout_optimization_e2e_469.py |
 
 ## Failed Tests Details
 
-### FAILED: test_005_error_recovery_resilience
-- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_real_agent_execution_staging.py
-- **Duration:** 0.709s
-- **Error:** tests\e2e\staging\test_real_agent_execution_staging.py:198: in create_authenticated_websocket
-    websocket = await asyncio.wait_for(
-C:\Program Files\Python313\Lib\asyncio\tasks.py:507: in wait_for
-    return await fut
-           ^^^^^^^^^
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:543: in __await_impl__
-    await self.connection.handshake(
-C:\Users\USER\AppData\Roaming\Python\Python313\site-packages\websockets\asyncio\client.py:114: in handshake
- ...
+### FAILED: test_staging_gcp_auth_timeout_performance_baseline_measurement
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py
+- **Duration:** 0.001s
+- **Error:** tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py:374: in test_staging_gcp_auth_timeout_performance_baseline_measurement
+    baseline_performance = await self.staging_monitor.measure_staging_auth_performance(
+                                 ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGCPTimeoutOptimizationE2E' object has no attribute 'staging_monitor'...
+
+### FAILED: test_staging_gcp_multi_user_timeout_performance_validation
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py
+- **Duration:** 0.001s
+- **Error:** tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py:513: in test_staging_gcp_multi_user_timeout_performance_validation
+    baseline_performance = await self.staging_monitor.measure_staging_auth_performance(
+                                 ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGCPTimeoutOptimizationE2E' object has no attribute 'staging_monitor'...
+
+### FAILED: test_staging_gcp_timeout_optimization_validation
+- **File:** C:\GitHub\netra-apex\tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py
+- **Duration:** 0.001s
+- **Error:** tests\e2e\staging\test_gcp_timeout_optimization_e2e_469.py:715: in test_staging_gcp_timeout_optimization_validation
+    scenario_performance = await self.staging_monitor.measure_staging_auth_performance(
+                                 ^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'TestGCPTimeoutOptimizationE2E' object has no attribute 'staging_monitor'...
 
 ## Pytest Output Format
 
 ```
-<<<<<<< Updated upstream
-test_ssot_event_validator_staging.py::test_ssot_validator_with_real_agent_execution FAILED
-test_ssot_event_validator_staging.py::test_ssot_validator_performance_under_load FAILED
-test_ssot_event_validator_staging.py::test_ssot_validator_staging_environment_integration FAILED
+test_gcp_timeout_optimization_e2e_469.py::test_staging_gcp_auth_timeout_performance_baseline_measurement FAILED
+test_gcp_timeout_optimization_e2e_469.py::test_staging_gcp_multi_user_timeout_performance_validation FAILED
+test_gcp_timeout_optimization_e2e_469.py::test_staging_gcp_timeout_optimization_validation FAILED
+test_gcp_timeout_optimization_e2e_469.py::test_staging_gcp_timeout_optimization_e2e_recommendations_summary PASSED
 
 ==================================================
-0 passed, 3 failed in 0.94s
-=======
-test_real_agent_execution_staging.py::test_001_unified_data_agent_real_execution PASSED
-test_real_agent_execution_staging.py::test_002_optimization_agent_real_execution PASSED
-test_real_agent_execution_staging.py::test_003_multi_agent_coordination_real PASSED
-test_real_agent_execution_staging.py::test_004_concurrent_user_isolation PASSED
-test_real_agent_execution_staging.py::test_005_error_recovery_resilience FAILED
-test_real_agent_execution_staging.py::test_006_performance_benchmarks PASSED
-test_real_agent_execution_staging.py::test_007_business_value_validation PASSED
-
-==================================================
-6 passed, 1 failed in 12.61s
->>>>>>> Stashed changes
+1 passed, 3 failed in 0.36s
 ```
 
 ## Test Coverage Matrix
 
 | Category | Total | Passed | Failed | Coverage |
 |----------|-------|--------|--------|----------|
-<<<<<<< Updated upstream
-| Agent | 1 | 0 | 1 | 0.0% |
-| Performance | 1 | 0 | 1 | 0.0% |
-=======
-| Agent | 3 | 3 | 0 | 100.0% |
-| Performance | 1 | 1 | 0 | 100.0% |
->>>>>>> Stashed changes
+| Authentication | 1 | 0 | 1 | 0.0% |
+| Performance | 2 | 0 | 2 | 0.0% |
 
 ---
 *Report generated by pytest-staging framework v1.0*

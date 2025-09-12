@@ -15,7 +15,7 @@ from netra_backend.app.agents.base_agent import BaseAgent, AgentState
 from netra_backend.app.agents.data_helper_agent import DataHelperAgent  
 from netra_backend.app.agents.supervisor.agent_registry import UserAgentSession
 from netra_backend.app.services.user_execution_context import UserExecutionContext, UserContextManager
-from netra_backend.app.schemas.agent_schemas import AgentExecutionResult
+from shared.types.agent_types import AgentExecutionResult
 
 # Execution Tracking
 from netra_backend.app.core.agent_execution_tracker import AgentExecutionTracker, ExecutionTracker, get_execution_tracker
@@ -46,8 +46,25 @@ from netra_backend.app.tools.result_aggregator import ToolResultAggregator
 # Redis Client (CRITICAL - VERIFIED 2025-09-11)
 from netra_backend.app.services.redis_client import get_redis_client, get_redis_service
 
-# Shared Types (Cross-Service)
+# ClickHouse Client (SSOT - VERIFIED 2025-09-11)
+from netra_backend.app.db.clickhouse import ClickHouseService, ClickHouseClient, get_clickhouse_client
+from netra_backend.app.db.clickhouse_client import ClickHouseClient  # Compatibility import (deprecated)
+
+# Database Configuration (VERIFIED 2025-09-11)
+from netra_backend.app.core.configuration.database import DatabaseConfigManager
+
+# Schemas (Request/Response Models)
+from netra_backend.app.schemas.request import RequestModel, Response, StartAgentPayload, StartAgentMessage
+
+# Circuit Breaker (VERIFIED 2025-09-11)
+from netra_backend.app.clients.circuit_breaker import CircuitBreaker, CircuitBreakerOpen, CircuitBreakerTimeout, CircuitBreakerHalfOpen
+from netra_backend.app.clients.circuit_breaker import CircuitBreakerConfig, CircuitBreakerStats, get_circuit_breaker
+
+# Shared Types (Cross-Service)  
 from shared.types.core_types import UserID, ThreadID, RunID
+
+# Backend Auth Integration (NEW - VERIFIED 2025-09-11)
+from netra_backend.app.auth_integration.auth import BackendAuthIntegration, AuthValidationResult, TokenRefreshResult
 ```
 
 #### ✅ AVAILABLE AGENTS (Confirmed):
@@ -79,6 +96,16 @@ from netra_backend.app.agents.agent_websocket_bridge import create_agent_websock
 # CRITICAL: Fixed 2025-09-11 - IsolatedEnvironment import path correction (E2E test collection blocker)
 from netra_backend.app.core.isolated_environment import IsolatedEnvironment  # ❌ BROKEN PATH
 # USE INSTEAD: from shared.isolated_environment import IsolatedEnvironment, get_env
+
+# CRITICAL: Fixed 2025-09-11 - CircuitBreakerHalfOpen added for SSOT completeness
+# CircuitBreakerHalfOpen exception now available for half-open state max calls exceeded
+# AVAILABLE: CircuitBreakerOpen, CircuitBreakerTimeout, CircuitBreakerHalfOpen
+
+# CRITICAL: Fixed 2025-09-11 - agent_schemas module does not exist
+from netra_backend.app.schemas.agent_schemas import RequestModel  # ❌ BROKEN PATH
+# USE INSTEAD: from netra_backend.app.schemas.request import RequestModel
+from netra_backend.app.schemas.agent_schemas import AgentExecutionResult  # ❌ BROKEN PATH
+# USE INSTEAD: from shared.types.agent_types import AgentExecutionResult
 ```
 
 ---
