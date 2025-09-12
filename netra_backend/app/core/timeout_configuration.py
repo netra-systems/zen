@@ -132,12 +132,21 @@ class CloudNativeTimeoutManager:
         
         # **Issue #586**: Enhanced GCP Cloud Run detection
         if gcp_markers['is_gcp_cloud_run']:
-            if gcp_markers['project_id'] == 'netra-staging' or env_name == "staging":
-                logger.info(f"Detected GCP Cloud Run STAGING environment - Project: {gcp_markers['project_id']}, "
+            # Prioritize explicit environment setting, then use project ID as confirmation/fallback
+            if env_name == "staging" and (gcp_markers['project_id'] is None or 'staging' in gcp_markers['project_id']):
+                logger.info(f"Detected GCP Cloud Run STAGING environment - Env: {env_name}, Project: {gcp_markers['project_id']}, "
                            f"Service: {gcp_markers['service_name']}")
                 return TimeoutEnvironment.CLOUD_RUN_STAGING
-            elif gcp_markers['project_id'] == 'netra-production' or env_name == "production":
-                logger.info(f"Detected GCP Cloud Run PRODUCTION environment - Project: {gcp_markers['project_id']}, "
+            elif env_name == "production" and (gcp_markers['project_id'] is None or 'production' in gcp_markers['project_id']):
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment - Env: {env_name}, Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}")
+                return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
+            elif gcp_markers['project_id'] == 'netra-staging':
+                logger.info(f"Detected GCP Cloud Run STAGING environment via project ID - Project: {gcp_markers['project_id']}, "
+                           f"Service: {gcp_markers['service_name']}")
+                return TimeoutEnvironment.CLOUD_RUN_STAGING
+            elif gcp_markers['project_id'] == 'netra-production':
+                logger.info(f"Detected GCP Cloud Run PRODUCTION environment via project ID - Project: {gcp_markers['project_id']}, "
                            f"Service: {gcp_markers['service_name']}")
                 return TimeoutEnvironment.CLOUD_RUN_PRODUCTION
             else:

@@ -68,7 +68,7 @@ class TestClickHouseDockerEnvironmentDetection:
             yield mock_config
     
     @pytest.mark.asyncio
-    async def test_clickhouse_docker_unavailable_detection_fails_as_expected(
+    async def test_clickhouse_docker_unavailable_detection_works_with_environment_detection(
         self, 
         mock_logger,
         cloud_run_environment, 
@@ -76,15 +76,15 @@ class TestClickHouseDockerEnvironmentDetection:
         mock_get_config
     ):
         """
-        Test that ClickHouse initialization fails when Docker is unavailable.
+        Test that ClickHouse initialization properly handles Docker unavailability
+        by using CloudEnvironmentDetector to skip Docker checks in Cloud Run.
         
-        This test is DESIGNED TO FAIL in environments where Docker is unavailable,
-        proving that Issue #568 exists. The test validates:
+        This test validates Issue #568 fix:
         
-        1. Docker unavailability is properly detected
-        2. ClickHouse initialization fails with appropriate error
-        3. Error handling provides useful diagnostic information
-        4. Status report includes Docker unavailability details
+        1. Cloud Run environment is detected properly
+        2. Docker checks are skipped when CloudPlatform.CLOUD_RUN is detected
+        3. ClickHouse is skipped (not failed) in staging when optional
+        4. Appropriate logging is provided for operational visibility
         """
         # Mock CloudEnvironmentDetector to return Cloud Run staging
         with patch('netra_backend.app.startup_module.get_env') as mock_get_env:
@@ -97,29 +97,31 @@ class TestClickHouseDockerEnvironmentDetection:
                 'CLICKHOUSE_PASSWORD': ''
             }.get(key, default)
             
-            # Mock ClickHouse table initialization to fail due to Docker unavailability
-            with patch('netra_backend.app.startup_module._setup_clickhouse_tables') as mock_setup:
-                # Simulate ClickHouse connection failure due to Docker unavailability
-                mock_setup.side_effect = ConnectionError("Docker daemon not available in Cloud Run")
+            # Mock CloudEnvironmentDetector to detect Cloud Run
+            with patch('netra_backend.app.core.environment_context.cloud_environment_detector.get_cloud_environment_detector') as mock_detector_factory:
+                mock_detector = MagicMock()
+                mock_context = MagicMock()
+                mock_context.cloud_platform.value = 'cloud_run'
+                mock_context.environment_type.value = 'staging'
+                mock_context.service_name = 'netra-backend-staging'
+                # Add CloudPlatform.CLOUD_RUN enum for comparison
+                from netra_backend.app.core.environment_context.cloud_environment_detector import CloudPlatform
+                mock_context.cloud_platform = CloudPlatform.CLOUD_RUN
+                mock_detector.detect_environment_context = AsyncMock(return_value=mock_context)
+                mock_detector_factory.return_value = mock_detector
                 
-                # Execute the test - this should fail and return failure status
+                # Execute the test - should skip ClickHouse in staging environment
                 result = await initialize_clickhouse(mock_logger)
                 
-                # VALIDATION: Test should detect the Docker unavailability issue
+                # VALIDATION: Environment detection fix should work correctly
                 assert result is not None, "initialize_clickhouse should return status report"
                 assert result['service'] == 'clickhouse'
-                assert result['status'] == 'failed', f"Expected failed status, got: {result['status']}"
+                assert result['status'] == 'skipped', f"Expected skipped status in staging, got: {result['status']}"
                 assert result['required'] == False, "ClickHouse should not be required in staging"
-                assert result['error'] is not None, "Error should be reported for Docker unavailability"
+                # No error expected since it's properly skipped
                 
-                # Validate error message contains Docker-related information
-                error_msg = result['error'].lower()
-                assert any(keyword in error_msg for keyword in [
-                    'docker', 'daemon', 'connection', 'unavailable'
-                ]), f"Error should mention Docker unavailability: {result['error']}"
-                
-                # Verify Docker availability was checked
-                mock_setup.assert_called_once()
+                # Verify environment detection was called
+                mock_detector.detect_environment_context.assert_called_once()
     
     @pytest.mark.asyncio 
     async def test_clickhouse_optional_in_staging_continues_gracefully(
