@@ -268,13 +268,13 @@ class CloudNativeTimeoutManager:
         base_buffer = base_buffers.get(environment.lower(), 2.0)
         
         # Additional buffer for complex services
-        service_name = gcp_markers.get('service_name', '').lower()
-        if 'backend' in service_name:
+        service_name = gcp_markers.get('service_name') or ''
+        if 'backend' in service_name.lower():
             base_buffer += 1.0  # Backend services need more time for initialization
         
         # Additional buffer for high-tier services requiring longer startup
-        project_id = gcp_markers.get('project_id', '').lower()
-        if 'production' in project_id:
+        project_id = gcp_markers.get('project_id') or ''
+        if 'production' in project_id.lower():
             base_buffer += 1.0  # Production gets extra safety buffer
         
         logger = logging.getLogger(__name__)
