@@ -183,7 +183,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
     case 'staging':
       // Use environment variables if available, otherwise fall back to static staging URLs
       const stagingApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.staging.netrasystems.ai';
-      const stagingWsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'wss://api.staging.netrasystems.ai';
+      const stagingWsUrl = process.env.NEXT_PUBLIC_WS_URL || 'wss://api.staging.netrasystems.ai';
       const stagingAuthUrl = process.env.NEXT_PUBLIC_AUTH_URL || 'https://auth.staging.netrasystems.ai';
       const stagingFrontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || 'https://app.staging.netrasystems.ai';
       
