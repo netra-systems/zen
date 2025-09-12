@@ -22,11 +22,11 @@ from netra_backend.app.websocket_core.unified_manager import (
     WebSocketConnection,
 )
 
-# SECURITY FIX: Import secure factory pattern instead of unsafe singleton
+# SSOT MIGRATION: Import direct WebSocket manager instead of deprecated factory pattern
+from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
 from netra_backend.app.websocket_core.websocket_manager_factory import (
     WebSocketManagerFactory,
     IsolatedWebSocketManager,
-    get_websocket_manager_factory,
     create_websocket_manager
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
@@ -227,7 +227,7 @@ __all__ = [
     # SECURITY FIX: Secure factory pattern exports
     "WebSocketManagerFactory",
     "IsolatedWebSocketManager", 
-    "get_websocket_manager_factory",
+    "get_websocket_manager",
     "create_websocket_manager",
     "UserExecutionContext",
     
