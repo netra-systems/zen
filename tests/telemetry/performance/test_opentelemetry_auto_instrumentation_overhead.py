@@ -373,17 +373,13 @@ class TestOpenTelemetryAutoInstrumentationOverhead(SSotAsyncTestCase):
             
             # Warmup iterations
             for _ in range(self.warmup_iterations):
-                await asyncio.get_event_loop().run_in_executor(
-                    None, operation_func, redis_client, scenario_name, 0
-                )
+                await operation_func(redis_client, scenario_name, 0)
                 
             # Measured iterations
             for i in range(self.performance_iterations):
                 start_time = time.perf_counter()
                 
-                await asyncio.get_event_loop().run_in_executor(
-                    None, operation_func, redis_client, scenario_name, i
-                )
+                await operation_func(redis_client, scenario_name, i)
                 
                 end_time = time.perf_counter()
                 execution_times.append(end_time - start_time)
