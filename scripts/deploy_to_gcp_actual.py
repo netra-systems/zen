@@ -114,14 +114,14 @@ class GCPDeployer:
                     "CLICKHOUSE_USER": "default",
                     "CLICKHOUSE_DB": "default",
                     "CLICKHOUSE_SECURE": "true",
-                    # CRITICAL FIX: WebSocket timeout configuration for GCP staging - OPTIMIZED FOR ISSUE #128
-                    "WEBSOCKET_CONNECTION_TIMEOUT": "360",  # 6 minutes (60% reduction from 15min)
+                    # CRITICAL FIX: WebSocket timeout configuration for GCP staging - CLOUD RUN TIMEOUT ALIGNMENT
+                    "WEBSOCKET_CONNECTION_TIMEOUT": "240",  # 4 minutes (SAFE: Under Cloud Run 5min limit)
                     "WEBSOCKET_HEARTBEAT_INTERVAL": "15",   # Send heartbeat every 15s (faster detection)
                     "WEBSOCKET_HEARTBEAT_TIMEOUT": "45",    # Wait 45s for heartbeat response (faster failure detection)
-                    "WEBSOCKET_CLEANUP_INTERVAL": "120",    # Cleanup every 2 minutes (more frequent cleanup)
+                    "WEBSOCKET_CLEANUP_INTERVAL": "60",     # Cleanup every 1 minute (FREQUENT: Prevent state desync)
                     # CRITICAL FIX: Bypass startup validation for OAuth domain mismatch (staging only)
                     "BYPASS_STARTUP_VALIDATION": "true",    # OAuth domain mismatch is non-critical in staging
-                    "WEBSOCKET_STALE_TIMEOUT": "360",       # 6 minutes before marking connection stale (consistent with connection timeout)
+                    "WEBSOCKET_STALE_TIMEOUT": "240",       # 4 minutes before marking connection stale (consistent with connection timeout)
                     # NEW: Additional timeout optimizations for Issue #128 WebSocket connectivity
                     "WEBSOCKET_CONNECT_TIMEOUT": "10",      # 10s max for initial connection establishment
                     "WEBSOCKET_HANDSHAKE_TIMEOUT": "15",    # 15s max for WebSocket handshake completion  

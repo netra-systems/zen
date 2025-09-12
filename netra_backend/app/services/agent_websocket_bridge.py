@@ -3015,6 +3015,10 @@ class AgentWebSocketBridge(MonitorableComponent):
         finally:
             # Clean up if needed
             pass
+    
+    # COMPATIBILITY: Reference to WebSocketNotifier class for test compatibility
+    # This allows tests to access AgentWebSocketBridge.WebSocketNotifier
+    WebSocketNotifier = None  # Will be set after class definition
 
 
 class RequestScopedOrchestrator:
@@ -3632,3 +3636,6 @@ def create_agent_websocket_bridge(user_context: 'UserExecutionContext' = None, w
 
 # REMOVED: Deprecated get_agent_websocket_bridge() function that created security vulnerabilities
 # All code must use create_agent_websocket_bridge(user_context) for proper user isolation
+
+# COMPATIBILITY: Set the WebSocketNotifier reference for test compatibility
+AgentWebSocketBridge.WebSocketNotifier = WebSocketNotifier
