@@ -1,6 +1,6 @@
 ---
 description: "Run unit tests"
-argument-hint: "[focus area, defaults to all]"
+argument-hint: "[focus area, defaults to all] [parallel yes or no]"
 ---
 
 SNST = SPAWN NEW SUBAGENT TASK  (EVERY STEP IN PROCESS)
@@ -13,7 +13,7 @@ REPEAT THIS PROCESS UNTIL ALL TESTS PASS OR 10 TIMES.
 
 PROCESS INSTRUCTIONS START SNST:
 
-    0) Run unit tests with a focus on ${1 : latest issues}, fast failure.
+    0) Run unit tests with a focus on ${1 : latest issues}, fast failure, ${2 : parallel flags}
 
     1) ISSUE SEARCH AND UPDATE OR CREATION: SEARCH GITHUB ISSUES FOR EXISTING ISSUE.
 
@@ -40,16 +40,17 @@ PROCESS INSTRUCTIONS START SNST:
         add tag: actively-being-worked-on
         4.2) Git commit work in conceptual batches. 
 
-    5) PROOF: SNST : Spawn a sub agent PROVE THAT THE TEST NOW PASSES OR STILL FAILES, AND CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
-    IF BREAKING CHANGES OR TEST STILL FAILING GO BACK: ensure that any code changes exclusively add value as one atomic package of commit and
-    do not introduce new problems.
-    5.1) UPDATE a comment on the ISSUE with PROOF  following @GITHUB_STYLE_GUIDE.md  .
+        5) PROOF: SNST : Spawn a sub agent PROVE THAT THE TEST NOW PASSES OR STILL FAILES, AND CHANGES HAVE KEPT STABILITY OF SYSTEM AND NOT INTRODUCED NEW BREAKING CHANGES
+        IF BREAKING CHANGES OR TEST STILL FAILING GO BACK: ensure that any code changes exclusively add value as one atomic package of commit and
+        do not introduce new problems.
+        5.1) UPDATE a comment on the ISSUE with PROOF
 
     6) PR AND CLOSURE: SNST:
-    6.1) Git commit remaining related work in conceptual batches. 
-    6.2) Make a NEW PR (Pull Request).
-    6.3) Cross link the prior generated issue so it will close on PR merge.
-    6.4) Do a final update for this loop  following @GITHUB_STYLE_GUIDE.md  .
+        6.1) Git commit remaining related work in conceptual batches. 
+        6.2) Make a NEW PR (Pull Request).
+        6.3) Cross link the prior generated issue so it will close on PR merge.
+        6.4) Do a final update for this loop
+            remove tag: actively-being-worked-on
 
 END PROCESS INSTRUCTIONS
 
