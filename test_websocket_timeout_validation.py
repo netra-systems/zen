@@ -17,6 +17,7 @@ Expected Results:
 - If tests FAIL: 1.2s timeouts are still active, need remediation
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import os
 import sys
 import unittest
@@ -44,7 +45,7 @@ from netra_backend.app.websocket_core.gcp_initialization_validator import (
 )
 
 
-class TestWebSocketTimeoutValidation(unittest.TestCase):
+class TestWebSocketTimeoutValidation(SSotBaseTestCase):
     """Test WebSocket timeout configuration validation for Issue #404."""
     
     def setUp(self):
@@ -297,7 +298,7 @@ class TestWebSocketTimeoutValidation(unittest.TestCase):
         print("   ✅ Race condition properly detected in old configuration")
 
 
-class TestEnvironmentDetection(unittest.TestCase):
+class TestEnvironmentDetection(SSotBaseTestCase):
     """Test environment detection for timeout configuration."""
     
     def setUp(self):

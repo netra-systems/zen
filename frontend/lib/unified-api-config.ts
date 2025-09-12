@@ -148,7 +148,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           health: 'https://api.netrasystems.ai/health',
           ready: 'https://api.netrasystems.ai/health/ready',
           threads: 'https://api.netrasystems.ai/api/threads',
-          websocket: 'wss://api.netrasystems.ai/ws',
+          websocket: 'wss://api.netrasystems.ai/websocket',
           
           // v1 Agent API endpoints (deprecated)
           agentV1Optimization: 'https://api.netrasystems.ai/api/agents/optimization',
@@ -200,7 +200,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           health: `${stagingApiUrl}/health`,
           ready: `${stagingApiUrl}/health/ready`,
           threads: `${stagingApiUrl}/api/threads`,
-          websocket: `${stagingWsUrl}/ws`,
+          websocket: `${stagingWsUrl}/websocket`,
           
           // v1 Agent API endpoints (deprecated)
           agentV1Optimization: `${stagingApiUrl}/api/agents/optimization`,
@@ -246,7 +246,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           health: 'http://localhost:8000/health',
           ready: 'http://localhost:8000/health/ready',
           threads: 'http://localhost:8000/api/threads',
-          websocket: 'ws://localhost:8000/ws',
+          websocket: 'ws://localhost:8000/websocket',
           
           // v1 Agent API endpoints (deprecated)
           agentV1Optimization: 'http://localhost:8000/api/agents/optimization',
@@ -297,7 +297,7 @@ function getEnvironmentConfig(env: Environment): UnifiedApiConfig {
           health: `${apiUrl}/health`,
           ready: `${apiUrl}/health/ready`,
           threads: `${apiUrl}/api/threads`,
-          websocket: `${wsUrl}/ws`,
+          websocket: `${wsUrl}/websocket`,
           
           // v1 Agent API endpoints (deprecated)
           agentV1Optimization: `${apiUrl}/api/agents/optimization`,
