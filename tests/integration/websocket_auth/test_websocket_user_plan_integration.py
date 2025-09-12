@@ -17,7 +17,8 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
 from test_framework.base import BaseTestCase
-from test_framework.fixtures.auth_fixtures import real_services_fixture, create_test_user_context
+from test_framework.fixtures.real_services import real_services_fixture
+from test_framework.fixtures.auth_fixtures import test_user_token
 from test_framework.fixtures.websocket_fixtures import websocket_connection_fixture
 from netra_backend.app.services.tool_permission_service import (
     ToolPermissionService, 
@@ -42,7 +43,7 @@ class TestWebSocketUserPlanIntegration(BaseTestCase):
     """Integration tests for WebSocket user plan validation and enforcement"""
 
     @pytest.fixture(autouse=True)
-    async def setup_services(self, real_services_fixture):
+    async def setup_services(self, real_services_fixture, test_user_token):
         """Setup real services for plan validation testing"""
         self.redis_client = await RedisConnectionHandler().get_async_redis()
         self.permission_service = ToolPermissionService(self.redis_client)
@@ -282,7 +283,7 @@ class TestWebSocketPlanFeatureValidation(BaseTestCase):
     """Integration tests for plan feature flag and business requirement validation"""
     
     @pytest.fixture(autouse=True)
-    async def setup_services(self, real_services_fixture):
+    async def setup_services(self, real_services_fixture, test_user_token):
         """Setup real services for feature validation testing"""
         self.redis_client = await RedisConnectionHandler().get_async_redis()
         self.permission_service = ToolPermissionService(self.redis_client)
