@@ -1,5 +1,5 @@
 ---
-description: "PR Merger - Safe PR merging to working branch with remote branch management"
+description: "PR Merger - Safe PR merge."
 argument-hint: "[PR Number, defaults to all]"
 ---
 
