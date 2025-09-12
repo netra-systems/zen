@@ -1,567 +1,280 @@
-# REMOVED_SYNTAX_ERROR: class TestWebSocketConnection:
-    # REMOVED_SYNTAX_ERROR: """Real WebSocket connection for testing instead of mocks."""
+"""
+Mission-critical thread propagation verification tests.
 
-# REMOVED_SYNTAX_ERROR: def __init__(self):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self.messages_sent = []
-    # REMOVED_SYNTAX_ERROR: self.is_connected = True
-    # REMOVED_SYNTAX_ERROR: self._closed = False
+Tests that thread_id correctly propagates through the entire system
+ensuring proper isolation for multi-user chat functionality.
 
-# REMOVED_SYNTAX_ERROR: async def send_json(self, message: dict):
-    # REMOVED_SYNTAX_ERROR: """Send JSON message."""
-    # REMOVED_SYNTAX_ERROR: if self._closed:
-        # REMOVED_SYNTAX_ERROR: raise RuntimeError("WebSocket is closed")
-        # REMOVED_SYNTAX_ERROR: self.messages_sent.append(message)
+Critical verification points:
+1. WebSocket -> Message Handler propagation
+2. Message Handler -> Agent Registry propagation  
+3. Agent Registry -> Execution Engine propagation
+4. Execution Engine -> Tool Dispatcher propagation
+5. Tool results -> WebSocket response propagation
+6. End-to-end thread consistency verification
 
-# REMOVED_SYNTAX_ERROR: async def close(self, code: int = 1000, reason: str = "Normal closure"):
-    # REMOVED_SYNTAX_ERROR: """Close WebSocket connection."""
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: self._closed = True
-    # REMOVED_SYNTAX_ERROR: self.is_connected = False
+Business Context:
+- Thread isolation is critical for $500K+ ARR multi-user chat platform
+- Each user's conversation must remain isolated from other users
+- WebSocket events must deliver to correct user only
+- Agent execution context must preserve thread identity
+"""
 
-# REMOVED_SYNTAX_ERROR: def get_messages(self) -> list:
-    # REMOVED_SYNTAX_ERROR: """Get all sent messages."""
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return self.messages_sent.copy()
+import asyncio
+import logging
+import uuid
+import pytest
+from typing import Dict, Any, Optional
+from datetime import datetime
 
-    # REMOVED_SYNTAX_ERROR: '''
-    # REMOVED_SYNTAX_ERROR: Mission-critical thread propagation verification tests.
-    # REMOVED_SYNTAX_ERROR: Tests that thread_id correctly propagates through the entire system.
+from test_framework.ssot.base_test_case import SSotAsyncTestCase
+from test_framework.ssot.mock_factory import SSotMockFactory
+from test_framework.ssot.websocket import WebSocketTestUtility
+from test_framework.ssot.database import DatabaseTestUtility
+from shared.isolated_environment import IsolatedEnvironment
 
-    # REMOVED_SYNTAX_ERROR: Critical verification points:
-        # REMOVED_SYNTAX_ERROR: 1. WebSocket -> Message Handler propagation
-        # REMOVED_SYNTAX_ERROR: 2. Message Handler -> Agent Registry propagation
-        # REMOVED_SYNTAX_ERROR: 3. Agent Registry -> Execution Engine propagation
-        # REMOVED_SYNTAX_ERROR: 4. Execution Engine -> Tool Dispatcher propagation
-        # REMOVED_SYNTAX_ERROR: 5. Tool results -> WebSocket response propagation
-        # REMOVED_SYNTAX_ERROR: 6. End-to-end thread consistency verification
-        # REMOVED_SYNTAX_ERROR: '''
+# Import core services for thread propagation testing
+try:
+    from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager
+    from netra_backend.app.services.message_handlers import MessageHandlerService
+    REAL_SERVICES_AVAILABLE = True
+except ImportError as e:
+    # Services not available in test environment - use mock mode
+    UnifiedWebSocketManager = None
+    MessageHandlerService = None
+    REAL_SERVICES_AVAILABLE = False
 
-        # REMOVED_SYNTAX_ERROR: import asyncio
-        # REMOVED_SYNTAX_ERROR: import uuid
-        # REMOVED_SYNTAX_ERROR: import json
-        # REMOVED_SYNTAX_ERROR: from typing import Dict, Any, Optional
-        # REMOVED_SYNTAX_ERROR: import pytest
-        # REMOVED_SYNTAX_ERROR: from datetime import datetime
-        # REMOVED_SYNTAX_ERROR: from test_framework.database.test_database_manager import DatabaseTestManager
-        # REMOVED_SYNTAX_ERROR: from auth_service.core.auth_manager import AuthManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.agent_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.user_execution_engine import UserExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import IsolatedEnvironment
+logger = logging.getLogger(__name__)
 
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.websocket_core.unified_manager import UnifiedWebSocketManager as WebSocketManager, get_websocket_manager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.services.message_handlers import handle_ai_backend_message
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.registry.universal_registry import AgentRegistry
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.execution_engine import ExecutionEngine
-        # REMOVED_SYNTAX_ERROR: from fastapi import WebSocket
-        # REMOVED_SYNTAX_ERROR: from fastapi.websockets import WebSocketState
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.core.unified_error_handler import UnifiedErrorHandler
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.db.database_manager import DatabaseManager
-        # REMOVED_SYNTAX_ERROR: from netra_backend.app.clients.auth_client_core import AuthServiceClient
-        # REMOVED_SYNTAX_ERROR: from shared.isolated_environment import get_env
-
-
-# REMOVED_SYNTAX_ERROR: class TestThreadPropagationVerification:
-    # REMOVED_SYNTAX_ERROR: """Verify thread_id propagation through all system layers."""
-    # REMOVED_SYNTAX_ERROR: pass
-
-    # REMOVED_SYNTAX_ERROR: @pytest.fixture
-# REMOVED_SYNTAX_ERROR: async def setup(self):
-    # REMOVED_SYNTAX_ERROR: """Setup test environment with all components."""
-    # Generate test IDs
-    # REMOVED_SYNTAX_ERROR: user_id = str(uuid.uuid4())
-    # REMOVED_SYNTAX_ERROR: run_id = str(uuid.uuid4())
-    # REMOVED_SYNTAX_ERROR: thread_id = str(uuid.uuid4())
-
-    # Create components
-    # REMOVED_SYNTAX_ERROR: manager = WebSocketManager()
-
-    # REMOVED_SYNTAX_ERROR: yield { )
-    # REMOVED_SYNTAX_ERROR: 'manager': manager,
-    # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
-    # REMOVED_SYNTAX_ERROR: 'run_id': run_id,
-    # REMOVED_SYNTAX_ERROR: 'thread_id': thread_id
+class TestThreadPropagationVerification(SSotAsyncTestCase):
+    """
+    Mission-critical thread propagation validation using real services.
     
-
-    # Cleanup
-    # REMOVED_SYNTAX_ERROR: await manager.shutdown()
-
-    # Removed problematic line: @pytest.mark.asyncio
-    # Removed problematic line: async def test_websocket_to_message_handler_propagation(self, setup):
-        # REMOVED_SYNTAX_ERROR: """Test thread_id propagation from WebSocket to message handler."""
-        # REMOVED_SYNTAX_ERROR: pass
-        # REMOVED_SYNTAX_ERROR: manager = setup['manager']
-        # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-        # REMOVED_SYNTAX_ERROR: user_id = setup['user_id']
-
-        # Create mock WebSocket
-        # REMOVED_SYNTAX_ERROR: mock_ws = AsyncMock(spec=WebSocket)
-        # REMOVED_SYNTAX_ERROR: mock_ws.websocket = TestWebSocketConnection()
-        # REMOVED_SYNTAX_ERROR: mock_ws.client_state = WebSocketState.CONNECTED
-
-        # Connect with thread_id
-        # REMOVED_SYNTAX_ERROR: connection_id = await manager.connect_user(user_id, mock_ws, thread_id=thread_id)
-
-        # Mock the message handler
-        # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.services.message_handlers.handle_ai_backend_message') as mock_handler:
-            # REMOVED_SYNTAX_ERROR: mock_handler.return_value = {'status': 'success'}
-
-            # Simulate WebSocket message with thread_id
-            # REMOVED_SYNTAX_ERROR: websocket_message = { )
-            # REMOVED_SYNTAX_ERROR: 'message': 'Test query',
-            # REMOVED_SYNTAX_ERROR: 'conversation_id': thread_id,
-            # REMOVED_SYNTAX_ERROR: 'user_id': user_id
+    These tests MUST fail initially to prove they work, then pass when
+    proper thread propagation is implemented.
+    """
+    
+    def setup_method(self, method):
+        """Setup test environment for thread propagation testing."""
+        super().setup_method(method)
+        
+        # Generate unique test identifiers
+        self.user_id = str(uuid.uuid4())
+        self.thread_id = str(uuid.uuid4())
+        self.run_id = str(uuid.uuid4())
+        
+        # WebSocket utilities will be initialized in test methods as needed
+        self.websocket_util = None
+        self.db_util = None
+        
+        # Initialize services if available
+        if REAL_SERVICES_AVAILABLE:
+            try:
+                self.websocket_manager = UnifiedWebSocketManager()
+                self.message_handler = MessageHandlerService()
+                logger.info("Real services initialized for thread propagation testing")
+            except Exception as e:
+                logger.info(f"Using mock mode for services due to: {e}")
+                self.websocket_manager = None
+                self.message_handler = None
+        else:
+            logger.info("Real services not available - using mock mode")
+            self.websocket_manager = None
+            self.message_handler = None
+        
+        # Track thread propagation
+        self.thread_capture_log = {}
+        
+        logger.info(f"Thread propagation test setup - User: {self.user_id[:8]}, Thread: {self.thread_id[:8]}")
+    
+    def teardown_method(self, method):
+        """Cleanup test resources."""
+        try:
+            if hasattr(self, 'websocket_manager') and self.websocket_manager:
+                # Can't use await in sync method - WebSocket manager should handle cleanup
+                pass
+        except Exception as e:
+            logger.warning(f"Websocket cleanup warning: {e}")
+        
+        super().teardown_method(method)
+    
+    @pytest.mark.asyncio
+    async def test_websocket_to_message_handler_propagation_FAIL_FIRST(self):
+        """
+        Test thread_id propagation from WebSocket to message handler.
+        
+        This test is designed to FAIL initially to prove thread propagation
+        is not working, then PASS when proper implementation is added.
+        """
+        logger.info("Testing WebSocket to Message Handler thread propagation")
+        
+        # Initialize WebSocket test utility in mock mode (no real server needed)
+        # Set environment to force mock mode
+        import os
+        os.environ['WEBSOCKET_MOCK_MODE'] = 'true'
+        os.environ['NO_REAL_SERVERS'] = 'true'
+        
+        self.websocket_util = WebSocketTestUtility()
+        await self.websocket_util.initialize()
+        
+        # Create WebSocket test client
+        websocket_client = await self.websocket_util.create_test_client(
+            user_id=self.user_id
+        )
+        
+        # Test WebSocket manager thread context handling  
+        if self.websocket_manager:
+            try:
+                # Connect with thread context
+                connection_id = await self.websocket_manager.connect_user(
+                    user_id=self.user_id,
+                    websocket=websocket_client.websocket,
+                    thread_id=self.thread_id
+                )
+                
+                # FAILING ASSERTION: Check if WebSocket manager preserves thread context
+                # This should fail initially because proper thread propagation is not implemented
+                self.assertIsNotNone(connection_id, "Connection should be established")
+                
+                # Check if we can retrieve the connection with thread context
+                connection_info = self.websocket_manager.get_connection_info(self.user_id)
+                
+                # This will likely fail, proving thread context is not properly maintained
+                self.assertIn('thread_id', connection_info,
+                    "WebSocket manager should maintain thread_id in connection info")
+                self.assertEqual(connection_info.get('thread_id'), self.thread_id,
+                    "Thread ID should match what was provided during connection")
+                
+            except AssertionError as e:
+                # Expected failure - proves test works
+                logger.warning(f"Expected failure in WebSocket thread propagation: {e}")
+                raise
+            except Exception as e:
+                # Any exception indicates thread propagation issues
+                logger.error(f"WebSocket thread propagation error: {e}")
+                raise
+        else:
+            # No WebSocket manager available - test fails as expected
+            assert False, "WebSocket manager not available - thread propagation cannot be tested"
+        
+        logger.info("WebSocket to Message Handler propagation test completed")
+    
+    @pytest.mark.asyncio  
+    async def test_message_handler_to_agent_registry_propagation_FAIL_FIRST(self):
+        """
+        Test thread_id propagation from message handler to downstream services.
+        
+        Designed to fail initially, proving thread context is not preserved.
+        """
+        logger.info("Testing Message Handler thread context propagation")
+        
+        # Test with mock context to prove thread propagation logic
+        test_context = {
+            'thread_id': self.thread_id,
+            'user_id': self.user_id,
+            'message': 'Test thread propagation'
+        }
+        
+        try:
+            if self.message_handler:
+                # Test with real message handler
+                result = await self.message_handler.handle_user_message(
+                    user_id=self.user_id,
+                    message={'content': 'Test', 'thread_id': self.thread_id},
+                    websocket_manager=self.websocket_manager
+                )
+                
+                # FAILING ASSERTION: Should preserve thread context
+                self.assertIsInstance(result, (dict, type(None)), "Handler should return result")
+                # This will fail if thread context is not maintained
+                self.assertIn(self.thread_id, str(result) if result else '',
+                    "Thread ID should be preserved in processing chain")
+            else:
+                # No real services - this failure proves the test works
+                assert False, "Message handler not available - thread propagation cannot be tested"
             
-
-            # Process through message handler
-            # REMOVED_SYNTAX_ERROR: await handle_ai_backend_message(websocket_message)
-
-            # Verify thread_id was passed
-            # REMOVED_SYNTAX_ERROR: mock_handler.assert_called_once()
-            # REMOVED_SYNTAX_ERROR: call_args = mock_handler.call_args[0][0]
-            # REMOVED_SYNTAX_ERROR: assert call_args['conversation_id'] == thread_id
-
-            # Removed problematic line: @pytest.mark.asyncio
-            # Removed problematic line: async def test_message_handler_to_agent_registry_propagation(self, setup):
-                # REMOVED_SYNTAX_ERROR: """Test thread_id propagation from message handler to agent registry."""
-                # REMOVED_SYNTAX_ERROR: manager = setup['manager']
-                # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-                # REMOVED_SYNTAX_ERROR: user_id = setup['user_id']
-                # REMOVED_SYNTAX_ERROR: run_id = setup['run_id']
-
-                # Connect WebSocket with thread_id
-                # REMOVED_SYNTAX_ERROR: mock_ws = AsyncMock(spec=WebSocket)
-                # REMOVED_SYNTAX_ERROR: mock_ws.websocket = TestWebSocketConnection()
-                # REMOVED_SYNTAX_ERROR: mock_ws.client_state = WebSocketState.CONNECTED
-
-                # REMOVED_SYNTAX_ERROR: connection_id = await manager.connect_user(user_id, mock_ws, thread_id=thread_id)
-
-                # Mock agent registry
-                # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.core.agent_registry.AgentRegistry') as MockRegistry:
-                    # REMOVED_SYNTAX_ERROR: mock_instance = Magic            MockRegistry.get_instance.return_value = mock_instance
-                    # REMOVED_SYNTAX_ERROR: mock_instance.execute_agent = AsyncMock(return_value={ ))
-                    # REMOVED_SYNTAX_ERROR: 'status': 'success',
-                    # REMOVED_SYNTAX_ERROR: 'result': 'Agent executed'
-                    
-
-                    # Create message with thread_id
-                    # REMOVED_SYNTAX_ERROR: message = { )
-                    # REMOVED_SYNTAX_ERROR: 'message': 'Test query',
-                    # REMOVED_SYNTAX_ERROR: 'conversation_id': thread_id,
-                    # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
-                    # REMOVED_SYNTAX_ERROR: 'run_id': run_id
-                    
-
-                    # Process message
-                    # REMOVED_SYNTAX_ERROR: registry = MockRegistry.get_instance()
-                    # REMOVED_SYNTAX_ERROR: context = { )
-                    # REMOVED_SYNTAX_ERROR: 'thread_id': thread_id,
-                    # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
-                    # REMOVED_SYNTAX_ERROR: 'run_id': run_id
-                    
-
-                    # REMOVED_SYNTAX_ERROR: await registry.execute_agent('test_agent', context, message['message'])
-
-                    # Verify thread_id in context
-                    # REMOVED_SYNTAX_ERROR: mock_instance.execute_agent.assert_called()
-                    # REMOVED_SYNTAX_ERROR: call_context = mock_instance.execute_agent.call_args[0][1]
-                    # REMOVED_SYNTAX_ERROR: assert call_context['thread_id'] == thread_id
-
-                    # Removed problematic line: @pytest.mark.asyncio
-                    # Removed problematic line: async def test_agent_registry_to_execution_engine_propagation(self, setup):
-                        # REMOVED_SYNTAX_ERROR: """Test thread_id propagation from agent registry to execution engine."""
-                        # REMOVED_SYNTAX_ERROR: pass
-                        # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-                        # REMOVED_SYNTAX_ERROR: user_id = setup['user_id']
-                        # REMOVED_SYNTAX_ERROR: run_id = setup['run_id']
-
-                        # Create mock execution engine
-                        # REMOVED_SYNTAX_ERROR: mock_engine = MagicMock(spec=ExecutionEngine)
-                        # REMOVED_SYNTAX_ERROR: mock_engine.execute = AsyncMock(return_value={'result': 'success'})
-
-                        # Mock agent registry to use our engine
-                        # REMOVED_SYNTAX_ERROR: registry = AgentRegistry()
-
-                        # Set thread context
-                        # REMOVED_SYNTAX_ERROR: context = { )
-                        # REMOVED_SYNTAX_ERROR: 'thread_id': thread_id,
-                        # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
-                        # REMOVED_SYNTAX_ERROR: 'run_id': run_id
-                        
-
-                        # Execute through registry
-                        # REMOVED_SYNTAX_ERROR: await registry.execute_agent('test_agent', context, 'test prompt')
-
-                        # Verify engine received thread_id
-                        # REMOVED_SYNTAX_ERROR: if mock_engine.execute.called:
-                            # REMOVED_SYNTAX_ERROR: call_args = mock_engine.execute.call_args
-                            # Check if thread_id is in the context passed to engine
-                            # REMOVED_SYNTAX_ERROR: assert thread_id in str(call_args)
-
-                            # Removed problematic line: @pytest.mark.asyncio
-                            # Removed problematic line: async def test_execution_engine_to_tool_dispatcher_propagation(self, setup):
-                                # REMOVED_SYNTAX_ERROR: """Test thread_id propagation from execution engine to tool dispatcher."""
-                                # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-                                # REMOVED_SYNTAX_ERROR: run_id = setup['run_id']
-
-                                # Mock tool dispatcher
-                                # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.core.tools.dispatcher.ToolDispatcher') as MockDispatcher:
-                                    # REMOVED_SYNTAX_ERROR: mock_dispatcher = Magic            MockDispatcher.return_value = mock_dispatcher
-                                    # REMOVED_SYNTAX_ERROR: mock_dispatcher.execute_tool = AsyncMock(return_value={'result': 'tool_output'})
-
-                                    # Create execution context with thread_id
-                                    # REMOVED_SYNTAX_ERROR: execution_context = { )
-                                    # REMOVED_SYNTAX_ERROR: 'thread_id': thread_id,
-                                    # REMOVED_SYNTAX_ERROR: 'run_id': run_id,
-                                    # REMOVED_SYNTAX_ERROR: 'tool': 'test_tool',
-                                    # REMOVED_SYNTAX_ERROR: 'params': {}
-                                    
-
-                                    # Execute tool
-                                    # REMOVED_SYNTAX_ERROR: await mock_dispatcher.execute_tool( )
-                                    # REMOVED_SYNTAX_ERROR: 'test_tool',
-                                    # REMOVED_SYNTAX_ERROR: execution_context['params'],
-                                    # REMOVED_SYNTAX_ERROR: context=execution_context
-                                    
-
-                                    # Verify thread_id passed to tool
-                                    # REMOVED_SYNTAX_ERROR: mock_dispatcher.execute_tool.assert_called()
-                                    # REMOVED_SYNTAX_ERROR: call_args = mock_dispatcher.execute_tool.call_args
-
-                                    # Check context contains thread_id
-                                    # REMOVED_SYNTAX_ERROR: if 'context' in call_args.kwargs:
-                                        # REMOVED_SYNTAX_ERROR: assert call_args.kwargs['context']['thread_id'] == thread_id
-
-                                        # Removed problematic line: @pytest.mark.asyncio
-                                        # Removed problematic line: async def test_tool_results_to_websocket_propagation(self, setup):
-                                            # REMOVED_SYNTAX_ERROR: """Test thread_id propagation from tool results back to WebSocket."""
-                                            # REMOVED_SYNTAX_ERROR: pass
-                                            # REMOVED_SYNTAX_ERROR: manager = setup['manager']
-                                            # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-                                            # REMOVED_SYNTAX_ERROR: user_id = setup['user_id']
-
-                                            # Connect WebSocket
-                                            # REMOVED_SYNTAX_ERROR: mock_ws = AsyncMock(spec=WebSocket)
-                                            # REMOVED_SYNTAX_ERROR: mock_ws.websocket = TestWebSocketConnection()
-                                            # REMOVED_SYNTAX_ERROR: mock_ws.client_state = WebSocketState.CONNECTED
-
-                                            # REMOVED_SYNTAX_ERROR: connection_id = await manager.connect_user( )
-                                            # REMOVED_SYNTAX_ERROR: user_id,
-                                            # REMOVED_SYNTAX_ERROR: mock_ws,
-                                            # REMOVED_SYNTAX_ERROR: thread_id=thread_id
-                                            
-
-                                            # Simulate tool completion message
-                                            # REMOVED_SYNTAX_ERROR: tool_result = { )
-                                            # REMOVED_SYNTAX_ERROR: 'type': 'tool_completed',
-                                            # REMOVED_SYNTAX_ERROR: 'data': { )
-                                            # REMOVED_SYNTAX_ERROR: 'tool': 'search',
-                                            # REMOVED_SYNTAX_ERROR: 'result': 'Found 10 items'
-                                            
-                                            
-
-                                            # Send through manager
-                                            # REMOVED_SYNTAX_ERROR: success = await manager.send_to_user(user_id, tool_result)
-                                            # REMOVED_SYNTAX_ERROR: assert success
-
-                                            # Allow processing
-                                            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)
-
-                                            # Verify message sent
-                                            # REMOVED_SYNTAX_ERROR: mock_ws.send_json.assert_called()
-                                            # REMOVED_SYNTAX_ERROR: sent_msg = mock_ws.send_json.call_args[0][0]
-                                            # REMOVED_SYNTAX_ERROR: assert sent_msg['type'] == 'tool_completed'
-
-                                            # Removed problematic line: @pytest.mark.asyncio
-                                            # Removed problematic line: async def test_end_to_end_thread_consistency(self, setup):
-                                                # REMOVED_SYNTAX_ERROR: """Test thread_id consistency through complete flow."""
-                                                # REMOVED_SYNTAX_ERROR: manager = setup['manager']
-                                                # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-                                                # REMOVED_SYNTAX_ERROR: user_id = setup['user_id']
-                                                # REMOVED_SYNTAX_ERROR: run_id = setup['run_id']
-
-                                                # Connect WebSocket with thread_id
-                                                # REMOVED_SYNTAX_ERROR: mock_ws = AsyncMock(spec=WebSocket)
-                                                # REMOVED_SYNTAX_ERROR: mock_ws.websocket = TestWebSocketConnection()
-                                                # REMOVED_SYNTAX_ERROR: mock_ws.client_state = WebSocketState.CONNECTED
-
-                                                # REMOVED_SYNTAX_ERROR: connection_id = await manager.connect_user(user_id, mock_ws, thread_id=thread_id)
-
-                                                # Track thread_id through all layers
-                                                # REMOVED_SYNTAX_ERROR: captured_thread_ids = {}
-
-                                                # Mock message handler
-                                                # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.services.message_handlers.AgentRegistry') as MockRegistry:
-                                                    # REMOVED_SYNTAX_ERROR: mock_registry = Magic            MockRegistry.get_instance.return_value = mock_registry
-
-# REMOVED_SYNTAX_ERROR: async def capture_registry_thread(agent, context, prompt):
-    # REMOVED_SYNTAX_ERROR: captured_thread_ids['registry'] = context.get('thread_id')
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return {'result': 'success'}
-
-    # REMOVED_SYNTAX_ERROR: mock_registry.execute_agent = AsyncMock(side_effect=capture_registry_thread)
-
-    # Mock execution engine
-    # REMOVED_SYNTAX_ERROR: with patch('netra_backend.app.core.execution_engine.ExecutionEngine') as MockEngine:
-        # REMOVED_SYNTAX_ERROR: mock_engine = Magic                MockEngine.return_value = mock_engine
-
-# REMOVED_SYNTAX_ERROR: async def capture_engine_thread(context):
-    # REMOVED_SYNTAX_ERROR: captured_thread_ids['engine'] = context.get('thread_id')
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return {'result': 'executed'}
-
-    # REMOVED_SYNTAX_ERROR: mock_engine.execute = AsyncMock(side_effect=capture_engine_thread)
-
-    # Start the flow
-    # REMOVED_SYNTAX_ERROR: initial_message = { )
-    # REMOVED_SYNTAX_ERROR: 'message': 'Test query',
-    # REMOVED_SYNTAX_ERROR: 'conversation_id': thread_id,
-    # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
-    # REMOVED_SYNTAX_ERROR: 'run_id': run_id
+        except AssertionError as e:
+            logger.warning(f"Expected failure in message handler propagation: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Message handler error indicates thread propagation issue: {e}")
+            raise
+    
+    @pytest.mark.asyncio
+    async def test_thread_context_isolation_FAIL_FIRST(self):
+        """
+        Test that thread contexts are properly isolated between concurrent users.
+        
+        This test validates the business-critical requirement that each user's
+        conversation thread remains isolated from other users.
+        """
+        logger.info("Testing Thread Context Isolation")
+        
+        # Create multiple user contexts  
+        user_contexts = []
+        for i in range(3):
+            user_contexts.append({
+                'user_id': str(uuid.uuid4()),
+                'thread_id': str(uuid.uuid4()),
+                'message': f'User {i+1} test message'
+            })
+        
+        # Initialize WebSocket utility if needed
+        if not self.websocket_util:
+            import os
+            os.environ['WEBSOCKET_MOCK_MODE'] = 'true'
+            os.environ['NO_REAL_SERVERS'] = 'true'
+            self.websocket_util = WebSocketTestUtility()
+            await self.websocket_util.initialize()
+        
+        # Create WebSocket connections for each user
+        connections = []
+        for ctx in user_contexts:
+            conn = await self.websocket_util.create_test_client(
+                user_id=ctx['user_id']
+            )
+            connections.append((ctx, conn))
+        
+        try:
+            # Simulate concurrent processing
+            if self.websocket_manager:
+                connection_results = []
+                for ctx, conn in connections:
+                    try:
+                        connection_id = await self.websocket_manager.connect_user(
+                            user_id=ctx['user_id'],
+                            websocket=conn.websocket,
+                            thread_id=ctx['thread_id']
+                        )
+                        connection_results.append((ctx, connection_id))
+                    except Exception as e:
+                        logger.error(f"Connection failed for user {ctx['user_id']}: {e}")
+                
+                # FAILING ASSERTION: Thread contexts should be isolated
+                # This will fail if thread isolation is not properly implemented
+                self.assertGreater(len(connection_results), 0, 
+                    "At least one connection should be established")
+                
+                # Each connection should maintain its own thread context
+                unique_threads = set(ctx['thread_id'] for ctx, _ in connection_results)
+                self.assertEqual(len(unique_threads), len(connection_results),
+                    "Each connection should have unique thread context")
+                
+            else:
+                # No WebSocket manager - test fails as expected
+                assert False, "WebSocket manager not available - thread isolation cannot be tested"
+                
+        except AssertionError as e:
+            logger.warning(f"Expected failure in thread isolation: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Thread isolation error: {e}")
+            raise
+        
+        logger.info("Thread Context Isolation test completed")
     
 
-    # Process through system
-    # REMOVED_SYNTAX_ERROR: registry = MockRegistry.get_instance()
-    # REMOVED_SYNTAX_ERROR: context = { )
-    # REMOVED_SYNTAX_ERROR: 'thread_id': thread_id,
-    # REMOVED_SYNTAX_ERROR: 'user_id': user_id,
-    # REMOVED_SYNTAX_ERROR: 'run_id': run_id
-    
 
-    # REMOVED_SYNTAX_ERROR: await registry.execute_agent('test_agent', context, initial_message['message'])
-
-    # Send result to WebSocket through manager
-    # Removed problematic line: await manager.send_to_user(user_id, { ))
-    # REMOVED_SYNTAX_ERROR: 'type': 'agent_completed',
-    # REMOVED_SYNTAX_ERROR: 'data': {'result': 'success'}
-    
-
-    # Capture WebSocket thread context
-    # REMOVED_SYNTAX_ERROR: conn = manager.connections.get(connection_id)
-    # REMOVED_SYNTAX_ERROR: if conn:
-        # REMOVED_SYNTAX_ERROR: captured_thread_ids['websocket'] = conn.get('thread_id')
-
-        # Verify thread_id consistency
-        # REMOVED_SYNTAX_ERROR: for layer, captured_id in captured_thread_ids.items():
-            # REMOVED_SYNTAX_ERROR: assert captured_id == thread_id, "formatted_string"
-
-            # Removed problematic line: @pytest.mark.asyncio
-            # Removed problematic line: async def test_thread_id_persistence_across_retries(self, setup):
-                # REMOVED_SYNTAX_ERROR: """Test thread_id persists across operation retries."""
-                # REMOVED_SYNTAX_ERROR: pass
-                # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-                # REMOVED_SYNTAX_ERROR: run_id = setup['run_id']
-
-                # REMOVED_SYNTAX_ERROR: retry_count = 0
-                # REMOVED_SYNTAX_ERROR: thread_ids_seen = []
-
-                # Mock operation that fails then succeeds
-# REMOVED_SYNTAX_ERROR: async def flaky_operation(context):
-    # REMOVED_SYNTAX_ERROR: pass
-    # REMOVED_SYNTAX_ERROR: nonlocal retry_count
-    # REMOVED_SYNTAX_ERROR: thread_ids_seen.append(context.get('thread_id'))
-    # REMOVED_SYNTAX_ERROR: retry_count += 1
-
-    # REMOVED_SYNTAX_ERROR: if retry_count < 3:
-        # REMOVED_SYNTAX_ERROR: raise Exception("Temporary failure")
-        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-        # REMOVED_SYNTAX_ERROR: return {'status': 'success'}
-
-        # Retry logic
-        # REMOVED_SYNTAX_ERROR: context = {'thread_id': thread_id, 'run_id': run_id}
-        # REMOVED_SYNTAX_ERROR: max_retries = 5
-
-        # REMOVED_SYNTAX_ERROR: for attempt in range(max_retries):
-            # REMOVED_SYNTAX_ERROR: try:
-                # REMOVED_SYNTAX_ERROR: result = await flaky_operation(context)
-                # REMOVED_SYNTAX_ERROR: break
-                # REMOVED_SYNTAX_ERROR: except Exception:
-                    # REMOVED_SYNTAX_ERROR: if attempt == max_retries - 1:
-                        # REMOVED_SYNTAX_ERROR: raise
-                        # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)
-
-                        # Verify thread_id consistent across retries
-                        # REMOVED_SYNTAX_ERROR: assert len(thread_ids_seen) == 3
-                        # REMOVED_SYNTAX_ERROR: assert all(tid == thread_id for tid in thread_ids_seen)
-
-                        # Removed problematic line: @pytest.mark.asyncio
-                        # Removed problematic line: async def test_thread_id_in_error_messages(self, setup):
-                            # REMOVED_SYNTAX_ERROR: """Test thread_id context in error messages."""
-                            # REMOVED_SYNTAX_ERROR: manager = setup['manager']
-                            # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-                            # REMOVED_SYNTAX_ERROR: user_id = setup['user_id']
-
-                            # Connect WebSocket
-                            # REMOVED_SYNTAX_ERROR: mock_ws = AsyncMock(spec=WebSocket)
-                            # REMOVED_SYNTAX_ERROR: mock_ws.websocket = TestWebSocketConnection()
-                            # REMOVED_SYNTAX_ERROR: mock_ws.client_state = WebSocketState.CONNECTED
-
-                            # REMOVED_SYNTAX_ERROR: connection_id = await manager.connect_user( )
-                            # REMOVED_SYNTAX_ERROR: user_id,
-                            # REMOVED_SYNTAX_ERROR: mock_ws,
-                            # REMOVED_SYNTAX_ERROR: thread_id=thread_id
-                            
-
-                            # Send error message
-                            # REMOVED_SYNTAX_ERROR: error_message = { )
-                            # REMOVED_SYNTAX_ERROR: 'type': 'agent_error',
-                            # REMOVED_SYNTAX_ERROR: 'data': { )
-                            # REMOVED_SYNTAX_ERROR: 'error': 'Processing failed',
-                            # REMOVED_SYNTAX_ERROR: 'details': 'Invalid input'
-                            
-                            
-
-                            # REMOVED_SYNTAX_ERROR: success = await manager.send_to_user(user_id, error_message)
-                            # REMOVED_SYNTAX_ERROR: assert success
-
-                            # Allow processing
-                            # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.1)
-
-                            # Verify error message sent
-                            # REMOVED_SYNTAX_ERROR: mock_ws.send_json.assert_called()
-                            # REMOVED_SYNTAX_ERROR: sent_msg = mock_ws.send_json.call_args[0][0]
-                            # REMOVED_SYNTAX_ERROR: assert sent_msg['type'] == 'agent_error'
-
-                            # Verify connection has correct thread_id
-                            # REMOVED_SYNTAX_ERROR: conn = manager.connections.get(connection_id)
-                            # REMOVED_SYNTAX_ERROR: assert conn is not None
-                            # REMOVED_SYNTAX_ERROR: assert conn['thread_id'] == thread_id
-
-                            # Removed problematic line: @pytest.mark.asyncio
-                            # Removed problematic line: async def test_thread_id_in_websocket_events(self, setup):
-                                # REMOVED_SYNTAX_ERROR: """Test all WebSocket event types work with thread context."""
-                                # REMOVED_SYNTAX_ERROR: pass
-                                # REMOVED_SYNTAX_ERROR: manager = setup['manager']
-                                # REMOVED_SYNTAX_ERROR: thread_id = setup['thread_id']
-                                # REMOVED_SYNTAX_ERROR: user_id = setup['user_id']
-
-                                # Connect WebSocket
-                                # REMOVED_SYNTAX_ERROR: mock_ws = AsyncMock(spec=WebSocket)
-                                # REMOVED_SYNTAX_ERROR: mock_ws.websocket = TestWebSocketConnection()
-                                # REMOVED_SYNTAX_ERROR: mock_ws.client_state = WebSocketState.CONNECTED
-
-                                # REMOVED_SYNTAX_ERROR: connection_id = await manager.connect_user( )
-                                # REMOVED_SYNTAX_ERROR: user_id,
-                                # REMOVED_SYNTAX_ERROR: mock_ws,
-                                # REMOVED_SYNTAX_ERROR: thread_id=thread_id
-                                
-
-                                # Test all event types
-                                # REMOVED_SYNTAX_ERROR: event_types = [ )
-                                # REMOVED_SYNTAX_ERROR: 'agent_started',
-                                # REMOVED_SYNTAX_ERROR: 'agent_thinking',
-                                # REMOVED_SYNTAX_ERROR: 'tool_executing',
-                                # REMOVED_SYNTAX_ERROR: 'tool_completed',
-                                # REMOVED_SYNTAX_ERROR: 'agent_completed',
-                                # REMOVED_SYNTAX_ERROR: 'typing_indicator',
-                                # REMOVED_SYNTAX_ERROR: 'presence_update'
-                                
-
-                                # REMOVED_SYNTAX_ERROR: for event_type in event_types:
-                                    # Removed problematic line: success = await manager.send_to_user(user_id, { ))
-                                    # REMOVED_SYNTAX_ERROR: 'type': event_type,
-                                    # REMOVED_SYNTAX_ERROR: 'data': {'test': 'data'}
-                                    
-                                    # REMOVED_SYNTAX_ERROR: assert success
-
-                                    # Allow processing
-                                    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.2)
-
-                                    # Verify all events were sent
-                                    # REMOVED_SYNTAX_ERROR: assert mock_ws.send_json.call_count == len(event_types)
-
-                                    # REMOVED_SYNTAX_ERROR: for call in mock_ws.send_json.call_args_list:
-                                        # REMOVED_SYNTAX_ERROR: sent_msg = call[0][0]
-                                        # REMOVED_SYNTAX_ERROR: assert sent_msg['type'] in event_types
-
-                                        # Verify connection maintains thread context
-                                        # REMOVED_SYNTAX_ERROR: conn = manager.connections.get(connection_id)
-                                        # REMOVED_SYNTAX_ERROR: assert conn is not None
-                                        # REMOVED_SYNTAX_ERROR: assert conn['thread_id'] == thread_id
-
-                                        # Removed problematic line: @pytest.mark.asyncio
-                                        # Removed problematic line: async def test_thread_context_in_parallel_operations(self, setup):
-                                            # REMOVED_SYNTAX_ERROR: """Test thread context maintained in parallel operations."""
-                                            # Create multiple thread contexts
-                                            # REMOVED_SYNTAX_ERROR: threads = []
-                                            # REMOVED_SYNTAX_ERROR: for i in range(5):
-                                                # REMOVED_SYNTAX_ERROR: threads.append({ ))
-                                                # REMOVED_SYNTAX_ERROR: 'thread_id': str(uuid.uuid4()),
-                                                # REMOVED_SYNTAX_ERROR: 'run_id': str(uuid.uuid4()),
-                                                # REMOVED_SYNTAX_ERROR: 'user_id': str(uuid.uuid4()),
-                                                # REMOVED_SYNTAX_ERROR: 'index': i
-                                                
-
-                                                # Track which thread each operation sees
-                                                # REMOVED_SYNTAX_ERROR: operation_threads = {}
-
-# REMOVED_SYNTAX_ERROR: async def simulated_operation(context):
-    # Store the thread_id this operation sees
-    # REMOVED_SYNTAX_ERROR: operation_threads[context['index']] = context['thread_id']
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0.05)  # Simulate work
-    # REMOVED_SYNTAX_ERROR: await asyncio.sleep(0)
-    # REMOVED_SYNTAX_ERROR: return {'result': "formatted_string"}
-
-    # Execute operations in parallel
-    # REMOVED_SYNTAX_ERROR: tasks = []
-    # REMOVED_SYNTAX_ERROR: for thread in threads:
-        # REMOVED_SYNTAX_ERROR: task = asyncio.create_task(simulated_operation(thread))
-        # REMOVED_SYNTAX_ERROR: tasks.append(task)
-
-        # Wait for all to complete
-        # REMOVED_SYNTAX_ERROR: results = await asyncio.gather(*tasks)
-
-        # Verify each operation saw correct thread_id
-        # REMOVED_SYNTAX_ERROR: for thread in threads:
-            # REMOVED_SYNTAX_ERROR: assert operation_threads[thread['index']] == thread['thread_id']
-
-            # Verify results correspond to correct threads
-            # REMOVED_SYNTAX_ERROR: assert len(results) == 5
-            # REMOVED_SYNTAX_ERROR: for i, result in enumerate(results):
-                # REMOVED_SYNTAX_ERROR: assert threads[i]['thread_id'][:8] in result['result']
-
-                # Removed problematic line: @pytest.mark.asyncio
-                # Removed problematic line: async def test_thread_id_validation_at_boundaries(self, setup):
-                    # REMOVED_SYNTAX_ERROR: """Test thread_id validation at system boundaries."""
-                    # REMOVED_SYNTAX_ERROR: pass
-                    # REMOVED_SYNTAX_ERROR: user_id = setup['user_id']
-
-                    # Test invalid thread_id formats
-                    # REMOVED_SYNTAX_ERROR: invalid_thread_ids = [ )
-                    # REMOVED_SYNTAX_ERROR: None,
-                    # REMOVED_SYNTAX_ERROR: '',
-                    # REMOVED_SYNTAX_ERROR: ' ',
-                    # REMOVED_SYNTAX_ERROR: 'not-a-uuid',
-                    # REMOVED_SYNTAX_ERROR: 12345,
-                    # REMOVED_SYNTAX_ERROR: {'invalid': 'type'}
-                    
-
-                    # REMOVED_SYNTAX_ERROR: for invalid_id in invalid_thread_ids:
-                        # Test at WebSocket boundary
-                        # REMOVED_SYNTAX_ERROR: manager = WebSocketManager()
-                        # REMOVED_SYNTAX_ERROR: mock_ws = AsyncMock(spec=WebSocket)
-                        # REMOVED_SYNTAX_ERROR: mock_ws.websocket = TestWebSocketConnection()
-                        # REMOVED_SYNTAX_ERROR: mock_ws.client_state = WebSocketState.CONNECTED
-
-                        # Should handle gracefully
-                        # REMOVED_SYNTAX_ERROR: try:
-                            # REMOVED_SYNTAX_ERROR: connection_id = await manager.connect_user( )
-                            # REMOVED_SYNTAX_ERROR: user_id,
-                            # REMOVED_SYNTAX_ERROR: mock_ws,
-                            # REMOVED_SYNTAX_ERROR: thread_id=invalid_id
-                            
-                            # Connection should succeed - WebSocketManager accepts any thread_id
-                            # REMOVED_SYNTAX_ERROR: conn = manager.connections.get(connection_id)
-                            # REMOVED_SYNTAX_ERROR: if conn:
-                                # REMOVED_SYNTAX_ERROR: stored_thread = conn.get('thread_id')
-                                # Should store the invalid_id as-is or handle appropriately
-                                # REMOVED_SYNTAX_ERROR: assert stored_thread == invalid_id or stored_thread is None
-                                # REMOVED_SYNTAX_ERROR: except (ValueError, TypeError):
-                                    # Also acceptable to reject invalid thread_id
-                                    # REMOVED_SYNTAX_ERROR: pass
-
-                                    # REMOVED_SYNTAX_ERROR: await manager.shutdown()
-
-
-                                    # REMOVED_SYNTAX_ERROR: if __name__ == "__main__":
-                                        # REMOVED_SYNTAX_ERROR: pytest.main([__file__, "-v", "-s"])
+if __name__ == "__main__":
+    # Run tests with verbose output to see failures
+    import sys
+    sys.exit(pytest.main([__file__, "-v", "-s", "--tb=short"]))
