@@ -64,7 +64,7 @@ try:
     )
 except ImportError as e:
     # Skip the test file if imports fail - this is expected in some environments
-    pytest.skip(f"Skipping execution_engine tests due to import error: {e}")
+    pytest.skip(f"Skipping execution_engine tests due to import error: {e}", allow_module_level=True)
     
 from netra_backend.app.agents.supervisor.execution_context import (
     AgentExecutionContext,
