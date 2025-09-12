@@ -143,11 +143,15 @@ class UserContextExtractor:
     
     async def validate_and_decode_jwt(self, token: str, fast_path_enabled: bool = False) -> Optional[Dict[str, Any]]:
         """
-        Validate and decode JWT token using UNIFIED JWT validation logic with E2E fast path.
+        DEPRECATED: JWT validation method - use authenticate_websocket_ssot() instead.
         
-        CRITICAL FIX: This now uses direct JWT validation with the SAME unified JWT secret
-        that REST middleware uses, ensuring consistent JWT secret resolution and
-        preventing the 403 WebSocket authentication failures in staging.
+        MIGRATION REQUIRED: This method is deprecated as part of SSOT consolidation.
+        JWT validation is now handled internally by authenticate_websocket_ssot() from
+        netra_backend.app.websocket_core.unified_websocket_auth.
+        
+        This method is preserved for backward compatibility but should not be used
+        for new implementations. All WebSocket authentication should go through
+        the single authenticate_websocket_ssot() function.
         
         Args:
             token: JWT token string
@@ -156,6 +160,19 @@ class UserContextExtractor:
         Returns:
             Decoded JWT payload if valid, None otherwise
         """
+        import warnings
+        warnings.warn(
+            "UserContextExtractor.validate_and_decode_jwt() is deprecated. "
+            "Use authenticate_websocket_ssot() instead. "
+            "JWT validation is now handled internally.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            "DEPRECATION: UserContextExtractor.validate_and_decode_jwt() called. "
+            "JWT validation is now internal to authenticate_websocket_ssot()."
+        )
         # SSOT COMPLIANCE: All JWT operations delegated to auth service
         from shared.isolated_environment import get_env
         

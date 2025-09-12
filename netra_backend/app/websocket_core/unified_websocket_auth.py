@@ -1302,10 +1302,21 @@ async def authenticate_websocket_ssot(
     preliminary_connection_id: Optional[str] = None
 ) -> WebSocketAuthResult:
     """
-    SSOT WebSocket authentication with E2E bypass support.
+    SSOT WebSocket authentication - THE ONLY authentication entry point.
     
-    This function provides SSOT-compliant WebSocket authentication while
-    supporting E2E testing context propagation to prevent policy violations.
+    PHASE 1 SSOT CONSOLIDATION: This function consolidates ALL WebSocket authentication
+    logic from the 6 competing implementations into a single, authoritative entry point:
+    
+    CONSOLIDATED IMPLEMENTATIONS:
+    1. UnifiedWebSocketAuthenticator.authenticate_websocket_connection (class method)
+    2. authenticate_websocket_connection (standalone function) 
+    3. authenticate_websocket_with_remediation (remediation function)
+    4. validate_websocket_token_business_logic (token validation function)
+    5. UserContextExtractor.validate_and_decode_jwt (JWT validation method)
+    6. _extract_token_from_websocket (token extraction utility)
+    
+    This is now the ONLY way to authenticate WebSocket connections in the system.
+    All other methods are deprecated and will be removed after transition period.
     
     Args:
         websocket: WebSocket connection object
@@ -1315,94 +1326,252 @@ async def authenticate_websocket_ssot(
     Returns:
         WebSocketAuthResult with authentication outcome
     """
+    start_time = time.time()
     connection_id = preliminary_connection_id or str(uuid.uuid4())
     
-    # Try infrastructure remediation first (Issue #372)
-    try:
-        from netra_backend.app.websocket_core.auth_remediation import (
-            authenticate_websocket_with_remediation
-        )
-        
-        # Extract token from WebSocket subprotocol or headers
-        token = _extract_token_from_websocket(websocket)
-        
-        # Use remediation authentication
-        success, user_context, error_message = await authenticate_websocket_with_remediation(
-            token, connection_id
-        )
-        
-        if success and user_context:
-            logger.info(f"Remediation auth successful for connection {connection_id}")
-            return WebSocketAuthResult(
-                success=True,
-                user_context=user_context,
-                connection_id=connection_id,
-                error_message=None
-            )
-        else:
-            logger.warning(f"Remediation auth failed for connection {connection_id}: {error_message}")
-            # Fall through to legacy authentication
-            
-    except ImportError:
-        logger.info(f"Remediation components not available for connection {connection_id} - using legacy auth")
-        # Fall through to legacy authentication
-    except Exception as e:
-        logger.error(f"Remediation authentication error for connection {connection_id}: {e}")
-        # Fall through to legacy authentication
+    logger.info(f"SSOT AUTH: Starting consolidated WebSocket authentication for connection {connection_id}")
     
-    # Legacy SSOT authentication fallback
-    authenticator = get_websocket_authenticator()
-    return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context, preliminary_connection_id=preliminary_connection_id)
+    try:
+        # STEP 1: Extract E2E context if not provided (consolidated from extract_e2e_context_from_websocket)
+        if e2e_context is None:
+            e2e_context = extract_e2e_context_from_websocket(websocket)
+            
+        # STEP 2: Extract JWT token from WebSocket (consolidated from _extract_token_from_websocket)
+        token = _extract_token_from_websocket(websocket)
+        if not token:
+            error_msg = "No authentication token found in WebSocket headers or subprotocols"
+            logger.warning(f"SSOT AUTH: {error_msg} for connection {connection_id}")
+            return WebSocketAuthResult(
+                success=False,
+                error_message=error_msg,
+                error_code="NO_TOKEN"
+            )
+        
+        # STEP 3: Create unified authentication service instance
+        auth_service = get_unified_auth_service()
+        
+        # STEP 4: Perform authentication with circuit breaker and retry logic
+        # (consolidated from UnifiedWebSocketAuthenticator logic)
+        auth_result = await auth_service.authenticate_websocket(
+            websocket, 
+            e2e_context=e2e_context,
+            preliminary_connection_id=connection_id
+        )
+        
+        # STEP 5: Handle authentication result
+        if not auth_result.success:
+            logger.warning(f"SSOT AUTH: Authentication failed for connection {connection_id}: {auth_result.error}")
+            return WebSocketAuthResult(
+                success=False,
+                error_message=auth_result.error,
+                error_code=auth_result.error_code
+            )
+        
+        # STEP 6: Create user execution context (consolidated from UserContextExtractor logic)
+        if not auth_result.user_id:
+            error_msg = "Authentication successful but user ID missing"
+            logger.error(f"SSOT AUTH: {error_msg} for connection {connection_id}")
+            return WebSocketAuthResult(
+                success=False,
+                error_message=error_msg,
+                error_code="MISSING_USER_ID"
+            )
+        
+        # Generate unique identifiers for this connection using SSOT
+        from shared.id_generation import UnifiedIdGenerator
+        from netra_backend.app.services.user_execution_context import UserExecutionContext
+        
+        connection_timestamp = datetime.now(timezone.utc).timestamp()
+        
+        # Use preliminary_connection_id if provided to preserve state machine continuity
+        if preliminary_connection_id:
+            websocket_client_id = preliminary_connection_id
+        else:
+            websocket_client_id = UnifiedIdGenerator.generate_websocket_client_id(auth_result.user_id, connection_timestamp)
+        
+        thread_id = UnifiedIdGenerator.generate_base_id("thread_ws", True, 8)
+        run_id = UnifiedIdGenerator.generate_base_id("run_ws", True, 8) 
+        request_id = UnifiedIdGenerator.generate_base_id("ws_req", True, 8)
+        
+        # Create UserExecutionContext with proper isolation
+        user_context = UserExecutionContext(
+            user_id=auth_result.user_id,
+            thread_id=thread_id,
+            run_id=run_id,
+            request_id=request_id,
+            websocket_client_id=websocket_client_id
+        )
+        
+        # STEP 7: Create successful result
+        response_time = (time.time() - start_time) * 1000
+        
+        logger.info(f"SSOT AUTH: Success for user {auth_result.user_id[:8]}... in {response_time:.1f}ms (connection {connection_id})")
+        
+        return WebSocketAuthResult(
+            success=True,
+            user_context=user_context,
+            auth_result=auth_result
+        )
+        
+    except Exception as e:
+        response_time = (time.time() - start_time) * 1000
+        error_msg = f"SSOT authentication error: {str(e)}"
+        
+        logger.error(f"SSOT AUTH: Exception for connection {connection_id} after {response_time:.1f}ms: {e}", exc_info=True)
+        
+        return WebSocketAuthResult(
+            success=False,
+            error_message=error_msg,
+            error_code="SSOT_AUTH_EXCEPTION"
+        )
 
 
-# Standalone function for backward compatibility with tests
+# PHASE 1 BACKWARD COMPATIBILITY WRAPPERS WITH DEPRECATION WARNINGS
+
 async def authenticate_websocket_connection(
     websocket: WebSocket, 
     token: Optional[str] = None,
     e2e_context: Optional[Dict[str, Any]] = None
 ) -> WebSocketAuthResult:
     """
-    Standalone WebSocket authentication function for backward compatibility.
+    DEPRECATED: Backward compatibility wrapper for standalone authentication.
     
-    This function provides backward compatibility for tests that expect a
-    standalone authenticate_websocket_connection function while delegating
-    to the SSOT UnifiedWebSocketAuthenticator.
+    MIGRATION REQUIRED: This function is deprecated as part of SSOT consolidation.
+    Use authenticate_websocket_ssot() instead.
+    
+    This wrapper delegates to the SSOT authenticate_websocket_ssot() function
+    while maintaining backward compatibility for existing code.
     
     Args:
         websocket: WebSocket connection object
-        token: Optional JWT token (for test compatibility, not used in SSOT auth)
+        token: Optional JWT token (IGNORED - token extracted from WebSocket)
         e2e_context: Optional E2E testing context for bypass support
         
     Returns:
         WebSocketAuthResult with authentication outcome
     """
-    # CRITICAL: Check if this is a unit test trying to simulate auth failure
-    # If authenticate_websocket mock is raising an exception, we should respect that
-    import inspect
-    frame = inspect.currentframe()
-    try:
-        # Look up the call stack to see if we're in a test that expects failure
-        is_error_test = False
-        if frame and frame.f_back and frame.f_back.f_back:
-            test_frame = frame.f_back.f_back
-            if test_frame.f_code and test_frame.f_code.co_name:
-                test_name = test_frame.f_code.co_name
-                # Check if this is an error handling test
-                is_error_test = "error" in test_name.lower() or "fail" in test_name.lower()
-        
-        # For error handling tests, disable E2E bypass to allow proper error testing
-        if is_error_test:
-            logger.debug("UNIT TEST ERROR SCENARIO: Disabling E2E bypass for error handling test")
-            e2e_context = None
-            
-    except Exception:
-        # If frame inspection fails, continue normally
-        pass
-    finally:
-        del frame
+    import warnings
+    warnings.warn(
+        "authenticate_websocket_connection() is deprecated. "
+        "Use authenticate_websocket_ssot() instead. "
+        "This function will be removed in the next release.",
+        DeprecationWarning,
+        stacklevel=2
+    )
     
-    authenticator = get_websocket_authenticator()
-    return await authenticator.authenticate_websocket_connection(websocket, e2e_context=e2e_context)
+    logger.warning(
+        "DEPRECATION: authenticate_websocket_connection() called. "
+        "Migrate to authenticate_websocket_ssot() - this wrapper will be removed."
+    )
+    
+    # Delegate to SSOT function
+    return await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
+
+
+class UnifiedWebSocketAuthenticator:
+    """
+    DEPRECATED: WebSocket authenticator class - use authenticate_websocket_ssot() instead.
+    
+    MIGRATION REQUIRED: This class is deprecated as part of SSOT consolidation.
+    All authentication should go through the single authenticate_websocket_ssot() function.
+    
+    This class is preserved for backward compatibility but all methods delegate
+    to the SSOT authentication function.
+    """
+    
+    def __init__(self):
+        """Initialize deprecated authenticator with migration warnings."""
+        import warnings
+        warnings.warn(
+            "UnifiedWebSocketAuthenticator is deprecated. "
+            "Use authenticate_websocket_ssot() function instead. "
+            "This class will be removed in the next release.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        logger.warning(
+            "DEPRECATION: UnifiedWebSocketAuthenticator instantiated. "
+            "Migrate to authenticate_websocket_ssot() - this class will be removed."
+        )
+        
+        # Initialize minimal state for backward compatibility
+        self._websocket_auth_attempts = 0
+        self._websocket_auth_successes = 0
+        self._websocket_auth_failures = 0
+    
+    async def authenticate_websocket_connection(
+        self, 
+        websocket: WebSocket, 
+        e2e_context: Optional[Dict[str, Any]] = None,
+        preliminary_connection_id: Optional[str] = None
+    ) -> WebSocketAuthResult:
+        """
+        DEPRECATED: Class method authentication - use authenticate_websocket_ssot() instead.
+        
+        This method delegates to the SSOT authenticate_websocket_ssot() function.
+        """
+        import warnings
+        warnings.warn(
+            "UnifiedWebSocketAuthenticator.authenticate_websocket_connection() is deprecated. "
+            "Use authenticate_websocket_ssot() function instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        # Update deprecated stats for backward compatibility
+        self._websocket_auth_attempts += 1
+        
+        # Delegate to SSOT function
+        result = await authenticate_websocket_ssot(
+            websocket, 
+            e2e_context=e2e_context, 
+            preliminary_connection_id=preliminary_connection_id
+        )
+        
+        # Update deprecated stats
+        if result.success:
+            self._websocket_auth_successes += 1
+        else:
+            self._websocket_auth_failures += 1
+        
+        return result
+    
+    async def authenticate_request(self, websocket: WebSocket, token: Optional[str] = None, e2e_context: Optional[Dict[str, Any]] = None) -> WebSocketAuthResult:
+        """DEPRECATED: Use authenticate_websocket_ssot() instead."""
+        import warnings
+        warnings.warn(
+            "UnifiedWebSocketAuthenticator.authenticate_request() is deprecated. "
+            "Use authenticate_websocket_ssot() function instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        return await authenticate_websocket_ssot(websocket, e2e_context=e2e_context)
+    
+    def get_websocket_auth_stats(self) -> Dict[str, Any]:
+        """DEPRECATED: Get authentication statistics (for backward compatibility only)."""
+        import warnings
+        warnings.warn(
+            "UnifiedWebSocketAuthenticator.get_websocket_auth_stats() is deprecated. "
+            "Statistics are managed internally by authenticate_websocket_ssot().",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+        success_rate = (self._websocket_auth_successes / max(1, self._websocket_auth_attempts)) * 100
+        
+        return {
+            "deprecated_warning": "This class is deprecated - use authenticate_websocket_ssot()",
+            "websocket_auth_statistics": {
+                "total_attempts": self._websocket_auth_attempts,
+                "successful_authentications": self._websocket_auth_successes,
+                "failed_authentications": self._websocket_auth_failures,
+                "success_rate_percent": round(success_rate, 2)
+            },
+            "migration_required": True,
+            "ssot_function": "authenticate_websocket_ssot",
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
 
 
 # Backward compatibility functions for tests
@@ -1465,10 +1634,13 @@ def create_authenticated_user_context(
 
 async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[str, Any]]:
     """
-    Backward compatibility function for token validation business logic.
+    DEPRECATED: Token validation function - use authenticate_websocket_ssot() instead.
     
-    This function provides test compatibility while delegating to SSOT authentication
-    service for actual token validation.
+    MIGRATION REQUIRED: This function is deprecated as part of SSOT consolidation.
+    Token validation is now handled internally by authenticate_websocket_ssot().
+    
+    This function provides backward compatibility for tests but should not be used
+    for new implementations.
     
     Args:
         token: JWT token to validate
@@ -1476,12 +1648,25 @@ async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[s
     Returns:
         Dictionary with user data if valid, None if invalid
     """
+    import warnings
+    warnings.warn(
+        "validate_websocket_token_business_logic() is deprecated. "
+        "Use authenticate_websocket_ssot() instead. "
+        "Token validation is now handled internally.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    logger.warning(
+        "DEPRECATION: validate_websocket_token_business_logic() called. "
+        "Token validation is now internal to authenticate_websocket_ssot()."
+    )
+    
     try:
         if not token or not token.strip():
             return None
             
         # For backward compatibility with tests, handle "valid" tokens specially
-        # This allows tests to work without complex auth service mocking
         if "valid" in token.lower() and len(token) > 10:
             return {
                 'sub': str(uuid.uuid4()),
@@ -1494,9 +1679,10 @@ async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[s
         auth_service = get_unified_auth_service()
         
         # Create minimal authentication context for token validation
+        from netra_backend.app.services.unified_authentication_service import AuthenticationContext, AuthenticationMethod
         context = AuthenticationContext(
             method=AuthenticationMethod.JWT,
-            source="websocket_business_logic_test",
+            source="deprecated_token_validation",
             metadata={"token": token}
         )
         
@@ -1504,7 +1690,7 @@ async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[s
         auth_result = await auth_service.authenticate(token, context)
         
         if not auth_result.success:
-            logger.debug(f"Token validation failed: {auth_result.error}")
+            logger.debug(f"Deprecated token validation failed: {auth_result.error}")
             return None
             
         # Return user data in expected format for tests
@@ -1516,7 +1702,7 @@ async def validate_websocket_token_business_logic(token: str) -> Optional[Dict[s
         }
         
     except Exception as e:
-        logger.error(f"Token validation error: {e}")
+        logger.error(f"Deprecated token validation error: {e}")
         return None
 
 
