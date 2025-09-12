@@ -154,7 +154,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 raise
         else:
             # No WebSocket manager available - test fails as expected
-            self.fail("WebSocket manager not available - thread propagation cannot be tested")
+            assert False, "WebSocket manager not available - thread propagation cannot be tested"
         
         logger.info("WebSocket to Message Handler propagation test completed")
     
@@ -190,7 +190,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                     "Thread ID should be preserved in processing chain")
             else:
                 # No real services - this failure proves the test works
-                self.fail("Message handler not available - thread propagation cannot be tested")
+                assert False, "Message handler not available - thread propagation cannot be tested"
             
         except AssertionError as e:
             logger.warning(f"Expected failure in message handler propagation: {e}")
@@ -218,12 +218,19 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 'message': f'User {i+1} test message'
             })
         
+        # Initialize WebSocket utility if needed
+        if not self.websocket_util:
+            import os
+            os.environ['WEBSOCKET_MOCK_MODE'] = 'true'
+            os.environ['NO_REAL_SERVERS'] = 'true'
+            self.websocket_util = WebSocketTestUtility()
+            await self.websocket_util.initialize()
+        
         # Create WebSocket connections for each user
         connections = []
         for ctx in user_contexts:
-            conn = await self.websocket_util.create_test_connection(
-                user_id=ctx['user_id'],
-                thread_id=ctx['thread_id']
+            conn = await self.websocket_util.create_test_client(
+                user_id=ctx['user_id']
             )
             connections.append((ctx, conn))
         
@@ -235,7 +242,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                     try:
                         connection_id = await self.websocket_manager.connect_user(
                             user_id=ctx['user_id'],
-                            websocket=conn.mock_websocket,
+                            websocket=conn.websocket,
                             thread_id=ctx['thread_id']
                         )
                         connection_results.append((ctx, connection_id))
@@ -254,7 +261,7 @@ class TestThreadPropagationVerification(SSotAsyncTestCase):
                 
             else:
                 # No WebSocket manager - test fails as expected
-                self.fail("WebSocket manager not available - thread isolation cannot be tested")
+                assert False, "WebSocket manager not available - thread isolation cannot be tested"
                 
         except AssertionError as e:
             logger.warning(f"Expected failure in thread isolation: {e}")
