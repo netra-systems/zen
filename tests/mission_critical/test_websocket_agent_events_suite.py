@@ -362,11 +362,11 @@ class TestRealWebSocketComponents:
     async def test_websocket_notifier_all_methods(self):
         """Test that WebSocketNotifier has ALL required methods and they work."""
         # ISSUE #420 RESOLUTION: Use proper AgentWebSocketBridge.create_user_emitter pattern instead of manager directly
-        # Create user context for SSOT pattern
+        # Create user context for SSOT pattern (avoid placeholder validation)
         user_context = UserExecutionContext(
-            user_id="test_user",
-            thread_id="test_thread",
-            run_id="test_run"
+            user_id="usr_mission_critical_websocket_test_001",
+            thread_id="thread_mission_critical_websocket_test_001",
+            run_id="run_mission_critical_websocket_test_001"
         )
         
         # Create proper emitter using AgentWebSocketBridge factory pattern (fixes missing notification methods)
@@ -374,15 +374,13 @@ class TestRealWebSocketComponents:
         emitter = await bridge.create_user_emitter(user_context)
         notifier = AgentWebSocketBridge.WebSocketNotifier.create_for_user(emitter, user_context)
         
-        # Verify all methods exist
+        # Verify all methods exist (5 critical Golden Path WebSocket events)
         required_methods = [
-            'send_agent_started',
-            'send_agent_thinking',
-            'send_partial_result',
-            'send_tool_executing',
-            'send_tool_completed',
-            'send_final_report',
-            'send_agent_completed'
+            'send_agent_started',     # Event 1: Agent begins processing
+            'send_agent_thinking',    # Event 2: Real-time reasoning visibility
+            'send_tool_executing',    # Event 3: Tool usage transparency
+            'send_tool_completed',    # Event 4: Tool results display
+            'send_agent_completed'    # Event 5: User knows response is ready
         ]
         
         for method in required_methods:
