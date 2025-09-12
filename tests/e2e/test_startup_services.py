@@ -275,17 +275,10 @@ class TestServiceStartup:
         redis_client = None
         try:
             # Create Redis connection
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host='localhost',
-                port=6379,
-                db=0,
-                decode_responses=True,
-                socket_connect_timeout=5,
-                socket_timeout=5
-            )
+            redis_client = await get_redis_client()
             
             # Test basic connectivity
-            pong = await await redis_client.ping()
+            pong = await redis_client.ping()
             assert pong, "Redis ping failed"
             
             # Test basic operations
@@ -293,8 +286,8 @@ class TestServiceStartup:
             test_value = "test_value_123"
             
             # Set and get
-            await await redis_client.set(test_key, test_value, ex=60)
-            retrieved = await await redis_client.get(test_key)
+            await redis_client.set(test_key, test_value, ex=60)
+            retrieved = await redis_client.get(test_key)
             assert retrieved == test_value, f"Redis get/set failed: expected {test_value}, got {retrieved}"
             
             # Test pub/sub
@@ -302,20 +295,20 @@ class TestServiceStartup:
             await pubsub.subscribe("test_channel")
             
             # Publish a message
-            await await redis_client.publish("test_channel", "test_message")
+            await redis_client.publish("test_channel", "test_message")
             
             # Clean up test data
-            await await redis_client.delete(test_key)
+            await redis_client.delete(test_key)
             await pubsub.unsubscribe("test_channel")
             await pubsub.close()
             
             # Check Redis info
-            info = await await redis_client.info()
+            info = await redis_client.info()
             assert info['redis_version'], "Redis version not available"
             assert int(info['connected_clients']) > 0, "No Redis clients connected"
             
             # Check memory usage
-            memory_info = await await redis_client.info('memory')
+            memory_info = await redis_client.info('memory')
             used_memory_mb = int(memory_info['used_memory']) / (1024 * 1024)
             assert used_memory_mb < 1000, f"Redis memory usage too high: {used_memory_mb}MB"
             
@@ -323,4 +316,4 @@ class TestServiceStartup:
             raise AssertionError(f"Redis connection pool test failed: {str(e)}")
         finally:
             if redis_client:
-                await await redis_client.close()
+                await redis_client.close()

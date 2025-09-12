@@ -380,8 +380,8 @@
                 # Test Redis service health
                 # REMOVED_SYNTAX_ERROR: try:
                     # REMOVED_SYNTAX_ERROR: redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, socket_timeout=10)
-                    # REMOVED_SYNTAX_ERROR: await await redis_client.ping()
-                    # REMOVED_SYNTAX_ERROR: await await redis_client.close()
+                    # REMOVED_SYNTAX_ERROR: await redis_client.ping()
+                    # REMOVED_SYNTAX_ERROR: await redis_client.close()
                     # REMOVED_SYNTAX_ERROR: result['services']['redis'] = {'healthy': True, 'url': "formatted_string"}
                     # REMOVED_SYNTAX_ERROR: except Exception as e:
                         # REMOVED_SYNTAX_ERROR: result['services']['redis'] = {'healthy': False, 'error': str(e)}
@@ -525,8 +525,8 @@
         # REMOVED_SYNTAX_ERROR: try:
             # REMOVED_SYNTAX_ERROR: start_time = time.time()
             # REMOVED_SYNTAX_ERROR: redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, socket_timeout=15)
-            # REMOVED_SYNTAX_ERROR: ping_result = await await redis_client.ping()
-            # REMOVED_SYNTAX_ERROR: await await redis_client.close()
+            # REMOVED_SYNTAX_ERROR: ping_result = await redis_client.ping()
+            # REMOVED_SYNTAX_ERROR: await redis_client.close()
             # REMOVED_SYNTAX_ERROR: result['connection_tests'].append({ ))
             # REMOVED_SYNTAX_ERROR: 'name': 'ping_connection',
             # REMOVED_SYNTAX_ERROR: 'success': ping_result,
@@ -547,10 +547,10 @@
                     # REMOVED_SYNTAX_ERROR: test_key = "test:database_validation"
                     # REMOVED_SYNTAX_ERROR: test_value = "database_connectivity_test_value"
 
-                    # REMOVED_SYNTAX_ERROR: await await redis_client.set(test_key, test_value, ex=60)  # 60 second expiry
-                    # REMOVED_SYNTAX_ERROR: retrieved_value = await await redis_client.get(test_key)
-                    # REMOVED_SYNTAX_ERROR: await await redis_client.delete(test_key)
-                    # REMOVED_SYNTAX_ERROR: await await redis_client.close()
+                    # REMOVED_SYNTAX_ERROR: await redis_client.set(test_key, test_value, ex=60)  # 60 second expiry
+                    # REMOVED_SYNTAX_ERROR: retrieved_value = await redis_client.get(test_key)
+                    # REMOVED_SYNTAX_ERROR: await redis_client.delete(test_key)
+                    # REMOVED_SYNTAX_ERROR: await redis_client.close()
 
                     # REMOVED_SYNTAX_ERROR: result['operation_tests'].append({ ))
                     # REMOVED_SYNTAX_ERROR: 'name': 'set_get_operations',

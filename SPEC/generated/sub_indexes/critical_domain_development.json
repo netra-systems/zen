@@ -2,8 +2,8 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_domain_development",
-    "generated_at": "2025-09-11T10:15:35.862236",
-    "root_directory": "/Users/anthony/Desktop/netra-apex",
+    "generated_at": "2025-09-12T05:38:12.376704",
+    "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 4
   },
   "literals": {
@@ -42,7 +42,7 @@
       "value": "ws://localhost:8000",
       "category": "critical_domain_development",
       "locations": [
-        "netra_backend/app/monitoring/configuration_drift_monitor.py:633",
+        "netra_backend/app/monitoring/configuration_drift_monitor.py:555",
         "scripts/scan_string_literals.py:94",
         "scripts/scan_string_literals.py:100",
         "scripts/verify_cold_start.py:173",

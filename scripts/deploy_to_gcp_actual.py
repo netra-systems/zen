@@ -178,7 +178,6 @@ class GCPDeployer:
                     "NEXT_PUBLIC_ENVIRONMENT": "staging",  # CRITICAL: Controls environment-specific behavior
                     "NEXT_PUBLIC_API_URL": "https://api.staging.netrasystems.ai",  # CRITICAL: Backend API endpoint
                     "NEXT_PUBLIC_WS_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: WebSocket endpoint
-                    "NEXT_PUBLIC_WEBSOCKET_URL": "wss://api.staging.netrasystems.ai",  # CRITICAL: Alternative WebSocket endpoint
                     "NEXT_PUBLIC_AUTH_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service endpoint
                     "NEXT_PUBLIC_AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth service alternative
                     "NEXT_PUBLIC_AUTH_API_URL": "https://auth.staging.netrasystems.ai",  # CRITICAL: Auth API endpoint
@@ -300,7 +299,6 @@ class GCPDeployer:
             "NEXT_PUBLIC_API_URL", 
             "NEXT_PUBLIC_AUTH_URL",
             "NEXT_PUBLIC_WS_URL",
-            "NEXT_PUBLIC_WEBSOCKET_URL",
             "NEXT_PUBLIC_AUTH_SERVICE_URL",
             "NEXT_PUBLIC_AUTH_API_URL", 
             "NEXT_PUBLIC_BACKEND_URL",
@@ -377,7 +375,7 @@ class GCPDeployer:
             "API_URL", "NEXT_PUBLIC_API_URL", "BACKEND_URL",
             "AUTH_URL", "NEXT_PUBLIC_AUTH_URL", "AUTH_SERVICE_URL", 
             "FRONTEND_URL", "NEXT_PUBLIC_FRONTEND_URL",
-            "WS_URL", "NEXT_PUBLIC_WS_URL", "WEBSOCKET_URL", "NEXT_PUBLIC_WEBSOCKET_URL"
+            "WS_URL", "NEXT_PUBLIC_WS_URL", "WEBSOCKET_URL"
         ]
         
         # Check for local development URLs that shouldn't be in staging/production  
@@ -1036,7 +1034,6 @@ CMD ["npm", "start"]
                 f"NEXT_PUBLIC_API_URL={staging_api_url}",  # Main API endpoint
                 f"NEXT_PUBLIC_AUTH_URL={staging_auth_url}",  # Auth service primary
                 f"NEXT_PUBLIC_WS_URL={staging_ws_url}",  # WebSocket primary
-                f"NEXT_PUBLIC_WEBSOCKET_URL={staging_ws_url}",  # WebSocket fallback
                 f"NEXT_PUBLIC_AUTH_SERVICE_URL={staging_auth_url}",  # Auth service fallback
                 f"NEXT_PUBLIC_AUTH_API_URL={staging_auth_url}",  # Auth API specific
                 f"NEXT_PUBLIC_BACKEND_URL={staging_api_url}",  # Backend fallback

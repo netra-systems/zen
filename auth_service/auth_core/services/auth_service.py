@@ -69,6 +69,9 @@ class AuthService:
         
         # Initialize database connection
         self._initialize_database()
+        
+        # Initialize demo users if demo mode is enabled
+        self._initialize_demo_users()
     
     def _initialize_database(self):
         """Initialize database connection for auth service"""
@@ -80,6 +83,53 @@ class AuthService:
             logger.warning(f"AuthService: Running without database - {e}")
             logger.info("AuthService: Operating in STATELESS mode - JWT validation only, no user persistence")
             self._db_connection = None
+    
+    def _initialize_demo_users(self):
+        """Initialize default demo users if demo mode is enabled."""
+        try:
+            # Check if demo mode is enabled
+            from auth_service.auth_core.auth_environment import get_auth_env
+            auth_env = get_auth_env()
+            
+            if not auth_env.is_demo_mode():
+                return
+            
+            demo_config = auth_env.get_demo_config()
+            if not demo_config.get("auto_create_demo_users", False):
+                return
+            
+            # Create demo users in memory for immediate availability
+            demo_users = [
+                {"email": "demo@demo.com", "password": "demo", "name": "Demo User"},
+                {"email": "test@test.com", "password": "test", "name": "Test User"},
+                {"email": "admin@demo.com", "password": "1234", "name": "Demo Admin"}
+            ]
+            
+            for user_info in demo_users:
+                email = user_info["email"]
+                password = user_info["password"]
+                name = user_info["name"]
+                
+                # Only create if doesn't already exist
+                if email not in self._test_users:
+                    user_id = UnifiedIdGenerator.generate_base_id("user")
+                    password_hash = self.password_hasher.hash(password)
+                    
+                    self._test_users[email] = {
+                        'id': user_id,
+                        'email': email,
+                        'name': name,
+                        'password_hash': password_hash,
+                        'created_at': datetime.now(UTC),
+                        'is_demo_user': True
+                    }
+                    
+                    logger.info(f"Demo mode: Created demo user {email}")
+            
+            logger.info(f"Demo mode: Initialized {len(demo_users)} demo users")
+            
+        except Exception as e:
+            logger.error(f"Error initializing demo users: {e}")
     
     async def _get_db_session(self):
         """Get database session for operations"""
@@ -174,10 +224,19 @@ class AuthService:
         """Create a new user with database persistence."""
         from auth_service.auth_core.database.repository import AuthUserRepository
         from auth_service.auth_core.database.models import AuthUser
+        from auth_service.auth_core.auth_environment import get_auth_env
         from sqlalchemy.exc import IntegrityError
         
-        # Validate email format
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        auth_env = get_auth_env()
+        
+        # Validate email format (relaxed in demo mode)
+        if auth_env.is_demo_mode():
+            # Demo mode: allow simple email formats like "demo@demo" 
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.*$'
+        else:
+            # Production: strict email validation
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        
         if not re.match(email_pattern, email):
             logger.error(f"Invalid email format: {email}")
             return None

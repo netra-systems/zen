@@ -226,7 +226,7 @@ class EventProcessor:
         # This would be implemented with actual Redis client
         # For testing, we simulate the operation
         if hasattr(self.redis_client, 'cache_events'):
-            await self.await redis_client.cache_events(events)
+            await redis_client.cache_events(events)
         else:
             # Simulate successful caching
             await asyncio.sleep(0.001)  # Simulate network latency
@@ -358,12 +358,7 @@ class TestEventProcessor:
         try:
             import redis.asyncio as redis
             
-            client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host='localhost',
-                port=6379,
-                db=3,  # Use separate DB for event processor tests
-                decode_responses=True
-            )
+            client = await get_redis_client()
             
             # Test connection
             await client.ping()
@@ -656,12 +651,7 @@ class TestErrorHandling:
             )
             
             # Create Redis client with invalid config
-            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                host='localhost',
-                port=6379,
-                db=999,  # Invalid DB number to trigger failures
-                decode_responses=True
-            )
+            redis_client = await get_redis_client()
             
             # Add failing methods
             async def failing_insert_events(events):

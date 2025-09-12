@@ -150,7 +150,7 @@ class AuthRedisManager:
             self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=self._connection_pool)
             
             # Test connection
-            await self.await redis_client.ping()
+            await redis_client.ping()
             self.connected = True
             logger.info(f"Connected to Redis at {self.host}:{self.port}")
             return True
@@ -163,7 +163,7 @@ class AuthRedisManager:
     async def disconnect(self):
         """Disconnect from Redis."""
         if self.redis_client:
-            await self.await redis_client.close()
+            await redis_client.close()
         if self._connection_pool:
             await self._connection_pool.disconnect()
         
@@ -193,7 +193,7 @@ class AuthRedisManager:
         
         try:
             key = f"{self.session_prefix}{session_id}"
-            await self.await redis_client.setex(key, ttl_seconds, json.dumps(session_data))
+            await redis_client.setex(key, ttl_seconds, json.dumps(session_data))
             return True
         except Exception as e:
             logger.error(f"Failed to store session {session_id}: {e}")
@@ -310,12 +310,12 @@ class AuthRedisManager:
         try:
             # Get all session keys
             pattern = f"{self.session_prefix}*"
-            keys = await self.await redis_client.keys(pattern)
+            keys = await redis_client.keys(pattern)
             
             # Check which ones exist (non-expired)
             active_sessions = 0
             for key in keys:
-                if await self.await redis_client.exists(key):
+                if await redis_client.exists(key):
                     active_sessions += 1
             
             logger.info(f"Found {active_sessions} active sessions")

@@ -85,7 +85,7 @@ class TestServiceDependencyIntegrationWithRealServices(BaseTestCase):
         
         assert database_accessible, "PostgreSQL should be accessible for queries"
     
-    def test_redis_dependency_resolution(self):
+    async def test_redis_dependency_resolution(self):
         """Test Redis dependency checking with real cache."""
         # BVJ: Validates cache availability for chat performance optimization
         redis_dependency = ServiceDependency(

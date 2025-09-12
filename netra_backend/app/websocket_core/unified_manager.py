@@ -724,7 +724,21 @@ class UnifiedWebSocketManager:
                         if not self.active_connections[connection.user_id]:
                             del self.active_connections[connection.user_id]
                     
-                    logger.info(f"Removed connection {connection_id} with pattern-agnostic cleanup (thread-safe)")
+                    # PHASE 2 INTEGRATION - Cleanup Token Lifecycle Management
+                    # Unregister connection from token lifecycle manager when WebSocket closes
+                    try:
+                        from netra_backend.app.websocket_core.token_lifecycle_manager import get_token_lifecycle_manager
+                        
+                        lifecycle_manager = get_token_lifecycle_manager()
+                        await lifecycle_manager.unregister_connection(validated_connection_id)
+                        
+                        logger.debug(f"PHASE 2: Token lifecycle management cleaned up for connection {validated_connection_id}")
+                        
+                    except Exception as e:
+                        logger.warning(f"PHASE 2: Error cleaning up token lifecycle for connection {validated_connection_id}: {e}")
+                        # Don't fail connection removal due to lifecycle cleanup errors
+                    
+                    logger.info(f"Removed connection {connection_id} with pattern-agnostic cleanup and Phase 2 lifecycle cleanup (thread-safe)")
     
     def get_connection(self, connection_id: Union[str, ConnectionID]) -> Optional[WebSocketConnection]:
         """Get a specific connection with type validation."""

@@ -56,6 +56,7 @@ from netra_backend.app.core.windows_asyncio_safe import (
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, Query, Header
 from fastapi.responses import JSONResponse
 from fastapi.websockets import WebSocketState
+from starlette.datastructures import QueryParams
 
 # Core infrastructure imports
 from netra_backend.app.core.tracing import TracingManager
@@ -83,6 +84,17 @@ from netra_backend.app.websocket_core import (
 from netra_backend.app.websocket_core.unified_websocket_auth import (
     get_websocket_authenticator,
     authenticate_websocket_ssot
+)
+
+# PERMISSIVE AUTH REMEDIATION: Import auth permissiveness and circuit breaker
+from netra_backend.app.auth_integration.auth_permissiveness import (
+    authenticate_with_permissiveness,
+    AuthPermissivenessLevel,
+    get_auth_permissiveness_validator
+)
+from netra_backend.app.auth_integration.auth_circuit_breaker import (
+    authenticate_with_circuit_breaker,
+    get_auth_circuit_status
 )
 from netra_backend.app.websocket_core.user_context_extractor import extract_websocket_user_context
 
@@ -215,6 +227,11 @@ class WebSocketSSOTRouter:
         self.router.post("/api/v1/websocket")(self.websocket_api_create)
         self.router.get("/api/v1/websocket/protected")(self.websocket_api_protected)
         
+        # PERMISSIVE AUTH ENDPOINTS: Auth circuit breaker and permissiveness status
+        self.router.get("/ws/auth/circuit-breaker")(self.auth_circuit_breaker_status)
+        self.router.get("/ws/auth/permissiveness")(self.auth_permissiveness_status)
+        self.router.get("/ws/auth/health")(self.auth_health_status)
+        
         # Specialized endpoints for factory and isolated modes
         self.router.get("/ws/factory/status")(self.factory_status_endpoint)
         self.router.get("/ws/factory/health")(self.factory_health_endpoint)
@@ -335,7 +352,7 @@ class WebSocketSSOTRouter:
             "connection_id": connection_id,
             "websocket_url": str(websocket.url),
             "path": websocket.url.path,
-            "query_params": dict(websocket.url.query_params) if websocket.url.query_params else {},
+            "query_params": dict(QueryParams(websocket.url.query)) if websocket.url.query else {},
             "mode_parameter": mode,
             "user_agent": user_agent,
             "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
@@ -503,21 +520,45 @@ class WebSocketSSOTRouter:
                 logger.debug("[MAIN MODE] Accepting WebSocket without subprotocol")
                 await websocket.accept()
             
-            # Step 2: SSOT Authentication (preserves full auth pipeline)
-            logger.critical(f"[U+1F511] GOLDEN PATH AUTH: Starting SSOT authentication for connection {connection_id} - user_id: pending, connection_state: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown'))}, timestamp: {datetime.now(timezone.utc).isoformat()}")
+            # Step 2: PERMISSIVE AUTH REMEDIATION (with circuit breaker protection)
+            logger.critical(f"[U+1F511] GOLDEN PATH AUTH: Starting permissive authentication with circuit breaker for connection {connection_id} - user_id: pending, connection_state: {_safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown'))}, timestamp: {datetime.now(timezone.utc).isoformat()}")
             
-            auth_result = await authenticate_websocket_ssot(
-                websocket, 
-                preliminary_connection_id=preliminary_connection_id
-            )
+            # Try circuit breaker auth first for graceful degradation
+            try:
+                auth_result = await authenticate_with_circuit_breaker(websocket)
+                logger.info(f"[PERMISSIVE AUTH] Circuit breaker auth result: success={auth_result.success}, level={auth_result.level.value if hasattr(auth_result, 'level') else 'unknown'}")
+            except Exception as circuit_error:
+                logger.warning(f"[PERMISSIVE AUTH] Circuit breaker auth failed, falling back to permissive auth: {circuit_error}")
+                # Fallback to direct permissive auth
+                auth_result = await authenticate_with_permissiveness(websocket)
+            
+            # Convert permissive auth result to WebSocket auth result format for compatibility
+            if hasattr(auth_result, 'user_context') and auth_result.user_context:
+                # Create compatible auth result structure
+                class CompatibleAuthResult:
+                    def __init__(self, permissive_result):
+                        self.success = permissive_result.success
+                        self.user_context = permissive_result.user_context
+                        self.error_message = "; ".join(permissive_result.security_warnings) if permissive_result.security_warnings else None
+                        self.error_code = permissive_result.audit_info.get('error_code', 'PERMISSIVE_AUTH_FAILURE') if not permissive_result.success else None
+                        self.auth_method = permissive_result.auth_method
+                        self.auth_level = permissive_result.level.value if hasattr(permissive_result, 'level') else 'unknown'
+                        self.bypass_reason = permissive_result.bypass_reason
+                        self.security_warnings = permissive_result.security_warnings or []
+                
+                auth_result = CompatibleAuthResult(auth_result)
             
             if not auth_result.success:
-                # CRITICAL AUTH FAILURE LOGGING
+                # CRITICAL AUTH FAILURE LOGGING (Enhanced for permissive auth)
                 auth_failure_context = {
                     "connection_id": connection_id,
                     "preliminary_connection_id": preliminary_connection_id,
                     "error_message": auth_result.error_message,
                     "error_code": getattr(auth_result, 'error_code', 'UNKNOWN'),
+                    "auth_method": getattr(auth_result, 'auth_method', 'unknown'),
+                    "auth_level": getattr(auth_result, 'auth_level', 'unknown'),
+                    "bypass_reason": getattr(auth_result, 'bypass_reason', None),
+                    "security_warnings": getattr(auth_result, 'security_warnings', []),
                     "websocket_state": _safe_websocket_state_for_logging(getattr(websocket, 'client_state', 'unknown')),
                     "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
                     "headers_available": len(websocket.headers) if websocket.headers else 0,
@@ -526,7 +567,7 @@ class WebSocketSSOTRouter:
                     "user_agent": websocket.headers.get('user-agent', 'unknown') if websocket.headers else 'unknown',
                     "origin": websocket.headers.get('origin', 'unknown') if websocket.headers else 'unknown',
                     "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "golden_path_impact": "CRITICAL - Blocks user login to AI response flow"
+                    "golden_path_impact": "CRITICAL - Blocks user login to AI response flow despite permissive auth"
                 }
                 
                 logger.critical(f" ALERT:  GOLDEN PATH AUTH FAILURE: WebSocket authentication failed for connection {connection_id} - {auth_result.error_message}")
@@ -559,7 +600,7 @@ class WebSocketSSOTRouter:
             user_context = auth_result.user_context
             user_id = getattr(auth_result.user_context, 'user_id', None) if auth_result.success else None
             
-            # CRITICAL SUCCESS LOGGING
+            # CRITICAL SUCCESS LOGGING (Enhanced for permissive auth)
             auth_success_context = {
                 "connection_id": connection_id,
                 "user_id": user_id[:8] + "..." if user_id else 'unknown',
@@ -568,8 +609,13 @@ class WebSocketSSOTRouter:
                 "run_id": getattr(user_context, 'run_id', 'unknown') if user_context else 'unknown',
                 "client_host": getattr(websocket.client, 'host', 'unknown') if websocket.client else 'no_client',
                 "user_agent": websocket.headers.get('user-agent', 'unknown') if websocket.headers else 'unknown',
+                "auth_method": getattr(auth_result, 'auth_method', 'unknown'),
+                "auth_level": getattr(auth_result, 'auth_level', 'unknown'),
+                "bypass_reason": getattr(auth_result, 'bypass_reason', None),
+                "security_warnings": getattr(auth_result, 'security_warnings', []),
+                "permissive_auth_active": True,
                 "timestamp": datetime.now(timezone.utc).isoformat(),
-                "golden_path_milestone": "Authentication successful - user can proceed to AI interactions"
+                "golden_path_milestone": "Permissive authentication successful - user can proceed to AI interactions"
             }
             
             logger.info(f" PASS:  GOLDEN PATH AUTH SUCCESS: User {user_id[:8] if user_id else 'unknown'}... authenticated successfully for connection {connection_id}")
@@ -914,8 +960,9 @@ class WebSocketSSOTRouter:
     async def _create_websocket_manager(self, user_context):
         """Create WebSocket manager with emergency fallback."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            return create_websocket_manager(user_context)
+            # SSOT MIGRATION: Direct WebSocketManager instantiation replaces factory pattern
+            manager = await get_websocket_manager(user_context)
+            return manager
         except Exception as e:
             logger.error(f"WebSocket manager creation failed: {e}")
             return self._create_emergency_websocket_manager(user_context)
@@ -1391,15 +1438,16 @@ class WebSocketSSOTRouter:
     async def websocket_health_check(self):
         """WebSocket health check endpoint."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = get_websocket_manager_factory()
+            # SSOT PATTERN: Direct manager access for health checks (no user context required)
+            manager = await get_websocket_manager(user_context=None)
             health_status = {
                 "status": "healthy",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "mode": "ssot_consolidated",
                 "components": {
-                    "factory": factory is not None,
+                    "manager": manager is not None,
                     "message_router": get_message_router() is not None,
                     "connection_monitor": get_connection_monitor() is not None
                 },
@@ -1422,9 +1470,10 @@ class WebSocketSSOTRouter:
     async def get_websocket_config(self):
         """Get WebSocket configuration."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = get_websocket_manager_factory()
+            # SSOT PATTERN: Direct manager access for configuration endpoint
+            manager = await get_websocket_manager(user_context=None)
             
             return {
                 "websocket_config": {
@@ -1438,7 +1487,7 @@ class WebSocketSSOTRouter:
                     "consolidation_complete": True,
                     "competing_routes_eliminated": 4
                 },
-                "factory_available": factory is not None,
+                "manager_available": manager is not None,
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
         except Exception as e:
@@ -1448,9 +1497,10 @@ class WebSocketSSOTRouter:
     async def websocket_detailed_stats(self):
         """Get detailed WebSocket statistics."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = get_websocket_manager_factory()
+            # SSOT PATTERN: Direct manager access for statistics endpoint
+            manager = await get_websocket_manager(user_context=None)
             message_router = get_message_router()
             
             return {
@@ -1462,7 +1512,7 @@ class WebSocketSSOTRouter:
                     "ssot_compliance": True
                 },
                 "active_components": {
-                    "factory": factory is not None,
+                    "manager": manager is not None,
                     "message_router": message_router is not None,
                     "connection_monitor": get_connection_monitor() is not None
                 },
@@ -1585,6 +1635,104 @@ class WebSocketSSOTRouter:
         except Exception as e:
             logger.error(f"WebSocket protected API failed: {e}")
             raise HTTPException(status_code=401, detail="Authentication required")
+    
+    # PERMISSIVE AUTH ENDPOINTS
+    async def auth_circuit_breaker_status(self):
+        """Get authentication circuit breaker status."""
+        try:
+            circuit_status = get_auth_circuit_status()
+            
+            return {
+                "service": "auth_circuit_breaker",
+                "status": "operational",
+                "circuit_breaker": circuit_status,
+                "remediation_active": True,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Auth circuit breaker status failed: {e}")
+            return {
+                "service": "auth_circuit_breaker",
+                "status": "error",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+    
+    async def auth_permissiveness_status(self):
+        """Get authentication permissiveness system status."""
+        try:
+            validator = get_auth_permissiveness_validator()
+            validation_stats = validator.get_validation_stats()
+            
+            return {
+                "service": "auth_permissiveness",
+                "status": "operational",
+                "permissiveness_levels": [level.value for level in AuthPermissivenessLevel],
+                "validation_stats": validation_stats,
+                "remediation_active": True,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Auth permissiveness status failed: {e}")
+            return {
+                "service": "auth_permissiveness", 
+                "status": "error",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+    
+    async def auth_health_status(self):
+        """Get comprehensive authentication health status."""
+        try:
+            # Get circuit breaker status
+            try:
+                circuit_status = get_auth_circuit_status()
+                circuit_healthy = circuit_status.get("circuit_breaker", {}).get("state", "unknown") != "open"
+            except Exception as e:
+                circuit_status = {"error": str(e)}
+                circuit_healthy = False
+            
+            # Get permissiveness validator status
+            try:
+                validator = get_auth_permissiveness_validator()
+                validation_stats = validator.get_validation_stats()
+                permissive_healthy = validation_stats.get("success_rate_percent", 0) > 50
+            except Exception as e:
+                validation_stats = {"error": str(e)}
+                permissive_healthy = False
+            
+            # Overall health assessment
+            overall_healthy = circuit_healthy and permissive_healthy
+            
+            return {
+                "service": "auth_health",
+                "status": "healthy" if overall_healthy else "degraded",
+                "components": {
+                    "circuit_breaker": {
+                        "healthy": circuit_healthy,
+                        "status": circuit_status
+                    },
+                    "permissiveness_validator": {
+                        "healthy": permissive_healthy,
+                        "stats": validation_stats
+                    }
+                },
+                "remediation": {
+                    "active": True,
+                    "websocket_1011_prevention": True,
+                    "graceful_degradation": True,
+                    "multi_level_auth": True
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Auth health status failed: {e}")
+            return {
+                "service": "auth_health",
+                "status": "error",
+                "error": str(e),
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
 
 
 # Create SSOT router instance

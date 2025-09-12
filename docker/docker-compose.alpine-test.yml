@@ -109,7 +109,7 @@ services:
     image: netra-alpine-test-migration:latest
     build:
       context: .
-      dockerfile: docker/migration.alpine.Dockerfile
+      dockerfile: dockerfiles/migration.alpine.Dockerfile
       args:
         BUILD_ENV: test
     environment:
@@ -138,7 +138,7 @@ services:
           - backend
     build:
       context: .
-      dockerfile: docker/backend.alpine.Dockerfile
+      dockerfile: dockerfiles/backend.alpine.Dockerfile
       args:
         BUILD_ENV: test
       cache_from:
@@ -201,7 +201,7 @@ services:
           - auth
     build:
       context: .
-      dockerfile: docker/auth.alpine.Dockerfile
+      dockerfile: dockerfiles/auth.alpine.Dockerfile
       args:
         BUILD_ENV: test
       cache_from:
@@ -248,7 +248,7 @@ services:
     image: netra-alpine-test-frontend:latest
     build:
       context: .
-      dockerfile: docker/frontend.alpine.Dockerfile
+      dockerfile: dockerfiles/frontend.alpine.Dockerfile
       args:
         BUILD_ENV: test
         NEXT_PUBLIC_API_URL: http://localhost:8002

@@ -242,9 +242,9 @@ class TestRouteMiddlewareIntegration:
         # Test HTTP endpoint
         try:
             http_response = client.get("/collision-path")
-            assert(http_response.status_code, 200)
+            assert http_response.status_code == 200
             data = http_response.json()
-            assert(data["type"], "http")
+            assert data["type"] == "http"
             self.record_metric("route_collision_http_collision_success", 1)
         except Exception as e:
             self.route_errors.append(("http_collision", str(e)))
@@ -253,7 +253,7 @@ class TestRouteMiddlewareIntegration:
         try:
             with client.websocket_connect("/collision-path") as websocket:
                 data = websocket.receive_json()
-                assert(data["type"], "websocket")
+                assert data["type"] == "websocket"
                 self.record_metric("route_collision_websocket_collision_success", 1)
         except Exception as e:
             self.route_errors.append(("websocket_collision", str(e)))

@@ -195,8 +195,8 @@ class TestCacheContentionSuite:
         
     async def setup_test_environment(self):
         """Setup test environment and prepare test data."""
-        await self.await redis_client.connect()
-        await self.await redis_client.flush_test_data()
+        await redis_client.connect()
+        await redis_client.flush_test_data()
         
         # Generate test data
         await self._generate_test_data()
@@ -211,7 +211,7 @@ class TestCacheContentionSuite:
             if self.test_keys and self.redis_client.client:
                 await self.redis_client.client.delete(*self.test_keys)
             
-            await self.await redis_client.disconnect()
+            await redis_client.disconnect()
             logger.info("Test environment cleanup complete")
         except Exception as e:
             logger.warning(f"Error during cleanup: {e}")
@@ -818,7 +818,7 @@ class TestCacheContentionSuite:
         logger.info("Starting memory pressure cache eviction test")
         
         # Fill Redis with data until memory pressure
-        initial_memory = await self.suite.await redis_client.get_memory_usage()
+        initial_memory = await self.redis_client.get_memory_usage()
         target_memory = initial_memory + (50 * 1024 * 1024)  # Add 50MB
         
         keys_created = []
@@ -839,7 +839,7 @@ class TestCacheContentionSuite:
             keys_created.append(key)
             
             if counter % 100 == 0:
-                current_memory = await self.suite.await redis_client.get_memory_usage()
+                current_memory = await redis_client.info("memory")["used_memory"]
                 
             counter += 1
             
@@ -898,7 +898,8 @@ class TestCacheContentionSuite:
         successful_operations = sum(r for r in results if isinstance(r, int))
         expected_operations = num_workers * operations_per_worker
         
-        final_memory = await self.suite.await redis_client.get_memory_usage()
+        final_memory_info = await redis_client.info("memory")
+        final_memory = final_memory_info["used_memory"]
         
         # Check cache hit ratio under pressure
         cache_hit_ratio = self.suite.metrics.get_cache_hit_ratio()

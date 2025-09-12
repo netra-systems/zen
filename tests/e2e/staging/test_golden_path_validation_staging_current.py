@@ -69,11 +69,11 @@ from netra_backend.app.core.service_dependencies.golden_path_validator import (
     GoldenPathValidationResult,
 )
 from netra_backend.app.core.service_dependencies.models import (
-from netra_backend.app.services.user_execution_context import UserExecutionContext
     EnvironmentType,
     ServiceType,
     GOLDEN_PATH_REQUIREMENTS,
 )
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class TestGoldenPathValidationStagingIssues:

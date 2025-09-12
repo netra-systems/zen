@@ -35,13 +35,13 @@ import pytest
 # Real services and isolation testing components
 import asyncpg
 import psycopg2
-# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
+from netra_backend.app.services.redis_client import get_redis_client
 import websockets
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from multiprocessing import Process, Queue
 
 # Import real framework components - NO MOCKS
-from netra_backend.app.database.manager import DatabaseManager
+from netra_backend.app.db.database_manager import DatabaseManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.core.registry.universal_registry import AgentRegistry
 from netra_backend.app.agents.supervisor.execution_factory import ExecutionFactory
@@ -67,7 +67,14 @@ class TestSSOTRegressionPrevention:
         # Initialize REAL service connections for isolation testing
         self.env = IsolatedEnvironment()
         self.db_manager = DatabaseManager()
-        self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, decode_responses=True)
+        # Use sync redis client for non-async functions
+        from shared.isolated_environment import get_env
+        import redis
+        self.redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
         self.test_context = TestContext(user_id=f"test_user_{self.test_id}")
         
         # Create isolated test environment
@@ -75,17 +82,11 @@ class TestSSOTRegressionPrevention:
         self.websocket_connections = {}
         self.database_sessions = {}
         
-        logger.info(f"Starting regression prevention test with REAL services: {self._testMethodName} (ID: {self.test_id})")
+        logger.info(f"Starting regression prevention test with REAL services: {getattr(self, '_testMethodName', 'unknown')} (ID: {self.test_id})")
     
     def tearDown(self):
         """Clean up regression prevention test and REAL service connections."""
-        # Clean up all real service connections
-        for ws_conn in self.websocket_connections.values():
-            try:
-                asyncio.get_event_loop().run_until_complete(ws_conn.close())
-            except:
-                pass
-        
+        # Clean up all real service connections - sync version for non-async tests
         for db_session in self.database_sessions.values():
             try:
                 db_session.close()
@@ -93,11 +94,11 @@ class TestSSOTRegressionPrevention:
                 pass
         
         try:
-            self.await redis_client.flushdb()
+            self.redis_client.flushdb()
         except:
             pass
             
-        logger.info(f"Completed regression prevention test cleanup: {self._testMethodName} (ID: {self.test_id})")
+        logger.info(f"Completed regression prevention test cleanup (ID: {self.test_id})")
     
     def test_user_context_isolation_concurrent_database_access(self):
         """
@@ -108,13 +109,22 @@ class TestSSOTRegressionPrevention:
         operations_per_user = 10
         isolation_failures = []
         
-        def user_database_operations(user_id):
+        async def user_database_operations(user_id):
             """Simulate database operations for a specific user."""
             failures = []
             try:
                 # Create isolated database session for this user
                 user_env = IsolatedEnvironment()
                 user_db = DatabaseManager()
+                
+                # Get Redis client for this operation
+                from shared.isolated_environment import get_env
+                import redis
+                redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
                 
                 # Create user-specific data
                 user_data = {
@@ -127,15 +137,24 @@ class TestSSOTRegressionPrevention:
                 # Perform database operations
                 for op_num in range(operations_per_user):
                     try:
+                        # Get Redis client for this operation
+                        from shared.isolated_environment import get_env
+                        import redis
+                        redis_client = redis.Redis(
+                            host=get_env('REDIS_HOST', 'localhost'),
+                            port=int(get_env('REDIS_PORT', '6379')),
+                            decode_responses=True
+                        )
+                        
                         # Store user-specific data
-                        self.await redis_client.hset(
+                        redis_client.hset(
                             f"user:{user_id}:data",
                             f"operation_{op_num}",
                             str(user_data)
                         )
                         
                         # Verify data isolation - should only see own data
-                        stored_data = self.await redis_client.hget(
+                        stored_data = redis_client.hget(
                             f"user:{user_id}:data",
                             f"operation_{op_num}"
                         )
@@ -152,7 +171,7 @@ class TestSSOTRegressionPrevention:
                         # Verify no cross-contamination
                         for other_user in range(num_users):
                             if other_user != user_id:
-                                other_data = self.await redis_client.hget(
+                                other_data = redis_client.hget(
                                     f"user:{other_user}:data",
                                     f"operation_{op_num}"
                                 )
@@ -183,10 +202,14 @@ class TestSSOTRegressionPrevention:
             
             return failures
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_user_operations(user_id):
+            return asyncio.run(user_database_operations(user_id))
+        
         # Execute concurrent user operations
         with ThreadPoolExecutor(max_workers=num_users) as executor:
             future_to_user = {
-                executor.submit(user_database_operations, user_id): user_id 
+                executor.submit(run_user_operations, user_id): user_id 
                 for user_id in range(num_users)
             }
             
@@ -429,7 +452,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(isolation_failures) == 0, f"Agent registry isolation failed: {len(isolation_failures)} failures detected"
     
-    def test_race_condition_prevention_concurrent_state_access(self):
+    async def test_race_condition_prevention_concurrent_state_access(self):
         """
         ISOLATION CRITICAL: Test race condition prevention in concurrent state access.
         Verifies state management prevents race conditions and maintains data integrity.
@@ -439,18 +462,36 @@ class TestSSOTRegressionPrevention:
         shared_state_key = f"shared_state_{self.test_id}"
         race_condition_failures = []
         
-        def concurrent_state_operations(worker_id):
+        async def concurrent_state_operations(worker_id):
             """Perform concurrent state operations to detect race conditions."""
             failures = []
             
             try:
+                # Get Redis client for this operation
+                from shared.isolated_environment import get_env
+                import redis
+                redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
+                
                 for op_num in range(operations_per_worker):
                     operation_id = f"worker_{worker_id}_op_{op_num}"
                     
                     # Simulate atomic state updates
                     try:
+                        # Get Redis client for this operation
+                        from shared.isolated_environment import get_env
+                        import redis
+                        redis_client = redis.Redis(
+                            host=get_env('REDIS_HOST', 'localhost'),
+                            port=int(get_env('REDIS_PORT', '6379')),
+                            decode_responses=True
+                        )
+                        
                         # Read current state
-                        current_state = self.await redis_client.get(shared_state_key)
+                        current_state = redis_client.get(shared_state_key)
                         if current_state is None:
                             current_state = "0"
                         
@@ -458,13 +499,16 @@ class TestSSOTRegressionPrevention:
                         new_value = current_value + 1
                         
                         # Atomic update with race condition detection
-                        pipe = self.await redis_client.pipeline()
+                        pipe = redis_client.pipeline()
                         pipe.watch(shared_state_key)
                         pipe.multi()
                         pipe.set(shared_state_key, str(new_value))
                         pipe.set(f"operation:{operation_id}", f"updated_to_{new_value}")
                         
-                        result = pipe.execute()
+                        try:
+                            result = pipe.execute()
+                        except redis.WatchError:
+                            result = None
                         
                         if not result:
                             # Race condition detected
@@ -477,8 +521,8 @@ class TestSSOTRegressionPrevention:
                             })
                         
                         # Verify state consistency
-                        final_state = self.await redis_client.get(shared_state_key)
-                        operation_record = self.await redis_client.get(f"operation:{operation_id}")
+                        final_state = redis_client.get(shared_state_key)
+                        operation_record = redis_client.get(f"operation:{operation_id}")
                         
                         if operation_record and f"updated_to_{final_state}" not in operation_record:
                             failures.append({
@@ -509,12 +553,23 @@ class TestSSOTRegressionPrevention:
                 }]
         
         # Initialize shared state
-        self.await redis_client.set(shared_state_key, "0")
+        from shared.isolated_environment import get_env
+        import redis
+        redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
+        redis_client.set(shared_state_key, "0")
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_state_operations(worker_id):
+            return asyncio.run(concurrent_state_operations(worker_id))
+            
         # Execute concurrent operations
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
             future_to_worker = {
-                executor.submit(concurrent_state_operations, worker_id): worker_id 
+                executor.submit(run_state_operations, worker_id): worker_id 
                 for worker_id in range(num_workers)
             }
             
@@ -531,7 +586,7 @@ class TestSSOTRegressionPrevention:
                     })
         
         # Verify final state consistency
-        final_value = int(self.await redis_client.get(shared_state_key) or "0")
+        final_value = int(redis_client.get(shared_state_key) or "0")
         expected_max_value = num_workers * operations_per_worker
         
         # Some race conditions are expected and handled properly
@@ -549,7 +604,7 @@ class TestSSOTRegressionPrevention:
         # But fail on critical consistency failures
         assert len(critical_failures) == 0, f"Critical race condition failures detected: {len(critical_failures)} failures"
     
-    def test_security_boundary_validation_user_isolation(self):
+    async def test_security_boundary_validation_user_isolation(self):
         """
         SECURITY CRITICAL: Test security boundary validation between isolated users.
         Verifies users cannot access each other's data or execute unauthorized operations.
@@ -558,13 +613,31 @@ class TestSSOTRegressionPrevention:
         security_failures = []
         user_secrets = {}
         
+        # Create sync redis client for this test
+        from shared.isolated_environment import get_env
+        import redis
+        sync_redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
+        
         # Setup isolated user environments with secrets
         for user_id in range(num_users):
             user_secret = f"top_secret_data_for_user_{user_id}_{uuid.uuid4().hex}"
             user_secrets[user_id] = user_secret
             
+            # Get Redis client
+            from shared.isolated_environment import get_env
+            import redis
+            redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            
             # Store user's private data
-            self.await redis_client.hset(
+            sync_redis_client.hset(
                 f"user:{user_id}:private",
                 "secret_data",
                 user_secret
@@ -572,13 +645,13 @@ class TestSSOTRegressionPrevention:
             
             # Store user's authorization token
             auth_token = f"auth_token_{user_id}_{uuid.uuid4().hex}"
-            self.await redis_client.hset(
+            sync_redis_client.hset(
                 f"user:{user_id}:auth",
                 "token",
                 auth_token
             )
         
-        def attempt_security_breach(attacker_user_id, target_user_id):
+        async def attempt_security_breach(attacker_user_id, target_user_id):
             """Attempt to breach security boundaries between users."""
             failures = []
             
@@ -587,9 +660,18 @@ class TestSSOTRegressionPrevention:
                 attacker_env = IsolatedEnvironment()
                 attacker_context = TestContext(user_id=f"user_{attacker_user_id}")
                 
+                # Get Redis client for security test
+                from shared.isolated_environment import get_env
+                import redis
+                redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
+                
                 # Attempt 1: Direct data access to other user's private data
                 try:
-                    stolen_secret = self.await redis_client.hget(
+                    stolen_secret = sync_redis_client.hget(
                         f"user:{target_user_id}:private",
                         "secret_data"
                     )
@@ -608,7 +690,7 @@ class TestSSOTRegressionPrevention:
                 
                 # Attempt 2: Auth token theft
                 try:
-                    stolen_token = self.await redis_client.hget(
+                    stolen_token = sync_redis_client.hget(
                         f"user:{target_user_id}:auth",
                         "token"
                     )
@@ -677,6 +759,10 @@ class TestSSOTRegressionPrevention:
                     'error': str(e)
                 }]
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_security_breach(attacker_user_id, target_user_id):
+            return asyncio.run(attempt_security_breach(attacker_user_id, target_user_id))
+            
         # Test all possible user-to-user attack vectors
         with ThreadPoolExecutor(max_workers=num_users) as executor:
             attack_futures = []
@@ -684,7 +770,7 @@ class TestSSOTRegressionPrevention:
             for attacker in range(num_users):
                 for target in range(num_users):
                     if attacker != target:
-                        future = executor.submit(attempt_security_breach, attacker, target)
+                        future = executor.submit(run_security_breach, attacker, target)
                         attack_futures.append(future)
             
             for future in as_completed(attack_futures):
@@ -703,7 +789,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(security_failures) == 0, f"CRITICAL SECURITY FAILURE: {len(security_failures)} boundary breaches detected"
     
-    def test_database_session_isolation_transaction_boundaries(self):
+    async def test_database_session_isolation_transaction_boundaries(self):
         """
         ISOLATION CRITICAL: Test database session isolation with transaction boundaries.
         Verifies each session has proper transaction isolation with no data leakage.
@@ -712,7 +798,7 @@ class TestSSOTRegressionPrevention:
         transactions_per_session = 8
         isolation_failures = []
         
-        def session_transaction_operations(session_id):
+        async def session_transaction_operations(session_id):
             """Perform database transactions within an isolated session."""
             failures = []
             
@@ -732,18 +818,25 @@ class TestSSOTRegressionPrevention:
                     tx_id = f"tx_{session_id}_{tx_num}"
                     
                     try:
-                        # Begin transaction
+                        # Begin transaction - using sync redis for non-async context
                         with db_manager.get_session() as db_session:
                             # Store transaction data
                             tx_key = f"transaction:{tx_id}"
-                            self.await redis_client.hset(
+                            from shared.isolated_environment import get_env
+                            import redis
+                            sync_redis_client = redis.Redis(
+                                host=get_env('REDIS_HOST', 'localhost'),
+                                port=int(get_env('REDIS_PORT', '6379')),
+                                decode_responses=True
+                            )
+                            sync_redis_client.hset(
                                 tx_key,
                                 "data",
                                 str(session_data)
                             )
                             
                             # Verify transaction isolation
-                            stored_data = self.await redis_client.hget(tx_key, "data")
+                            stored_data = sync_redis_client.hget(tx_key, "data")
                             if not stored_data or str(session_id) not in stored_data:
                                 failures.append({
                                     'session_id': session_id,
@@ -754,10 +847,10 @@ class TestSSOTRegressionPrevention:
                                 })
                             
                             # Check for cross-session contamination
-                            all_tx_keys = self.await redis_client.keys("transaction:*")
+                            all_tx_keys = sync_redis_client.keys("transaction:*")
                             for other_key in all_tx_keys:
                                 if tx_id not in other_key:
-                                    other_data = self.await redis_client.hget(other_key, "data")
+                                    other_data = sync_redis_client.hget(other_key, "data")
                                     if other_data and str(session_id) in other_data:
                                         other_tx_id = other_key.split(":")[1]
                                         if not other_tx_id.startswith(f"tx_{session_id}_"):
@@ -771,10 +864,10 @@ class TestSSOTRegressionPrevention:
                             
                             # Simulate transaction rollback scenario
                             if tx_num % 3 == 0:  # Rollback every 3rd transaction
-                                self.await redis_client.delete(tx_key)
+                                sync_redis_client.delete(tx_key)
                                 
                                 # Verify rollback isolation
-                                rollback_data = self.await redis_client.hget(tx_key, "data")
+                                rollback_data = sync_redis_client.hget(tx_key, "data")
                                 if rollback_data:
                                     failures.append({
                                         'session_id': session_id,
@@ -802,10 +895,14 @@ class TestSSOTRegressionPrevention:
                     'error': str(e)
                 }]
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_session_operations(session_id):
+            return asyncio.run(session_transaction_operations(session_id))
+            
         # Execute concurrent session operations
         with ThreadPoolExecutor(max_workers=num_sessions) as executor:
             future_to_session = {
-                executor.submit(session_transaction_operations, session_id): session_id 
+                executor.submit(run_session_operations, session_id): session_id 
                 for session_id in range(num_sessions)
             }
             
@@ -827,7 +924,7 @@ class TestSSOTRegressionPrevention:
         
         assert len(isolation_failures) == 0, f"Database session isolation failed: {len(isolation_failures)} failures detected"
     
-    def test_performance_metrics_concurrent_load_testing(self):
+    async def test_performance_metrics_concurrent_load_testing(self):
         """
         PERFORMANCE CRITICAL: Test performance metrics under concurrent load.
         Verifies system maintains performance standards with high concurrent usage.
@@ -848,7 +945,7 @@ class TestSSOTRegressionPrevention:
             'throughput_metrics': []
         }
         
-        def performance_load_operation(thread_id):
+        async def performance_load_operation(thread_id):
             """Execute performance-intensive operations for load testing."""
             thread_metrics = {
                 'response_times': [],
@@ -867,15 +964,23 @@ class TestSSOTRegressionPrevention:
                         # CPU-intensive operation
                         result = sum(hash(item) for item in large_data)
                         
-                        # I/O-intensive operation
+                        # I/O-intensive operation - using sync redis for non-async context
+                        from shared.isolated_environment import get_env
+                        import redis
+                        sync_redis_client = redis.Redis(
+                            host=get_env('REDIS_HOST', 'localhost'),
+                            port=int(get_env('REDIS_PORT', '6379')),
+                            decode_responses=True
+                        )
+                        
                         for i in range(10):
-                            self.await redis_client.set(
+                            sync_redis_client.set(
                                 f"perf_test:{thread_id}:{op_num}:{i}",
                                 f"performance_data_{result}_{i}"
                             )
                             
                             # Verify data integrity
-                            retrieved = self.await redis_client.get(
+                            retrieved = sync_redis_client.get(
                                 f"perf_test:{thread_id}:{op_num}:{i}"
                             )
                             
@@ -925,12 +1030,16 @@ class TestSSOTRegressionPrevention:
         initial_memory = process.memory_info().rss
         initial_cpu = process.cpu_percent()
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_performance_operation(thread_id):
+            return asyncio.run(performance_load_operation(thread_id))
+            
         # Execute concurrent performance operations
         start_time = time.time()
         
         with ThreadPoolExecutor(max_workers=num_concurrent_operations) as executor:
             future_to_thread = {
-                executor.submit(performance_load_operation, thread_id): thread_id 
+                executor.submit(run_performance_operation, thread_id): thread_id 
                 for thread_id in range(num_concurrent_operations)
             }
             
@@ -1308,19 +1417,26 @@ class TestSSOTContinuousCompliance:
         # Initialize REAL service connections for compliance testing
         self.env = IsolatedEnvironment()
         self.db_manager = DatabaseManager()
-        self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, decode_responses=True)
+        # Use sync redis client for non-async functions
+        from shared.isolated_environment import get_env
+        import redis
+        self.redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
         self.test_context = TestContext(user_id=f"compliance_user_{self.test_id}")
         
-        logger.info(f"Starting continuous compliance test with REAL services: {self._testMethodName} (ID: {self.test_id})")
+        logger.info(f"Starting continuous compliance test with REAL services (ID: {self.test_id})")
     
     def tearDown(self):
         """Clean up continuous compliance test and REAL service connections."""
         try:
-            self.await redis_client.flushdb()
+            self.redis_client.flushdb()
         except:
             pass
             
-        logger.info(f"Completed continuous compliance test cleanup: {self._testMethodName} (ID: {self.test_id})")
+        logger.info(f"Completed continuous compliance test cleanup (ID: {self.test_id})")
     
     def test_continuous_system_health_real_services(self):
         """
@@ -1336,8 +1452,15 @@ class TestSSOTContinuousCompliance:
             with self.db_manager.get_session() as session:
                 # Test basic database operations
                 test_key = f"health_check_{self.test_id}"
-                self.await redis_client.set(test_key, "healthy")
-                result = self.await redis_client.get(test_key)
+                from shared.isolated_environment import get_env
+                import redis
+                sync_redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
+                sync_redis_client.set(test_key, "healthy")
+                result = sync_redis_client.get(test_key)
                 
                 if result != "healthy":
                     health_issues.append({
@@ -1347,7 +1470,7 @@ class TestSSOTContinuousCompliance:
                         'actual': result
                     })
                 
-                self.await redis_client.delete(test_key)
+                sync_redis_client.delete(test_key)
             
             db_response_time = time.time() - db_start_time
             service_health['database'] = {
@@ -1378,10 +1501,17 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis operations
             test_hash = f"redis_health_{self.test_id}"
-            self.await redis_client.hset(test_hash, "field1", "value1")
-            self.await redis_client.hset(test_hash, "field2", "value2")
+            from shared.isolated_environment import get_env
+            import redis
+            sync_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            sync_redis_client.hset(test_hash, "field1", "value1")
+            sync_redis_client.hset(test_hash, "field2", "value2")
             
-            all_fields = self.await redis_client.hgetall(test_hash)
+            all_fields = sync_redis_client.hgetall(test_hash)
             if len(all_fields) != 2 or all_fields.get("field1") != "value1":
                 health_issues.append({
                     'service': 'redis',
@@ -1391,7 +1521,7 @@ class TestSSOTContinuousCompliance:
                     'data': all_fields
                 })
             
-            self.await redis_client.delete(test_hash)
+            sync_redis_client.delete(test_hash)
             
             redis_response_time = time.time() - redis_start_time
             service_health['redis'] = {
@@ -1499,17 +1629,24 @@ class TestSSOTContinuousCompliance:
             db_start = time.time()
             
             # Execute database operations
+            from shared.isolated_environment import get_env
+            import redis
+            sync_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
             for i in range(50):
                 key = f"regression_test_{self.test_id}_{i}"
-                self.await redis_client.set(key, f"test_data_{i}")
-                result = self.await redis_client.get(key)
+                sync_redis_client.set(key, f"test_data_{i}")
+                result = sync_redis_client.get(key)
                 if not result:
                     regression_issues.append({
                         'metric': 'database_operations',
                         'operation': i,
                         'issue': 'data_persistence_failure'
                     })
-                self.await redis_client.delete(key)
+                sync_redis_client.delete(key)
             
             db_time = time.time() - db_start
             regression_metrics['service_metrics']['database_50_ops'] = db_time
@@ -1580,15 +1717,25 @@ class TestSSOTContinuousCompliance:
             # Test concurrent isolation operations
             def quick_isolation_test(test_id):
                 context = TestContext(user_id=f"regression_user_{test_id}")
-                self.await redis_client.set(
+                from shared.isolated_environment import get_env
+                import redis
+                sync_redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
+                sync_redis_client.set(
                     f"isolation_test:{test_id}",
                     f"data_{test_id}"
                 )
-                return self.await redis_client.get(f"isolation_test:{test_id}")
+                return sync_redis_client.get(f"isolation_test:{test_id}")
             
+            def run_quick_isolation_test(test_id):
+                return quick_isolation_test(test_id)
+                
             with ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [
-                    executor.submit(quick_isolation_test, i) 
+                    executor.submit(run_quick_isolation_test, i) 
                     for i in range(10)
                 ]
                 
@@ -1676,7 +1823,14 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis connection
             start_time = time.time()
-            self.await redis_client.ping()
+            from shared.isolated_environment import get_env
+            import redis
+            sync_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            sync_redis_client.ping()
             health_metrics['service_response_times']['redis'] = time.time() - start_time
             
             # Test Database connection
@@ -1698,7 +1852,13 @@ class TestSSOTContinuousCompliance:
             # Initialize real service components to measure load time
             test_env = IsolatedEnvironment()
             test_db = DatabaseManager()
-            test_redis = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381)
+            from shared.isolated_environment import get_env
+            import redis
+            test_redis = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
             
             # Test basic operations
             test_redis.ping()
@@ -1753,14 +1913,21 @@ class TestSSOTContinuousCompliance:
                 for op_num in range(operations_per_context):
                     operation_key = f"context:{context_id}:operation:{op_num}"
                     
-                    # Store context-specific secret data
-                    self.await redis_client.hset(
+                    # Store context-specific secret data - using sync redis for non-async context
+                    from shared.isolated_environment import get_env
+                    import redis
+                    sync_redis_client = redis.Redis(
+                        host=get_env('REDIS_HOST', 'localhost'),
+                        port=int(get_env('REDIS_PORT', '6379')),
+                        decode_responses=True
+                    )
+                    sync_redis_client.hset(
                         operation_key,
                         "secret_data",
                         secrets['secret_key']
                     )
                     
-                    self.await redis_client.hset(
+                    sync_redis_client.hset(
                         operation_key,
                         "private_data",
                         secrets['private_data']
@@ -1772,9 +1939,9 @@ class TestSSOTContinuousCompliance:
                             other_secrets = context_secrets[other_context]
                             
                             # Check if current context's data leaked to other context
-                            other_keys = self.await redis_client.keys(f"context:{other_context}:*")
+                            other_keys = sync_redis_client.keys(f"context:{other_context}:*")
                             for other_key in other_keys:
-                                other_data = self.await redis_client.hgetall(other_key)
+                                other_data = sync_redis_client.hgetall(other_key)
                                 
                                 # Check for secret leakage
                                 for field, value in other_data.items():
@@ -1792,7 +1959,7 @@ class TestSSOTContinuousCompliance:
                                         })
                             
                             # Check reverse leakage - other context data in current context
-                            current_data = self.await redis_client.hgetall(operation_key)
+                            current_data = sync_redis_client.hgetall(operation_key)
                             for field, value in current_data.items():
                                 if (other_secrets['secret_key'] in str(value) or 
                                     other_secrets['private_data'] in str(value) or
@@ -1818,10 +1985,20 @@ class TestSSOTContinuousCompliance:
                     'error': str(e)
                 }]
         
+        # Wrapper function to run async function in ThreadPoolExecutor
+        def isolated_context_operations_wrapper(context_id):
+            # Run the async function in a new event loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(isolated_context_operations(context_id))
+            finally:
+                loop.close()
+        
         # Execute all contexts concurrently to maximize leakage detection
         with ThreadPoolExecutor(max_workers=num_isolated_contexts) as executor:
             future_to_context = {
-                executor.submit(isolated_context_operations, context_id): context_id 
+                executor.submit(isolated_context_operations_wrapper, context_id): context_id 
                 for context_id in range(num_isolated_contexts)
             }
             
@@ -1838,10 +2015,17 @@ class TestSSOTContinuousCompliance:
                     })
         
         # Clean up test data
+        from shared.isolated_environment import get_env
+        import redis
+        cleanup_redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
         for context_id in range(num_isolated_contexts):
-            keys_to_delete = self.await redis_client.keys(f"context:{context_id}:*")
+            keys_to_delete = cleanup_redis_client.keys(f"context:{context_id}:*")
             if keys_to_delete:
-                self.await redis_client.delete(*keys_to_delete)
+                cleanup_redis_client.delete(*keys_to_delete)
         
         # Verify NO data leakage detected
         if leakage_violations:
@@ -1899,15 +2083,22 @@ class TestSSOTContinuousCompliance:
                                 }
                             }
                             
-                            # Store complex data
-                            self.await redis_client.hset(
+                            # Store complex data - using sync redis for non-async context
+                            from shared.isolated_environment import get_env
+                            import redis
+                            sync_redis_client = redis.Redis(
+                                host=get_env('REDIS_HOST', 'localhost'),
+                                port=int(get_env('REDIS_PORT', '6379')),
+                                decode_responses=True
+                            )
+                            sync_redis_client.hset(
                                 key,
                                 "complex_data",
                                 str(complex_data)
                             )
                             
                             # Immediate verification
-                            retrieved = self.await redis_client.hget(key, "complex_data")
+                            retrieved = sync_redis_client.hget(key, "complex_data")
                             if not retrieved or user_data_signature not in retrieved:
                                 failures.append({
                                     'user_id': user_id,
@@ -1922,13 +2113,13 @@ class TestSSOTContinuousCompliance:
                             random_other_users = [u for u in range(num_concurrent_users) if u != user_id]
                             if random_other_users:
                                 random_user = random_other_users[operation_count % len(random_other_users)]
-                                random_keys = self.await redis_client.keys(f"stress:{random_user}:*")
+                                random_keys = sync_redis_client.keys(f"stress:{random_user}:*")
                                 
                                 if random_keys:
                                     # Sample a few random keys to check for contamination
                                     sample_keys = random_keys[:min(3, len(random_keys))]
                                     for sample_key in sample_keys:
-                                        sample_data = self.await redis_client.hget(sample_key, "complex_data")
+                                        sample_data = sync_redis_client.hget(sample_key, "complex_data")
                                         if sample_data and user_data_signature in sample_data:
                                             failures.append({
                                                 'user_id': user_id,
@@ -2022,13 +2213,20 @@ class TestSSOTContinuousCompliance:
         
         # Clean up stress test data
         try:
-            keys_to_delete = self.await redis_client.keys("stress:*")
+            from shared.isolated_environment import get_env
+            import redis
+            cleanup_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            keys_to_delete = cleanup_redis_client.keys("stress:*")
             if keys_to_delete:
                 # Delete in batches to avoid overwhelming Redis
                 batch_size = 100
                 for i in range(0, len(keys_to_delete), batch_size):
                     batch = keys_to_delete[i:i + batch_size]
-                    self.await redis_client.delete(*batch)
+                    cleanup_redis_client.delete(*batch)
         except Exception as e:
             logger.warning(f"Stress test cleanup warning: {e}")
         
@@ -2048,16 +2246,17 @@ class TestSSOTContinuousCompliance:
         assert len(isolation_stress_failures) <= 20, f"Too many stress test issues: {len(isolation_stress_failures)} detected"
 
 
-async def run_async_tests():
-    """Run async WebSocket isolation tests."""
+def run_websocket_tests():
+    """Run WebSocket isolation tests."""
     test_instance = TestSSOTRegressionPrevention()
     test_instance.setUp()
     
     try:
-        await test_instance.test_websocket_channel_isolation_concurrent_sessions()
-        logger.info("Async WebSocket isolation tests completed successfully")
+        # Run the WebSocket test synchronously by using asyncio.run
+        asyncio.run(test_instance.test_websocket_channel_isolation_concurrent_sessions())
+        logger.info("WebSocket isolation tests completed successfully")
     except Exception as e:
-        logger.error(f"Async WebSocket isolation tests failed: {e}")
+        logger.error(f"WebSocket isolation tests failed: {e}")
         raise
     finally:
         test_instance.tearDown()
@@ -2070,11 +2269,11 @@ if __name__ == '__main__':
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    # Run async tests first
+    # Run WebSocket tests first
     try:
-        asyncio.run(run_async_tests())
+        run_websocket_tests()
     except Exception as e:
-        logger.error(f"Async test execution failed: {e}")
+        logger.error(f"WebSocket test execution failed: {e}")
     
     # Run the synchronous tests
     pytest.main([__file__, '-v', '--tb=short', '--capture=no', '--maxfail=3'])

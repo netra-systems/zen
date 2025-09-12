@@ -12,11 +12,11 @@ Each function  <= 8 lines, file  <= 300 lines.
 
 import logging
 from typing import Dict, Any, Optional
-import redis
-from redis.connection import ConnectionPool
+
+# MIGRATED: Use SSOT Redis import pattern
+from shared.isolated_environment import get_env
 
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
-from shared.isolated_environment import get_env
 
 logger = logging.getLogger(__name__)
 
@@ -86,10 +86,13 @@ class RedisConnectionHandler:
         """Get Redis connection information."""
         return self._connection_info.copy()
     
-    def create_connection_pool(self) -> ConnectionPool:
+    def create_connection_pool(self):
         """Create Redis connection pool with proper configuration."""
         if self._connection_pool is None:
             try:
+                # Use SSOT Redis import pattern
+                import redis
+                
                 pool_config = {
                     "host": self._connection_info["host"],
                     "port": self._connection_info["port"],
@@ -110,7 +113,7 @@ class RedisConnectionHandler:
                         "ssl_check_hostname": self._connection_info["ssl_check_hostname"]
                     })
                 
-                self._connection_pool = ConnectionPool(**pool_config)
+                self._connection_pool = redis.ConnectionPool(**pool_config)
                 logger.info(f"Created Redis connection pool for {self.env} environment: {self._connection_info['host']}:{self._connection_info['port']}")
                 
             except Exception as e:
@@ -118,11 +121,23 @@ class RedisConnectionHandler:
                 
         return self._connection_pool
     
-    def get_redis_client(self) -> redis.Redis:
+    def get_redis_client(self):
         """Get Redis client with proper connection configuration."""
         try:
-            pool = self.create_connection_pool()
-            client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool, decode_responses=True)
+            # Use SSOT Redis import pattern
+            import redis
+            
+            # Create Redis client directly with connection info
+            client = redis.Redis(
+                host=self._connection_info["host"],
+                port=self._connection_info["port"],
+                db=self._connection_info["db"],
+                socket_timeout=self._connection_info["socket_timeout"],
+                socket_connect_timeout=self._connection_info["socket_connect_timeout"],
+                retry_on_timeout=self._connection_info["retry_on_timeout"],
+                health_check_interval=self._connection_info["health_check_interval"],
+                decode_responses=True
+            )
             
             # Test connection
             client.ping()

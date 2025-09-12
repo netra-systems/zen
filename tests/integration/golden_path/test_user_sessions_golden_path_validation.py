@@ -64,11 +64,11 @@ from netra_backend.app.core.service_dependencies.golden_path_validator import (
     GoldenPathValidationResult
 )
 from netra_backend.app.core.service_dependencies.models import (
-from netra_backend.app.services.user_execution_context import UserExecutionContext
     ServiceType,
     EnvironmentType,
     GoldenPathRequirement
 )
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 logger = logging.getLogger(__name__)
 

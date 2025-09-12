@@ -160,8 +160,14 @@ class AuthEnvironment:
             return "HS256"
     
     def get_jwt_expiration_minutes(self) -> int:
-        """Get JWT token expiration in minutes with environment-specific defaults."""
+        """Get JWT token expiration in minutes with environment-specific and demo mode defaults."""
         env = self.get_environment()
+        
+        # Demo mode: extended JWT expiration (48 hours)
+        if self.is_demo_mode():
+            demo_config = self.get_demo_config()
+            demo_hours = demo_config.get("jwt_expiration_hours", 48)
+            return demo_hours * 60  # Convert hours to minutes
         
         try:
             value = self.env.get("JWT_EXPIRATION_MINUTES")
@@ -821,6 +827,58 @@ class AuthEnvironment:
         """Check if running in test environment."""
         return self.get_environment() in ["test", "testing"] or self.env.get("TESTING", "false").lower() == "true"
     
+    def is_demo_mode(self) -> bool:
+        """Check if demo mode is enabled.
+        
+        Demo mode is enabled when DEMO_MODE=true is set in environment variables.
+        Production environments explicitly block demo mode for security.
+        
+        Returns:
+            bool: True if demo mode is enabled and allowed
+        """
+        env = self.get_environment()
+        
+        # SECURITY: Block demo mode in production environments
+        if env == "production":
+            demo_mode = self.env.get("DEMO_MODE", "false").lower() == "true"
+            if demo_mode:
+                logger.critical(f"SECURITY VIOLATION: Demo mode is explicitly disabled in production environment")
+                raise ValueError("Demo mode cannot be enabled in production environment for security reasons")
+            return False
+        
+        # Check environment variable for demo mode
+        demo_mode_str = self.env.get("DEMO_MODE", "false").lower()
+        return demo_mode_str in ("true", "1", "yes", "on")
+    
+    def get_demo_config(self) -> Dict[str, Any]:
+        """Get demo mode configuration settings.
+        
+        Returns configuration settings that are relaxed in demo mode:
+        - Password minimum length: 4 characters instead of default
+        - JWT expiration: 48 hours instead of default 
+        - Email verification: disabled
+        - Circuit breaker: relaxed thresholds
+        - Rate limiting: relaxed limits
+        
+        Returns:
+            Dict[str, Any]: Demo configuration settings
+        """
+        if not self.is_demo_mode():
+            return {}
+        
+        return {
+            "password_min_length": 4,  # Relaxed from production 12/staging 10
+            "jwt_expiration_hours": 48,  # Extended from default 15min-2hrs 
+            "require_email_verification": False,  # Disabled in demo
+            "circuit_breaker_failure_threshold": 10,  # Relaxed from 5
+            "circuit_breaker_timeout_seconds": 30,  # Reduced from 60
+            "login_rate_limit": 20,  # Increased from 3-10
+            "max_failed_login_attempts": 20,  # Increased from 3-10
+            "allow_simple_passwords": True,  # Allow demo/test/1234
+            "auto_create_demo_users": True,  # Auto-create demo users
+            "skip_password_complexity": True  # Skip complexity requirements
+        }
+    
     # CORS Configuration
     def get_cors_origins(self) -> list[str]:
         """Get allowed CORS origins with environment-specific defaults."""
@@ -890,8 +948,13 @@ class AuthEnvironment:
     
     # Rate Limiting (for auth endpoints)
     def get_login_rate_limit(self) -> int:
-        """Get login attempts rate limit with environment-specific defaults."""
+        """Get login attempts rate limit with environment-specific and demo mode defaults."""
         env = self.get_environment()
+        
+        # Demo mode: relaxed rate limiting
+        if self.is_demo_mode():
+            demo_config = self.get_demo_config()
+            return demo_config.get("login_rate_limit", 20)
         
         try:
             value = self.env.get("LOGIN_RATE_LIMIT")
@@ -954,8 +1017,13 @@ class AuthEnvironment:
             return 300
     
     def get_max_failed_login_attempts(self) -> int:
-        """Get max failed login attempts before lockout with environment-specific defaults."""
+        """Get max failed login attempts before lockout with environment-specific and demo mode defaults."""
         env = self.get_environment()
+        
+        # Demo mode: relaxed failed login attempts
+        if self.is_demo_mode():
+            demo_config = self.get_demo_config()
+            return demo_config.get("max_failed_login_attempts", 20)
         
         try:
             value = self.env.get("MAX_FAILED_LOGIN_ATTEMPTS")
@@ -994,8 +1062,13 @@ class AuthEnvironment:
     
     # Password Policy
     def get_min_password_length(self) -> int:
-        """Get minimum password length with environment-specific defaults."""
+        """Get minimum password length with environment-specific and demo mode defaults."""
         env = self.get_environment()
+        
+        # Demo mode: relaxed password requirements
+        if self.is_demo_mode():
+            demo_config = self.get_demo_config()
+            return demo_config.get("password_min_length", 4)
         
         try:
             value = self.env.get("MIN_PASSWORD_LENGTH")
@@ -1026,8 +1099,13 @@ class AuthEnvironment:
             return 8
     
     def require_password_complexity(self) -> bool:
-        """Check if password complexity is required with environment-specific defaults."""
+        """Check if password complexity is required with environment-specific and demo mode defaults."""
         env = self.get_environment()
+        
+        # Demo mode: skip password complexity
+        if self.is_demo_mode():
+            demo_config = self.get_demo_config()
+            return not demo_config.get("skip_password_complexity", False)
         
         complexity_str = self.env.get("REQUIRE_PASSWORD_COMPLEXITY")
         if complexity_str:

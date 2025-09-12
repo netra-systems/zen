@@ -38,7 +38,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
     """Integration tests for authentication error handling and resilience with real services."""
     
     @pytest.fixture(autouse=True)
-    def setup_resilience_environment(self):
+    async def setup_resilience_environment(self):
         """Setup integration environment for auth resilience testing."""
         self.env = get_env()
         self.env.enable_isolation()
@@ -61,7 +61,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         # Connect to test Redis for resilience testing
         try:
             self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, db=0, decode_responses=True)
-            self.await redis_client.ping()  # Verify connection
+            await self.redis_client.ping()  # Verify connection
         except Exception as e:
             pytest.skip(f"Redis not available for resilience integration tests: {e}")
         
@@ -69,9 +69,9 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         
         # Cleanup test data
         try:
-            test_keys = self.await redis_client.keys("test_resilience:*")
+            test_keys = await redis_client.keys("test_resilience:*")
             if test_keys:
-                self.await redis_client.delete(*test_keys)
+                await redis_client.delete(*test_keys)
         except:
             pass  # Cleanup is best effort
         
@@ -171,11 +171,11 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
                     "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
-                self.await redis_client.hset(session_key, mapping=session_data)
-                self.await redis_client.expire(session_key, 300)  # 5 minute expiry
+                await redis_client.hset(session_key, mapping=session_data)
+                await redis_client.expire(session_key, 300)  # 5 minute expiry
                 
                 # Retrieve session data
-                retrieved_data = self.await redis_client.hgetall(session_key)
+                retrieved_data = await redis_client.hgetall(session_key)
                 redis_time = time.time() - start_time
                 
                 operations_results.append({
@@ -432,8 +432,8 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
                 "token_valid": str(is_valid)
             }
             
-            self.await redis_client.hset(session_key, mapping=session_data)
-            self.await redis_client.expire(session_key, 1200)  # 20 minute expiry
+            await redis_client.hset(session_key, mapping=session_data)
+            await redis_client.expire(session_key, 1200)  # 20 minute expiry
             
             pre_restart_results.append({
                 "user_id": user_data["user_id"],
@@ -454,16 +454,16 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         # Flush auth-specific cache keys (simulate restart cache clearing)
         try:
             # Clear potential auth cache keys
-            auth_cache_keys = self.await redis_client.keys("auth:*")
-            circuit_breaker_keys = self.await redis_client.keys("circuit_breaker:*")
-            blacklist_keys = self.await redis_client.keys("blacklist:*")
+            auth_cache_keys = await redis_client.keys("auth:*")
+            circuit_breaker_keys = await redis_client.keys("circuit_breaker:*")
+            blacklist_keys = await redis_client.keys("blacklist:*")
             
             if auth_cache_keys:
-                self.await redis_client.delete(*auth_cache_keys)
+                await redis_client.delete(*auth_cache_keys)
             if circuit_breaker_keys:
-                self.await redis_client.delete(*circuit_breaker_keys)
+                await redis_client.delete(*circuit_breaker_keys)
             if blacklist_keys:
-                self.await redis_client.delete(*blacklist_keys)
+                await redis_client.delete(*blacklist_keys)
                 
             print(f"   [U+1F5D1][U+FE0F] Cleared {len(auth_cache_keys + circuit_breaker_keys + blacklist_keys)} cache keys")
         except Exception as e:
@@ -505,7 +505,7 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
             # Operation 2: Session data should still exist
             try:
                 session_key = f"test_resilience:recovery:{user_id}"
-                session_data = self.await redis_client.hgetall(session_key)
+                session_data = await redis_client.hgetall(session_key)
                 
                 recovery_operations.append({
                     "operation": "session_retrieval",
@@ -595,6 +595,6 @@ class TestAuthErrorHandlingResilienceIntegration(BaseIntegrationTest):
         for user_data in recovery_test_users:
             session_key = f"test_resilience:recovery:{user_data['user_id']}"
             try:
-                self.await redis_client.delete(session_key)
+                await redis_client.delete(session_key)
             except:
                 pass

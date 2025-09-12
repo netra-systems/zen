@@ -187,13 +187,7 @@ class HealthCheckManager:
                 if redis_url:
                     client = redis.from_url(redis_url, decode_responses=True)
                 else:
-                    client = await get_redis_client()  # MIGRATED: was redis.Redis(
-                        host=redis_host,
-                        port=int(redis_port),
-                        password=redis_password if redis_password else None,
-                        db=int(redis_db),
-                        decode_responses=True
-                    )
+                    client = await get_redis_client()  # MIGRATED: was redis.Redis
                 
                 connection_start = time.time()
                 

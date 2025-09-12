@@ -187,10 +187,37 @@ async def authenticate_websocket_with_remediation(
     connection_id: str
 ) -> tuple[bool, Optional[UserExecutionContext], Optional[str]]:
     """
-    Convenience function for WebSocket authentication with remediation.
+    DEPRECATED: Remediation-based authentication - use authenticate_websocket_ssot() instead.
     
-    This function should be used by WebSocket handlers to authenticate connections
-    with all available remediation features.
+    MIGRATION REQUIRED: This function is deprecated as part of SSOT consolidation.
+    All WebSocket authentication should use authenticate_websocket_ssot() from
+    netra_backend.app.websocket_core.unified_websocket_auth.
+    
+    This function is preserved for backward compatibility but delegates to the
+    deprecated auth integration which in turn should not be used for new code.
+    
+    Args:
+        token: Optional JWT token
+        connection_id: WebSocket connection identifier
+        
+    Returns:
+        Tuple of (success, user_context, error_message)
     """
+    import warnings
+    warnings.warn(
+        "authenticate_websocket_with_remediation() is deprecated. "
+        "Use authenticate_websocket_ssot() from unified_websocket_auth instead. "
+        "This function will be removed in the next release.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning(
+        f"DEPRECATION: authenticate_websocket_with_remediation() called for connection {connection_id}. "
+        "Migrate to authenticate_websocket_ssot() - this function will be removed."
+    )
+    
     auth_integration = get_websocket_auth_integration()
     return await auth_integration.authenticate_websocket_connection(token, connection_id)

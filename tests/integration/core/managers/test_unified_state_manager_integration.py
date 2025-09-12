@@ -83,9 +83,9 @@ class TestUnifiedStateManagerIntegrationCore(SSotAsyncTestCase):
         # Clean up test data from Redis
         for user_id in self.test_user_ids:
             pattern = f"state:{user_id}:*"
-            keys = self.await redis_client.keys(pattern)
+            keys = await redis_client.keys(pattern)
             if keys:
-                self.await redis_client.delete(*keys)
+                await redis_client.delete(*keys)
         
         # Clean up test data from PostgreSQL
         cursor = self.postgres_client.cursor()
@@ -124,7 +124,7 @@ class TestRealRedisIntegration(TestUnifiedStateManagerIntegrationCore):
         
         # Verify state exists in Redis directly
         redis_key = f"state:{manager.user_id}:thread:{thread_id}"
-        redis_data = self.await redis_client.hgetall(redis_key)
+        redis_data = await redis_client.hgetall(redis_key)
         self.assertIsNotNone(redis_data)
         
         # Create new manager instance to test persistence
@@ -602,7 +602,7 @@ class TestDisasterRecoveryIntegration(TestUnifiedStateManagerIntegrationCore):
         
         # Simulate corruption by directly modifying Redis data
         redis_key = f"state:{manager.user_id}:thread:{thread_id}"
-        self.await redis_client.hset(redis_key, "corrupted_field", "invalid_json{")
+        await redis_client.hset(redis_key, "corrupted_field", "invalid_json{")
         
         # Manager should handle corrupted data gracefully
         try:

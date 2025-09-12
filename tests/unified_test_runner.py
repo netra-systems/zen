@@ -311,17 +311,18 @@ class UnifiedTestRunner:
         self.max_collection_size = int(env.get("MAX_TEST_COLLECTION_SIZE", "1000"))
         
         # Test configurations - Use project root as working directory to fix import issues
+        # ISSUE #558 FIX: Use centralized pyproject.toml instead of missing service-specific pytest.ini files
         self.test_configs = {
             "backend": {
                 "path": self.project_root,  # Changed from backend_path to project_root
                 "test_dir": "netra_backend/tests",  # Updated to full path from root
-                "config": "netra_backend/pytest.ini",  # Updated to full path from root
+                "config": "pyproject.toml",  # FIXED: Use centralized config instead of missing pytest.ini
                 "command": f"{self.python_command} -m pytest"
             },
             "auth": {
                 "path": self.project_root,  # Changed from auth_path to project_root
                 "test_dir": "auth_service/tests",  # Updated to full path from root
-                "config": "auth_service/pytest.ini",  # Updated to full path from root
+                "config": "pyproject.toml",  # FIXED: Use centralized config instead of missing pytest.ini
                 "command": f"{self.python_command} -m pytest"
             },
             "frontend": {
@@ -1202,6 +1203,8 @@ class UnifiedTestRunner:
             # This allows staging.env to be loaded for ClickHouse and other configurations
             env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_config')
             env.set('ENVIRONMENT', 'staging', 'staging_config')
+            env.set('NETRA_ENVIRONMENT', 'staging', 'staging_config')
+            env.set('TEST_ENV', 'staging', 'staging_config')  # Required by environment_markers.py
             if self.docker_ports:
                 # Set discovered PostgreSQL URL
                 postgres_port = self.docker_ports.get('postgres', 5434)
@@ -1461,6 +1464,8 @@ class UnifiedTestRunner:
                 bypass_key = result.stdout.strip()
                 env.set('E2E_OAUTH_SIMULATION_KEY', bypass_key, 'staging_e2e_auth')
                 env.set('ENVIRONMENT', 'staging', 'staging_e2e_auth')
+                env.set('NETRA_ENVIRONMENT', 'staging', 'staging_e2e_auth')
+                env.set('TEST_ENV', 'staging', 'staging_e2e_auth')  # Required by environment_markers.py
                 env.set('STAGING_AUTH_URL', 'https://api.staging.netrasystems.ai', 'staging_e2e_auth')
                 # CRITICAL: Enable local config file loading for staging tests
                 env.set('ENABLE_LOCAL_CONFIG_FILES', 'true', 'staging_e2e_auth')

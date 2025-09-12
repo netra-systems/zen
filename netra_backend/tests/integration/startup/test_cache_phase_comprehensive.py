@@ -161,27 +161,22 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         self.logger.info("Testing Redis connection establishment")
         
         # Test direct Redis connection
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,  # Test Redis port
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test basic connectivity
-        pong = await await redis_client.ping()
+        pong = await redis_client.ping()
         assert pong is True, "Redis ping must return True"
         
         # Test basic operations
         test_key = self._generate_test_key("connection_test")
-        await await redis_client.set(test_key, "test_value")
+        await redis_client.set(test_key, "test_value")
         
-        retrieved_value = await await redis_client.get(test_key)
+        retrieved_value = await redis_client.get(test_key)
         assert retrieved_value == "test_value", "Redis must store and retrieve values correctly"
         
         # Test connection info
-        info = await await redis_client.info('server')
+        info = await redis_client.info('server')
         assert 'redis_version' in info, "Redis server info must be accessible"
         
         self.logger.info(f"Redis connection established successfully - version: {info.get('redis_version', 'unknown')}")
@@ -229,17 +224,12 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing Redis health checks and connectivity")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test ping health check
         start_time = time.time()
-        pong = await await redis_client.ping()
+        pong = await redis_client.ping()
         response_time = time.time() - start_time
         
         assert pong is True, "Redis ping health check must succeed"
@@ -247,7 +237,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         
         # Test server info health check
         start_time = time.time()
-        info = await await redis_client.info('server')
+        info = await redis_client.info('server')
         info_response_time = time.time() - start_time
         
         assert isinstance(info, dict), "Redis info must return dictionary"
@@ -255,7 +245,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         assert info_response_time < 0.2, f"Redis info must respond within 200ms, got {info_response_time:.3f}s"
         
         # Test memory info for performance monitoring
-        memory_info = await await redis_client.info('memory')
+        memory_info = await redis_client.info('memory')
         assert 'used_memory' in memory_info, "Redis memory info must be accessible"
         assert 'maxmemory' in memory_info, "Redis max memory info must be accessible"
         
@@ -271,12 +261,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing session storage capabilities")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test session data storage
@@ -296,14 +281,14 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         }
         
         # Store session data
-        await await redis_client.setex(
+        await redis_client.setex(
             session_key,
             3600,  # 1 hour TTL
             json.dumps(session_data)
         )
         
         # Retrieve and verify session data
-        stored_data = await await redis_client.get(session_key)
+        stored_data = await redis_client.get(session_key)
         assert stored_data is not None, "Session data must be stored successfully"
         
         parsed_data = json.loads(stored_data)
@@ -312,7 +297,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         assert 'chat_preferences' in parsed_data, "Session must store nested data"
         
         # Test session TTL
-        ttl = await await redis_client.ttl(session_key)
+        ttl = await redis_client.ttl(session_key)
         assert ttl > 3500, "Session TTL must be set correctly"
         assert ttl <= 3600, "Session TTL must not exceed expected value"
         
@@ -328,12 +313,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing WebSocket connection caching")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test WebSocket connection metadata storage
@@ -353,18 +333,18 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         }
         
         # Store connection data
-        await await redis_client.setex(
+        await redis_client.setex(
             connection_key,
             1800,  # 30 minutes TTL
             json.dumps(connection_data)
         )
         
         # Store user -> connections mapping
-        await await redis_client.sadd(user_connections_key, connection_id)
-        await await redis_client.expire(user_connections_key, 1800)
+        await redis_client.sadd(user_connections_key, connection_id)
+        await redis_client.expire(user_connections_key, 1800)
         
         # Verify connection data storage
-        stored_connection = await await redis_client.get(connection_key)
+        stored_connection = await redis_client.get(connection_key)
         assert stored_connection is not None, "WebSocket connection data must be stored"
         
         connection_info = json.loads(stored_connection)
@@ -373,12 +353,12 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         assert connection_info['status'] == 'active', "Connection status must be tracked"
         
         # Verify user connections mapping
-        user_connections = await await redis_client.smembers(user_connections_key)
+        user_connections = await redis_client.smembers(user_connections_key)
         assert connection_id in user_connections, "User must have connection mapped"
         
         # Test connection lookup performance
         start_time = time.time()
-        lookup_result = await await redis_client.get(connection_key)
+        lookup_result = await redis_client.get(connection_key)
         lookup_time = time.time() - start_time
         
         assert lookup_result is not None, "Connection lookup must succeed"
@@ -396,12 +376,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing agent state caching")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test agent state storage
@@ -427,14 +402,14 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         }
         
         # Store agent state
-        await await redis_client.setex(
+        await redis_client.setex(
             agent_state_key,
             7200,  # 2 hours TTL
             json.dumps(agent_state)
         )
         
         # Verify agent state storage
-        stored_state = await await redis_client.get(agent_state_key)
+        stored_state = await redis_client.get(agent_state_key)
         assert stored_state is not None, "Agent state must be stored successfully"
         
         parsed_state = json.loads(stored_state)
@@ -448,14 +423,14 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         parsed_state['execution_state']['current_step'] = 'report_generation'
         parsed_state['updated_at'] = int(time.time())
         
-        await await redis_client.setex(
+        await redis_client.setex(
             agent_state_key,
             7200,
             json.dumps(parsed_state)
         )
         
         # Verify update
-        updated_state = await await redis_client.get(agent_state_key)
+        updated_state = await redis_client.get(agent_state_key)
         updated_data = json.loads(updated_state)
         assert updated_data['execution_state']['progress'] == 0.8, "Agent state must be updatable"
         assert updated_data['execution_state']['current_step'] == 'report_generation', "Agent progress must be tracked"
@@ -472,12 +447,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache performance requirements")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test basic operation performance
@@ -499,22 +469,22 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
             
             if operation == "SET":
                 start_time = time.time()
-                await await redis_client.set(test_key, json.dumps(test_data))
+                await redis_client.set(test_key, json.dumps(test_data))
                 elapsed = time.time() - start_time
             elif operation == "GET":
-                await await redis_client.set(test_key, json.dumps(test_data))  # Setup
+                await redis_client.set(test_key, json.dumps(test_data))  # Setup
                 start_time = time.time()
-                await await redis_client.get(test_key)
+                await redis_client.get(test_key)
                 elapsed = time.time() - start_time
             elif operation == "EXISTS":
-                await await redis_client.set(test_key, json.dumps(test_data))  # Setup
+                await redis_client.set(test_key, json.dumps(test_data))  # Setup
                 start_time = time.time()
-                await await redis_client.exists(test_key)
+                await redis_client.exists(test_key)
                 elapsed = time.time() - start_time
             elif operation == "DEL":
-                await await redis_client.set(test_key, json.dumps(test_data))  # Setup
+                await redis_client.set(test_key, json.dumps(test_data))  # Setup
                 start_time = time.time()
-                await await redis_client.delete(test_key)
+                await redis_client.delete(test_key)
                 elapsed = time.time() - start_time
             
             assert elapsed < max_time, f"{operation} operation took {elapsed:.4f}s, expected < {max_time}s"
@@ -544,12 +514,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache expiration policies")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test various TTL scenarios
@@ -564,31 +529,31 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
             test_key = self._generate_test_key(f"ttl_test_{data_type}")
             
             # Set with TTL
-            await await redis_client.setex(test_key, ttl_seconds, f"test_data_for_{data_type}")
+            await redis_client.setex(test_key, ttl_seconds, f"test_data_for_{data_type}")
             
             # Verify TTL is set
-            actual_ttl = await await redis_client.ttl(test_key)
+            actual_ttl = await redis_client.ttl(test_key)
             assert actual_ttl > ttl_seconds - 10, f"TTL for {description} must be set correctly"
             assert actual_ttl <= ttl_seconds, f"TTL for {description} must not exceed expected"
             
             # Verify data exists
-            exists = await await redis_client.exists(test_key)
+            exists = await redis_client.exists(test_key)
             assert exists == 1, f"Data for {description} must exist with TTL"
             
             self.logger.info(f"TTL test passed: {description} - TTL: {actual_ttl}s")
         
         # Test TTL update
         update_key = self._generate_test_key("ttl_update_test")
-        await await redis_client.setex(update_key, 100, "initial_data")
+        await redis_client.setex(update_key, 100, "initial_data")
         
         # Update TTL
-        await await redis_client.expire(update_key, 200)
-        updated_ttl = await await redis_client.ttl(update_key)
+        await redis_client.expire(update_key, 200)
+        updated_ttl = await redis_client.ttl(update_key)
         assert updated_ttl > 190, "TTL must be updatable"
         
         # Test persist (remove TTL)
-        await await redis_client.persist(update_key)
-        persistent_ttl = await await redis_client.ttl(update_key)
+        await redis_client.persist(update_key)
+        persistent_ttl = await redis_client.ttl(update_key)
         assert persistent_ttl == -1, "TTL must be removable with persist"
         
         self.logger.info("Cache expiration policies test completed successfully")
@@ -604,14 +569,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         self.logger.info("Testing Redis failover and error handling")
         
         # Test connection with invalid configuration (should handle gracefully)
-        invalid_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,  # Valid port for this test
-            db=0,
-            decode_responses=True,
-            socket_connect_timeout=1,  # Short timeout
-            socket_timeout=1
-        )
+        invalid_client = await get_redis_client()
         self.redis_clients.append(invalid_client)
         
         # Test that client handles connection properly
@@ -623,12 +581,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
             self.logger.info(f"Redis connection failed as expected: {e}")
         
         # Test error handling for invalid operations
-        valid_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        valid_client = await get_redis_client()
         self.redis_clients.append(valid_client)
         
         try:
@@ -664,12 +617,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache consistency for multi-user scenarios")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test concurrent user operations
@@ -688,10 +636,10 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
             }
             
             # Set user session
-            await await redis_client.setex(session_key, 300, json.dumps(user_data))
+            await redis_client.setex(session_key, 300, json.dumps(user_data))
             
             # Verify data was set correctly
-            stored_data = await await redis_client.get(session_key)
+            stored_data = await redis_client.get(session_key)
             parsed_data = json.loads(stored_data)
             
             assert parsed_data['user_id'] == user_id, f"User ID consistency failed for {user_id}"
@@ -710,7 +658,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
             session_key = f"multi_user_test:session:{user_id}"
             
             # Verify data consistency
-            final_data = await await redis_client.get(session_key)
+            final_data = await redis_client.get(session_key)
             assert final_data is not None, f"Session data must persist for {user_id}"
             
             parsed_final = json.loads(final_data)
@@ -721,14 +669,14 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         counter_key = self._generate_test_key("atomic_counter")
         
         async def atomic_increment_operation():
-            return await await redis_client.incr(counter_key)
+            return await redis_client.incr(counter_key)
         
         # Execute concurrent atomic operations
         atomic_tasks = [atomic_increment_operation() for _ in range(10)]
         atomic_results = await asyncio.gather(*atomic_tasks)
         
         # Verify atomic consistency
-        final_counter = await await redis_client.get(counter_key)
+        final_counter = await redis_client.get(counter_key)
         assert int(final_counter) == 10, "Atomic operations must maintain consistency"
         assert len(set(atomic_results)) == len(atomic_results), "All atomic operations must return unique values"
         
@@ -744,16 +692,11 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache memory management")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Get initial memory usage
-        initial_info = await await redis_client.info('memory')
+        initial_info = await redis_client.info('memory')
         initial_memory = initial_info['used_memory']
         
         self.logger.info(f"Initial Redis memory usage: {initial_memory} bytes")
@@ -770,10 +713,10 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         for i in range(100):
             key = self._generate_test_key(f"memory_test_{i}")
             test_keys.extend([key])
-            await await redis_client.setex(key, 300, large_data)
+            await redis_client.setex(key, 300, large_data)
         
         # Check memory usage after data insertion
-        after_insert_info = await await redis_client.info('memory')
+        after_insert_info = await redis_client.info('memory')
         after_insert_memory = after_insert_info['used_memory']
         memory_increase = after_insert_memory - initial_memory
         
@@ -783,26 +726,26 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         # Test memory cleanup with TTL expiration
         # Set very short TTL for cleanup test
         cleanup_key = self._generate_test_key("cleanup_test")
-        await await redis_client.setex(cleanup_key, 1, large_data)  # 1 second TTL
+        await redis_client.setex(cleanup_key, 1, large_data)  # 1 second TTL
         
         # Wait for expiration
         await asyncio.sleep(2)
         
         # Verify key expired
-        exists = await await redis_client.exists(cleanup_key)
+        exists = await redis_client.exists(cleanup_key)
         assert exists == 0, "Keys with TTL must expire and be cleaned up"
         
         # Test manual cleanup
         cleanup_keys = test_keys[:50]  # Clean up half the keys
-        await await redis_client.delete(*cleanup_keys)
+        await redis_client.delete(*cleanup_keys)
         
         # Verify cleanup
         for key in cleanup_keys:
-            exists = await await redis_client.exists(key)
+            exists = await redis_client.exists(key)
             assert exists == 0, f"Manually deleted key {key} must not exist"
         
         # Check memory after cleanup
-        after_cleanup_info = await await redis_client.info('memory')
+        after_cleanup_info = await redis_client.info('memory')
         after_cleanup_memory = after_cleanup_info['used_memory']
         
         assert after_cleanup_memory < after_insert_memory, "Memory usage must decrease after cleanup"
@@ -819,12 +762,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache data serialization")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Test complex data structures
@@ -879,10 +817,10 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
             
             # Serialize and store
             serialized = json.dumps(original_data, default=str)  # Handle datetime/timestamp objects
-            await await redis_client.setex(test_key, 300, serialized)
+            await redis_client.setex(test_key, 300, serialized)
             
             # Retrieve and deserialize
-            retrieved_serialized = await await redis_client.get(test_key)
+            retrieved_serialized = await redis_client.get(test_key)
             assert retrieved_serialized is not None, f"Serialized data for {test_case['name']} must be stored"
             
             deserialized_data = json.loads(retrieved_serialized)
@@ -919,12 +857,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         """
         self.logger.info("Testing cache readiness for chat operations")
         
-        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(
-            host='localhost',
-            port=6381,
-            db=0,
-            decode_responses=True
-        )
+        redis_client = await get_redis_client()
         self.redis_clients.append(redis_client)
         
         # Simulate complete chat session caching workflow
@@ -943,7 +876,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         }
         
         start_time = time.time()
-        await await redis_client.setex(session_key, 3600, json.dumps(session_data))
+        await redis_client.setex(session_key, 3600, json.dumps(session_data))
         session_write_time = time.time() - start_time
         
         assert session_write_time < 0.01, f"Session write must be fast (<10ms), got {session_write_time:.4f}s"
@@ -959,7 +892,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         }
         
         start_time = time.time()
-        await await redis_client.setex(ws_key, 1800, json.dumps(ws_data))
+        await redis_client.setex(ws_key, 1800, json.dumps(ws_data))
         ws_write_time = time.time() - start_time
         
         assert ws_write_time < 0.01, f"WebSocket write must be fast (<10ms), got {ws_write_time:.4f}s"
@@ -978,7 +911,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         }
         
         start_time = time.time()
-        await await redis_client.setex(agent_key, 7200, json.dumps(agent_data))
+        await redis_client.setex(agent_key, 7200, json.dumps(agent_data))
         agent_write_time = time.time() - start_time
         
         assert agent_write_time < 0.01, f"Agent state write must be fast (<10ms), got {agent_write_time:.4f}s"
@@ -992,7 +925,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         
         for key, data_type in retrieval_tests:
             start_time = time.time()
-            data = await await redis_client.get(key)
+            data = await redis_client.get(key)
             retrieval_time = time.time() - start_time
             
             assert data is not None, f"{data_type} data must be retrievable"
@@ -1013,14 +946,14 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
             self.test_keys.append(test_key)
             
             # Write operation
-            await await redis_client.setex(
+            await redis_client.setex(
                 test_key, 
                 300, 
                 json.dumps({'user_id': test_user_id, 'timestamp': time.time()})
             )
             
             # Read operation
-            data = await await redis_client.get(test_key)
+            data = await redis_client.get(test_key)
             return json.loads(data)['user_id'] == test_user_id
         
         # Execute concurrent operations
@@ -1049,7 +982,7 @@ class TestCachePhaseComprehensive(BaseIntegrationTest):
         
         # Verify pipeline results
         for i, key in enumerate(pipeline_keys):
-            value = await await redis_client.get(key)
+            value = await redis_client.get(key)
             assert value == f"pipeline_value_{i}", f"Pipeline operation {i} must succeed"
         
         self.logger.info(
