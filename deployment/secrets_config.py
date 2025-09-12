@@ -44,6 +44,7 @@ class SecretConfig:
                 "JWT_SECRET_KEY",      # CRITICAL: Primary JWT secret key
                 "JWT_SECRET_STAGING",  # CRITICAL: Environment-specific JWT secret
                 "SECRET_KEY",          # CRITICAL: Backend requires SECRET_KEY
+                "SESSION_SECRET_KEY",  # CRITICAL: Required for session management middleware
                 "SERVICE_SECRET",
                 "SERVICE_ID",          # CRITICAL: Required for inter-service auth with auth service
                 "FERNET_KEY"
@@ -86,6 +87,7 @@ class SecretConfig:
                 "JWT_SECRET_KEY",      # CRITICAL: Primary JWT secret key
                 "JWT_SECRET_STAGING",  # CRITICAL: Environment-specific JWT secret
                 "SECRET_KEY",          # CRITICAL: Auth service requires SECRET_KEY
+                "SESSION_SECRET_KEY",  # CRITICAL: Required for session management middleware
                 "SERVICE_SECRET",
                 "SERVICE_ID"
             ],
@@ -126,6 +128,7 @@ class SecretConfig:
         "JWT_SECRET_KEY": "jwt-secret-staging",     # CRITICAL: Same as JWT_SECRET for consistency
         "JWT_SECRET_STAGING": "jwt-secret-staging", # CRITICAL: Environment-specific name
         "SECRET_KEY": "secret-key-staging",         # CRITICAL: Maps to secret-key-staging
+        "SESSION_SECRET_KEY": "SESSION_SECRET_KEY", # CRITICAL: Maps directly to GSM secret name
         "SERVICE_SECRET": "service-secret-staging",
         "SERVICE_ID": "service-id-staging",
         "FERNET_KEY": "fernet-key-staging",
@@ -160,6 +163,7 @@ class SecretConfig:
     CRITICAL_SECRETS: Dict[str, List[str]] = {
         "backend": [
             "SECRET_KEY",      # CRITICAL: Required for encryption
+            "SESSION_SECRET_KEY",  # CRITICAL: Required for session middleware
             "JWT_SECRET",      # CRITICAL: Required for JWT tokens (auth validator)
             "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens (SSOT)
             "SERVICE_SECRET",  # CRITICAL: Required for inter-service auth
@@ -168,6 +172,7 @@ class SecretConfig:
         ],
         "auth": [
             "SECRET_KEY",      # CRITICAL: Required for auth service
+            "SESSION_SECRET_KEY",  # CRITICAL: Required for session middleware
             "JWT_SECRET",      # CRITICAL: Required for JWT tokens (auth validator)
             "JWT_SECRET_KEY",  # CRITICAL: Required for JWT tokens (SSOT)
             "SERVICE_SECRET",  # CRITICAL: Required for inter-service auth
@@ -300,6 +305,7 @@ class SecretConfig:
         """
         explanations = {
             "SECRET_KEY": "General encryption key for the service (CRITICAL - required for startup)",
+            "SESSION_SECRET_KEY": "Secret key for session management middleware (CRITICAL - required for startup)",
             "JWT_SECRET_KEY": "Key for signing JWT tokens (CRITICAL - required for authentication)",
             "SERVICE_SECRET": "Secret for inter-service authentication",
             "POSTGRES_PASSWORD": "PostgreSQL database password (CRITICAL - required for database access)",
