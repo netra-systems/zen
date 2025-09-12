@@ -914,8 +914,9 @@ class WebSocketSSOTRouter:
     async def _create_websocket_manager(self, user_context):
         """Create WebSocket manager with emergency fallback."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import create_websocket_manager
-            return create_websocket_manager(user_context)
+            # SSOT MIGRATION: Direct WebSocketManager instantiation replaces factory pattern
+            manager = await get_websocket_manager(user_context)
+            return manager
         except Exception as e:
             logger.error(f"WebSocket manager creation failed: {e}")
             return self._create_emergency_websocket_manager(user_context)
@@ -1391,9 +1392,9 @@ class WebSocketSSOTRouter:
     async def websocket_health_check(self):
         """WebSocket health check endpoint."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = get_websocket_manager_factory()
+            factory = None  # SSOT MIGRATION: Factory pattern deprecated - using direct manager access
             health_status = {
                 "status": "healthy",
                 "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -1422,9 +1423,9 @@ class WebSocketSSOTRouter:
     async def get_websocket_config(self):
         """Get WebSocket configuration."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = get_websocket_manager_factory()
+            factory = None  # SSOT MIGRATION: Factory pattern deprecated - using direct manager access
             
             return {
                 "websocket_config": {
@@ -1448,9 +1449,9 @@ class WebSocketSSOTRouter:
     async def websocket_detailed_stats(self):
         """Get detailed WebSocket statistics."""
         try:
-            from netra_backend.app.websocket_core.websocket_manager_factory import get_websocket_manager_factory
+            from netra_backend.app.websocket_core.websocket_manager import get_websocket_manager
             
-            factory = get_websocket_manager_factory()
+            factory = None  # SSOT MIGRATION: Factory pattern deprecated - using direct manager access
             message_router = get_message_router()
             
             return {
