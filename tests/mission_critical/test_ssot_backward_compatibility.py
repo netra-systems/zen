@@ -191,7 +191,7 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
-        def modern_pattern_operations(context_id):
+        async def modern_pattern_operations(context_id):
             """Simulate modern pattern operations with strict isolation."""
             failures = []
             
@@ -259,17 +259,24 @@ class TestSSOTBackwardCompatibility:
                     'error': str(e)
                 }]
         
+        # Create wrapper functions for ThreadPoolExecutor since it can't handle async functions directly
+        def run_legacy_operations(context_id):
+            return asyncio.run(legacy_pattern_operations(context_id))
+            
+        def run_modern_operations(context_id):
+            return asyncio.run(modern_pattern_operations(context_id))
+        
         # Execute concurrent legacy and modern operations
         with ThreadPoolExecutor(max_workers=num_legacy_contexts + num_modern_contexts) as executor:
             # Submit legacy operations
             legacy_futures = {
-                executor.submit(legacy_pattern_operations, context_id): f"legacy_{context_id}"
+                executor.submit(run_legacy_operations, context_id): f"legacy_{context_id}"
                 for context_id in range(num_legacy_contexts)
             }
             
             # Submit modern operations
             modern_futures = {
-                executor.submit(modern_pattern_operations, context_id): f"modern_{context_id}"
+                executor.submit(run_modern_operations, context_id): f"modern_{context_id}"
                 for context_id in range(num_modern_contexts)
             }
             
