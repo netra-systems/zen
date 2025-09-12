@@ -64,9 +64,36 @@ Duplicate and conflicting WebSocket URL environment variables create configurati
 - **Post-SSOT Fix**: 15 new SSOT tests pass, 25+ Golden Path tests pass
 - **Business Protection**: $500K+ ARR Golden Path validated via staging E2E
 
-### ⏳ Step 2: Execute Test Plan (PENDING)
-- [ ] Create new SSOT tests for WebSocket configuration
-- [ ] Validate test execution (non-docker)
+### ✅ Step 2: Execute Test Plan (COMPLETED)
+- [x] Create new SSOT tests for WebSocket configuration 
+- [x] Validate test execution (non-docker)
+
+#### New SSOT Tests Created:
+**Test Distribution Implemented:**
+- **Unit Tests**: 4 test classes (`tests/unit/websocket/ssot/`)
+  - `TestWebSocketURLSSOTValidation` - Core SSOT violation detection
+  - `TestWebSocketConfigurationSSOTConsistency` - Configuration consistency
+- **Integration Tests**: 2 test classes (`tests/integration/websocket/ssot/`)
+  - `TestWebSocketSSOTServiceIntegration` - Service integration
+  - `TestWebSocketSSOTConnectionValidation` - Real connection tests
+- **E2E Tests**: 1 test class (`tests/e2e/websocket/ssot/`)
+  - `TestWebSocketSSOTGoldenPathProtection` - Golden Path validation
+
+**Test Execution Commands Ready:**
+```bash
+# Unit SSOT validation
+python tests/unified_test_runner.py --category unit --pattern "*websocket*ssot*"
+
+# Integration with real services  
+python tests/unified_test_runner.py --category integration --real-services --env staging --pattern "*websocket*ssot*"
+
+# E2E Golden Path protection
+python tests/unified_test_runner.py --category e2e --env staging --pattern "*golden_path*websocket*"
+```
+
+**Expected Test Behavior:**
+- **Currently**: Tests MUST FAIL (detecting dual variables by design)
+- **After SSOT Fix**: Tests MUST PASS (confirming consolidation successful)
 
 ### ⏳ Step 3: Plan SSOT Remediation (PENDING) 
 - [ ] Plan consolidation to single canonical variable
