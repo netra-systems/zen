@@ -41,10 +41,6 @@ class TestAgentExecutionCore(BaseIntegrationTest):
         super().setup_method()
         self._setUp()
     
-    def setUp(self):
-        """Compatibility method for BaseIntegrationTest."""
-        self._setUp()
-        
     def _setUp(self):
         """Set up test fixtures."""
         self.mock_registry = Mock()

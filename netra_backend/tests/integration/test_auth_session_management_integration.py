@@ -56,8 +56,8 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         
         # Connect to test Redis for session verification
         try:
-            self.redis_client = redis.Redis(host='localhost', port=6381, db=0, decode_responses=True)
-            self.redis_client.ping()  # Verify connection
+            self.redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host='localhost', port=6381, db=0, decode_responses=True)
+            self.await redis_client.ping()  # Verify connection
         except Exception as e:
             pytest.skip(f"Redis not available for integration tests: {e}")
         
@@ -66,9 +66,9 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         # Cleanup test data from Redis
         try:
             # Clean up test keys
-            test_keys = self.redis_client.keys("test_session:*")
+            test_keys = self.await redis_client.keys("test_session:*")
             if test_keys:
-                self.redis_client.delete(*test_keys)
+                self.await redis_client.delete(*test_keys)
         except:
             pass  # Cleanup is best effort
         
@@ -223,17 +223,17 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         }
         
         # Store in Redis with expiration
-        self.redis_client.hset(session_key, mapping=session_data)
-        self.redis_client.expire(session_key, 300)  # 5 minute expiry
+        self.await redis_client.hset(session_key, mapping=session_data)
+        self.await redis_client.expire(session_key, 300)  # 5 minute expiry
         
         # Assert: Session data must be stored and retrievable from Redis
-        stored_data = self.redis_client.hgetall(session_key)
+        stored_data = self.await redis_client.hgetall(session_key)
         assert stored_data is not None, "Session data must be stored in Redis"
         assert stored_data["user_id"] == user_id, "Stored session must contain correct user_id"
         assert stored_data["email"] == email, "Stored session must contain correct email"
         
         # Verify Redis expiration is set
-        ttl = self.redis_client.ttl(session_key)
+        ttl = self.await redis_client.ttl(session_key)
         assert ttl > 0, f"Session key must have expiration set, got TTL: {ttl}"
         assert ttl <= 300, f"Session TTL must not exceed set expiration, got: {ttl}"
         
@@ -241,9 +241,9 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         await asyncio.sleep(1)  # Ensure time difference
         
         updated_access_time = datetime.now(timezone.utc).isoformat()
-        self.redis_client.hset(session_key, "last_accessed", updated_access_time)
+        self.await redis_client.hset(session_key, "last_accessed", updated_access_time)
         
-        updated_data = self.redis_client.hgetall(session_key)
+        updated_data = self.await redis_client.hgetall(session_key)
         assert updated_data["last_accessed"] != session_data["last_accessed"], (
             "Session last_accessed time must be updated on access"
         )
@@ -308,8 +308,8 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
             }
             
             try:
-                self.redis_client.hset(session_key, mapping=session_redis_data)
-                self.redis_client.expire(session_key, 180)  # 3 minute expiry
+                self.await redis_client.hset(session_key, mapping=session_redis_data)
+                self.await redis_client.expire(session_key, 180)  # 3 minute expiry
                 redis_success = True
             except Exception as e:
                 redis_success = False
@@ -339,7 +339,7 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         # Verify session isolation - each user's Redis data is separate
         for session in user_sessions:
             session_key = f"test_session:concurrent:{session['user_id']}"
-            stored_data = self.redis_client.hgetall(session_key)
+            stored_data = self.await redis_client.hgetall(session_key)
             
             assert stored_data is not None, f"Session data must exist for user {session['index']}"
             assert stored_data["user_id"] == session["user_id"], (
@@ -387,14 +387,14 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
             }
             
             # Store session data
-            self.redis_client.hset(session_key, mapping=session_data)
+            self.await redis_client.hset(session_key, mapping=session_data)
             
             if config["expiry_seconds"] > 0:
                 # Set expiration for active sessions
-                self.redis_client.expire(session_key, config["expiry_seconds"])
+                self.await redis_client.expire(session_key, config["expiry_seconds"])
             else:
                 # Set very short expiration for expired sessions to simulate cleanup
-                self.redis_client.expire(session_key, 1)
+                self.await redis_client.expire(session_key, 1)
             
             created_keys.append(session_key)
         
@@ -404,8 +404,8 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         # Act: Check which sessions still exist after expiration
         existing_sessions = []
         for i, session_key in enumerate(created_keys):
-            exists = self.redis_client.exists(session_key)
-            ttl = self.redis_client.ttl(session_key) if exists else -2
+            exists = self.await redis_client.exists(session_key)
+            ttl = self.await redis_client.ttl(session_key) if exists else -2
             
             existing_sessions.append({
                 "config": session_configs[i],
@@ -444,6 +444,6 @@ class TestAuthSessionManagementIntegration(BaseIntegrationTest):
         # Clean up test data
         for session_key in created_keys:
             try:
-                self.redis_client.delete(session_key)
+                self.await redis_client.delete(session_key)
             except:
                 pass  # Best effort cleanup

@@ -612,8 +612,8 @@ class TestWebSocketIDRoutingIntegrity(BaseIntegrationTest):
         
         # Test Redis connection state storage (if available)
         try:
-            redis_client = redis.Redis(host="localhost", port=6381, decode_responses=True)
-            await redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host="localhost", port=6381, decode_responses=True)
+            await await redis_client.ping()
             
             # Store connection states with typed IDs
             for connection_info in connection_infos:
@@ -626,13 +626,13 @@ class TestWebSocketIDRoutingIntegrity(BaseIntegrationTest):
                     "message_count": connection_info.message_count
                 }
                 
-                await redis_client.hset(state_key, mapping=state_data)
-                await redis_client.expire(state_key, 3600)  # 1 hour TTL
+                await await redis_client.hset(state_key, mapping=state_data)
+                await await redis_client.expire(state_key, 3600)  # 1 hour TTL
             
             # Validate connection state isolation
             for connection_info in connection_infos:
                 state_key = f"websocket_connection:{connection_info.websocket_id}"
-                stored_state = await redis_client.hgetall(state_key)
+                stored_state = await await redis_client.hgetall(state_key)
                 
                 if stored_state:
                     stored_user_id = UserID(stored_state["user_id"])
@@ -653,9 +653,9 @@ class TestWebSocketIDRoutingIntegrity(BaseIntegrationTest):
             # Cleanup connection states
             for connection_info in connection_infos:
                 state_key = f"websocket_connection:{connection_info.websocket_id}"
-                await redis_client.delete(state_key)
+                await await redis_client.delete(state_key)
             
-            await redis_client.close()
+            await await redis_client.close()
             
             self.logger.info("WebSocket connection state management validation passed")
             

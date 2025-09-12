@@ -23,6 +23,7 @@ from enum import Enum
 
 from test_framework.ssot.base_test_case import SSotBaseTestCase
 from shared.types.core_types import UserID, ThreadID, AgentID, ExecutionID
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 
 class AgentType(Enum):
@@ -542,6 +543,15 @@ class MockAgentOrchestrator:
 @pytest.mark.golden_path
 @pytest.mark.unit
 class TestAgentOrchestrationLogic(SSotBaseTestCase):
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Test agent orchestration business logic validation."""
     
     def setup_method(self, method=None):

@@ -60,7 +60,7 @@ class TestRedisConnectionIssues:
                 
                 # Try to connect to Redis
                 redis_client = redis.from_url(redis_url)
-                await redis_client.ping()
+                await await redis_client.ping()
                 
                 pytest.fail("Expected Redis connection to fail when service not provisioned")
                 
@@ -105,7 +105,7 @@ class TestRedisConnectionIssues:
                     # Try to create Redis client with malformed URL
                     if malformed_url.strip():
                         redis_client = redis.from_url(malformed_url.strip())
-                        await redis_client.ping()
+                        await await redis_client.ping()
                     else:
                         raise ValueError("Empty Redis URL")
                     
@@ -140,7 +140,7 @@ class TestRedisConnectionIssues:
             try:
                 # Try to connect with wrong credentials
                 redis_client = redis.from_url(wrong_password_redis_url)
-                await redis_client.ping()
+                await await redis_client.ping()
                 
                 pytest.fail("Expected Redis authentication failure with wrong password")
                 
@@ -180,8 +180,8 @@ class TestRedisConnectionIssues:
                 mock_pool.side_effect = ConnectionError("Redis connection pool initialization failed")
                 
                 try:
-                    redis_client = redis.Redis(connection_pool=mock_pool())
-                    await redis_client.ping()
+                    redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=mock_pool())
+                    await await redis_client.ping()
                     
                     pytest.fail("Expected Redis connection pool initialization to fail")
                     
@@ -220,11 +220,11 @@ class TestRedisConnectionIssues:
                 
                 # Test basic operations that should fail
                 operations = [
-                    ("ping", lambda: redis_client.ping()),
-                    ("set", lambda: redis_client.set("test_key", "test_value")),
-                    ("get", lambda: redis_client.get("test_key")),
-                    ("delete", lambda: redis_client.delete("test_key")),
-                    ("exists", lambda: redis_client.exists("test_key")),
+                    ("ping", lambda: await redis_client.ping()),
+                    ("set", lambda: await redis_client.set("test_key", "test_value")),
+                    ("get", lambda: await redis_client.get("test_key")),
+                    ("delete", lambda: await redis_client.delete("test_key")),
+                    ("exists", lambda: await redis_client.exists("test_key")),
                 ]
                 
                 for op_name, operation in operations:
@@ -263,7 +263,7 @@ class TestRedisConnectionIssues:
                 
                 # This should timeout or fail quickly
                 start_time = asyncio.get_event_loop().time()
-                await redis_client.ping()
+                await await redis_client.ping()
                 elapsed = asyncio.get_event_loop().time() - start_time
                 
                 if elapsed > 5:
@@ -302,7 +302,7 @@ class TestRedisConnectionIssues:
             try:
                 # Try to create cluster client connecting to single instance
                 redis_client = redis.from_url(cluster_redis_url)
-                await redis_client.ping()
+                await await redis_client.ping()
                 
                 print("✅ Redis connection succeeded (single instance mode)")
                 
@@ -375,7 +375,7 @@ class TestRedisConnectionIssues:
             try:
                 # Try to connect with SSL to non-SSL Redis
                 redis_client = redis.from_url(ssl_redis_url)
-                await redis_client.ping()
+                await await redis_client.ping()
                 
                 print("✅ Redis SSL connection succeeded (SSL properly configured)")
                 
@@ -416,7 +416,7 @@ class TestRedisConnectionIssues:
                 redis_client = redis.from_url("redis://localhost:6379/0")
                 
                 # Check memory configuration
-                info = await redis_client.info()
+                info = await await redis_client.info()
                 used_memory = info.get('used_memory', 0)
                 max_memory = info.get('maxmemory', 0)
                 
@@ -424,7 +424,7 @@ class TestRedisConnectionIssues:
                     print(f"⚠️ Redis memory pressure detected: {used_memory}/{max_memory} bytes")
                 
                 # Try to perform operation that might fail due to memory
-                await redis_client.set("test_key", "test_value")
+                await await redis_client.set("test_key", "test_value")
                 
                 pytest.fail("Expected Redis operation to fail due to memory issues")
                 

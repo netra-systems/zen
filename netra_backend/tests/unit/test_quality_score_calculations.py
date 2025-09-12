@@ -69,7 +69,7 @@ class TestQualityScoreCalculations(BaseTestCase):
         ```python
         import redis
         pool = redis.ConnectionPool(host='localhost', port=6379, socket_timeout=5)
-        client = redis.Redis(connection_pool=pool)
+        client = await get_redis_client()  # MIGRATED: was redis.Redis(connection_pool=pool)
         ```
         
         Set max_connections=100 for high-throughput scenarios.

@@ -7,6 +7,7 @@ APPROACH: Extract and test the core threshold checking logic directly
 Business Impact: $500K+ ARR at risk from legitimate users being blocked
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import time
 import unittest
 import hashlib
@@ -20,7 +21,7 @@ _test_token_usage_stats = {
 }
 
 
-class TestIssue465IsolatedThresholdLogic(unittest.TestCase):
+class TestIssue465IsolatedThresholdLogic(SSotBaseTestCase):
     """
     Isolated tests for the token reuse threshold logic
     

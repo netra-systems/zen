@@ -33,6 +33,7 @@ import uuid
 
 from shared.types.core_types import UserID, AgentID, RunID
 from shared.isolated_environment import get_env
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # Business Logic Classes (SSOT for agent orchestration)
 
@@ -484,6 +485,15 @@ class AgentOrchestrator:
 @pytest.mark.golden_path
 @pytest.mark.unit
 class TestAIAgentOrchestrationBusinessLogic:
+
+    def create_user_context(self) -> UserExecutionContext:
+        """Create isolated user execution context for golden path tests"""
+        return UserExecutionContext.create_for_user(
+            user_id="test_user",
+            thread_id="test_thread",
+            run_id="test_run"
+        )
+
     """Test AI agent orchestration business logic that drives value delivery."""
     
     def setup_method(self):

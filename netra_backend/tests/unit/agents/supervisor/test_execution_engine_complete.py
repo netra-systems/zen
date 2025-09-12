@@ -284,17 +284,6 @@ class TestExecutionEngineConstruction(SSotAsyncTestCase):
 class TestExecutionEngineInitialization(SSotAsyncTestCase):
     """Test ExecutionEngine initialization and component setup."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="init_user",
-            thread_id="init_thread",
-            run_id="init_run"
-        )
-        
     def create_engine(self) -> ExecutionEngine:
         """Helper to create ExecutionEngine for tests."""
         return ExecutionEngine._init_from_factory(
@@ -478,22 +467,6 @@ class TestExecutionEngineInitialization(SSotAsyncTestCase):
 class TestExecutionEngineValidation(SSotAsyncTestCase):
     """Test ExecutionEngine context validation functionality."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="validation_user",
-            thread_id="validation_thread",
-            run_id="validation_run"
-        )
-        self.engine = ExecutionEngine._init_from_factory(
-            registry=self.registry,
-            websocket_bridge=self.websocket_bridge,
-            user_context=self.user_context
-        )
-        
     def test_valid_execution_context_passes(self):
         """Test that valid execution context passes validation."""
         context = AgentExecutionContext(
@@ -662,28 +635,6 @@ class TestExecutionEngineValidation(SSotAsyncTestCase):
 class TestExecutionEngineWebSocketEvents(SSotAsyncTestCase):
     """Test ExecutionEngine WebSocket event emission functionality."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="websocket_user",
-            thread_id="websocket_thread",
-            run_id="websocket_run"
-        )
-        self.engine = ExecutionEngine._init_from_factory(
-            registry=self.registry,
-            websocket_bridge=self.websocket_bridge,
-            user_context=self.user_context
-        )
-        self.context = AgentExecutionContext(
-            run_id="websocket_run",
-            thread_id="websocket_thread",
-            user_id="websocket_user",
-            agent_name="test_agent"
-        )
-        
     async def test_send_agent_thinking_event(self):
         """Test sending agent thinking WebSocket event."""
         thought = "Processing user request..."
@@ -858,18 +809,6 @@ class TestExecutionEngineWebSocketEvents(SSotAsyncTestCase):
 class TestExecutionEngineAgentExecution(SSotAsyncTestCase):
     """Test ExecutionEngine single agent execution functionality."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="execution_user",
-            thread_id="execution_thread", 
-            run_id="execution_run"
-        )
-        self.mock_agent_core = MockAgentCore(should_succeed=True, execution_time=100)
-        
     def create_engine_with_mock_core(self) -> ExecutionEngine:
         """Create engine with mocked agent core."""
         engine = ExecutionEngine._init_from_factory(
@@ -1070,22 +1009,6 @@ class TestExecutionEngineAgentExecution(SSotAsyncTestCase):
 class TestExecutionEnginePipelineExecution(SSotAsyncTestCase):
     """Test ExecutionEngine pipeline execution functionality."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="pipeline_user",
-            thread_id="pipeline_thread",
-            run_id="pipeline_run"
-        )
-        self.engine = ExecutionEngine._init_from_factory(
-            registry=self.registry,
-            websocket_bridge=self.websocket_bridge,
-            user_context=self.user_context
-        )
-        
     def create_pipeline_steps(self, count: int, strategy: AgentExecutionStrategy = AgentExecutionStrategy.SEQUENTIAL) -> List[PipelineStep]:
         """Create test pipeline steps."""
         steps = []
@@ -1274,22 +1197,6 @@ class TestExecutionEnginePipelineExecution(SSotAsyncTestCase):
 class TestExecutionEngineErrorHandling(SSotAsyncTestCase):
     """Test ExecutionEngine error handling and recovery functionality."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="error_user",
-            thread_id="error_thread",
-            run_id="error_run"
-        )
-        self.engine = ExecutionEngine._init_from_factory(
-            registry=self.registry,
-            websocket_bridge=self.websocket_bridge,
-            user_context=self.user_context
-        )
-        
     async def test_execution_error_handling(self):
         """Test execution error handling with user notification."""
         context = AgentExecutionContext(
@@ -1454,22 +1361,6 @@ class TestExecutionEngineErrorHandling(SSotAsyncTestCase):
 class TestExecutionEnginePerformanceAndStats(SSotAsyncTestCase):
     """Test ExecutionEngine performance monitoring and statistics."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="perf_user",
-            thread_id="perf_thread",
-            run_id="perf_run"
-        )
-        self.engine = ExecutionEngine._init_from_factory(
-            registry=self.registry,
-            websocket_bridge=self.websocket_bridge,
-            user_context=self.user_context
-        )
-        
     async def test_execution_stats_collection(self):
         """Test execution statistics collection."""
         # Get initial stats
@@ -1615,17 +1506,6 @@ class TestExecutionEnginePerformanceAndStats(SSotAsyncTestCase):
 class TestExecutionEngineFactoryMethods(SSotAsyncTestCase):
     """Test ExecutionEngine factory methods and creation patterns."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="factory_user",
-            thread_id="factory_thread",
-            run_id="factory_run"
-        )
-        
     def test_create_request_scoped_engine_factory(self):
         """Test create_request_scoped_engine factory method."""
         engine = create_request_scoped_engine(
@@ -1706,12 +1586,6 @@ class TestExecutionEngineFactoryMethods(SSotAsyncTestCase):
 class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
     """Test ExecutionEngine user isolation and context management."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        
     def test_user_execution_context_integration(self):
         """Test UserExecutionContext integration with ExecutionEngine."""
         user_context = UserExecutionContext.from_request(
@@ -1945,22 +1819,6 @@ class TestExecutionEngineUserIsolation(SSotAsyncTestCase):
 class TestExecutionEngineShutdownAndCleanup(SSotAsyncTestCase):
     """Test ExecutionEngine shutdown and cleanup functionality."""
     
-    def setUp(self):
-        super().setUp()
-        self.env = get_env()
-        self.registry = MockAgentRegistry()
-        self.websocket_bridge = MockWebSocketBridge()
-        self.user_context = UserExecutionContext.from_request(
-            user_id="cleanup_user",
-            thread_id="cleanup_thread",
-            run_id="cleanup_run"
-        )
-        self.engine = ExecutionEngine._init_from_factory(
-            registry=self.registry,
-            websocket_bridge=self.websocket_bridge,
-            user_context=self.user_context
-        )
-        
     async def test_engine_shutdown(self):
         """Test ExecutionEngine shutdown process."""
         # Add some active runs to verify cleanup

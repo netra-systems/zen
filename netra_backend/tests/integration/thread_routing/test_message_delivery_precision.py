@@ -103,8 +103,8 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
         redis_port = int(env.get("REDIS_PORT", "6381"))
         
         try:
-            redis_client = redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
-            await redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=redis_host, port=redis_port, decode_responses=True)
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available at {redis_host}:{redis_port} - {e}")
         
@@ -413,7 +413,7 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
         self.logger.info(f"  Users tested: {user_count}")
         self.logger.info(f"  Precision signatures verified: {len(precision_signatures)}")
         
-        await redis_client.close()
+        await await redis_client.close()
         await db_session.close()
 
     @pytest.mark.integration
@@ -433,11 +433,11 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
         
         # Setup Redis connection
         env = get_env()
-        redis_client = redis.Redis(host=env.get("REDIS_HOST", "localhost"), 
+        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=env.get("REDIS_HOST", "localhost"), 
                                  port=int(env.get("REDIS_PORT", "6381")), 
                                  decode_responses=True)
         try:
-            await redis_client.ping()
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available: {e}")
         
@@ -689,7 +689,7 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
         
         self.logger.info(f"Concurrent message delivery load test completed successfully")
         
-        await redis_client.close()
+        await await redis_client.close()
         await db_session.close()
 
     @pytest.mark.integration
@@ -710,11 +710,11 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
         
         # Setup Redis connection
         env = get_env()
-        redis_client = redis.Redis(host=env.get("REDIS_HOST", "localhost"), 
+        redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host=env.get("REDIS_HOST", "localhost"), 
                                  port=int(env.get("REDIS_PORT", "6381")), 
                                  decode_responses=True)
         try:
-            await redis_client.ping()
+            await await redis_client.ping()
         except Exception as e:
             pytest.skip(f"Redis not available: {e}")
         
@@ -767,11 +767,11 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
             
             # Store WebSocket state in Redis
             connection_key = f"websocket:connection:{websocket_id}"
-            await redis_client.hset(connection_key, mapping=connection_info)
+            await await redis_client.hset(connection_key, mapping=connection_info)
             
             # Add to thread mapping
             thread_mapping_key = f"websocket:thread_mapping:{thread.id}"
-            await redis_client.sadd(thread_mapping_key, str(websocket_id))
+            await await redis_client.sadd(thread_mapping_key, str(websocket_id))
             
             websocket_connections[thread.id] = {
                 "websocket_id": websocket_id,
@@ -810,7 +810,7 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
                 # Stage 2: WebSocket message processing and validation
                 # Verify WebSocket connection exists and is valid
                 connection_key = f"websocket:connection:{websocket_info['websocket_id']}"
-                stored_connection = await redis_client.hgetall(connection_key)
+                stored_connection = await await redis_client.hgetall(connection_key)
                 
                 if not stored_connection or stored_connection.get("thread_id") != thread_id:
                     raise ValueError(f"Invalid WebSocket connection for thread {thread_id}")
@@ -864,8 +864,8 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
                 
                 # Store response in Redis for WebSocket delivery
                 response_key = f"websocket:pending_response:{websocket_info['websocket_id']}"
-                await redis_client.lpush(response_key, json.dumps(response_payload))
-                await redis_client.expire(response_key, 300)  # 5 minute expiration
+                await await redis_client.lpush(response_key, json.dumps(response_payload))
+                await await redis_client.expire(response_key, 300)  # 5 minute expiration
                 
                 flow_stages.append(("websocket_response_queued", response_payload["message_id"]))
                 
@@ -987,7 +987,7 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
             
             # Check pending responses for this websocket
             response_key = f"websocket:pending_response:{websocket_id}"
-            pending_responses = await redis_client.lrange(response_key, 0, -1)
+            pending_responses = await await redis_client.lrange(response_key, 0, -1)
             
             # Verify all responses belong to correct thread
             for response_json in pending_responses:
@@ -1027,7 +1027,7 @@ class TestMessageDeliveryPrecision(BaseIntegrationTest):
         self.logger.info(f"  WebSocket connections: {len(websocket_connections)}")
         self.logger.info(f"  Database messages stored: {len(integration_threads) * flows_per_thread * 2}")
         
-        await redis_client.close()
+        await await redis_client.close()
         await db_session.close()
 
 

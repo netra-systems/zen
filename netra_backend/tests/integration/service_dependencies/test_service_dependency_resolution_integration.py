@@ -16,7 +16,7 @@ import asyncio
 import time
 from typing import Dict, List
 import psycopg2
-import redis
+# MIGRATED: from netra_backend.app.services.redis_client import get_redis_client
 import requests
 
 # These imports will FAIL initially - that's expected and drives implementation
@@ -106,8 +106,8 @@ class TestServiceDependencyIntegrationWithRealServices(BaseTestCase):
         
         # Verify actual Redis connectivity
         try:
-            redis_client = redis.Redis(host="localhost", port=6381, decode_responses=True)
-            redis_client.ping()
+            redis_client = await get_redis_client()  # MIGRATED: was redis.Redis(host="localhost", port=6381, decode_responses=True)
+            await redis_client.ping()
             redis_accessible = True
         except Exception:
             redis_accessible = False

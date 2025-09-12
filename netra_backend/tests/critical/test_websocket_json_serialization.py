@@ -13,6 +13,7 @@ that was causing "Object of type WebSocketState is not JSON serializable" errors
 ULTRA CRITICAL: This test MUST fail if WebSocketState logging reverts to unsafe patterns.
 """
 
+from test_framework.ssot.base_test_case import SSotAsyncTestCase, SSotBaseTestCase
 import asyncio
 import json
 import logging
@@ -25,7 +26,7 @@ from fastapi.websockets import WebSocketState
 from netra_backend.app.logging_config import central_logger
 
 
-class TestWebSocketStateJSONSerialization(unittest.TestCase):
+class TestWebSocketStateJSONSerialization(SSotAsyncTestCase):
     """Critical tests for WebSocket state JSON serialization safety."""
     
     def setUp(self):
