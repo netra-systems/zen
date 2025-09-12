@@ -102,10 +102,10 @@ class TestImportFailureReproduction:
         test_dir = root_dir / "netra_backend"
         
         # Test the workaround that developers currently use
-        workaround_code = """
+        workaround_code = f"""
 import sys
 from pathlib import Path
-root_dir = Path(__file__).parent.parent
+root_dir = Path(r'{root_dir}')
 sys.path.insert(0, str(root_dir))
 from test_framework.base_integration_test import BaseIntegrationTest
 print('WORKAROUND_SUCCESS')
