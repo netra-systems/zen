@@ -800,7 +800,7 @@ class TestRedisDockerIntegrationEnd2End:
         finally:
             env.reset_to_original()
     
-    def test_redis_failure_recovery_integration(self, docker_environment):
+    async def test_redis_failure_recovery_integration(self, docker_environment):
         """Test Redis failure and recovery scenarios."""
         env = get_env()
         env.enable_isolation(backup_original=True)
