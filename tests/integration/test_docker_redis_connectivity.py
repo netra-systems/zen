@@ -397,7 +397,7 @@ class TestDockerRedisConnectivity:
         except Exception as e:
             pytest.fail(f"Redis error handling test failed: {e}")
     
-    def test_redis_database_selection(self, redis_service):
+    async def test_redis_database_selection(self, redis_service):
         """Test Redis database selection and isolation."""
         test_config = {
             "ENVIRONMENT": "test",
@@ -540,7 +540,7 @@ class TestRedisDockerHealthChecks:
         finally:
             self.docker_manager.stop_test_redis()
     
-    def test_redis_startup_timing_validation(self):
+    async def test_redis_startup_timing_validation(self):
         """Test Redis startup timing and readiness."""
         if not self.docker_manager.is_docker_available():
             pytest.skip("Docker not available")
