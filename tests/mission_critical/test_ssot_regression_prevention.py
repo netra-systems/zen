@@ -1768,7 +1768,14 @@ class TestSSOTContinuousCompliance:
             
             # Test Redis connection
             start_time = time.time()
-            await redis_client.ping()
+            from shared.isolated_environment import get_env
+            import redis
+            sync_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            sync_redis_client.ping()
             health_metrics['service_response_times']['redis'] = time.time() - start_time
             
             # Test Database connection
@@ -2035,13 +2042,13 @@ class TestSSOTContinuousCompliance:
                             random_other_users = [u for u in range(num_concurrent_users) if u != user_id]
                             if random_other_users:
                                 random_user = random_other_users[operation_count % len(random_other_users)]
-                                random_keys = await redis_client.keys(f"stress:{random_user}:*")
+                                random_keys = sync_redis_client.keys(f"stress:{random_user}:*")
                                 
                                 if random_keys:
                                     # Sample a few random keys to check for contamination
                                     sample_keys = random_keys[:min(3, len(random_keys))]
                                     for sample_key in sample_keys:
-                                        sample_data = await redis_client.hget(sample_key, "complex_data")
+                                        sample_data = sync_redis_client.hget(sample_key, "complex_data")
                                         if sample_data and user_data_signature in sample_data:
                                             failures.append({
                                                 'user_id': user_id,
@@ -2135,13 +2142,20 @@ class TestSSOTContinuousCompliance:
         
         # Clean up stress test data
         try:
-            keys_to_delete = await redis_client.keys("stress:*")
+            from shared.isolated_environment import get_env
+            import redis
+            cleanup_redis_client = redis.Redis(
+                host=get_env('REDIS_HOST', 'localhost'),
+                port=int(get_env('REDIS_PORT', '6379')),
+                decode_responses=True
+            )
+            keys_to_delete = cleanup_redis_client.keys("stress:*")
             if keys_to_delete:
                 # Delete in batches to avoid overwhelming Redis
                 batch_size = 100
                 for i in range(0, len(keys_to_delete), batch_size):
                     batch = keys_to_delete[i:i + batch_size]
-                    await redis_client.delete(*batch)
+                    cleanup_redis_client.delete(*batch)
         except Exception as e:
             logger.warning(f"Stress test cleanup warning: {e}")
         
