@@ -109,13 +109,22 @@ class TestSSOTRegressionPrevention:
         operations_per_user = 10
         isolation_failures = []
         
-        def user_database_operations(user_id):
+        async def user_database_operations(user_id):
             """Simulate database operations for a specific user."""
             failures = []
             try:
                 # Create isolated database session for this user
                 user_env = IsolatedEnvironment()
                 user_db = DatabaseManager()
+                
+                # Get Redis client for this operation
+                from shared.isolated_environment import get_env
+                import redis
+                redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
                 
                 # Create user-specific data
                 user_data = {
@@ -184,10 +193,14 @@ class TestSSOTRegressionPrevention:
             
             return failures
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_user_operations(user_id):
+            return asyncio.run(user_database_operations(user_id))
+        
         # Execute concurrent user operations
         with ThreadPoolExecutor(max_workers=num_users) as executor:
             future_to_user = {
-                executor.submit(user_database_operations, user_id): user_id 
+                executor.submit(run_user_operations, user_id): user_id 
                 for user_id in range(num_users)
             }
             
@@ -445,13 +458,22 @@ class TestSSOTRegressionPrevention:
             failures = []
             
             try:
+                # Get Redis client for this operation
+                from shared.isolated_environment import get_env
+                import redis
+                redis_client = redis.Redis(
+                    host=get_env('REDIS_HOST', 'localhost'),
+                    port=int(get_env('REDIS_PORT', '6379')),
+                    decode_responses=True
+                )
+                
                 for op_num in range(operations_per_worker):
                     operation_id = f"worker_{worker_id}_op_{op_num}"
                     
                     # Simulate atomic state updates
                     try:
                         # Read current state
-                        current_state = await redis_client.get(shared_state_key)
+                        current_state = redis_client.get(shared_state_key)
                         if current_state is None:
                             current_state = "0"
                         
@@ -459,13 +481,16 @@ class TestSSOTRegressionPrevention:
                         new_value = current_value + 1
                         
                         # Atomic update with race condition detection
-                        pipe = await redis_client.pipeline()
+                        pipe = redis_client.pipeline()
                         pipe.watch(shared_state_key)
                         pipe.multi()
                         pipe.set(shared_state_key, str(new_value))
                         pipe.set(f"operation:{operation_id}", f"updated_to_{new_value}")
                         
-                        result = pipe.execute()
+                        try:
+                            result = pipe.execute()
+                        except redis.WatchError:
+                            result = None
                         
                         if not result:
                             # Race condition detected
@@ -478,8 +503,8 @@ class TestSSOTRegressionPrevention:
                             })
                         
                         # Verify state consistency
-                        final_state = await redis_client.get(shared_state_key)
-                        operation_record = await redis_client.get(f"operation:{operation_id}")
+                        final_state = redis_client.get(shared_state_key)
+                        operation_record = redis_client.get(f"operation:{operation_id}")
                         
                         if operation_record and f"updated_to_{final_state}" not in operation_record:
                             failures.append({
@@ -510,7 +535,14 @@ class TestSSOTRegressionPrevention:
                 }]
         
         # Initialize shared state
-        await redis_client.set(shared_state_key, "0")
+        from shared.isolated_environment import get_env
+        import redis
+        redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
+        redis_client.set(shared_state_key, "0")
         
         # Execute concurrent operations
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
@@ -532,7 +564,7 @@ class TestSSOTRegressionPrevention:
                     })
         
         # Verify final state consistency
-        final_value = int(await redis_client.get(shared_state_key) or "0")
+        final_value = int(redis_client.get(shared_state_key) or "0")
         expected_max_value = num_workers * operations_per_worker
         
         # Some race conditions are expected and handled properly
@@ -559,13 +591,22 @@ class TestSSOTRegressionPrevention:
         security_failures = []
         user_secrets = {}
         
+        # Create sync redis client for this test
+        from shared.isolated_environment import get_env
+        import redis
+        sync_redis_client = redis.Redis(
+            host=get_env('REDIS_HOST', 'localhost'),
+            port=int(get_env('REDIS_PORT', '6379')),
+            decode_responses=True
+        )
+        
         # Setup isolated user environments with secrets
         for user_id in range(num_users):
             user_secret = f"top_secret_data_for_user_{user_id}_{uuid.uuid4().hex}"
             user_secrets[user_id] = user_secret
             
             # Store user's private data
-            await redis_client.hset(
+            sync_redis_client.hset(
                 f"user:{user_id}:private",
                 "secret_data",
                 user_secret
@@ -573,7 +614,7 @@ class TestSSOTRegressionPrevention:
             
             # Store user's authorization token
             auth_token = f"auth_token_{user_id}_{uuid.uuid4().hex}"
-            await redis_client.hset(
+            sync_redis_client.hset(
                 f"user:{user_id}:auth",
                 "token",
                 auth_token
@@ -590,7 +631,7 @@ class TestSSOTRegressionPrevention:
                 
                 # Attempt 1: Direct data access to other user's private data
                 try:
-                    stolen_secret = await redis_client.hget(
+                    stolen_secret = sync_redis_client.hget(
                         f"user:{target_user_id}:private",
                         "secret_data"
                     )
@@ -609,7 +650,7 @@ class TestSSOTRegressionPrevention:
                 
                 # Attempt 2: Auth token theft
                 try:
-                    stolen_token = await redis_client.hget(
+                    stolen_token = sync_redis_client.hget(
                         f"user:{target_user_id}:auth",
                         "token"
                     )
