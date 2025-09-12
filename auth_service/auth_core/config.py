@@ -367,6 +367,16 @@ class AuthConfig:
         """Check if running in test environment."""
         return get_auth_env().is_testing()
     
+    @staticmethod
+    def is_demo_mode() -> bool:
+        """Check if demo mode is enabled."""
+        return get_auth_env().is_demo_mode()
+    
+    @staticmethod
+    def get_demo_config() -> dict:
+        """Get demo mode configuration."""
+        return get_auth_env().get_demo_config()
+    
     # OAuth Helper Methods - delegate to SSOT
     @staticmethod
     def is_google_oauth_enabled() -> bool:
