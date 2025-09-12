@@ -79,9 +79,9 @@ async def execute_real_agent_workflow(websocket: WebSocket, user_message: str, c
             "message": "Starting AI optimization analysis..."
         })
         
-        # Execute the agent workflow
+        # Execute the agent workflow with proper parameter name
         await supervisor.run(
-            user_prompt=user_message,
+            user_request=user_message,
             thread_id=thread_id,
             user_id=demo_user_id,
             run_id=run_id
