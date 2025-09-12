@@ -5,7 +5,14 @@ BUSINESS VALUE: Platform/Internal - System Stability & Critical Infrastructure
 Prevents staging service outages that block $500K+ ARR chat functionality.
 
 ROOT CAUSE: NameError in rate_limiter.py line 23 - missing proper redis import
+The original issue was:
+- Line 5: import redis  
+- Line 23: def __init__(self, redis_client: Optional[redis.Redis] = None):
+- But the type annotation 'redis.Redis' failed because only the module was imported
+
 FIX: Added explicit redis import to resolve NameError: name 'redis' is not defined
+- Line 5: import redis
+- Line 6: import redis.asyncio as redis_asyncio
 
 These tests reproduce the exact import error that caused the staging backend
 HTTP 503 service outage and validate the fix prevents regression.
