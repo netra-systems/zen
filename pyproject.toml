@@ -193,7 +193,19 @@ markers = [
     "performance_monitoring: Performance monitoring tests",
     "pipeline_execution: Pipeline execution tests",
     "protocol_parsing: Protocol parsing tests",
-    "workflow_execution: Workflow execution tests"
+    "workflow_execution: Workflow execution tests",
+    
+    # Final missing markers (last batch)
+    "authentication: Authentication tests",
+    "flow_context: Flow context tests",
+    "ssot_compliance: SSOT compliance tests",
+    "user_engine_delegation: User engine delegation tests", 
+    "websocket_coordination: WebSocket coordination tests",
+    
+    # Truly final markers
+    "bug_reproduction: Bug reproduction tests",
+    "isolation_status: Isolation status tests",
+    "workflow_validation: Workflow validation tests"
 ]
 
 # Coverage settings
