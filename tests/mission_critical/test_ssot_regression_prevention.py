@@ -184,10 +184,14 @@ class TestSSOTRegressionPrevention:
             
             return failures
         
+        # Create wrapper function for ThreadPoolExecutor since it can't handle async functions directly
+        def run_user_operations(user_id):
+            return asyncio.run(user_database_operations(user_id))
+        
         # Execute concurrent user operations
         with ThreadPoolExecutor(max_workers=num_users) as executor:
             future_to_user = {
-                executor.submit(user_database_operations, user_id): user_id 
+                executor.submit(run_user_operations, user_id): user_id 
                 for user_id in range(num_users)
             }
             
