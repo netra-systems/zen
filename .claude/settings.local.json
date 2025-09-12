@@ -96,7 +96,8 @@
       "Bash(npm install:*)",
       "Bash(NODE_OPTIONS=\"--max-old-space-size=4096\" npm run build)",
       "Bash(lsof:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []
