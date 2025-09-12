@@ -30,7 +30,7 @@ from netra_backend.app.agents.supervisor.request_scoped_executor import (
 )
 from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
-from netra_backend.app.agents.state import DeepAgentState
+# Note: DeepAgentState eliminated - using UserExecutionContext pattern instead
 from netra_backend.app.services.websocket_event_emitter import WebSocketEventEmitter
 
 
@@ -70,16 +70,17 @@ async def demo_basic_usage():
         print(f"   Context ID: {alice_context.get_correlation_id()}")
         
         # Create test state
-        test_state = DeepAgentState(
-            user_request="Alice wants to analyze her data",
-            user_id=alice_context.user_id,
-            run_id=alice_context.run_id
-        )
+        # DeepAgentState eliminated - using UserExecutionContext pattern
+        test_state_data = {
+            "user_request": "Alice wants to analyze her data",
+            "user_id": alice_context.user_id,
+            "run_id": alice_context.run_id
+        }
         
         # Mock the agent execution core 
         mock_result = AgentExecutionResult(
             success=True,
-            state=test_state,
+            state=alice_context,  # Uses UserExecutionContext instead of DeepAgentState
             duration=1.2
         )
         
@@ -87,7 +88,7 @@ async def demo_basic_usage():
         executor._agent_core.execute_agent = AsyncMock(return_value=mock_result)
         
         print("\n🔄 Executing agent for Alice...")
-        result = await executor.execute_agent("demo_agent", test_state)
+        result = await executor.execute_agent("demo_agent", alice_context)
         
         print(f"✅ Agent execution completed!")
         print(f"   Success: {result.success}")
@@ -152,7 +153,8 @@ async def demo_user_isolation():
         user_context = executor.get_user_context()
         
         # Create user-specific state
-        test_state = DeepAgentState(
+        # DeepAgentState eliminated - using UserExecutionContext pattern
+        test_state_data = {
             user_request=f"User {user_index+1}'s unique request",
             user_id=user_context.user_id,
             run_id=user_context.run_id
@@ -161,14 +163,14 @@ async def demo_user_isolation():
         # Mock execution
         mock_result = AgentExecutionResult(
             success=True,
-            state=test_state,
+            state=user_context,  # Uses UserExecutionContext instead of DeepAgentState
             duration=0.5 + (user_index * 0.3)  # Different durations
         )
         executor._agent_core.execute_agent = AsyncMock(return_value=mock_result)
         
         # Execute
         await asyncio.sleep(0.1 * user_index)  # Stagger starts
-        result = await executor.execute_agent(f"agent_for_user_{user_index+1}", test_state)
+        result = await executor.execute_agent(f"agent_for_user_{user_index+1}", user_context)
         
         return user_index + 1, result
     
@@ -238,11 +240,12 @@ async def demo_factory_patterns():
     print(f"✅ Factory created executor for: {user_context.user_id}")
     
     # Test it works
-    test_state = DeepAgentState(user_request="Factory test request")
-    mock_result = AgentExecutionResult(success=True, state=test_state, duration=0.8)
+    # DeepAgentState eliminated - using UserExecutionContext pattern
+    test_state_data = {"user_request": "Factory test request"}
+    mock_result = AgentExecutionResult(success=True, state=user_context, duration=0.8)  # Uses UserExecutionContext
     executor._agent_core.execute_agent = AsyncMock(return_value=mock_result)
     
-    result = await executor.execute_agent("factory_agent", test_state)
+    result = await executor.execute_agent("factory_agent", user_context)
     print(f"✅ Factory executor worked: Success={result.success}")
     
     await executor.dispose()

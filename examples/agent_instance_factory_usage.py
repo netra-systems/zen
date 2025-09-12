@@ -24,7 +24,7 @@ from netra_backend.app.agents.supervisor.agent_instance_factory import (
 )
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -95,11 +95,13 @@ class RequestHandler:
                 logger.info(f"✅ Created fresh {agent_name} agent for user {user_id}")
                 
                 # Prepare agent state with user-specific data
-                agent_state = DeepAgentState(
-                    user_request=user_message,
-                    thread_id=thread_id,
-                    user_id=user_id
-                )
+                # Note: UserExecutionContext is now passed via user_context parameter
+                # The agent state data is embedded in the execution context
+                agent_state_data = {
+                    'user_request': user_message,
+                    'thread_id': thread_id,
+                    'user_id': user_id
+                }
                 
                 # Execute agent with proper isolation
                 logger.info(f"🤖 Executing {agent_name} agent for user {user_id}")
@@ -110,7 +112,9 @@ class RequestHandler:
                     # - agent_thinking 
                     # - tool_executing/tool_completed (if tools are used)
                     # - agent_completed
-                    result = await agent.execute(agent_state, run_id, stream_updates=True)
+                    # Agent now uses UserExecutionContext instead of DeepAgentState
+                    # Pass the user_context which contains all necessary user isolation
+                    result = await agent.execute(user_context, run_id, stream_updates=True)
                     
                     logger.info(f"✅ Agent execution completed for user {user_id}")
                     

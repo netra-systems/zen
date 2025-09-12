@@ -22,6 +22,34 @@ SSOT Violations Eliminated:
 - test_framework/base.py (BaseTestCase, AsyncTestCase)
 - netra_backend/tests/helpers/shared_test_types.py (BaseTestMixin, TestErrorHandling, etc.)
 - 6,000+ duplicate test utility implementations across test files
+
+COMPATIBILITY SOLUTION (Issue #485 Resolution):
+This module provides automatic compatibility between unittest-style (setUp/tearDown) 
+and pytest-style (setup_method/teardown_method) test patterns:
+
+1. PREFERRED PATTERN (pytest-style):
+   ```python
+   class MyTest(SSotAsyncTestCase):
+       def setup_method(self, method):
+           super().setup_method(method)
+           # Your setup code here
+   ```
+
+2. LEGACY COMPATIBLE PATTERN (unittest-style):  
+   ```python
+   class MyTest(SSotAsyncTestCase, unittest.TestCase):
+       def setUp(self):
+           super().setUp()  # Automatically calls setup_method
+           # Your setup code here
+   ```
+
+Both patterns are fully supported and provide identical SSOT functionality including
+environment isolation, metrics recording, and test context management.
+
+GOLDEN PATH BUSINESS IMPACT:
+This compatibility solution directly enables the $500K+ ARR Golden Path user flow
+tests to run reliably, protecting critical business functionality during 
+infrastructure changes and SSOT consolidation efforts.
 """
 
 import asyncio
@@ -219,6 +247,76 @@ class SSotBaseTestCase:
             self._cleanup_callbacks.clear()
             self._test_context = None
             self._original_env_state = None
+    
+    # === UNITTEST COMPATIBILITY LAYER ===
+    # These methods provide compatibility with unittest-style test classes
+    # that use setUp/tearDown instead of setup_method/teardown_method
+    
+    def setUp(self):
+        """
+        unittest compatibility method.
+        
+        IMPORTANT: This provides backward compatibility for tests that inherit 
+        from unittest.TestCase and use setUp/tearDown pattern. It calls the 
+        pytest-style setup_method to ensure consistent behavior.
+        
+        NOTE: Tests should prefer setup_method/teardown_method for new code.
+        """
+        # Get the current test method from the stack
+        import inspect
+        frame = inspect.currentframe()
+        test_method = None
+        
+        # Walk up the call stack to find the test method
+        try:
+            while frame:
+                code = frame.f_code
+                if code.co_name.startswith('test_'):
+                    # Found the test method, create a mock method object
+                    class MockMethod:
+                        def __init__(self, name):
+                            self.__name__ = name
+                    test_method = MockMethod(code.co_name)
+                    break
+                frame = frame.f_back
+        finally:
+            del frame
+        
+        # Call the standard setup_method
+        self.setup_method(test_method)
+    
+    def tearDown(self):
+        """
+        unittest compatibility method.
+        
+        IMPORTANT: This provides backward compatibility for tests that inherit 
+        from unittest.TestCase and use setUp/tearDown pattern. It calls the 
+        pytest-style teardown_method to ensure consistent behavior.
+        
+        NOTE: Tests should prefer setup_method/teardown_method for new code.
+        """
+        # Get the current test method from the stack
+        import inspect
+        frame = inspect.currentframe()
+        test_method = None
+        
+        # Walk up the call stack to find the test method
+        try:
+            while frame:
+                code = frame.f_code
+                if code.co_name.startswith('test_'):
+                    # Found the test method, create a mock method object
+                    class MockMethod:
+                        def __init__(self, name):
+                            self.__name__ = name
+                    test_method = MockMethod(code.co_name)
+                    break
+                frame = frame.f_back
+        finally:
+            del frame
+        
+        # Call the standard teardown_method
+        self.teardown_method(test_method)
     
     # === CORE UTILITIES ===
     
@@ -581,6 +679,75 @@ class SSotAsyncTestCase(SSotBaseTestCase):
         if not hasattr(self, '_original_env_state'):
             self._original_env_state = None
         super().teardown_method(method)
+    
+    # === ASYNC UNITTEST COMPATIBILITY LAYER ===
+    # These methods provide compatibility with async unittest-style test classes
+    
+    def setUp(self):
+        """
+        unittest compatibility method for async tests.
+        
+        IMPORTANT: This provides backward compatibility for async tests that inherit 
+        from unittest.TestCase and use setUp/tearDown pattern. It calls the 
+        pytest-style setup_method to ensure consistent behavior.
+        
+        NOTE: Tests should prefer setup_method/teardown_method for new code.
+        """
+        # Get the current test method from the stack
+        import inspect
+        frame = inspect.currentframe()
+        test_method = None
+        
+        # Walk up the call stack to find the test method
+        try:
+            while frame:
+                code = frame.f_code
+                if code.co_name.startswith('test_'):
+                    # Found the test method, create a mock method object
+                    class MockMethod:
+                        def __init__(self, name):
+                            self.__name__ = name
+                    test_method = MockMethod(code.co_name)
+                    break
+                frame = frame.f_back
+        finally:
+            del frame
+        
+        # Call the standard setup_method
+        self.setup_method(test_method)
+    
+    def tearDown(self):
+        """
+        unittest compatibility method for async tests.
+        
+        IMPORTANT: This provides backward compatibility for async tests that inherit 
+        from unittest.TestCase and use setUp/tearDown pattern. It calls the 
+        pytest-style teardown_method to ensure consistent behavior.
+        
+        NOTE: Tests should prefer setup_method/teardown_method for new code.
+        """
+        # Get the current test method from the stack
+        import inspect
+        frame = inspect.currentframe()
+        test_method = None
+        
+        # Walk up the call stack to find the test method
+        try:
+            while frame:
+                code = frame.f_code
+                if code.co_name.startswith('test_'):
+                    # Found the test method, create a mock method object
+                    class MockMethod:
+                        def __init__(self, name):
+                            self.__name__ = name
+                    test_method = MockMethod(code.co_name)
+                    break
+                frame = frame.f_back
+        finally:
+            del frame
+        
+        # Call the standard teardown_method
+        self.teardown_method(test_method)
     
     async def wait_for_condition(
         self,
