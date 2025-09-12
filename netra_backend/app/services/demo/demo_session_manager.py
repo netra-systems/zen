@@ -6,7 +6,12 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-import asyncpg
+try:
+    import asyncpg
+    ASYNCPG_AVAILABLE = True
+except ImportError:
+    ASYNCPG_AVAILABLE = False
+    
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -21,6 +26,10 @@ class DemoSessionManager:
         
     async def _get_connection(self):
         """Get database connection from pool."""
+        if not ASYNCPG_AVAILABLE:
+            logger.warning("asyncpg not available, using in-memory storage only")
+            return None
+            
         if not self._pool:
             # Get database configuration from environment
             database_url = os.environ.get("DATABASE_URL", "")
@@ -69,16 +78,20 @@ class DemoSessionManager:
                 database = os.environ.get("DB_NAME", "netra")
             
             try:
-                self._pool = await asyncpg.create_pool(
-                    host=host,
-                    port=port,
-                    user=user,
-                    password=password,
-                    database=database,
-                    min_size=1,
-                    max_size=10,
-                    command_timeout=60
-                )
+                if ASYNCPG_AVAILABLE:
+                    self._pool = await asyncpg.create_pool(
+                        host=host,
+                        port=port,
+                        user=user,
+                        password=password,
+                        database=database,
+                        min_size=1,
+                        max_size=10,
+                        command_timeout=60
+                    )
+                else:
+                    logger.warning("asyncpg not available, cannot create database pool")
+                    return None
             except Exception as e:
                 logger.error(f"Failed to create database pool: {str(e)}")
                 # Return None to allow fallback behavior
