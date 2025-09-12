@@ -20,9 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 from collections import Counter, defaultdict
 
-from netra_backend.app.core.unified_id_manager import (
-    UnifiedIDManager, IDConfig, IDType, GenerationStrategy, DistributionMode
-)
+from netra_backend.app.core.unified_id_manager import UnifiedIDManager, IDType, IDMetadata
 from shared.isolated_environment import IsolatedEnvironment
 from test_framework.ssot.base_test_case import SSotAsyncTestCase
 

@@ -133,7 +133,7 @@ class TestWebSocketBasicSecurity:
         """Test that rate limiting functionality exists for WebSocket connections."""
         # Test that rate limiting related functionality exists
         try:
-            from netra_backend.app.websocket_core import WebSocketManager
+            from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
             manager = WebSocketManager()
             
             # Check if rate limiting methods exist

@@ -25,7 +25,7 @@ from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.services.agent_websocket_bridge import AgentWebSocketBridge
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.websocket_core import UnifiedWebSocketManager as WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.agents.unified_tool_execution import UnifiedToolExecutionEngine
 from netra_backend.app.logging_config import central_logger
 

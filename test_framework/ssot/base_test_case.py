@@ -563,6 +563,20 @@ class SSotBaseTestCase:
         """Assert that first <= second."""
         assert first <= second, msg or f"Expected {first} <= {second}"
     
+    def assertAlmostEqual(self, first, second, places=7, msg=None, delta=None):
+        """Assert that first and second are approximately equal within tolerance."""
+        if delta is not None:
+            # If delta is specified, use it directly
+            diff = abs(first - second)
+            assert diff <= delta, msg or f"Expected {first} ≈ {second} (delta={delta}), but difference was {diff}"
+        else:
+            # Use places parameter (number of decimal places)
+            if places is None:
+                places = 7
+            tolerance = 10**(-places)
+            diff = abs(first - second)
+            assert diff <= tolerance, msg or f"Expected {first} ≈ {second} (places={places}), but difference was {diff}"
+    
     def assert_env_var_set(self, key: str, expected_value: Optional[str] = None) -> None:
         """
         Assert that an environment variable is set.

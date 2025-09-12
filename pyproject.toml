@@ -217,7 +217,17 @@ markers = [
     "issue_553_config: Issue #553 configuration tests",
     "issue_553_golden_path: Issue #553 golden path accessibility tests",
     
+    # Final missing markers (Issue #553 completion)
+    "app_factory: Application factory pattern tests",
+    "health_checks: Health check and service status tests",
+    "ssot_violation: SSOT violation detection and remediation tests",
+    
     # Additional comprehensive marker definitions (Issue #553 Resolution)
+    "infrastructure_validation: Infrastructure validation tests",
+    "sessionmiddleware: Session middleware tests",
+    "windows_asyncio: Windows-specific asyncio tests",
+    "must_fail_initially: Tests that must fail initially to prove gaps exist",
+    "reproduction_tests: Tests that reproduce specific issues",
     "L3: Level 3 escalation tests",
     "access_logging: Access logging tests",
     "agent: Agent tests",

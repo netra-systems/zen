@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "critical_config",
-    "generated_at": "2025-09-12T05:38:12.376373",
+    "generated_at": "2025-09-12T12:31:30.098047",
     "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 11
   },
@@ -20,7 +20,7 @@
         "netra_backend/app/services/configuration_service.py:38",
         "netra_backend/app/services/configuration_service.py:59",
         "netra_backend/app/services/configuration_service.py:70",
-        "netra_backend/app/startup_module.py:986"
+        "netra_backend/app/startup_module.py:1027"
       ],
       "warning": "CRITICAL: See MISSION_CRITICAL_NAMED_VALUES_INDEX.xml before modifying!"
     },
@@ -45,7 +45,7 @@
       "value": "GOOGLE_CLIENT_ID",
       "category": "critical_config",
       "locations": [
-        "netra_backend/app/core/auth_startup_validator.py:342",
+        "netra_backend/app/core/auth_startup_validator.py:294",
         "netra_backend/app/core/config_dependencies.py:567",
         "netra_backend/app/core/config_dependencies.py:699",
         "netra_backend/app/schemas/config.py:991",
@@ -62,7 +62,7 @@
       "value": "GOOGLE_CLIENT_SECRET",
       "category": "critical_config",
       "locations": [
-        "netra_backend/app/core/auth_startup_validator.py:343",
+        "netra_backend/app/core/auth_startup_validator.py:295",
         "netra_backend/app/core/config_dependencies.py:692",
         "netra_backend/app/core/config_dependencies.py:573",
         "netra_backend/app/schemas/config.py:992",

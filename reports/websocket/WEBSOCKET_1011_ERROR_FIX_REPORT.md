@@ -44,7 +44,7 @@ return MessageHandlerService(supervisor, thread_service)
 
 **Before**:
 ```python
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 ```
 
 **After**: 

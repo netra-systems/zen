@@ -46,7 +46,7 @@ except ImportError:
     ServicesUserContext = None
 
 try:
-    from netra_backend.app.models.user_execution_context import UserExecutionContext as ModelsUserContext
+    from netra_backend.app.services.user_execution_context import UserExecutionContext as ModelsUserContext
 except ImportError:
     ModelsUserContext = None
 

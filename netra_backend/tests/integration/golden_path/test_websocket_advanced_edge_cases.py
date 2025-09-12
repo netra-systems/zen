@@ -45,7 +45,9 @@ from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.websocket.connection_manager import WebSocketConnectionManager
 from netra_backend.app.api.websocket.events import WebSocketEventType
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.agents.supervisor.user_execution_engine import UserExecutionEngine as ExecutionEngine
+from netra_backend.app.agents.supervisor.execution_engine import create_request_scoped_engine
+from netra_backend.app.services.agent_websocket_bridge import create_agent_websocket_bridge
 from shared.types import UserID, ThreadID, RunID, RequestID
 from shared.isolated_environment import get_env
 
@@ -286,8 +288,18 @@ class TestAdvancedWebSocketEdgeCases(BaseIntegrationTest):
         # Initialize components
         websocket_manager = WebSocketManager()
         agent_registry = AgentRegistry()
-        execution_engine = ExecutionEngine()
         agent_registry.set_websocket_manager(websocket_manager)
+        
+        # Create WebSocket bridge for proper ExecutionEngine instantiation
+        websocket_bridge = create_agent_websocket_bridge()
+        
+        # Use factory method for ExecutionEngine (SSOT compliance)
+        execution_engine = create_request_scoped_engine(
+            user_context=auth_context,
+            registry=agent_registry, 
+            websocket_bridge=websocket_bridge,
+            max_concurrent_executions=3
+        )
         
         # Track message ordering
         sent_messages = []

@@ -36,7 +36,7 @@ Fixed critical WebSocket authentication bug that was preventing all WebSocket co
 ### The Bug
 ```python
 # WRONG: user_context_extractor.py was importing from models
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 
 # WRONG: Using incorrect field name in UserExecutionContext creation
 user_context = UserExecutionContext(

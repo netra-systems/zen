@@ -36,7 +36,7 @@ from fastapi.websockets import WebSocketState
 import uvicorn
 
 from test_framework.environment_isolation import get_test_env_manager
-from netra_backend.app.websocket_core import WebSocketManager
+from netra_backend.app.websocket_core.websocket_manager import WebSocketManager
 from netra_backend.app.agents.state import DeepAgentState
 
 

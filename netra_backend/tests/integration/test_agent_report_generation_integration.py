@@ -22,7 +22,7 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.message import Message, MessageType
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager
-from netra_backend.app.models.user_execution_context import UserExecutionContext
+from netra_backend.app.services.user_execution_context import UserExecutionContext
 from netra_backend.app.services.thread_run_registry import ThreadRunRegistry
 from shared.id_generation.unified_id_generator import UnifiedIdGenerator
 from shared.isolated_environment import IsolatedEnvironment

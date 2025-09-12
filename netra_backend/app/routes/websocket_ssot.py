@@ -613,13 +613,23 @@ class WebSocketSSOTRouter:
                 logger.warning("No app_state available for GCP readiness validation - proceeding")
             
             # Step 1: Negotiate subprotocol and accept WebSocket connection (RFC 6455 compliance)
-            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
-            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
-            if accepted_subprotocol:
-                logger.info(f"[MAIN MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
-                await websocket.accept(subprotocol=accepted_subprotocol)
+            # CRITICAL FIX: Proper RFC 6455 subprotocol negotiation
+            # If client sends subprotocols, server MUST respond with one or reject the connection
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header.strip():
+                # Client requested subprotocols - we MUST negotiate one or reject
+                accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+                if accepted_subprotocol:
+                    logger.info(f"[MAIN MODE] Accepting WebSocket with negotiated subprotocol: {accepted_subprotocol}")
+                    await websocket.accept(subprotocol=accepted_subprotocol)
+                else:
+                    # CRITICAL: RFC 6455 compliance - reject connection if no supported subprotocols
+                    logger.error(f"[MAIN MODE] WebSocket connection rejected: no supported subprotocols found in client request: {subprotocol_header}")
+                    await safe_websocket_close(websocket, 1003, "No supported subprotocols")
+                    return
             else:
-                logger.debug("[MAIN MODE] Accepting WebSocket without subprotocol")
+                # Client sent no subprotocols - accept without subprotocol
+                logger.debug("[MAIN MODE] Accepting WebSocket without subprotocol (client sent none)")
                 await websocket.accept()
             
             # Step 2: PERMISSIVE AUTH REMEDIATION (with circuit breaker protection)
@@ -854,13 +864,22 @@ class WebSocketSSOTRouter:
             logger.info(f"[FACTORY MODE] Pre-auth success: user={user_id[:8]}")
             
             # Step 2: Negotiate subprotocol and accept connection after authentication (RFC 6455 compliance)
-            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
-            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
-            if accepted_subprotocol:
-                logger.info(f"[FACTORY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
-                await websocket.accept(subprotocol=accepted_subprotocol)
+            # CRITICAL FIX: Proper RFC 6455 subprotocol negotiation
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header.strip():
+                # Client requested subprotocols - we MUST negotiate one or reject
+                accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+                if accepted_subprotocol:
+                    logger.info(f"[FACTORY MODE] Accepting WebSocket with negotiated subprotocol: {accepted_subprotocol}")
+                    await websocket.accept(subprotocol=accepted_subprotocol)
+                else:
+                    # CRITICAL: RFC 6455 compliance - reject connection if no supported subprotocols
+                    logger.error(f"[FACTORY MODE] WebSocket connection rejected: no supported subprotocols found in client request: {subprotocol_header}")
+                    await safe_websocket_close(websocket, 1003, "No supported subprotocols")
+                    return
             else:
-                logger.debug("[FACTORY MODE] Accepting WebSocket without subprotocol")
+                # Client sent no subprotocols - accept without subprotocol
+                logger.debug("[FACTORY MODE] Accepting WebSocket without subprotocol (client sent none)")
                 await websocket.accept()
             
             # Step 3: Create isolated WebSocket manager via factory pattern
@@ -929,13 +948,22 @@ class WebSocketSSOTRouter:
             logger.info(f"[ISOLATED MODE] Starting isolated connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
-            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
-            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
-            if accepted_subprotocol:
-                logger.info(f"[ISOLATED MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
-                await websocket.accept(subprotocol=accepted_subprotocol)
+            # CRITICAL FIX: Proper RFC 6455 subprotocol negotiation
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header.strip():
+                # Client requested subprotocols - we MUST negotiate one or reject
+                accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+                if accepted_subprotocol:
+                    logger.info(f"[ISOLATED MODE] Accepting WebSocket with negotiated subprotocol: {accepted_subprotocol}")
+                    await websocket.accept(subprotocol=accepted_subprotocol)
+                else:
+                    # CRITICAL: RFC 6455 compliance - reject connection if no supported subprotocols
+                    logger.error(f"[ISOLATED MODE] WebSocket connection rejected: no supported subprotocols found in client request: {subprotocol_header}")
+                    await safe_websocket_close(websocket, 1003, "No supported subprotocols")
+                    return
             else:
-                logger.debug("[ISOLATED MODE] Accepting WebSocket without subprotocol")
+                # Client sent no subprotocols - accept without subprotocol
+                logger.debug("[ISOLATED MODE] Accepting WebSocket without subprotocol (client sent none)")
                 await websocket.accept()
             
             # Step 2: SSOT Authentication with audit logging
@@ -1027,13 +1055,22 @@ class WebSocketSSOTRouter:
             logger.info(f"[LEGACY MODE] Starting legacy connection {connection_id}")
             
             # Step 1: Negotiate subprotocol and accept connection (RFC 6455 compliance)
-            # NOTE: This sophisticated negotiation already addresses Issue #280 RFC 6455 compliance
-            accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
-            if accepted_subprotocol:
-                logger.info(f"[LEGACY MODE] Accepting WebSocket with subprotocol: {accepted_subprotocol}")
-                await websocket.accept(subprotocol=accepted_subprotocol)
+            # CRITICAL FIX: Proper RFC 6455 subprotocol negotiation
+            subprotocol_header = websocket.headers.get("sec-websocket-protocol", "")
+            if subprotocol_header.strip():
+                # Client requested subprotocols - we MUST negotiate one or reject
+                accepted_subprotocol = self._negotiate_websocket_subprotocol(websocket)
+                if accepted_subprotocol:
+                    logger.info(f"[LEGACY MODE] Accepting WebSocket with negotiated subprotocol: {accepted_subprotocol}")
+                    await websocket.accept(subprotocol=accepted_subprotocol)
+                else:
+                    # CRITICAL: RFC 6455 compliance - reject connection if no supported subprotocols
+                    logger.error(f"[LEGACY MODE] WebSocket connection rejected: no supported subprotocols found in client request: {subprotocol_header}")
+                    await safe_websocket_close(websocket, 1003, "No supported subprotocols")
+                    return
             else:
-                logger.debug("[LEGACY MODE] Accepting WebSocket without subprotocol")
+                # Client sent no subprotocols - accept without subprotocol
+                logger.debug("[LEGACY MODE] Accepting WebSocket without subprotocol (client sent none)")
                 await websocket.accept()
             
             # Step 2: Send legacy compatibility confirmation

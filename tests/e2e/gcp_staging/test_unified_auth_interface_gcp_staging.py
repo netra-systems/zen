@@ -22,9 +22,10 @@ import secrets
 import base64
 import hashlib
 
-from netra_backend.app.services.unified_authentication_service import (
-    UnifiedAuthenticationService, AuthConfig, SecurityLevel, SessionPolicy
-)
+from netra_backend.app.services.unified_authentication_service import UnifiedAuthenticationService
+from netra_backend.app.schemas.auth_types import AuthConfig
+from netra_backend.app.core.security import SecurityLevel
+from auth_service.auth_core.security.session_policy_validator import SessionPolicyValidator as SessionPolicy
 from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.oauth_user import OAuthUser
 from netra_backend.app.core.unified_id_manager import UnifiedIDManager

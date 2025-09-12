@@ -2,7 +2,7 @@
   "metadata": {
     "version": "3.0.0",
     "category": "environment",
-    "generated_at": "2025-09-12T05:38:12.379761",
+    "generated_at": "2025-09-12T12:31:30.102196",
     "root_directory": "C:\\GitHub\\netra-apex",
     "total_literals": 211
   },
@@ -153,14 +153,14 @@
       "value": "AUTH_CACHE_ENABLED",
       "category": "environment",
       "locations": [
-        "netra_backend/app/core/auth_startup_validator.py:496"
+        "netra_backend/app/core/auth_startup_validator.py:448"
       ]
     },
     "AUTH_CACHE_TTL": {
       "value": "AUTH_CACHE_TTL",
       "category": "environment",
       "locations": [
-        "netra_backend/app/core/auth_startup_validator.py:495"
+        "netra_backend/app/core/auth_startup_validator.py:447"
       ]
     },
     "AUTH_CACHE_TTL_SECONDS": {
@@ -206,7 +206,7 @@
       "value": "AUTH_CIRCUIT_FAILURE_THRESHOLD",
       "category": "environment",
       "locations": [
-        "netra_backend/app/core/auth_startup_validator.py:470"
+        "netra_backend/app/core/auth_startup_validator.py:422"
       ]
     },
     "AUTH_CIRCUIT_OPEN_TIMEOUT": {
@@ -228,7 +228,7 @@
       "value": "AUTH_CIRCUIT_TIMEOUT",
       "category": "environment",
       "locations": [
-        "netra_backend/app/core/auth_startup_validator.py:471"
+        "netra_backend/app/core/auth_startup_validator.py:423"
       ]
     },
     "AUTH_CLIENT_CACHE_TTL": {
@@ -332,7 +332,7 @@
       "locations": [
         "netra_backend/app/core/error_codes.py:15",
         "netra_backend/app/core/unified_error_handler.py:241",
-        "netra_backend/app/routes/websocket_ssot.py:595",
+        "netra_backend/app/routes/websocket_ssot.py:708",
         "netra_backend/app/websocket_core/unified_websocket_auth.py:691"
       ]
     },
@@ -450,7 +450,7 @@
       "category": "environment",
       "locations": [
         "netra_backend/app/clients/auth_client_cache.py:608",
-        "netra_backend/app/core/auth_startup_validator.py:311",
+        "netra_backend/app/core/auth_startup_validator.py:244",
         "netra_backend/app/routes/auth_routes/debug_helpers.py:60",
         "scripts/deploy_to_gcp_actual.py:107",
         "scripts/fix_authentication_system.py:91",
@@ -482,7 +482,7 @@
       "value": "AUTH_SERVICE_HOST",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:683"
+        "auth_service/auth_core/auth_environment.py:684"
       ]
     },
     "AUTH_SERVICE_INTERNAL_URL": {
@@ -500,7 +500,7 @@
       "value": "AUTH_SERVICE_PORT",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:650",
+        "auth_service/auth_core/auth_environment.py:651",
         "scripts/fix_authentication_system.py:174",
         "shared/port_discovery.py:90"
       ]
@@ -514,11 +514,11 @@
         "netra_backend/app/clients/auth_client_config.py:106",
         "netra_backend/app/clients/auth_client_config.py:108",
         "netra_backend/app/clients/auth_client_config.py:151",
-        "netra_backend/app/core/auth_startup_validator.py:310",
+        "netra_backend/app/core/auth_startup_validator.py:243",
+        "netra_backend/app/core/auth_startup_validator.py:255",
+        "netra_backend/app/core/auth_startup_validator.py:260",
         "netra_backend/app/core/backend_environment.py:241",
-        "netra_backend/app/core/config_dependencies.py:322",
-        "netra_backend/app/core/config_dependencies.py:287",
-        "netra_backend/app/core/config_dependencies.py:311"
+        "netra_backend/app/core/config_dependencies.py:322"
       ]
     },
     "AUTH_STRICT_MODE": {
@@ -820,7 +820,7 @@
         "netra_backend/app/core/config_dependencies.py:274",
         "netra_backend/app/core/config_dependencies.py:311",
         "netra_backend/app/schemas/config.py:1183",
-        "auth_service/auth_core/auth_environment.py:581",
+        "auth_service/auth_core/auth_environment.py:582",
         "scripts/demonstrate_config_protection.py:33",
         "scripts/demonstrate_config_protection.py:54",
         "scripts/demonstrate_config_protection.py:55",
@@ -832,7 +832,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_ID_",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:578",
+        "auth_service/auth_core/auth_environment.py:579",
         "shared/configuration/central_config_validator.py:1174",
         "shared/configuration/cross_service_validator.py:418"
       ]
@@ -922,7 +922,7 @@
         "netra_backend/app/core/config_dependencies.py:298",
         "netra_backend/app/core/config_dependencies.py:287",
         "netra_backend/app/schemas/config.py:1186",
-        "auth_service/auth_core/auth_environment.py:613",
+        "auth_service/auth_core/auth_environment.py:614",
         "shared/configuration/central_config_validator.py:105",
         "shared/configuration/cross_service_validator.py:94"
       ]
@@ -931,7 +931,7 @@
       "value": "GOOGLE_OAUTH_CLIENT_SECRET_",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:610",
+        "auth_service/auth_core/auth_environment.py:611",
         "shared/configuration/central_config_validator.py:1175",
         "shared/configuration/cross_service_validator.py:419"
       ]
@@ -1052,7 +1052,7 @@
       "value": "LLM_API_KEY",
       "category": "environment",
       "locations": [
-        "netra_backend/app/startup_module.py:988"
+        "netra_backend/app/startup_module.py:1029"
       ]
     },
     "MISSING_REDIS_COMPONENTS": {
@@ -1301,28 +1301,28 @@
       "value": "OAUTH_GITHUB_CLIENT_ID",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:638"
+        "auth_service/auth_core/auth_environment.py:639"
       ]
     },
     "OAUTH_GITHUB_CLIENT_SECRET": {
       "value": "OAUTH_GITHUB_CLIENT_SECRET",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:642"
+        "auth_service/auth_core/auth_environment.py:643"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_ID": {
       "value": "OAUTH_GOOGLE_CLIENT_ID",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:580"
+        "auth_service/auth_core/auth_environment.py:581"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_ID_": {
       "value": "OAUTH_GOOGLE_CLIENT_ID_",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:579"
+        "auth_service/auth_core/auth_environment.py:580"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_ID_ENV": {
@@ -1340,14 +1340,14 @@
       "value": "OAUTH_GOOGLE_CLIENT_SECRET",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:612"
+        "auth_service/auth_core/auth_environment.py:613"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_SECRET_": {
       "value": "OAUTH_GOOGLE_CLIENT_SECRET_",
       "category": "environment",
       "locations": [
-        "auth_service/auth_core/auth_environment.py:611"
+        "auth_service/auth_core/auth_environment.py:612"
       ]
     },
     "OAUTH_GOOGLE_CLIENT_SECRET_ENV": {
@@ -1422,7 +1422,7 @@
       "value": "PERMISSIVE_AUTH_FAILURE",
       "category": "environment",
       "locations": [
-        "netra_backend/app/routes/websocket_ssot.py:542"
+        "netra_backend/app/routes/websocket_ssot.py:655"
       ]
     },
     "PERPLEXITY_API_KEY": {
@@ -1492,7 +1492,7 @@
         "auth_service/auth_core/redis_config_builder.py:41",
         "scripts/fetch_secrets_to_env.py:125",
         "scripts/fetch_secrets_to_env.py:169",
-        "shared/configuration/central_config_validator.py:88"
+        "scripts/validate_database_connections.py:304"
       ]
     },
     "REDIS_DISABLED": {
@@ -1726,7 +1726,7 @@
       "value": "SERVICE_AUTH_ERROR",
       "category": "environment",
       "locations": [
-        "netra_backend/app/services/unified_authentication_service.py:974"
+        "netra_backend/app/services/unified_authentication_service.py:978"
       ]
     },
     "SKIP_AUTH_VALIDATION": {
