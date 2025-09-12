@@ -865,10 +865,10 @@ class StartupOrchestrator:
         This is CRITICAL and must happen early in startup to prevent auth vulnerabilities.
         """
         try:
-            from netra_backend.app.core.auth_startup_validator import validate_auth_at_startup
+            from netra_backend.app.core.auth_startup_validator import validate_auth_startup
             
             self.logger.info("  [U+1F510] Running SSOT auth validation...")
-            await validate_auth_at_startup()
+            await validate_auth_startup()
             self.logger.info("   PASS:  SSOT auth validation passed - auth system is secure")
             
         except ImportError as e:
